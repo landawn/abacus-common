@@ -140,8 +140,8 @@ import com.landawn.abacus.util.stream.Stream;
  *     });
  *
  * // Collection conversion
- * List<Integer> list = OptionalInt.of(42).toList(); // [42]
- * Set<Boolean> set = OptionalBoolean.of(true).toSet(); // {true}
+ * List<Integer> list = OptionalInt.of(42).toList();  // [42]
+ * Set<Boolean> set = OptionalBoolean.of(true).toSet();  // {true}
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -323,7 +323,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalBoolean empty = OptionalBoolean.empty();
-         * empty.isPresent(); // returns false
+         * empty.isPresent();  // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalBoolean}
@@ -339,7 +339,7 @@ public class u { // NOSONAR
          * <pre>{@code
          * OptionalBoolean optTrue = OptionalBoolean.of(true);
          * OptionalBoolean optFalse = OptionalBoolean.of(false);
-         * optTrue.get(); // returns true
+         * optTrue.get();  // returns true
          * }</pre>
          *
          * @param value the value to describe
@@ -357,8 +357,8 @@ public class u { // NOSONAR
          * <pre>{@code
          * Boolean nullValue = null;
          * Boolean trueValue = Boolean.TRUE;
-         * OptionalBoolean.ofNullable(nullValue); // returns empty OptionalBoolean
-         * OptionalBoolean.ofNullable(trueValue); // returns OptionalBoolean with true
+         * OptionalBoolean.ofNullable(nullValue);   // returns empty OptionalBoolean
+         * OptionalBoolean.ofNullable(trueValue);   // returns OptionalBoolean with true
          * }</pre>
          *
          * @param val the possibly-null value to describe
@@ -422,8 +422,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalBoolean.of(true).ifPresent(val -> System.out.println("Value: " + val)); // prints "Value: true"
-         * OptionalBoolean.empty().ifPresent(val -> System.out.println("Value: " + val)); // does nothing
+         * OptionalBoolean.of(true).ifPresent(val -> System.out.println("Value: " + val));   // prints "Value: true"
+         * OptionalBoolean.empty().ifPresent(val -> System.out.println("Value: " + val));    // does nothing
          * }</pre>
          *
          * @param <E> the type of exception that the action may throw
@@ -476,8 +476,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalBoolean.of(true).filter(val -> val); // returns OptionalBoolean with true
-         * OptionalBoolean.of(false).filter(val -> val); // returns empty OptionalBoolean
+         * OptionalBoolean.of(true).filter(val -> val);    // returns OptionalBoolean with true
+         * OptionalBoolean.of(false).filter(val -> val);   // returns empty OptionalBoolean
          * }</pre>
          *
          * @param <E> the type of exception that the predicate may throw
@@ -505,8 +505,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalBoolean.of(true).map(val -> !val); // returns OptionalBoolean with false
-         * OptionalBoolean.empty().map(val -> !val); // returns empty OptionalBoolean
+         * OptionalBoolean.of(true).map(val -> !val);   // returns OptionalBoolean with false
+         * OptionalBoolean.empty().map(val -> !val);    // returns empty OptionalBoolean
          * }</pre>
          *
          * @param <E> the type of exception that the mapping function may throw
@@ -695,8 +695,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalBoolean.of(true).orElse(false); // returns true
-         * OptionalBoolean.empty().orElse(false); // returns false
+         * OptionalBoolean.of(true).orElse(false);   // returns true
+         * OptionalBoolean.empty().orElse(false);    // returns false
          * }</pre>
          *
          * @param other the value to be returned, if no value is present
@@ -1070,7 +1070,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar empty = OptionalChar.empty();
-         * empty.isPresent(); // returns false
+         * empty.isPresent();  // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalChar}
@@ -1085,7 +1085,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar optChar = OptionalChar.of('A');
-         * optChar.get(); // returns 'A'
+         * optChar.get();  // returns 'A'
          * }</pre>
          *
          * @param value the value to describe
@@ -1103,8 +1103,8 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Character nullChar = null;
-         * OptionalChar.ofNullable(nullChar); // returns empty OptionalChar
-         * OptionalChar.ofNullable('B'); // returns OptionalChar with 'B'
+         * OptionalChar.ofNullable(nullChar);   // returns empty OptionalChar
+         * OptionalChar.ofNullable('B');        // returns OptionalChar with 'B'
          * }</pre>
          *
          * @param val the possibly-null value to describe
@@ -3003,7 +3003,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalInt empty = OptionalInt.empty();
-         * empty.isPresent(); // returns false
+         * empty.isPresent();  // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalInt}
@@ -3018,7 +3018,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalInt opt = OptionalInt.of(42);
-         * opt.get(); // returns 42
+         * opt.get();  // returns 42
          * }</pre>
          *
          * @param value the int value to be present
@@ -3035,8 +3035,8 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Integer nullInt = null;
-         * OptionalInt.ofNullable(nullInt); // returns empty OptionalInt
-         * OptionalInt.ofNullable(100); // returns OptionalInt with 100
+         * OptionalInt.ofNullable(nullInt);   // returns empty OptionalInt
+         * OptionalInt.ofNullable(100);       // returns OptionalInt with 100
          * }</pre>
          *
          * @param val the possibly-null value to describe
@@ -5632,7 +5632,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<String> empty = Optional.empty();
-         * empty.isPresent(); // returns false
+         * empty.isPresent();  // returns false
          * }</pre>
          *
          * @param <T> the type of the non-existent value
@@ -5649,7 +5649,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<String> opt = Optional.of("Hello");
-         * opt.get(); // returns "Hello"
+         * opt.get();  // returns "Hello"
          * }</pre>
          *
          * @param value the {@code non-null} value to store
@@ -5673,7 +5673,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<Integer> opt = Optional.of(42);
-         * opt.get(); // returns 42
+         * opt.get();  // returns 42
          * }</pre>
          *
          * @param <T> the type of the value
@@ -6427,8 +6427,8 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable<String> empty = Nullable.empty();
-         * empty.isPresent(); // returns false
-         * empty.isNull(); // returns true
+         * empty.isPresent();   // returns false
+         * empty.isNull();      // returns true
          * }</pre>
          *
          * @param <T> the type of the non-existent value
@@ -6446,9 +6446,9 @@ public class u { // NOSONAR
          * <pre>{@code
          * Nullable<String> nullable = Nullable.of("Hello");
          * Nullable<String> nullValue = Nullable.of((String) null);
-         * nullable.isPresent(); // returns true
-         * nullValue.isPresent(); // returns true
-         * nullValue.isNull(); // returns true
+         * nullable.isPresent();    // returns true
+         * nullValue.isPresent();   // returns true
+         * nullValue.isNull();      // returns true
          * }</pre>
          *
          * @param value the value to be present, which may be {@code null}
@@ -6471,8 +6471,8 @@ public class u { // NOSONAR
          * <pre>{@code
          * Nullable<Integer> nullable = Nullable.of(42);
          * Nullable<Integer> nullValue = Nullable.of((Integer) null);
-         * nullable.orElse(0); // returns 42
-         * nullValue.orElse(0); // returns null (different from Optional!)
+         * nullable.orElse(0);    // returns 42
+         * nullValue.orElse(0);   // returns null (different from Optional!)
          * }</pre>
          *
          * @param <T> the type of the value

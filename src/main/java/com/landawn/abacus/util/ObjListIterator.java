@@ -54,10 +54,10 @@ import com.landawn.abacus.util.stream.Stream;
  * ObjListIterator<String> iter = ObjListIterator.of(list);
  * 
  * // Bidirectional iteration
- * iter.next();     // "a"
- * iter.next();     // "b"
- * iter.previous(); // "b"
- * iter.previous(); // "a"
+ * iter.next();  // "a"
+ * iter.next();  // "b"
+ * iter.previous();  // "b"
+ * iter.previous();  // "a"
  * 
  * // Skip and limit
  * ObjListIterator<String> sliced = ObjListIterator.of(list).skip(1).limit(2);
@@ -155,11 +155,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> single = ObjListIterator.just("Hello");
-     * single.hasNext();    // true
-     * single.hasPrevious(); // false
-     * single.next();       // "Hello"
-     * single.hasPrevious(); // true
-     * single.hasNext();    // false
+     * single.hasNext();       // true
+     * single.hasPrevious();   // false
+     * single.next();          // "Hello"
+     * single.hasPrevious();   // true
+     * single.hasNext();       // false
      * }</pre>
      *
      * @param <T> the type of the element
@@ -328,9 +328,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <pre>{@code
      * ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
      * ObjListIterator<Integer> skipped = iter.skip(2);
-     * skipped.next(); // 3
-     * skipped.next(); // 4
-     * skipped.previous(); // 4
+     * skipped.next();       // 3
+     * skipped.next();       // 4
+     * skipped.previous();   // 4
      * }</pre>
      *
      * @param n the number of elements to skip
@@ -523,7 +523,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("first", "second"));
-     * Nullable<String> first = iter.first(); // Nullable.of("first")
+     * Nullable<String> first = iter.first();  // Nullable.of("first")
      * }</pre>
      *
      * @return a {@code Nullable} containing the first element, or empty if no elements
@@ -544,7 +544,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList(null, null, "found", "next"));
-     * Optional<String> first = iter.firstNonNull(); // Optional.of("found")
+     * Optional<String> first = iter.firstNonNull();  // Optional.of("found")
      * }</pre>
      *
      * @return an Optional containing the first {@code non-null} element, or empty if none found
@@ -571,7 +571,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4));
-     * Nullable<Integer> last = iter.last(); // Nullable.of(4)
+     * Nullable<Integer> last = iter.last();  // Nullable.of(4)
      * }</pre>
      *
      * @return a {@code Nullable} containing the last element, or empty if no elements
@@ -609,7 +609,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-     * String[] array = iter.toArray(new String[0]); // {"a", "b", "c"}
+     * String[] array = iter.toArray(new String[0]);  // {"a", "b", "c"}
      * }</pre>
      *
      * @param <A> the component type of the array
@@ -628,7 +628,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
-     * List<Integer> list = iter.toList(); // [1, 2, 3]
+     * List<Integer> list = iter.toList();  // [1, 2, 3]
      * }</pre>
      *
      * @return a List containing all remaining elements
@@ -653,7 +653,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
      * long count = iter.stream()
      *     .filter(s -> s.length() > 0)
-     *     .count(); // 3
+     *     .count();  // 3
      * }</pre>
      *
      * @return a Stream of the remaining elements
@@ -696,7 +696,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * ObjListIterator<String> iter = ObjListIterator.of(list);
-     * iter.next(); // Skip first element
+     * iter.next();  // Skip first element
      * iter.foreachIndexed((index, value) -> 
      *     System.out.println(index + ": " + value)
      * );

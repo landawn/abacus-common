@@ -78,39 +78,39 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <pre>{@code
  * // Creating and initializing float lists
  * FloatList coordinates = FloatList.of(1.5f, 2.7f, 3.14f, 4.2f);
- * FloatList range = FloatList.range(0.0f, 10.0f, 0.5f);    // [0.0, 0.5, 1.0, ..., 9.5]
- * FloatList audioSamples = new FloatList(44100);           // Pre-sized for 1 second at 44.1kHz
- * FloatList random = FloatList.random(0.0f, 1.0f, 1000);   // 1000 random floats [0.0, 1.0)
+ * FloatList range = FloatList.range(0.0f, 10.0f, 0.5f);  // [0.0, 0.5, 1.0, ..., 9.5]
+ * FloatList audioSamples = new FloatList(44100);  // Pre-sized for 1 second at 44.1kHz
+ * FloatList random = FloatList.random(0.0f, 1.0f, 1000);  // 1000 random floats [0.0, 1.0)
  *
  * // Basic operations
- * coordinates.add(5.8f);                                   // Append float value
- * float x = coordinates.get(0);                            // Access by index: 1.5
- * coordinates.set(1, 3.0f);                                // Modify existing value
+ * coordinates.add(5.8f);  // Append float value
+ * float x = coordinates.get(0);  // Access by index: 1.5
+ * coordinates.set(1, 3.0f);  // Modify existing value
  *
  * // Mathematical operations for floating-point data
- * OptionalFloat min = coordinates.min();                   // Find minimum value
- * OptionalFloat max = coordinates.max();                   // Find maximum value
- * OptionalFloat median = coordinates.median();             // Calculate median value
- * double sum = coordinates.stream().sum();                 // Calculate sum
+ * OptionalFloat min = coordinates.min();  // Find minimum value
+ * OptionalFloat max = coordinates.max();  // Find maximum value
+ * OptionalFloat median = coordinates.median();  // Calculate median value
+ * double sum = coordinates.stream().sum();  // Calculate sum
  *
  * // Set operations for data analysis
  * FloatList set1 = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f);
  * FloatList set2 = FloatList.of(3.0f, 4.0f, 5.0f, 6.0f);
- * FloatList intersection = set1.intersection(set2);        // [3.0, 4.0]
- * FloatList difference = set1.difference(set2);            // [1.0, 2.0]
+ * FloatList intersection = set1.intersection(set2);  // [3.0, 4.0]
+ * FloatList difference = set1.difference(set2);  // [1.0, 2.0]
  *
  * // High-performance sorting and searching
- * coordinates.sort();                                      // Sort in ascending order
- * coordinates.parallelSort();                              // Parallel sort for large datasets
- * int index = coordinates.binarySearch(3.14f);             // Fast lookup
+ * coordinates.sort();  // Sort in ascending order
+ * coordinates.parallelSort();  // Parallel sort for large datasets
+ * int index = coordinates.binarySearch(3.14f);  // Fast lookup
  *
  * // Type conversions for different precision needs
- * DoubleList doubleValues = coordinates.toDoubleList();    // Convert to double precision
+ * DoubleList doubleValues = coordinates.toDoubleList();  // Convert to double precision
  * IntList roundedValues = coordinates.stream()             // Convert to rounded integers
  *     .mapToInt(f -> Math.round(f))
  *     .collect(IntList::new, IntList::add, IntList::addAll);
- * float[] primitiveArray = coordinates.toArray();          // To primitive array
- * List<Float> boxedList = coordinates.boxed();             // To boxed collection
+ * float[] primitiveArray = coordinates.toArray();  // To primitive array
+ * List<Float> boxedList = coordinates.boxed();  // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -1359,12 +1359,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 2.0f, 2.0f, 4.0f);
-     * FloatList result = list1.intersection(list2); // result will be [1.0f, 2.0f]
+     * FloatList result = list1.intersection(list2);  // result will be [1.0f, 2.0f]
      * // One occurrence of '1.0f' (minimum count in both lists) and one occurrence of '2.0f'
      *
      * FloatList list3 = FloatList.of(5.0f, 5.0f, 6.0f);
      * FloatList list4 = FloatList.of(5.0f, 7.0f);
-     * FloatList result2 = list3.intersection(list4); // result will be [5.0f]
+     * FloatList result2 = list3.intersection(list4);  // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both lists)
      * }</pre>
      *
@@ -1405,12 +1405,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * float[] array = new float[] {1.0f, 2.0f, 2.0f, 4.0f};
-     * FloatList result = list1.intersection(array); // result will be [1.0f, 2.0f]
+     * FloatList result = list1.intersection(array);  // result will be [1.0f, 2.0f]
      * // One occurrence of '1.0f' (minimum count in both sources) and one occurrence of '2.0f'
      *
      * FloatList list2 = FloatList.of(5.0f, 5.0f, 6.0f);
      * float[] array2 = new float[] {5.0f, 7.0f};
-     * FloatList result2 = list2.intersection(array2); // result will be [5.0f]
+     * FloatList result2 = list2.intersection(array2);  // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both sources)
      * }</pre>
      *
@@ -1441,12 +1441,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 4.0f);
-     * FloatList result = list1.difference(list2); // result will be [1.0f, 2.0f, 3.0f]
+     * FloatList result = list1.difference(list2);  // result will be [1.0f, 2.0f, 3.0f]
      * // One '1.0f' remains because list1 has two occurrences and list2 has one
      *
      * FloatList list3 = FloatList.of(5.0f, 6.0f);
      * FloatList list4 = FloatList.of(5.0f, 5.0f, 6.0f);
-     * FloatList result2 = list3.difference(list4); // result will be [] (empty)
+     * FloatList result2 = list3.difference(list4);  // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1486,12 +1486,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * float[] array = new float[] {1.0f, 4.0f};
-     * FloatList result = list1.difference(array); // result will be [1.0f, 2.0f, 3.0f]
+     * FloatList result = list1.difference(array);  // result will be [1.0f, 2.0f, 3.0f]
      * // One '1.0f' remains because list1 has two occurrences and array has one
      *
      * FloatList list2 = FloatList.of(5.0f, 6.0f);
      * float[] array2 = new float[] {5.0f, 5.0f, 6.0f};
-     * FloatList result2 = list2.difference(array2); // result will be [] (empty)
+     * FloatList result2 = list2.difference(array2);  // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *

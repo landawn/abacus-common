@@ -360,7 +360,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *         processLine(it.next());
      *     }
      * } finally {
-     *     it.close(); // Important to close to release resources
+     *     it.close();  // Important to close to release resources
      * }
      * }</pre>
      */

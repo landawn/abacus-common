@@ -71,7 +71,7 @@ import com.landawn.abacus.util.Objectory;
  * try {
  *     // use resource
  * } finally {
- *     pool.add(resource); // return to pool
+ *     pool.add(resource);  // return to pool
  * }
  * }</pre>
  *
@@ -448,7 +448,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj); // return to pool
+     *         pool.add(obj);  // return to pool
      *     }
      * } else {
      *     // pool is empty, create new object if needed

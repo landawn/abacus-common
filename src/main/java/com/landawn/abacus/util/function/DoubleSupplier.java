@@ -45,7 +45,7 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleSupplier random = Math::random;
-     * double value = random.getAsDouble(); // Returns random value between 0.0 and 1.0
+     * double value = random.getAsDouble();  // Returns random value between 0.0 and 1.0
      * }</pre>
      *
      * @return a double value

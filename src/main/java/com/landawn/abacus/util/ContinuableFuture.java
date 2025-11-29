@@ -448,7 +448,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<String> future = ContinuableFuture.completed("Hello");
      * 
      * // This doesn't block and returns immediately
-     * String result = future.get(); // "Hello"
+     * String result = future.get();  // "Hello"
      * 
      * // Useful for conditional async operations
      * ContinuableFuture<Data> loadData(boolean useCache) {
@@ -542,7 +542,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Cancel after 1 second
      * Thread.sleep(1000);
-     * boolean cancelled = future.cancel(true); // Interrupt if running
+     * boolean cancelled = future.cancel(true);  // Interrupt if running
      * }</pre>
      *
      * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted;
@@ -695,7 +695,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * 
      * try {
-     *     Integer result = future.get(); // Blocks for ~1 second
+     *     Integer result = future.get();  // Blocks for ~1 second
      *     System.out.println("Result: " + result);
      * } catch (InterruptedException e) {
      *     Thread.currentThread().interrupt();
@@ -736,7 +736,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *     System.out.println("Got result: " + result);
      * } catch (TimeoutException e) {
      *     System.err.println("Operation timed out");
-     *     future.cancel(true); // Cancel the operation
+     *     future.cancel(true);  // Cancel the operation
      * }
      * }</pre>
      *
@@ -807,7 +807,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * Data data = result.orElseGet(() -> {
      *     if (result.getException() instanceof TimeoutException) {
-     *         return getCachedData(); // Fallback on timeout
+     *         return getCachedData();  // Fallback on timeout
      *     }
      *     return getDefaultData();
      * });
@@ -840,7 +840,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Check immediately without blocking
      * String result = future.getNow("Computing...");
-     * System.out.println(result); // Prints "Computing..." if not done
+     * System.out.println(result);  // Prints "Computing..." if not done
      * 
      * // Polling pattern
      * while (true) {
@@ -880,12 +880,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Transform the result synchronously after completion
      * String result = future.getThenApply(num -> "The answer is: " + num);
-     * System.out.println(result); // "The answer is: 42"
+     * System.out.println(result);  // "The answer is: 42"
      * 
      * // Can throw checked exceptions
      * Data processed = future.getThenApply(num -> {
      *     if (num < 0) throw new IllegalArgumentException("Negative!");
-     *     return processNumber(num); // May throw IOException
+     *     return processNumber(num);  // May throw IOException
      * });
      * }</pre>
      *
@@ -1160,7 +1160,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      *
      * // The transformation happens when the original completes
-     * System.out.println(stringFuture.get()); // "The result is: 42"
+     * System.out.println(stringFuture.get());  // "The result is: 42"
      * }</pre>
      *
      * @param <U> the type of the transformed result
@@ -1392,7 +1392,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenCall((data, exception) -> {
      *         if (exception != null) {
      *             logger.warn("Primary failed, using fallback", exception);
-     *             return fetchFromSecondary(); // Recovery
+     *             return fetchFromSecondary();  // Recovery
      *         }
      *         return enhanceData(data);
      *     });
@@ -1754,7 +1754,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      * 
      * localWeather.runAfterEither(remoteWeather, weather -> {
-     *     displayWeather(weather); // weather may be null if the first future failed
+     *     displayWeather(weather);  // weather may be null if the first future failed
      *     logSource(weather.getSource());
      * });
      * }</pre>
@@ -1857,7 +1857,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * ContinuableFuture<Order> order = vendorA.callAfterEither(vendorB, price -> {
      *     // Process the first available price
-     *     return createOrder(price); // price may be null if the first future failed
+     *     return createOrder(price);  // price may be null if the first future failed
      * });
      * }</pre>
      *
@@ -2266,7 +2266,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenUse(cpuExecutor)                             // Switch to CPU executor
      *     .thenCall(() -> processData())                    // CPU-intensive processing
      *     .thenUse(ioExecutor)                              // Switch to I/O executor
-     *     .thenRun(result -> writeToFile(result));          // I/O operation
+     *     .thenRun(result -> writeToFile(result));  // I/O operation
      * }</pre>
      *
      * @param executor the executor to use for subsequent actions in the chain; must not be null

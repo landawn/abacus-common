@@ -167,7 +167,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
      * stats.accept(new BigInteger("100"));
      * stats.accept(new BigInteger("50"));
-     * BigInteger min = stats.getMin(); // Returns 50
+     * BigInteger min = stats.getMin();  // Returns 50
      * }</pre>
      *
      * @return the minimum value, or {@code null} if none
@@ -184,7 +184,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
      * stats.accept(new BigInteger("100"));
      * stats.accept(new BigInteger("500"));
-     * BigInteger max = stats.getMax(); // Returns 500
+     * BigInteger max = stats.getMax();  // Returns 500
      * }</pre>
      *
      * @return the maximum value, or {@code null} if none
@@ -201,7 +201,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
      * stats.accept(new BigInteger("10"));
      * stats.accept(new BigInteger("20"));
-     * long count = stats.getCount(); // Returns 2
+     * long count = stats.getCount();  // Returns 2
      * }</pre>
      *
      * @return the count of values
@@ -218,7 +218,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
      * stats.accept(new BigInteger("1000"));
      * stats.accept(new BigInteger("2000"));
-     * BigInteger sum = stats.getSum(); // Returns 3000
+     * BigInteger sum = stats.getSum();  // Returns 3000
      * }</pre>
      *
      * @return the sum of values, or zero if none
@@ -239,7 +239,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * stats.accept(new BigInteger("10"));
      * stats.accept(new BigInteger("20"));
      * stats.accept(new BigInteger("30"));
-     * BigDecimal avg = stats.getAverage(); // Returns 20
+     * BigDecimal avg = stats.getAverage();  // Returns 20
      * }</pre>
      *
      * @return the arithmetic mean of values as a BigDecimal, or zero if none

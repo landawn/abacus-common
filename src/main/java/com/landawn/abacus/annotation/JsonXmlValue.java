@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  *     @JsonXmlValue
  *     private BigDecimal value;
  *
- *     private String currency; // This won't be serialized as the main value
+ *     private String currency;  // This won't be serialized as the main value
  *
  *     public Amount(BigDecimal value, String currency) {
  *         this.value = value;

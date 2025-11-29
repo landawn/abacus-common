@@ -26,8 +26,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedChar ic = IndexedChar.of('A', 0);
- * System.out.println(ic.value()); // prints: A
- * System.out.println(ic.index()); // prints: 0
+ * System.out.println(ic.value());  // prints: A
+ * System.out.println(ic.index());  // prints: 0
  * }</pre>
  * 
  */

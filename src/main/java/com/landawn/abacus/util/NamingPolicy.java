@@ -36,8 +36,8 @@ import com.landawn.abacus.annotation.Beta;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String original = "user-name";
- * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original); // "userName"
- * String snakeCase = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert(original); // "user_name"
+ * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original);  // "userName"
+ * String snakeCase = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert(original);  // "user_name"
  * }</pre>
  * 
  * @see Strings#toCamelCase(String)
@@ -131,9 +131,9 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.NO_CHANGE.convert("any-String_123");     // "any-String_123"
-     * String result2 = NamingPolicy.NO_CHANGE.convert("MixedCase");          // "MixedCase"
-     * String result3 = NamingPolicy.NO_CHANGE.convert("UPPER_CASE");         // "UPPER_CASE"
+     * String result1 = NamingPolicy.NO_CHANGE.convert("any-String_123");   // "any-String_123"
+     * String result2 = NamingPolicy.NO_CHANGE.convert("MixedCase");        // "MixedCase"
+     * String result3 = NamingPolicy.NO_CHANGE.convert("UPPER_CASE");       // "UPPER_CASE"
      * }</pre>
      *
      * @see #convert(String)
@@ -165,11 +165,11 @@ public enum NamingPolicy {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to lower camel case
-     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user-name"); // "userName"
-     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("USER_NAME"); // "userName"
+     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user-name");            // "userName"
+     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("USER_NAME");            // "userName"
      *
      * // Convert to snake case
-     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName"); // "user_name"
+     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName");   // "user_name"
      * }</pre>
      *
      * @param str the string to convert; may contain various separators (underscores, hyphens, spaces)

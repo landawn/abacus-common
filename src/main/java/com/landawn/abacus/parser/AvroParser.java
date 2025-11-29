@@ -337,7 +337,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "..."; // Base64 encoded Avro data
+     * String base64Data = "...";  // Base64 encoded Avro data
      * AvroDeserializationConfig config = new AvroDeserializationConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
@@ -362,7 +362,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "..."; // Base64 encoded Avro data
+     * String base64Data = "...";  // Base64 encoded Avro data
      * AvroDeserializationConfig config = new AvroDeserializationConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);

@@ -37,7 +37,7 @@ public interface IntNConsumer {
      *     for (int v : values) sum += v;
      *     System.out.println("Sum: " + sum);
      * };
-     * summer.accept(1, 2, 3, 4); // Prints: Sum: 10
+     * summer.accept(1, 2, 3, 4);  // Prints: Sum: 10
      * }</pre>
      *
      * @param args the input arguments as a variable-length array of {@code int} values

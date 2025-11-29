@@ -172,8 +172,8 @@ import com.landawn.abacus.util.stream.Stream;
  * });
  *
  * // File splitting for large files
- * IOUtil.splitBySize(largeFile, 1024 * 1024); // 1MB parts
- * IOUtil.split(file, 10); // Split into 10 equal parts
+ * IOUtil.splitBySize(largeFile, 1024 * 1024);  // 1MB parts
+ * IOUtil.split(file, 10);  // Split into 10 equal parts
  *
  * // Content comparison
  * boolean identical = IOUtil.contentEquals(file1, file2);
@@ -805,7 +805,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceKb(5000); // 5-second timeout
+     *     long freeSpace = IOUtil.freeDiskSpaceKb(5000);  // 5-second timeout
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
@@ -926,7 +926,7 @@ public final class IOUtil {
      * <pre>{@code
      * char[] chars = new char[] {'H', 'e', 'l', 'l', 'o'};
      * byte[] bytes = IOUtil.chars2Bytes(chars, StandardCharsets.UTF_8);
-     * IOUtil.chars2Bytes(null); // returns empty byte array
+     * IOUtil.chars2Bytes(null);  // returns empty byte array
      * }</pre>
      *
      * @param chars the character array to convert. May be {@code null} or empty.
@@ -980,9 +980,9 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111}; // "Hello"
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello"
      * char[] chars = IOUtil.bytes2Chars(bytes);
-     * IOUtil.bytes2Chars(null); // returns empty char array
+     * IOUtil.bytes2Chars(null);  // returns empty char array
      * }</pre>
      *
      * @param bytes the byte array to convert. May be {@code null} or empty.
@@ -997,7 +997,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111}; // "Hello" in UTF-8
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
      * char[] chars = IOUtil.bytes2Chars(bytes, StandardCharsets.UTF_8);
      * }</pre>
      *
@@ -1018,7 +1018,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111}; // "Hello" in UTF-8
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
      * // Convert the sub-array {101, 108, 108}
      * char[] chars = IOUtil.bytes2Chars(bytes, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
@@ -2791,7 +2791,7 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
-     *     String line = IOUtil.readLine(file, 0); // Read the first line
+     *     String line = IOUtil.readLine(file, 0);  // Read the first line
      *     System.out.println("First line: " + line);
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -2817,7 +2817,7 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
-     *     String line = IOUtil.readLine(file, StandardCharsets.UTF_8, 5); // Read the 6th line
+     *     String line = IOUtil.readLine(file, StandardCharsets.UTF_8, 5);  // Read the 6th line
      *     System.out.println("Line 6: " + line);
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -2855,7 +2855,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
-     *     String line = IOUtil.readLine(reader, 4); // Read the 5th line
+     *     String line = IOUtil.readLine(reader, 4);  // Read the 5th line
      *     System.out.println("Line 5: " + line);
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
@@ -2930,7 +2930,7 @@ public final class IOUtil {
      * File file = new File("data.bin");
      * byte[] buffer = new byte[1024];
      * try {
-     *     int bytesRead = IOUtil.read(file, buffer, 10, 100); // Read 100 bytes into buffer starting at index 10
+     *     int bytesRead = IOUtil.read(file, buffer, 10, 100);  // Read 100 bytes into buffer starting at index 10
      *     System.out.println("Read " + bytesRead + " bytes");
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -2988,7 +2988,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("data.bin")) {
      *     byte[] buffer = new byte[1024];
-     *     int bytesRead = IOUtil.read(inputStream, buffer, 50, 200); // Read 200 bytes into buffer starting at index 50
+     *     int bytesRead = IOUtil.read(inputStream, buffer, 50, 200);  // Read 200 bytes into buffer starting at index 50
      *     System.out.println("Read " + bytesRead + " bytes");
      * } catch (IOException e) {
      *     System.err.println("Error reading stream: " + e.getMessage());
@@ -3087,7 +3087,7 @@ public final class IOUtil {
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
-     *     int charsRead = IOUtil.read(file, buffer, 10, 100); // Read 100 chars into buffer starting at index 10
+     *     int charsRead = IOUtil.read(file, buffer, 10, 100);  // Read 100 chars into buffer starting at index 10
      *     System.out.println("Read " + charsRead + " characters");
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -3113,7 +3113,7 @@ public final class IOUtil {
      * File file = new File("text_file.txt");
      * char[] buffer = new char[1024];
      * try {
-     *     int charsRead = IOUtil.read(file, StandardCharsets.UTF_8, buffer, 20, 150); // Read 150 chars starting at index 20
+     *     int charsRead = IOUtil.read(file, StandardCharsets.UTF_8, buffer, 20, 150);  // Read 150 chars starting at index 20
      *     System.out.println("Read " + charsRead + " characters");
      * } catch (IOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -3174,7 +3174,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     char[] buffer = new char[1024];
-     *     int charsRead = IOUtil.read(reader, buffer, 50, 200); // Read 200 chars into buffer starting at index 50
+     *     int charsRead = IOUtil.read(reader, buffer, 50, 200);  // Read 200 chars into buffer starting at index 50
      *     System.out.println("Read " + charsRead + " characters");
      * } catch (IOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
@@ -5258,10 +5258,10 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.removeExtension("foo.txt");    // Returns "foo"
-     * FilenameUtil.removeExtension("a\\b\\c.jpg"); // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a\\b\\c");     // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a.b\\c");      // Returns "a.b\\c"
+     * FilenameUtil.removeExtension("foo.txt");       // Returns "foo"
+     * FilenameUtil.removeExtension("a\\b\\c.jpg");   // Returns "a\\b\\c"
+     * FilenameUtil.removeExtension("a\\b\\c");       // Returns "a\\b\\c"
+     * FilenameUtil.removeExtension("a.b\\c");        // Returns "a.b\\c"
      * FilenameUtil.removeExtension(null)            = null
      * }</pre>
      *
@@ -6323,7 +6323,6 @@ public final class IOUtil {
      *
      * @param file the File that may need parents, which may be {@code null}.
      * @return the parent directory, or {@code null} if the given File does have a parent.
-     * @since 2.9.0
      */
     private static boolean createParentDirectories(final File file) {
         return mkdirsIfNotExists(getParentFile(file));
@@ -6459,7 +6458,6 @@ public final class IOUtil {
      * @throws IllegalArgumentException if source is not a file.
      * @throws IOException if an I/O error occurs.
      * @see StandardCopyOption
-     * @since 2.9.0
      */
     public static void copyFile(final File srcFile, final File destFile, final CopyOption... copyOptions) throws IOException {
         copyFile(srcFile, destFile, true, copyOptions);
@@ -6493,7 +6491,6 @@ public final class IOUtil {
      * @throws IllegalArgumentException if {@code srcFile} or {@code destFile} is not a file
      * @throws IOException if the output file length is not the same as the input file length after the copy completes, or if an I/O error occurs, setting the last-modified time didn't succeed or the destination is not writable 
      * @see #copyToDirectory(File, File, boolean)
-     * @since 2.8.0
      */
     public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate, final CopyOption... copyOptions) throws IOException {
         Objects.requireNonNull(destFile, "destination");
@@ -6526,7 +6523,6 @@ public final class IOUtil {
      * @param output the {@link OutputStream} to write.
      * @return the number of bytes copied}.}.
      * @throws IOException          if an I/O error occurs.
-     * @since 2.1
      */
     public static long copyFile(final File input, final OutputStream output) throws IOException {
         return copy(input.toPath(), output);
@@ -7782,98 +7778,98 @@ public final class IOUtil {
     }
 
     /**
-    * Splits a file into multiple parts based on the specified size per part.
-    * <p>
-    * This method divides the source file into sequential parts where each part (except possibly the last one)
-    * has the specified size. The parts are saved as separate files in the same directory as the source file
-    * with numbered suffixes. This is useful for creating file chunks for distribution, storage limitations,
-    * or transfer purposes.
-    * </p>
-    *
-    * <p>File naming convention:</p>
-    * <ul>
-    *   <li><strong>Pattern:</strong> {@code originalFileName_NNNN}</li>
-    *   <li><strong>Numbering:</strong> Sequential 4-digit zero-padded numbers starting from 0001</li>
-    *   <li><strong>Example:</strong> {@code document.pdf} becomes {@code document.pdf_0001}, {@code document.pdf_0002}, etc.</li>
-    * </ul>
-    *
-    * <p>Size distribution:</p>
-    * <ul>
-    *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
-    *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-    *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
-    * </ul>
-    *
-    * <p><b>Usage Examples:</b></p>
-    * <pre>{@code
-    * File sourceFile = new File("large_document.pdf");
-    * 
-    * // Split into 1MB parts
-    * IOUtil.splitBySize(sourceFile, 1024 * 1024);
-    * // Creates: large_document.pdf_0001, large_document.pdf_0002, etc.
-    * 
-    * // Split into 10KB parts
-    * IOUtil.splitBySize(sourceFile, 10240);
-    * }</pre>
-    *
-    * @param file the source file to split; must exist and be readable
-    * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part)
-    * @throws IllegalArgumentException if {@code file} is {@code null}
-    * @throws FileNotFoundException if the source file does not exist
-    * @throws IOException if there are issues with file validation
-    * @see #splitBySize(File, long, File)
-    * @see #split(File, int, File)
-    * @see #split(File, int)
-    */
+     * Splits a file into multiple parts based on the specified size per part.
+     * <p>
+     * This method divides the source file into sequential parts where each part (except possibly the last one)
+     * has the specified size. The parts are saved as separate files in the same directory as the source file
+     * with numbered suffixes. This is useful for creating file chunks for distribution, storage limitations,
+     * or transfer purposes.
+     * </p>
+     *
+     * <p>File naming convention:</p>
+     * <ul>
+     *   <li><strong>Pattern:</strong> {@code originalFileName_NNNN}</li>
+     *   <li><strong>Numbering:</strong> Sequential 4-digit zero-padded numbers starting from 0001</li>
+     *   <li><strong>Example:</strong> {@code document.pdf} becomes {@code document.pdf_0001}, {@code document.pdf_0002}, etc.</li>
+     * </ul>
+     *
+     * <p>Size distribution:</p>
+     * <ul>
+     *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
+     *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
+     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File sourceFile = new File("large_document.pdf");
+     * 
+     * // Split into 1MB parts
+     * IOUtil.splitBySize(sourceFile, 1024 * 1024);
+     * // Creates: large_document.pdf_0001, large_document.pdf_0002, etc.
+     * 
+     * // Split into 10KB parts
+     * IOUtil.splitBySize(sourceFile, 10240);
+     * }</pre>
+     *
+     * @param file the source file to split; must exist and be readable
+     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part)
+     * @throws IllegalArgumentException if {@code file} is {@code null}
+     * @throws FileNotFoundException if the source file does not exist
+     * @throws IOException if there are issues with file validation
+     * @see #splitBySize(File, long, File)
+     * @see #split(File, int, File)
+     * @see #split(File, int)
+     */
     public static void splitBySize(final File file, final long sizeOfPart) throws IOException {
         splitBySize(file, sizeOfPart, file.getParentFile());
     }
 
     /**
-    * Splits a file into multiple parts based on the specified size per part and saves them to a destination directory.
-    * <p>
-    * This method divides the source file into sequential parts where each part (except possibly the last one)
-    * has the specified size. The parts are saved as separate files in the destination directory with numbered
-    * suffixes. This is useful for creating file chunks for distribution, storage limitations, or transfer purposes.
-    * </p>
-    *
-    * <p>File naming convention:</p>
-    * <ul>
-    *   <li><strong>Pattern:</strong> {@code originalFileName_NNNN}</li>
-    *   <li><strong>Numbering:</strong> Sequential 4-digit zero-padded numbers starting from 0001</li>
-    *   <li><strong>Example:</strong> {@code document.pdf} becomes {@code document.pdf_0001}, {@code document.pdf_0002}, etc.</li>
-    * </ul>
-    *
-    * <p>Size distribution:</p>
-    * <ul>
-    *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
-    *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-    *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
-    * </ul>
-    *
-    * <p><b>Usage Examples:</b></p>
-    * <pre>{@code
-    * File sourceFile = new File("large_document.pdf");
-    * File outputDir = new File("split_parts");
-    * 
-    * // Split into 1MB parts
-    * IOUtil.splitBySize(sourceFile, 1024 * 1024, outputDir);
-    * // Creates: large_document.pdf_0001, large_document.pdf_0002, etc.
-    * 
-    * // Split into 10KB parts
-    * IOUtil.splitBySize(sourceFile, 10240, outputDir);
-    * }</pre>
-    *
-    * @param file the source file to split; must exist and be readable
-    * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part)
-    * @param destDir the destination directory where split parts will be saved; must exist and be writable
-    * @throws IllegalArgumentException if {@code file} or {@code destDir} is {@code null}
-    * @throws FileNotFoundException if the source file does not exist or the destination directory is invalid
-    * @throws IOException if there are issues with file validation or directory access
-    * @see #splitBySize(File, long)
-    * @see #split(File, int, File)
-    * @see #split(File, int)
-    */
+     * Splits a file into multiple parts based on the specified size per part and saves them to a destination directory.
+     * <p>
+     * This method divides the source file into sequential parts where each part (except possibly the last one)
+     * has the specified size. The parts are saved as separate files in the destination directory with numbered
+     * suffixes. This is useful for creating file chunks for distribution, storage limitations, or transfer purposes.
+     * </p>
+     *
+     * <p>File naming convention:</p>
+     * <ul>
+     *   <li><strong>Pattern:</strong> {@code originalFileName_NNNN}</li>
+     *   <li><strong>Numbering:</strong> Sequential 4-digit zero-padded numbers starting from 0001</li>
+     *   <li><strong>Example:</strong> {@code document.pdf} becomes {@code document.pdf_0001}, {@code document.pdf_0002}, etc.</li>
+     * </ul>
+     *
+     * <p>Size distribution:</p>
+     * <ul>
+     *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
+     *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
+     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File sourceFile = new File("large_document.pdf");
+     * File outputDir = new File("split_parts");
+     * 
+     * // Split into 1MB parts
+     * IOUtil.splitBySize(sourceFile, 1024 * 1024, outputDir);
+     * // Creates: large_document.pdf_0001, large_document.pdf_0002, etc.
+     * 
+     * // Split into 10KB parts
+     * IOUtil.splitBySize(sourceFile, 10240, outputDir);
+     * }</pre>
+     *
+     * @param file the source file to split; must exist and be readable
+     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part)
+     * @param destDir the destination directory where split parts will be saved; must exist and be writable
+     * @throws IllegalArgumentException if {@code file} or {@code destDir} is {@code null}
+     * @throws FileNotFoundException if the source file does not exist or the destination directory is invalid
+     * @throws IOException if there are issues with file validation or directory access
+     * @see #splitBySize(File, long)
+     * @see #split(File, int, File)
+     * @see #split(File, int)
+     */
     public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws IOException {
         checkFileExists(file);
         checkDestDirectory(destDir);
@@ -7943,7 +7939,6 @@ public final class IOUtil {
      * @param destDir    the directory where the split parts will be stored.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
-    @SuppressWarnings("null")
     static void splitByLine(final File file, final int numOfParts, final File destDir) throws UncheckedIOException {
         N.checkArgPositive(numOfParts, cs.numOfParts);
 
@@ -8580,7 +8575,6 @@ public final class IOUtil {
      * @throws IOException in case of an I/O error.
      * @throws UnsupportedCharsetException if the named charset is unavailable (unchecked exception).
      * @see IOUtil#contentEqualsIgnoreEOL(Reader, Reader)
-     * @since 2.2
      */
     public static boolean contentEqualsIgnoreEOL(final File file1, final File file2, final String charsetName) throws IOException {
         if (file1 == file2) {

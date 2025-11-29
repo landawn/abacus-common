@@ -108,8 +108,8 @@ public class DateType extends AbstractDateType<Date> {
      * Date now = dateType.valueOf("sysTime");
      *
      * // Handle null/empty strings
-     * Date nullDate = dateType.valueOf(null);  // returns null
-     * Date emptyDate = dateType.valueOf("");   // returns null
+     * Date nullDate = dateType.valueOf(null);   // returns null
+     * Date emptyDate = dateType.valueOf("");    // returns null
      * }</pre>
      *
      * @param str the string to parse. Can be {@code null} or empty.

@@ -109,7 +109,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> empty = BiIterator.empty();
-     * assertFalse(empty.hasNext()); // true - no elements
+     * assertFalse(empty.hasNext());  // true - no elements
      * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator

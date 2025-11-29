@@ -132,7 +132,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains character 'A'
      * OptionalChar opt = type.get(rs, 1);
@@ -168,7 +168,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "grade" contains character 'A'
      * OptionalChar opt = type.get(rs, "grade");

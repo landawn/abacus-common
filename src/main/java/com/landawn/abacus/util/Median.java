@@ -83,8 +83,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Basic median calculation for primitive arrays
  * int[] numbers = {5, 2, 8, 1, 9, 3};
  * Pair<Integer, OptionalInt> result = Median.of(numbers);
- * int median1 = result.left;                    // First median (smaller for even length)
- * OptionalInt median2 = result.right;           // Second median (empty for odd length)
+ * int median1 = result.left;  // First median (smaller for even length)
+ * OptionalInt median2 = result.right;  // Second median (empty for odd length)
  *
  * // Handle odd vs even length results
  * if (median2.isPresent()) {
@@ -97,12 +97,12 @@ import com.landawn.abacus.util.u.OptionalShort;
  * }
  *
  * // Range-based median calculation
- * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4); // Elements at indices 1-3
+ * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4);  // Elements at indices 1-3
  *
  * // Collection with natural ordering
  * List<String> words = Arrays.asList("zebra", "apple", "banana", "cherry");
  * Pair<String, Optional<String>> wordMedian = Median.of(words);
- * String medianWord = wordMedian.left;          // "banana" (alphabetically)
+ * String medianWord = wordMedian.left;  // "banana" (alphabetically)
  *
  * // Collection with custom comparator
  * Comparator<String> lengthComparator = Comparator.comparing(String::length);
@@ -297,7 +297,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Character, OptionalChar> median = Median.of('z', 'a', 'm');
-     * char medianValue = median.left; // 'm'
+     * char medianValue = median.left;  // 'm'
      * }</pre>
      *
      * @param a the array of characters to find the median from. Must not be {@code null} or empty.
@@ -403,7 +403,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Byte, OptionalByte> median = Median.of((byte)10, (byte)5, (byte)15);
-     * byte medianValue = median.left; // 10
+     * byte medianValue = median.left;  // 10
      * }</pre>
      *
      * @param a the array of bytes to find the median from. Must not be {@code null} or empty.
@@ -508,7 +508,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Short, OptionalShort> median = Median.of((short)100, (short)50, (short)200);
-     * short medianValue = median.left; // 100
+     * short medianValue = median.left;  // 100
      * }</pre>
      *
      * @param a the array of short integers to find the median from. Must not be {@code null} or empty.
@@ -613,8 +613,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
-     * int lowerMedian = median.left; // 10
-     * int upperMedian = median.right.get(); // 15
+     * int lowerMedian = median.left;  // 10
+     * int upperMedian = median.right.get();  // 15
      * }</pre>
      *
      * @param a the array of integers to find the median from. Must not be {@code null} or empty.
@@ -719,8 +719,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
-     * long lowerMedian = median.left; // 750
-     * long upperMedian = median.right.get(); // 1000
+     * long lowerMedian = median.left;  // 750
+     * long upperMedian = median.right.get();  // 1000
      * }</pre>
      *
      * @param a the array of long integers to find the median from. Must not be {@code null} or empty.
@@ -827,7 +827,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Float, OptionalFloat> median = Median.of(10.5f, 5.2f, 20.8f);
-     * float medianValue = median.left; // 10.5f
+     * float medianValue = median.left;  // 10.5f
      * }</pre>
      *
      * @param a the array of float values to find the median from. Must not be {@code null} or empty.
@@ -935,8 +935,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
-     * double lowerMedian = median.left; // 10.5
-     * double upperMedian = median.right.get(); // 15.1
+     * double lowerMedian = median.left;  // 10.5
+     * double upperMedian = median.right.get();  // 15.1
      * }</pre>
      *
      * @param a the array of double values to find the median from. Must not be {@code null} or empty.
@@ -1044,7 +1044,7 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
      * Pair<String, Optional<String>> median = Median.of(words);
-     * String medianWord = median.left; // "banana"
+     * String medianWord = median.left;  // "banana"
      * }</pre>
      *
      * @param <T> the type of elements in the array, which must implement Comparable
@@ -1125,7 +1125,7 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "pie", "banana"};
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left; // "apple" (middle length)
+     * String medianWord = median.left;  // "apple" (middle length)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -1246,7 +1246,7 @@ public final class Median {
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(10, 5, 20, 15, 25);
      * Pair<Integer, Optional<Integer>> median = Median.of(numbers);
-     * int medianValue = median.left; // 15
+     * int medianValue = median.left;  // 15
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable
@@ -1288,7 +1288,7 @@ public final class Median {
      * <pre>{@code
      * Set<String> words = new HashSet<>(Arrays.asList("apple", "pie", "banana"));
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left; // Word with median length
+     * String medianWord = median.left;  // Word with median length
      * }</pre>
      *
      * @param <T> the type of elements in the collection

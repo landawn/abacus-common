@@ -39,7 +39,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteFunction<Byte> boxer = ByteFunction.BOX;
-     * Byte boxed = boxer.apply((byte) 42); // Returns Byte.valueOf((byte) 42)
+     * Byte boxed = boxer.apply((byte) 42);  // Returns Byte.valueOf((byte) 42)
      * }</pre>
      */
     ByteFunction<Byte> BOX = value -> value;
@@ -59,10 +59,10 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteFunction<String> toHex = b -> String.format("%02X", b);
-     * String hex = toHex.apply((byte) 255); // Returns "FF"
+     * String hex = toHex.apply((byte) 255);  // Returns "FF"
      *
      * ByteFunction<Integer> toUnsigned = b -> Byte.toUnsignedInt(b);
-     * Integer unsigned = toUnsigned.apply((byte) -1); // Returns 255
+     * Integer unsigned = toUnsigned.apply((byte) -1);  // Returns 255
      * }</pre>
      *
      * @param value the byte input argument
@@ -82,7 +82,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * ByteFunction<Integer> toInt = b -> (int) b;
      * Function<Integer, String> toString = Object::toString;
      * ByteFunction<String> combined = toInt.andThen(toString);
-     * String result = combined.apply((byte) 42); // Returns "42"
+     * String result = combined.apply((byte) 42);  // Returns "42"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -104,7 +104,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteFunction<Byte> identity = ByteFunction.identity();
-     * Byte result = identity.apply((byte) 42); // Returns 42 (boxed)
+     * Byte result = identity.apply((byte) 42);  // Returns 42 (boxed)
      * }</pre>
      *
      * @return a function that always returns its input argument as a Byte

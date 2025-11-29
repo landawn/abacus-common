@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Strings;
  * // Convert Type to string
  * Type stringType = TypeFactory.getType(String.class);
  * TypeType typeHandler = new TypeType();
- * String typeName = typeHandler.stringOf(stringType); // "String"
+ * String typeName = typeHandler.stringOf(stringType);  // "String"
  *
  * // Convert string back to Type
  * Type reconstructed = typeHandler.valueOf("String");

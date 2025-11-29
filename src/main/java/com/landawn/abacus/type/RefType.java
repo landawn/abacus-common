@@ -35,7 +35,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * Class<Ref> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Output: java.sql.Ref
+     * System.out.println(clazz.getName());  // Output: java.sql.Ref
      * }</pre>
      *
      * @return the Class object for java.sql.Ref.class
@@ -53,7 +53,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * boolean serializable = type.isSerializable();
-     * System.out.println(serializable); // Output: false
+     * System.out.println(serializable);  // Output: false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -71,11 +71,11 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * Ref ref = ...; // some SQL Ref from database
+     * Ref ref = ...;  // some SQL Ref from database
      * try {
      *     String str = type.stringOf(ref);
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot convert Ref to string"); // This will execute
+     *     System.out.println("Cannot convert Ref to string");  // This will execute
      * }
      * }</pre>
      *
@@ -99,7 +99,7 @@ public class RefType extends AbstractType<Ref> {
      * try {
      *     Ref ref = type.valueOf("some_string");
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot create Ref from string"); // This will execute
+     *     System.out.println("Cannot create Ref from string");  // This will execute
      * }
      * }</pre>
      *
@@ -170,7 +170,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * PreparedStatement stmt = connection.prepareStatement("UPDATE table SET object_ref = ? WHERE id = ?");
-     * Ref ref = ...; // obtained from database or created
+     * Ref ref = ...;  // obtained from database or created
      * type.set(stmt, 1, ref);
      * stmt.setInt(2, 123);
      * stmt.executeUpdate();
@@ -195,7 +195,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * CallableStatement stmt = connection.prepareCall("{call update_ref(?, ?)}");
-     * Ref ref = ...; // obtained from database or created
+     * Ref ref = ...;  // obtained from database or created
      * type.set(stmt, "ref_param", ref);
      * stmt.setInt("id_param", 123);
      * stmt.execute();

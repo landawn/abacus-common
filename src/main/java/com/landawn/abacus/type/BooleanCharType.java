@@ -73,9 +73,9 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * String result = type.stringOf(true); // returns "Y"
-     * String falseResult = type.stringOf(false); // returns "N"
-     * String nullResult = type.stringOf(null); // returns "N"
+     * String result = type.stringOf(true);         // returns "Y"
+     * String falseResult = type.stringOf(false);   // returns "N"
+     * String nullResult = type.stringOf(null);     // returns "N"
      * }</pre>
      *
      * @param b the Boolean value to convert
@@ -119,8 +119,8 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = ...; // from SQL query
-     * Boolean isActive = type.get(rs, 1); // retrieves Boolean from column 1 ('Y' -> true, 'N' -> false)
+     * ResultSet rs = ...;  // from SQL query
+     * Boolean isActive = type.get(rs, 1);  // retrieves Boolean from column 1 ('Y' -> true, 'N' -> false)
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -140,8 +140,8 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = ...; // from SQL query
-     * Boolean isActive = type.get(rs, "is_active"); // retrieves Boolean from "is_active" column
+     * ResultSet rs = ...;  // from SQL query
+     * Boolean isActive = type.get(rs, "is_active");  // retrieves Boolean from "is_active" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -163,7 +163,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET is_active = ? WHERE id = ?");
-     * type.set(stmt, 1, true); // sets parameter 1 to 'Y'
+     * type.set(stmt, 1, true);  // sets parameter 1 to 'Y'
      * stmt.executeUpdate();
      * }</pre>
      *

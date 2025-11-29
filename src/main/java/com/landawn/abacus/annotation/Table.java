@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
  *     private String name;
  *     private BigDecimal price;
  *     private transient String tempData;  // Excluded from mapping
- *     private Map cache;                   // Excluded from mapping
+ *     private Map cache;  // Excluded from mapping
  * }
  * }</pre>
  * 
@@ -144,8 +144,8 @@ public @interface Table {
      *     private Long id;
      *     private String username;
      *     private String email;
-     *     private String tempToken;        // Not mapped
-     *     private List<Role> roles;        // Not mapped
+     *     private String tempToken;  // Not mapped
+     *     private List<Role> roles;  // Not mapped
      * }
      * }</pre>
      * 
@@ -170,12 +170,12 @@ public @interface Table {
      * <pre>{@code
      * @Table(name = "products", nonColumnFields = {"displayPrice", "cache", "dirty"})
      * public class Product {
-     *     private Long id;                  // Mapped
-     *     private String name;              // Mapped
-     *     private BigDecimal price;         // Mapped
-     *     private String displayPrice;      // Not mapped - calculated field
-     *     private Map<String, Object> cache;// Not mapped - temporary cache
-     *     private boolean dirty;            // Not mapped - state tracking
+     *     private Long id;  // Mapped
+     *     private String name;  // Mapped
+     *     private BigDecimal price;  // Mapped
+     *     private String displayPrice;  // Not mapped - calculated field
+     *     private Map<String, Object> cache;  // Not mapped - temporary cache
+     *     private boolean dirty;  // Not mapped - state tracking
      * }
      * }</pre>
      * 

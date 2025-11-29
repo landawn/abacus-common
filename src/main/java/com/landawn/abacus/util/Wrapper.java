@@ -47,7 +47,7 @@ import java.util.function.ToIntFunction;
  * 
  * Map<Wrapper<int[]>, String> map = new HashMap<>();
  * map.put(Wrapper.of(array1), "value");
- * String result = map.get(Wrapper.of(array2)); // Returns "value"
+ * String result = map.get(Wrapper.of(array2));  // Returns "value"
  * 
  * // Custom wrapper with specific hash/equals logic
  * Person person = new Person("John", 30);
@@ -186,7 +186,7 @@ public abstract class Wrapper<T> implements Immutable {
      * <pre>{@code
      * int[] array = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(array);
-     * int[] unwrapped = wrapper.value(); // Returns the original array
+     * int[] unwrapped = wrapper.value();  // Returns the original array
      * }</pre>
      *
      * @return the wrapped value

@@ -24,11 +24,11 @@ package com.landawn.abacus.type;
  * Type<Double> type = TypeFactory.getType(double.class);
  *
  * // Convert string to double
- * Double value = type.valueOf("3.14159"); // Returns 3.14159
- * Double value2 = type.valueOf("-2.718"); // Returns -2.718
+ * Double value = type.valueOf("3.14159");  // Returns 3.14159
+ * Double value2 = type.valueOf("-2.718");  // Returns -2.718
  *
  * // Get default value
- * Double defaultVal = type.defaultValue(); // Returns 0.0
+ * Double defaultVal = type.defaultValue();  // Returns 0.0
  *
  * // Read from database
  * try (ResultSet rs = stmt.executeQuery("SELECT amount FROM transactions")) {

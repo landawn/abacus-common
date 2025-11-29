@@ -1531,7 +1531,7 @@ public final class Comparators {
      * Comparator<Object[]> cmp = Comparators.comparingObjArray(String.CASE_INSENSITIVE_ORDER);
      * Object[] arr1 = {"apple", "banana"};
      * Object[] arr2 = {"APPLE", "CHERRY"};
-     * int result = cmp.compare(arr1, arr2); // returns negative (banana < cherry)
+     * int result = cmp.compare(arr1, arr2);  // returns negative (banana < cherry)
      * }</pre>
      *
      * @param cmp the comparator to use for comparing array elements
@@ -1556,7 +1556,7 @@ public final class Comparators {
      * String[] arr1 = {"apple", "banana"};
      * String[] arr2 = {"apple", "cherry"};
      * Comparator<String[]> cmp = Comparators.comparingArray();
-     * int result = cmp.compare(arr1, arr2); // returns negative (banana < cherry)
+     * int result = cmp.compare(arr1, arr2);  // returns negative (banana < cherry)
      * }</pre>
      *
      * @param <T> the type of Comparable elements in the arrays
@@ -1584,7 +1584,7 @@ public final class Comparators {
      * Comparator<Integer[]> cmp = Comparators.comparingArray(Integer::compare);
      * Integer[] arr1 = {1, 2, 3};
      * Integer[] arr2 = {1, 2, 3, 4};
-     * int result = cmp.compare(arr1, arr2); // returns negative (arr1 is shorter)
+     * int result = cmp.compare(arr1, arr2);  // returns negative (arr1 is shorter)
      * }</pre>
      *
      * @param <T> the type of elements in the arrays
@@ -1631,7 +1631,7 @@ public final class Comparators {
      * List<Integer> list1 = Arrays.asList(1, 2, 3);
      * List<Integer> list2 = Arrays.asList(1, 2, 4);
      * Comparator<List<Integer>> cmp = Comparators.comparingCollection();
-     * int result = cmp.compare(list1, list2); // returns negative (3 < 4)
+     * int result = cmp.compare(list1, list2);  // returns negative (3 < 4)
      * }</pre>
      *
      * @param <C> the type of Collection containing Comparable elements
@@ -1659,7 +1659,7 @@ public final class Comparators {
      * Comparator<List<String>> cmp = Comparators.comparingCollection(String.CASE_INSENSITIVE_ORDER);
      * List<String> list1 = Arrays.asList("apple", "BANANA");
      * List<String> list2 = Arrays.asList("APPLE", "banana", "cherry");
-     * int result = cmp.compare(list1, list2); // returns negative (smaller size)
+     * int result = cmp.compare(list1, list2);  // returns negative (smaller size)
      * }</pre>
      *
      * @param <T> the type of elements in the collections
@@ -1710,7 +1710,7 @@ public final class Comparators {
      * Iterable<String> iter1 = Arrays.asList("apple", "banana");
      * Iterable<String> iter2 = Arrays.asList("apple", "cherry");
      * Comparator<Iterable<String>> cmp = Comparators.comparingIterable();
-     * int result = cmp.compare(iter1, iter2); // returns negative (banana < cherry)
+     * int result = cmp.compare(iter1, iter2);  // returns negative (banana < cherry)
      * }</pre>
      *
      * @param <C> the type of Iterable containing Comparable elements
@@ -1790,7 +1790,7 @@ public final class Comparators {
      * Iterator<Integer> iter1 = Arrays.asList(1, 2, 3).iterator();
      * Iterator<Integer> iter2 = Arrays.asList(1, 2, 4).iterator();
      * Comparator<Iterator<Integer>> cmp = Comparators.comparingIterator();
-     * int result = cmp.compare(iter1, iter2); // returns negative (3 < 4)
+     * int result = cmp.compare(iter1, iter2);  // returns negative (3 < 4)
      * // Note: iter1 and iter2 are now exhausted
      * }</pre>
      *
@@ -1876,7 +1876,7 @@ public final class Comparators {
      * map2.put("cherry", 3);
      * 
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByKey();
-     * int result = cmp.compare(map1, map2); // returns negative (banana < cherry)
+     * int result = cmp.compare(map1, map2);  // returns negative (banana < cherry)
      * }</pre>
      *
      * @param <M> the type of Map with Comparable keys
@@ -1906,7 +1906,7 @@ public final class Comparators {
      * );
      * Map<String, Integer> map1 = Map.of("apple", 1, "BANANA", 2);
      * Map<String, Integer> map2 = Map.of("APPLE", 1, "banana", 2, "cherry", 3);
-     * int result = cmp.compare(map1, map2); // returns negative (smaller size)
+     * int result = cmp.compare(map1, map2);  // returns negative (smaller size)
      * }</pre>
      *
      * @param <K> the type of keys in the maps
@@ -1963,7 +1963,7 @@ public final class Comparators {
      * scores2.put("Dave", 88);
      * 
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByValue();
-     * int result = cmp.compare(scores1, scores2); // returns positive (92 > 88)
+     * int result = cmp.compare(scores1, scores2);  // returns positive (92 > 88)
      * }</pre>
      *
      * @param <M> the type of Map with Comparable values
@@ -2108,7 +2108,7 @@ public final class Comparators {
      * Comparator<Person> byAgeReversed = Comparators.reverseOrder(byAge);
      * 
      * List<Person> people = getPeople();
-     * people.sort(byAgeReversed); // Sorts from oldest to youngest
+     * people.sort(byAgeReversed);  // Sorts from oldest to youngest
      * }</pre>
      *
      * @param <T> the type of objects to compare
@@ -2379,7 +2379,7 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Employee> employees = getEmployees(); // May contain null entries
+     * List<Employee> employees = getEmployees();  // May contain null entries
      * // Sort by salary in descending order, with null employees first
      * employees.sort(Comparators.reversedComparingByIfNotNullOrElseNullsFirst(
      *     emp -> emp.getSalary()
@@ -2413,7 +2413,7 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Product> products = getProducts(); // May contain null entries
+     * List<Product> products = getProducts();  // May contain null entries
      * // Sort by price in descending order, with null products last
      * products.sort(Comparators.reversedComparingByIfNotNullOrElseNullsLast(
      *     prod -> prod.getPrice()

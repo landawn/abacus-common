@@ -48,7 +48,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Class<Instant> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Outputs: org.joda.time.Instant
+     * System.out.println(clazz.getName());  // Outputs: org.joda.time.Instant
      * }</pre>
      *
      * @return the Class object representing org.joda.time.Instant
@@ -70,10 +70,10 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant instant = Instant.now();
      * String str = type.stringOf(instant);
-     * System.out.println(str); // Example output: 2021-01-01T10:30:00.123
+     * System.out.println(str);  // Example output: 2021-01-01T10:30:00.123
      *
      * // null input returns null
-     * String nullStr = type.stringOf(null); // returns null
+     * String nullStr = type.stringOf(null);  // returns null
      * }</pre>
      *
      * @param x the Instant to convert
@@ -115,7 +115,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Instant instant4 = type.valueOf("SYS_TIME");
      *
      * // Empty or null returns null
-     * Instant instant5 = type.valueOf(null); // returns null
+     * Instant instant5 = type.valueOf(null);  // returns null
      * }</pre>
      *
      * @param str the string to parse
@@ -170,7 +170,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Instant instant3 = type.valueOf(buffer, 6, 24);
      *
      * // null or empty array returns null
-     * Instant instant4 = type.valueOf(null, 0, 0); // returns null
+     * Instant instant4 = type.valueOf(null, 0, 0);  // returns null
      * }</pre>
      *
      * @param cbuf the character buffer containing the value to parse
@@ -309,10 +309,10 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Instant instant = Instant.now();
      * StringBuilder sb = new StringBuilder("Timestamp: ");
      * type.appendTo(sb, instant);
-     * System.out.println(sb); // Outputs: Timestamp: 2021-01-01T10:30:00.123
+     * System.out.println(sb);  // Outputs: Timestamp: 2021-01-01T10:30:00.123
      *
      * // null handling
-     * type.appendTo(sb, null); // Appends "null"
+     * type.appendTo(sb, null);  // Appends "null"
      * }</pre>
      *
      * @param appendable the Appendable to write to
@@ -351,13 +351,13 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * // Write with LONG format (no quotes)
      * JSONXMLSerializationConfig config1 = JSONXMLSerializationConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.LONG).build();
-     * type.writeCharacter(writer, instant, config1); // Writes: 1609459200000
+     * type.writeCharacter(writer, instant, config1);  // Writes: 1609459200000
      *
      * // Write with ISO_8601_TIMESTAMP format (with quotes)
      * JSONXMLSerializationConfig config2 = JSONXMLSerializationConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
      *     .setStringQuotation('"').build();
-     * type.writeCharacter(writer, instant, config2); // Writes: "2021-01-01T10:30:00.123"
+     * type.writeCharacter(writer, instant, config2);  // Writes: "2021-01-01T10:30:00.123"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

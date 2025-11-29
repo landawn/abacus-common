@@ -38,7 +38,7 @@ public class MillisDateType extends DateType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
      * Date date = type.get(rs, 1);
@@ -69,7 +69,7 @@ public class MillisDateType extends DateType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "created_date" contains milliseconds value 1609459200000
      * Date date = type.get(rs, "created_date");
@@ -103,7 +103,7 @@ public class MillisDateType extends DateType {
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO users (id, created_date) VALUES (?, ?)");
      *
-     * Date date = new Date(1609459200000L); // Jan 1, 2021
+     * Date date = new Date(1609459200000L);  // Jan 1, 2021
      * type.set(stmt, 2, date);
      * // Sets parameter to 1609459200000
      *
@@ -131,7 +131,7 @@ public class MillisDateType extends DateType {
      * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * CallableStatement stmt = connection.prepareCall("{call update_date(?, ?)}");
      *
-     * Date date = new Date(1609459200000L); // Jan 1, 2021
+     * Date date = new Date(1609459200000L);  // Jan 1, 2021
      * type.set(stmt, "p_created_date", date);
      * // Sets parameter to 1609459200000
      *

@@ -85,7 +85,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.empty();
-     * System.out.println(iter.hasNext()); // false
+     * System.out.println(iter.hasNext());  // false
      * }</pre>
      *
      * @return an empty {@code CharIterator}
@@ -104,7 +104,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * char first = iter.nextChar(); // 'a'
+     * char first = iter.nextChar();  // 'a'
      * }</pre>
      *
      * @param a the char array (may be {@code null})
@@ -245,7 +245,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * CharIterator iter = CharIterator.generate(() -> 'X');
      * // Infinite iterator that always returns 'X'
      * for (int i = 0; i < 5 && iter.hasNext(); i++) {
-     *     System.out.print(iter.nextChar()); // XXXXX
+     *     System.out.print(iter.nextChar());  // XXXXX
      * }
      * }</pre>
      *
@@ -339,8 +339,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * char first = iter.nextChar(); // 'a'
-     * char second = iter.nextChar(); // 'b'
+     * char first = iter.nextChar();    // 'a'
+     * char second = iter.nextChar();   // 'b'
      * }</pre>
      *
      * @return the next char value
@@ -358,7 +358,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * OptionalChar first = iter.first(); // OptionalChar.of('a')
+     * OptionalChar first = iter.first();  // OptionalChar.of('a')
      * // Iterator now points to 'b'
      * }</pre>
      *
@@ -385,7 +385,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * OptionalChar last = iter.last(); // OptionalChar.of('c')
+     * OptionalChar last = iter.last();  // OptionalChar.of('c')
      * // Iterator is now exhausted
      * }</pre>
      *
@@ -418,7 +418,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // array = ['a', 'b', 'c', 'd', 'e']
      *
      * // Empty iterator returns empty array
-     * char[] empty = CharIterator.empty().toArray(); // empty.length == 0
+     * char[] empty = CharIterator.empty().toArray();  // empty.length == 0
      * }</pre>
      *
      * @return a char array containing all remaining elements
@@ -441,7 +441,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // list contains ['a', 'b', 'c', 'd', 'e']
      *
      * // Empty iterator returns empty list
-     * CharList empty = CharIterator.empty().toList(); // empty.size() == 0
+     * CharList empty = CharIterator.empty().toList();  // empty.size() == 0
      * }</pre>
      *
      * @return a CharList containing all remaining elements
@@ -471,7 +471,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * CharStream stream = iter.stream();
      * String result = stream.mapToObj(String::valueOf)
-     *                       .collect(Collectors.joining()); // "abc"
+     *                       .collect(Collectors.joining());  // "abc"
      * }</pre>
      *
      * @return a {@code CharStream} backed by this iterator
@@ -576,7 +576,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * iter.foreachRemaining(ch -> System.out.print(ch)); // abc
+     * iter.foreachRemaining(ch -> System.out.print(ch));  // abc
      * }</pre>
      *
      * @param <E> the type of exception the action may throw

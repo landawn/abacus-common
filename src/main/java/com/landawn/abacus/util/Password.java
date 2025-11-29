@@ -74,7 +74,7 @@ public final class Password {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
-     * String algo = password.getAlgorithm(); // Returns "SHA-256"
+     * String algo = password.getAlgorithm();  // Returns "SHA-256"
      * }</pre>
      *
      * @return the algorithm name (e.g., "SHA-256", "MD5")
@@ -121,8 +121,8 @@ public final class Password {
      * Password password = new Password("SHA-256");
      * String encrypted = password.encrypt("myPassword");
      * 
-     * boolean matches = password.isEqual("myPassword", encrypted); // true
-     * boolean notMatches = password.isEqual("wrongPassword", encrypted); // false
+     * boolean matches = password.isEqual("myPassword", encrypted);         // true
+     * boolean notMatches = password.isEqual("wrongPassword", encrypted);   // false
      * }</pre>
      *
      * @param plainPassword the plain text password to verify
@@ -155,8 +155,8 @@ public final class Password {
      * Password p2 = new Password("SHA-256");
      * Password p3 = new Password("MD5");
      * 
-     * p1.equals(p2); // true
-     * p1.equals(p3); // false
+     * p1.equals(p2);   // true
+     * p1.equals(p3);   // false
      * }</pre>
      *
      * @param obj the object to compare with

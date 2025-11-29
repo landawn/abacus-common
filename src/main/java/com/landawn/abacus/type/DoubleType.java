@@ -61,8 +61,8 @@ public final class DoubleType extends AbstractDoubleType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = ...; // from SQL query
-     * Double price = type.get(rs, 1); // retrieves Double from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Double price = type.get(rs, 1);  // retrieves Double from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -90,8 +90,8 @@ public final class DoubleType extends AbstractDoubleType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = ...; // from SQL query
-     * Double price = type.get(rs, "price"); // retrieves Double from "price" column
+     * ResultSet rs = ...;  // from SQL query
+     * Double price = type.get(rs, "price");  // retrieves Double from "price" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

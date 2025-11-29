@@ -58,7 +58,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate isPositive = value -> value > 0;
-     * boolean result = isPositive.test((byte) 5); // Returns true
+     * boolean result = isPositive.test((byte) 5);  // Returns true
      * }</pre>
      *
      * @param value the byte input argument
@@ -74,7 +74,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate pred = BytePredicate.of(v -> v > 0);
-     * boolean result = pred.test((byte) 5); // Returns true
+     * boolean result = pred.test((byte) 5);  // Returns true
      * }</pre>
      *
      * @param predicate the predicate to return
@@ -146,7 +146,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate isFive = BytePredicate.equal((byte) 5);
-     * boolean result = isFive.test((byte) 5); // Returns true
+     * boolean result = isFive.test((byte) 5);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -162,7 +162,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate notZero = BytePredicate.notEqual((byte) 0);
-     * boolean result = notZero.test((byte) 5); // Returns true
+     * boolean result = notZero.test((byte) 5);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -178,7 +178,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate greaterThanTen = BytePredicate.greaterThan((byte) 10);
-     * boolean result = greaterThanTen.test((byte) 15); // Returns true
+     * boolean result = greaterThanTen.test((byte) 15);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -194,7 +194,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate atLeastZero = BytePredicate.greaterEqual((byte) 0);
-     * boolean result = atLeastZero.test((byte) 0); // Returns true
+     * boolean result = atLeastZero.test((byte) 0);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -210,7 +210,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate lessThanHundred = BytePredicate.lessThan((byte) 100);
-     * boolean result = lessThanHundred.test((byte) 50); // Returns true
+     * boolean result = lessThanHundred.test((byte) 50);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -226,7 +226,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate maxTen = BytePredicate.lessEqual((byte) 10);
-     * boolean result = maxTen.test((byte) 10); // Returns true
+     * boolean result = maxTen.test((byte) 10);  // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
@@ -243,7 +243,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BytePredicate inRange = BytePredicate.between((byte) 0, (byte) 100);
-     * boolean result = inRange.test((byte) 50); // Returns true
+     * boolean result = inRange.test((byte) 50);  // Returns true
      * }</pre>
      *
      * @param minValue the exclusive lower bound

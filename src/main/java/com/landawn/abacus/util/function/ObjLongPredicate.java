@@ -48,9 +48,9 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * ObjLongPredicate<List<Integer>> hasSizeAbove = (list, minSize) ->
      *     list.size() >= minSize;
      *
-     * boolean isLong = isLengthAbove.test("Hello World", 5L); // Returns true
+     * boolean isLong = isLengthAbove.test("Hello World", 5L);  // Returns true
      * List<Integer> numbers = List.of(1, 2, 3);
-     * boolean isBig = hasSizeAbove.test(numbers, 2L); // Returns true
+     * boolean isBig = hasSizeAbove.test(numbers, 2L);  // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T

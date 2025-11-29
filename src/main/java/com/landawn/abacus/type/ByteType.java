@@ -61,8 +61,8 @@ public final class ByteType extends AbstractByteType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteType type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = ...; // from SQL query
-     * Byte status = type.get(rs, 1); // retrieves Byte from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Byte status = type.get(rs, 1);  // retrieves Byte from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -90,8 +90,8 @@ public final class ByteType extends AbstractByteType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteType type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = ...; // from SQL query
-     * Byte status = type.get(rs, "status"); // retrieves Byte from "status" column
+     * ResultSet rs = ...;  // from SQL query
+     * Byte status = type.get(rs, "status");  // retrieves Byte from "status" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

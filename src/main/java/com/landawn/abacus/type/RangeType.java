@@ -41,15 +41,15 @@ import com.landawn.abacus.util.WD;
  * Type<Range<Integer>> type = TypeFactory.getType("Range<Integer>");
  *
  * // Serialize a Range to string
- * Range<Integer> closedRange = Range.closed(1, 10); // [1, 10]
- * String str1 = type.stringOf(closedRange); // Returns "[1, 10]"
+ * Range<Integer> closedRange = Range.closed(1, 10);  // [1, 10]
+ * String str1 = type.stringOf(closedRange);  // Returns "[1, 10]"
  *
- * Range<Integer> openRange = Range.open(1, 10); // (1, 10)
- * String str2 = type.stringOf(openRange); // Returns "(1, 10)"
+ * Range<Integer> openRange = Range.open(1, 10);  // (1, 10)
+ * String str2 = type.stringOf(openRange);  // Returns "(1, 10)"
  *
  * // Deserialize string to Range
  * Range<Integer> restored = type.valueOf("[1, 10]");
- * boolean contains5 = restored.contains(5); // true
+ * boolean contains5 = restored.contains(5);  // true
  * }</pre>
  *
  * @param <T> the type of values in the range, must be Comparable

@@ -22,7 +22,7 @@ package com.landawn.abacus.type;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Integer> type = TypeFactory.getType(int.class);
- * Integer defaultVal = type.defaultValue(); // Returns 0
+ * Integer defaultVal = type.defaultValue();  // Returns 0
  * }</pre>
  */
 @SuppressWarnings("java:S2160")

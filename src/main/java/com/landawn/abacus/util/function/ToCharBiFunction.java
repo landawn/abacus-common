@@ -35,16 +35,16 @@ public interface ToCharBiFunction<T, U> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToCharBiFunction<String, Integer> charAt = String::charAt;
-     * char result1 = charAt.applyAsChar("Hello", 0); // returns 'H'
-     * char result2 = charAt.applyAsChar("World", 4); // returns 'd'
+     * char result1 = charAt.applyAsChar("Hello", 0);   // returns 'H'
+     * char result2 = charAt.applyAsChar("World", 4);   // returns 'd'
      *
      * ToCharBiFunction<Integer, Integer> digitToChar = (digit, base) ->
      *     Character.forDigit(digit, base);
-     * char result3 = digitToChar.applyAsChar(10, 16); // returns 'a' (hex)
+     * char result3 = digitToChar.applyAsChar(10, 16);  // returns 'a' (hex)
      *
      * ToCharBiFunction<Character, Integer> shift = (ch, offset) ->
      *     (char) (ch + offset);
-     * char result4 = shift.applyAsChar('A', 2); // returns 'C'
+     * char result4 = shift.applyAsChar('A', 2);  // returns 'C'
      * }</pre>
      *
      * @param t the first function argument

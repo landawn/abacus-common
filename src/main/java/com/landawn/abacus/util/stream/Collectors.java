@@ -1475,7 +1475,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Create an immutable list from stream elements
      * ImmutableList<String> immutable = Stream.of("a", "b", "c")
      *     .collect(Collectors.toImmutableList());
-     * // immutable.add("d"); // This would throw UnsupportedOperationException
+     * // immutable.add("d");  // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1508,7 +1508,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Create an unmodifiable list
      * List<Integer> unmodifiable = Stream.of(1, 2, 3)
      *     .collect(Collectors.toUnmodifiableList());
-     * // unmodifiable.add(4); // This would throw UnsupportedOperationException
+     * // unmodifiable.add(4);  // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1606,7 +1606,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * ImmutableSet<String> immutable = Stream.of("a", "b", "b", "c")
      *     .collect(Collectors.toImmutableSet());
      * // Result contains: ["a", "b", "c"]
-     * // immutable.add("d"); // This would throw UnsupportedOperationException
+     * // immutable.add("d");  // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1637,7 +1637,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Set<Integer> unmodifiable = Stream.of(1, 2, 2, 3)
      *     .collect(Collectors.toUnmodifiableSet());
      * // Result contains: [1, 2, 3]
-     * // unmodifiable.add(4); // This would throw UnsupportedOperationException
+     * // unmodifiable.add(4);  // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements

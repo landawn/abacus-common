@@ -39,8 +39,8 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double boxed = 3.14;
-     * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed); // returns 3.14
-     * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null); // returns 0.0
+     * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed);     // returns 3.14
+     * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null);   // returns 0.0
      * }</pre>
      */
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
@@ -53,12 +53,12 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 42;
-     * double result1 = ToDoubleFunction.FROM_NUM.applyAsDouble(intValue); // returns 42.0
+     * double result1 = ToDoubleFunction.FROM_NUM.applyAsDouble(intValue);  // returns 42.0
      *
      * BigDecimal bigDecimal = new BigDecimal("123.456");
-     * double result2 = ToDoubleFunction.FROM_NUM.applyAsDouble(bigDecimal); // returns 123.456
+     * double result2 = ToDoubleFunction.FROM_NUM.applyAsDouble(bigDecimal);  // returns 123.456
      *
-     * double defaultValue = ToDoubleFunction.FROM_NUM.applyAsDouble(null); // returns 0.0
+     * double defaultValue = ToDoubleFunction.FROM_NUM.applyAsDouble(null);  // returns 0.0
      * }</pre>
      */
     ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toDouble(value);
@@ -69,13 +69,13 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToDoubleFunction<String> parseFunction = Double::parseDouble;
-     * double parsed = parseFunction.applyAsDouble("3.14159"); // Returns 3.14159
+     * double parsed = parseFunction.applyAsDouble("3.14159");  // Returns 3.14159
      *
      * ToDoubleFunction<Integer> convertFunction = Integer::doubleValue;
-     * double converted = convertFunction.applyAsDouble(42); // Returns 42.0
+     * double converted = convertFunction.applyAsDouble(42);  // Returns 42.0
      *
      * ToDoubleFunction<BigDecimal> bdFunction = BigDecimal::doubleValue;
-     * double value = bdFunction.applyAsDouble(new BigDecimal("123.45")); // Returns 123.45
+     * double value = bdFunction.applyAsDouble(new BigDecimal("123.45"));  // Returns 123.45
      * }</pre>
      *
      * @param value the function argument

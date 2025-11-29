@@ -35,7 +35,7 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleConsumer printer = d -> System.out.println("Value: " + d);
-     * printer.accept(3.14); // Prints: Value: 3.14
+     * printer.accept(3.14);  // Prints: Value: 3.14
      *
      * DoubleStream.of(1.1, 2.2, 3.3).forEach(printer);
      * }</pre>
@@ -55,7 +55,7 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * DoubleConsumer logger = d -> System.out.println("Processing: " + d);
      * DoubleConsumer validator = d -> { if (d < 0) throw new IllegalArgumentException(); };
      * DoubleConsumer combined = logger.andThen(validator);
-     * combined.accept(5.5); // Logs then validates
+     * combined.accept(5.5);  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

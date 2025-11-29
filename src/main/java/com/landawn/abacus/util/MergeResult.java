@@ -80,8 +80,8 @@ public enum MergeResult {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MergeResult result = MergeResult.minFirst(5, 10); // returns TAKE_FIRST
-     * MergeResult result2 = MergeResult.minFirst("b", "a"); // returns TAKE_SECOND
+     * MergeResult result = MergeResult.minFirst(5, 10);       // returns TAKE_FIRST
+     * MergeResult result2 = MergeResult.minFirst("b", "a");   // returns TAKE_SECOND
      * }</pre>
      * 
      * @param <T> the type of the values being compared (must be Comparable)
@@ -128,8 +128,8 @@ public enum MergeResult {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MergeResult result = MergeResult.maxFirst(5, 10); // returns TAKE_SECOND
-     * MergeResult result2 = MergeResult.maxFirst("b", "a"); // returns TAKE_FIRST
+     * MergeResult result = MergeResult.maxFirst(5, 10);       // returns TAKE_SECOND
+     * MergeResult result2 = MergeResult.maxFirst("b", "a");   // returns TAKE_FIRST
      * }</pre>
      * 
      * @param <T> the type of the values being compared (must be Comparable)
@@ -283,9 +283,9 @@ public enum MergeResult {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, MergeResult> alternator = MergeResult.alternate();
-     * alternator.apply("a", "b"); // returns TAKE_FIRST
-     * alternator.apply("c", "d"); // returns TAKE_SECOND
-     * alternator.apply("e", "f"); // returns TAKE_FIRST
+     * alternator.apply("a", "b");   // returns TAKE_FIRST
+     * alternator.apply("c", "d");   // returns TAKE_SECOND
+     * alternator.apply("e", "f");   // returns TAKE_FIRST
      * }</pre>
      * 
      * @param <T> the type of the values (not used in the decision)

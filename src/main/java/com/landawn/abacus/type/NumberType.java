@@ -223,8 +223,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * NumberType<Integer> type = new NumberType<>(Integer.class);
-     * type.appendTo(sb, 42); // Appends "42"
-     * type.appendTo(sb, null); // Appends "null"
+     * type.appendTo(sb, 42);     // Appends "42"
+     * type.appendTo(sb, null);   // Appends "null"
      * }</pre>
      *
      * @param appendable the Appendable to write to

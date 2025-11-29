@@ -141,7 +141,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains boolean value true
      * OptionalBoolean opt = type.get(rs, 1);
@@ -171,7 +171,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "is_active" contains boolean value true
      * OptionalBoolean opt = type.get(rs, "is_active");

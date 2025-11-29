@@ -131,7 +131,7 @@ public interface HashFunction {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] largeData = new byte[1024 * 1024]; // 1MB
+     * byte[] largeData = new byte[1024 * 1024];  // 1MB
      * HashCode hash = hashFunction.newHasher(largeData.length)
      *     .put(largeData)
      *     .hash();
@@ -310,7 +310,7 @@ public interface HashFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction sha256 = Hashing.sha256();
-     * System.out.println(sha256.bits()); // prints: 256
+     * System.out.println(sha256.bits());  // prints: 256
      * }</pre>
      *
      * @return the number of bits in hash codes produced by this function (always positive

@@ -716,7 +716,7 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "hello world".toCharArray();
-     * int hash = ParserUtil.hashCode(chars, 0, 5); // Hash of "hello"
+     * int hash = ParserUtil.hashCode(chars, 0, 5);  // Hash of "hello"
      * }</pre>
      * 
      * @param a the character array
@@ -2386,7 +2386,7 @@ public final class ParserUtil {
          * <pre>{@code
          * Person person = new Person("John", 30);
          * PropInfo nameProp = ... // property info for "name"
-         * String name = nameProp.getPropValue(person); // returns "John"
+         * String name = nameProp.getPropValue(person);  // returns "John"
          * }</pre>
          *
          * @param <T> the expected type of the property value
@@ -2432,7 +2432,7 @@ public final class ParserUtil {
          * Person person = new Person();
          * PropInfo ageProp = ... // property info for "age"
          * ageProp.setPropValue(person, 25);
-         * ageProp.setPropValue(person, "30"); // automatic conversion from String
+         * ageProp.setPropValue(person, "30");  // automatic conversion from String
          * }</pre>
          *
          * @param obj the object to set the property value on

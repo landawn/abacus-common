@@ -25,9 +25,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * WeekDay today = WeekDay.MONDAY;
- * int dayValue = today.intValue(); // Returns 1
+ * int dayValue = today.intValue();  // Returns 1
  * 
- * WeekDay sunday = WeekDay.valueOf(0); // Returns WeekDay.SUNDAY
+ * WeekDay sunday = WeekDay.valueOf(0);  // Returns WeekDay.SUNDAY
  * }</pre>
  *
  * @see Color
@@ -84,8 +84,8 @@ public enum WeekDay {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int mondayValue = WeekDay.MONDAY.intValue(); // Returns 1
-     * int saturdayValue = WeekDay.SATURDAY.intValue(); // Returns 6
+     * int mondayValue = WeekDay.MONDAY.intValue();       // Returns 1
+     * int saturdayValue = WeekDay.SATURDAY.intValue();   // Returns 6
      * }</pre>
      *
      * @return the integer value of this weekday (0-6)
@@ -100,8 +100,8 @@ public enum WeekDay {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * WeekDay day = WeekDay.valueOf(1); // Returns WeekDay.MONDAY
-     * WeekDay weekend = WeekDay.valueOf(6); // Returns WeekDay.SATURDAY
+     * WeekDay day = WeekDay.valueOf(1);       // Returns WeekDay.MONDAY
+     * WeekDay weekend = WeekDay.valueOf(6);   // Returns WeekDay.SATURDAY
      * }</pre>
      *
      * @param intValue the integer value to convert (must be 0-6)

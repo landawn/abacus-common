@@ -433,8 +433,8 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use JSON format for headers in current thread
      * CSVUtil.setHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
-     * Dataset ds = CSVUtil.loadCSV(file); // Will use JSON parser
-     * CSVUtil.resetHeaderParser(); // Reset to default
+     * Dataset ds = CSVUtil.loadCSV(file);   // Will use JSON parser
+     * CSVUtil.resetHeaderParser();          // Reset to default
      * }</pre>
      *
      * @param parser the Function to set as the CSV header parser, must not be null
@@ -458,8 +458,8 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use splitter for simple CSV files in current thread
      * CSVUtil.setLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
-     * Dataset ds = CSVUtil.loadCSV(file); // Will use splitter parser
-     * CSVUtil.resetLineParser(); // Reset to default
+     * Dataset ds = CSVUtil.loadCSV(file);   // Will use splitter parser
+     * CSVUtil.resetLineParser();            // Reset to default
      * }</pre>
      *
      * @param parser the BiConsumer to set as the CSV line parser, must not be null
@@ -482,7 +482,7 @@ public final class CSVUtil {
      * <pre>{@code
      * CSVUtil.setHeaderParser(customParser);
      * // ... use custom parser
-     * CSVUtil.resetHeaderParser(); // Back to default
+     * CSVUtil.resetHeaderParser();  // Back to default
      * }</pre>
      *
      * @see #setHeaderParser(Function)
@@ -501,7 +501,7 @@ public final class CSVUtil {
      * <pre>{@code
      * CSVUtil.setLineParser(customParser);
      * // ... use custom parser
-     * CSVUtil.resetLineParser(); // Back to default
+     * CSVUtil.resetLineParser();  // Back to default
      * }</pre>
      *
      * @see #setLineParser(BiConsumer)
@@ -559,7 +559,7 @@ public final class CSVUtil {
      * <pre>{@code
      * CSVUtil.setEscapeCharToBackSlashForWrite();
      * // Write CSV with backslash escaping
-     * CSVUtil.resetEscapeCharForWrite(); // Reset to default
+     * CSVUtil.resetEscapeCharForWrite();  // Reset to default
      * }</pre>
      * 
      * @see #resetEscapeCharForWrite()
@@ -576,7 +576,7 @@ public final class CSVUtil {
      * <pre>{@code
      * CSVUtil.setEscapeCharToBackSlashForWrite();
      * // ... write with backslash escaping
-     * CSVUtil.resetEscapeCharForWrite(); // Back to default
+     * CSVUtil.resetEscapeCharForWrite();  // Back to default
      * }</pre>
      */
     public static void resetEscapeCharForWrite() {
@@ -600,7 +600,7 @@ public final class CSVUtil {
      * BufferedCSVWriter writer = new BufferedCSVWriter(outputWriter);
      * CSVUtil.writeField(writer, Type.of(String.class), "Hello, World");
      * CSVUtil.writeField(writer, Type.of(Integer.class), 42);
-     * CSVUtil.writeField(writer, null, null); // Writes NULL
+     * CSVUtil.writeField(writer, null, null);  // Writes NULL
      * }</pre>
      * 
      * @param writer the BufferedCSVWriter to write to
@@ -746,7 +746,7 @@ public final class CSVUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("data.csv")) {
      *     Dataset ds = CSVUtil.loadCSV(reader);
-     *     ds.println(); // Print the dataset
+     *     ds.println();  // Print the dataset
      * }
      * }</pre>
      *
@@ -1561,9 +1561,9 @@ public final class CSVUtil {
      * <pre>{@code
      * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = 
      *     (columns, row, output) -> {
-     *         output[0] = row.get(0); // name as String
-     *         output[1] = Integer.parseInt(row.get(1)); // age as int
-     *         output[2] = LocalDate.parse(row.get(2)); // date as LocalDate
+     *         output[0] = row.get(0);  // name as String
+     *         output[1] = Integer.parseInt(row.get(1));  // age as int
+     *         output[2] = LocalDate.parse(row.get(2));  // date as LocalDate
      *     };
      * 
      * Dataset ds = CSVUtil.loadCSV(new File("data.csv"), extractor);
@@ -1589,7 +1589,7 @@ public final class CSVUtil {
      *     (columns, row, output) -> {
      *         // Process only selected columns
      *         output[0] = row.get(0).toUpperCase();
-     *         output[1] = Double.parseDouble(row.get(1)) * 1.1; // Add 10%
+     *         output[1] = Double.parseDouble(row.get(1)) * 1.1;  // Add 10%
      *     };
      * 
      * Dataset ds = CSVUtil.loadCSV(
@@ -1709,9 +1709,9 @@ public final class CSVUtil {
      * Reader reader = new FileReader("employees.csv");
      * List<String> columns = Arrays.asList("name", "department", "salary");
      * Dataset result = CSVUtil.loadCSV(reader, columns, (columnNames, rowData, output) -> {
-     *     output[0] = rowData.get(0); // name
-     *     output[1] = rowData.get(1); // department
-     *     output[2] = Double.parseDouble(rowData.get(2)); // salary as double
+     *     output[0] = rowData.get(0);  // name
+     *     output[1] = rowData.get(1);  // department
+     *     output[2] = Double.parseDouble(rowData.get(2));  // salary as double
      * });
      * }</pre>
      *
@@ -2328,7 +2328,7 @@ public final class CSVUtil {
      *         new File("people.csv"),
      *         (columns, row) -> {
      *             PersonDTO dto = new PersonDTO();
-     *             dto.setFullName(row.get(0) + " " + row.get(1)); // Combine first and last
+     *             dto.setFullName(row.get(0) + " " + row.get(1));  // Combine first and last
      *             dto.setAge(Integer.parseInt(row.get(2)));
      *             return dto;
      *         })) {

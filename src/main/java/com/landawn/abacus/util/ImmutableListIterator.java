@@ -102,9 +102,9 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableListIterator<String> empty = ImmutableListIterator.empty();
-     * System.out.println(empty.hasNext()); // prints: false
-     * System.out.println(empty.nextIndex()); // prints: 0
-     * System.out.println(empty.previousIndex()); // prints: -1
+     * System.out.println(empty.hasNext());         // prints: false
+     * System.out.println(empty.nextIndex());       // prints: 0
+     * System.out.println(empty.previousIndex());   // prints: -1
      * }</pre>
      *
      * @param <T> the type of elements (not) returned by this iterator
@@ -135,7 +135,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * while (immutableIter.hasNext()) {
      *     System.out.println(immutableIter.next());
      * }
-     * // immutableIter.set(4); // Would throw UnsupportedOperationException
+     * // immutableIter.set(4);  // Would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of elements returned by the iterator

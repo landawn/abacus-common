@@ -32,8 +32,8 @@ import com.landawn.abacus.util.function.ByteConsumer;
  * stats.accept((byte) 10);
  * stats.accept((byte) 20);
  * stats.accept((byte) 30);
- * System.out.println("Count: " + stats.getCount()); // Count: 3
- * System.out.println("Average: " + stats.getAverage()); // Average: 20.0
+ * System.out.println("Count: " + stats.getCount());  // Count: 3
+ * System.out.println("Average: " + stats.getAverage());  // Average: 20.0
  * }</pre>
  * 
  * @see ByteConsumer
@@ -96,7 +96,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 42);
      * stats.accept((byte) 17);
-     * System.out.println(stats.getCount()); // 2
+     * System.out.println(stats.getCount());  // 2
      * }</pre>
      *
      * @param value the byte value to record
@@ -127,8 +127,8 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats2.accept((byte) 40);
      * 
      * stats1.combine(stats2);
-     * System.out.println(stats1.getCount()); // 4
-     * System.out.println(stats1.getSum()); // 100
+     * System.out.println(stats1.getCount());   // 4
+     * System.out.println(stats1.getSum());     // 100
      * }</pre>
      *
      * @param other another {@code ByteSummaryStatistics} to combine with this one
@@ -150,7 +150,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats.accept((byte) 50);
      * stats.accept((byte) 10);
      * stats.accept((byte) 30);
-     * System.out.println(stats.getMin()); // 10
+     * System.out.println(stats.getMin());  // 10
      * }</pre>
      *
      * @return the minimum value, or {@code Byte.MAX_VALUE} if none
@@ -169,7 +169,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats.accept((byte) 50);
      * stats.accept((byte) 10);
      * stats.accept((byte) 30);
-     * System.out.println(stats.getMax()); // 50
+     * System.out.println(stats.getMax());  // 50
      * }</pre>
      *
      * @return the maximum value, or {@code Byte.MIN_VALUE} if none
@@ -187,7 +187,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats.accept((byte) 1);
      * stats.accept((byte) 2);
      * stats.accept((byte) 3);
-     * System.out.println(stats.getCount()); // 3
+     * System.out.println(stats.getCount());  // 3
      * }</pre>
      *
      * @return the count of values
@@ -208,7 +208,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats.accept((byte) 10);
      * stats.accept((byte) 20);
      * stats.accept((byte) 30);
-     * System.out.println(stats.getSum()); // 60
+     * System.out.println(stats.getSum());  // 60
      * }</pre>
      *
      * @return the sum of values, as a {@code Long}
@@ -229,7 +229,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats.accept((byte) 10);
      * stats.accept((byte) 20);
      * stats.accept((byte) 30);
-     * System.out.println(stats.getAverage()); // 20.0
+     * System.out.println(stats.getAverage());  // 20.0
      * }</pre>
      *
      * @return the arithmetic mean of values, or zero if none

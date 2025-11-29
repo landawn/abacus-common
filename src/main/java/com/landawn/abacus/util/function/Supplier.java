@@ -38,17 +38,17 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<String> helloSupplier = () -> "Hello, World!";
-     * String greeting = helloSupplier.get(); // returns "Hello, World!"
+     * String greeting = helloSupplier.get();  // returns "Hello, World!"
      *
      * Supplier<LocalDateTime> timestampSupplier = LocalDateTime::now;
-     * LocalDateTime now = timestampSupplier.get(); // returns current date-time
+     * LocalDateTime now = timestampSupplier.get();  // returns current date-time
      *
      * Supplier<UUID> uuidSupplier = UUID::randomUUID;
-     * UUID id = uuidSupplier.get(); // returns a random UUID
+     * UUID id = uuidSupplier.get();  // returns a random UUID
      *
      * // Lazy initialization pattern
      * Supplier<ExpensiveObject> lazyInit = () -> new ExpensiveObject();
-     * ExpensiveObject obj = lazyInit.get(); // creates object only when needed
+     * ExpensiveObject obj = lazyInit.get();  // creates object only when needed
      * }</pre>
      *
      * @return a result

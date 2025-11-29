@@ -61,8 +61,8 @@ public final class IntegerType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = ...; // from SQL query
-     * Integer age = type.get(rs, 1); // retrieves Integer from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Integer age = type.get(rs, 1);  // retrieves Integer from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -92,8 +92,8 @@ public final class IntegerType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = ...; // from SQL query
-     * Integer age = type.get(rs, "age"); // retrieves Integer from "age" column
+     * ResultSet rs = ...;  // from SQL query
+     * Integer age = type.get(rs, "age");  // retrieves Integer from "age" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

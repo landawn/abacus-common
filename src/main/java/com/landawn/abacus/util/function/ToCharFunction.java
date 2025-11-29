@@ -43,14 +43,14 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToCharFunction<Character> unbox = ToCharFunction.UNBOX;
-     * char result1 = unbox.applyAsChar('A'); // returns 'A'
-     * char result2 = unbox.applyAsChar(null); // returns '\0' (0)
+     * char result1 = unbox.applyAsChar('A');    // returns 'A'
+     * char result2 = unbox.applyAsChar(null);   // returns '\0' (0)
      *
      * ToCharFunction<String> firstChar = str -> str.charAt(0);
-     * char result3 = firstChar.applyAsChar("Hello"); // returns 'H'
+     * char result3 = firstChar.applyAsChar("Hello");  // returns 'H'
      *
      * ToCharFunction<Integer> digitToChar = n -> Character.forDigit(n, 10);
-     * char result4 = digitToChar.applyAsChar(5); // returns '5'
+     * char result4 = digitToChar.applyAsChar(5);  // returns '5'
      * }</pre>
      *
      * @param value the function argument

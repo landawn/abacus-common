@@ -50,7 +50,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
-     * Class<Timestamp> clazz = type.clazz(); // Returns Timestamp.class
+     * Class<Timestamp> clazz = type.clazz();  // Returns Timestamp.class
      * }</pre>
      *
      * @return {@code Timestamp.class}
@@ -74,9 +74,9 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
-     * Timestamp ts1 = type.valueOf(1609459200000L); // From milliseconds
-     * Timestamp ts2 = type.valueOf(new Date()); // From Date
-     * Timestamp ts3 = type.valueOf("2021-01-01 00:00:00"); // From String
+     * Timestamp ts1 = type.valueOf(1609459200000L);          // From milliseconds
+     * Timestamp ts2 = type.valueOf(new Date());              // From Date
+     * Timestamp ts3 = type.valueOf("2021-01-01 00:00:00");   // From String
      * }</pre>
      *
      * @param obj the object to convert to Timestamp
@@ -107,8 +107,8 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * Timestamp ts1 = type.valueOf("2021-01-01 12:30:45");
-     * Timestamp ts2 = type.valueOf("SYS_TIME"); // Returns current timestamp
-     * Timestamp ts3 = type.valueOf(null); // Returns null
+     * Timestamp ts2 = type.valueOf("SYS_TIME");   // Returns current timestamp
+     * Timestamp ts3 = type.valueOf(null);         // Returns null
      * }</pre>
      *
      * @param str the string to parse

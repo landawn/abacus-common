@@ -35,12 +35,12 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharConsumer printer = c -> System.out.println("Character: " + c);
-     * printer.accept('A'); // Prints: Character: A
+     * printer.accept('A');  // Prints: Character: A
      *
      * StringBuilder sb = new StringBuilder();
      * CharConsumer appender = sb::append;
      * appender.accept('H');
-     * appender.accept('i'); // sb now contains "Hi"
+     * appender.accept('i');  // sb now contains "Hi"
      * }</pre>
      *
      * @param t the char input argument
@@ -59,7 +59,7 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      * CharConsumer logger = c -> System.out.println("Processing: " + c);
      * CharConsumer validator = c -> { if (!Character.isLetter(c)) throw new IllegalArgumentException(); };
      * CharConsumer combined = logger.andThen(validator);
-     * combined.accept('A'); // Logs then validates
+     * combined.accept('A');  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

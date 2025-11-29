@@ -32,9 +32,9 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
- * String left = triple.left();     // "Hello"
- * Integer middle = triple.middle(); // 42
- * Boolean right = triple.right();   // true
+ * String left = triple.left();  // "Hello"
+ * Integer middle = triple.middle();  // 42
+ * Boolean right = triple.right();  // true
  * }</pre>
  *
  * @param <L> the type of the left element
@@ -136,7 +136,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * String left = triple.left(); // returns "Hello"
+     * String left = triple.left();  // returns "Hello"
      * }</pre>
      *
      * @return the left element of this triple, may be {@code null}
@@ -154,7 +154,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Integer middle = triple.middle(); // returns 42
+     * Integer middle = triple.middle();  // returns 42
      * }</pre>
      *
      * @return the middle element of this triple, may be {@code null}
@@ -172,7 +172,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Boolean right = triple.right(); // returns true
+     * Boolean right = triple.right();  // returns true
      * }</pre>
      *
      * @return the right element of this triple, may be {@code null}
@@ -188,7 +188,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * String left = triple.getLeft(); // returns "Hello"
+     * String left = triple.getLeft();  // returns "Hello"
      * }</pre>
      *
      * @return the left element, may be {@code null}
@@ -225,7 +225,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Integer middle = triple.getMiddle(); // returns 42
+     * Integer middle = triple.getMiddle();  // returns 42
      * }</pre>
      *
      * @return the middle element, may be {@code null}
@@ -262,7 +262,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Boolean right = triple.getRight(); // returns true
+     * Boolean right = triple.getRight();  // returns true
      * }</pre>
      *
      * @return the right element, may be {@code null}
@@ -852,9 +852,9 @@ public final class Triple<L, M, R> implements Mutable {
      * Triple<String, Integer, Boolean> t2 = Triple.of("text", 42, true);
      * Triple<String, Integer, Boolean> t3 = Triple.of("other", 42, true);
      *
-     * t1.equals(t2); // returns true
-     * t1.equals(t3); // returns false
-     * t1.equals(null); // returns false
+     * t1.equals(t2);     // returns true
+     * t1.equals(t3);     // returns false
+     * t1.equals(null);   // returns false
      * }</pre>
      *
      * @param obj the object to compare with this Triple for equality

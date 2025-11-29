@@ -42,8 +42,8 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToIntFunction converter = LongToIntFunction.DEFAULT;
-     * int result1 = converter.applyAsInt(42L);        // returns 42
-     * int result2 = converter.applyAsInt(2147483648L); // returns -2147483648 (overflow)
+     * int result1 = converter.applyAsInt(42L);           // returns 42
+     * int result2 = converter.applyAsInt(2147483648L);   // returns -2147483648 (overflow)
      * }</pre>
      *
      * <p>Warning: This conversion can lose information about the overall magnitude

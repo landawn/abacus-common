@@ -91,7 +91,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongBiPredicate sumGreaterThan100 = (a, b) -> a + b > 100;
-     * boolean result = sumGreaterThan100.test(50L, 60L); // Returns true
+     * boolean result = sumGreaterThan100.test(50L, 60L);  // Returns true
      * }</pre>
      *
      * @param t the first input argument
@@ -128,7 +128,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * LongBiPredicate isPositive = (a, b) -> a > 0 && b > 0;
      * LongBiPredicate sumLessThan100 = (a, b) -> a + b < 100;
      * LongBiPredicate combined = isPositive.and(sumLessThan100);
-     * boolean result = combined.test(10L, 20L); // true (both positive AND sum < 100)
+     * boolean result = combined.test(10L, 20L);  // true (both positive AND sum < 100)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
@@ -155,7 +155,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * LongBiPredicate isZero = (a, b) -> a == 0 || b == 0;
      * LongBiPredicate isNegative = (a, b) -> a < 0 || b < 0;
      * LongBiPredicate combined = isZero.or(isNegative);
-     * boolean result = combined.test(-5L, 10L); // true (at least one is negative)
+     * boolean result = combined.test(-5L, 10L);  // true (at least one is negative)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.

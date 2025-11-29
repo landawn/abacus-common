@@ -63,7 +63,7 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongFunction<String> toString = value -> "Value: " + value;
-     * String result = toString.apply(42L); // Returns "Value: 42"
+     * String result = toString.apply(42L);  // Returns "Value: 42"
      * }</pre>
      *
      * @param value the function argument, a long value to be transformed
@@ -120,7 +120,7 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongFunction<Long> identity = LongFunction.identity();
-     * Long result = identity.apply(42L); // Returns 42L (boxed)
+     * Long result = identity.apply(42L);  // Returns 42L (boxed)
      * }</pre>
      *
      * @return a function that always returns its input argument as a Long object

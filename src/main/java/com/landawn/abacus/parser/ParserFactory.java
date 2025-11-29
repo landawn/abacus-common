@@ -57,7 +57,7 @@ import com.landawn.abacus.util.cs;
  * 
  * // Register Kryo classes for better performance
  * ParserFactory.registerKryo(MyClass.class);
- * ParserFactory.registerKryo(MyClass.class, 100); // with ID
+ * ParserFactory.registerKryo(MyClass.class, 100);  // with ID
  * }</pre>
  * 
  * @see JSONParser

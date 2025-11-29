@@ -5992,8 +5992,8 @@ public final class Throwables {
          *     createExpensiveDatabase()
          * );
          * // Database is not created until first call to dbInit.get()
-         * Database db = dbInit.get(); // Initializes once
-         * Database sameDb = dbInit.get(); // Returns cached instance
+         * Database db = dbInit.get();       // Initializes once
+         * Database sameDb = dbInit.get();   // Returns cached instance
          * }</pre>
          *
          * @param <T> the type of the value to be lazily initialized

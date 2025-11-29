@@ -38,7 +38,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * Class<RowId> clazz = type.clazz(); // Returns RowId.class
+     * Class<RowId> clazz = type.clazz();  // Returns RowId.class
      * }</pre>
      *
      * @return the Class object for java.sql.RowId.class
@@ -55,7 +55,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * boolean serializable = type.isSerializable(); // Returns false
+     * boolean serializable = type.isSerializable();  // Returns false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -73,7 +73,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * RowId rowId = resultSet.getRowId(1);
-     * String str = type.stringOf(rowId); // Converts RowId to String
+     * String str = type.stringOf(rowId);  // Converts RowId to String
      * }</pre>
      *
      * @param x the RowId object to convert
@@ -113,7 +113,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users");
-     * RowId rowId = type.get(rs, 1); // Get RowId from first column
+     * RowId rowId = type.get(rs, 1);  // Get RowId from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -134,7 +134,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users");
-     * RowId rowId = type.get(rs, "row_id"); // Get RowId by column name
+     * RowId rowId = type.get(rs, "row_id");  // Get RowId by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -155,7 +155,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET status = ? WHERE ROWID = ?");
-     * type.set(stmt, 2, rowId); // Set RowId at parameter index 2
+     * type.set(stmt, 2, rowId);  // Set RowId at parameter index 2
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -176,7 +176,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CallableStatement stmt = conn.prepareCall("{call update_user_status(?, ?)}");
-     * type.set(stmt, "user_rowid", rowId); // Set RowId by parameter name
+     * type.set(stmt, "user_rowid", rowId);  // Set RowId by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -198,7 +198,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, rowId, config); // Writes RowId to character stream
+     * type.writeCharacter(writer, rowId, config);  // Writes RowId to character stream
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

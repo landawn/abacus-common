@@ -49,7 +49,7 @@ public class JUDateType extends AbstractDateType<Date> {
      * <pre>{@code
      * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * String name = type.declaringName();
-     * System.out.println(name); // Outputs: java.util.Date
+     * System.out.println(name);  // Outputs: java.util.Date
      * }</pre>
      *
      * @return the canonical name of java.util.Date class
@@ -68,7 +68,7 @@ public class JUDateType extends AbstractDateType<Date> {
      * <pre>{@code
      * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * Class<Date> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Outputs: java.util.Date
+     * System.out.println(clazz.getName());  // Outputs: java.util.Date
      * }</pre>
      *
      * @return the Class object representing java.util.Date
@@ -99,7 +99,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * // From existing Date
      * Date existing = new Date();
-     * Date date2 = type.valueOf(existing); // Creates a new instance
+     * Date date2 = type.valueOf(existing);  // Creates a new instance
      *
      * // From String
      * Date date3 = type.valueOf("2021-01-01");

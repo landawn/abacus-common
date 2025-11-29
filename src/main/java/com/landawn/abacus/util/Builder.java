@@ -3598,7 +3598,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare("apple", "banana")
-         *     .result(); // returns negative value
+         *     .result();  // returns negative value
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3671,7 +3671,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareNullLess(null, "value")
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3707,7 +3707,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareNullBigger("value", null)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3742,7 +3742,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareFalseLess(false, true)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first boolean value
@@ -3776,7 +3776,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareTrueLess(true, false)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first boolean value
@@ -3803,7 +3803,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare('a', 'b')
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first char value
@@ -3830,7 +3830,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare((byte)10, (byte)20)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first byte value
@@ -3857,7 +3857,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare((short)100, (short)200)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first short value
@@ -3881,7 +3881,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(42, 100)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first int value
@@ -3908,7 +3908,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1000L, 2000L)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first long value
@@ -3941,7 +3941,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.5f, 2.5f)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first float value
@@ -3971,7 +3971,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.0001f, 1.0002f, 0.001f)
-         *     .result(); // returns 0 (considered equal)
+         *     .result();  // returns 0 (considered equal)
          * }</pre>
          *
          * @param left the first float to compare
@@ -4005,7 +4005,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.5, 2.5)
-         *     .result(); // returns -1
+         *     .result();  // returns -1
          * }</pre>
          *
          * @param left the first double value
@@ -4035,7 +4035,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.00001, 1.00002, 0.0001)
-         *     .result(); // returns 0 (considered equal)
+         *     .result();  // returns 0 (considered equal)
          * }</pre>
          *
          * @param left the first double to compare
@@ -4137,7 +4137,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals("hello", "hello")
          *     .equals(null, null)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first object to compare, may be null
@@ -4199,7 +4199,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(true, true)
          *     .equals(false, false)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first boolean value
@@ -4227,7 +4227,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals('a', 'a')
          *     .equals('X', 'X')
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first char value
@@ -4254,7 +4254,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals((byte)10, (byte)10)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first byte value
@@ -4281,7 +4281,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals((short)100, (short)100)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first short value
@@ -4309,7 +4309,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(42, 42)
          *     .equals(100, 100)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first int value
@@ -4336,7 +4336,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1000L, 1000L)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first long value
@@ -4367,7 +4367,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(1.5f, 1.5f)
          *     .equals(Float.NaN, Float.NaN)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first float value
@@ -4397,7 +4397,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1.0001f, 1.0002f, 0.001f)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first float to compare
@@ -4429,7 +4429,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(1.5, 1.5)
          *     .equals(Double.NaN, Double.NaN)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first double value
@@ -4459,7 +4459,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1.00001, 1.00002, 0.0001)
-         *     .result(); // returns true
+         *     .result();  // returns true
          * }</pre>
          *
          * @param left the first double to compare

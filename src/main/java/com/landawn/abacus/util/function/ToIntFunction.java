@@ -38,8 +38,8 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer boxed = 42;
-     * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed); // returns 42
-     * int defaultValue = ToIntFunction.UNBOX.applyAsInt(null); // returns 0
+     * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed);     // returns 42
+     * int defaultValue = ToIntFunction.UNBOX.applyAsInt(null);   // returns 0
      * }</pre>
      */
     ToIntFunction<Integer> UNBOX = value -> value == null ? 0 : value;
@@ -54,15 +54,15 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long longValue = 100L;
-     * int result1 = ToIntFunction.FROM_NUM.applyAsInt(longValue); // returns 100
+     * int result1 = ToIntFunction.FROM_NUM.applyAsInt(longValue);  // returns 100
      *
      * Double doubleValue = 123.456;
-     * int result2 = ToIntFunction.FROM_NUM.applyAsInt(doubleValue); // returns 123 (truncated)
+     * int result2 = ToIntFunction.FROM_NUM.applyAsInt(doubleValue);  // returns 123 (truncated)
      *
      * BigDecimal bigDecimal = new BigDecimal("999");
-     * int result3 = ToIntFunction.FROM_NUM.applyAsInt(bigDecimal); // returns 999
+     * int result3 = ToIntFunction.FROM_NUM.applyAsInt(bigDecimal);  // returns 999
      *
-     * int defaultValue = ToIntFunction.FROM_NUM.applyAsInt(null); // returns 0
+     * int defaultValue = ToIntFunction.FROM_NUM.applyAsInt(null);  // returns 0
      * }</pre>
      */
     ToIntFunction<Number> FROM_NUM = value -> value == null ? 0 : value.intValue();
@@ -73,13 +73,13 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToIntFunction<String> lengthFunction = String::length;
-     * int length = lengthFunction.applyAsInt("Hello"); // Returns 5
+     * int length = lengthFunction.applyAsInt("Hello");  // Returns 5
      *
      * ToIntFunction<List<Integer>> sizeFunction = List::size;
-     * int size = sizeFunction.applyAsInt(Arrays.asList(1, 2, 3)); // Returns 3
+     * int size = sizeFunction.applyAsInt(Arrays.asList(1, 2, 3));  // Returns 3
      *
      * ToIntFunction<Integer> identityFunction = x -> x;
-     * int result = identityFunction.applyAsInt(42); // Returns 42
+     * int result = identityFunction.applyAsInt(42);  // Returns 42
      * }</pre>
      *
      * @param value the function argument

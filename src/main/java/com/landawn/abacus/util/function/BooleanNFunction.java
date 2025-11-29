@@ -33,7 +33,7 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanNFunction<String> formatter = values -> Arrays.toString(values);
-     * String result = formatter.apply(true, false); // Returns "[true, false]"
+     * String result = formatter.apply(true, false);  // Returns "[true, false]"
      * }</pre>
      *
      * @param args the function arguments as a variable-length array of {@code boolean} values.

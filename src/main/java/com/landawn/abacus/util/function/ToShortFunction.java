@@ -42,8 +42,8 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Short boxed = 42;
-     * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed); // returns 42
-     * short defaultValue = ToShortFunction.UNBOX.applyAsShort(null); // returns 0
+     * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed);     // returns 42
+     * short defaultValue = ToShortFunction.UNBOX.applyAsShort(null);   // returns 0
      * }</pre>
      */
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;
@@ -58,15 +58,15 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 100;
-     * short result1 = ToShortFunction.FROM_NUM.applyAsShort(intValue); // returns 100
+     * short result1 = ToShortFunction.FROM_NUM.applyAsShort(intValue);  // returns 100
      *
      * Long longValue = 30000L;
-     * short result2 = ToShortFunction.FROM_NUM.applyAsShort(longValue); // returns 30000
+     * short result2 = ToShortFunction.FROM_NUM.applyAsShort(longValue);  // returns 30000
      *
      * Double doubleValue = 123.456;
-     * short result3 = ToShortFunction.FROM_NUM.applyAsShort(doubleValue); // returns 123 (truncated)
+     * short result3 = ToShortFunction.FROM_NUM.applyAsShort(doubleValue);  // returns 123 (truncated)
      *
-     * short defaultValue = ToShortFunction.FROM_NUM.applyAsShort(null); // returns 0
+     * short defaultValue = ToShortFunction.FROM_NUM.applyAsShort(null);  // returns 0
      * }</pre>
      */
     ToShortFunction<Number> FROM_NUM = value -> value == null ? 0 : value.shortValue();
@@ -77,13 +77,13 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToShortFunction<String> lengthFunction = str -> (short) str.length();
-     * short length = lengthFunction.applyAsShort("Hello"); // Returns 5
+     * short length = lengthFunction.applyAsShort("Hello");  // Returns 5
      *
      * ToShortFunction<Integer> convertFunction = Integer::shortValue;
-     * short converted = convertFunction.applyAsShort(42); // Returns 42
+     * short converted = convertFunction.applyAsShort(42);  // Returns 42
      *
      * ToShortFunction<Short> identityFunction = s -> s;
-     * short result = identityFunction.applyAsShort((short) 100); // Returns 100
+     * short result = identityFunction.applyAsShort((short) 100);  // Returns 100
      * }</pre>
      *
      * @param value the function argument

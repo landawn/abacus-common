@@ -34,18 +34,18 @@ public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortTernaryOperator sum = (a, b, c) -> (short) (a + b + c);
-     * short result1 = sum.applyAsShort((short) 10, (short) 20, (short) 30); // returns 60
+     * short result1 = sum.applyAsShort((short) 10, (short) 20, (short) 30);  // returns 60
      *
      * ShortTernaryOperator median = (a, b, c) -> {
      *     if (a >= b && a <= c || a >= c && a <= b) return a;
      *     if (b >= a && b <= c || b >= c && b <= a) return b;
      *     return c;
      * };
-     * short result2 = median.applyAsShort((short) 5, (short) 2, (short) 8); // returns 5
+     * short result2 = median.applyAsShort((short) 5, (short) 2, (short) 8);  // returns 5
      *
      * ShortTernaryOperator clamp = (value, min, max) ->
      *     (short) Math.max(min, Math.min(max, value));
-     * short result3 = clamp.applyAsShort((short) 150, (short) 0, (short) 100); // returns 100
+     * short result3 = clamp.applyAsShort((short) 150, (short) 0, (short) 100);  // returns 100
      * }</pre>
      *
      * @param a the first operand

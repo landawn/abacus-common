@@ -35,8 +35,8 @@ public interface CharToBooleanFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToBooleanFunction defaultConversion = CharToBooleanFunction.DEFAULT;
-     * boolean result1 = defaultConversion.applyAsBoolean('Y'); // Returns true
-     * boolean result2 = defaultConversion.applyAsBoolean('N'); // Returns false
+     * boolean result1 = defaultConversion.applyAsBoolean('Y');   // Returns true
+     * boolean result2 = defaultConversion.applyAsBoolean('N');   // Returns false
      * }</pre>
      */
     CharToBooleanFunction DEFAULT = value -> (value == 'Y' || value == 'y' || value == '1');
@@ -47,10 +47,10 @@ public interface CharToBooleanFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToBooleanFunction isDigit = c -> Character.isDigit(c);
-     * boolean result = isDigit.applyAsBoolean('7'); // Returns true
+     * boolean result = isDigit.applyAsBoolean('7');  // Returns true
      *
      * CharToBooleanFunction isUpperCase = c -> Character.isUpperCase(c);
-     * boolean upper = isUpperCase.applyAsBoolean('A'); // Returns true
+     * boolean upper = isUpperCase.applyAsBoolean('A');  // Returns true
      * }</pre>
      *
      * @param value the char function argument

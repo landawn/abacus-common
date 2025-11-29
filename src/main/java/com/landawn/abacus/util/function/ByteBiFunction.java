@@ -33,7 +33,7 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBiFunction<String> formatter = (a, b) -> String.format("%d+%d=%d", a, b, a+b);
-     * String result = formatter.apply((byte)5, (byte)3); // Returns "5+3=8"
+     * String result = formatter.apply((byte)5, (byte)3);  // Returns "5+3=8"
      * }</pre>
      *
      * @param t the first function argument

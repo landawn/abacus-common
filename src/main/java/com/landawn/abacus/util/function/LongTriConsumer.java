@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriConsumer printSum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
- * printSum.accept(10L, 20L, 30L); // prints "Sum: 60"
+ * printSum.accept(10L, 20L, 30L);  // prints "Sum: 60"
  *
  * LongTriConsumer storeValues = (x, y, z) -> {
  *     System.out.println("x: " + x);

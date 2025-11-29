@@ -1209,9 +1209,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<List<String>, List<Integer>, List<Boolean>> result =
      *     TriIterator.zip(names, ages, active).toMultiList(ArrayList::new);
-     * List<String> nameList = result.left();    // [Alice, Bob, Charlie]
-     * List<Integer> ageList = result.middle();  // [25, 30, 35]
-     * List<Boolean> activeList = result.right(); // [true, false, true]
+     * List<String> nameList = result.left();       // [Alice, Bob, Charlie]
+     * List<Integer> ageList = result.middle();     // [25, 30, 35]
+     * List<Boolean> activeList = result.right();   // [true, false, true]
      * }</pre>
      *
      * @param supplier a Supplier that provides new instances of List for storing the elements
@@ -1242,9 +1242,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<Set<String>, Set<Integer>, Set<Boolean>> result =
      *     TriIterator.zip(names, ages, active).toMultiSet(HashSet::new);
-     * Set<String> nameSet = result.left();    // [Alice, Bob] (duplicates removed)
-     * Set<Integer> ageSet = result.middle();  // [25, 30]
-     * Set<Boolean> activeSet = result.right(); // [true, false]
+     * Set<String> nameSet = result.left();       // [Alice, Bob] (duplicates removed)
+     * Set<Integer> ageSet = result.middle();     // [25, 30]
+     * Set<Boolean> activeSet = result.right();   // [true, false]
      * }</pre>
      *
      * @param supplier a Supplier that provides new instances of Set for storing the elements

@@ -35,7 +35,7 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
-     * boolean valid = indexInRange.test(5, "Hello World"); // Returns true
+     * boolean valid = indexInRange.test(5, "Hello World");  // Returns true
      * }</pre>
      *
      * @param t the {@code int} argument

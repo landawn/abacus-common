@@ -39,10 +39,10 @@ public interface ToShortBiFunction<T, U> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToShortBiFunction<Integer, Integer> adder = (a, b) -> (short)(a + b);
-     * short sum = adder.applyAsShort(100, 200); // returns 300
+     * short sum = adder.applyAsShort(100, 200);  // returns 300
      *
      * ToShortBiFunction<String, Integer> charCodeAt = (str, index) -> (short) str.charAt(index);
-     * short charCode = charCodeAt.applyAsShort("Hello", 0); // returns 72 (ASCII code for 'H')
+     * short charCode = charCodeAt.applyAsShort("Hello", 0);  // returns 72 (ASCII code for 'H')
      * }</pre>
      *
      * @param t the first function argument

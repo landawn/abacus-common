@@ -33,16 +33,16 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortUnaryOperator identity = ShortUnaryOperator.identity();
-     * short result1 = identity.applyAsShort((short) 42); // returns 42
+     * short result1 = identity.applyAsShort((short) 42);  // returns 42
      *
      * ShortUnaryOperator doubler = x -> (short) (x * 2);
-     * short result2 = doubler.applyAsShort((short) 21); // returns 42
+     * short result2 = doubler.applyAsShort((short) 21);  // returns 42
      *
      * ShortUnaryOperator negate = x -> (short) -x;
-     * short result3 = negate.applyAsShort((short) 10); // returns -10
+     * short result3 = negate.applyAsShort((short) 10);  // returns -10
      *
      * ShortUnaryOperator abs = x -> (short) Math.abs(x);
-     * short result4 = abs.applyAsShort((short) -25); // returns 25
+     * short result4 = abs.applyAsShort((short) -25);  // returns 25
      * }</pre>
      *
      * @param operand the operand

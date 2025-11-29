@@ -46,7 +46,7 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatSupplier pi = () -> 3.14159f;
-     * float value = pi.getAsFloat(); // Returns 3.14159f
+     * float value = pi.getAsFloat();  // Returns 3.14159f
      * }</pre>
      *
      * @return a float value

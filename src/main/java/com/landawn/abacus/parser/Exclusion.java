@@ -56,8 +56,8 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(0);      // Default int value, will be excluded
-     * person.setActive(false); // Default boolean value, will be excluded
+     * person.setAge(0);          // Default int value, will be excluded
+     * person.setActive(false);   // Default boolean value, will be excluded
      * 
      * // With Exclusion.DEFAULT, output: {"name": "John"}
      * }</pre>

@@ -35,14 +35,14 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Standard Math.min returns NaN if any argument is NaN
- * double result1 = Math.min(5.0, Double.NaN); // returns NaN
+ * double result1 = Math.min(5.0, Double.NaN);  // returns NaN
  * 
  * // IEEE754rUtil.min returns the non-NaN value
- * double result2 = IEEE754rUtil.min(5.0, Double.NaN); // returns 5.0
+ * double result2 = IEEE754rUtil.min(5.0, Double.NaN);  // returns 5.0
  * 
  * // Array operations
  * float[] values = {3.0f, Float.NaN, 1.0f, 2.0f};
- * float min = IEEE754rUtil.min(values); // returns 1.0f
+ * float min = IEEE754rUtil.min(values);  // returns 1.0f
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -68,10 +68,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0f, 5.0f);        // returns 3.0f
-     * IEEE754rUtil.min(Float.NaN, 5.0f);   // returns 5.0f
-     * IEEE754rUtil.min(3.0f, Float.NaN);   // returns 3.0f
-     * IEEE754rUtil.min(Float.NaN, Float.NaN); // returns Float.NaN
+     * IEEE754rUtil.min(3.0f, 5.0f);             // returns 3.0f
+     * IEEE754rUtil.min(Float.NaN, 5.0f);        // returns 5.0f
+     * IEEE754rUtil.min(3.0f, Float.NaN);        // returns 3.0f
+     * IEEE754rUtil.min(Float.NaN, Float.NaN);   // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -100,8 +100,8 @@ public final class IEEE754rUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);  // returns 1.0f
-     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f); // returns 1.0f
+     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);        // returns 1.0f
+     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f);   // returns 1.0f
      * }</pre>
      *
      * @param a the first value
@@ -122,7 +122,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
-     * float min = IEEE754rUtil.min(values); // returns 1.0f
+     * float min = IEEE754rUtil.min(values);  // returns 1.0f
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -152,10 +152,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0, 5.0);          // returns 3.0
-     * IEEE754rUtil.min(Double.NaN, 5.0);   // returns 5.0
-     * IEEE754rUtil.min(3.0, Double.NaN);   // returns 3.0
-     * IEEE754rUtil.min(Double.NaN, Double.NaN); // returns Double.NaN
+     * IEEE754rUtil.min(3.0, 5.0);                 // returns 3.0
+     * IEEE754rUtil.min(Double.NaN, 5.0);          // returns 5.0
+     * IEEE754rUtil.min(3.0, Double.NaN);          // returns 3.0
+     * IEEE754rUtil.min(Double.NaN, Double.NaN);   // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
@@ -184,8 +184,8 @@ public final class IEEE754rUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0, 5.0, 1.0);  // returns 1.0
-     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0); // returns 1.0
+     * IEEE754rUtil.min(3.0, 5.0, 1.0);          // returns 1.0
+     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0);   // returns 1.0
      * }</pre>
      *
      * @param a the first value
@@ -206,7 +206,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
-     * double min = IEEE754rUtil.min(values); // returns 1.0
+     * double min = IEEE754rUtil.min(values);  // returns 1.0
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -236,10 +236,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0f, 5.0f);        // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, 5.0f);   // returns 5.0f
-     * IEEE754rUtil.max(3.0f, Float.NaN);   // returns 3.0f
-     * IEEE754rUtil.max(Float.NaN, Float.NaN); // returns Float.NaN
+     * IEEE754rUtil.max(3.0f, 5.0f);             // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, 5.0f);        // returns 5.0f
+     * IEEE754rUtil.max(3.0f, Float.NaN);        // returns 3.0f
+     * IEEE754rUtil.max(Float.NaN, Float.NaN);   // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -268,8 +268,8 @@ public final class IEEE754rUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);  // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f); // returns 5.0f
+     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);        // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f);   // returns 5.0f
      * }</pre>
      *
      * @param a the first value
@@ -290,7 +290,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
-     * float max = IEEE754rUtil.max(values); // returns 5.0f
+     * float max = IEEE754rUtil.max(values);  // returns 5.0f
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -320,10 +320,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0, 5.0);          // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, 5.0);   // returns 5.0
-     * IEEE754rUtil.max(3.0, Double.NaN);   // returns 3.0
-     * IEEE754rUtil.max(Double.NaN, Double.NaN); // returns Double.NaN
+     * IEEE754rUtil.max(3.0, 5.0);                 // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, 5.0);          // returns 5.0
+     * IEEE754rUtil.max(3.0, Double.NaN);          // returns 3.0
+     * IEEE754rUtil.max(Double.NaN, Double.NaN);   // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
@@ -352,8 +352,8 @@ public final class IEEE754rUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0, 5.0, 1.0);  // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0); // returns 5.0
+     * IEEE754rUtil.max(3.0, 5.0, 1.0);          // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0);   // returns 5.0
      * }</pre>
      *
      * @param a the first value
@@ -374,7 +374,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
-     * double max = IEEE754rUtil.max(values); // returns 5.0
+     * double max = IEEE754rUtil.max(values);  // returns 5.0
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty

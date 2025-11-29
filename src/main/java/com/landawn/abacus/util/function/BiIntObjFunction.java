@@ -35,7 +35,7 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIntObjFunction<String, String> formatter = (i, j, prefix) -> prefix + (i + j);
-     * String result = formatter.apply(10, 20, "Sum: "); // Returns "Sum: 30"
+     * String result = formatter.apply(10, 20, "Sum: ");  // Returns "Sum: 30"
      * }</pre>
      *
      * @param i the first function argument (int value)

@@ -55,12 +55,11 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * DisposableArray<String> disposable = DisposableArray.wrap(array);
-     * String first = disposable.get(0); // "a"
-     * List<String> list = disposable.toList(); // Creates a new list
+     * String first = disposable.get(0);          // "a"
+     * List<String> list = disposable.toList();   // Creates a new list
      * }</pre>
      *
      * @param <T> the type of elements in the array
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -224,7 +223,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * disposable.foreach(System.out::println); // Prints each element
+         * disposable.foreach(System.out::println);  // Prints each element
          * }</pre>
          *
          * @param <E> the type of exception that the action may throw
@@ -275,7 +274,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * String joined = disposable.join(", "); // "a, b, c"
+         * String joined = disposable.join(", ");  // "a, b, c"
          * }</pre>
          *
          * @param delimiter the delimiter to use between elements
@@ -292,7 +291,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * String joined = disposable.join(", ", "[", "]"); // "[a, b, c]"
+         * String joined = disposable.join(", ", "[", "]");  // "[a, b, c]"
          * }</pre>
          *
          * @param delimiter the delimiter to use between elements
@@ -337,7 +336,6 @@ public interface NoCachingNoUpdating {
      * DisposableObjArray wrapped = DisposableObjArray.wrap(objects);
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -397,11 +395,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * boolean[] array = {true, false, true};
      * DisposableBooleanArray disposable = DisposableBooleanArray.wrap(array);
-     * boolean first = disposable.get(0); // true
-     * BooleanList list = disposable.toList(); // Creates a new list
+     * boolean first = disposable.get(0);        // true
+     * BooleanList list = disposable.toList();   // Creates a new list
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -591,11 +588,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
      * DisposableCharArray disposable = DisposableCharArray.wrap(array);
-     * char first = disposable.get(0); // 'a'
-     * int sum = disposable.sum(); // Sum of char values
+     * char first = disposable.get(0);   // 'a'
+     * int sum = disposable.sum();       // Sum of char values
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -817,11 +813,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * byte[] array = {1, 2, 3, 4, 5};
      * DisposableByteArray disposable = DisposableByteArray.wrap(array);
-     * byte first = disposable.get(0); // 1
-     * int sum = disposable.sum(); // 15
+     * byte first = disposable.get(0);   // 1
+     * int sum = disposable.sum();       // 15
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -1041,11 +1036,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * short[] array = {100, 200, 300};
      * DisposableShortArray disposable = DisposableShortArray.wrap(array);
-     * short first = disposable.get(0); // 100
-     * int sum = disposable.sum(); // 600
+     * short first = disposable.get(0);   // 100
+     * int sum = disposable.sum();        // 600
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -1265,12 +1259,11 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * int[] array = {10, 20, 30, 40, 50};
      * DisposableIntArray disposable = DisposableIntArray.wrap(array);
-     * int first = disposable.get(0); // 10
-     * int sum = disposable.sum(); // 150
-     * double avg = disposable.average(); // 30.0
+     * int first = disposable.get(0);       // 10
+     * int sum = disposable.sum();          // 150
+     * double avg = disposable.average();   // 30.0
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -1490,11 +1483,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * long[] array = {1000L, 2000L, 3000L};
      * DisposableLongArray disposable = DisposableLongArray.wrap(array);
-     * long first = disposable.get(0); // 1000L
-     * long sum = disposable.sum(); // 6000L
+     * long first = disposable.get(0);   // 1000L
+     * long sum = disposable.sum();      // 6000L
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -1714,11 +1706,10 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * float[] array = {1.5f, 2.5f, 3.5f};
      * DisposableFloatArray disposable = DisposableFloatArray.wrap(array);
-     * float first = disposable.get(0); // 1.5f
-     * float sum = disposable.sum(); // 7.5f
+     * float first = disposable.get(0);   // 1.5f
+     * float sum = disposable.sum();      // 7.5f
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -1938,12 +1929,11 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3, 4.4};
      * DisposableDoubleArray disposable = DisposableDoubleArray.wrap(array);
-     * double first = disposable.get(0); // 1.1
-     * double sum = disposable.sum(); // 11.0
-     * double avg = disposable.average(); // 2.75
+     * double first = disposable.get(0);    // 1.1
+     * double sum = disposable.sum();       // 11.0
+     * double avg = disposable.average();   // 2.75
      * }</pre>
      *
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -2165,12 +2155,11 @@ public interface NoCachingNoUpdating {
      * deque.add("first");
      * deque.add("second");
      * DisposableDeque<String> disposable = DisposableDeque.wrap(deque);
-     * String first = disposable.getFirst(); // "first"
-     * List<String> list = disposable.toList(); // Creates a new list
+     * String first = disposable.getFirst();      // "first"
+     * List<String> list = disposable.toList();   // Creates a new list
      * }</pre>
      *
      * @param <T> the type of elements in the deque
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -2360,14 +2349,13 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * Map.Entry<String, Integer> entry = Map.entry("key", 100);
      * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
-     * String key = disposable.getKey(); // "key"
-     * Integer value = disposable.getValue(); // 100
-     * Map.Entry<String, Integer> copy = disposable.copy(); // Creates a mutable copy
+     * String key = disposable.getKey();                      // "key"
+     * Integer value = disposable.getValue();                 // 100
+     * Map.Entry<String, Integer> copy = disposable.copy();   // Creates a mutable copy
      * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -2450,7 +2438,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableEntry<String, Integer> entry = DisposableEntry.wrap(Map.entry("age", 25));
-         * String result = entry.apply((k, v) -> k + "=" + v); // "age=25"
+         * String result = entry.apply((k, v) -> k + "=" + v);  // "age=25"
          * }</pre>
          *
          * @param <R> the type of the result
@@ -2504,14 +2492,13 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("left", 100);
      * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
-     * String left = disposable.left(); // "left"
-     * Integer right = disposable.right(); // 100
-     * Pair<String, Integer> copy = disposable.copy(); // Creates a mutable copy
+     * String left = disposable.left();                  // "left"
+     * Integer right = disposable.right();               // 100
+     * Pair<String, Integer> copy = disposable.copy();   // Creates a mutable copy
      * }</pre>
      *
      * @param <L> the type of the left element
      * @param <R> the type of the right element
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -2581,7 +2568,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposablePair<Integer, Integer> pair = DisposablePair.wrap(Pair.of(3, 4));
-         * Integer sum = pair.apply((l, r) -> l + r); // 7
+         * Integer sum = pair.apply((l, r) -> l + r);  // 7
          * }</pre>
          *
          * @param <U> the type of the result
@@ -2625,16 +2612,15 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
      * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
-     * String left = disposable.left(); // "left"
-     * Integer middle = disposable.middle(); // 100
-     * Boolean right = disposable.right(); // true
-     * Triple<String, Integer, Boolean> copy = disposable.copy(); // Creates a mutable copy
+     * String left = disposable.left();                             // "left"
+     * Integer middle = disposable.middle();                        // 100
+     * Boolean right = disposable.right();                          // true
+     * Triple<String, Integer, Boolean> copy = disposable.copy();   // Creates a mutable copy
      * }</pre>
      *
      * @param <L> the type of the left element
      * @param <M> the type of the middle element
      * @param <R> the type of the right element
-     * @since 1.0
      */
     @Beta
     @SequentialOnly
@@ -2717,7 +2703,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableTriple<Integer, Integer, Integer> triple = DisposableTriple.wrap(Triple.of(1, 2, 3));
-         * Integer sum = triple.apply((l, m, r) -> l + m + r); // 6
+         * Integer sum = triple.apply((l, m, r) -> l + m + r);  // 6
          * }</pre>
          *
          * @param <U> the type of the result
@@ -2761,12 +2747,11 @@ public interface NoCachingNoUpdating {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> timedValue = Timed.of("Hello", System.currentTimeMillis());
-     * String value = timedValue.value(); // "Hello"
-     * long time = timedValue.timestamp(); // The timestamp in milliseconds
+     * String value = timedValue.value();    // "Hello"
+     * long time = timedValue.timestamp();   // The timestamp in milliseconds
      * }</pre>
      *
      * @param <T> the type of the value
-     * @since 1.0
      */
     class Timed<T> implements NoCachingNoUpdating {
 

@@ -273,7 +273,6 @@ public abstract class TypeReference<T> {
      * @param <T> the type to be captured and represented
      * @see TypeReference
      * @see Type
-     * @since 1.0
      */
     public abstract static class TypeToken<T> extends TypeReference<T> {
         /**

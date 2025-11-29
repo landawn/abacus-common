@@ -42,7 +42,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Class<ShortList> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Output: com.landawn.abacus.util.ShortList
+     * System.out.println(clazz.getName());  // Output: com.landawn.abacus.util.ShortList
      * }</pre>
      *
      * @return the Class object for ShortList.class
@@ -60,7 +60,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Type<Short> elementType = type.getElementType();
-     * System.out.println(elementType.name()); // Output: short
+     * System.out.println(elementType.name());  // Output: short
      * }</pre>
      *
      * @return the Type instance representing short type for list elements
@@ -77,8 +77,8 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Type<Short>[] paramTypes = type.getParameterTypes();
-     * System.out.println(paramTypes.length); // Output: 1
-     * System.out.println(paramTypes[0].name()); // Output: short
+     * System.out.println(paramTypes.length);      // Output: 1
+     * System.out.println(paramTypes[0].name());   // Output: short
      * }</pre>
      *
      * @return an array containing the Short Type that describes the elements of this list type
@@ -99,10 +99,10 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
      * String str = type.stringOf(list);
-     * System.out.println(str); // Output: [1, 2, 3]
+     * System.out.println(str);  // Output: [1, 2, 3]
      *
      * String nullStr = type.stringOf(null);
-     * System.out.println(nullStr); // Output: null
+     * System.out.println(nullStr);  // Output: null
      * }</pre>
      *
      * @param x the ShortList to convert to string
@@ -121,14 +121,14 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = type.valueOf("[1, 2, 3]");
-     * System.out.println(list.size()); // Output: 3
-     * System.out.println(list.get(0)); // Output: 1
+     * System.out.println(list.size());   // Output: 3
+     * System.out.println(list.get(0));   // Output: 1
      *
      * ShortList emptyList = type.valueOf("[]");
-     * System.out.println(emptyList.isEmpty()); // Output: true
+     * System.out.println(emptyList.isEmpty());  // Output: true
      *
      * ShortList nullList = type.valueOf(null);
-     * System.out.println(nullList); // Output: null
+     * System.out.println(nullList);  // Output: null
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
@@ -151,11 +151,11 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, list);
-     * System.out.println(sb.toString()); // Output: Values: [10, 20, 30]
+     * System.out.println(sb.toString());  // Output: Values: [10, 20, 30]
      *
      * StringBuilder nullSb = new StringBuilder();
      * type.appendTo(nullSb, null);
-     * System.out.println(nullSb.toString()); // Output: null
+     * System.out.println(nullSb.toString());  // Output: null
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -184,11 +184,11 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
      * type.writeCharacter(writer, list, config);
-     * System.out.println(writer.toString()); // Output: [100, 200, 300]
+     * System.out.println(writer.toString());  // Output: [100, 200, 300]
      *
      * CharacterWriter nullWriter = new CharacterWriter();
      * type.writeCharacter(nullWriter, null, config);
-     * System.out.println(nullWriter.toString()); // Output: null
+     * System.out.println(nullWriter.toString());  // Output: null
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

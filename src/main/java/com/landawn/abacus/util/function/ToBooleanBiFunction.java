@@ -35,14 +35,14 @@ public interface ToBooleanBiFunction<T, U> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToBooleanBiFunction<String, String> equals = String::equals;
-     * boolean result1 = equals.applyAsBoolean("hello", "hello"); // returns true
-     * boolean result2 = equals.applyAsBoolean("hello", "world"); // returns false
+     * boolean result1 = equals.applyAsBoolean("hello", "hello");   // returns true
+     * boolean result2 = equals.applyAsBoolean("hello", "world");   // returns false
      *
      * ToBooleanBiFunction<Integer, Integer> greaterThan = (a, b) -> a > b;
-     * boolean result3 = greaterThan.applyAsBoolean(10, 5); // returns true
+     * boolean result3 = greaterThan.applyAsBoolean(10, 5);  // returns true
      *
      * ToBooleanBiFunction<List, Object> contains = List::contains;
-     * boolean result4 = contains.applyAsBoolean(Arrays.asList(1, 2, 3), 2); // returns true
+     * boolean result4 = contains.applyAsBoolean(Arrays.asList(1, 2, 3), 2);  // returns true
      * }</pre>
      *
      * @param t the first function argument

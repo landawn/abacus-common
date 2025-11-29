@@ -123,7 +123,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains boolean value true
      * MutableBoolean mb = type.get(rs, 1);
@@ -151,7 +151,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "is_active" contains boolean value true
      * MutableBoolean mb = type.get(rs, "is_active");

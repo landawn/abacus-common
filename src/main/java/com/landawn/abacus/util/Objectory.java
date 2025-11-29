@@ -59,7 +59,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *     sb.append("Hello").append(" ").append("World");
  *     return sb.toString();
  * } finally {
- *     Objectory.recycle(sb); // Return to pool for reuse
+ *     Objectory.recycle(sb);  // Return to pool for reuse
  * }
  * }</pre>
  * 

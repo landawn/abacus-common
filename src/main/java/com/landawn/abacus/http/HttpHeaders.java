@@ -630,8 +630,8 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate")); // "gzip; deflate"
-     * String date = HttpHeaders.valueOf(new Date()); // HTTP date format
+     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));   // "gzip; deflate"
+     * String date = HttpHeaders.valueOf(new Date());                          // HTTP date format
      * }</pre>
      *
      * @param headerValue The header value to convert
@@ -1144,7 +1144,7 @@ public final class HttpHeaders {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders copy = headers.copy();
-     * copy.set("X-Modified", "true"); // Original is not affected
+     * copy.set("X-Modified", "true");  // Original is not affected
      * }</pre>
      *
      * @return A new HttpHeaders instance with a copy of all headers

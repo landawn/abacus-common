@@ -82,7 +82,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.empty();
-     * System.out.println(iter.hasNext()); // false
+     * System.out.println(iter.hasNext());  // false
      * }</pre>
      *
      * @return an empty {@code LongIterator}
@@ -310,8 +310,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L);
-     * long first = iter.nextLong(); // 1
-     * long second = iter.nextLong(); // 2
+     * long first = iter.nextLong();    // 1
+     * long second = iter.nextLong();   // 2
      * }</pre>
      *
      * @return the next long value
@@ -531,7 +531,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * long[] empty = LongIterator.empty().toArray(); // empty.length == 0
+     * long[] empty = LongIterator.empty().toArray();  // empty.length == 0
      * }</pre>
      *
      * @return a long array containing all remaining elements
@@ -554,7 +554,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * LongList empty = LongIterator.empty().toList(); // empty.size() == 0
+     * LongList empty = LongIterator.empty().toList();  // empty.size() == 0
      * }</pre>
      *
      * @return a LongList containing all remaining elements

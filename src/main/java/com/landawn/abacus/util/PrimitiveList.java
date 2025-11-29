@@ -86,8 +86,8 @@ import com.landawn.abacus.annotation.Beta;
  * // Set operations for data analysis
  * IntList set1 = IntList.of(1, 2, 3, 4);
  * IntList set2 = IntList.of(3, 4, 5, 6);
- * IntList intersection = set1.intersection(set2); // [3, 4]
- * IntList difference = set1.difference(set2);     // [1, 2]
+ * IntList intersection = set1.intersection(set2);  // [3, 4]
+ * IntList difference = set1.difference(set2);  // [1, 2]
  *
  * // Efficient sorting and searching
  * numbers.sort();
@@ -371,7 +371,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1, 4, 3);
-     * list.removeDuplicates(); // list becomes [1, 2, 3, 4]
+     * list.removeDuplicates();  // list becomes [1, 2, 3, 4]
      * }</pre>
      *
      * @return {@code true} if any duplicates were removed from this list,
@@ -421,7 +421,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
-     * list.deleteAllByIndices(1, 3); // removes elements at indices 1 and 3
+     * list.deleteAllByIndices(1, 3);  // removes elements at indices 1 and 3
      * // list now contains [10, 30, 50]
      * }</pre>
      *
@@ -440,7 +440,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
-     * list.deleteRange(1, 4); // removes elements at indices 1, 2, and 3
+     * list.deleteRange(1, 4);  // removes elements at indices 1, 2, and 3
      * // list now contains [10, 50]
      * }</pre>
      *
@@ -488,7 +488,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
      * IntList replacement = IntList.of(10, 20, 30);
-     * list.replaceRange(1, 3, replacement); // replaces elements at indices 1 and 2
+     * list.replaceRange(1, 3, replacement);  // replaces elements at indices 1 and 2
      * // list now contains [1, 10, 20, 30, 4, 5]
      * }</pre>
      *
@@ -516,7 +516,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
      * int[] replacement = {10, 20, 30};
-     * list.replaceRange(1, 3, replacement); // replaces elements at indices 1 and 2
+     * list.replaceRange(1, 3, replacement);  // replaces elements at indices 1 and 2
      * // list now contains [1, 10, 20, 30, 4, 5]
      * }</pre>
      *
@@ -543,7 +543,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 3, 4);
      * IntList list2 = IntList.of(3, 5, 7);
-     * boolean result = list1.containsAny(list2); // returns {@code true} (common element: 3)
+     * boolean result = list1.containsAny(list2);  // returns {@code true} (common element: 3)
      * }</pre>
      *
      * @param l the PrimitiveList to be checked for common elements with this list.
@@ -565,7 +565,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4);
      * int[] array = {3, 5, 7};
-     * boolean result = list.containsAny(array); // returns {@code true} (common element: 3)
+     * boolean result = list.containsAny(array);  // returns {@code true} (common element: 3)
      * }</pre>
      *
      * @param a the array to be checked for common elements with this list.
@@ -590,7 +590,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 2, 3, 4);
      * IntList list2 = IntList.of(2, 2, 3);
-     * boolean result = list1.containsAll(list2); // returns true
+     * boolean result = list1.containsAll(list2);  // returns true
      * }</pre>
      *
      * @param l the PrimitiveList to be checked for containment in this list.
@@ -615,7 +615,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 4);
      * int[] array = {2, 2, 3};
-     * boolean result = list.containsAll(array); // returns true
+     * boolean result = list.containsAll(array);  // returns true
      * }</pre>
      *
      * @param a the array to be checked for containment in this list.
@@ -636,11 +636,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 3);
      * IntList list2 = IntList.of(4, 5, 6);
-     * boolean result = list1.disjoint(list2); // returns true
+     * boolean result = list1.disjoint(list2);  // returns true
      * 
      * IntList list3 = IntList.of(1, 2, 3);
      * IntList list4 = IntList.of(3, 4, 5);
-     * boolean result2 = list3.disjoint(list4); // returns {@code false} (common element: 3)
+     * boolean result2 = list3.disjoint(list4);  // returns {@code false} (common element: 3)
      * }</pre>
      *
      * @param l the PrimitiveList to check for disjointness with this list.
@@ -661,10 +661,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3);
      * int[] array1 = {4, 5, 6};
-     * boolean result1 = list.disjoint(array1); // returns true
+     * boolean result1 = list.disjoint(array1);  // returns true
      * 
      * int[] array2 = {3, 4, 5};
-     * boolean result2 = list.disjoint(array2); // returns {@code false} (common element: 3)
+     * boolean result2 = list.disjoint(array2);  // returns {@code false} (common element: 3)
      * }</pre>
      *
      * @param a the array to check for disjointness with this list.
@@ -686,12 +686,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(1, 2, 2, 4);
-     * IntList result = list1.intersection(list2); // result will be [1, 2, 2]
+     * IntList result = list1.intersection(list2);  // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      *
      * IntList list3 = IntList.of(5, 5, 6);
      * IntList list4 = IntList.of(5, 7);
-     * IntList result2 = list3.intersection(list4); // result will be [5]
+     * IntList result2 = list3.intersection(list4);  // result will be [5]
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
@@ -716,12 +716,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {1, 2, 2, 4};
-     * IntList result = list1.intersection(array); // result will be [1, 2, 2]
+     * IntList result = list1.intersection(array);  // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * IntList list2 = IntList.of(5, 5, 6);
      * int[] array2 = new int[] {5, 7};
-     * IntList result2 = list2.intersection(array2); // result will be [5]
+     * IntList result2 = list2.intersection(array2);  // result will be [5]
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
@@ -746,12 +746,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
-     * IntList result = list1.difference(list2); // result will be [0, 2, 3]
+     * IntList result = list1.difference(list2);  // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and list2 has one
      *
      * IntList list3 = IntList.of(5, 6);
      * IntList list4 = IntList.of(5, 5, 6);
-     * IntList result2 = list3.difference(list4); // result will be [] (empty)
+     * IntList result2 = list3.difference(list4);  // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -776,12 +776,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {2, 5, 1};
-     * IntList result = list1.difference(array); // result will be [0, 2, 3]
+     * IntList result = list1.difference(array);  // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and array has one
      *
      * IntList list2 = IntList.of(5, 6);
      * int[] array2 = new int[] {5, 5, 6};
-     * IntList result2 = list2.difference(array2); // result will be [] (empty)
+     * IntList result2 = list2.difference(array2);  // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -866,10 +866,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 3, 4);
-     * boolean result1 = list1.hasDuplicates(); // returns false
+     * boolean result1 = list1.hasDuplicates();  // returns false
      * 
      * IntList list2 = IntList.of(1, 2, 3, 2);
-     * boolean result2 = list2.hasDuplicates(); // returns true
+     * boolean result2 = list2.hasDuplicates();  // returns true
      * }</pre>
      *
      * @return {@code true} if the list contains at least one duplicate element,
@@ -887,7 +887,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1, 4, 3);
-     * IntList result = list.distinct(); // returns [1, 2, 3, 4]
+     * IntList result = list.distinct();  // returns [1, 2, 3, 4]
      * }</pre>
      *
      * @return a new PrimitiveList with distinct elements
@@ -907,7 +907,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1, 4, 3);
-     * IntList result = list.distinct(1, 6); // returns [2, 3, 1, 4]
+     * IntList result = list.distinct(1, 6);  // returns [2, 3, 1, 4]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to process.
@@ -929,10 +929,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 2, 3, 5);
-     * boolean result1 = list1.isSorted(); // returns true
+     * boolean result1 = list1.isSorted();  // returns true
      * 
      * IntList list2 = IntList.of(1, 3, 2, 4);
-     * boolean result2 = list2.isSorted(); // returns false
+     * boolean result2 = list2.isSorted();  // returns false
      * }</pre>
      *
      * @return {@code true} if all elements are in ascending order (allowing equal consecutive values),
@@ -1068,7 +1068,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
-     * Random rnd = new Random(12345); // seed for reproducibility
+     * Random rnd = new Random(12345);  // seed for reproducibility
      * list.shuffle(rnd);
      * // list now contains elements in a random order determined by the seed
      * }</pre>
@@ -1153,12 +1153,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
      * 
      * // Forward stepping
-     * IntList copy1 = list.copy(0, 10, 2); // returns [0, 2, 4, 6, 8]
-     * IntList copy2 = list.copy(1, 8, 3);  // returns [1, 4, 7]
+     * IntList copy1 = list.copy(0, 10, 2);    // returns [0, 2, 4, 6, 8]
+     * IntList copy2 = list.copy(1, 8, 3);     // returns [1, 4, 7]
      * 
      * // Reverse stepping
-     * IntList copy3 = list.copy(8, 2, -2); // returns [8, 6, 4]
-     * IntList copy4 = list.copy(9, -1, -3); // returns [9, 6, 3, 0]
+     * IntList copy3 = list.copy(8, 2, -2);    // returns [8, 6, 4]
+     * IntList copy4 = list.copy(9, -1, -3);   // returns [9, 6, 3, 0]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy.
@@ -1240,11 +1240,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntList list = new IntList(100); // capacity = 100
+     * IntList list = new IntList(100);  // capacity = 100
      * list.add(1);
      * list.add(2);
-     * list.add(3); // size = 3, capacity = 100
-     * list.trimToSize(); // size = 3, capacity = 3
+     * list.add(3)         = 3, capacity = 100
+     * list.trimToSize()   = 3, capacity = 3
      * }</pre>
      *
      * @return this PrimitiveList instance (for method chaining)
@@ -1276,13 +1276,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = new IntList();
-     * boolean empty1 = list.isEmpty(); // returns true
+     * boolean empty1 = list.isEmpty();  // returns true
      * 
      * list.add(42);
-     * boolean empty2 = list.isEmpty(); // returns false
+     * boolean empty2 = list.isEmpty();  // returns false
      * 
      * list.clear();
-     * boolean empty3 = list.isEmpty(); // returns true
+     * boolean empty3 = list.isEmpty();  // returns true
      * }</pre>
      *
      * @return {@code true} if this list contains no elements, {@code false} otherwise
@@ -1295,11 +1295,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = new IntList();
-     * int size1 = list.size(); // returns 0
+     * int size1 = list.size();  // returns 0
      * 
      * list.add(10);
      * list.add(20);
-     * int size2 = list.size(); // returns 2
+     * int size2 = list.size();  // returns 2
      * }</pre>
      *
      * @return the number of elements in this list

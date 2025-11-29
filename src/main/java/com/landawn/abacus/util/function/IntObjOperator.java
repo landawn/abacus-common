@@ -38,7 +38,7 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntObjOperator<String> repeater = (count, str) -> str.length() * count;
-     * int result = repeater.applyAsInt(3, "hello"); // Returns 15 (5 * 3)
+     * int result = repeater.applyAsInt(3, "hello");  // Returns 15 (5 * 3)
      * }</pre>
      *
      * @param operand the {@code int} operand

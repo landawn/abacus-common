@@ -184,7 +184,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      * Instant instant = type.get(rs, 1);
      * // Returns: Instant value from column 1
      * }</pre>

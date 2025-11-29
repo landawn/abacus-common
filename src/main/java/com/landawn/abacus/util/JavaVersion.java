@@ -40,7 +40,7 @@ package com.landawn.abacus.util;
  * 
  * // Parse a version string
  * JavaVersion version = JavaVersion.of("11");
- * System.out.println(version); // Prints: 11
+ * System.out.println(version);  // Prints: 11
  * }</pre>
  * 
  * <p>
@@ -488,11 +488,11 @@ public enum JavaVersion {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JavaVersion.get("1.8");     // Returns JAVA_1_8
-     * JavaVersion.get("8");       // Returns JAVA_1_8
-     * JavaVersion.get("11");      // Returns JAVA_11
-     * JavaVersion.get("17.0.1");  // Returns JAVA_17
-     * JavaVersion.get("50");      // Returns JAVA_RECENT (for versions > 39)
+     * JavaVersion.get("1.8");      // Returns JAVA_1_8
+     * JavaVersion.get("8");        // Returns JAVA_1_8
+     * JavaVersion.get("11");       // Returns JAVA_11
+     * JavaVersion.get("17.0.1");   // Returns JAVA_17
+     * JavaVersion.get("50");       // Returns JAVA_RECENT (for versions > 39)
      * }</pre>
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
@@ -620,9 +620,9 @@ public enum JavaVersion {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JavaVersion v1 = JavaVersion.of("1.8");     // Returns JAVA_1_8
-     * JavaVersion v2 = JavaVersion.of("11");      // Returns JAVA_11
-     * JavaVersion v3 = JavaVersion.of("17.0.1");  // Returns JAVA_17
+     * JavaVersion v1 = JavaVersion.of("1.8");      // Returns JAVA_1_8
+     * JavaVersion v2 = JavaVersion.of("11");       // Returns JAVA_11
+     * JavaVersion v3 = JavaVersion.of("17.0.1");   // Returns JAVA_17
      * 
      * // Get current Java version
      * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
@@ -669,8 +669,8 @@ public enum JavaVersion {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * System.out.println(JavaVersion.JAVA_1_8);  // Prints: 1.8
-     * System.out.println(JavaVersion.JAVA_11);   // Prints: 11
+     * System.out.println(JavaVersion.JAVA_1_8);   // Prints: 1.8
+     * System.out.println(JavaVersion.JAVA_11);    // Prints: 11
      * }</pre>
      *
      * @return the standard version name, never null

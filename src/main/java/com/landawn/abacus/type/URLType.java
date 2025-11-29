@@ -43,7 +43,7 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * Class<URL> clazz = type.clazz(); // Returns URL.class
+     * Class<URL> clazz = type.clazz();  // Returns URL.class
      * }</pre>
      *
      * @return the Class object for URL.class
@@ -65,7 +65,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * URL url = new URL("https://example.com/path");
-     * String str = type.stringOf(url); // Returns "https://example.com/path"
+     * String str = type.stringOf(url);  // Returns "https://example.com/path"
      * }</pre>
      *
      * @param x the URL instance to convert to string
@@ -86,7 +86,7 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * URL url = type.valueOf("https://example.com/path"); // Creates a URL
+     * URL url = type.valueOf("https://example.com/path");  // Creates a URL
      * }</pre>
      *
      * @param str the string to convert to a URL
@@ -117,7 +117,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
-     * URL website = type.get(rs, 1); // Get URL from first column
+     * URL website = type.get(rs, 1);  // Get URL from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -141,7 +141,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
-     * URL website = type.get(rs, "website"); // Get URL by column name
+     * URL website = type.get(rs, "website");  // Get URL by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -165,7 +165,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO companies (website) VALUES (?)");
-     * type.set(stmt, 1, new URL("https://example.com")); // Set URL at parameter index 1
+     * type.set(stmt, 1, new URL("https://example.com"));  // Set URL at parameter index 1
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
@@ -189,7 +189,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * CallableStatement stmt = conn.prepareCall("{call update_company(?)}");
-     * type.set(stmt, "website", new URL("https://example.com")); // Set URL by parameter name
+     * type.set(stmt, "website", new URL("https://example.com"));  // Set URL by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in

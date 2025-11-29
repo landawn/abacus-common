@@ -76,7 +76,7 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      *
      * ObjIntConsumer<StringBuilder> combined = appendIndex.andThen(appendNewline);
      * StringBuilder builder = new StringBuilder();
-     * combined.accept(builder, 5); // builder contains "[5]\n"
+     * combined.accept(builder, 5);  // builder contains "[5]\n"
      * }</pre>
      *
      * @param after the operation to perform after this operation

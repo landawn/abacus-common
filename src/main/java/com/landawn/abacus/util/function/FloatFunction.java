@@ -45,7 +45,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<Float> boxer = FloatFunction.BOX;
-     * Float boxed = boxer.apply(3.14f); // Returns Float.valueOf(3.14f)
+     * Float boxed = boxer.apply(3.14f);  // Returns Float.valueOf(3.14f)
      * }</pre>
      */
     FloatFunction<Float> BOX = value -> value;
@@ -94,7 +94,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * // Composed function that converts float to double, then formats it
      * FloatFunction<String> floatToFormattedString = toDouble.andThen(format);
      *
-     * String result = floatToFormattedString.apply(3.14159f); // "3.1416"
+     * String result = floatToFormattedString.apply(3.14159f);  // "3.1416"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -115,7 +115,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<Float> identity = FloatFunction.identity();
-     * Float result = identity.apply(42.0f); // Returns Float.valueOf(42.0f)
+     * Float result = identity.apply(42.0f);  // Returns Float.valueOf(42.0f)
      *
      * // Useful in conditional operations
      * FloatFunction<Float> processor = shouldProcess

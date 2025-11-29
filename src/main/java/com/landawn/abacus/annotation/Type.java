@@ -53,10 +53,10 @@ import java.lang.annotation.Target;
  *     private String password;  // Encrypted when saved to DB
  *
  *     @Type(enumerated = EnumBy.ORDINAL)
- *     private Status status;    // Stored as integer in DB
+ *     private Status status;  // Stored as integer in DB
  *
  *     @Type(clazz = CustomDateType.class)
- *     private Date createdDate; // Uses custom date formatting
+ *     private Date createdDate;  // Uses custom date formatting
  *
  *     @Type(name = "JsonString", scope = Scope.SERIALIZATION)
  *     private Object metadata;  // Serialized as JSON string in output

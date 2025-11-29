@@ -45,10 +45,10 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * <pre>{@code
      * CharTriPredicate allLetters = (c1, c2, c3) ->
      *     Character.isLetter(c1) && Character.isLetter(c2) && Character.isLetter(c3);
-     * boolean result = allLetters.test('a', 'b', 'c'); // Returns true
+     * boolean result = allLetters.test('a', 'b', 'c');  // Returns true
      *
      * CharTriPredicate allSame = (c1, c2, c3) -> c1 == c2 && c2 == c3;
-     * boolean result2 = allSame.test('x', 'x', 'x'); // Returns true
+     * boolean result2 = allSame.test('x', 'x', 'x');  // Returns true
      * }</pre>
      *
      * @param a the first char input argument
@@ -68,7 +68,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * <pre>{@code
      * CharTriPredicate allSame = (c1, c2, c3) -> c1 == c2 && c2 == c3;
      * CharTriPredicate notAllSame = allSame.negate();
-     * boolean result = notAllSame.test('a', 'b', 'c'); // Returns true
+     * boolean result = notAllSame.test('a', 'b', 'c');  // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -91,7 +91,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * CharTriPredicate allUpperCase = (c1, c2, c3) ->
      *     Character.isUpperCase(c1) && Character.isUpperCase(c2) && Character.isUpperCase(c3);
      * CharTriPredicate combined = allLetters.and(allUpperCase);
-     * boolean result = combined.test('A', 'B', 'C'); // Returns true
+     * boolean result = combined.test('A', 'B', 'C');  // Returns true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
@@ -115,7 +115,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * CharTriPredicate allDigits = (c1, c2, c3) ->
      *     Character.isDigit(c1) && Character.isDigit(c2) && Character.isDigit(c3);
      * CharTriPredicate combined = allSame.or(allDigits);
-     * boolean result = combined.test('1', '2', '3'); // Returns true (all digits)
+     * boolean result = combined.test('1', '2', '3');  // Returns true (all digits)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.

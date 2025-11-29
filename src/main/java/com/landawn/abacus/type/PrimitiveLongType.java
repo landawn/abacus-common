@@ -22,7 +22,7 @@ package com.landawn.abacus.type;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Long> type = TypeFactory.getType(long.class);
- * Long defaultVal = type.defaultValue(); // Returns 0L
+ * Long defaultVal = type.defaultValue();  // Returns 0L
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
@@ -43,8 +43,8 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
      * Class clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Output: long
-     * System.out.println(clazz.isPrimitive()); // Output: true
+     * System.out.println(clazz.getName());       // Output: long
+     * System.out.println(clazz.isPrimitive());   // Output: true
      * }</pre>
      *
      * @return the Class object for long.class
@@ -63,7 +63,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
      * boolean isPrimitive = type.isPrimitiveType();
-     * System.out.println(isPrimitive); // Output: true
+     * System.out.println(isPrimitive);  // Output: true
      * }</pre>
      *
      * @return {@code true}, indicating this is a primitive type
@@ -81,7 +81,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
      * Long defaultVal = type.defaultValue();
-     * System.out.println(defaultVal); // Output: 0
+     * System.out.println(defaultVal);  // Output: 0
      * }</pre>
      *
      * @return Long object containing the value 0L

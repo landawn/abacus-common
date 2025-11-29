@@ -43,7 +43,7 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * <pre>{@code
      * IntTriConsumer coordinate3D = (x, y, z) ->
      *     System.out.println("Coordinate: (" + x + ", " + y + ", " + z + ")");
-     * coordinate3D.accept(10, 20, 30); // Prints: Coordinate: (10, 20, 30)
+     * coordinate3D.accept(10, 20, 30);  // Prints: Coordinate: (10, 20, 30)
      *
      * IntTriConsumer rgbPrinter = (r, g, b) ->
      *     System.out.printf("RGB Color: rgb(%d, %d, %d)%n", r, g, b);
@@ -73,7 +73,7 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * IntTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
      * IntTriConsumer sum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
      * IntTriConsumer combined = logger.andThen(sum);
-     * combined.accept(5, 10, 15); // Logs then calculates sum
+     * combined.accept(5, 10, 15);  // Logs then calculates sum
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

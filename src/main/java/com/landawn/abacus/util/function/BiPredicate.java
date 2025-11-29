@@ -36,7 +36,7 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiPredicate<String, Integer> lengthEquals = (str, len) -> str.length() == len;
-     * boolean result = lengthEquals.test("hello", 5); // Returns true
+     * boolean result = lengthEquals.test("hello", 5);  // Returns true
      * }</pre>
      *
      * @param t the first input argument

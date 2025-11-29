@@ -37,7 +37,7 @@ public interface ShortNConsumer {
      *     for (short value : args) sum += value;
      *     System.out.println("Sum: " + sum);
      * };
-     * sumPrinter.accept((short) 1, (short) 2, (short) 3); // Prints "Sum: 6"
+     * sumPrinter.accept((short) 1, (short) 2, (short) 3);  // Prints "Sum: 6"
      *
      * ShortNConsumer minMaxPrinter = args -> {
      *     if (args.length == 0) return;

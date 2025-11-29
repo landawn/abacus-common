@@ -50,8 +50,8 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *     str.repeat(times);
      *
      * List<String> items = List.of("a", "b", "c");
-     * String element = getAtIndex.apply(items, 2); // Returns "c"
-     * String repeated = repeat.apply("Hello", 3); // Returns "HelloHelloHello"
+     * String element = getAtIndex.apply(items, 2);   // Returns "c"
+     * String repeated = repeat.apply("Hello", 3);    // Returns "HelloHelloHello"
      * }</pre>
      *
      * @param t the first function argument of type T
@@ -82,7 +82,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *     getElement.andThen(parseLength);
      *
      * String[] words = {"Hello", "World", "Java"};
-     * Integer length = getElementLength.apply(words, 1); // Returns 5 (length of "World")
+     * Integer length = getElementLength.apply(words, 1);  // Returns 5 (length of "World")
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

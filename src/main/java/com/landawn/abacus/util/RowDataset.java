@@ -179,9 +179,9 @@ public final class RowDataset implements Dataset, Cloneable {
      * RowDataset dataset = new RowDataset(columnNames, columns);
      *
      * // Accessing data
-     * System.out.println(dataset.size());         // prints: 2
-     * System.out.println(dataset.columnCount());  // prints: 3
-     * System.out.println(dataset.get(0, 1));      // prints: "Alice"
+     * System.out.println(dataset.size());          // prints: 2
+     * System.out.println(dataset.columnCount());   // prints: 3
+     * System.out.println(dataset.get(0, 1));       // prints: "Alice"
      * }</pre>
      *
      * @param columnNameList the list of column names for the dataset. Must not be {@code null},
@@ -233,9 +233,9 @@ public final class RowDataset implements Dataset, Cloneable {
      * RowDataset dataset = new RowDataset(columnNames, columns, properties);
      *
      * // Accessing dataset and properties
-     * System.out.println(dataset.size());                    // prints: 3
-     * System.out.println(dataset.getProperty("source"));     // prints: "test_data"
-     * System.out.println(dataset.get(0, "name"));            // prints: "Alice"
+     * System.out.println(dataset.size());                  // prints: 3
+     * System.out.println(dataset.getProperty("source"));   // prints: "test_data"
+     * System.out.println(dataset.get(0, "name"));          // prints: "Alice"
      * }</pre>
      *
      * @param columnNameList the list of column names for the dataset. Must not be {@code null},

@@ -36,7 +36,7 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntBiConsumer adder = (a, b) -> System.out.println("Sum: " + (a + b));
-     * adder.accept(5, 10); // Prints: Sum: 15
+     * adder.accept(5, 10);  // Prints: Sum: 15
      *
      * Map<Integer, Integer> map = new HashMap<>();
      * IntBiConsumer mapPutter = (key, value) -> map.put(key, value);
@@ -60,7 +60,7 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      * IntBiConsumer logger = (x, y) -> System.out.println("Processing: " + x + ", " + y);
      * IntBiConsumer validator = (x, y) -> { if (x < 0 || y < 0) throw new IllegalArgumentException(); };
      * IntBiConsumer combined = logger.andThen(validator);
-     * combined.accept(10, 20); // Logs then validates
+     * combined.accept(10, 20);  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

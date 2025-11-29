@@ -67,10 +67,10 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
-     * boolean result = areEqual.test('a', 'a'); // Returns true
+     * boolean result = areEqual.test('a', 'a');  // Returns true
      *
      * CharBiPredicate areBothLetters = (c1, c2) -> Character.isLetter(c1) && Character.isLetter(c2);
-     * boolean result2 = areBothLetters.test('a', 'b'); // Returns true
+     * boolean result2 = areBothLetters.test('a', 'b');  // Returns true
      * }</pre>
      *
      * @param t the first char input argument
@@ -89,7 +89,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * <pre>{@code
      * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
      * CharBiPredicate areNotEqual = areEqual.negate();
-     * boolean result = areNotEqual.test('a', 'b'); // Returns true
+     * boolean result = areNotEqual.test('a', 'b');  // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -110,7 +110,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * CharBiPredicate bothLetters = (c1, c2) -> Character.isLetter(c1) && Character.isLetter(c2);
      * CharBiPredicate bothUpperCase = (c1, c2) -> Character.isUpperCase(c1) && Character.isUpperCase(c2);
      * CharBiPredicate combined = bothLetters.and(bothUpperCase);
-     * boolean result = combined.test('A', 'B'); // Returns true
+     * boolean result = combined.test('A', 'B');  // Returns true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
@@ -133,7 +133,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
      * CharBiPredicate bothDigits = (c1, c2) -> Character.isDigit(c1) && Character.isDigit(c2);
      * CharBiPredicate combined = areEqual.or(bothDigits);
-     * boolean result = combined.test('1', '2'); // Returns true (both are digits)
+     * boolean result = combined.test('1', '2');  // Returns true (both are digits)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.

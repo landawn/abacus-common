@@ -51,12 +51,12 @@ public interface IntToCharFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToCharFunction toChar = value -> (char) value;
-     * char result1 = toChar.applyAsChar(65); // Returns 'A'
-     * char result2 = toChar.applyAsChar(0x263A); // Returns '☺' (smiley face)
+     * char result1 = toChar.applyAsChar(65);       // Returns 'A'
+     * char result2 = toChar.applyAsChar(0x263A);   // Returns '☺' (smiley face)
      *
      * // Convert digit to char
      * IntToCharFunction digitToChar = digit -> (char) ('0' + digit);
-     * char result3 = digitToChar.applyAsChar(5); // Returns '5'
+     * char result3 = digitToChar.applyAsChar(5);  // Returns '5'
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to char.

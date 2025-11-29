@@ -42,7 +42,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * <pre>{@code
      * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * Class<LocalDateTime> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Outputs: java.time.LocalDateTime
+     * System.out.println(clazz.getName());  // Outputs: java.time.LocalDateTime
      * }</pre>
      *
      * @return The Class object for LocalDateTime
@@ -61,7 +61,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * LocalDateTime dateTime = LocalDateTime.of(2021, 1, 1, 10, 30, 0);
      * String str = type.stringOf(dateTime);
-     * System.out.println(str); // Outputs: 2021-01-01T10:30:00
+     * System.out.println(str);  // Outputs: 2021-01-01T10:30:00
      * }</pre>
      *
      * @param x The LocalDateTime object to convert

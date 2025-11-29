@@ -41,10 +41,10 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Using MediaType for content classification
  * MediaType type = MediaType.IMAGE;
- * int code = type.intValue(); // returns 3
+ * int code = type.intValue();  // returns 3
  * 
  * // Converting from numeric code to MediaType
- * MediaType decoded = MediaType.valueOf(2); // returns VIDEO
+ * MediaType decoded = MediaType.valueOf(2);  // returns VIDEO
  * 
  * // Using in switch statements
  * switch (contentType) {
@@ -143,7 +143,7 @@ public enum MediaType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MediaType audioType = MediaType.AUDIO;
-     * int audioCode = audioType.intValue(); // returns 1
+     * int audioCode = audioType.intValue();  // returns 1
      * 
      * // Storing in database
      * preparedStatement.setInt(1, mediaType.intValue());

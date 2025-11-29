@@ -24,8 +24,8 @@ package com.landawn.abacus.http;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;
- * String contentType = format.contentType(); // returns "application/json"
- * String encoding = format.contentEncoding(); // returns "gzip"
+ * String contentType = format.contentType();  // returns "application/json"
+ * String encoding = format.contentEncoding();  // returns "gzip"
  * }</pre>
  */
 public enum ContentFormat {

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * ObjBiIntFunction<String, String> substring = (str, start, end) ->
  *     str.substring(start, end);
- * String result = substring.apply("Hello World", 0, 5); // returns "Hello"
+ * String result = substring.apply("Hello World", 0, 5);  // returns "Hello"
  *
  * ObjBiIntFunction<int[][], Integer> getMatrixElement = (matrix, row, col) ->
  *     matrix[row][col];
@@ -89,7 +89,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      *
      * ObjBiIntFunction<String, String> substringAndUpper =
      *     substring.andThen(toUpperCase);
-     * String result = substringAndUpper.apply("hello world", 0, 5); // returns "HELLO"
+     * String result = substringAndUpper.apply("hello world", 0, 5);  // returns "HELLO"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

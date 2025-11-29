@@ -191,7 +191,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * // Register custom types for better performance
  * parser.register(MyCustomType.class);
- * parser.register(MyCustomType.class, 100); // with ID
+ * parser.register(MyCustomType.class, 100);  // with ID
  *
  * // Deep copy
  * MyObject copy = parser.clone(obj);
@@ -431,7 +431,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF..."; // Base64 encoded
+     * String base64Data = "rO0ABXNyABF...";  // Base64 encoded
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -454,7 +454,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF..."; // Base64 encoded
+     * String base64Data = "rO0ABXNyABF...";  // Base64 encoded
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -701,7 +701,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerializationConfig config = KryoSerializationConfig.create();
-     * config = parser.check(config); // Validates and returns config
+     * config = parser.check(config);  // Validates and returns config
      * }</pre>
      *
      * @param config the configuration to check (may be null)
@@ -726,7 +726,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoDeserializationConfig config = KryoDeserializationConfig.create();
-     * config = parser.check(config); // Validates and returns config
+     * config = parser.check(config);  // Validates and returns config
      * }</pre>
      *
      * @param config the configuration to check (may be null)

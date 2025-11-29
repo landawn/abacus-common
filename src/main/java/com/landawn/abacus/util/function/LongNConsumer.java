@@ -59,7 +59,7 @@ public interface LongNConsumer {
      *     }
      *     System.out.println("Sum: " + sum);
      * };
-     * sumPrinter.accept(1L, 2L, 3L, 4L, 5L); // Prints: Sum: 15
+     * sumPrinter.accept(1L, 2L, 3L, 4L, 5L);  // Prints: Sum: 15
      * }</pre>
      *
      * @param args the input arguments as a varargs array. Can be empty, contain
@@ -84,7 +84,7 @@ public interface LongNConsumer {
      * LongNConsumer logger = args -> System.out.println("Processing " + args.length + " values");
      * LongNConsumer processor = args -> processValues(args);
      * LongNConsumer combined = processor.andThen(logger);
-     * combined.accept(10L, 20L, 30L); // First processes, then logs
+     * combined.accept(10L, 20L, 30L);  // First processes, then logs
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

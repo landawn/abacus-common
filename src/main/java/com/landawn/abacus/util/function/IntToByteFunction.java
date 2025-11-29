@@ -46,15 +46,15 @@ public interface IntToByteFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToByteFunction toByte = value -> (byte) value;
-     * byte result1 = toByte.applyAsByte(65); // Returns 65 (ASCII 'A')
-     * byte result2 = toByte.applyAsByte(255); // Returns -1 (overflow)
+     * byte result1 = toByte.applyAsByte(65);    // Returns 65 (ASCII 'A')
+     * byte result2 = toByte.applyAsByte(255);   // Returns -1 (overflow)
      *
      * IntToByteFunction clampToByte = value -> {
      *     if (value > 127) return 127;
      *     if (value < -128) return -128;
      *     return (byte) value;
      * };
-     * byte result3 = clampToByte.applyAsByte(200); // Returns 127 (clamped)
+     * byte result3 = clampToByte.applyAsByte(200);  // Returns 127 (clamped)
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to byte

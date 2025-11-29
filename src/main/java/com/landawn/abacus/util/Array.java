@@ -216,7 +216,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Work with 2D arrays
  * Integer[][] matrix = {{1, 2, 3}, {4, null, 6}, {7, 8, 9}};
- * int[][] cleanMatrix = Array.unbox(matrix, 0);   // Replace nulls with 0
+ * int[][] cleanMatrix = Array.unbox(matrix, 0);  // Replace nulls with 0
  * int[][] transposed = Array.transpose(cleanMatrix);  // Transpose the matrix
  *
  * // Dynamic array creation
@@ -283,8 +283,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Integer[] intArray = Array.newInstance(Integer.class, 5); // returns an Integer array of length 5
-     * String[] strArray = Array.newInstance(String.class, 10); // returns a String array of length 10
+     * Integer[] intArray = Array.newInstance(Integer.class, 5);   // returns an Integer array of length 5
+     * String[] strArray = Array.newInstance(String.class, 10);    // returns a String array of length 10
      * }</pre>
      *
      * @param <T> the type of the array.
@@ -313,8 +313,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Array.newInstance(Integer.class, 5, 5); // returns a 5x5 Integer array
-     * Array.newInstance(String.class, 3, 3, 3); // returns a 3x3x3 String array
+     * Array.newInstance(Integer.class, 5, 5);     // returns a 5x5 Integer array
+     * Array.newInstance(String.class, 3, 3, 3);   // returns a 3x3x3 String array
      * }</pre>
      *
      * @param <T> the type of the array.
@@ -338,10 +338,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * int length = Array.getLength(array); // returns 3
+     * int length = Array.getLength(array);  // returns 3
      * int[] nums = {1, 2, 3, 4};
-     * int numLength = Array.getLength(nums); // returns 4
-     * int nullLength = Array.getLength(null); // returns 0
+     * int numLength = Array.getLength(nums);    // returns 4
+     * int nullLength = Array.getLength(null);   // returns 0
      * }</pre>
      *
      * @param array the array whose length is to be determined.
@@ -362,7 +362,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3};
-     * Integer element = Array.get(array, 1); // returns 2
+     * Integer element = Array.get(array, 1);  // returns 2
      * }</pre>
      *
      * @param <T> the type of the array.
@@ -386,7 +386,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * boolean element = Array.getBoolean(array, 1); // returns false
+     * boolean element = Array.getBoolean(array, 1);  // returns false
      * }</pre>
      *
      * @param array the array from which to retrieve the boolean value.
@@ -409,7 +409,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * byte element = Array.getByte(array, 1); // returns 2
+     * byte element = Array.getByte(array, 1);  // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the byte value.
@@ -432,7 +432,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * char element = Array.getChar(array, 1); // returns 'b'
+     * char element = Array.getChar(array, 1);  // returns 'b'
      * }</pre>
      *
      * @param array the array from which to retrieve the char value.
@@ -455,7 +455,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * short element = Array.getShort(array, 1); // returns 2
+     * short element = Array.getShort(array, 1);  // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the short value.
@@ -478,7 +478,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * int element = Array.getInt(array, 1); // returns 2
+     * int element = Array.getInt(array, 1);  // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the integer value.
@@ -501,7 +501,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * long element = Array.getLong(array, 1); // returns 2L
+     * long element = Array.getLong(array, 1);  // returns 2L
      * }</pre>
      *
      * @param array the array from which to retrieve the long value.
@@ -524,7 +524,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
-     * float element = Array.getFloat(array, 1); // returns 2.2f
+     * float element = Array.getFloat(array, 1);  // returns 2.2f
      * }</pre>
      *
      * @param array the array from which to retrieve the float value.
@@ -547,7 +547,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
-     * double element = Array.getDouble(array, 1); // returns 2.2
+     * double element = Array.getDouble(array, 1);  // returns 2.2
      * }</pre>
      *
      * @param array the array from which to retrieve the double value.
@@ -570,7 +570,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3};
-     * Array.set(array, 1, 4); // array now is {1, 4, 3}
+     * Array.set(array, 1, 4);  // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the value.
@@ -593,7 +593,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * Array.setBoolean(array, 1, true); // array now is {true, true, true}
+     * Array.setBoolean(array, 1, true);  // array now is {true, true, true}
      * }</pre>
      *
      * @param array the array in which to set the boolean value.
@@ -616,7 +616,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * Array.setByte(array, 1, (byte)4); // array now is {1, 4, 3}
+     * Array.setByte(array, 1, (byte)4);  // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the byte value.
@@ -639,7 +639,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * Array.setChar(array, 1, 'd'); // array now is {'a', 'd', 'c'}
+     * Array.setChar(array, 1, 'd');  // array now is {'a', 'd', 'c'}
      * }</pre>
      *
      * @param array the array in which to set the char value.
@@ -662,7 +662,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * Array.setShort(array, 1, (short)4); // array now is {1, 4, 3}
+     * Array.setShort(array, 1, (short)4);  // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the short value.
@@ -685,7 +685,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * Array.setInt(array, 1, 4); // array now is {1, 4, 3}
+     * Array.setInt(array, 1, 4);  // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the integer value.
@@ -708,7 +708,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * Array.setLong(array, 1, 4L); // array now is {1L, 4L, 3L}
+     * Array.setLong(array, 1, 4L);  // array now is {1L, 4L, 3L}
      * }</pre>
      *
      * @param array the array in which to set the long value.
@@ -731,7 +731,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
-     * Array.setFloat(array, 1, 4.4f); // array now is {1.1f, 4.4f, 3.3f}
+     * Array.setFloat(array, 1, 4.4f);  // array now is {1.1f, 4.4f, 3.3f}
      * }</pre>
      *
      * @param array the array in which to set the float value.
@@ -754,7 +754,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
-     * Array.setDouble(array, 1, 4.4); // array now is {1.1, 4.4, 3.3}
+     * Array.setDouble(array, 1, 4.4);  // array now is {1.1, 4.4, 3.3}
      * }</pre>
      *
      * @param array the array in which to set the double value.
@@ -788,13 +788,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = Array.asList(array);
-     * list.set(0, "x"); // Modifies both list and original array
+     * list.set(0, "x");  // Modifies both list and original array
      * 
      * String[] emptyArray = {};
-     * List<String> emptyList = Array.asList(emptyArray); // Returns empty list
+     * List<String> emptyList = Array.asList(emptyArray);  // Returns empty list
      * 
      * String[] nullArray = null;
-     * List<String> nullList = Array.asList(nullArray); // Returns empty list
+     * List<String> nullList = Array.asList(nullArray);  // Returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the array and returned list
@@ -804,7 +804,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see N#asList(Object...)
      * @see List#of(Object...)
      * @see N#emptyList()
-     * @since 1.0
      */
     @SafeVarargs
     @NullSafe
@@ -817,8 +816,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean[] array = Array.of(true, false, true); // returns boolean array {true, false, true}
-     * boolean[] empty = Array.of(); // returns empty boolean array
+     * boolean[] array = Array.of(true, false, true);   // returns boolean array {true, false, true}
+     * boolean[] empty = Array.of();                    // returns empty boolean array
      * }</pre>
      *
      * @param a the input array of booleans
@@ -833,8 +832,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] array = Array.of('a', 'b', 'c'); // returns char array {'a', 'b', 'c'}
-     * char[] vowels = Array.of('a', 'e', 'i', 'o', 'u'); // returns char array of vowels
+     * char[] array = Array.of('a', 'b', 'c');              // returns char array {'a', 'b', 'c'}
+     * char[] vowels = Array.of('a', 'e', 'i', 'o', 'u');   // returns char array of vowels
      * }</pre>
      *
      * @param a the input array of characters
@@ -849,8 +848,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] array = Array.of((byte) 1, (byte) 2, (byte) 3); // returns byte array {1, 2, 3}
-     * byte[] empty = Array.of(); // returns empty byte array
+     * byte[] array = Array.of((byte) 1, (byte) 2, (byte) 3);   // returns byte array {1, 2, 3}
+     * byte[] empty = Array.of();                               // returns empty byte array
      * }</pre>
      *
      * @param a the input array of bytes
@@ -865,8 +864,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short[] array = Array.of((short) 10, (short) 20, (short) 30); // returns short array {10, 20, 30}
-     * short[] empty = Array.of(); // returns empty short array
+     * short[] array = Array.of((short) 10, (short) 20, (short) 30);   // returns short array {10, 20, 30}
+     * short[] empty = Array.of();                                     // returns empty short array
      * }</pre>
      *
      * @param a the input array of shorts
@@ -881,8 +880,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int[] array = Array.of(1, 2, 3, 4, 5); // returns int array {1, 2, 3, 4, 5}
-     * int[] primes = Array.of(2, 3, 5, 7, 11); // returns int array of prime numbers
+     * int[] array = Array.of(1, 2, 3, 4, 5);     // returns int array {1, 2, 3, 4, 5}
+     * int[] primes = Array.of(2, 3, 5, 7, 11);   // returns int array of prime numbers
      * }</pre>
      *
      * @param a the input array of integers
@@ -897,8 +896,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long[] array = Array.of(1L, 2L, 3L); // returns long array {1L, 2L, 3L}
-     * long[] timestamps = Array.of(1609459200000L, 1612137600000L); // returns long array of timestamps
+     * long[] array = Array.of(1L, 2L, 3L);                            // returns long array {1L, 2L, 3L}
+     * long[] timestamps = Array.of(1609459200000L, 1612137600000L);   // returns long array of timestamps
      * }</pre>
      *
      * @param a the input array of longs
@@ -913,8 +912,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float[] array = Array.of(1.1f, 2.2f, 3.3f); // returns float array {1.1f, 2.2f, 3.3f}
-     * float[] empty = Array.of(); // returns empty float array
+     * float[] array = Array.of(1.1f, 2.2f, 3.3f);   // returns float array {1.1f, 2.2f, 3.3f}
+     * float[] empty = Array.of();                   // returns empty float array
      * }</pre>
      *
      * @param a the input array of floats
@@ -929,8 +928,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double[] array = Array.of(1.1, 2.2, 3.3); // returns double array {1.1, 2.2, 3.3}
-     * double[] prices = Array.of(19.99, 29.99, 39.99); // returns double array of prices
+     * double[] array = Array.of(1.1, 2.2, 3.3);          // returns double array {1.1, 2.2, 3.3}
+     * double[] prices = Array.of(19.99, 29.99, 39.99);   // returns double array of prices
      * }</pre>
      *
      * @param a the input array of doubles
@@ -945,8 +944,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] array = Array.of("apple", "banana", "cherry"); // returns String array
-     * String[] names = Array.of("Alice", "Bob", "Charlie"); // returns String array of names
+     * String[] array = Array.of("apple", "banana", "cherry");   // returns String array
+     * String[] names = Array.of("Alice", "Bob", "Charlie");     // returns String array of names
      * }</pre>
      *
      * @param a the input array of strings
@@ -1032,9 +1031,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] chars = Array.range('a', 'e'); // returns {'a', 'b', 'c', 'd'}
-     * char[] digits = Array.range('0', '5'); // returns {'0', '1', '2', '3', '4'}
-     * char[] empty = Array.range('z', 'a'); // returns empty array
+     * char[] chars = Array.range('a', 'e');    // returns {'a', 'b', 'c', 'd'}
+     * char[] digits = Array.range('0', '5');   // returns {'0', '1', '2', '3', '4'}
+     * char[] empty = Array.range('z', 'a');    // returns empty array
      * }</pre>
      *
      * @param startInclusive the first character (inclusive) in the char array.
@@ -1111,9 +1110,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int[] nums = Array.range(0, 5); // returns {0, 1, 2, 3, 4}
-     * int[] range = Array.range(10, 15); // returns {10, 11, 12, 13, 14}
-     * int[] empty = Array.range(5, 5); // returns empty array
+     * int[] nums = Array.range(0, 5);      // returns {0, 1, 2, 3, 4}
+     * int[] range = Array.range(10, 15);   // returns {10, 11, 12, 13, 14}
+     * int[] empty = Array.range(5, 5);     // returns empty array
      * }</pre>
      *
      * @param startInclusive the first integer (inclusive) in the integer array.
@@ -1147,9 +1146,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long[] nums = Array.range(0L, 5L); // returns {0L, 1L, 2L, 3L, 4L}
-     * long[] range = Array.range(100L, 105L); // returns {100L, 101L, 102L, 103L, 104L}
-     * long[] empty = Array.range(5L, 5L); // returns empty array
+     * long[] nums = Array.range(0L, 5L);        // returns {0L, 1L, 2L, 3L, 4L}
+     * long[] range = Array.range(100L, 105L);   // returns {100L, 101L, 102L, 103L, 104L}
+     * long[] empty = Array.range(5L, 5L);       // returns empty array
      * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
@@ -3669,8 +3668,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] primitives = {true, false, true};
-     * Boolean[] objects = Array.box(primitives); // returns {Boolean.TRUE, Boolean.FALSE, Boolean.TRUE}
-     * Boolean[] nullResult = Array.box(null); // returns null
+     * Boolean[] objects = Array.box(primitives);   // returns {Boolean.TRUE, Boolean.FALSE, Boolean.TRUE}
+     * Boolean[] nullResult = Array.box(null);      // returns null
      * }</pre>
      *
      * @param a the array of primitive booleans to be converted. May be {@code null}.
@@ -3848,8 +3847,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] primitives = {1, 2, 3};
-     * Integer[] objects = Array.box(primitives); // returns {Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)}
-     * Integer[] nullResult = Array.box(null); // returns null
+     * Integer[] objects = Array.box(primitives);   // returns {Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)}
+     * Integer[] nullResult = Array.box(null);      // returns null
      * }</pre>
      *
      * @param a the array of primitive integers to be converted. May be {@code null}.
@@ -4390,8 +4389,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Boolean[] objects = {Boolean.TRUE, null, Boolean.FALSE};
-     * boolean[] primitives = Array.unbox(objects); // returns {true, false, false}
-     * boolean[] nullResult = Array.unbox(null); // returns null
+     * boolean[] primitives = Array.unbox(objects);   // returns {true, false, false}
+     * boolean[] nullResult = Array.unbox(null);      // returns null
      * }</pre>
      *
      * @param a the array of Boolean objects to be converted. May be {@code null}.
@@ -4648,8 +4647,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] objects = {Integer.valueOf(1), null, Integer.valueOf(3)};
-     * int[] primitives = Array.unbox(objects); // returns {1, 0, 3}
-     * int[] nullResult = Array.unbox(null); // returns null
+     * int[] primitives = Array.unbox(objects);   // returns {1, 0, 3}
+     * int[] nullResult = Array.unbox(null);      // returns null
      * }</pre>
      *
      * @param a the array of Integer objects to be converted. May be {@code null}.

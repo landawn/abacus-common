@@ -38,10 +38,10 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToLongBiFunction<Integer, Integer> multiplier = (a, b) -> (long) a * b;
-     * long product = multiplier.applyAsLong(1000000, 1000000); // returns 1000000000000L
+     * long product = multiplier.applyAsLong(1000000, 1000000);  // returns 1000000000000L
      *
      * ToLongBiFunction<String, Long> hasher = (str, seed) -> str.hashCode() + seed;
-     * long hash = hasher.applyAsLong("Hello", 12345L); // returns hash of "Hello" plus 12345
+     * long hash = hasher.applyAsLong("Hello", 12345L);  // returns hash of "Hello" plus 12345
      * }</pre>
      *
      * @param t the first function argument

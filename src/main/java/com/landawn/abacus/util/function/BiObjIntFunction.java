@@ -36,7 +36,7 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiObjIntFunction<String, String, String> repeater = (s1, s2, times) -> (s1 + s2).repeat(times);
-     * String result = repeater.apply("Hello", "World", 2); // Returns "HelloWorldHelloWorld"
+     * String result = repeater.apply("Hello", "World", 2);  // Returns "HelloWorldHelloWorld"
      * }</pre>
      *
      * @param t the first function argument (object value)

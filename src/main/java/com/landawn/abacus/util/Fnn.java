@@ -104,7 +104,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Rate-limited operations
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi = 
- *     Fnn.rateLimiter(10.0); // 10 requests per second
+ *     Fnn.rateLimiter(10.0);  // 10 requests per second
  *
  * // Map entry manipulation
  * Map<String, Integer> scores = data.stream()
@@ -2021,18 +2021,18 @@ public final class Fnn {
     }
 
     /**
-    * Returns a BiPredicate that can throw checked exceptions by wrapping the provided BiPredicate.
-    * This method is used to convert a standard BiPredicate to a Throwables.BiPredicate, allowing
-    * it to be used in contexts where checked exceptions are expected.
-    *
-    * @param <T> the type of the first argument to the predicate
-    * @param <U> the type of the second argument to the predicate
-    * @param <E> the type of the checked exception that the returned predicate may throw
-    * @param biPredicate the BiPredicate to wrap
-    * @return a Throwables.BiPredicate that wraps the provided BiPredicate
-    * @throws IllegalArgumentException if biPredicate is null
-    * @see #from(java.util.function.BiPredicate)
-    */
+     * Returns a BiPredicate that can throw checked exceptions by wrapping the provided BiPredicate.
+     * This method is used to convert a standard BiPredicate to a Throwables.BiPredicate, allowing
+     * it to be used in contexts where checked exceptions are expected.
+     *
+     * @param <T> the type of the first argument to the predicate
+     * @param <U> the type of the second argument to the predicate
+     * @param <E> the type of the checked exception that the returned predicate may throw
+     * @param biPredicate the BiPredicate to wrap
+     * @return a Throwables.BiPredicate that wraps the provided BiPredicate
+     * @throws IllegalArgumentException if biPredicate is null
+     * @see #from(java.util.function.BiPredicate)
+     */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate);

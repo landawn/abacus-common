@@ -143,7 +143,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains long value 123456789
      * OptionalLong opt = type.get(rs, 1);
@@ -173,7 +173,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "user_id" contains long value 987654321
      * OptionalLong opt = type.get(rs, "user_id");

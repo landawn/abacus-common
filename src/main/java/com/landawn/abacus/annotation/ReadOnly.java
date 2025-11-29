@@ -75,7 +75,7 @@ import java.lang.annotation.Target;
  *
  *     @ReadOnly
  *     @Column(name = "view_count")
- *     private Integer viewCount;       // Updated by stored procedure
+ *     private Integer viewCount;  // Updated by stored procedure
  * }
  * }</pre>
  * 

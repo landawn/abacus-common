@@ -61,8 +61,8 @@ public final class FloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = ...; // from SQL query
-     * Float temperature = type.get(rs, 1); // retrieves Float from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Float temperature = type.get(rs, 1);  // retrieves Float from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -90,8 +90,8 @@ public final class FloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = ...; // from SQL query
-     * Float temperature = type.get(rs, "temperature"); // retrieves Float from "temperature" column
+     * ResultSet rs = ...;  // from SQL query
+     * Float temperature = type.get(rs, "temperature");  // retrieves Float from "temperature" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

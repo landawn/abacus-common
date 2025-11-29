@@ -51,9 +51,9 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * ShortBiFunction<Boolean> inRange = (value, max) ->
      *     value >= 0 && value <= max;
      *
-     * Integer total = sum.apply((short) 100, (short) 200); // Returns 300
-     * String point = formatter.apply((short) 10, (short) 20); // Returns "Point(10, 20)"
-     * Boolean valid = inRange.apply((short) 50, (short) 100); // Returns true
+     * Integer total = sum.apply((short) 100, (short) 200);      // Returns 300
+     * String point = formatter.apply((short) 10, (short) 20);   // Returns "Point(10, 20)"
+     * Boolean valid = inRange.apply((short) 50, (short) 100);   // Returns true
      * }</pre>
      *
      * @param t the first function argument

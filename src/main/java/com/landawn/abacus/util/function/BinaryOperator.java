@@ -50,10 +50,10 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BinaryOperator<Integer> adder = (a, b) -> a + b;
-     * Integer sum = adder.apply(5, 3); // Returns 8
+     * Integer sum = adder.apply(5, 3);  // Returns 8
      *
      * BinaryOperator<String> concatenator = (s1, s2) -> s1 + s2;
-     * String combined = concatenator.apply("Hello, ", "World!"); // Returns "Hello, World!"
+     * String combined = concatenator.apply("Hello, ", "World!");  // Returns "Hello, World!"
      * }</pre>
      *
      * @param t the first operand

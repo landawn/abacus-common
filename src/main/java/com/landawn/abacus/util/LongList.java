@@ -78,36 +78,36 @@ import com.landawn.abacus.util.stream.LongStream;
  * <pre>{@code
  * // Creating and initializing long lists
  * LongList timestamps = LongList.of(1640995200000L, 1640995260000L, 1640995320000L);
- * LongList range = LongList.range(1L, 1000000L);      // [1, 2, 3, ..., 999999]
- * LongList sequence = LongList.range(0L, 100L, 5L);   // [0, 5, 10, 15, ..., 95]
- * LongList userIds = new LongList(10000);             // Pre-sized for performance
+ * LongList range = LongList.range(1L, 1000000L);  // [1, 2, 3, ..., 999999]
+ * LongList sequence = LongList.range(0L, 100L, 5L);  // [0, 5, 10, 15, ..., 95]
+ * LongList userIds = new LongList(10000);  // Pre-sized for performance
  *
  * // Basic operations
- * timestamps.add(System.currentTimeMillis());         // Add current timestamp
- * long firstTime = timestamps.get(0);                 // Access by index
- * timestamps.set(1, System.nanoTime());               // Modify with nanosecond precision
+ * timestamps.add(System.currentTimeMillis());  // Add current timestamp
+ * long firstTime = timestamps.get(0);  // Access by index
+ * timestamps.set(1, System.nanoTime());  // Modify with nanosecond precision
  *
  * // Mathematical operations for large numbers
- * OptionalLong min = timestamps.min();                // Find earliest timestamp
- * OptionalLong max = timestamps.max();                // Find latest timestamp
- * OptionalLong median = timestamps.median();          // Calculate median timestamp
+ * OptionalLong min = timestamps.min();  // Find earliest timestamp
+ * OptionalLong max = timestamps.max();  // Find latest timestamp
+ * OptionalLong median = timestamps.median();  // Calculate median timestamp
  *
  * // Set operations for data analysis
  * LongList set1 = LongList.of(100L, 200L, 300L, 400L);
  * LongList set2 = LongList.of(300L, 400L, 500L, 600L);
- * LongList intersection = set1.intersection(set2);    // [300, 400]
- * LongList difference = set1.difference(set2);        // [100, 200]
+ * LongList intersection = set1.intersection(set2);  // [300, 400]
+ * LongList difference = set1.difference(set2);  // [100, 200]
  *
  * // High-performance sorting and searching
- * timestamps.sort();                                  // Sort chronologically
- * timestamps.parallelSort();                          // Parallel sort for large datasets
- * int index = timestamps.binarySearch(1640995200000L); // Fast lookup
+ * timestamps.sort();  // Sort chronologically
+ * timestamps.parallelSort();  // Parallel sort for large datasets
+ * int index = timestamps.binarySearch(1640995200000L);  // Fast lookup
  *
  * // Type conversions for different precision needs
- * DoubleList doubleValues = timestamps.toDoubleList(); // Convert to double precision
- * FloatList floatValues = timestamps.toFloatList();    // Convert to float (with precision loss)
- * long[] primitiveArray = timestamps.toArray();        // To primitive array
- * List<Long> boxedList = timestamps.boxed();           // To boxed collection
+ * DoubleList doubleValues = timestamps.toDoubleList();  // Convert to double precision
+ * FloatList floatValues = timestamps.toFloatList();  // Convert to float (with precision loss)
+ * long[] primitiveArray = timestamps.toArray();  // To primitive array
+ * List<Long> boxedList = timestamps.boxed();  // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -270,10 +270,10 @@ import com.landawn.abacus.util.stream.LongStream;
  * // ... record more events
  *
  * // Analyze timing data
- * systemEvents.sort();                           // Sort chronologically
- * OptionalLong firstEvent = systemEvents.first(); // Earliest event
- * OptionalLong lastEvent = systemEvents.last();   // Latest event
- * OptionalLong medianTime = systemEvents.median(); // Median timestamp
+ * systemEvents.sort();  // Sort chronologically
+ * OptionalLong firstEvent = systemEvents.first();  // Earliest event
+ * OptionalLong lastEvent = systemEvents.last();  // Latest event
+ * OptionalLong medianTime = systemEvents.median();  // Median timestamp
  *
  * // Calculate duration and intervals
  * long totalDuration = lastEvent.orElse(0L) - firstEvent.orElse(0L);
@@ -446,9 +446,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList.range(1, 5)  // returns [1, 2, 3, 4]
-     * LongList.range(5, 1)  // returns [5, 4, 3, 2]
-     * LongList.range(3, 3)  // returns []
+     * LongList.range(1, 5);   // returns [1, 2, 3, 4]
+     * LongList.range(5, 1);   // returns [5, 4, 3, 2]
+     * LongList.range(3, 3);   // returns []
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -467,9 +467,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList.range(0, 10, 2)   // returns [0, 2, 4, 6, 8]
-     * LongList.range(10, 0, -2)  // returns [10, 8, 6, 4, 2]
-     * LongList.range(1, 10, 3)   // returns [1, 4, 7]
+     * LongList.range(0, 10, 2);    // returns [0, 2, 4, 6, 8]
+     * LongList.range(10, 0, -2);   // returns [10, 8, 6, 4, 2]
+     * LongList.range(1, 10, 3);    // returns [1, 4, 7]
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -490,9 +490,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList.rangeClosed(1, 4)  // returns [1, 2, 3, 4]
-     * LongList.rangeClosed(4, 1)  // returns [4, 3, 2, 1]
-     * LongList.rangeClosed(3, 3)  // returns [3]
+     * LongList.rangeClosed(1, 4);   // returns [1, 2, 3, 4]
+     * LongList.rangeClosed(4, 1);   // returns [4, 3, 2, 1]
+     * LongList.rangeClosed(3, 3);   // returns [3]
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -512,9 +512,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList.rangeClosed(0, 10, 2)   // returns [0, 2, 4, 6, 8, 10]
-     * LongList.rangeClosed(10, 0, -2)  // returns [10, 8, 6, 4, 2, 0]
-     * LongList.rangeClosed(1, 10, 3)   // returns [1, 4, 7, 10]
+     * LongList.rangeClosed(0, 10, 2);    // returns [0, 2, 4, 6, 8, 10]
+     * LongList.rangeClosed(10, 0, -2);   // returns [10, 8, 6, 4, 2, 0]
+     * LongList.rangeClosed(1, 10, 3);    // returns [1, 4, 7, 10]
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -532,9 +532,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList.repeat(5, 3)   // returns [5, 5, 5]
-     * LongList.repeat(0, 0)   // returns []
-     * LongList.repeat(7, 1)   // returns [7]
+     * LongList.repeat(5, 3);   // returns [5, 5, 5]
+     * LongList.repeat(0, 0);   // returns []
+     * LongList.repeat(7, 1);   // returns [7]
      * }</pre>
      *
      * @param element the long value to be repeated
@@ -1504,12 +1504,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 2L, 2L, 4L);
-     * LongList result = list1.intersection(list2); // result will be [1L, 2L]
+     * LongList result = list1.intersection(list2);  // result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both lists) and one occurrence of '2L'
      *
      * LongList list3 = LongList.of(5L, 5L, 6L);
      * LongList list4 = LongList.of(5L, 7L);
-     * LongList result2 = list3.intersection(list4); // result will be [5L]
+     * LongList result2 = list3.intersection(list4);  // result will be [5L]
      * // One occurrence of '5L' (minimum count in both lists)
      * }</pre>
      *
@@ -1550,12 +1550,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 2L, 2L, 4L};
-     * LongList result = list1.intersection(array); // result will be [1L, 2L]
+     * LongList result = list1.intersection(array);  // result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both sources) and one occurrence of '2L'
      *
      * LongList list2 = LongList.of(5L, 5L, 6L);
      * long[] array2 = new long[] {5L, 7L};
-     * LongList result2 = list2.intersection(array2); // result will be [5L]
+     * LongList result2 = list2.intersection(array2);  // result will be [5L]
      * // One occurrence of '5L' (minimum count in both sources)
      * }</pre>
      *
@@ -1586,12 +1586,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 4L);
-     * LongList result = list1.difference(list2); // result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(list2);  // result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and list2 has one
      *
      * LongList list3 = LongList.of(5L, 6L);
      * LongList list4 = LongList.of(5L, 5L, 6L);
-     * LongList result2 = list3.difference(list4); // result will be [] (empty)
+     * LongList result2 = list3.difference(list4);  // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1631,12 +1631,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 4L};
-     * LongList result = list1.difference(array); // result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(array);  // result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and array has one
      *
      * LongList list2 = LongList.of(5L, 6L);
      * long[] array2 = new long[] {5L, 5L, 6L};
-     * LongList result2 = list2.difference(array2); // result will be [] (empty)
+     * LongList result2 = list2.difference(array2);  // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *

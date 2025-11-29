@@ -60,10 +60,10 @@ import java.lang.annotation.Target;
  *     private BigDecimal discountedPrice;  // Calculated at runtime
  *
  *     @NotColumn
- *     private List<Review> reviews;         // Loaded separately via JOIN
+ *     private List<Review> reviews;  // Loaded separately via JOIN
  *
  *     @NotColumn
- *     private boolean inCart;               // UI state, not persisted
+ *     private boolean inCart;  // UI state, not persisted
  *
  *     public BigDecimal getDiscountedPrice() {
  *         // Calculate based on current promotions

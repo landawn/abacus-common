@@ -968,7 +968,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Create a read-write mapping
      * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
-     * buffer.putInt(0, 42); // Write to the beginning of the file
+     * buffer.putInt(0, 42);  // Write to the beginning of the file
      * }</pre>
      *
      * @param file the file to map

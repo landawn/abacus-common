@@ -40,15 +40,15 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
-     * Integer result = sum.apply(1, 2, 3); // returns 6
+     * Integer result = sum.apply(1, 2, 3);  // returns 6
      *
      * TriFunction<String, String, String, String> concatenator =
      *     (s1, s2, s3) -> s1 + "-" + s2 + "-" + s3;
-     * String joined = concatenator.apply("2024", "01", "15"); // returns "2024-01-15"
+     * String joined = concatenator.apply("2024", "01", "15");  // returns "2024-01-15"
      *
      * TriFunction<Double, Double, Double, Double> volumeCalculator =
      *     (length, width, height) -> length * width * height;
-     * Double volume = volumeCalculator.apply(2.0, 3.0, 4.0); // returns 24.0
+     * Double volume = volumeCalculator.apply(2.0, 3.0, 4.0);  // returns 24.0
      * }</pre>
      *
      * @param a the first function argument
@@ -70,14 +70,14 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * Function<Integer, String> formatter = n -> "Result: " + n;
      *
      * TriFunction<Integer, Integer, Integer, String> sumAndFormat = sum.andThen(formatter);
-     * String result = sumAndFormat.apply(10, 20, 30); // returns "Result: 60"
+     * String result = sumAndFormat.apply(10, 20, 30);  // returns "Result: 60"
      *
      * TriFunction<String, String, String, String> joiner =
      *     (s1, s2, s3) -> s1 + s2 + s3;
      * Function<String, Integer> lengthGetter = String::length;
      *
      * TriFunction<String, String, String, Integer> joinAndGetLength = joiner.andThen(lengthGetter);
-     * Integer length = joinAndGetLength.apply("Hello", "World", "!"); // returns 11
+     * Integer length = joinAndGetLength.apply("Hello", "World", "!");  // returns 11
      * }</pre>
      *
      * @param <V> the type of output of the after function, and of the composed function

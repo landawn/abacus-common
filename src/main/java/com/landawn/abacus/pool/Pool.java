@@ -112,7 +112,7 @@ public interface Pool extends Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
-     *     pool.vacate(); // free up some space
+     *     pool.vacate();  // free up some space
      * }
      * }</pre>
      * 
@@ -179,7 +179,7 @@ public interface Pool extends Serializable {
      * try {
      *     // use the pool
      * } finally {
-     *     pool.close(); // ensure cleanup
+     *     pool.close();  // ensure cleanup
      * }
      * }</pre>
      */

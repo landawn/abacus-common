@@ -95,25 +95,25 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic iterator access operations
  * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
- * Nullable<String> element = Iterators.get(iter, 2);         // Nullable["C"]
- * Nullable<String> first = Iterators.getFirst(iter);         // Nullable["A"]
- * Nullable<String> notFound = Iterators.get(iter, 10);       // Nullable.empty()
+ * Nullable<String> element = Iterators.get(iter, 2);  // Nullable["C"]
+ * Nullable<String> first = Iterators.getFirst(iter);  // Nullable["A"]
+ * Nullable<String> notFound = Iterators.get(iter, 10);  // Nullable.empty()
  *
  * // Search operations with predicates
  * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
- * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);     // Nullable[4]
- * int index = Iterators.indexOf(numbers.iterator(), 3);                   // Returns 2
+ * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);  // Nullable[4]
+ * int index = Iterators.indexOf(numbers.iterator(), 3);  // Returns 2
  *
  * // Transformation operations
  * Iterator<String> words = Arrays.asList("hello", "world", "java").iterator();
- * Iterator<Integer> lengths = Iterators.map(words, String::length);       // [5, 5, 4]
- * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4); // [hello, world]
+ * Iterator<Integer> lengths = Iterators.map(words, String::length);  // [5, 5, 4]
+ * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4);  // [hello, world]
  *
  * // Aggregation operations
  * Iterator<Double> values = Arrays.asList(1.0, 2.0, 3.0, 4.0).iterator();
- * double sum = Iterators.sum(values);                        // 10.0
- * double average = Iterators.average(values);                // 2.5
- * Nullable<Double> max = Iterators.max(values);              // Nullable[4.0]
+ * double sum = Iterators.sum(values);  // 10.0
+ * double average = Iterators.average(values);  // 2.5
+ * Nullable<Double> max = Iterators.max(values);  // Nullable[4.0]
  *
  * // Parallel processing operations
  * ExecutorService executor = Executors.newFixedThreadPool(4);
@@ -127,8 +127,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Validation operations with short-circuit
  * Iterator<Integer> nums = Arrays.asList(2, 4, 6, 8).iterator();
- * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);    // true
- * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);     // false
+ * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);  // true
+ * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);  // false
  *
  * // Conversion operations
  * Iterator<String> stringIter = Arrays.asList("a", "b", "c").iterator();

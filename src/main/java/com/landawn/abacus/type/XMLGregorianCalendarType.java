@@ -48,7 +48,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<XMLGregorianCalendar> type = TypeFactory.getType(XMLGregorianCalendar.class);
-     * Class&lt;XMLGregorianCalendar&gt; clazz = type.clazz(); // Returns XMLGregorianCalendar.class
+     * Class&lt;XMLGregorianCalendar&gt; clazz = type.clazz();  // Returns XMLGregorianCalendar.class
      * }</pre>
      *
      * @return the Class object for XMLGregorianCalendar.class
@@ -72,7 +72,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar cal1 = type.valueOf("2023-10-15T10:30:00");
-     * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME"); // Current time
+     * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME");  // Current time
      * }</pre>
      *
      * @param str the string to convert to XMLGregorianCalendar
@@ -95,7 +95,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "1697364600000".toCharArray();
-     * XMLGregorianCalendar cal = type.valueOf(chars, 0, chars.length); // From epoch millis
+     * XMLGregorianCalendar cal = type.valueOf(chars, 0, chars.length);  // From epoch millis
      * }</pre>
      *
      * @param cbuf the character array containing the date/time representation
@@ -130,7 +130,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
-     * String str = type.stringOf(cal); // Returns formatted date/time string
+     * String str = type.stringOf(cal);  // Returns formatted date/time string
      * }</pre>
      *
      * @param x the XMLGregorianCalendar instance to convert to string
@@ -199,7 +199,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
-     * type.set(preparedStatement, 1, cal); // Sets timestamp at first parameter
+     * type.set(preparedStatement, 1, cal);  // Sets timestamp at first parameter
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
@@ -222,7 +222,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
-     * type.set(callableStatement, "created_date", cal); // Sets timestamp parameter
+     * type.set(callableStatement, "created_date", cal);  // Sets timestamp parameter
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in
@@ -245,7 +245,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, xmlGregorianCalendar); // Appends formatted date/time
+     * type.appendTo(sb, xmlGregorianCalendar);  // Appends formatted date/time
      * }</pre>
      *
      * @param appendable the Appendable to write to
@@ -278,7 +278,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
-     * type.writeCharacter(writer, xmlGregorianCalendar, config); // Writes formatted date/time
+     * type.writeCharacter(writer, xmlGregorianCalendar, config);  // Writes formatted date/time
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

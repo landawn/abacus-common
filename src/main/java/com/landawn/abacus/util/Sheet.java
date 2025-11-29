@@ -98,7 +98,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Cell operations
  * Integer mathScore = scores.get("Student1", "Math");  // 85
- * scores.put("Student2", "Science", 95);               // Update cell
+ * scores.put("Student2", "Science", 95);  // Update cell
  * boolean hasScore = scores.contains("Student3", "English");
  *
  * // Row and column operations
@@ -250,8 +250,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>();
-     * sheet.addRow("row1", List.of()); // Add empty row
-     * sheet.addColumn("col1", List.of(1)); // Add column with value
+     * sheet.addRow("row1", List.of());       // Add empty row
+     * sheet.addColumn("col1", List.of(1));   // Add column with value
      * }</pre>
      */
     public Sheet() {
@@ -273,7 +273,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2", "col3")
      * );
      * // All cells initially contain null
-     * sheet.put("row1", "col1", 42); // Set a value
+     * sheet.put("row1", "col1", 42);  // Set a value
      * }</pre>
      *
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
@@ -308,7 +308,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         {4, null, 6}   // row2: col1=4, col2=null, col3=6
      *     }
      * );
-     * Integer val = sheet.get("row2", "col2"); // returns null
+     * Integer val = sheet.get("row2", "col2");  // returns null
      * }</pre>
      *
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
@@ -365,7 +365,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> emptySheet = Sheet.empty();
-     * // emptySheet.put("row", "col", 1); // throws IllegalStateException
+     * // emptySheet.put("row", "col", 1);  // throws IllegalStateException
      * }</pre>
      *
      * @param <R> the type of the row keys
@@ -603,7 +603,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * ImmutableSet<String> rowKeys = sheet.rowKeySet(); // ["row1", "row2"]
+     * ImmutableSet<String> rowKeys = sheet.rowKeySet();  // ["row1", "row2"]
      * 
      * // Iterate over rows
      * for (String rowKey : sheet.rowKeySet()) {
@@ -634,7 +634,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2", "col3"),
      *     new Integer[][] {{1, 2, 3}, {4, 5, 6}}
      * );
-     * ImmutableSet<String> colKeys = sheet.columnKeySet(); // ["col1", "col2", "col3"]
+     * ImmutableSet<String> colKeys = sheet.columnKeySet();  // ["col1", "col2", "col3"]
      * 
      * // Iterate over columns
      * for (String colKey : sheet.columnKeySet()) {
@@ -664,7 +664,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, null}, {3, 4}}
      * );
-     * boolean isNull = sheet.isNull("row1", "col2"); // true
+     * boolean isNull = sheet.isNull("row1", "col2");  // true
      * }</pre>
      *
      * @param rowKey the key identifying the row
@@ -701,7 +701,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, null}, {3, 4}}
      * );
-     * boolean isNull = sheet.isNull(0, 1); // true (row1, col2)
+     * boolean isNull = sheet.isNull(0, 1);  // true (row1, col2)
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -731,7 +731,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Point point = Point.of(0, 1);
-     * boolean isNull = sheet.isNull(point); // checks cell at row 0, column 1
+     * boolean isNull = sheet.isNull(point);  // checks cell at row 0, column 1
      * }</pre>
      *
      * @param point the Point containing row and column indices
@@ -758,7 +758,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer value = sheet.get("row1", "col2"); // returns 2
+     * Integer value = sheet.get("row1", "col2");  // returns 2
      * }</pre>
      *
      * @param rowKey the key identifying the row
@@ -797,7 +797,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer value = sheet.get(0, 1); // returns 2 (row1, col2)
+     * Integer value = sheet.get(0, 1);  // returns 2 (row1, col2)
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -828,7 +828,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Point point = Point.of(0, 1);
-     * Integer value = sheet.get(point); // gets value at row 0, column 1
+     * Integer value = sheet.get(point);  // gets value at row 0, column 1
      * }</pre>
      *
      * @param point the Point containing row and column indices
@@ -856,7 +856,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer oldValue = sheet.put("row1", "col2", 10); // returns 2, sets to 10
+     * Integer oldValue = sheet.put("row1", "col2", 10);  // returns 2, sets to 10
      * }</pre>
      *
      * @param rowKey the key identifying the row
@@ -893,7 +893,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer oldValue = sheet.put(0, 1, 10); // returns 2, sets cell[0][1] to 10
+     * Integer oldValue = sheet.put(0, 1, 10);  // returns 2, sets cell[0][1] to 10
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -934,7 +934,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * Point point = Point.of(0, 1);
-     * Integer oldValue = sheet.put(point, 10); // returns 2, sets cell at row 0, column 1 to 10
+     * Integer oldValue = sheet.put(point, 10);  // returns 2, sets cell at row 0, column 1 to 10
      * }</pre>
      *
      * @param point the Point containing row and column indices
@@ -1105,8 +1105,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * 
-     * Integer removed = sheet.remove("row1", "col2"); // returns 2
-     * Integer nowNull = sheet.get("row1", "col2"); // returns null
+     * Integer removed = sheet.remove("row1", "col2");   // returns 2
+     * Integer nowNull = sheet.get("row1", "col2");      // returns null
      * }</pre>
      *
      * @param rowKey the row key of the cell to clear
@@ -1149,8 +1149,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * 
-     * Integer removed = sheet.remove(0, 1); // removes value at row1, col2; returns 2
-     * Integer nowNull = sheet.get(0, 1); // returns null
+     * Integer removed = sheet.remove(0, 1);   // removes value at row1, col2; returns 2
+     * Integer nowNull = sheet.get(0, 1);      // returns null
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -1189,8 +1189,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * 
-     * Point point = Point.of(1, 0); // row2, col1
-     * Integer removed = sheet.remove(point); // returns 3
+     * Point point = Point.of(1, 0);            // row2, col1
+     * Integer removed = sheet.remove(point);   // returns 3
      * }</pre>
      *
      * @param point the Point containing the row and column indices of the cell
@@ -1220,8 +1220,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2")
      * );
      * 
-     * boolean exists = sheet.contains("row1", "col1"); // true
-     * boolean missing = sheet.contains("row3", "col1"); // false
+     * boolean exists = sheet.contains("row1", "col1");    // true
+     * boolean missing = sheet.contains("row3", "col1");   // false
      * }</pre>
      *
      * @param rowKey the row key to check
@@ -1251,9 +1251,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, null}}
      * );
      * 
-     * boolean hasValue = sheet.contains("row1", "col1", 1); // true
-     * boolean hasNull = sheet.contains("row2", "col2", null); // true
-     * boolean wrong = sheet.contains("row1", "col1", 5); // false
+     * boolean hasValue = sheet.contains("row1", "col1", 1);     // true
+     * boolean hasNull = sheet.contains("row2", "col2", null);   // true
+     * boolean wrong = sheet.contains("row1", "col1", 5);        // false
      * }</pre>
      *
      * @param rowKey the row key of the cell to check
@@ -1284,9 +1284,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, null}}
      * );
      * 
-     * boolean hasOne = sheet.containsValue(1); // true
-     * boolean hasNull = sheet.containsValue(null); // true
-     * boolean hasFive = sheet.containsValue(5); // false
+     * boolean hasOne = sheet.containsValue(1);       // true
+     * boolean hasNull = sheet.containsValue(null);   // true
+     * boolean hasFive = sheet.containsValue(5);      // false
      * }</pre>
      *
      * @param value the value to search for in all cells
@@ -1328,8 +1328,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         {4, null, 6}
      *     }
      * );
-     * List<Integer> row1 = sheet.getRow("row1"); // [1, 2, 3]
-     * List<Integer> row2 = sheet.getRow("row2"); // [4, null, 6]
+     * List<Integer> row1 = sheet.getRow("row1");   // [1, 2, 3]
+     * List<Integer> row2 = sheet.getRow("row2");   // [4, null, 6]
      * }</pre>
      *
      * @param rowKey the row key identifying the row to retrieve
@@ -1821,8 +1821,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * 
-     * boolean exists = sheet.containsRow("row1"); // true
-     * boolean missing = sheet.containsRow("row3"); // false
+     * boolean exists = sheet.containsRow("row1");    // true
+     * boolean missing = sheet.containsRow("row3");   // false
      * }</pre>
      *
      * @param rowKey the row key to check
@@ -1941,8 +1941,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         {5, 6}
      *     }
      * );
-     * List<Integer> col1 = sheet.getColumn("col1"); // [1, 3, 5]
-     * List<Integer> col2 = sheet.getColumn("col2"); // [2, null, 6]
+     * List<Integer> col1 = sheet.getColumn("col1");   // [1, 3, 5]
+     * List<Integer> col2 = sheet.getColumn("col2");   // [2, null, 6]
      * }</pre>
      *
      * @param columnKey the key identifying the column to retrieve
@@ -2419,8 +2419,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      * 
-     * boolean exists = sheet.containsColumn("col1"); // true
-     * boolean missing = sheet.containsColumn("col3"); // false
+     * boolean exists = sheet.containsColumn("col1");    // true
+     * boolean missing = sheet.containsColumn("col3");   // false
      * }</pre>
      *
      * @param columnKey the column key to check
@@ -2535,7 +2535,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}, {5, 6}}
      * );
-     * int rows = sheet.rowLength(); // returns 3
+     * int rows = sheet.rowLength();  // returns 3
      * }</pre>
      *
      * @return the number of rows in the Sheet
@@ -2560,7 +2560,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2", "col3"),
      *     new Integer[][] {{1, 2, 3}, {4, 5, 6}}
      * );
-     * int cols = sheet.columnLength(); // returns 3
+     * int cols = sheet.columnLength();  // returns 3
      * }</pre>
      *
      * @return the number of columns in the Sheet
@@ -3773,7 +3773,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      * 
      * sheet.freeze();
-     * // sheet.put("row1", "col1", 2); // throws IllegalStateException
+     * // sheet.put("row1", "col1", 2);  // throws IllegalStateException
      * }</pre>
      *
      * @see #isFrozen()
@@ -3793,10 +3793,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.empty();
-     * boolean frozen1 = sheet.isFrozen(); // true (empty sheet is frozen)
+     * boolean frozen1 = sheet.isFrozen();  // true (empty sheet is frozen)
      * 
      * Sheet<String, String, Integer> mutable = new Sheet<>(List.of("r"), List.of("c"));
-     * boolean frozen2 = mutable.isFrozen(); // false
+     * boolean frozen2 = mutable.isFrozen();  // false
      * }</pre>
      *
      * @return {@code true} if the Sheet is frozen, {@code false} otherwise
@@ -3823,7 +3823,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * 
      * sheet.clear();
      * // All values are now null, but structure is preserved
-     * Integer val = sheet.get("row1", "col1"); // returns null
+     * Integer val = sheet.get("row1", "col1");  // returns null
      * }</pre>
      *
      * @throws IllegalStateException if the Sheet is frozen
@@ -3851,7 +3851,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(rowKeys, colKeys);
      * // ... add and remove many rows ...
-     * sheet.trimToSize(); // optimize memory usage
+     * sheet.trimToSize();  // optimize memory usage
      * }</pre>
      *
      * @see #clear()
@@ -3881,7 +3881,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, null, 3}, {4, 5, null}}
      * );
      * 
-     * long count = sheet.countOfNonNullValue(); // returns 4
+     * long count = sheet.countOfNonNullValue();  // returns 4
      * }</pre>
      *
      * @return the number of {@code non-null} values in the Sheet
@@ -3915,13 +3915,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> empty1 = new Sheet<>(List.of(), List.of("col1"));
-     * boolean isEmpty1 = empty1.isEmpty(); // true (no rows)
+     * boolean isEmpty1 = empty1.isEmpty();  // true (no rows)
      * 
      * Sheet<String, String, Integer> empty2 = new Sheet<>(List.of("row1"), List.of());
-     * boolean isEmpty2 = empty2.isEmpty(); // true (no columns)
+     * boolean isEmpty2 = empty2.isEmpty();  // true (no columns)
      * 
      * Sheet<String, String, Integer> notEmpty = new Sheet<>(List.of("row1"), List.of("col1"));
-     * boolean isEmpty3 = notEmpty.isEmpty(); // false
+     * boolean isEmpty3 = notEmpty.isEmpty();  // false
      * }</pre>
      *
      * @return {@code true} if the Sheet has no rows or no columns, {@code false} otherwise
@@ -6385,7 +6385,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{42}}
      * );
      * 
-     * boolean isEqual = sheet1.equals(sheet2); // true
+     * boolean isEqual = sheet1.equals(sheet2);  // true
      * }</pre>
      *
      * @param obj the reference object with which to compare

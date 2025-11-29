@@ -540,7 +540,7 @@ public final class HARUtil {
      * <pre>{@code
      * Tuple2<String, String> bodyAndType = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
      * String requestBody = bodyAndType._1;  // e.g., {"user":"john","pass":"secret"}
-     * String mimeType = bodyAndType._2;     // e.g., "application/json"
+     * String mimeType = bodyAndType._2;  // e.g., "application/json"
      * }</pre>
      * 
      * @param requestEntry the HAR request entry map

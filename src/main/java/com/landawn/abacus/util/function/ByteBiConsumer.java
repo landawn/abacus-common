@@ -33,7 +33,7 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      * <pre>{@code
      * ByteBiConsumer rangeChecker = (min, max) ->
      *     System.out.println("Range: [" + min + ", " + max + "]");
-     * rangeChecker.accept((byte) 10, (byte) 100); // Prints: Range: [10, 100]
+     * rangeChecker.accept((byte) 10, (byte) 100);  // Prints: Range: [10, 100]
      *
      * Map<Byte, Byte> byteMap = new HashMap<>();
      * ByteBiConsumer mapPutter = (key, value) -> byteMap.put(key, value);
@@ -56,7 +56,7 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      * ByteBiConsumer logger = (a, b) -> System.out.println("Values: " + a + ", " + b);
      * ByteBiConsumer validator = (a, b) -> { if (a < 0 || b < 0) throw new IllegalArgumentException(); };
      * ByteBiConsumer combined = logger.andThen(validator);
-     * combined.accept((byte) 5, (byte) 10); // Logs then validates
+     * combined.accept((byte) 5, (byte) 10);  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

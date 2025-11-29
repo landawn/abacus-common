@@ -89,8 +89,8 @@ import com.landawn.abacus.util.TypeReference;
  * <pre>{@code
  * // Basic type operations
  * Type<String> stringType = Type.of(String.class);
- * String value = stringType.valueOf("Hello");        // Parse from string
- * String repr = stringType.stringOf(value);          // Convert to string
+ * String value = stringType.valueOf("Hello");  // Parse from string
+ * String repr = stringType.stringOf(value);  // Convert to string
  *
  * // Generic type handling
  * Type<List<Integer>> listType = Type.of(new TypeReference<List<Integer>>(){});
@@ -98,13 +98,13 @@ import com.landawn.abacus.util.TypeReference;
  *
  * // Database operations
  * Type<Date> dateType = Type.of(Date.class);
- * Date date = dateType.get(resultSet, "created_date"); // Get from ResultSet
- * dateType.set(preparedStmt, 1, date);                 // Set parameter
+ * Date date = dateType.get(resultSet, "created_date");  // Get from ResultSet
+ * dateType.set(preparedStmt, 1, date);  // Set parameter
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3)); // Collection to array
- * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class); // Array to collection
+ * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3));  // Collection to array
+ * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class);  // Array to collection
  *
  * // Type checking and metadata
  * if (type.isNumber()) {

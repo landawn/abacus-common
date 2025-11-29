@@ -37,7 +37,7 @@ package com.landawn.abacus.http;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpMethod method = HttpMethod.GET;
- * String methodName = method.name(); // "GET"
+ * String methodName = method.name();  // "GET"
  *
  * // Using with HTTP clients
  * String response = HttpRequest.url("https://api.example.com/users")

@@ -54,7 +54,7 @@ import com.landawn.abacus.util.N;
  * if (retrieved != null) {
  *     String value = retrieved.value();
  *     // use value
- *     pool.add(retrieved); // return to pool
+ *     pool.add(retrieved);  // return to pool
  * }
  * }</pre>
  * 

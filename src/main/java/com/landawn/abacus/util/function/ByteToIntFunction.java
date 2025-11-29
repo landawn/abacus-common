@@ -34,7 +34,7 @@ public interface ByteToIntFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteToIntFunction defaultConversion = ByteToIntFunction.DEFAULT;
-     * int result = defaultConversion.applyAsInt((byte) 42); // Returns 42
+     * int result = defaultConversion.applyAsInt((byte) 42);  // Returns 42
      * }</pre>
      */
     ByteToIntFunction DEFAULT = value -> value;
@@ -46,10 +46,10 @@ public interface ByteToIntFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteToIntFunction unsignedConverter = b -> Byte.toUnsignedInt(b);
-     * int unsigned = unsignedConverter.applyAsInt((byte) -1); // Returns 255
+     * int unsigned = unsignedConverter.applyAsInt((byte) -1);  // Returns 255
      *
      * ByteToIntFunction multiplier = b -> b * 10;
-     * int result = multiplier.applyAsInt((byte) 5); // Returns 50
+     * int result = multiplier.applyAsInt((byte) 5);  // Returns 50
      * }</pre>
      *
      * @param value the byte function argument

@@ -95,7 +95,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * Future<Profile> profileFuture = profileService.fetchProfile(userId);
  *
  * ContinuableFuture<List<Object>> allResults = Futures.allOf(userFuture, ordersFuture, profileFuture);
- * List<Object> results = allResults.get(); // [User, List<Order>, Profile]
+ * List<Object> results = allResults.get();  // [User, List<Order>, Profile]
  *
  * // Structured result combination using Tuples
  * ContinuableFuture<Tuple3<User, List<Order>, Profile>> structuredResult =
@@ -359,7 +359,7 @@ public final class Futures {
      * ContinuableFuture<Integer> sum = Futures.compose(future1, future2,
      *     (f1, f2) -> f1.get() + f2.get());
      *
-     * System.out.println(sum.get()); // Prints: 15
+     * System.out.println(sum.get());  // Prints: 15
      * }</pre>
      *
      * @param <T1> the result type of the first future
@@ -438,7 +438,7 @@ public final class Futures {
      *     (f1, f2, f3) -> String.format("%s, %d years old, from %s",
      *         f1.get(), f2.get(), f3.get()));
      *
-     * System.out.println(profile.get()); // "John, 30 years old, from New York"
+     * System.out.println(profile.get());  // "John, 30 years old, from New York"
      * }</pre>
      *
      * @param <T1> the result type of the first future
@@ -527,7 +527,7 @@ public final class Futures {
      *     return total;
      * });
      *
-     * System.out.println(sum.get()); // Prints: 6
+     * System.out.println(sum.get());  // Prints: 6
      * }</pre>
      *
      * @param <T> the result type of the input futures
@@ -1206,7 +1206,7 @@ public final class Futures {
      *     cacheSource, primarySource, secondarySource
      * );
      *
-     * Data result = firstAvailable.get(); // Gets the fastest result
+     * Data result = firstAvailable.get();  // Gets the fastest result
      * }</pre>
      *
      * @param <T> the result type of the futures

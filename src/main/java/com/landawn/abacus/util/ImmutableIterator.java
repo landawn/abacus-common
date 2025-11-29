@@ -85,7 +85,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
      * Set<String> set = iter.toSet();
-     * System.out.println(set); // [a, b, c] (order may vary)
+     * System.out.println(set);  // [a, b, c] (order may vary)
      * }</pre>
      *
      * @return a Set containing all remaining elements from this iterator
@@ -105,7 +105,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
      * LinkedList<String> list = iter.toCollection(LinkedList::new);
-     * System.out.println(list); // [a, b, c]
+     * System.out.println(list);  // [a, b, c]
      * }</pre>
      *
      * @param <C> the type of the collection to create
@@ -132,7 +132,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <pre>{@code
      * ImmutableIterator<Integer> iter = ImmutableSet.of(1, 2, 3).iterator();
      * ImmutableList<Integer> list = iter.toImmutableList();
-     * System.out.println(list); // [1, 2, 3] (order depends on source)
+     * System.out.println(list);  // [1, 2, 3] (order depends on source)
      * }</pre>
      *
      * @return an ImmutableList containing all remaining elements from this iterator
@@ -152,7 +152,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
      * ImmutableSet<String> set = iter.toImmutableSet();
-     * System.out.println(set.size()); // 3 (duplicates removed)
+     * System.out.println(set.size());  // 3 (duplicates removed)
      * }</pre>
      *
      * @return an ImmutableSet containing all remaining unique elements from this iterator
@@ -172,10 +172,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
-     * iter.next(); // Skip first element
+     * iter.next();  // Skip first element
      * long remaining = iter.count();
-     * System.out.println(remaining); // 2
-     * System.out.println(iter.hasNext()); // false (iterator exhausted)
+     * System.out.println(remaining);        // 2
+     * System.out.println(iter.hasNext());   // false (iterator exhausted)
      * }</pre>
      *
      * @return the number of remaining elements

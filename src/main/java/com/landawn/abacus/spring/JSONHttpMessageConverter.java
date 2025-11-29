@@ -191,7 +191,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @GetMapping("/users/{id}")
      * public User getUser(@PathVariable Long id) {
      *     User user = userService.findById(id);
-     *     return user; // Automatically serialized to JSON by this method
+     *     return user;  // Automatically serialized to JSON by this method
      * }
      * }</pre>
      *

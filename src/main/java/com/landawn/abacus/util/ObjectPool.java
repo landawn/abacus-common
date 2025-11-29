@@ -111,8 +111,8 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
      * pool.put("one", 1);
-     * Integer value = pool.get("one"); // Returns 1
-     * Integer missing = pool.get("two"); // Returns null
+     * Integer value = pool.get("one");     // Returns 1
+     * Integer missing = pool.get("two");   // Returns null
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -236,8 +236,8 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
      * pool.put("key", 100);
-     * Integer removed = pool.remove("key"); // Returns 100
-     * Integer notFound = pool.remove("key"); // Returns null
+     * Integer removed = pool.remove("key");    // Returns 100
+     * Integer notFound = pool.remove("key");   // Returns null
      * }</pre>
      *
      * @param key key whose mapping is to be removed from the map

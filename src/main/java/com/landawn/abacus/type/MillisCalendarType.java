@@ -46,7 +46,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
      * Calendar cal = type.get(rs, 1);
@@ -77,7 +77,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "created_date" contains milliseconds value 1609459200000
      * Calendar cal = type.get(rs, "created_date");
@@ -112,7 +112,7 @@ public class MillisCalendarType extends CalendarType {
      *     "INSERT INTO events (id, event_date) VALUES (?, ?)");
      *
      * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L); // Jan 1, 2021
+     * cal.setTimeInMillis(1609459200000L);  // Jan 1, 2021
      * type.set(stmt, 2, cal);
      * // Sets parameter to 1609459200000
      *
@@ -141,7 +141,7 @@ public class MillisCalendarType extends CalendarType {
      * CallableStatement stmt = connection.prepareCall("{call set_event(?, ?)}");
      *
      * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L); // Jan 1, 2021
+     * cal.setTimeInMillis(1609459200000L);  // Jan 1, 2021
      * type.set(stmt, "p_event_date", cal);
      * // Sets parameter to 1609459200000
      *

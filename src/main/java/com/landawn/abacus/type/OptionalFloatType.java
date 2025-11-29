@@ -143,7 +143,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains float value 3.14
      * OptionalFloat opt = type.get(rs, 1);
@@ -173,7 +173,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "temperature" contains float value 98.6
      * OptionalFloat opt = type.get(rs, "temperature");

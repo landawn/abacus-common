@@ -124,7 +124,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {1, 2, 3, 4, 5};
-     * ShortIterator iter = ShortIterator.of(values, 1, 4); // iterates over 2, 3, 4
+     * ShortIterator iter = ShortIterator.of(values, 1, 4);  // iterates over 2, 3, 4
      * }</pre>
      *
      * @param a the short array (may be {@code null})
@@ -313,8 +313,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2, (short)3);
-     * short first = iter.nextShort(); // 1
-     * short second = iter.nextShort(); // 2
+     * short first = iter.nextShort();    // 1
+     * short second = iter.nextShort();   // 2
      * }</pre>
      *
      * @return the next short value
@@ -329,7 +329,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
-     * ShortIterator skipped = iter.skip(2); // Will iterate over 3, 4, 5
+     * ShortIterator skipped = iter.skip(2);  // Will iterate over 3, 4, 5
      * }</pre>
      *
      * @param n the number of elements to skip
@@ -385,7 +385,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.generate(() -> (short)1);
-     * ShortIterator limited = iter.limit(3); // Will only return three 1s
+     * ShortIterator limited = iter.limit(3);  // Will only return three 1s
      * }</pre>
      *
      * @param count the maximum number of elements to iterate
@@ -428,7 +428,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
-     * ShortIterator evens = iter.filter(x -> x % 2 == 0); // Will iterate over 2, 4
+     * ShortIterator evens = iter.filter(x -> x % 2 == 0);  // Will iterate over 2, 4
      * }</pre>
      *
      * @param predicate the predicate to test each element
@@ -479,8 +479,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort first = ShortIterator.of(new short[] {1, 2, 3}).first(); // OptionalShort.of(1)
-     * OptionalShort empty = ShortIterator.empty().first(); // OptionalShort.empty()
+     * OptionalShort first = ShortIterator.of(new short[] {1, 2, 3}).first();   // OptionalShort.of(1)
+     * OptionalShort empty = ShortIterator.empty().first();                     // OptionalShort.empty()
      * }</pre>
      *
      * @return an OptionalShort containing the first element, or empty if no elements
@@ -499,8 +499,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort last = ShortIterator.of(new short[] {1, 2, 3}).last(); // OptionalShort.of(3)
-     * OptionalShort empty = ShortIterator.empty().last(); // OptionalShort.empty()
+     * OptionalShort last = ShortIterator.of(new short[] {1, 2, 3}).last();   // OptionalShort.of(3)
+     * OptionalShort empty = ShortIterator.empty().last();                    // OptionalShort.empty()
      * }</pre>
      *
      * @return an OptionalShort containing the last element, or empty if no elements
@@ -532,7 +532,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * short[] empty = ShortIterator.empty().toArray(); // empty.length == 0
+     * short[] empty = ShortIterator.empty().toArray();  // empty.length == 0
      * }</pre>
      *
      * @return a short array containing all remaining elements
@@ -555,7 +555,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * ShortList empty = ShortIterator.empty().toList(); // empty.size() == 0
+     * ShortList empty = ShortIterator.empty().toList();  // empty.size() == 0
      * }</pre>
      *
      * @return a ShortList containing all remaining elements

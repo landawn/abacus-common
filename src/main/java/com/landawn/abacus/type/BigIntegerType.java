@@ -56,8 +56,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
      * BigInteger value = new BigInteger("12345678901234567890");
-     * String str = type.stringOf(value); // returns "12345678901234567890"
-     * String nullStr = type.stringOf(null); // returns null
+     * String str = type.stringOf(value);      // returns "12345678901234567890"
+     * String nullStr = type.stringOf(null);   // returns null
      * }</pre>
      *
      * @param x the BigInteger value to convert
@@ -77,8 +77,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
      * BigInteger value = type.valueOf("12345678901234567890");
-     * BigInteger nullValue = type.valueOf(null); // returns null
-     * BigInteger emptyValue = type.valueOf(""); // returns null
+     * BigInteger nullValue = type.valueOf(null);   // returns null
+     * BigInteger emptyValue = type.valueOf("");    // returns null
      * }</pre>
      *
      * @param str the string to parse as a BigInteger in decimal format
@@ -96,8 +96,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = ...; // from SQL query
-     * BigInteger largeId = type.get(rs, 1); // retrieves BigInteger from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * BigInteger largeId = type.get(rs, 1);  // retrieves BigInteger from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -118,8 +118,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = ...; // from SQL query
-     * BigInteger largeId = type.get(rs, "large_id"); // retrieves BigInteger from "large_id" column
+     * ResultSet rs = ...;  // from SQL query
+     * BigInteger largeId = type.get(rs, "large_id");  // retrieves BigInteger from "large_id" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

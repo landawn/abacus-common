@@ -39,7 +39,7 @@ import java.io.Serial;
  *     try {
  *         Thread.sleep(1000);
  *     } catch (InterruptedException e) {
- *         Thread.currentThread().interrupt(); // Restore interrupted status
+ *         Thread.currentThread().interrupt();  // Restore interrupted status
  *         throw new UncheckedInterruptedException("Processing interrupted", e);
  *     }
  * });
@@ -76,7 +76,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (InterruptedException e) {
-     *     Thread.currentThread().interrupt(); // Restore interrupted status
+     *     Thread.currentThread().interrupt();  // Restore interrupted status
      *     throw new UncheckedInterruptedException(e);
      * }
      * }</pre>
@@ -101,7 +101,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (InterruptedException e) {
-     *     Thread.currentThread().interrupt(); // Restore interrupted status
+     *     Thread.currentThread().interrupt();  // Restore interrupted status
      *     throw new UncheckedInterruptedException("Interrupted while waiting for resource", e);
      * }
      * }</pre>

@@ -32,7 +32,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  *
  * // Reading from database
  * NClob nclob = type.get(resultSet, 1);
- * String content = type.stringOf(nclob); // Converts NClob to String
+ * String content = type.stringOf(nclob);  // Converts NClob to String
  *
  * // Writing to database
  * type.set(preparedStatement, 1, nclob);
@@ -74,7 +74,7 @@ public class NClobType extends AbstractType<NClob> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NClob nclob = resultSet.getNClob(1);
-     * String content = type.stringOf(nclob); // Extracts full content and frees NClob
+     * String content = type.stringOf(nclob);  // Extracts full content and frees NClob
      * }</pre>
      *
      * @param x the NClob object to convert

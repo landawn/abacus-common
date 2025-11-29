@@ -32,9 +32,9 @@ import com.landawn.abacus.util.function.CharConsumer;
  * stats.accept('A');
  * stats.accept('B');
  * stats.accept('C');
- * System.out.println("Count: " + stats.getCount()); // Count: 3
- * System.out.println("Min: " + stats.getMin()); // Min: A
- * System.out.println("Max: " + stats.getMax()); // Max: C
+ * System.out.println("Count: " + stats.getCount());  // Count: 3
+ * System.out.println("Min: " + stats.getMin());  // Min: A
+ * System.out.println("Max: " + stats.getMax());  // Max: C
  * }</pre>
  * 
  * @see CharConsumer
@@ -97,7 +97,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('X');
      * stats.accept('Y');
-     * System.out.println(stats.getCount()); // 2
+     * System.out.println(stats.getCount());  // 2
      * }</pre>
      *
      * @param value the char value to record
@@ -128,9 +128,9 @@ public class CharSummaryStatistics implements CharConsumer {
      * stats2.accept('Z');
      * 
      * stats1.combine(stats2);
-     * System.out.println(stats1.getCount()); // 4
-     * System.out.println(stats1.getMin()); // A
-     * System.out.println(stats1.getMax()); // Z
+     * System.out.println(stats1.getCount());   // 4
+     * System.out.println(stats1.getMin());     // A
+     * System.out.println(stats1.getMax());     // Z
      * }</pre>
      *
      * @param other another {@code CharSummaryStatistics} to combine with this one
@@ -152,7 +152,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * stats.accept('M');
      * stats.accept('A');
      * stats.accept('Z');
-     * System.out.println(stats.getMin()); // A
+     * System.out.println(stats.getMin());  // A
      * }</pre>
      *
      * @return the minimum char value, or {@code Character.MAX_VALUE} if none
@@ -171,7 +171,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * stats.accept('M');
      * stats.accept('A');
      * stats.accept('Z');
-     * System.out.println(stats.getMax()); // Z
+     * System.out.println(stats.getMax());  // Z
      * }</pre>
      *
      * @return the maximum char value, or {@code Character.MIN_VALUE} if none
@@ -189,7 +189,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * stats.accept('X');
      * stats.accept('Y');
      * stats.accept('Z');
-     * System.out.println(stats.getCount()); // 3
+     * System.out.println(stats.getCount());  // 3
      * }</pre>
      *
      * @return the count of values
@@ -207,10 +207,10 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A'); // ASCII value 65
-     * stats.accept('B'); // ASCII value 66
-     * stats.accept('C'); // ASCII value 67
-     * System.out.println(stats.getSum()); // 198
+     * stats.accept('A');                    // ASCII value 65
+     * stats.accept('B');                    // ASCII value 66
+     * stats.accept('C');                    // ASCII value 67
+     * System.out.println(stats.getSum());   // 198
      * }</pre>
      *
      * @return the sum of values, as a {@code Long}
@@ -229,10 +229,10 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A'); // ASCII value 65
-     * stats.accept('B'); // ASCII value 66
-     * stats.accept('C'); // ASCII value 67
-     * System.out.println(stats.getAverage()); // 66.0
+     * stats.accept('A');                        // ASCII value 65
+     * stats.accept('B');                        // ASCII value 66
+     * stats.accept('C');                        // ASCII value 67
+     * System.out.println(stats.getAverage());   // 66.0
      * }</pre>
      *
      * @return the arithmetic mean of values, or zero if none

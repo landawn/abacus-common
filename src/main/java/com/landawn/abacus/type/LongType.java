@@ -61,8 +61,8 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = ...; // from SQL query
-     * Long userId = type.get(rs, 1); // retrieves Long from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Long userId = type.get(rs, 1);  // retrieves Long from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -92,8 +92,8 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = ...; // from SQL query
-     * Long userId = type.get(rs, "user_id"); // retrieves Long from "user_id" column
+     * ResultSet rs = ...;  // from SQL query
+     * Long userId = type.get(rs, "user_id");  // retrieves Long from "user_id" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

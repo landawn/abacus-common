@@ -35,13 +35,13 @@ import com.landawn.abacus.util.Password;
  * stmt.setString(1, "john");
  *
  * Type<String> passwordType = TypeFactory.getType("Password");
- * passwordType.set(stmt, 2, plainPassword); // Password is encrypted before storage
+ * passwordType.set(stmt, 2, plainPassword);  // Password is encrypted before storage
  * stmt.executeUpdate();
  *
  * // Retrieving a password (returns encrypted form)
  * ResultSet rs = stmt.executeQuery("SELECT password FROM users WHERE username = 'john'");
  * if (rs.next()) {
- *     String encryptedPassword = passwordType.get(rs, 1); // Returns encrypted password
+ *     String encryptedPassword = passwordType.get(rs, 1);  // Returns encrypted password
  * }
  * }</pre>
  */

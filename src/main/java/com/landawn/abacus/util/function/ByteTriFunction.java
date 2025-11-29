@@ -37,10 +37,10 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteTriFunction<String> formatter = (r, g, b) -> String.format("RGB(%d,%d,%d)", r, g, b);
-     * String color = formatter.apply((byte) 255, (byte) 128, (byte) 0); // Returns "RGB(255,128,0)"
+     * String color = formatter.apply((byte) 255, (byte) 128, (byte) 0);  // Returns "RGB(255,128,0)"
      *
      * ByteTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
-     * Integer total = sum.apply((byte) 10, (byte) 20, (byte) 30); // Returns 60
+     * Integer total = sum.apply((byte) 10, (byte) 20, (byte) 30);  // Returns 60
      * }</pre>
      *
      * @param a the first byte function argument
@@ -62,7 +62,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * ByteTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
      * Function<Integer, String> toString = Object::toString;
      * ByteTriFunction<String> combined = sum.andThen(toString);
-     * String result = combined.apply((byte) 1, (byte) 2, (byte) 3); // Returns "6"
+     * String result = combined.apply((byte) 1, (byte) 2, (byte) 3);  // Returns "6"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

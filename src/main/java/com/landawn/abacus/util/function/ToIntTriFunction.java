@@ -40,15 +40,15 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
      * <pre>{@code
      * ToIntTriFunction<String, String, String> totalLength =
      *     (s1, s2, s3) -> s1.length() + s2.length() + s3.length();
-     * int total = totalLength.applyAsInt("Hello", "World", "!"); // returns 11
+     * int total = totalLength.applyAsInt("Hello", "World", "!");  // returns 11
      *
      * ToIntTriFunction<Integer, Integer, Integer> sum =
      *     (a, b, c) -> a + b + c;
-     * int result = sum.applyAsInt(10, 20, 30); // returns 60
+     * int result = sum.applyAsInt(10, 20, 30);  // returns 60
      *
      * ToIntTriFunction<List<String>, Integer, Integer> subListSize =
      *     (list, from, to) -> list.subList(from, to).size();
-     * int size = subListSize.applyAsInt(Arrays.asList("a", "b", "c", "d"), 1, 3); // returns 2
+     * int size = subListSize.applyAsInt(Arrays.asList("a", "b", "c", "d"), 1, 3);  // returns 2
      * }</pre>
      *
      * @param a the first function argument

@@ -24,9 +24,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Month month = Month.JANUARY;
- * int monthNumber = month.intValue(); // returns 1
+ * int monthNumber = month.intValue();  // returns 1
  * 
- * Month decoded = Month.valueOf(3); // returns MARCH
+ * Month decoded = Month.valueOf(3);  // returns MARCH
  * }</pre>
  * 
  */
@@ -104,8 +104,8 @@ public enum Month {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Month.MARCH.intValue(); // returns 3
-     * Month.DECEMBER.intValue(); // returns 12
+     * Month.MARCH.intValue();      // returns 3
+     * Month.DECEMBER.intValue();   // returns 12
      * }</pre>
      * 
      * @return the numeric value of this month (1-12)
@@ -123,8 +123,8 @@ public enum Month {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Month jan = Month.valueOf(1); // returns JANUARY
-     * Month dec = Month.valueOf(12); // returns DECEMBER
+     * Month jan = Month.valueOf(1);    // returns JANUARY
+     * Month dec = Month.valueOf(12);   // returns DECEMBER
      * }</pre>
      * 
      * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)

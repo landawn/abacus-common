@@ -114,8 +114,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> empty = ImmutableList.empty();
-     * System.out.println(empty.size()); // prints: 0
-     * System.out.println(empty.isEmpty()); // prints: true
+     * System.out.println(empty.size());      // prints: 0
+     * System.out.println(empty.isEmpty());   // prints: true
      * }</pre>
      *
      * @param <E> the type of elements in the list
@@ -132,7 +132,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> single = ImmutableList.just("hello");
-     * System.out.println(single.get(0)); // prints: hello
+     * System.out.println(single.get(0));  // prints: hello
      * }</pre>
      *
      * @param <E> the type of the element
@@ -150,7 +150,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<Integer> single = ImmutableList.of(42);
-     * // single.add(43); // Would throw UnsupportedOperationException
+     * // single.add(43);  // Would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <E> the type of the element
@@ -325,7 +325,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <pre>{@code
      * String[] array = {"one", "two", "three"};
      * ImmutableList<String> list = ImmutableList.of(array);
-     * array[0] = "modified"; // Does not affect list
+     * array[0] = "modified";  // Does not affect list
      * }</pre>
      *
      * @param <E> the type of the elements
@@ -354,7 +354,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <pre>{@code
      * List<Integer> mutable = new ArrayList<>(Arrays.asList(1, 2, 3));
      * ImmutableList<Integer> immutable = ImmutableList.copyOf(mutable);
-     * mutable.add(4); // Does not affect immutable
+     * mutable.add(4);  // Does not affect immutable
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -387,8 +387,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * mutable.add("initial");
      *
      * ImmutableList<String> wrapped = ImmutableList.wrap(mutable);
-     * mutable.add("added later"); // This WILL be visible in wrapped!
-     * System.out.println(wrapped.get(1)); // prints: "added later"
+     * mutable.add("added later");           // This WILL be visible in wrapped!
+     * System.out.println(wrapped.get(1));   // prints: "added later"
      * }</pre>
      *
      * @param <E> the type of elements in the list
@@ -428,7 +428,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-     * String second = list.get(1); // returns "b"
+     * String second = list.get(1);  // returns "b"
      * }</pre>
      *
      * @param index index of the element to return (0-based)
@@ -450,8 +450,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
-     * int index = list.indexOf("b"); // returns 1
-     * int notFound = list.indexOf("d"); // returns -1
+     * int index = list.indexOf("b");      // returns 1
+     * int notFound = list.indexOf("d");   // returns -1
      * }</pre>
      *
      * @param valueToFind the element to search for, may be null
@@ -473,7 +473,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
-     * int lastIndex = list.lastIndexOf("b"); // returns 3
+     * int lastIndex = list.lastIndexOf("b");  // returns 3
      * }</pre>
      *
      * @param valueToFind the element to search for, may be null
@@ -519,9 +519,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
      * ImmutableListIterator<String> iter = list.listIterator(2);
-     * System.out.println(iter.next()); // prints "c"
-     * System.out.println(iter.previous()); // prints "c" again
-     * System.out.println(iter.previous()); // prints "b"
+     * System.out.println(iter.next());       // prints "c"
+     * System.out.println(iter.previous());   // prints "c" again
+     * System.out.println(iter.previous());   // prints "b"
      * }</pre>
      *
      * @param index index of the first element to be returned from the list iterator (by a call to next())
@@ -907,7 +907,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableList<String> finalList = builder.build();
-         * System.out.println(finalList.size()); // Number of elements added
+         * System.out.println(finalList.size());  // Number of elements added
          * }</pre>
          *
          * @return a new ImmutableList containing all added elements in the order they were added

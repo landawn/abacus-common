@@ -123,8 +123,8 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleTriPredicate allZero = (a, b, c) -> a == 0 && b == 0 && c == 0;
-     * DoubleTriPredicate allOne = (a, b, c) -> a == 1 && b == 1 && c == 1;
+     * DoubleTriPredicate allZero = (a, b, c)   == 0 && b == 0 && c == 0;
+     * DoubleTriPredicate allOne = (a, b, c)    == 1 && b == 1 && c == 1;
      *
      * // Combined predicate: all zeros OR all ones
      * DoubleTriPredicate specialCase = allZero.or(allOne);

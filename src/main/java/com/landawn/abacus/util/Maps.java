@@ -107,18 +107,18 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Map<String, Integer> zipped = Maps.zip(keys, values);  // {a=1, b=2, c=3}
  *
  * // Safe access operations with Optional returns
- * Optional<Integer> value = Maps.get(map, "key");        // Optional-wrapped value
- * Nullable<Integer> nullable = Maps.getNullable(map, "key"); // Nullable-wrapped value
- * int defaultValue = Maps.getOrDefault(map, "key", 0);   // With default value
+ * Optional<Integer> value = Maps.get(map, "key");  // Optional-wrapped value
+ * Nullable<Integer> nullable = Maps.getNullable(map, "key");  // Nullable-wrapped value
+ * int defaultValue = Maps.getOrDefault(map, "key", 0);  // With default value
  *
  * // Null-safe operations
- * Optional<Integer> fromNull = Maps.get(null, "key");    // Optional.empty()
- * boolean isEmpty = Maps.isEmpty(null);                  // Returns true
+ * Optional<Integer> fromNull = Maps.get(null, "key");  // Optional.empty()
+ * boolean isEmpty = Maps.isEmpty(null);  // Returns true
  *
  * // Transformation operations
  * Map<String, String> transformed = Maps.map(map, (k, v) -> k.toUpperCase(), v -> v.toString());
  * Map<String, Integer> filtered = Maps.filter(map, (k, v) -> v > 0);
- * Map<Integer, String> inverted = Maps.invert(map);      // Swap keys and values
+ * Map<Integer, String> inverted = Maps.invert(map);  // Swap keys and values
  *
  * // Functional operations
  * boolean allPositive = Maps.allMatch(map, (k, v) -> v > 0);
@@ -129,7 +129,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Merging and combining operations
  * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2);
  * Map<String, Integer> map2 = Maps.of("b", 3, "c", 4);
- * Map<String, Integer> merged = Maps.merge(map1, map2, Integer::sum); // {a=1, b=5, c=4}
+ * Map<String, Integer> merged = Maps.merge(map1, map2, Integer::sum);  // {a=1, b=5, c=4}
  *
  * // Conversion operations
  * List<Map.Entry<String, Integer>> entries = Maps.toList(map);
@@ -771,9 +771,9 @@ public final class Maps {
      * map.put("key1", "value1");
      * map.put("key2", null);
      * 
-     * Nullable<String> result1 = Maps.get(map, "key1");  // Nullable.of("value1")
-     * Nullable<String> result2 = Maps.get(map, "key2");  // Nullable.of(null)
-     * Nullable<String> result3 = Maps.get(map, "key3");  // Nullable.empty()
+     * Nullable<String> result1 = Maps.get(map, "key1");   // Nullable.of("value1")
+     * Nullable<String> result2 = Maps.get(map, "key2");   // Nullable.of(null)
+     * Nullable<String> result3 = Maps.get(map, "key3");   // Nullable.empty()
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -810,9 +810,9 @@ public final class Maps {
      * innerMap.put("inner1", 100);
      * nestedMap.put("outer1", innerMap);
      * 
-     * Nullable<Integer> result1 = Maps.get(nestedMap, "outer1", "inner1");  // Nullable.of(100)
-     * Nullable<Integer> result2 = Maps.get(nestedMap, "outer1", "inner2");  // Nullable.empty()
-     * Nullable<Integer> result3 = Maps.get(nestedMap, "outer2", "inner1");  // Nullable.empty()
+     * Nullable<Integer> result1 = Maps.get(nestedMap, "outer1", "inner1");   // Nullable.of(100)
+     * Nullable<Integer> result2 = Maps.get(nestedMap, "outer1", "inner2");   // Nullable.empty()
+     * Nullable<Integer> result3 = Maps.get(nestedMap, "outer2", "inner1");   // Nullable.empty()
      * }</pre>
      *
      * @param <K> the type of the outer map's keys
@@ -852,9 +852,9 @@ public final class Maps {
      * map.put("key1", "value1");
      * map.put("key2", null);
      * 
-     * String result1 = Maps.getOrDefaultIfAbsent(map, "key1", "default");  // "value1"
-     * String result2 = Maps.getOrDefaultIfAbsent(map, "key2", "default");  // "default"
-     * String result3 = Maps.getOrDefaultIfAbsent(map, "key3", "default");  // "default"
+     * String result1 = Maps.getOrDefaultIfAbsent(map, "key1", "default");   // "value1"
+     * String result2 = Maps.getOrDefaultIfAbsent(map, "key2", "default");   // "default"
+     * String result3 = Maps.getOrDefaultIfAbsent(map, "key3", "default");   // "default"
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -896,9 +896,9 @@ public final class Maps {
      * innerMap.put("count", 5);
      * nestedMap.put("data", innerMap);
      * 
-     * Integer result1 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "count", 0);    // 5
-     * Integer result2 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "missing", 0);  // 0
-     * Integer result3 = Maps.getOrDefaultIfAbsent(nestedMap, "missing", "count", 0); // 0
+     * Integer result1 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "count", 0);      // 5
+     * Integer result2 = Maps.getOrDefaultIfAbsent(nestedMap, "data", "missing", 0);    // 0
+     * Integer result3 = Maps.getOrDefaultIfAbsent(nestedMap, "missing", "count", 0);   // 0
      * }</pre>
      *
      * @param <K> the type of the outer map's keys
@@ -942,9 +942,9 @@ public final class Maps {
      * map.put("fruits", Arrays.asList("apple", "banana"));
      * map.put("empty", null);
      * 
-     * List<String> result1 = Maps.getOrEmptyListIfAbsent(map, "fruits");   // ["apple", "banana"]
-     * List<String> result2 = Maps.getOrEmptyListIfAbsent(map, "empty");    // []
-     * List<String> result3 = Maps.getOrEmptyListIfAbsent(map, "missing");  // []
+     * List<String> result1 = Maps.getOrEmptyListIfAbsent(map, "fruits");    // ["apple", "banana"]
+     * List<String> result2 = Maps.getOrEmptyListIfAbsent(map, "empty");     // []
+     * List<String> result3 = Maps.getOrEmptyListIfAbsent(map, "missing");   // []
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -979,9 +979,9 @@ public final class Maps {
      * map.put("primes", new HashSet<>(Arrays.asList(2, 3, 5, 7)));
      * map.put("empty", null);
      * 
-     * Set<Integer> result1 = Maps.getOrEmptySetIfAbsent(map, "primes");   // {2, 3, 5, 7}
-     * Set<Integer> result2 = Maps.getOrEmptySetIfAbsent(map, "empty");    // {}
-     * Set<Integer> result3 = Maps.getOrEmptySetIfAbsent(map, "missing");  // {}
+     * Set<Integer> result1 = Maps.getOrEmptySetIfAbsent(map, "primes");    // {2, 3, 5, 7}
+     * Set<Integer> result2 = Maps.getOrEmptySetIfAbsent(map, "empty");     // {}
+     * Set<Integer> result3 = Maps.getOrEmptySetIfAbsent(map, "missing");   // {}
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1019,9 +1019,9 @@ public final class Maps {
      * map.put("data", innerMap);
      * map.put("empty", null);
      * 
-     * Map<String, Integer> result1 = Maps.getOrEmptyMapIfAbsent(map, "data");    // {a=1, b=2}
-     * Map<String, Integer> result2 = Maps.getOrEmptyMapIfAbsent(map, "empty");   // {}
-     * Map<String, Integer> result3 = Maps.getOrEmptyMapIfAbsent(map, "missing"); // {}
+     * Map<String, Integer> result1 = Maps.getOrEmptyMapIfAbsent(map, "data");      // {a=1, b=2}
+     * Map<String, Integer> result2 = Maps.getOrEmptyMapIfAbsent(map, "empty");     // {}
+     * Map<String, Integer> result3 = Maps.getOrEmptyMapIfAbsent(map, "missing");   // {}
      * }</pre>
      *
      * @param <K> the type of keys maintained by the outer map
@@ -1059,10 +1059,10 @@ public final class Maps {
      * map.put("flag2", "false");
      * map.put("flag3", null);
      * 
-     * OptionalBoolean result1 = Maps.getBoolean(map, "flag1");  // OptionalBoolean.of(true)
-     * OptionalBoolean result2 = Maps.getBoolean(map, "flag2");  // OptionalBoolean.of(false)
-     * OptionalBoolean result3 = Maps.getBoolean(map, "flag3");  // OptionalBoolean.empty()
-     * OptionalBoolean result4 = Maps.getBoolean(map, "flag4");  // OptionalBoolean.empty()
+     * OptionalBoolean result1 = Maps.getBoolean(map, "flag1");   // OptionalBoolean.of(true)
+     * OptionalBoolean result2 = Maps.getBoolean(map, "flag2");   // OptionalBoolean.of(false)
+     * OptionalBoolean result3 = Maps.getBoolean(map, "flag3");   // OptionalBoolean.empty()
+     * OptionalBoolean result4 = Maps.getBoolean(map, "flag4");   // OptionalBoolean.empty()
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1136,10 +1136,10 @@ public final class Maps {
      * map.put("digit", "5");
      * map.put("empty", null);
      * 
-     * OptionalChar result1 = Maps.getChar(map, "letter");  // OptionalChar.of('A')
-     * OptionalChar result2 = Maps.getChar(map, "digit");   // OptionalChar.of('5')
-     * OptionalChar result3 = Maps.getChar(map, "empty");   // OptionalChar.empty()
-     * OptionalChar result4 = Maps.getChar(map, "missing"); // OptionalChar.empty()
+     * OptionalChar result1 = Maps.getChar(map, "letter");    // OptionalChar.of('A')
+     * OptionalChar result2 = Maps.getChar(map, "digit");     // OptionalChar.of('5')
+     * OptionalChar result3 = Maps.getChar(map, "empty");     // OptionalChar.empty()
+     * OptionalChar result4 = Maps.getChar(map, "missing");   // OptionalChar.empty()
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1174,9 +1174,9 @@ public final class Maps {
      * map.put("grade", 'A');
      * map.put("initial", "J");
      * 
-     * char result1 = Maps.getChar(map, "grade", 'F');    // 'A'
-     * char result2 = Maps.getChar(map, "initial", 'X');  // 'J'
-     * char result3 = Maps.getChar(map, "missing", 'N');  // 'N' (default)
+     * char result1 = Maps.getChar(map, "grade", 'F');     // 'A'
+     * char result2 = Maps.getChar(map, "initial", 'X');   // 'J'
+     * char result3 = Maps.getChar(map, "missing", 'N');   // 'N' (default)
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1213,10 +1213,10 @@ public final class Maps {
      * map.put("medium", 127);
      * map.put("text", "25");
      * 
-     * OptionalByte result1 = Maps.getByte(map, "small");   // OptionalByte.of(10)
-     * OptionalByte result2 = Maps.getByte(map, "medium");  // OptionalByte.of(127)
-     * OptionalByte result3 = Maps.getByte(map, "text");    // OptionalByte.of(25)
-     * OptionalByte result4 = Maps.getByte(map, "missing"); // OptionalByte.empty()
+     * OptionalByte result1 = Maps.getByte(map, "small");     // OptionalByte.of(10)
+     * OptionalByte result2 = Maps.getByte(map, "medium");    // OptionalByte.of(127)
+     * OptionalByte result3 = Maps.getByte(map, "text");      // OptionalByte.of(25)
+     * OptionalByte result4 = Maps.getByte(map, "missing");   // OptionalByte.empty()
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1251,9 +1251,9 @@ public final class Maps {
      * map.put("id", (byte) 5);
      * map.put("count", "10");
      * 
-     * byte result1 = Maps.getByte(map, "id", (byte) 0);      // 5
-     * byte result2 = Maps.getByte(map, "count", (byte) 0);   // 10
-     * byte result3 = Maps.getByte(map, "missing", (byte) -1); // -1 (default)
+     * byte result1 = Maps.getByte(map, "id", (byte) 0);         // 5
+     * byte result2 = Maps.getByte(map, "count", (byte) 0);      // 10
+     * byte result3 = Maps.getByte(map, "missing", (byte) -1);   // -1 (default)
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1290,10 +1290,10 @@ public final class Maps {
      * map.put("count", 1000);
      * map.put("text", "500");
      * 
-     * OptionalShort result1 = Maps.getShort(map, "year");    // OptionalShort.of(2023)
-     * OptionalShort result2 = Maps.getShort(map, "count");   // OptionalShort.of(1000)
-     * OptionalShort result3 = Maps.getShort(map, "text");    // OptionalShort.of(500)
-     * OptionalShort result4 = Maps.getShort(map, "missing"); // OptionalShort.empty()
+     * OptionalShort result1 = Maps.getShort(map, "year");      // OptionalShort.of(2023)
+     * OptionalShort result2 = Maps.getShort(map, "count");     // OptionalShort.of(1000)
+     * OptionalShort result3 = Maps.getShort(map, "text");      // OptionalShort.of(500)
+     * OptionalShort result4 = Maps.getShort(map, "missing");   // OptionalShort.empty()
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1367,10 +1367,10 @@ public final class Maps {
      * map.put("total", "100");
      * map.put("null", null);
      * 
-     * OptionalInt result1 = Maps.getInt(map, "count");   // OptionalInt.of(42)
-     * OptionalInt result2 = Maps.getInt(map, "total");   // OptionalInt.of(100)
-     * OptionalInt result3 = Maps.getInt(map, "null");    // OptionalInt.empty()
-     * OptionalInt result4 = Maps.getInt(map, "missing"); // OptionalInt.empty()
+     * OptionalInt result1 = Maps.getInt(map, "count");     // OptionalInt.of(42)
+     * OptionalInt result2 = Maps.getInt(map, "total");     // OptionalInt.of(100)
+     * OptionalInt result3 = Maps.getInt(map, "null");      // OptionalInt.empty()
+     * OptionalInt result4 = Maps.getInt(map, "missing");   // OptionalInt.empty()
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -1405,9 +1405,9 @@ public final class Maps {
      * map.put("age", 25);
      * map.put("score", "98");
      * 
-     * int result1 = Maps.getInt(map, "age", 0);      // 25
-     * int result2 = Maps.getInt(map, "score", 0);    // 98
-     * int result3 = Maps.getInt(map, "missing", -1); // -1 (default)
+     * int result1 = Maps.getInt(map, "age", 0);        // 25
+     * int result2 = Maps.getInt(map, "score", 0);      // 98
+     * int result3 = Maps.getInt(map, "missing", -1);   // -1 (default)
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -2562,7 +2562,7 @@ public final class Maps {
      * map2.put("c", 4);
      * map2.put("d", 5);
      *
-     * Map<String, Integer> result = Maps.intersection(map1, map2); // result will be {"b": 2}
+     * Map<String, Integer> result = Maps.intersection(map1, map2);  // result will be {"b": 2}
      * // Only "b" is included because it has the same value in both maps
      *
      * Map<String, String> map3 = new HashMap<>();
@@ -2573,7 +2573,7 @@ public final class Maps {
      * map4.put("x", "foo");
      * map4.put("z", "baz");
      *
-     * Map<String, String> result2 = Maps.intersection(map3, map4); // result will be {"x": "foo"}
+     * Map<String, String> result2 = Maps.intersection(map3, map4);  // result will be {"x": "foo"}
      * // Only "x" is included because it has the same value in both maps
      * }</pre>
      *
@@ -2934,7 +2934,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * Map.Entry<String, Integer> entry = N.newEntry("a", 1);
-     * boolean removed = Maps.remove(map, entry); // true, entry removed
+     * boolean removed = Maps.remove(map, entry);  // true, entry removed
      * // map: {b=2}
      * }</pre>
      *
@@ -2960,8 +2960,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * 
-     * boolean removed1 = Maps.remove(map, "a", 1);  // true, entry removed
-     * boolean removed2 = Maps.remove(map, "b", 3);  // false, value doesn't match
+     * boolean removed1 = Maps.remove(map, "a", 1);   // true, entry removed
+     * boolean removed2 = Maps.remove(map, "b", 3);   // false, value doesn't match
      * // map: {b=2}
      * }</pre>
      *
@@ -3296,8 +3296,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * 
-     * boolean replaced1 = Maps.replace(map, "a", 1, 10);  // true
-     * boolean replaced2 = Maps.replace(map, "b", 3, 20);  // false, old value doesn't match
+     * boolean replaced1 = Maps.replace(map, "a", 1, 10);   // true
+     * boolean replaced2 = Maps.replace(map, "b", 3, 20);   // false, old value doesn't match
      * // map: {a=10, b=2}
      * }</pre>
      *
@@ -3336,8 +3336,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * 
-     * Integer oldValue1 = Maps.replace(map, "a", 10);  // returns 1
-     * Integer oldValue2 = Maps.replace(map, "c", 30);  // returns null
+     * Integer oldValue1 = Maps.replace(map, "a", 10);   // returns 1
+     * Integer oldValue2 = Maps.replace(map, "c", 30);   // returns null
      * // map: {a=10, b=2}
      * }</pre>
      *

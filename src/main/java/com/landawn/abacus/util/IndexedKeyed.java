@@ -26,9 +26,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, User> indexed = IndexedKeyed.of(0, "user123", new User("John"));
- * System.out.println(indexed.index()); // prints: 0
- * System.out.println(indexed.key());   // prints: "user123"
- * System.out.println(indexed.val());   // prints: User object
+ * System.out.println(indexed.index());  // prints: 0
+ * System.out.println(indexed.key());  // prints: "user123"
+ * System.out.println(indexed.val());  // prints: User object
  * }</pre>
  *
  * @param <K> the type of the key
@@ -87,7 +87,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, String> item = IndexedKeyed.of(3, "key", "value");
-     * int pos = item.index(); // returns 3
+     * int pos = item.index();  // returns 3
      * }</pre>
      *
      * @return the index value, which can be any integer including negative values
@@ -147,8 +147,8 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * IndexedKeyed<String, String> item2 = IndexedKeyed.of(1, "key", "value2");
      * IndexedKeyed<String, String> item3 = IndexedKeyed.of(1, "other", "value1");
      *
-     * item1.equals(item2); // true - same index and key, different value
-     * item1.equals(item3); // false - same index but different key
+     * item1.equals(item2);   // true - same index and key, different value
+     * item1.equals(item3);   // false - same index but different key
      * }</pre>
      *
      * @param obj the reference object with which to compare
@@ -186,10 +186,10 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, Integer> item1 = IndexedKeyed.of(2, "abc", 42);
-     * System.out.println(item1); // Output: {index=2, key=abc, val=42}
+     * System.out.println(item1);  // Output: {index=2, key=abc, val=42}
      *
      * IndexedKeyed<String, String> item2 = IndexedKeyed.of(0, null, "test");
-     * System.out.println(item2); // Output: {index=0, key=null, val=test}
+     * System.out.println(item2);  // Output: {index=0, key=null, val=test}
      * }</pre>
      *
      * @return a string representation of this object showing index, key, and value

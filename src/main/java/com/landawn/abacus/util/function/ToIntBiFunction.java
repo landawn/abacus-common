@@ -38,10 +38,10 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToIntBiFunction<String, String> combinedLength = (s1, s2) -> s1.length() + s2.length();
-     * int total = combinedLength.applyAsInt("Hello", "World"); // returns 10
+     * int total = combinedLength.applyAsInt("Hello", "World");  // returns 10
      *
      * ToIntBiFunction<Integer, Integer> multiplier = (a, b) -> a * b;
-     * int product = multiplier.applyAsInt(5, 6); // returns 30
+     * int product = multiplier.applyAsInt(5, 6);  // returns 30
      * }</pre>
      *
      * @param t the first function argument

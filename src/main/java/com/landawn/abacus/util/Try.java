@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * <pre>{@code
  * // Execute code that throws checked exceptions
  * Try.run(() -> {
- *     Thread.sleep(1000); // throws InterruptedException
+ *     Thread.sleep(1000);  // throws InterruptedException
  * });
  * 
  * // Call code with return value and default on exception

@@ -143,7 +143,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains double value 3.14159
      * OptionalDouble opt = type.get(rs, 1);
@@ -173,7 +173,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "price" contains double value 99.99
      * OptionalDouble opt = type.get(rs, "price");

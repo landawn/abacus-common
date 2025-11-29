@@ -74,10 +74,10 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleBiPredicate areClose = (d1, d2) -> Math.abs(d1 - d2) < 0.001;
-     * boolean result = areClose.test(1.0001, 1.0002); // Returns true
+     * boolean result = areClose.test(1.0001, 1.0002);  // Returns true
      *
      * DoubleBiPredicate firstGreater = (d1, d2) -> d1 > d2;
-     * boolean result2 = firstGreater.test(5.5, 3.3); // Returns true
+     * boolean result2 = firstGreater.test(5.5, 3.3);  // Returns true
      * }</pre>
      *
      * @param t the first double input argument
@@ -94,7 +94,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * <pre>{@code
      * DoubleBiPredicate areEqual = EQUAL;
      * DoubleBiPredicate areNotEqual = areEqual.negate();
-     * boolean result = areNotEqual.test(1.5, 2.5); // Returns true
+     * boolean result = areNotEqual.test(1.5, 2.5);  // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -112,7 +112,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * DoubleBiPredicate bothPositive = (d1, d2) -> d1 > 0 && d2 > 0;
      * DoubleBiPredicate bothLessThan100 = (d1, d2) -> d1 < 100 && d2 < 100;
      * DoubleBiPredicate combined = bothPositive.and(bothLessThan100);
-     * boolean result = combined.test(5.0, 10.0); // Returns true
+     * boolean result = combined.test(5.0, 10.0);  // Returns true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -131,7 +131,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * DoubleBiPredicate areEqual = EQUAL;
      * DoubleBiPredicate firstIsZero = (d1, d2) -> d1 == 0.0;
      * DoubleBiPredicate combined = areEqual.or(firstIsZero);
-     * boolean result = combined.test(0.0, 5.0); // Returns true (first is zero)
+     * boolean result = combined.test(0.0, 5.0);  // Returns true (first is zero)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

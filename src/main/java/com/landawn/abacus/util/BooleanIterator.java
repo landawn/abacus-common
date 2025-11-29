@@ -87,7 +87,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.empty();
-     * System.out.println(iter.hasNext()); // false
+     * System.out.println(iter.hasNext());  // false
      * }</pre>
      *
      * @return an empty {@code BooleanIterator}
@@ -312,8 +312,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * boolean first = iter.nextBoolean(); // true
-     * boolean second = iter.nextBoolean(); // false
+     * boolean first = iter.nextBoolean();    // true
+     * boolean second = iter.nextBoolean();   // false
      * }</pre>
      *
      * @return the next boolean value
@@ -328,7 +328,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator skipped = iter.skip(2);
-     * boolean value = skipped.nextBoolean(); // true (third element)
+     * boolean value = skipped.nextBoolean();  // true (third element)
      * }</pre>
      *
      * @param n the number of elements to skip
@@ -478,10 +478,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * OptionalBoolean first = iter.first(); // OptionalBoolean.of(true)
+     * OptionalBoolean first = iter.first();  // OptionalBoolean.of(true)
      * 
      * BooleanIterator empty = BooleanIterator.empty();
-     * OptionalBoolean none = empty.first(); // OptionalBoolean.empty()
+     * OptionalBoolean none = empty.first();  // OptionalBoolean.empty()
      * }</pre>
      *
      * @return an OptionalBoolean containing the first element, or empty
@@ -502,7 +502,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
-     * OptionalBoolean last = iter.last(); // OptionalBoolean.of(true)
+     * OptionalBoolean last = iter.last();  // OptionalBoolean.of(true)
      * }</pre>
      *
      * @return an OptionalBoolean containing the last element, or empty
@@ -534,7 +534,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // array = [true, false, true]
      *
      * // Empty iterator returns empty array
-     * boolean[] empty = BooleanIterator.empty().toArray(); // empty.length == 0
+     * boolean[] empty = BooleanIterator.empty().toArray();  // empty.length == 0
      * }</pre>
      *
      * @return a boolean array containing all remaining elements
@@ -557,7 +557,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // list contains [true, false, true]
      *
      * // Empty iterator returns empty list
-     * BooleanList empty = BooleanIterator.empty().toList(); // empty.size() == 0
+     * BooleanList empty = BooleanIterator.empty().toList();  // empty.size() == 0
      * }</pre>
      *
      * @return a BooleanList containing all remaining elements
@@ -580,7 +580,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * long trueCount = iter.stream()
      *     .filter(b -> b)
-     *     .count(); // Returns 2
+     *     .count();  // Returns 2
      * }</pre>
      *
      * @return a Stream of Boolean values

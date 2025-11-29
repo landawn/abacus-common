@@ -29,11 +29,11 @@ import com.landawn.abacus.util.Strings;
  *
  * // Convert Pattern to string
  * Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
- * String patternStr = patternType.stringOf(emailPattern); // Returns "^[A-Za-z0-9+_.-]+@(.+)$"
+ * String patternStr = patternType.stringOf(emailPattern);  // Returns "^[A-Za-z0-9+_.-]+@(.+)$"
  *
  * // Convert string to Pattern
  * Pattern restored = patternType.valueOf("^[A-Za-z0-9+_.-]+@(.+)$");
- * boolean matches = restored.matcher("test@example.com").matches(); // true
+ * boolean matches = restored.matcher("test@example.com").matches();  // true
  * }</pre>
  */
 public class PatternType extends AbstractType<Pattern> {

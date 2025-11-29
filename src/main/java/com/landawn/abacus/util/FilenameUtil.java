@@ -45,16 +45,16 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get file extension
- * String ext = FilenameUtil.getExtension("report.pdf"); // Returns "pdf"
+ * String ext = FilenameUtil.getExtension("report.pdf");  // Returns "pdf"
  * 
  * // Get base name without extension
- * String base = FilenameUtil.getBaseName("/docs/report.pdf"); // Returns "report"
+ * String base = FilenameUtil.getBaseName("/docs/report.pdf");  // Returns "report"
  * 
  * // Normalize path
- * String normalized = FilenameUtil.normalize("/foo/../bar/./file.txt"); // Returns "/bar/file.txt"
+ * String normalized = FilenameUtil.normalize("/foo/../bar/./file.txt");  // Returns "/bar/file.txt"
  * 
  * // Check if file matches wildcard pattern
- * boolean matches = FilenameUtil.wildcardMatch("test.java", "*.java"); // Returns true
+ * boolean matches = FilenameUtil.wildcardMatch("test.java", "*.java");  // Returns true
  * }</pre>
  *
  * <p>Origin of code: Excalibur, Alexandria, Tomcat, Commons-Utils.</p>
@@ -157,10 +157,10 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Force Unix separators
-     * FilenameUtil.normalize("C:\\foo\\bar", true);   // Returns "C:/foo/bar"
+     * FilenameUtil.normalize("C:\\foo\\bar", true);  // Returns "C:/foo/bar"
      *
      * // Force Windows separators
-     * FilenameUtil.normalize("/foo/bar", false);      // Returns "\\foo\\bar"
+     * FilenameUtil.normalize("/foo/bar", false);  // Returns "\\foo\\bar"
      * }</pre>
      *
      * @param filename the filename to normalize, {@code null} returns null
@@ -185,10 +185,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.normalizeNoEndSeparator("/foo//");      // Returns "/foo"
-     * FilenameUtil.normalizeNoEndSeparator("/foo/./");     // Returns "/foo"
-     * FilenameUtil.normalizeNoEndSeparator("/foo/../bar"); // Returns "/bar"
-     * FilenameUtil.normalizeNoEndSeparator("/foo/bar/");   // Returns "/foo/bar"
+     * FilenameUtil.normalizeNoEndSeparator("/foo//");        // Returns "/foo"
+     * FilenameUtil.normalizeNoEndSeparator("/foo/./");       // Returns "/foo"
+     * FilenameUtil.normalizeNoEndSeparator("/foo/../bar");   // Returns "/bar"
+     * FilenameUtil.normalizeNoEndSeparator("/foo/bar/");     // Returns "/foo/bar"
      * }</pre>
      *
      * @param filename the filename to normalize, {@code null} returns null
@@ -205,7 +205,7 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unix separators, no trailing slash
-     * FilenameUtil.normalizeNoEndSeparator("C:\\foo\\bar\\", true); // Returns "C:/foo/bar"
+     * FilenameUtil.normalizeNoEndSeparator("C:\\foo\\bar\\", true);  // Returns "C:/foo/bar"
      * }</pre>
      *
      * @param filename the filename to normalize, {@code null} returns null
@@ -322,12 +322,12 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.concat("/foo/", "bar");       // Returns "/foo/bar"
-     * FilenameUtil.concat("/foo", "bar");        // Returns "/foo/bar"
-     * FilenameUtil.concat("/foo", "/bar");       // Returns "/bar"
-     * FilenameUtil.concat("/foo", "C:/bar");     // Returns "C:/bar"
-     * FilenameUtil.concat("/foo/a/", "../bar");  // Returns "/foo/bar"
-     * FilenameUtil.concat("/foo/", "../../bar"); // Returns null
+     * FilenameUtil.concat("/foo/", "bar");         // Returns "/foo/bar"
+     * FilenameUtil.concat("/foo", "bar");          // Returns "/foo/bar"
+     * FilenameUtil.concat("/foo", "/bar");         // Returns "/bar"
+     * FilenameUtil.concat("/foo", "C:/bar");       // Returns "C:/bar"
+     * FilenameUtil.concat("/foo/a/", "../bar");    // Returns "/foo/bar"
+     * FilenameUtil.concat("/foo/", "../../bar");   // Returns null
      * }</pre>
      *
      * @param basePath the base path to attach to, always treated as a path
@@ -372,9 +372,9 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.directoryContains("/Users/john", "/Users/john/documents"); // Returns true
-     * FilenameUtil.directoryContains("/Users/john", "/Users/jane/documents"); // Returns false
-     * FilenameUtil.directoryContains("/Users/john", "/Users/john");          // Returns false
+     * FilenameUtil.directoryContains("/Users/john", "/Users/john/documents");   // Returns true
+     * FilenameUtil.directoryContains("/Users/john", "/Users/jane/documents");   // Returns false
+     * FilenameUtil.directoryContains("/Users/john", "/Users/john");             // Returns false
      * }</pre>
      *
      * @param canonicalParent the file to consider as the parent
@@ -403,8 +403,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.separatorsToUnix("C:\\docs\\file.txt"); // Returns "C:/docs/file.txt"
-     * FilenameUtil.separatorsToUnix("/already/unix");      // Returns "/already/unix"
+     * FilenameUtil.separatorsToUnix("C:\\docs\\file.txt");   // Returns "C:/docs/file.txt"
+     * FilenameUtil.separatorsToUnix("/already/unix");        // Returns "/already/unix"
      * }</pre>
      *
      * @param path the path to be changed, {@code null} ignored
@@ -422,8 +422,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.separatorsToWindows("/docs/file.txt");    // Returns "\\docs\\file.txt"
-     * FilenameUtil.separatorsToWindows("C:\\already\\windows"); // Returns "C:\\already\\windows"
+     * FilenameUtil.separatorsToWindows("/docs/file.txt");         // Returns "\\docs\\file.txt"
+     * FilenameUtil.separatorsToWindows("C:\\already\\windows");   // Returns "C:\\already\\windows"
      * }</pre>
      *
      * @param path the path to be changed, {@code null} ignored
@@ -444,10 +444,10 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
-     * FilenameUtil.separatorsToSystem("/docs/file.txt"); // Returns "\\docs\\file.txt"
+     * FilenameUtil.separatorsToSystem("/docs/file.txt");  // Returns "\\docs\\file.txt"
      * 
      * // On Unix/Linux/Mac:
-     * FilenameUtil.separatorsToSystem("C:\\docs\\file.txt"); // Returns "C:/docs/file.txt"
+     * FilenameUtil.separatorsToSystem("C:\\docs\\file.txt");  // Returns "C:/docs/file.txt"
      * }</pre>
      *
      * @param path the path to be changed, {@code null} ignored
@@ -556,9 +556,9 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.indexOfLastSeparator("a/b/c.txt");  // Returns 3
-     * FilenameUtil.indexOfLastSeparator("a\\b\\c.txt"); // Returns 3
-     * FilenameUtil.indexOfLastSeparator("file.txt");    // Returns -1
+     * FilenameUtil.indexOfLastSeparator("a/b/c.txt");     // Returns 3
+     * FilenameUtil.indexOfLastSeparator("a\\b\\c.txt");   // Returns 3
+     * FilenameUtil.indexOfLastSeparator("file.txt");      // Returns -1
      * }</pre>
      *
      * @param filename the filename to find the last path separator in, {@code null} returns -1
@@ -580,10 +580,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.indexOfExtension("file.txt");     // Returns 4
-     * FilenameUtil.indexOfExtension("a/b/file.txt"); // Returns 8
-     * FilenameUtil.indexOfExtension("a.txt/b");      // Returns -1 (no extension)
-     * FilenameUtil.indexOfExtension("a/b/c");        // Returns -1
+     * FilenameUtil.indexOfExtension("file.txt");       // Returns 4
+     * FilenameUtil.indexOfExtension("a/b/file.txt");   // Returns 8
+     * FilenameUtil.indexOfExtension("a.txt/b");        // Returns -1 (no extension)
+     * FilenameUtil.indexOfExtension("a/b/c");          // Returns -1
      * }</pre>
      *
      * @param filename the filename to find the last extension separator in, {@code null} returns -1
@@ -607,10 +607,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getPrefix("C:\\a\\b\\c.txt");  // Returns "C:\\"
-     * FilenameUtil.getPrefix("/a/b/c.txt");       // Returns "/"
-     * FilenameUtil.getPrefix("~/a/b/c.txt");      // Returns "~/"
-     * FilenameUtil.getPrefix("a/b/c.txt");        // Returns ""
+     * FilenameUtil.getPrefix("C:\\a\\b\\c.txt");   // Returns "C:\\"
+     * FilenameUtil.getPrefix("/a/b/c.txt");        // Returns "/"
+     * FilenameUtil.getPrefix("~/a/b/c.txt");       // Returns "~/"
+     * FilenameUtil.getPrefix("a/b/c.txt");         // Returns ""
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -641,10 +641,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getPath("C:\\a\\b\\c.txt"); // Returns "a\\b\\"
-     * FilenameUtil.getPath("~/a/b/c.txt");     // Returns "a/b/"
-     * FilenameUtil.getPath("a.txt");           // Returns ""
-     * FilenameUtil.getPath("a/b/c");           // Returns "a/b/"
+     * FilenameUtil.getPath("C:\\a\\b\\c.txt");   // Returns "a\\b\\"
+     * FilenameUtil.getPath("~/a/b/c.txt");       // Returns "a/b/"
+     * FilenameUtil.getPath("a.txt");             // Returns ""
+     * FilenameUtil.getPath("a/b/c");             // Returns "a/b/"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -661,10 +661,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getPathNoEndSeparator("C:\\a\\b\\c.txt"); // Returns "a\\b"
-     * FilenameUtil.getPathNoEndSeparator("~/a/b/c.txt");     // Returns "a/b"
-     * FilenameUtil.getPathNoEndSeparator("a.txt");           // Returns ""
-     * FilenameUtil.getPathNoEndSeparator("a/b/c/");          // Returns "a/b/c"
+     * FilenameUtil.getPathNoEndSeparator("C:\\a\\b\\c.txt");   // Returns "a\\b"
+     * FilenameUtil.getPathNoEndSeparator("~/a/b/c.txt");       // Returns "a/b"
+     * FilenameUtil.getPathNoEndSeparator("a.txt");             // Returns ""
+     * FilenameUtil.getPathNoEndSeparator("a/b/c/");            // Returns "a/b/c"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -702,10 +702,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getFullPath("C:\\a\\b\\c.txt"); // Returns "C:\\a\\b\\"
-     * FilenameUtil.getFullPath("~/a/b/c.txt");     // Returns "~/a/b/"
-     * FilenameUtil.getFullPath("a.txt");           // Returns ""
-     * FilenameUtil.getFullPath("C:");              // Returns "C:"
+     * FilenameUtil.getFullPath("C:\\a\\b\\c.txt");   // Returns "C:\\a\\b\\"
+     * FilenameUtil.getFullPath("~/a/b/c.txt");       // Returns "~/a/b/"
+     * FilenameUtil.getFullPath("a.txt");             // Returns ""
+     * FilenameUtil.getFullPath("C:");                // Returns "C:"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -720,11 +720,11 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getFullPathNoEndSeparator("C:\\a\\b\\c.txt"); // Returns "C:\\a\\b"
-     * FilenameUtil.getFullPathNoEndSeparator("~/a/b/c.txt");     // Returns "~/a/b"
-     * FilenameUtil.getFullPathNoEndSeparator("a.txt");           // Returns ""
-     * FilenameUtil.getFullPathNoEndSeparator("a/b/c/");          // Returns "a/b/c"
-     * FilenameUtil.getFullPathNoEndSeparator("C:\\");          // Returns "C:\"
+     * FilenameUtil.getFullPathNoEndSeparator("C:\\a\\b\\c.txt");   // Returns "C:\\a\\b"
+     * FilenameUtil.getFullPathNoEndSeparator("~/a/b/c.txt");       // Returns "~/a/b"
+     * FilenameUtil.getFullPathNoEndSeparator("a.txt");             // Returns ""
+     * FilenameUtil.getFullPathNoEndSeparator("a/b/c/");            // Returns "a/b/c"
+     * FilenameUtil.getFullPathNoEndSeparator("C:\\");              // Returns "C:\"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -769,10 +769,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getName("a/b/c.txt"); // Returns "c.txt"
-     * FilenameUtil.getName("a.txt");     // Returns "a.txt"
-     * FilenameUtil.getName("a/b/c");     // Returns "c"
-     * FilenameUtil.getName("a/b/c/");    // Returns ""
+     * FilenameUtil.getName("a/b/c.txt");   // Returns "c.txt"
+     * FilenameUtil.getName("a.txt");       // Returns "a.txt"
+     * FilenameUtil.getName("a/b/c");       // Returns "c"
+     * FilenameUtil.getName("a/b/c/");      // Returns ""
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -812,10 +812,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getBaseName("a/b/c.txt"); // Returns "c"
-     * FilenameUtil.getBaseName("a.txt");     // Returns "a"
-     * FilenameUtil.getBaseName("a/b/c");     // Returns "c"
-     * FilenameUtil.getBaseName("a/b/c/");    // Returns ""
+     * FilenameUtil.getBaseName("a/b/c.txt");   // Returns "c"
+     * FilenameUtil.getBaseName("a.txt");       // Returns "a"
+     * FilenameUtil.getBaseName("a/b/c");       // Returns "c"
+     * FilenameUtil.getBaseName("a/b/c/");      // Returns ""
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns null
@@ -835,10 +835,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.getExtension("foo.txt");   // Returns "txt"
-     * FilenameUtil.getExtension("a/b/c.jpg"); // Returns "jpg"
-     * FilenameUtil.getExtension("a/b.txt/c"); // Returns ""
-     * FilenameUtil.getExtension("a/b/c");     // Returns ""
+     * FilenameUtil.getExtension("foo.txt");     // Returns "txt"
+     * FilenameUtil.getExtension("a/b/c.jpg");   // Returns "jpg"
+     * FilenameUtil.getExtension("a/b.txt/c");   // Returns ""
+     * FilenameUtil.getExtension("a/b/c");       // Returns ""
      * }</pre>
      *
      * @param filename the filename to retrieve the extension of
@@ -870,10 +870,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.removeExtension("foo.txt");    // Returns "foo"
-     * FilenameUtil.removeExtension("a\\b\\c.jpg"); // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a\\b\\c");     // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a.b\\c");      // Returns "a.b\\c"
+     * FilenameUtil.removeExtension("foo.txt");       // Returns "foo"
+     * FilenameUtil.removeExtension("a\\b\\c.jpg");   // Returns "a\\b\\c"
+     * FilenameUtil.removeExtension("a\\b\\c");       // Returns "a\\b\\c"
+     * FilenameUtil.removeExtension("a.b\\c");        // Returns "a.b\\c"
      * FilenameUtil.removeExtension(null)            = null
      * }</pre>
      *
@@ -906,9 +906,9 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.equals("file.txt", "file.txt"); // Returns true
-     * FilenameUtil.equals("file.txt", "FILE.TXT"); // Returns false
-     * FilenameUtil.equals(null, null);             // Returns true
+     * FilenameUtil.equals("file.txt", "file.txt");   // Returns true
+     * FilenameUtil.equals("file.txt", "FILE.TXT");   // Returns false
+     * FilenameUtil.equals(null, null);               // Returns true
      * }</pre>
      *
      * @param filename1 the first filename to query, may be null
@@ -928,10 +928,10 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
-     * FilenameUtil.equalsOnSystem("file.txt", "FILE.TXT"); // Returns true
+     * FilenameUtil.equalsOnSystem("file.txt", "FILE.TXT");  // Returns true
      * 
      * // On Unix/Linux:
-     * FilenameUtil.equalsOnSystem("file.txt", "FILE.TXT"); // Returns false
+     * FilenameUtil.equalsOnSystem("file.txt", "FILE.TXT");  // Returns false
      * }</pre>
      *
      * @param filename1 the first filename to query, may be null
@@ -953,8 +953,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.equalsNormalized("/foo/bar", "/foo/./bar");     // Returns true
-     * FilenameUtil.equalsNormalized("/foo/bar", "/foo/../foo/bar"); // Returns true
+     * FilenameUtil.equalsNormalized("/foo/bar", "/foo/./bar");        // Returns true
+     * FilenameUtil.equalsNormalized("/foo/bar", "/foo/../foo/bar");   // Returns true
      * }</pre>
      *
      * @param filename1 the first filename to query, may be null
@@ -974,10 +974,10 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
-     * FilenameUtil.equalsNormalizedOnSystem("/foo/bar", "/FOO/./BAR"); // Returns true
+     * FilenameUtil.equalsNormalizedOnSystem("/foo/bar", "/FOO/./BAR");  // Returns true
      * 
      * // On Unix:
-     * FilenameUtil.equalsNormalizedOnSystem("/foo/bar", "/FOO/./BAR"); // Returns false
+     * FilenameUtil.equalsNormalizedOnSystem("/foo/bar", "/FOO/./BAR");  // Returns false
      * }</pre>
      *
      * @param filename1 the first filename to query, may be null
@@ -1001,8 +1001,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.equals("/foo/bar", "/foo/./bar", true, IOCase.SENSITIVE);  // Returns true
-     * FilenameUtil.equals("file.txt", "FILE.TXT", false, IOCase.INSENSITIVE); // Returns true
+     * FilenameUtil.equals("/foo/bar", "/foo/./bar", true, IOCase.SENSITIVE);    // Returns true
+     * FilenameUtil.equals("file.txt", "FILE.TXT", false, IOCase.INSENSITIVE);   // Returns true
      * }</pre>
      *
      * @param filename1 the first filename to query, may be null
@@ -1039,10 +1039,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.isExtension("file.txt", "txt");  // Returns true
-     * FilenameUtil.isExtension("file.txt", "TXT");  // Returns false
-     * FilenameUtil.isExtension("file", "");         // Returns true
-     * FilenameUtil.isExtension("file.txt", null);   // Returns false
+     * FilenameUtil.isExtension("file.txt", "txt");   // Returns true
+     * FilenameUtil.isExtension("file.txt", "TXT");   // Returns false
+     * FilenameUtil.isExtension("file", "");          // Returns true
+     * FilenameUtil.isExtension("file.txt", null);    // Returns false
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns false
@@ -1071,8 +1071,8 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] exts = {"txt", "xml", "json"};
-     * FilenameUtil.isExtension("file.txt", exts);  // Returns true
-     * FilenameUtil.isExtension("file.doc", exts);  // Returns false
+     * FilenameUtil.isExtension("file.txt", exts);   // Returns true
+     * FilenameUtil.isExtension("file.doc", exts);   // Returns false
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns false
@@ -1106,8 +1106,8 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> exts = Arrays.asList("txt", "xml", "json");
-     * FilenameUtil.isExtension("file.txt", exts);  // Returns true
-     * FilenameUtil.isExtension("file.doc", exts);  // Returns false
+     * FilenameUtil.isExtension("file.txt", exts);   // Returns true
+     * FilenameUtil.isExtension("file.doc", exts);   // Returns false
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns false
@@ -1143,11 +1143,11 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.wildcardMatch("c.txt", "*.txt");      // Returns true
-     * FilenameUtil.wildcardMatch("c.txt", "*.jpg");      // Returns false
-     * FilenameUtil.wildcardMatch("a/b/c.txt", "a/b/*");  // Returns true
-     * FilenameUtil.wildcardMatch("c.txt", "*.???");      // Returns true
-     * FilenameUtil.wildcardMatch("c.txt", "*.????");     // Returns false
+     * FilenameUtil.wildcardMatch("c.txt", "*.txt");       // Returns true
+     * FilenameUtil.wildcardMatch("c.txt", "*.jpg");       // Returns false
+     * FilenameUtil.wildcardMatch("a/b/c.txt", "a/b/*");   // Returns true
+     * FilenameUtil.wildcardMatch("c.txt", "*.???");       // Returns true
+     * FilenameUtil.wildcardMatch("c.txt", "*.????");      // Returns false
      * }</pre>
      *
      * @param filename the filename to match on
@@ -1167,10 +1167,10 @@ public final class FilenameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
-     * FilenameUtil.wildcardMatchOnSystem("file.TXT", "*.txt"); // Returns true
+     * FilenameUtil.wildcardMatchOnSystem("file.TXT", "*.txt");  // Returns true
      * 
      * // On Unix:
-     * FilenameUtil.wildcardMatchOnSystem("file.TXT", "*.txt"); // Returns false
+     * FilenameUtil.wildcardMatchOnSystem("file.TXT", "*.txt");  // Returns false
      * }</pre>
      *
      * @param filename the filename to match on
@@ -1198,9 +1198,9 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.wildcardMatch("file.txt", "*.txt", IOCase.SENSITIVE);   // Returns true
-     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.INSENSITIVE); // Returns true
-     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.SENSITIVE);   // Returns false
+     * FilenameUtil.wildcardMatch("file.txt", "*.txt", IOCase.SENSITIVE);     // Returns true
+     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.INSENSITIVE);   // Returns true
+     * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.SENSITIVE);     // Returns false
      * }</pre>
      *
      * @param filename the filename to match on, {@code null} returns {@code true} only if wildcardMatcher is also {@code null}
@@ -1308,10 +1308,10 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitOnTokens("*.txt")        // Returns ["*", ".txt"]
-     * splitOnTokens("file?.txt")    // Returns ["file", "?", ".txt"]
-     * splitOnTokens("a**b")         // Returns ["a", "*", "b"]
-     * splitOnTokens("plain")        // Returns ["plain"]
+     * splitOnTokens("*.txt");       // Returns ["*", ".txt"]
+     * splitOnTokens("file?.txt");   // Returns ["file", "?", ".txt"]
+     * splitOnTokens("a**b");        // Returns ["a", "*", "b"]
+     * splitOnTokens("plain");       // Returns ["plain"]
      * }</pre>
      *
      * @param text the wildcard pattern text to split, must not be {@code null}

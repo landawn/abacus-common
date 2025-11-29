@@ -36,7 +36,7 @@ public interface BooleanToCharFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanToCharFunction converter = value -> value ? 'T' : 'F';
-     * char result = converter.applyAsChar(true); // Returns 'T'
+     * char result = converter.applyAsChar(true);  // Returns 'T'
      * }</pre>
      *
      * @param value the function argument

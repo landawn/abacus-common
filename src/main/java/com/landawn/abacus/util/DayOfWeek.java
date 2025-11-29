@@ -25,10 +25,10 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get day from integer value
- * DayOfWeek monday = DayOfWeek.valueOf(1); // Returns MONDAY
+ * DayOfWeek monday = DayOfWeek.valueOf(1);  // Returns MONDAY
  * 
  * // Get integer value from day
- * int dayValue = DayOfWeek.FRIDAY.intValue(); // Returns 5
+ * int dayValue = DayOfWeek.FRIDAY.intValue();  // Returns 5
  * 
  * // Use in switch statements
  * DayOfWeek today = DayOfWeek.WEDNESDAY;
@@ -102,8 +102,8 @@ public enum DayOfWeek {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int fridayValue = DayOfWeek.FRIDAY.intValue(); // Returns 5
-     * int sundayValue = DayOfWeek.SUNDAY.intValue(); // Returns 0
+     * int fridayValue = DayOfWeek.FRIDAY.intValue();   // Returns 5
+     * int sundayValue = DayOfWeek.SUNDAY.intValue();   // Returns 0
      * }</pre>
      *
      * @return the integer value of this day (0 for Sunday through 6 for Saturday)
@@ -119,9 +119,9 @@ public enum DayOfWeek {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DayOfWeek monday = DayOfWeek.valueOf(1);    // Returns MONDAY
-     * DayOfWeek sunday = DayOfWeek.valueOf(0);    // Returns SUNDAY
-     * DayOfWeek saturday = DayOfWeek.valueOf(6);  // Returns SATURDAY
+     * DayOfWeek monday = DayOfWeek.valueOf(1);     // Returns MONDAY
+     * DayOfWeek sunday = DayOfWeek.valueOf(0);     // Returns SUNDAY
+     * DayOfWeek saturday = DayOfWeek.valueOf(6);   // Returns SATURDAY
      * 
      * // Useful for database operations
      * int storedDay = resultSet.getInt("day_of_week");

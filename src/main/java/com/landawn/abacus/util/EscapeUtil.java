@@ -260,10 +260,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeJava("Hello\nWorld")      = "Hello\\nWorld"
-     * EscapeUtil.escapeJava("He said \"Hi\"")    = "He said \\\"Hi\\\""
-     * EscapeUtil.escapeJava("C:\\temp\\file")    = "C:\\\\temp\\\\file"
-     * EscapeUtil.escapeJava(null)                = null
+     * EscapeUtil.escapeJava("Hello\nWorld")     = "Hello\\nWorld"
+     * EscapeUtil.escapeJava("He said \"Hi\"")   = "He said \\\"Hi\\\""
+     * EscapeUtil.escapeJava("C:\\temp\\file")   = "C:\\\\temp\\\\file"
+     * EscapeUtil.escapeJava(null)               = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -288,10 +288,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeEcmaScript("Don't stop")     = "Don\\'t stop"
-     * EscapeUtil.escapeEcmaScript("</script>")     = "<\\/script>"
-     * EscapeUtil.escapeEcmaScript("He said \"Hi\"") = "He said \\\"Hi\\\""
-     * EscapeUtil.escapeEcmaScript(null)             = null
+     * EscapeUtil.escapeEcmaScript("Don't stop")       = "Don\\'t stop"
+     * EscapeUtil.escapeEcmaScript("</script>")        = "<\\/script>"
+     * EscapeUtil.escapeEcmaScript("He said \"Hi\"")   = "He said \\\"Hi\\\""
+     * EscapeUtil.escapeEcmaScript(null)               = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -342,10 +342,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeJava("Hello\\nWorld")    = "Hello\nWorld"
-     * EscapeUtil.unescapeJava("He said \\\"Hi\\\"") = "He said \"Hi\""
-     * EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F") = "Hello"
-     * EscapeUtil.unescapeJava(null)               = null
+     * EscapeUtil.unescapeJava("Hello\\nWorld")                         = "Hello\nWorld"
+     * EscapeUtil.unescapeJava("He said \\\"Hi\\\"")                    = "He said \"Hi\""
+     * EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F")   = "Hello"
+     * EscapeUtil.unescapeJava(null)                                    = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -366,9 +366,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeEcmaScript("Don\\'t stop")  = "Don't stop"
-     * EscapeUtil.unescapeEcmaScript("<\\/script>")  = "</script>"
-     * EscapeUtil.unescapeEcmaScript(null)            = null
+     * EscapeUtil.unescapeEcmaScript("Don\\'t stop")   = "Don't stop"
+     * EscapeUtil.unescapeEcmaScript("<\\/script>")    = "</script>"
+     * EscapeUtil.unescapeEcmaScript(null)             = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -423,10 +423,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml4("<p>Hello</p>")  = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
-     * EscapeUtil.escapeHtml4("bread &amp; butter")    = "bread &amp;amp; butter"
-     * EscapeUtil.escapeHtml4("\"quoted\"")        = "&amp;quot;quoted&amp;quot;"
-     * EscapeUtil.escapeHtml4(null)                = null
+     * EscapeUtil.escapeHtml4("<p>Hello</p>")         = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
+     * EscapeUtil.escapeHtml4("bread &amp; butter")   = "bread &amp;amp; butter"
+     * EscapeUtil.escapeHtml4("\"quoted\"")           = "&amp;quot;quoted&amp;quot;"
+     * EscapeUtil.escapeHtml4(null)                   = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -448,9 +448,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml3("<div>")  = "&amp;lt;div&amp;gt;"
-     * EscapeUtil.escapeHtml3("A &amp; B")    = "A &amp;amp; B"
-     * EscapeUtil.escapeHtml3(null)       = null
+     * EscapeUtil.escapeHtml3("<div>")       = "&amp;lt;div&amp;gt;"
+     * EscapeUtil.escapeHtml3("A &amp; B")   = "A &amp;amp; B"
+     * EscapeUtil.escapeHtml3(null)          = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -477,11 +477,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")  = "<p>Hello</p>"
-     * EscapeUtil.unescapeHtml4("bread &amp;amp; butter")            = "bread &amp; butter"
-     * EscapeUtil.unescapeHtml4("&amp;copy; 2024")                   = "© 2024"
-     * EscapeUtil.unescapeHtml4("&amp;#65;")                         = "A"
-     * EscapeUtil.unescapeHtml4(null)                            = null
+     * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")   = "<p>Hello</p>"
+     * EscapeUtil.unescapeHtml4("bread &amp;amp; butter")                     = "bread &amp; butter"
+     * EscapeUtil.unescapeHtml4("&amp;copy; 2024")                            = "© 2024"
+     * EscapeUtil.unescapeHtml4("&amp;#65;")                                  = "A"
+     * EscapeUtil.unescapeHtml4(null)                                         = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -502,9 +502,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")  = "<div>"
-     * EscapeUtil.unescapeHtml3("A &amp;amp; B")    = "A &amp; B"
-     * EscapeUtil.unescapeHtml3(null)           = null
+     * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")   = "<div>"
+     * EscapeUtil.unescapeHtml3("A &amp;amp; B")         = "A &amp; B"
+     * EscapeUtil.unescapeHtml3(null)                    = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -534,10 +534,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml10("<root>data</root>")  = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
-     * EscapeUtil.escapeXml10("A &amp; B")                 = "A &amp;amp; B"
-     * EscapeUtil.escapeXml10("It's \"cool\"")        = "It&amp;apos;s &amp;quot;cool&amp;quot;"
-     * EscapeUtil.escapeXml10(null)                   = null
+     * EscapeUtil.escapeXml10("<root>data</root>")   = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
+     * EscapeUtil.escapeXml10("A &amp; B")           = "A &amp;amp; B"
+     * EscapeUtil.escapeXml10("It's \"cool\"")       = "It&amp;apos;s &amp;quot;cool&amp;quot;"
+     * EscapeUtil.escapeXml10(null)                  = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -569,9 +569,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml11("<tag>value</tag>")  = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
-     * EscapeUtil.escapeXml11("A &amp; B")                 = "A &amp;amp; B"
-     * EscapeUtil.escapeXml11(null)                   = null
+     * EscapeUtil.escapeXml11("<tag>value</tag>")   = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
+     * EscapeUtil.escapeXml11("A &amp; B")          = "A &amp;amp; B"
+     * EscapeUtil.escapeXml11(null)                 = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -598,11 +598,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")     = "<root>"
-     * EscapeUtil.unescapeXml("A &amp;amp; B")        = "A &amp; B"
-     * EscapeUtil.unescapeXml("&amp;apos;quoted&amp;apos;") = "'quoted'"
-     * EscapeUtil.unescapeXml("&amp;#65;")           = "A"
-     * EscapeUtil.unescapeXml(null)              = null
+     * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")         = "<root>"
+     * EscapeUtil.unescapeXml("A &amp;amp; B")                = "A &amp; B"
+     * EscapeUtil.unescapeXml("&amp;apos;quoted&amp;apos;")   = "'quoted'"
+     * EscapeUtil.unescapeXml("&amp;#65;")                    = "A"
+     * EscapeUtil.unescapeXml(null)                           = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -656,10 +656,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeCsv("simple")           = "simple"
-     * EscapeUtil.unescapeCsv("\"hello,world\"")  = "hello,world"
-     * EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"")  = "say \"hi\""
-     * EscapeUtil.unescapeCsv(null)               = null
+     * EscapeUtil.unescapeCsv("simple")               = "simple"
+     * EscapeUtil.unescapeCsv("\"hello,world\"")      = "hello,world"
+     * EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"")   = "say \"hi\""
+     * EscapeUtil.unescapeCsv(null)                   = null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null

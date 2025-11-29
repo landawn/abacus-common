@@ -242,14 +242,14 @@ public final class HttpUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid headers
-     * boolean valid1 = HttpUtil.isValidHttpHeader("Content-Type", "application/json"); // true
-     * boolean valid2 = HttpUtil.isValidHttpHeader("Authorization", "Bearer token123"); // true
+     * boolean valid1 = HttpUtil.isValidHttpHeader("Content-Type", "application/json");       // true
+     * boolean valid2 = HttpUtil.isValidHttpHeader("Authorization", "Bearer token123");       // true
      *
      * // Invalid headers
-     * boolean invalid1 = HttpUtil.isValidHttpHeader("", "value"); // false (empty key)
-     * boolean invalid2 = HttpUtil.isValidHttpHeader("Key:Name", "value"); // false (contains colon)
-     * boolean invalid3 = HttpUtil.isValidHttpHeader("Key\nName", "value"); // false (contains line separator)
-     * boolean invalid4 = HttpUtil.isValidHttpHeader("Key", "value\nwithout continuation"); // false (unescaped newline)
+     * boolean invalid1 = HttpUtil.isValidHttpHeader("", "value");                            // false (empty key)
+     * boolean invalid2 = HttpUtil.isValidHttpHeader("Key:Name", "value");                    // false (contains colon)
+     * boolean invalid3 = HttpUtil.isValidHttpHeader("Key\nName", "value");                   // false (contains line separator)
+     * boolean invalid4 = HttpUtil.isValidHttpHeader("Key", "value\nwithout continuation");   // false (unescaped newline)
      * }</pre>
      *
      * @param key The header key to validate
@@ -297,7 +297,7 @@ public final class HttpUtil {
      * 
      * // Multiple values
      * List<String> values = Arrays.asList("gzip", "deflate");
-     * String header2 = HttpUtil.readHttpHeadValue(values); // "gzip,deflate"
+     * String header2 = HttpUtil.readHttpHeadValue(values);  // "gzip,deflate"
      * }</pre>
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)

@@ -134,7 +134,7 @@ public final class HttpSettings {
      *
      * // Set different timeouts for connection and read operations
      * settings.setConnectionTimeout(5000)   // 5s to establish connection
-     *         .setReadTimeout(10000);        // 10s to read response
+     *         .setReadTimeout(10000);  // 10s to read response
      * }</pre>
      *
      * @param connectionTimeout The connection timeout in milliseconds (0 = infinite)
@@ -165,7 +165,7 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.setReadTimeout(10000); // 10 seconds
+     * settings.setReadTimeout(10000);  // 10 seconds
      * }</pre>
      *
      * @param readTimeout The read timeout in milliseconds

@@ -79,8 +79,6 @@ public class DigestUtil {
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The byte array to digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
-     *
-     * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final byte[] data) {
         return messageDigest.digest(data);
@@ -102,7 +100,6 @@ public class DigestUtil {
      * @param data The ByteBuffer containing data to digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
      *
-     * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final ByteBuffer data) {
         messageDigest.update(data);
@@ -127,7 +124,6 @@ public class DigestUtil {
      * @throws IOException If an I/O error occurs while reading the file
      * @throws java.io.FileNotFoundException if the file does not exist or cannot be opened
      *
-     * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final File data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -151,7 +147,6 @@ public class DigestUtil {
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading from the stream
      *
-     * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final InputStream data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -177,7 +172,6 @@ public class DigestUtil {
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading the file
      *
-     * @since 1.14
      */
     public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options) throws IOException {
         return updateDigest(messageDigest, data, options).digest();
@@ -201,7 +195,6 @@ public class DigestUtil {
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading the file
      *
-     * @since 1.14
      */
     public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -254,7 +247,6 @@ public class DigestUtil {
      * @return A MessageDigest instance for the algorithm if available, otherwise returns
      *         defaultMessageDigest (which may be {@code null})
      *
-     * @since 1.11
      */
     @MayReturnNull
     public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
@@ -294,7 +286,6 @@ public class DigestUtil {
      *                                  where MD2 support has been removed)
      *
      * @see MessageDigestAlgorithms#MD2
-     * @since 1.7
      */
     public static MessageDigest getMd2Digest() {
         return getDigest(MessageDigestAlgorithms.MD2);
@@ -342,7 +333,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If SHA-1 is not available (should not happen with standard JRE)
      *
      * @see MessageDigestAlgorithms#SHA_1
-     * @since 1.7
      */
     public static MessageDigest getSha1Digest() {
         return getDigest(MessageDigestAlgorithms.SHA_1);
@@ -387,7 +377,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If SHA3-224 is not available (requires Java 9 or later)
      *
      * @see MessageDigestAlgorithms#SHA3_224
-     * @since 1.12
      */
     public static MessageDigest getSha3_224Digest() {
         return getDigest(MessageDigestAlgorithms.SHA3_224);
@@ -411,7 +400,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If SHA3-256 is not available (requires Java 9 or later)
      *
      * @see MessageDigestAlgorithms#SHA3_256
-     * @since 1.12
      */
     public static MessageDigest getSha3_256Digest() {
         return getDigest(MessageDigestAlgorithms.SHA3_256);
@@ -433,7 +421,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If SHA3-384 is not available (requires Java 9 or later)
      *
      * @see MessageDigestAlgorithms#SHA3_384
-     * @since 1.12
      */
     public static MessageDigest getSha3_384Digest() {
         return getDigest(MessageDigestAlgorithms.SHA3_384);
@@ -456,7 +443,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If SHA3-512 is not available (requires Java 9 or later)
      *
      * @see MessageDigestAlgorithms#SHA3_512
-     * @since 1.12
      */
     public static MessageDigest getSha3_512Digest() {
         return getDigest(MessageDigestAlgorithms.SHA3_512);
@@ -586,7 +572,6 @@ public class DigestUtil {
      *                               Can be {@code null}, which will return {@code false}.
      * @return {@code true} if the algorithm is available and can be used, {@code false} otherwise
      *
-     * @since 1.11
      */
     public static boolean isAvailable(final String messageDigestAlgorithm) {
         return getDigest(messageDigestAlgorithm, null) != null;
@@ -605,7 +590,6 @@ public class DigestUtil {
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
      *
-     * @since 1.7
      */
     public static byte[] md2(final byte[] data) {
         return getMd2Digest().digest(data);
@@ -621,7 +605,6 @@ public class DigestUtil {
      * @return MD2 digest as a 16-byte array
      * @throws IOException If an I/O error occurs while reading the stream
      *
-     * @since 1.7
      */
     public static byte[] md2(final InputStream data) throws IOException {
         return digest(getMd2Digest(), data);
@@ -635,7 +618,6 @@ public class DigestUtil {
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
      *
-     * @since 1.7
      */
     public static byte[] md2(final String data) {
         return md2(Strings.getBytesUtf8(data));
@@ -655,7 +637,6 @@ public class DigestUtil {
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
      *
-     * @since 1.7
      */
     public static String md2Hex(final byte[] data) {
         return Hex.encodeToString(md2(data));
@@ -671,7 +652,6 @@ public class DigestUtil {
      * @return MD2 digest as a 32-character lowercase hexadecimal string
      * @throws IOException If an I/O error occurs while reading the stream
      *
-     * @since 1.7
      */
     public static String md2Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(md2(data));
@@ -685,7 +665,6 @@ public class DigestUtil {
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
      *
-     * @since 1.7
      */
     public static String md2Hex(final String data) {
         return Hex.encodeToString(md2(data));
@@ -719,7 +698,6 @@ public class DigestUtil {
      * @return MD5 digest as a 16-byte array
      * @throws IOException If an I/O error occurs while reading the stream
      *
-     * @since 1.4
      */
     public static byte[] md5(final InputStream data) throws IOException {
         return digest(getMd5Digest(), data);
@@ -766,7 +744,6 @@ public class DigestUtil {
      * @return MD5 digest as a 32-character lowercase hexadecimal string
      * @throws IOException If an I/O error occurs while reading the stream
      *
-     * @since 1.4
      */
     public static String md5Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(md5(data));
@@ -808,7 +785,6 @@ public class DigestUtil {
      * @return SHA-1 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * @deprecated Use {@link #sha1(InputStream)} instead
-     * @since 1.4
      */
     @Deprecated
     public static byte[] sha(final InputStream data) throws IOException {
@@ -834,7 +810,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-1 digest as a 20-byte array
      * 
-     * @since 1.7
      */
     public static byte[] sha1(final byte[] data) {
         return getSha1Digest().digest(data);
@@ -847,7 +822,6 @@ public class DigestUtil {
      * @return SHA-1 digest as a 20-byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.7
      */
     public static byte[] sha1(final InputStream data) throws IOException {
         return digest(getSha1Digest(), data);
@@ -869,7 +843,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-1 digest as a hex string
      * 
-     * @since 1.7
      */
     public static String sha1Hex(final byte[] data) {
         return Hex.encodeToString(sha1(data));
@@ -882,7 +855,6 @@ public class DigestUtil {
      * @return SHA-1 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.7
      */
     public static String sha1Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha1(data));
@@ -894,7 +866,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-1 digest as a hex string
      * 
-     * @since 1.7
      */
     public static String sha1Hex(final String data) {
         return Hex.encodeToString(sha1(data));
@@ -913,7 +884,6 @@ public class DigestUtil {
      * @return SHA-256 digest as a 32-byte array
      * 
      * 
-     * @since 1.4
      */
     public static byte[] sha256(final byte[] data) {
         return getSha256Digest().digest(data);
@@ -926,7 +896,6 @@ public class DigestUtil {
      * @return SHA-256 digest as a 32-byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static byte[] sha256(final InputStream data) throws IOException {
         return digest(getSha256Digest(), data);
@@ -938,7 +907,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-256 digest as a 32-byte array
      * 
-     * @since 1.4
      */
     public static byte[] sha256(final String data) {
         return sha256(Strings.getBytesUtf8(data));
@@ -957,7 +925,6 @@ public class DigestUtil {
      * @return SHA-256 digest as a hex string
      * 
      * 
-     * @since 1.4
      */
     public static String sha256Hex(final byte[] data) {
         return Hex.encodeToString(sha256(data));
@@ -970,7 +937,6 @@ public class DigestUtil {
      * @return SHA-256 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static String sha256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha256(data));
@@ -982,7 +948,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-256 digest as a hex string
      * 
-     * @since 1.4
      */
     public static String sha256Hex(final String data) {
         return Hex.encodeToString(sha256(data));
@@ -995,7 +960,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-224 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_224(final byte[] data) {
         return getSha3_224Digest().digest(data);
@@ -1008,7 +972,6 @@ public class DigestUtil {
      * @return SHA3-224 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static byte[] sha3_224(final InputStream data) throws IOException {
         return digest(getSha3_224Digest(), data);
@@ -1020,7 +983,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-224 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_224(final String data) {
         return sha3_224(Strings.getBytesUtf8(data));
@@ -1032,7 +994,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-224 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_224Hex(final byte[] data) {
         return Hex.encodeToString(sha3_224(data));
@@ -1045,7 +1006,6 @@ public class DigestUtil {
      * @return SHA3-224 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static String sha3_224Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_224(data));
@@ -1057,7 +1017,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-224 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_224Hex(final String data) {
         return Hex.encodeToString(sha3_224(data));
@@ -1069,7 +1028,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-256 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_256(final byte[] data) {
         return getSha3_256Digest().digest(data);
@@ -1082,7 +1040,6 @@ public class DigestUtil {
      * @return SHA3-256 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static byte[] sha3_256(final InputStream data) throws IOException {
         return digest(getSha3_256Digest(), data);
@@ -1094,7 +1051,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-256 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_256(final String data) {
         return sha3_256(Strings.getBytesUtf8(data));
@@ -1106,7 +1062,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-256 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_256Hex(final byte[] data) {
         return Hex.encodeToString(sha3_256(data));
@@ -1119,7 +1074,6 @@ public class DigestUtil {
      * @return SHA3-256 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static String sha3_256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_256(data));
@@ -1131,7 +1085,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-256 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_256Hex(final String data) {
         return Hex.encodeToString(sha3_256(data));
@@ -1143,7 +1096,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-384 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_384(final byte[] data) {
         return getSha3_384Digest().digest(data);
@@ -1156,7 +1108,6 @@ public class DigestUtil {
      * @return SHA3-384 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static byte[] sha3_384(final InputStream data) throws IOException {
         return digest(getSha3_384Digest(), data);
@@ -1168,7 +1119,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-384 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_384(final String data) {
         return sha3_384(Strings.getBytesUtf8(data));
@@ -1180,7 +1130,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-384 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_384Hex(final byte[] data) {
         return Hex.encodeToString(sha3_384(data));
@@ -1193,7 +1142,6 @@ public class DigestUtil {
      * @return SHA3-384 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static String sha3_384Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_384(data));
@@ -1205,7 +1153,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-384 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_384Hex(final String data) {
         return Hex.encodeToString(sha3_384(data));
@@ -1218,7 +1165,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-512 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_512(final byte[] data) {
         return getSha3_512Digest().digest(data);
@@ -1231,7 +1177,6 @@ public class DigestUtil {
      * @return SHA3-512 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static byte[] sha3_512(final InputStream data) throws IOException {
         return digest(getSha3_512Digest(), data);
@@ -1243,7 +1188,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-512 digest as a byte array
      * 
-     * @since 1.12
      */
     public static byte[] sha3_512(final String data) {
         return sha3_512(Strings.getBytesUtf8(data));
@@ -1255,7 +1199,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA3-512 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_512Hex(final byte[] data) {
         return Hex.encodeToString(sha3_512(data));
@@ -1268,7 +1211,6 @@ public class DigestUtil {
      * @return SHA3-512 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.12
      */
     public static String sha3_512Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_512(data));
@@ -1280,7 +1222,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA3-512 digest as a hex string
      * 
-     * @since 1.12
      */
     public static String sha3_512Hex(final String data) {
         return Hex.encodeToString(sha3_512(data));
@@ -1292,7 +1233,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-384 digest as a 48-byte array
      * 
-     * @since 1.4
      */
     public static byte[] sha384(final byte[] data) {
         return getSha384Digest().digest(data);
@@ -1305,7 +1245,6 @@ public class DigestUtil {
      * @return SHA-384 digest as a 48-byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static byte[] sha384(final InputStream data) throws IOException {
         return digest(getSha384Digest(), data);
@@ -1317,7 +1256,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-384 digest as a 48-byte array
      * 
-     * @since 1.4
      */
     public static byte[] sha384(final String data) {
         return sha384(Strings.getBytesUtf8(data));
@@ -1329,7 +1267,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-384 digest as a hex string
      * 
-     * @since 1.4
      */
     public static String sha384Hex(final byte[] data) {
         return Hex.encodeToString(sha384(data));
@@ -1342,7 +1279,6 @@ public class DigestUtil {
      * @return SHA-384 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static String sha384Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha384(data));
@@ -1354,7 +1290,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-384 digest as a hex string
      * 
-     * @since 1.4
      */
     public static String sha384Hex(final String data) {
         return Hex.encodeToString(sha384(data));
@@ -1367,7 +1302,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-512 digest as a 64-byte array
      * 
-     * @since 1.4
      */
     public static byte[] sha512(final byte[] data) {
         return getSha512Digest().digest(data);
@@ -1380,7 +1314,6 @@ public class DigestUtil {
      * @return SHA-512 digest as a 64-byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static byte[] sha512(final InputStream data) throws IOException {
         return digest(getSha512Digest(), data);
@@ -1392,7 +1325,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512 digest as a 64-byte array
      * 
-     * @since 1.4
      */
     public static byte[] sha512(final String data) {
         return sha512(Strings.getBytesUtf8(data));
@@ -1405,7 +1337,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-512/224 digest as a byte array
      * 
-     * @since 1.14
      */
     public static byte[] sha512_224(final byte[] data) {
         return getSha512_224Digest().digest(data);
@@ -1418,7 +1349,6 @@ public class DigestUtil {
      * @return SHA-512/224 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.14
      */
     public static byte[] sha512_224(final InputStream data) throws IOException {
         return digest(getSha512_224Digest(), data);
@@ -1430,7 +1360,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512/224 digest as a byte array
      * 
-     * @since 1.14
      */
     public static byte[] sha512_224(final String data) {
         return sha512_224(Strings.getBytesUtf8(data));
@@ -1442,7 +1371,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-512/224 digest as a hex string
      * 
-     * @since 1.14
      */
     public static String sha512_224Hex(final byte[] data) {
         return Hex.encodeToString(sha512_224(data));
@@ -1455,7 +1383,6 @@ public class DigestUtil {
      * @return SHA-512/224 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.14
      */
     public static String sha512_224Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512_224(data));
@@ -1467,7 +1394,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512/224 digest as a hex string
      * 
-     * @since 1.14
      */
     public static String sha512_224Hex(final String data) {
         return Hex.encodeToString(sha512_224(data));
@@ -1480,7 +1406,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-512/256 digest as a byte array
      * 
-     * @since 1.14
      */
     public static byte[] sha512_256(final byte[] data) {
         return getSha512_256Digest().digest(data);
@@ -1493,7 +1418,6 @@ public class DigestUtil {
      * @return SHA-512/256 digest as a byte array
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.14
      */
     public static byte[] sha512_256(final InputStream data) throws IOException {
         return digest(getSha512_256Digest(), data);
@@ -1505,7 +1429,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512/256 digest as a byte array
      *
-     * @since 1.14
      */
     public static byte[] sha512_256(final String data) {
         return sha512_256(Strings.getBytesUtf8(data));
@@ -1517,7 +1440,6 @@ public class DigestUtil {
      * @param data The data to digest
      * @return SHA-512/256 digest as a hex string
      * 
-     * @since 1.14
      */
     public static String sha512_256Hex(final byte[] data) {
         return Hex.encodeToString(sha512_256(data));
@@ -1530,7 +1452,6 @@ public class DigestUtil {
      * @return SHA-512/256 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.14
      */
     public static String sha512_256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512_256(data));
@@ -1542,7 +1463,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512/256 digest as a hex string
      * 
-     * @since 1.14
      */
     public static String sha512_256Hex(final String data) {
         return Hex.encodeToString(sha512_256(data));
@@ -1560,7 +1480,6 @@ public class DigestUtil {
      * @return SHA-512 digest as a hex string
      * 
      * 
-     * @since 1.4
      */
     public static String sha512Hex(final byte[] data) {
         return Hex.encodeToString(sha512(data));
@@ -1573,7 +1492,6 @@ public class DigestUtil {
      * @return SHA-512 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * 
-     * @since 1.4
      */
     public static String sha512Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512(data));
@@ -1585,7 +1503,6 @@ public class DigestUtil {
      * @param data The string to digest
      * @return SHA-512 digest as a hex string
      * 
-     * @since 1.4
      */
     public static String sha512Hex(final String data) {
         return Hex.encodeToString(sha512(data));
@@ -1610,7 +1527,6 @@ public class DigestUtil {
      * @return SHA-1 digest as a hex string
      * @throws IOException If an error occurs while reading the stream
      * @deprecated Use {@link #sha1Hex(InputStream)} instead
-     * @since 1.4
      */
     @Deprecated
     public static String shaHex(final InputStream data) throws IOException {
@@ -1646,7 +1562,6 @@ public class DigestUtil {
      * @return The updated MessageDigest (same instance as input)
      * 
      * 
-     * @since 1.7
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -1661,7 +1576,6 @@ public class DigestUtil {
      * @param valueToDigest The ByteBuffer containing data to add to the digest
      * @return The updated MessageDigest (same instance as input)
      * 
-     * @since 1.11
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final ByteBuffer valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -1677,7 +1591,6 @@ public class DigestUtil {
      * @return The updated MessageDigest (same instance as input)
      * @throws IOException If an error occurs while reading the file
      * 
-     * @since 1.11
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final File data) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(data))) {
@@ -1724,7 +1637,6 @@ public class DigestUtil {
      * @throws IOException If an error occurs while reading the stream
      * 
      * 
-     * @since 1.8
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final InputStream inputStream) throws IOException {
         final byte[] buffer = new byte[BUFFER_SIZE];
@@ -1747,7 +1659,6 @@ public class DigestUtil {
      * @return The updated MessageDigest (same instance as input)
      * @throws IOException If an error occurs while reading the file
      * 
-     * @since 1.14
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final Path path, final OpenOption... options) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(path, options))) {
@@ -1764,7 +1675,6 @@ public class DigestUtil {
      * @return The updated MessageDigest (same instance as input)
      * @throws IOException If an error occurs while reading
      * 
-     * @since 1.14
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
         return updateDigest(digest, data.getChannel());
@@ -1787,7 +1697,6 @@ public class DigestUtil {
      * @return The updated MessageDigest (same instance as input)
      * 
      * 
-     * @since 1.7
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
         messageDigest.update(Strings.getBytesUtf8(valueToDigest));
@@ -1828,7 +1737,6 @@ public class DigestUtil {
          * The SHA-224 hash algorithm defined in FIPS PUB 180-3.
          * Present in Oracle Java 8.
          * 
-         * @since 1.11
          */
         public static final String SHA_224 = "SHA-224";
 
@@ -1854,7 +1762,6 @@ public class DigestUtil {
          * The SHA-512/224 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
          * 
-         * @since 1.14
          */
         public static final String SHA_512_224 = "SHA-512/224";
 
@@ -1862,7 +1769,6 @@ public class DigestUtil {
          * The SHA-512/256 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
          * 
-         * @since 1.14
          */
         public static final String SHA_512_256 = "SHA-512/256";
 
@@ -1870,7 +1776,6 @@ public class DigestUtil {
          * The SHA3-224 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
          * 
-         * @since 1.11
          */
         public static final String SHA3_224 = "SHA3-224";
 
@@ -1878,7 +1783,6 @@ public class DigestUtil {
          * The SHA3-256 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
          * 
-         * @since 1.11
          */
         public static final String SHA3_256 = "SHA3-256";
 
@@ -1886,7 +1790,6 @@ public class DigestUtil {
          * The SHA3-384 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
          * 
-         * @since 1.11
          */
         public static final String SHA3_384 = "SHA3-384";
 
@@ -1894,7 +1797,6 @@ public class DigestUtil {
          * The SHA3-512 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
          * 
-         * @since 1.11
          */
         public static final String SHA3_512 = "SHA3-512";
 
@@ -1914,7 +1816,6 @@ public class DigestUtil {
          * @return An array of all algorithm name constants
          * 
          * 
-         * @since 1.11
          */
         public static String[] values() {
             // Do not use a constant array here as that can be changed externally by accident or design

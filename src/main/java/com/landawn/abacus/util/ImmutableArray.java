@@ -35,8 +35,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
- * String first = array.get(0); // "apple"
- * boolean hasApple = array.contains("apple"); // true
+ * String first = array.get(0);  // "apple"
+ * boolean hasApple = array.contains("apple");  // true
  * 
  * // Iterate over elements
  * for (String fruit : array) {
@@ -238,7 +238,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
      * ImmutableArray<String> immutable = ImmutableArray.copyOf(original);
-     * original[0] = "modified"; // Does not affect immutable array
+     * original[0] = "modified";  // Does not affect immutable array
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -263,7 +263,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
      * ImmutableArray<String> wrapped = ImmutableArray.wrap(original);
-     * original[0] = "modified"; // This WILL affect the "immutable" array!
+     * original[0] = "modified";  // This WILL affect the "immutable" array!
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -285,7 +285,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-     * int len = array.length(); // returns 3
+     * int len = array.length();  // returns 3
      * }</pre>
      *
      * @return the length of this array
@@ -300,7 +300,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> empty = ImmutableArray.copyOf(new String[0]);
-     * boolean isEmpty = empty.isEmpty(); // returns true
+     * boolean isEmpty = empty.isEmpty();  // returns true
      * }</pre>
      *
      * @return {@code true} if this array has length 0, {@code false} otherwise
@@ -315,7 +315,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-     * String second = array.get(1); // returns "b"
+     * String second = array.get(1);  // returns "b"
      * }</pre>
      *
      * @param index the index of the element to return (zero-based)
@@ -335,8 +335,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "b");
-     * int index = array.indexOf("b"); // returns 1
-     * int notFound = array.indexOf("d"); // returns -1
+     * int index = array.indexOf("b");      // returns 1
+     * int notFound = array.indexOf("d");   // returns -1
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -354,7 +354,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "b");
-     * int lastIndex = array.lastIndexOf("b"); // returns 3
+     * int lastIndex = array.lastIndexOf("b");  // returns 3
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -371,8 +371,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-     * boolean hasB = array.contains("b"); // returns true
-     * boolean hasD = array.contains("d"); // returns false
+     * boolean hasB = array.contains("b");   // returns true
+     * boolean hasD = array.contains("d");   // returns false
      * }</pre>
      *
      * @param valueToFind the element whose presence is to be tested
@@ -389,7 +389,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
-     * ImmutableArray<String> subArray = array.copy(1, 4); // contains ["b", "c", "d"]
+     * ImmutableArray<String> subArray = array.copy(1, 4);  // contains ["b", "c", "d"]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
@@ -450,7 +450,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
      * List<String> filtered = array.stream()
      *     .filter(s -> s.startsWith("a"))
-     *     .collect(Collectors.toList()); // ["apple"]
+     *     .collect(Collectors.toList());  // ["apple"]
      * }</pre>
      *
      * @return a Stream over the elements in this array
@@ -471,7 +471,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-     * array.forEach(System.out::println); // prints each element
+     * array.forEach(System.out::println);  // prints each element
      * }</pre>
      *
      * @param consumer the action to be performed for each element
@@ -567,8 +567,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array2 = ImmutableArray.of("a", "b", "c");
      * ImmutableArray<String> array3 = ImmutableArray.of("a", "b", "d");
      * 
-     * boolean equal1 = array1.equals(array2); // returns true
-     * boolean equal2 = array1.equals(array3); // returns false
+     * boolean equal1 = array1.equals(array2);   // returns true
+     * boolean equal2 = array1.equals(array3);   // returns false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this array
@@ -587,7 +587,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<Integer> array = ImmutableArray.of(1, 2, 3);
-     * String str = array.toString(); // returns "[1, 2, 3]"
+     * String str = array.toString();  // returns "[1, 2, 3]"
      * }</pre>
      *
      * @return a string representation of this array

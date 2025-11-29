@@ -40,7 +40,7 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiConsumer<String, Integer> printer = (str, num) -> System.out.println(str + ": " + num);
-     * printer.accept("Count", 42); // Prints: Count: 42
+     * printer.accept("Count", 42);  // Prints: Count: 42
      *
      * Map<String, Integer> map = new HashMap<>();
      * BiConsumer<String, Integer> mapPutter = (key, value) -> map.put(key, value);
@@ -65,7 +65,7 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      *     if (value < 0) throw new IllegalArgumentException();
      * };
      * BiConsumer<String, Integer> combined = logger.andThen(validator);
-     * combined.accept("score", 85); // Logs then validates
+     * combined.accept("score", 85);  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

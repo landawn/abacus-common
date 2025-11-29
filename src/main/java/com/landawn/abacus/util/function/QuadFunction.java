@@ -58,7 +58,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * QuadFunction<Double, Double, Double, Double, Double> calculateAverage =
      *     (a, b, c, d) -> (a + b + c + d) / 4.0;
      *
-     * Integer total = sum4.apply(10, 20, 30, 40); // Returns 100
+     * Integer total = sum4.apply(10, 20, 30, 40);  // Returns 100
      * Address addr = createAddress.apply("123 Main St", "Springfield", "IL", "62701");
      * }</pre>
      *
@@ -91,7 +91,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * QuadFunction<Integer, Integer, Integer, Integer, String> sumAndFormat =
      *     sum4.andThen(intToString);
      *
-     * String result = sumAndFormat.apply(10, 20, 30, 40); // Returns "Total: 100"
+     * String result = sumAndFormat.apply(10, 20, 30, 40);  // Returns "Total: 100"
      *
      * // More complex example
      * QuadFunction<User, Product, Integer, Double, Order> createOrder =

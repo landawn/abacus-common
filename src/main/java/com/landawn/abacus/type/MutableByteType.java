@@ -107,7 +107,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains byte value 42
      * MutableByte mb = type.get(rs, 1);
@@ -135,7 +135,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "status_code" contains byte value 1
      * MutableByte mb = type.get(rs, "status_code");

@@ -57,10 +57,10 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleToLongFunction truncate = DoubleToLongFunction.DEFAULT;
-     * long result = truncate.applyAsLong(3.14); // Returns 3L
+     * long result = truncate.applyAsLong(3.14);  // Returns 3L
      *
      * DoubleToLongFunction rounder = val -> Math.round(val);
-     * long result2 = rounder.applyAsLong(3.7); // Returns 4L
+     * long result2 = rounder.applyAsLong(3.7);  // Returns 4L
      * }</pre>
      *
      * @param value the double value to be converted to long

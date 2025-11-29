@@ -58,7 +58,7 @@ package com.landawn.abacus.util;
  * // Basic creation and access
  * Indexed<String> indexed = Indexed.of("Hello", 5);
  * String value = indexed.value();  // "Hello"
- * long index = indexed.index();    // 5
+ * long index = indexed.index();  // 5
  *
  * // Stream processing with indices
  * List<String> items = Arrays.asList("a", "b", "c");
@@ -274,7 +274,7 @@ public final class Indexed<T> extends AbstractIndexed {
      *
      * // Combining with int values (automatic widening)
      * int position = 100;
-     * Indexed<String> item = Indexed.of("item", position); // int automatically converts to long
+     * Indexed<String> item = Indexed.of("item", position);  // int automatically converts to long
      *
      * // Representing positions in distributed systems
      * long globalOffset = 10_000_000_000L;
@@ -309,7 +309,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic value retrieval
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * String value = indexed.value();  // "Hello"
+     * String value = indexed.value();   // "Hello"
      * long index = indexed.index();     // 5
      *
      * // Handling null values
@@ -360,14 +360,14 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx2 = Indexed.of("Hello", 5);
      * Indexed<String> idx3 = Indexed.of("World", 5);
      *
-     * idx1.hashCode() == idx2.hashCode();  // true (same index and value)
-     * idx1.hashCode() == idx3.hashCode();  // likely false (different values)
+     * idx1.hashCode() == idx2.hashCode();   // true (same index and value)
+     * idx1.hashCode() == idx3.hashCode();   // likely false (different values)
      *
      * // Using in HashSet
      * Set<Indexed<String>> set = new HashSet<>();
      * set.add(Indexed.of("A", 0));
-     * set.add(Indexed.of("A", 0));  // Duplicate, won't be added
-     * set.size();  // 1
+     * set.add(Indexed.of("A", 0));   // Duplicate, won't be added
+     * set.size();                    // 1
      * }</pre>
      *
      * @return the hash code value for this Indexed instance
@@ -403,17 +403,17 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx3 = Indexed.of("World", 5);
      * Indexed<String> idx4 = Indexed.of("Hello", 6);
      *
-     * idx1.equals(idx2);  // true (same index and value)
-     * idx1.equals(idx3);  // false (different values)
-     * idx1.equals(idx4);  // false (different indices)
+     * idx1.equals(idx2);   // true (same index and value)
+     * idx1.equals(idx3);   // false (different values)
+     * idx1.equals(idx4);   // false (different indices)
      *
      * // Null value handling
      * Indexed<String> nullIdx1 = Indexed.of(null, 0);
      * Indexed<String> nullIdx2 = Indexed.of(null, 0);
      * Indexed<String> nullIdx3 = Indexed.of(null, 1);
      *
-     * nullIdx1.equals(nullIdx2);  // true (both have null values and same index)
-     * nullIdx1.equals(nullIdx3);  // false (different indices)
+     * nullIdx1.equals(nullIdx2);   // true (both have null values and same index)
+     * nullIdx1.equals(nullIdx3);   // false (different indices)
      *
      * // Different types
      * Indexed<String> strIdx = Indexed.of("Hello", 5);
@@ -424,8 +424,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * List<Indexed<String>> list = new ArrayList<>();
      * Indexed<String> item = Indexed.of("test", 0);
      * list.add(item);
-     * list.contains(Indexed.of("test", 0));  // true
-     * list.contains(Indexed.of("test", 1));  // false
+     * list.contains(Indexed.of("test", 0));   // true
+     * list.contains(Indexed.of("test", 1));   // false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this Indexed instance

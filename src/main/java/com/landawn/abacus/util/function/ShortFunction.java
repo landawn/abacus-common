@@ -45,13 +45,13 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortFunction<String> formatter = value -> "Number: " + value;
-     * String result1 = formatter.apply((short) 42); // returns "Number: 42"
+     * String result1 = formatter.apply((short) 42);  // returns "Number: 42"
      *
      * ShortFunction<Integer> widener = value -> (int) value;
-     * Integer result2 = widener.apply((short) 100); // returns 100
+     * Integer result2 = widener.apply((short) 100);  // returns 100
      *
      * ShortFunction<Boolean> isPositive = value -> value > 0;
-     * Boolean result3 = isPositive.apply((short) -5); // returns false
+     * Boolean result3 = isPositive.apply((short) -5);  // returns false
      * }</pre>
      *
      * @param value the function argument
@@ -71,13 +71,13 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * Function<Integer, String> formatter = n -> "Value: " + n;
      *
      * ShortFunction<String> combined = widener.andThen(formatter);
-     * String result = combined.apply((short) 42); // returns "Value: 42"
+     * String result = combined.apply((short) 42);  // returns "Value: 42"
      *
      * ShortFunction<String> toString = value -> String.valueOf(value);
      * Function<String, Integer> length = String::length;
      *
      * ShortFunction<Integer> stringLength = toString.andThen(length);
-     * Integer len = stringLength.apply((short) 12345); // returns 5
+     * Integer len = stringLength.apply((short) 12345);  // returns 5
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -95,8 +95,8 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortFunction<Short> identity = ShortFunction.identity();
-     * Short result1 = identity.apply((short) 42); // returns 42
-     * Short result2 = identity.apply((short) -100); // returns -100
+     * Short result1 = identity.apply((short) 42);     // returns 42
+     * Short result2 = identity.apply((short) -100);   // returns -100
      *
      * // Useful in stream operations
      * short[] values = {1, 2, 3, 4, 5};

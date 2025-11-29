@@ -36,8 +36,8 @@ import java.io.Serializable;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableChar letter = MutableChar.of('A');
- * letter.increment(); // Now 'B'
- * letter.add(2); // Now 'D'
+ * letter.increment();  // Now 'B'
+ * letter.add(2);  // Now 'D'
  * }</pre>
  *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
@@ -62,7 +62,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar(); // value is '\0'
+     * MutableChar ch = new MutableChar();  // value is '\0'
      * }</pre>
      */
     MutableChar() {
@@ -73,7 +73,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar('X'); // value is 'X'
+     * MutableChar ch = new MutableChar('X');  // value is 'X'
      * }</pre>
      *
      * @param value the initial value to store
@@ -105,7 +105,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char val = ch.value(); // returns 'A'
+     * char val = ch.value();  // returns 'A'
      * }</pre>
      *
      * @return the current char value
@@ -135,7 +135,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * ch.setValue('B'); // value is now 'B'
+     * ch.setValue('B');  // value is now 'B'
      * }</pre>
      *
      * @param value the value to set
@@ -152,9 +152,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char old = ch.getAndSet('B'); // returns 'A', value is now 'B'
-     * System.out.println(old);      // prints 'A'
-     * System.out.println(ch.value()); // prints 'B'
+     * char old = ch.getAndSet('B');     // returns 'A', value is now 'B'
+     * System.out.println(old);          // prints 'A'
+     * System.out.println(ch.value());   // prints 'B'
      * }</pre>
      *
      * @param value the new value to set
@@ -174,8 +174,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char newVal = ch.setAndGet('B'); // returns 'B', value is now 'B'
-     * System.out.println(newVal); // prints 'B'
+     * char newVal = ch.setAndGet('B');   // returns 'B', value is now 'B'
+     * System.out.println(newVal);        // prints 'B'
      * }</pre>
      *
      * @param value the new value to set
@@ -196,9 +196,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
      * // Update only if current value is less than 'M'
-     * boolean updated = ch.setIf('Z', c -> c < 'M'); // returns true, value is now 'Z'
+     * boolean updated = ch.setIf('Z', c -> c < 'M');   // returns true, value is now 'Z'
      * // This update will fail because 'Z' is not < 'M'
-     * updated = ch.setIf('A', c -> c < 'M'); // returns false, value remains 'Z'
+     * updated = ch.setIf('A', c -> c < 'M');           // returns false, value remains 'Z'
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
@@ -228,8 +228,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * ch.increment(); // value is now 'B'
-     * ch.increment(); // value is now 'C'
+     * ch.increment();   // value is now 'B'
+     * ch.increment();   // value is now 'C'
      * }</pre>
      */
     public void increment() {
@@ -246,7 +246,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('B');
-     * ch.decrement(); // value is now 'A'
+     * ch.decrement();  // value is now 'A'
      * }</pre>
      */
     public void decrement() {
@@ -262,9 +262,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char old = ch.getAndIncrement(); // returns 'A', value is now 'B'
-     * System.out.println(old);         // prints 'A'
-     * System.out.println(ch.value());  // prints 'B'
+     * char old = ch.getAndIncrement();   // returns 'A', value is now 'B'
+     * System.out.println(old);           // prints 'A'
+     * System.out.println(ch.value());    // prints 'B'
      * }</pre>
      *
      * @return the value before incrementing
@@ -280,9 +280,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('B');
-     * char old = ch.getAndDecrement(); // returns 'B', value is now 'A'
-     * System.out.println(old);         // prints 'B'
-     * System.out.println(ch.value());  // prints 'A'
+     * char old = ch.getAndDecrement();   // returns 'B', value is now 'A'
+     * System.out.println(old);           // prints 'B'
+     * System.out.println(ch.value());    // prints 'A'
      * }</pre>
      *
      * @return the value before decrementing
@@ -298,8 +298,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char newVal = ch.incrementAndGet(); // returns 'B', value is now 'B'
-     * System.out.println(newVal); // prints 'B'
+     * char newVal = ch.incrementAndGet();   // returns 'B', value is now 'B'
+     * System.out.println(newVal);           // prints 'B'
      * }</pre>
      *
      * @return the value after incrementing
@@ -315,8 +315,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('B');
-     * char newVal = ch.decrementAndGet(); // returns 'A', value is now 'A'
-     * System.out.println(newVal); // prints 'A'
+     * char newVal = ch.decrementAndGet();   // returns 'A', value is now 'A'
+     * System.out.println(newVal);           // prints 'A'
      * }</pre>
      *
      * @return the value after decrementing
@@ -338,12 +338,12 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <pre>{@code
      * MutableChar a = MutableChar.of('A');
      * MutableChar b = MutableChar.of('B');
-     * int result = a.compareTo(b); // returns negative value (A < B)
+     * int result = a.compareTo(b);  // returns negative value (A < B)
      *
      * MutableChar c = MutableChar.of('A');
-     * result = a.compareTo(c); // returns 0 (A == A)
+     * result = a.compareTo(c);  // returns 0 (A == A)
      *
-     * result = b.compareTo(a); // returns positive value (B > A)
+     * result = b.compareTo(a);  // returns positive value (B > A)
      * }</pre>
      *
      * @param other the other MutableChar to compare to, must not be null
@@ -370,10 +370,10 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar b = MutableChar.of('X');
      * MutableChar c = MutableChar.of('Y');
      *
-     * boolean equal = a.equals(b); // returns true
-     * equal = a.equals(c); // returns false
-     * equal = a.equals(null); // returns false
-     * equal = a.equals(Character.valueOf('X')); // returns false (different types)
+     * boolean equal = a.equals(b);                // returns true
+     * equal = a.equals(c);                        // returns false
+     * equal = a.equals(null);                     // returns false
+     * equal = a.equals(Character.valueOf('X'));   // returns false (different types)
      * }</pre>
      *
      * @param obj the object to compare with, may be {@code null}
@@ -399,9 +399,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar a = MutableChar.of('A');
      * MutableChar b = MutableChar.of('A');
      *
-     * int hash1 = a.hashCode(); // returns 65 (Unicode value of 'A')
-     * int hash2 = b.hashCode(); // returns 65
-     * assert hash1 == hash2; // true
+     * int hash1 = a.hashCode();   // returns 65 (Unicode value of 'A')
+     * int hash2 = b.hashCode();   // returns 65
+     * assert hash1 == hash2;  // true
      * }</pre>
      *
      * @return a hash code value for this object, equal to the char value
@@ -420,10 +420,10 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('X');
-     * String str = ch.toString(); // returns "X"
+     * String str = ch.toString();  // returns "X"
      *
      * MutableChar newline = MutableChar.of('\n');
-     * String str2 = newline.toString(); // returns a string containing a newline character
+     * String str2 = newline.toString();  // returns a string containing a newline character
      * }</pre>
      *
      * @return the String representation of the current char value

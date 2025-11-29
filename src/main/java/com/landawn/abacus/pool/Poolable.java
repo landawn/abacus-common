@@ -37,7 +37,7 @@ package com.landawn.abacus.pool;
  *
  *     public PooledConnection(Connection conn) {
  *         this.connection = conn;
- *         this.activityPrint = new ActivityPrint(3600000, 600000); // 1hr live, 10min idle
+ *         this.activityPrint = new ActivityPrint(3600000, 600000);  // 1hr live, 10min idle
  *     }
  *
  *     @Override

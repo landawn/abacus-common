@@ -36,7 +36,7 @@ public interface BooleanToByteFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanToByteFunction converter = value -> value ? (byte) 1 : (byte) 0;
-     * byte result = converter.applyAsByte(true); // Returns 1
+     * byte result = converter.applyAsByte(true);  // Returns 1
      * }</pre>
      *
      * @param value the function argument

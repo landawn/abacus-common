@@ -46,10 +46,10 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleBiFunction<String> formatter = (x, y) -> String.format("(%.2f, %.2f)", x, y);
-     * String result = formatter.apply(3.14159, 2.71828); // Returns "(3.14, 2.72)"
+     * String result = formatter.apply(3.14159, 2.71828);  // Returns "(3.14, 2.72)"
      *
      * DoubleBiFunction<Double> average = (a, b) -> (a + b) / 2.0;
-     * Double avg = average.apply(10.0, 20.0); // Returns 15.0
+     * Double avg = average.apply(10.0, 20.0);  // Returns 15.0
      * }</pre>
      *
      * @param t the first double input argument
@@ -68,7 +68,7 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
      * DoubleBiFunction<Double> multiplier = (a, b) -> a * b;
      * Function<Double, String> formatter = d -> "Result: " + d;
      * DoubleBiFunction<String> combined = multiplier.andThen(formatter);
-     * String result = combined.apply(2.5, 4.0); // Returns "Result: 10.0"
+     * String result = combined.apply(2.5, 4.0);  // Returns "Result: 10.0"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

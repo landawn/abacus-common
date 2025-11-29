@@ -52,7 +52,7 @@ public class AsciiStreamType extends InputStreamType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType("AsciiStream");
-     * ResultSet rs = ...; // from SQL query
+     * ResultSet rs = ...;  // from SQL query
      * InputStream stream = type.get(rs, 1);
      * // Read ASCII text data from database column
      * String content = IOUtil.readAllToString(stream);

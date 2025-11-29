@@ -748,7 +748,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * map.put("a", new ArrayList<>(Arrays.asList(1, 2)));
      * map.put("b", new ArrayList<>(Arrays.asList(3, 4)));
      * ListMultimap<String, Integer> multimap = ListMultimap.wrap(map);
-     * multimap.put("a", 5); // modifies the original map
+     * multimap.put("a", 5);  // modifies the original map
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -781,7 +781,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Map<String, List<Integer>> map = new HashMap<>();
      * map.put("a", new LinkedList<>(Arrays.asList(1, 2)));
      * ListMultimap<String, Integer> multimap = ListMultimap.wrap(map, LinkedList::new);
-     * multimap.put("b", 3); // uses LinkedList for new keys
+     * multimap.put("b", 3);  // uses LinkedList for new keys
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -813,8 +813,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
      * multimap.put("a", 2);
-     * multimap.getFirst("a"); // returns 1
-     * multimap.getFirst("b"); // returns null
+     * multimap.getFirst("a");   // returns 1
+     * multimap.getFirst("b");   // returns null
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -837,8 +837,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
-     * multimap.getFirstOrDefault("a", 99); // returns 1
-     * multimap.getFirstOrDefault("b", 99); // returns 99
+     * multimap.getFirstOrDefault("a", 99);   // returns 1
+     * multimap.getFirstOrDefault("b", 99);   // returns 99
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -901,7 +901,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <pre>{@code
      * ListMultimap<String, Integer> original = ListMultimap.of("a", 1, "b", 2);
      * ListMultimap<String, Integer> copy = original.copy();
-     * copy.put("c", 3); // does not affect original
+     * copy.put("c", 3);  // does not affect original
      * }</pre>
      *
      * @return a new ListMultimap containing all the key-value pairs of this ListMultimap

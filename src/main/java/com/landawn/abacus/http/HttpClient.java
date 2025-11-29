@@ -1171,7 +1171,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * client.head(); // Check if resource exists
+     * client.head();  // Check if resource exists
      * }</pre>
      *
      * @throws UncheckedIOException if an I/O error occurs

@@ -37,7 +37,7 @@ package com.landawn.abacus.util;
  * writer.append("Hello")
  *       .append(' ')
  *       .append("World!");
- * String result = writer.toString(); // "Hello World!"
+ * String result = writer.toString();  // "Hello World!"
  * }</pre>
  * 
  * @see AppendableWriter
@@ -110,7 +110,7 @@ public final class StringWriter extends AppendableWriter {
      * StringWriter writer = new StringWriter();
      * writer.write("Hello");
      * StringBuilder sb = writer.stringBuilder();
-     * sb.reverse(); // Writer now contains "olleH"
+     * sb.reverse();  // Writer now contains "olleH"
      * }</pre>
      *
      * @return the internal StringBuilder buffer
@@ -164,7 +164,7 @@ public final class StringWriter extends AppendableWriter {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.append("Hello World", 0, 5); // Appends "Hello"
+     * writer.append("Hello World", 0, 5);  // Appends "Hello"
      * }</pre>
      *
      * @param csq the character sequence to append, may be null
@@ -188,8 +188,8 @@ public final class StringWriter extends AppendableWriter {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(65); // Writes 'A'
-     * writer.write('B'); // Also valid
+     * writer.write(65);    // Writes 'A'
+     * writer.write('B');   // Also valid
      * }</pre>
      *
      * @param c the character to write (as an integer)
@@ -224,7 +224,7 @@ public final class StringWriter extends AppendableWriter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
-     * writer.write(chars, 6, 5); // Writes "World"
+     * writer.write(chars, 6, 5);  // Writes "World"
      * }</pre>
      *
      * @param cbuf the character array containing data to write
@@ -261,7 +261,7 @@ public final class StringWriter extends AppendableWriter {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello, World!", 7, 5); // Writes "World"
+     * writer.write("Hello, World!", 7, 5);  // Writes "World"
      * }</pre>
      *
      * @param str the string containing data to write
@@ -310,7 +310,7 @@ public final class StringWriter extends AppendableWriter {
      * StringWriter writer = new StringWriter();
      * writer.write("Hello");
      * writer.append(" World!");
-     * String result = writer.toString(); // "Hello World!"
+     * String result = writer.toString();  // "Hello World!"
      * }</pre>
      *
      * @return a string containing the current buffer content

@@ -67,7 +67,7 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntBiPredicate sumGreaterThan10 = (a, b) -> a + b > 10;
-     * boolean result = sumGreaterThan10.test(5, 6); // Returns true
+     * boolean result = sumGreaterThan10.test(5, 6);  // Returns true
      * }</pre>
      *
      * @param t the first {@code int} argument

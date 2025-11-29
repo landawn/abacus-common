@@ -609,7 +609,7 @@ public final class Fn {
      * List<User> users1 = cachedUsers.get();
      * 
      * // Subsequent calls within 5 minutes return cached value
-     * List<User> users2 = cachedUsers.get(); // No database query
+     * List<User> users2 = cachedUsers.get();  // No database query
      * 
      * // After 5 minutes, the next call will query database again
      * // and cache the new result
@@ -741,13 +741,13 @@ public final class Fn {
      *     return IntStream.rangeClosed(1, n).reduce(1, (a, b) -> a * b);
      * });
      *
-     * System.out.println(factorial.apply(5)); // Prints "Computing factorial of 5", returns 120
-     * System.out.println(factorial.apply(5)); // Returns 120 immediately (cached, no computation)
+     * System.out.println(factorial.apply(5));   // Prints "Computing factorial of 5", returns 120
+     * System.out.println(factorial.apply(5));   // Returns 120 immediately (cached, no computation)
      *
      * // Works with null inputs and outputs
      * Function<String, String> processor = Fn.memoize(s -> s == null ? null : s.toUpperCase());
-     * processor.apply(null); // Computes and caches null -> null
-     * processor.apply(null); // Returns cached null without re-executing
+     * processor.apply(null);   // Computes and caches null -> null
+     * processor.apply(null);   // Returns cached null without re-executing
      * }</pre>
      *
      * @param <T> the type of the input to the function
@@ -4465,8 +4465,8 @@ public final class Fn {
      * String searchText = "error";
      * Predicate<String> containsError = Fn.p(searchText, String::contains);
      * 
-     * boolean result = containsError.test("runtime error occurred"); // Returns true
-     * boolean result2 = containsError.test("success"); // Returns false
+     * boolean result = containsError.test("runtime error occurred");   // Returns true
+     * boolean result2 = containsError.test("success");                 // Returns false
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-predicate
@@ -4498,8 +4498,8 @@ public final class Fn {
      * Predicate<Integer> containsErrorBetween = 
      *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(5);  // Returns true
-     * boolean result2 = containsErrorBetween.test(14); // Returns false
+     * boolean result = containsErrorBetween.test(5);     // Returns true
+     * boolean result2 = containsErrorBetween.test(14);   // Returns false
      * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-predicate
@@ -4559,8 +4559,8 @@ public final class Fn {
      * BiPredicate<Integer, Integer> containsErrorBetween = 
      *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(0, 5);  // Returns true
-     * boolean result2 = containsErrorBetween.test(6, 14); // Returns false
+     * boolean result = containsErrorBetween.test(0, 5);     // Returns true
+     * boolean result2 = containsErrorBetween.test(6, 14);   // Returns false
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
@@ -4650,8 +4650,8 @@ public final class Fn {
      * List<String> myList = new ArrayList<>();
      * Consumer<String> addToMyList = Fn.c(myList, (list, item) -> list.add(item));
      *
-     * addToMyList.accept("first");  // Adds "first" to myList
-     * addToMyList.accept("second"); // Adds "second" to myList
+     * addToMyList.accept("first");    // Adds "first" to myList
+     * addToMyList.accept("second");   // Adds "second" to myList
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-consumer
@@ -4685,7 +4685,7 @@ public final class Fn {
      * Consumer<String> logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
      *     System.out.println(p + msg + s));
      *
-     * logWithPrefixAndSuffix.accept("Hello"); // Prints: Log: Hello [end]
+     * logWithPrefixAndSuffix.accept("Hello");  // Prints: Log: Hello [end]
      * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-consumer

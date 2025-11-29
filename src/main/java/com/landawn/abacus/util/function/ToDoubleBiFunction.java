@@ -38,7 +38,7 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToDoubleBiFunction<String, Integer> lengthMultiplier = (str, num) -> str.length() * num;
-     * double result = lengthMultiplier.applyAsDouble("Hello", 2); // returns 10.0
+     * double result = lengthMultiplier.applyAsDouble("Hello", 2);  // returns 10.0
      * }</pre>
      *
      * @param t the first function argument

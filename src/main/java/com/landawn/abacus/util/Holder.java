@@ -96,7 +96,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * String value = holder.value(); // returns "test"
+     * String value = holder.value();  // returns "test"
      * }</pre>
      *
      * @return the value held by this Holder, may be {@code null}
@@ -111,7 +111,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * String value = holder.getValue(); // returns "test"
+     * String value = holder.getValue();  // returns "test"
      * }</pre>
      *
      * @return the value held by this Holder, may be {@code null}
@@ -132,7 +132,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * holder.setValue(20); // holder now contains 20
+     * holder.setValue(20);  // holder now contains 20
      * }</pre>
      *
      * @param value the new value to be held by this Holder, may be {@code null}
@@ -151,7 +151,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("old");
-     * String previous = holder.getAndSet("new"); // previous = "old", holder now contains "new"
+     * String previous = holder.getAndSet("new");  // previous = "old", holder now contains "new"
      * }</pre>
      *
      * @param value the new value to be set, may be {@code null}
@@ -173,7 +173,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Integer newValue = holder.setAndGet(20); // newValue = 20, holder contains 20
+     * Integer newValue = holder.setAndGet(20);  // newValue = 20, holder contains 20
      * }</pre>
      *
      * @param value the new value to be set, may be {@code null}
@@ -195,7 +195,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * Integer old = holder.getAndUpdate(n -> n * 2); // old = 5, holder now contains 10
+     * Integer old = holder.getAndUpdate(n -> n * 2);  // old = 5, holder now contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw
@@ -220,7 +220,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * Integer updated = holder.updateAndGet(n -> n * 2); // updated = 10, holder contains 10
+     * Integer updated = holder.updateAndGet(n -> n * 2);  // updated = 10, holder contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw
@@ -245,8 +245,8 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * boolean updated = holder.setIf(10, n -> n != null && n < 10); // returns true, holder now contains 10
-     * boolean notUpdated = holder.setIf(3, n -> n != null && n < 5); // returns false, holder still contains 10
+     * boolean updated = holder.setIf(10, n -> n != null && n < 10);    // returns true, holder now contains 10
+     * boolean notUpdated = holder.setIf(3, n -> n != null && n < 5);   // returns false, holder still contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
@@ -323,7 +323,7 @@ public final class Holder<T> implements Mutable {
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * if (holder.isNotNull()) {
-     *     System.out.println(holder.value().length()); // safe to use
+     *     System.out.println(holder.value().length());  // safe to use
      * }
      * }</pre>
      *
@@ -343,7 +343,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("Hello");
-     * holder.ifNotNull(value -> System.out.println(value)); // prints "Hello"
+     * holder.ifNotNull(value -> System.out.println(value));  // prints "Hello"
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
@@ -373,7 +373,7 @@ public final class Holder<T> implements Mutable {
      * holder.ifNotNullOrElse(
      *     value -> System.out.println("Value: " + value),
      *     () -> System.out.println("No value present")
-     * ); // prints "No value present"
+     * );  // prints "No value present"
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
@@ -403,7 +403,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * holder.accept(value -> System.out.println(value)); // prints "test"
+     * holder.accept(value -> System.out.println(value));  // prints "test"
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
@@ -423,7 +423,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * holder.acceptIfNotNull(value -> System.out.println(value.toUpperCase())); // prints "TEST"
+     * holder.acceptIfNotNull(value -> System.out.println(value.toUpperCase()));  // prints "TEST"
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
@@ -451,7 +451,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
-     * Integer length = holder.map(s -> s == null ? 0 : s.length()); // returns 5
+     * Integer length = holder.map(s -> s == null ? 0 : s.length());  // returns 5
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function
@@ -475,7 +475,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
-     * Nullable<Integer> length = holder.mapIfNotNull(String::length); // Nullable.of(5)
+     * Nullable<Integer> length = holder.mapIfNotNull(String::length);  // Nullable.of(5)
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function
@@ -507,7 +507,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length); // Optional.of(4)
+     * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length);  // Optional.of(4)
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function
@@ -539,7 +539,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Nullable<Integer> filtered = holder.filter(n -> n != null && n > 5); // Nullable.of(10)
+     * Nullable<Integer> filtered = holder.filter(n -> n != null && n > 5);  // Nullable.of(10)
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
@@ -567,7 +567,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5); // Optional.of(10)
+     * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5);  // Optional.of(10)
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
@@ -596,7 +596,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
-     * String value = holder.orElseIfNull("default"); // returns "default"
+     * String value = holder.orElseIfNull("default");  // returns "default"
      * }</pre>
      *
      * @param other the value to be returned if the held value is {@code null}, may be {@code null}
@@ -616,7 +616,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
-     * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault()); // supplier only called if needed
+     * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault());  // supplier only called if needed
      * }</pre>
      *
      * @param other the supplier whose result is returned if the held value is {@code null}, must not be {@code null}
@@ -642,7 +642,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("value");
-     * String value = holder.orElseThrowIfNull(); // returns "value"
+     * String value = holder.orElseThrowIfNull();  // returns "value"
      * }</pre>
      *
      * @return the value held by this Holder
@@ -666,7 +666,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
-     * String value = holder.orElseThrowIfNull("User name is required"); // throws with custom message
+     * String value = holder.orElseThrowIfNull("User name is required");  // throws with custom message
      * }</pre>
      *
      * @param errorMessage the detail message to be used in the exception if the value is {@code null}
@@ -831,7 +831,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * int hash = holder.hashCode(); // returns "test".hashCode()
+     * int hash = holder.hashCode();  // returns "test".hashCode()
      * }</pre>
      *
      * @return the hash code of the value, or 0 if the value is {@code null}
@@ -856,7 +856,7 @@ public final class Holder<T> implements Mutable {
      * <pre>{@code
      * Holder<String> h1 = Holder.of("test");
      * Holder<String> h2 = Holder.of("test");
-     * boolean areEqual = h1.equals(h2); // returns true
+     * boolean areEqual = h1.equals(h2);  // returns true
      * }</pre>
      *
      * @param obj the object to compare with this Holder for equality
@@ -878,7 +878,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * String str = holder.toString(); // returns "Holder[test]"
+     * String str = holder.toString();  // returns "Holder[test]"
      * }</pre>
      *
      * @return a string representation of this Holder in the format "Holder[value]"

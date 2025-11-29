@@ -184,7 +184,7 @@ public final class Charsets {
      * // Multiple calls return the same cached instance (reference equality)
      * Charset utf8_1 = Charsets.get("UTF-8");
      * Charset utf8_2 = Charsets.get("UTF-8");
-     * assert utf8_1 == utf8_2; // true - same cached instance
+     * assert utf8_1 == utf8_2;  // true - same cached instance
      * }</pre>
      *
      * @param charsetName the name of the requested charset; may be either a canonical name

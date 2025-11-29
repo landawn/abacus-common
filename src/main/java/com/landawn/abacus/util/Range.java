@@ -88,24 +88,24 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Creating ranges with different boundary types
- * Range<Integer> closedRange = Range.closed(1, 10);        // [1, 10] - includes 1 and 10
- * Range<Integer> openRange = Range.open(1, 10);            // (1, 10) - excludes 1 and 10
- * Range<Integer> halfOpen = Range.closedOpen(1, 10);       // [1, 10) - includes 1, excludes 10
- * Range<Integer> halfClosed = Range.openClosed(1, 10);     // (1, 10] - excludes 1, includes 10
+ * Range<Integer> closedRange = Range.closed(1, 10);  // [1, 10] - includes 1 and 10
+ * Range<Integer> openRange = Range.open(1, 10);  // (1, 10) - excludes 1 and 10
+ * Range<Integer> halfOpen = Range.closedOpen(1, 10);  // [1, 10) - includes 1, excludes 10
+ * Range<Integer> halfClosed = Range.openClosed(1, 10);  // (1, 10] - excludes 1, includes 10
  *
  * // Single element ranges
- * Range<String> single = Range.just("value");              // [value, value] - contains only "value"
+ * Range<String> single = Range.just("value");  // [value, value] - contains only "value"
  *
  * // Containment testing
- * boolean contains5 = closedRange.contains(5);             // true - 5 is in [1, 10]
- * boolean contains1 = openRange.contains(1);               // false - 1 is not in (1, 10)
- * boolean contains10 = halfOpen.contains(10);              // false - 10 is not in [1, 10)
+ * boolean contains5 = closedRange.contains(5);  // true - 5 is in [1, 10]
+ * boolean contains1 = openRange.contains(1);  // false - 1 is not in (1, 10)
+ * boolean contains10 = halfOpen.contains(10);  // false - 10 is not in [1, 10)
  *
  * // Range operations
  * Range<Integer> other = Range.closed(5, 15);
- * boolean overlaps = closedRange.isOverlappedBy(other);    // true - ranges overlap
- * Optional<Range<Integer>> intersection = closedRange.intersection(other); // [5, 10]
- * Range<Integer> span = closedRange.span(other);           // [1, 15] - encompasses both ranges
+ * boolean overlaps = closedRange.isOverlappedBy(other);  // true - ranges overlap
+ * Optional<Range<Integer>> intersection = closedRange.intersection(other);  // [5, 10]
+ * Range<Integer> span = closedRange.span(other);  // [1, 15] - encompasses both ranges
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -118,21 +118,21 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Functional transformation
  * Range<Integer> intRange = Range.closed(1, 5);
- * Range<String> stringRange = intRange.map(String::valueOf); // ["1", "5"]
+ * Range<String> stringRange = intRange.map(String::valueOf);  // ["1", "5"]
  *
  * // Collection containment
  * List<Integer> values = Arrays.asList(2, 3, 4);
- * boolean allInRange = closedRange.containsAll(values);     // true for [1, 10]
+ * boolean allInRange = closedRange.containsAll(values);  // true for [1, 10]
  *
  * // Range positioning tests
  * Range<Integer> before = Range.closed(-5, 0);
  * Range<Integer> after = Range.closed(15, 20);
- * boolean isBefore = before.isBeforeRange(closedRange);     // true
- * boolean isAfter = after.isAfterRange(closedRange);        // true
+ * boolean isBefore = before.isBeforeRange(closedRange);  // true
+ * boolean isAfter = after.isAfterRange(closedRange);  // true
  *
  * // Element positioning
- * boolean startsAt1 = closedRange.isStartedBy(1);           // true for [1, 10]
- * boolean endsAt10 = closedRange.isEndedBy(10);             // true for [1, 10]
+ * boolean startsAt1 = closedRange.isStartedBy(1);  // true for [1, 10]
+ * boolean endsAt10 = closedRange.isEndedBy(10);  // true for [1, 10]
  * }</pre>
  *
  * <p><b>Endpoint System Design:</b>
@@ -312,8 +312,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <pre>{@code
      * Range<Integer> range = Range.just(5);
      * // Creates range [5, 5]
-     * range.contains(5);  // returns true
-     * range.contains(4);  // returns false
+     * range.contains(5);   // returns true
+     * range.contains(4);   // returns false
      * }</pre>
      *
      * @param <T> the type of the elements in this range, must implement Comparable
@@ -333,9 +333,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <pre>{@code
      * Range<Integer> range = Range.open(1, 5);
      * // Creates range (1, 5)
-     * range.contains(1);  // returns false
-     * range.contains(3);  // returns true
-     * range.contains(5);  // returns false
+     * range.contains(1);   // returns false
+     * range.contains(3);   // returns true
+     * range.contains(5);   // returns false
      * }</pre>
      *
      * @param <T> the type of the elements in this range, must implement Comparable
@@ -361,9 +361,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <pre>{@code
      * Range<Integer> range = Range.openClosed(1, 5);
      * // Creates range (1, 5]
-     * range.contains(1);  // returns false
-     * range.contains(3);  // returns true
-     * range.contains(5);  // returns true
+     * range.contains(1);   // returns false
+     * range.contains(3);   // returns true
+     * range.contains(5);   // returns true
      * }</pre>
      *
      * @param <T> the type of the elements in this range, must implement Comparable
@@ -389,9 +389,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <pre>{@code
      * Range<Integer> range = Range.closedOpen(1, 5);
      * // Creates range [1, 5)
-     * range.contains(1);  // returns true
-     * range.contains(3);  // returns true
-     * range.contains(5);  // returns false
+     * range.contains(1);   // returns true
+     * range.contains(3);   // returns true
+     * range.contains(5);   // returns false
      * }</pre>
      *
      * @param <T> the type of the elements in this range, must implement Comparable
@@ -416,9 +416,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 5);
      * // Creates range [1, 5]
-     * range.contains(1);  // returns true
-     * range.contains(3);  // returns true
-     * range.contains(5);  // returns true
+     * range.contains(1);   // returns true
+     * range.contains(3);   // returns true
+     * range.contains(5);   // returns true
      * }</pre>
      *
      * @param <T> the type of the elements in this range, must implement Comparable
@@ -519,10 +519,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closedOpen(1, 5);
-     * range.contains(1);    // returns true (lower bound is inclusive)
-     * range.contains(3);    // returns true
-     * range.contains(5);    // returns false (upper bound is exclusive)
-     * range.contains(null); // returns false
+     * range.contains(1);      // returns true (lower bound is inclusive)
+     * range.contains(3);      // returns true
+     * range.contains(5);      // returns false (upper bound is exclusive)
+     * range.contains(null);   // returns false
      * }</pre>
      *
      * @param valueToFind the element to check for containment, {@code null} returns false
@@ -576,10 +576,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range1 = Range.closed(5, 10);
-     * range1.isStartedBy(5);   // returns true
+     * range1.isStartedBy(5);  // returns true
      * 
      * Range<Integer> range2 = Range.open(5, 10);
-     * range2.isStartedBy(5);   // returns {@code false} (lower bound is exclusive)
+     * range2.isStartedBy(5);  // returns {@code false} (lower bound is exclusive)
      * }</pre>
      *
      * @param element the element to check against the lower endpoint, {@code null} returns false
@@ -600,10 +600,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range1 = Range.closed(5, 10);
-     * range1.isEndedBy(10);    // returns true
+     * range1.isEndedBy(10);  // returns true
      * 
      * Range<Integer> range2 = Range.closedOpen(5, 10);
-     * range2.isEndedBy(10);    // returns {@code false} (upper bound is exclusive)
+     * range2.isEndedBy(10);  // returns {@code false} (upper bound is exclusive)
      * }</pre>
      *
      * @param element the element to check against the upper endpoint, {@code null} returns false
@@ -647,9 +647,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(5, 10);
-     * range.isBefore(12);  // returns true
-     * range.isBefore(10);  // returns {@code false} (10 is included in range)
-     * range.isBefore(7);   // returns {@code false} (7 is within range)
+     * range.isBefore(12);   // returns true
+     * range.isBefore(10);   // returns {@code false} (10 is included in range)
+     * range.isBefore(7);    // returns {@code false} (7 is within range)
      * }</pre>
      *
      * @param element the element to check, {@code null} returns false
@@ -676,9 +676,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(5, 10);
-     * range.compareTo(3);   // returns 1 (range is after 3)
-     * range.compareTo(7);   // returns 0 (7 is within range)
-     * range.compareTo(12);  // returns -1 (range is before 12)
+     * range.compareTo(3);    // returns 1 (range is after 3)
+     * range.compareTo(7);    // returns 0 (7 is within range)
+     * range.compareTo(12);   // returns -1 (range is before 12)
      * }</pre>
      *
      * @param element the element to compare against this range, must not be null
@@ -719,10 +719,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range3 = Range.closed(5, 15);
      * Range<Integer> range4 = Range.open(1, 10);
      *
-     * range1.containsRange(range2);  // returns true
-     * range1.containsRange(range3);  // returns {@code false} (extends beyond upper bound)
-     * range1.containsRange(range4);  // returns true (open range (1,10) is within [1,10])
-     * range1.containsRange(null);    // returns false
+     * range1.containsRange(range2);   // returns true
+     * range1.containsRange(range3);   // returns {@code false} (extends beyond upper bound)
+     * range1.containsRange(range4);   // returns true (open range (1,10) is within [1,10])
+     * range1.containsRange(null);     // returns false
      * }</pre>
      *
      * @param other the range to check for containment, {@code null} returns false
@@ -749,8 +749,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range2 = Range.closed(1, 5);
      * Range<Integer> range3 = Range.closed(1, 10);
      * 
-     * range1.isAfterRange(range2);  // returns true
-     * range1.isAfterRange(range3);  // returns {@code false} (ranges touch at 10)
+     * range1.isAfterRange(range2);   // returns true
+     * range1.isAfterRange(range3);   // returns {@code false} (ranges touch at 10)
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns false
@@ -775,8 +775,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range2 = Range.closed(10, 15);
      * Range<Integer> range3 = Range.closed(5, 10);
      * 
-     * range1.isBeforeRange(range2);  // returns true
-     * range1.isBeforeRange(range3);  // returns {@code false} (ranges touch at 5)
+     * range1.isBeforeRange(range2);   // returns true
+     * range1.isBeforeRange(range3);   // returns {@code false} (ranges touch at 5)
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns false
@@ -804,9 +804,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range3 = Range.closed(6, 10);
      * Range<Integer> range4 = Range.open(5, 10);
      * 
-     * range1.isOverlappedBy(range2);  // returns {@code true} (overlap from 3 to 5)
-     * range1.isOverlappedBy(range3);  // returns {@code false} (no overlap)
-     * range1.isOverlappedBy(range4);  // returns {@code false} (ranges touch at 5 but not both inclusive)
+     * range1.isOverlappedBy(range2);   // returns {@code true} (overlap from 3 to 5)
+     * range1.isOverlappedBy(range3);   // returns {@code false} (no overlap)
+     * range1.isOverlappedBy(range4);   // returns {@code false} (ranges touch at 5 but not both inclusive)
      * }</pre>
      *
      * @param other the range to test for overlap, {@code null} returns false
@@ -917,13 +917,13 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> emptyRange = Range.open(5, 5);
-     * emptyRange.isEmpty();     // returns true
+     * emptyRange.isEmpty();  // returns true
      * 
      * Range<Integer> pointRange = Range.closed(5, 5);
-     * pointRange.isEmpty();     // returns {@code false} (contains the value 5)
+     * pointRange.isEmpty();  // returns {@code false} (contains the value 5)
      * 
      * Range<Integer> normalRange = Range.open(5, 6);
-     * normalRange.isEmpty();    // returns false
+     * normalRange.isEmpty();  // returns false
      * }</pre>
      *
      * @return {@code true} if this range contains no values, {@code false} otherwise
@@ -947,8 +947,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range2 = Range.closed(1, 5);
      * Range<Integer> range3 = Range.open(1, 5);
      * 
-     * range1.equals(range2);  // returns true
-     * range1.equals(range3);  // returns {@code false} (different bound types)
+     * range1.equals(range2);   // returns true
+     * range1.equals(range3);   // returns {@code false} (different bound types)
      * }</pre>
      *
      * @param obj the reference object with which to compare

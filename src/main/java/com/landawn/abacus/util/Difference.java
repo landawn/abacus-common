@@ -86,10 +86,10 @@ import com.landawn.abacus.util.function.TriPredicate;
  * List<String> list2 = Arrays.asList("b", "c", "d", "c");
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
  *
- * List<String> common = diff.inCommon();      // ["b", "c"]
+ * List<String> common = diff.inCommon();  // ["b", "c"]
  * List<String> leftOnly = diff.onLeftOnly();  // ["a", "b"]
- * List<String> rightOnly = diff.onRightOnly(); // ["d", "c"]
- * boolean equal = diff.areEqual();             // false
+ * List<String> rightOnly = diff.onRightOnly();  // ["d", "c"]
+ * boolean equal = diff.areEqual();  // false
  *
  * // Array comparison with primitive types
  * int[] array1 = {1, 2, 3, 2};
@@ -2919,7 +2919,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String customer;  // Maps to customerName
          *     private BigDecimal total;  // Maps to totalAmount
          *     private String status;
-         *     private LocalDate date;    // Different date type
+         *     private LocalDate date;  // Different date type
          *     private Map<String, Object> metadata;
          *     // getters and setters...
          * }

@@ -135,7 +135,7 @@ public interface Hasher {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buffer = ByteBuffer.wrap("data".getBytes());
-     * hasher.put(buffer); // Buffer position is now at limit
+     * hasher.put(buffer);  // Buffer position is now at limit
      * }</pre>
      *
      * @param bytes the ByteBuffer containing data to add to the hash computation

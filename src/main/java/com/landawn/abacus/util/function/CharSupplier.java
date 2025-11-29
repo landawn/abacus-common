@@ -50,7 +50,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSupplier letterA = () -> 'A';
-     * char value = letterA.getAsChar(); // Returns 'A'
+     * char value = letterA.getAsChar();  // Returns 'A'
      * }</pre>
      *
      * @return a char value

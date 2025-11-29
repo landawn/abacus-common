@@ -52,10 +52,10 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntUnaryOperator increment = x -> x + 1;
-     * int result = increment.applyAsInt(5); // Returns 6
+     * int result = increment.applyAsInt(5);  // Returns 6
      *
      * IntUnaryOperator negate = x -> -x;
-     * int negated = negate.applyAsInt(10); // Returns -10
+     * int negated = negate.applyAsInt(10);  // Returns -10
      * }</pre>
      *
      * @param operand the operand to which the operation is applied
@@ -78,7 +78,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * IntUnaryOperator multiplyBy2 = x -> x * 2;
      * IntUnaryOperator add5 = x -> x + 5;
      * IntUnaryOperator add5ThenMultiplyBy2 = multiplyBy2.compose(add5);
-     * int result = add5ThenMultiplyBy2.applyAsInt(10); // (10 + 5) * 2 = 30
+     * int result = add5ThenMultiplyBy2.applyAsInt(10);  // (10 + 5) * 2 = 30
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied.
@@ -107,7 +107,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * IntUnaryOperator multiplyBy2 = x -> x * 2;
      * IntUnaryOperator add5 = x -> x + 5;
      * IntUnaryOperator multiplyBy2ThenAdd5 = multiplyBy2.andThen(add5);
-     * int result = multiplyBy2ThenAdd5.applyAsInt(10); // (10 * 2) + 5 = 25
+     * int result = multiplyBy2ThenAdd5.applyAsInt(10);  // (10 * 2) + 5 = 25
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied.
@@ -131,7 +131,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntUnaryOperator identity = IntUnaryOperator.identity();
-     * int result = identity.applyAsInt(42); // 42
+     * int result = identity.applyAsInt(42);  // 42
      * }</pre>
      *
      * @return a unary operator that always returns its input argument

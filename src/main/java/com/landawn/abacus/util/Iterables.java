@@ -111,34 +111,34 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <pre>{@code
  * // Statistical operations with Optional returns
  * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
- * OptionalDouble average = Iterables.average(numbers);        // OptionalDouble[3.0]
- * OptionalInt max = Iterables.max(numbers);                   // OptionalInt[5]
- * OptionalLong sum = Iterables.sumToLong(numbers);           // OptionalLong[15]
+ * OptionalDouble average = Iterables.average(numbers);  // OptionalDouble[3.0]
+ * OptionalInt max = Iterables.max(numbers);  // OptionalInt[5]
+ * OptionalLong sum = Iterables.sumToLong(numbers);  // OptionalLong[15]
  *
  * // Search operations with null safety
  * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
- * Optional<String> found = Iterables.findFirst(names, s -> s.startsWith("B")); // Optional[Bob]
- * Optional<String> notFound = Iterables.findFirst(names, s -> s.startsWith("X")); // Optional.empty()
+ * Optional<String> found = Iterables.findFirst(names, s -> s.startsWith("B"));  // Optional[Bob]
+ * Optional<String> notFound = Iterables.findFirst(names, s -> s.startsWith("X"));  // Optional.empty()
  *
  * // Null-safe operations
  * OptionalInt maxFromNull = Iterables.max((List<Integer>) null);  // OptionalInt.empty()
- * boolean isEmpty = Iterables.isEmpty(null);                      // Returns true
+ * boolean isEmpty = Iterables.isEmpty(null);  // Returns true
  *
  * // Functional transformations
  * List<String> words = Arrays.asList("hello", "world", "java");
- * List<Integer> lengths = Iterables.map(words, String::length);   // [5, 5, 4]
- * List<String> filtered = Iterables.filter(words, s -> s.length() > 4); // [hello, world]
+ * List<Integer> lengths = Iterables.map(words, String::length);  // [5, 5, 4]
+ * List<String> filtered = Iterables.filter(words, s -> s.length() > 4);  // [hello, world]
  *
  * // Collection operations
  * List<Integer> list1 = Arrays.asList(1, 2, 3);
  * List<Integer> list2 = Arrays.asList(2, 3, 4);
- * List<Integer> intersection = Iterables.intersection(list1, list2); // [2, 3]
- * List<Integer> union = Iterables.union(list1, list2);              // [1, 2, 3, 4]
+ * List<Integer> intersection = Iterables.intersection(list1, list2);  // [2, 3]
+ * List<Integer> union = Iterables.union(list1, list2);  // [1, 2, 3, 4]
  *
  * // Validation and matching
- * boolean allPositive = Iterables.allMatch(numbers, n -> n > 0);   // true
+ * boolean allPositive = Iterables.allMatch(numbers, n -> n > 0);  // true
  * boolean anyEven = Iterables.anyMatch(numbers, n -> n % 2 == 0);  // true
- * boolean noneNegative = Iterables.noneMatch(numbers, n -> n < 0); // true
+ * boolean noneNegative = Iterables.noneMatch(numbers, n -> n < 0);  // true
  *
  * // Conversion operations
  * Integer[] array = Iterables.toArray(numbers, Integer.class);
@@ -331,9 +331,9 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.firstNonNull("hello", "world"); // returns "hello"
-     * String result2 = Iterables.firstNonNull(null, "world"); // returns "world"
-     * String result3 = Iterables.firstNonNull(null, null); // returns null
+     * String result = Iterables.firstNonNull("hello", "world");   // returns "hello"
+     * String result2 = Iterables.firstNonNull(null, "world");     // returns "world"
+     * String result3 = Iterables.firstNonNull(null, null);        // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -354,10 +354,10 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.firstNonNull("hello", "world", "test"); // returns "hello"
-     * String result2 = Iterables.firstNonNull(null, "world", "test"); // returns "world"
-     * String result3 = Iterables.firstNonNull(null, null, "test"); // returns "test"
-     * String result4 = Iterables.firstNonNull(null, null, null); // returns null
+     * String result = Iterables.firstNonNull("hello", "world", "test");   // returns "hello"
+     * String result2 = Iterables.firstNonNull(null, "world", "test");     // returns "world"
+     * String result3 = Iterables.firstNonNull(null, null, "test");        // returns "test"
+     * String result4 = Iterables.firstNonNull(null, null, null);          // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -379,9 +379,9 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.firstNonNull("a", "b", "c"); // returns "a"
-     * String result2 = Iterables.firstNonNull(null, null, "c", "d"); // returns "c"
-     * String result3 = Iterables.firstNonNull(null, null, null); // returns null
+     * String result = Iterables.firstNonNull("a", "b", "c");           // returns "a"
+     * String result2 = Iterables.firstNonNull(null, null, "c", "d");   // returns "c"
+     * String result3 = Iterables.firstNonNull(null, null, null);       // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -450,7 +450,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNull(list.iterator()); // returns "first"
+     * String result = Iterables.firstNonNull(list.iterator());  // returns "first"
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -483,9 +483,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list, "default"); // returns "first"
+     * String result = Iterables.firstNonNullOrDefault(list, "default");  // returns "first"
      * List<String> empty = Arrays.asList();
-     * String result2 = Iterables.firstNonNullOrDefault(empty, "default"); // returns "default"
+     * String result2 = Iterables.firstNonNullOrDefault(empty, "default");  // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -518,7 +518,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default"); // returns "first"
+     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default");  // returns "first"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -552,9 +552,9 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.lastNonNull("hello", "world"); // returns "world"
-     * String result2 = Iterables.lastNonNull("hello", null); // returns "hello"
-     * String result3 = Iterables.lastNonNull(null, null); // returns null
+     * String result = Iterables.lastNonNull("hello", "world");   // returns "world"
+     * String result2 = Iterables.lastNonNull("hello", null);     // returns "hello"
+     * String result3 = Iterables.lastNonNull(null, null);        // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -575,10 +575,10 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.lastNonNull("hello", "world", "test"); // returns "test"
-     * String result2 = Iterables.lastNonNull("hello", "world", null); // returns "world"
-     * String result3 = Iterables.lastNonNull("hello", null, null); // returns "hello"
-     * String result4 = Iterables.lastNonNull(null, null, null); // returns null
+     * String result = Iterables.lastNonNull("hello", "world", "test");   // returns "test"
+     * String result2 = Iterables.lastNonNull("hello", "world", null);    // returns "world"
+     * String result3 = Iterables.lastNonNull("hello", null, null);       // returns "hello"
+     * String result4 = Iterables.lastNonNull(null, null, null);          // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -600,9 +600,9 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Iterables.lastNonNull("a", "b", "c"); // returns "c"
-     * String result2 = Iterables.lastNonNull("a", "b", null); // returns "b"
-     * String result3 = Iterables.lastNonNull(null, null, null); // returns null
+     * String result = Iterables.lastNonNull("a", "b", "c");       // returns "c"
+     * String result2 = Iterables.lastNonNull("a", "b", null);     // returns "b"
+     * String result3 = Iterables.lastNonNull(null, null, null);   // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -634,9 +634,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNull(list); // returns "second"
+     * String result = Iterables.lastNonNull(list);  // returns "second"
      * List<Integer> allNulls = Arrays.asList(null, null, null);
-     * Integer result2 = Iterables.lastNonNull(allNulls); // returns null
+     * Integer result2 = Iterables.lastNonNull(allNulls);  // returns null
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -688,7 +688,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNull(list.iterator()); // returns "second"
+     * String result = Iterables.lastNonNull(list.iterator());  // returns "second"
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -761,7 +761,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * OptionalChar result = Iterables.min(array); // OptionalChar['a']
+     * OptionalChar result = Iterables.min(array);  // OptionalChar['a']
      * }</pre>
      *
      * @param a the array of characters to evaluate
@@ -779,7 +779,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * OptionalByte result = Iterables.min(array); // OptionalByte[1]
+     * OptionalByte result = Iterables.min(array);  // OptionalByte[1]
      * }</pre>
      *
      * @param a the array of bytes to evaluate
@@ -797,7 +797,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * OptionalShort result = Iterables.min(array); // OptionalShort[1]
+     * OptionalShort result = Iterables.min(array);  // OptionalShort[1]
      * }</pre>
      *
      * @param a the array of shorts to evaluate
@@ -815,7 +815,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * OptionalInt result = Iterables.min(array); // OptionalInt[1]
+     * OptionalInt result = Iterables.min(array);  // OptionalInt[1]
      * }</pre>
      *
      * @param a the array of integers to evaluate
@@ -833,7 +833,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * OptionalLong result = Iterables.min(array); // OptionalLong[1]
+     * OptionalLong result = Iterables.min(array);  // OptionalLong[1]
      * }</pre>
      *
      * @param a the array of longs to evaluate
@@ -851,7 +851,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * OptionalFloat result = Iterables.min(array); // OptionalFloat[1.0]
+     * OptionalFloat result = Iterables.min(array);  // OptionalFloat[1.0]
      * }</pre>
      *
      * @param a the array of floats to evaluate
@@ -869,7 +869,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * OptionalDouble result = Iterables.min(array); // OptionalDouble[1.0]
+     * OptionalDouble result = Iterables.min(array);  // OptionalDouble[1.0]
      * }</pre>
      *
      * @param a the array of doubles to evaluate
@@ -888,7 +888,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"b", "a", "c"};
-     * Nullable<String> result = Iterables.min(array); // Nullable["a"]
+     * Nullable<String> result = Iterables.min(array);  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -907,7 +907,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"b", "a", "c"};
-     * Nullable<String> result = Iterables.min(array, Comparator.reverseOrder()); // Nullable["c"]
+     * Nullable<String> result = Iterables.min(array, Comparator.reverseOrder());  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -928,7 +928,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("b", "a", "c");
-     * Nullable<String> result = Iterables.min(list); // Nullable["a"]
+     * Nullable<String> result = Iterables.min(list);  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -947,7 +947,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("b", "a", "c");
-     * Nullable<String> result = Iterables.min(list, Comparator.reverseOrder()); // Nullable["c"]
+     * Nullable<String> result = Iterables.min(list, Comparator.reverseOrder());  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -968,7 +968,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("b", "a", "c").iterator();
-     * Nullable<String> result = Iterables.min(iter); // Nullable["a"]
+     * Nullable<String> result = Iterables.min(iter);  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -987,7 +987,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("b", "a", "c").iterator();
-     * Nullable<String> result = Iterables.min(iter, Comparator.reverseOrder()); // Nullable["c"]
+     * Nullable<String> result = Iterables.min(iter, Comparator.reverseOrder());  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1030,7 +1030,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "pear"};
-     * Nullable<String> result = Iterables.minBy(array, String::length); // Nullable["pear"]
+     * Nullable<String> result = Iterables.minBy(array, String::length);  // Nullable["pear"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1052,7 +1052,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "pear");
-     * Nullable<String> result = Iterables.minBy(list, String::length); // Nullable["pear"]
+     * Nullable<String> result = Iterables.minBy(list, String::length);  // Nullable["pear"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1074,7 +1074,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("apple", "banana", "pear").iterator();
-     * Nullable<String> result = Iterables.minBy(iter, String::length); // Nullable["pear"]
+     * Nullable<String> result = Iterables.minBy(iter, String::length);  // Nullable["pear"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1095,7 +1095,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalInt result = Iterables.minInt(array, String::length); // OptionalInt[1]
+     * OptionalInt result = Iterables.minInt(array, String::length);  // OptionalInt[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1131,7 +1131,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalInt result = Iterables.minInt(list, String::length); // OptionalInt[1]
+     * OptionalInt result = Iterables.minInt(list, String::length);  // OptionalInt[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1156,7 +1156,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalInt result = Iterables.minInt(iter, String::length); // OptionalInt[1]
+     * OptionalInt result = Iterables.minInt(iter, String::length);  // OptionalInt[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -1192,7 +1192,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalLong result = Iterables.minLong(array, String::length); // OptionalLong[1]
+     * OptionalLong result = Iterables.minLong(array, String::length);  // OptionalLong[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1228,7 +1228,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalLong result = Iterables.minLong(list, String::length); // OptionalLong[1]
+     * OptionalLong result = Iterables.minLong(list, String::length);  // OptionalLong[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1253,7 +1253,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalLong result = Iterables.minLong(iter, String::length); // OptionalLong[1]
+     * OptionalLong result = Iterables.minLong(iter, String::length);  // OptionalLong[1]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -1289,7 +1289,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalDouble result = Iterables.minDouble(array, s -> (double) s.length()); // OptionalDouble[1.0]
+     * OptionalDouble result = Iterables.minDouble(array, s -> (double) s.length());  // OptionalDouble[1.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1325,7 +1325,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalDouble result = Iterables.minDouble(list, s -> (double) s.length()); // OptionalDouble[1.0]
+     * OptionalDouble result = Iterables.minDouble(list, s -> (double) s.length());  // OptionalDouble[1.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1350,7 +1350,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalDouble result = Iterables.minDouble(iter, s -> (double) s.length()); // OptionalDouble[1.0]
+     * OptionalDouble result = Iterables.minDouble(iter, s -> (double) s.length());  // OptionalDouble[1.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -1386,7 +1386,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * OptionalChar result = Iterables.max(array); // OptionalChar['c']
+     * OptionalChar result = Iterables.max(array);  // OptionalChar['c']
      * }</pre>
      *
      * @param a the array of characters to evaluate
@@ -1404,7 +1404,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * OptionalByte result = Iterables.max(array); // OptionalByte[3]
+     * OptionalByte result = Iterables.max(array);  // OptionalByte[3]
      * }</pre>
      *
      * @param a the array of bytes to evaluate
@@ -1422,7 +1422,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * OptionalShort result = Iterables.max(array); // OptionalShort[3]
+     * OptionalShort result = Iterables.max(array);  // OptionalShort[3]
      * }</pre>
      *
      * @param a the array of shorts to evaluate
@@ -1440,7 +1440,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * OptionalInt result = Iterables.max(array); // OptionalInt[3]
+     * OptionalInt result = Iterables.max(array);  // OptionalInt[3]
      * }</pre>
      *
      * @param a the array of integers to evaluate
@@ -1458,7 +1458,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * OptionalLong result = Iterables.max(array); // OptionalLong[3]
+     * OptionalLong result = Iterables.max(array);  // OptionalLong[3]
      * }</pre>
      *
      * @param a the array of longs to evaluate
@@ -1476,7 +1476,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * OptionalFloat result = Iterables.max(array); // OptionalFloat[3.0]
+     * OptionalFloat result = Iterables.max(array);  // OptionalFloat[3.0]
      * }</pre>
      *
      * @param a the array of floats to evaluate
@@ -1494,7 +1494,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * OptionalDouble result = Iterables.max(array); // OptionalDouble[3.0]
+     * OptionalDouble result = Iterables.max(array);  // OptionalDouble[3.0]
      * }</pre>
      *
      * @param a the array of doubles to evaluate
@@ -1513,7 +1513,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "c", "b"};
-     * Nullable<String> result = Iterables.max(array); // Nullable["c"]
+     * Nullable<String> result = Iterables.max(array);  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1532,7 +1532,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "c", "b"};
-     * Nullable<String> result = Iterables.max(array, Comparator.reverseOrder()); // Nullable["a"]
+     * Nullable<String> result = Iterables.max(array, Comparator.reverseOrder());  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1553,7 +1553,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "c", "b");
-     * Nullable<String> result = Iterables.max(list); // Nullable["c"]
+     * Nullable<String> result = Iterables.max(list);  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1572,7 +1572,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "c", "b");
-     * Nullable<String> result = Iterables.max(list, Comparator.reverseOrder()); // Nullable["a"]
+     * Nullable<String> result = Iterables.max(list, Comparator.reverseOrder());  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1593,7 +1593,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "c", "b").iterator();
-     * Nullable<String> result = Iterables.max(iter); // Nullable["c"]
+     * Nullable<String> result = Iterables.max(iter);  // Nullable["c"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1612,7 +1612,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "c", "b").iterator();
-     * Nullable<String> result = Iterables.max(iter, Comparator.reverseOrder()); // Nullable["a"]
+     * Nullable<String> result = Iterables.max(iter, Comparator.reverseOrder());  // Nullable["a"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1655,7 +1655,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "pear"};
-     * Nullable<String> result = Iterables.maxBy(array, String::length); // Nullable["banana"]
+     * Nullable<String> result = Iterables.maxBy(array, String::length);  // Nullable["banana"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1677,7 +1677,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "pear");
-     * Nullable<String> result = Iterables.maxBy(list, String::length); // Nullable["banana"]
+     * Nullable<String> result = Iterables.maxBy(list, String::length);  // Nullable["banana"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1699,7 +1699,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("apple", "banana", "pear").iterator();
-     * Nullable<String> result = Iterables.maxBy(iter, String::length); // Nullable["banana"]
+     * Nullable<String> result = Iterables.maxBy(iter, String::length);  // Nullable["banana"]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -1720,7 +1720,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalInt result = Iterables.maxInt(array, String::length); // OptionalInt[3]
+     * OptionalInt result = Iterables.maxInt(array, String::length);  // OptionalInt[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1756,7 +1756,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalInt result = Iterables.maxInt(list, String::length); // OptionalInt[3]
+     * OptionalInt result = Iterables.maxInt(list, String::length);  // OptionalInt[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1781,7 +1781,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalInt result = Iterables.maxInt(iter, String::length); // OptionalInt[3]
+     * OptionalInt result = Iterables.maxInt(iter, String::length);  // OptionalInt[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -1817,7 +1817,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalLong result = Iterables.maxLong(array, String::length); // OptionalLong[3]
+     * OptionalLong result = Iterables.maxLong(array, String::length);  // OptionalLong[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1853,7 +1853,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalLong result = Iterables.maxLong(list, String::length); // OptionalLong[3]
+     * OptionalLong result = Iterables.maxLong(list, String::length);  // OptionalLong[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1878,7 +1878,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalLong result = Iterables.maxLong(iter, String::length); // OptionalLong[3]
+     * OptionalLong result = Iterables.maxLong(iter, String::length);  // OptionalLong[3]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -1914,7 +1914,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "bb", "ccc"};
-     * OptionalDouble result = Iterables.maxDouble(array, s -> (double) s.length()); // OptionalDouble[3.0]
+     * OptionalDouble result = Iterables.maxDouble(array, s -> (double) s.length());  // OptionalDouble[3.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -1950,7 +1950,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalDouble result = Iterables.maxDouble(list, s -> (double) s.length()); // OptionalDouble[3.0]
+     * OptionalDouble result = Iterables.maxDouble(list, s -> (double) s.length());  // OptionalDouble[3.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -1975,7 +1975,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
-     * OptionalDouble result = Iterables.maxDouble(iter, s -> (double) s.length()); // OptionalDouble[3.0]
+     * OptionalDouble result = Iterables.maxDouble(iter, s -> (double) s.length());  // OptionalDouble[3.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -2012,7 +2012,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {5, 2, 8, 1, 9};
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array);  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -2032,7 +2032,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {5, 2, 8, 1, 9};
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array, Comparator.naturalOrder());  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -2053,7 +2053,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(5, 2, 8, 1, 9);
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list);  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -2075,7 +2075,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(5, 2, 8, 1, 9);
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list, Comparator.naturalOrder());  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements
@@ -2098,7 +2098,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(5, 2, 8, 1, 9).iterator();
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter);  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -2118,7 +2118,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(5, 2, 8, 1, 9).iterator();
-     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter, Comparator.naturalOrder());  // Optional[Pair[1, 9]]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator
@@ -2141,10 +2141,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] oddArray = {1, 5, 2, 8, 3};
-     * Nullable<Integer> median1 = Iterables.median(oddArray); // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.median(oddArray);  // Nullable[3]
      *
      * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
-     * Nullable<Integer> median2 = Iterables.median(evenArray); // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.median(evenArray);  // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -2168,10 +2168,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] oddArray = {1, 5, 2, 8, 3};
-     * Nullable<Integer> median1 = Iterables.median(oddArray, Comparator.naturalOrder()); // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.median(oddArray, Comparator.naturalOrder());  // Nullable[3]
      *
      * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
-     * Nullable<Integer> median2 = Iterables.median(evenArray, Comparator.naturalOrder()); // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.median(evenArray, Comparator.naturalOrder());  // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -2196,10 +2196,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
-     * Nullable<Integer> median1 = Iterables.median(oddList); // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.median(oddList);  // Nullable[3]
      *
      * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
-     * Nullable<Integer> median2 = Iterables.median(evenList); // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.median(evenList);  // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -2223,10 +2223,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
-     * Nullable<Integer> median1 = Iterables.median(oddList, Comparator.naturalOrder()); // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.median(oddList, Comparator.naturalOrder());  // Nullable[3]
      *
      * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
-     * Nullable<Integer> median2 = Iterables.median(evenList, Comparator.naturalOrder()); // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.median(evenList, Comparator.naturalOrder());  // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -2248,7 +2248,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {3, 1, 4, 1, 5, 9, 2, 6};
-     * Nullable<Integer> result = Iterables.kthLargest(array, 3); // Nullable[5] (3rd largest is 5)
+     * Nullable<Integer> result = Iterables.kthLargest(array, 3);  // Nullable[5] (3rd largest is 5)
      * }</pre>
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Comparable
@@ -2268,7 +2268,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {3, 1, 4, 1, 5, 9, 2, 6};
-     * Nullable<Integer> result = Iterables.kthLargest(array, 3, Comparator.naturalOrder()); // Nullable[5]
+     * Nullable<Integer> result = Iterables.kthLargest(array, 3, Comparator.naturalOrder());  // Nullable[5]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -2289,7 +2289,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
-     * Nullable<Integer> result = Iterables.kthLargest(list, 3); // Nullable[5]
+     * Nullable<Integer> result = Iterables.kthLargest(list, 3);  // Nullable[5]
      * }</pre>
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
@@ -2309,7 +2309,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
-     * Nullable<Integer> result = Iterables.kthLargest(list, 3, Comparator.naturalOrder()); // Nullable[5]
+     * Nullable<Integer> result = Iterables.kthLargest(list, 3, Comparator.naturalOrder());  // Nullable[5]
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
@@ -2330,7 +2330,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-     * OptionalInt sum = Iterables.sumInt(numbers); // OptionalInt[15]
+     * OptionalInt sum = Iterables.sumInt(numbers);  // OptionalInt[15]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
@@ -2349,7 +2349,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalInt sum = Iterables.sumInt(list, String::length); // OptionalInt[6] (1 + 2 + 3)
+     * OptionalInt sum = Iterables.sumInt(list, String::length);  // OptionalInt[6] (1 + 2 + 3)
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2375,7 +2375,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(Integer.MAX_VALUE, 1, 2);
-     * OptionalLong sum = Iterables.sumIntToLong(numbers); // OptionalLong[2147483650]
+     * OptionalLong sum = Iterables.sumIntToLong(numbers);  // OptionalLong[2147483650]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
@@ -2394,7 +2394,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalLong sum = Iterables.sumIntToLong(list, String::length); // OptionalLong[6]
+     * OptionalLong sum = Iterables.sumIntToLong(list, String::length);  // OptionalLong[6]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2420,7 +2420,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Long> numbers = Arrays.asList(1L, 2L, 3L, 4L, 5L);
-     * OptionalLong sum = Iterables.sumLong(numbers); // OptionalLong[15]
+     * OptionalLong sum = Iterables.sumLong(numbers);  // OptionalLong[15]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
@@ -2439,7 +2439,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalLong sum = Iterables.sumLong(list, String::length); // OptionalLong[6] (1 + 2 + 3)
+     * OptionalLong sum = Iterables.sumLong(list, String::length);  // OptionalLong[6] (1 + 2 + 3)
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2465,7 +2465,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
-     * OptionalDouble sum = Iterables.sumDouble(numbers); // OptionalDouble[15.0]
+     * OptionalDouble sum = Iterables.sumDouble(numbers);  // OptionalDouble[15.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
@@ -2484,7 +2484,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "bb", "ccc");
-     * OptionalDouble sum = Iterables.sumDouble(list, s -> (double) s.length()); // OptionalDouble[6.0]
+     * OptionalDouble sum = Iterables.sumDouble(list, s -> (double) s.length());  // OptionalDouble[6.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2510,7 +2510,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<BigInteger> numbers = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2));
-     * Optional<BigInteger> sum = Iterables.sumBigInteger(numbers); // Optional[3]
+     * Optional<BigInteger> sum = Iterables.sumBigInteger(numbers);  // Optional[3]
      * }</pre>
      *
      * @param c the iterable of BigInteger elements to evaluate
@@ -2528,7 +2528,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("1", "2", "3");
-     * Optional<BigInteger> sum = Iterables.sumBigInteger(list, BigInteger::new); // Optional[6]
+     * Optional<BigInteger> sum = Iterables.sumBigInteger(list, BigInteger::new);  // Optional[6]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2554,7 +2554,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<BigDecimal> numbers = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"));
-     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(numbers); // Optional[4.0]
+     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(numbers);  // Optional[4.0]
      * }</pre>
      *
      * @param c the iterable of BigDecimal elements to evaluate
@@ -2572,7 +2572,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("1.5", "2.5", "3.0");
-     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(list, BigDecimal::new); // Optional[7.0]
+     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(list, BigDecimal::new);  // Optional[7.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -2598,7 +2598,7 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3, 4, 5};
-     * OptionalDouble avg = Iterables.averageInt(array); // OptionalDouble[3.0]
+     * OptionalDouble avg = Iterables.averageInt(array);  // OptionalDouble[3.0]
      * }</pre>
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Number

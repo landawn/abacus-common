@@ -49,7 +49,7 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntSupplier counter = new AtomicInteger()::incrementAndGet;
-     * int value = counter.getAsInt(); // Returns 1, then 2, then 3, etc.
+     * int value = counter.getAsInt();  // Returns 1, then 2, then 3, etc.
      * }</pre>
      *
      * @return an {@code int} value

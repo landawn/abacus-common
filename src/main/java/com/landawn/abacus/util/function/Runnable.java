@@ -90,7 +90,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * Future<Void> future = executor.submit(callable);
      *
      * // Wait for completion
-     * future.get(); // Returns null when task completes
+     * future.get();  // Returns null when task completes
      * }</pre>
      *
      * @return a {@code Callable<Void>} that executes this runnable and returns {@code null}

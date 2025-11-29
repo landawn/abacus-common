@@ -56,7 +56,7 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      *     updateDisplay(x, y);
      * };
      *
-     * maxTracker.accept((short) 100, (short) 200); // Prints "Maximum: 200"
+     * maxTracker.accept((short) 100, (short) 200);  // Prints "Maximum: 200"
      * coordinateProcessor.accept((short) 10, (short) 20);
      * }</pre>
      *

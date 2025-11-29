@@ -228,7 +228,7 @@ public class EventBus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EventBus eventBus = new EventBus("myBus");
-     * String id = eventBus.identifier(); // Returns "myBus"
+     * String id = eventBus.identifier();  // Returns "myBus"
      * }</pre>
      *
      * @return the identifier of this EventBus
@@ -924,7 +924,7 @@ public class EventBus {
      *     @Override
      *     protected boolean isSupportedThreadMode(ThreadMode threadMode) {
      *         if (threadMode == ThreadMode.MAIN_THREAD) {
-     *             return true; // Add support for main thread delivery
+     *             return true;  // Add support for main thread delivery
      *         }
      *         return super.isSupportedThreadMode(threadMode);
      *     }

@@ -37,7 +37,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * <pre>{@code
      * DoubleObjConsumer<String> logger = (value, msg) ->
      *     System.out.println(msg + ": " + value);
-     * logger.accept(3.14, "Pi"); // Prints: Pi: 3.14
+     * logger.accept(3.14, "Pi");  // Prints: Pi: 3.14
      *
      * Map<String, Double> map = new HashMap<>();
      * DoubleObjConsumer<String> mapPutter = (value, key) -> map.put(key, value);
@@ -62,7 +62,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      *     if (val < 0) throw new IllegalArgumentException(msg);
      * };
      * DoubleObjConsumer<String> combined = logger.andThen(validator);
-     * combined.accept(5.5, "value"); // Logs then validates
+     * combined.accept(5.5, "value");  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation

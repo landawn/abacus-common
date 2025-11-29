@@ -1332,8 +1332,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));    // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));   // [[1, 2], [3, 4], [5], [6], [7]]
      * }</pre>
      *
      * @param <T> the type of the elements in the resulting stream
@@ -3991,10 +3991,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4], produces: [f(1,2), f(2,3), f(3,4)]
-     * seq.slidingMap((a, b) -> a + b); // Results: [3, 5, 7]
+     * seq.slidingMap((a, b) -> a + b);  // Results: [3, 5, 7]
      *
      * // For sequence [1], produces: [f(1,null)]
-     * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b)); // Results: ["1,null"]
+     * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b));  // Results: ["1,null"]
      * }</pre>
      *
      * @param <R> the element type of the new stream
@@ -4018,10 +4018,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4] with increment=2, produces: [f(1,2), f(3,4)]
-     * seq.slidingMap(2, (a, b) -> a + b); // Results: [3, 7]
+     * seq.slidingMap(2, (a, b) -> a + b);  // Results: [3, 7]
      *
      * // For sequence [1, 2, 3, 4, 5] with increment=2, produces: [f(1,2), f(3,4), f(5,null)]
-     * seq.slidingMap(2, (a, b) -> a + "," + b); // Results: ["1,2", "3,4", "5,null"]
+     * seq.slidingMap(2, (a, b) -> a + "," + b);  // Results: ["1,2", "3,4", "5,null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4047,10 +4047,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5] with increment=2, ignoreNotPaired=false
-     * seq.slidingMap(2, false, (a, b) -> a + "," + b); // Results: ["1,2", "3,4", "5,null"]
+     * seq.slidingMap(2, false, (a, b) -> a + "," + b);  // Results: ["1,2", "3,4", "5,null"]
      *
      * // For sequence [1, 2, 3, 4, 5] with increment=2, ignoreNotPaired=true
-     * seq.slidingMap(2, true, (a, b) -> a + b); // Results: [3, 7] (element 5 is ignored)
+     * seq.slidingMap(2, true, (a, b) -> a + b);  // Results: [3, 7] (element 5 is ignored)
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4131,10 +4131,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5], produces: [f(1,2,3), f(2,3,4), f(3,4,5)]
-     * seq.slidingMap((a, b, c) -> a + b + c); // Results: [6, 9, 12]
+     * seq.slidingMap((a, b, c) -> a + b + c);  // Results: [6, 9, 12]
      *
      * // For sequence [1], produces: [f(1,null,null)]
-     * seq.slidingMap((a, b, c) -> String.format("%s,%s,%s", a, b, c)); // Results: ["1,null,null"]
+     * seq.slidingMap((a, b, c) -> String.format("%s,%s,%s", a, b, c));  // Results: ["1,null,null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4158,10 +4158,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5, 6] with increment=3, produces: [f(1,2,3), f(4,5,6)]
-     * seq.slidingMap(3, (a, b, c) -> a + b + c); // Results: [6, 15]
+     * seq.slidingMap(3, (a, b, c) -> a + b + c);  // Results: [6, 15]
      *
      * // For sequence [1, 2, 3, 4, 5, 6, 7, 8] with increment=3, produces: [f(1,2,3), f(4,5,6), f(7,8,null)]
-     * seq.slidingMap(3, (a, b, c) -> String.format("%s+%s+%s", a, b, c)); // Results: ["1+2+3", "4+5+6", "7+8+null"]
+     * seq.slidingMap(3, (a, b, c) -> String.format("%s+%s+%s", a, b, c));  // Results: ["1+2+3", "4+5+6", "7+8+null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -8376,7 +8376,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of("a", "b", "c")
      *    .zipWith(Arrays.asList(1, 2, 3, 4),
      *             (s, i) -> s + i)
-     *    .toList(); // Returns ["a1", "b2", "c3"]
+     *    .toList();  // Returns ["a1", "b2", "c3"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Collection
@@ -8409,7 +8409,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Arrays.asList(1, 2, 3),
      *             "z", 0,
      *             (s, i) -> s + i)
-     *    .toList(); // Returns ["a1", "b2", "z3"]
+     *    .toList();  // Returns ["a1", "b2", "z3"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Collection
@@ -8442,7 +8442,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Arrays.asList(1, 2),
      *             Arrays.asList(true, false, true),
      *             (s, i, b) -> s + i + b)
-     *    .toList(); // Returns ["a1true", "b2false"]
+     *    .toList();  // Returns ["a1true", "b2false"]
      * }</pre>
      *
      * @param <T2> the type of elements in the first given Collection
@@ -8478,7 +8478,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             Arrays.asList(true, false, true),
      *             "z", 0, false,
      *             (s, i, b) -> s + i + b)
-     *    .toList(); // Returns ["a1true", "b0false", "z0true"]
+     *    .toList();  // Returns ["a1true", "b0false", "z0true"]
      * }</pre>
      *
      * @param <T2> the type of elements in the first given Collection
@@ -8513,7 +8513,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a", "b", "c", "d"),
      *             (i, s) -> i + s)
-     *    .toList(); // Returns ["1a", "2b", "3c"]
+     *    .toList();  // Returns ["1a", "2b", "3c"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Seq
@@ -8544,7 +8544,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <pre>{@code
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a"), 0, "z", (i, s) -> i + s)
-     *    .toList(); // Returns ["1a", "2z", "3z"]
+     *    .toList();  // Returns ["1a", "2z", "3z"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Seq
@@ -8577,7 +8577,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a", "b"), Seq.of(true, false),
      *             (i, s, b) -> i + s + b)
-     *    .toList(); // Returns ["1atrue", "2bfalse"]
+     *    .toList();  // Returns ["1atrue", "2bfalse"]
      * }</pre>
      *
      * @param <T2> the type of elements in the second Seq
@@ -8612,7 +8612,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Seq.of("a"), Seq.of(true),
      *             0, "z", false,
      *             (i, s, b) -> i + s + b)
-     *    .toList(); // Returns ["1atrue", "2zfalse", "3zfalse"]
+     *    .toList();  // Returns ["1atrue", "2zfalse", "3zfalse"]
      * }</pre>
      *
      * @param <T2> the type of elements in the second Seq
@@ -8685,7 +8685,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * // With exception handling
      * seq.forEach(element -> {
-     *     processElement(element); // may throw IOException
+     *     processElement(element);  // may throw IOException
      * });
      * }</pre>
      *
@@ -9930,10 +9930,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 2, 3, 2, 4);
-     * boolean hasDups1 = seq1.hasDuplicates(); // true
+     * boolean hasDups1 = seq1.hasDuplicates();  // true
      * 
      * Seq<Integer> seq2 = Seq.of(1, 2, 3, 4, 5);
-     * boolean hasDups2 = seq2.hasDuplicates(); // false
+     * boolean hasDups2 = seq2.hasDuplicates();  // false
      * }</pre>
      * 
      * @return {@code true} if this sequence contains at least one duplicate element, otherwise {@code false}
@@ -10233,10 +10233,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq1 = Seq.of("single");
-     * Optional<String> only1 = seq1.onlyOne(); // only1.get() == "single"
+     * Optional<String> only1 = seq1.onlyOne();  // only1.get() == "single"
      * 
      * Seq<String> seq2 = Seq.of("first", "second");
-     * seq2.onlyOne(); // throws TooManyElementsException
+     * seq2.onlyOne();  // throws TooManyElementsException
      * }</pre>
      * 
      * @return an {@code Optional} describing the only element of this sequence, 
@@ -10274,7 +10274,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
-     * long count = seq.count(); // count == 4
+     * long count = seq.count();  // count == 4
      * }</pre>
      * 
      * @return the count of elements in this sequence
@@ -10489,7 +10489,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * ImmutableList<String> list = seq.toImmutableList();
-     * // list.add("d"); // would throw UnsupportedOperationException
+     * // list.add("d");  // would throw UnsupportedOperationException
      * }</pre>
      * 
      * @return an immutable list containing all the elements of this sequence
@@ -12344,7 +12344,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Reuse a Joiner
      * Joiner joiner = Joiner.with(", ", "[", "]");
      * Seq.of("a", "b", "c").joinTo(joiner);
-     * String result = joiner.toString(); // "[a, b, c]"
+     * String result = joiner.toString();  // "[a, b, c]"
      * }</pre>
      *
      * @param joiner the Joiner to append the elements to
@@ -13075,7 +13075,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     lines.limit(10).forEach(System.out::println);
      * } finally {
      *     if (lines != null) {
-     *         lines.close(); // Explicit close in finally block
+     *         lines.close();  // Explicit close in finally block
      *     }
      * }
      * 

@@ -37,7 +37,7 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * <pre>{@code
      * CharBiConsumer charPrinter = (first, second) ->
      *     System.out.println("Characters: " + first + ", " + second);
-     * charPrinter.accept('A', 'Z'); // Prints: Characters: A, Z
+     * charPrinter.accept('A', 'Z');  // Prints: Characters: A, Z
      *
      * StringBuilder sb = new StringBuilder();
      * CharBiConsumer appender = (c1, c2) -> sb.append(c1).append(c2);
@@ -61,7 +61,7 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * CharBiConsumer logger = (c1, c2) -> System.out.println("Processing: " + c1 + ", " + c2);
      * CharBiConsumer validator = (c1, c2) -> { if (!Character.isLetter(c1)) throw new IllegalArgumentException(); };
      * CharBiConsumer combined = logger.andThen(validator);
-     * combined.accept('A', 'B'); // Logs then validates
+     * combined.accept('A', 'B');  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

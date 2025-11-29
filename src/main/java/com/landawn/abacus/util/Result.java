@@ -87,7 +87,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Checking result state
  * if (result.isSuccess()) {
- *     String value = result.orElseThrow(); // Safe to call
+ *     String value = result.orElseThrow();  // Safe to call
  * } else {
  *     IOException error = result.getException();
  *     handleError(error);
@@ -511,7 +511,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = result.orElseThrow(); // throws exception if failed
+     * String value = result.orElseThrow();  // throws exception if failed
      * }</pre>
      *
      * @return the value contained in this Result if successful
@@ -700,7 +700,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * Result<String, Exception> r1 = Result.of("value", null);
      * Result<String, Exception> r2 = Result.of("value", null);
-     * boolean isEqual = r1.equals(r2); // true
+     * boolean isEqual = r1.equals(r2);  // true
      * }</pre>
      *
      * @param obj the object to compare with this Result

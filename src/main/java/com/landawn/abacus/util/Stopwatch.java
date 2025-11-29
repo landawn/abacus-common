@@ -43,11 +43,11 @@ import java.util.concurrent.TimeUnit;
  * <pre>{@code
  * Stopwatch stopwatch = Stopwatch.createStarted();
  * doSomething();
- * stopwatch.stop(); // optional
+ * stopwatch.stop();  // optional
  *
  * Duration duration = stopwatch.elapsed();
  *
- * log.info("time: " + stopwatch); // formatted string like "12.3 ms"
+ * log.info("time: " + stopwatch);  // formatted string like "12.3 ms"
  * }</pre>
  *
  * <p>Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is
@@ -213,9 +213,9 @@ public final class Stopwatch {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * stopwatch.stop();
-     * Duration duration = stopwatch.elapsed(); // Time when stopped
+     * Duration duration = stopwatch.elapsed();  // Time when stopped
      * Thread.sleep(1000);
-     * Duration sameDuration = stopwatch.elapsed(); // Still the same time
+     * Duration sameDuration = stopwatch.elapsed();  // Still the same time
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining

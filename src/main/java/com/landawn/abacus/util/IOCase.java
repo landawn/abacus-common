@@ -32,7 +32,7 @@ package com.landawn.abacus.util;
  * // On Windows: true, on Unix: false
  * 
  * // Always case-sensitive comparison
- * boolean isSensitive = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt"); // false
+ * boolean isSensitive = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");  // false
  * }</pre>
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
@@ -81,7 +81,7 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IOCase ioCase = IOCase.forName("Sensitive"); // returns IOCase.SENSITIVE
+     * IOCase ioCase = IOCase.forName("Sensitive");  // returns IOCase.SENSITIVE
      * }</pre>
      *
      * @param name the name of the IOCase constant ("Sensitive", "Insensitive", or "System")
@@ -152,8 +152,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns 0
-     * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns negative
+     * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt");   // returns 0
+     * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt");    // returns negative
      * }</pre>
      *
      * @param str1 the first string to compare, not null
@@ -176,8 +176,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt"); // true
-     * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt"); // false
+     * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt");   // true
+     * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");    // false
      * }</pre>
      *
      * @param str1 the first string to compare, not null
@@ -200,8 +200,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE"); // true
-     * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE"); // false
+     * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE");   // true
+     * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE");    // false
      * }</pre>
      *
      * @param str the string to check, not null
@@ -225,8 +225,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT"); // true
-     * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT"); // false
+     * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT");   // true
+     * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT");    // false
      * }</pre>
      *
      * @param str the string to check, not null
@@ -252,8 +252,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns 7
-     * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns -1
+     * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file");   // returns 7
+     * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file");    // returns -1
      * }</pre>
      *
      * @param str the string to search in, not null
@@ -287,8 +287,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // true
-     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // false
+     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE");   // true
+     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE");    // false
      * }</pre>
      *
      * @param str the string to check, not null

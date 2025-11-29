@@ -40,15 +40,15 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
      * <pre>{@code
      * ToLongTriFunction<Integer, Integer, Integer> multiplier =
      *     (a, b, c) -> (long) a * b * c;
-     * long product = multiplier.applyAsLong(1000, 1000, 100); // returns 100000000L
+     * long product = multiplier.applyAsLong(1000, 1000, 100);  // returns 100000000L
      *
      * ToLongTriFunction<Date, Date, TimeUnit> timeDifference =
      *     (start, end, unit) -> unit.convert(end.getTime() - start.getTime(), TimeUnit.MILLISECONDS);
-     * long days = timeDifference.applyAsLong(startDate, endDate, TimeUnit.DAYS); // returns days between dates
+     * long days = timeDifference.applyAsLong(startDate, endDate, TimeUnit.DAYS);  // returns days between dates
      *
      * ToLongTriFunction<String, Integer, Integer> hashCombiner =
      *     (str, seed1, seed2) -> str.hashCode() + seed1 * 31L + seed2;
-     * long hash = hashCombiner.applyAsLong("test", 7, 13); // returns combined hash value
+     * long hash = hashCombiner.applyAsLong("test", 7, 13);  // returns combined hash value
      * }</pre>
      *
      * @param a the first function argument

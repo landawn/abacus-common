@@ -99,8 +99,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> empty = ImmutableSet.empty();
-     * System.out.println(empty.size()); // prints: 0
-     * System.out.println(empty.isEmpty()); // prints: true
+     * System.out.println(empty.size());      // prints: 0
+     * System.out.println(empty.isEmpty());   // prints: true
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -118,8 +118,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> single = ImmutableSet.just("hello");
-     * System.out.println(single.contains("hello")); // prints: true
-     * System.out.println(single.size()); // prints: 1
+     * System.out.println(single.contains("hello"));   // prints: true
+     * System.out.println(single.size());              // prints: 1
      * }</pre>
      *
      * @param <E> the type of the element
@@ -138,7 +138,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Integer> single = ImmutableSet.of(42);
-     * // single.add(43); // Would throw UnsupportedOperationException
+     * // single.add(43);  // Would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <E> the type of the element
@@ -158,10 +158,10 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> pair = ImmutableSet.of("first", "second");
-     * System.out.println(pair.size()); // prints: 2
+     * System.out.println(pair.size());  // prints: 2
      *
      * ImmutableSet<String> duplicate = ImmutableSet.of("same", "same");
-     * System.out.println(duplicate.size()); // prints: 1
+     * System.out.println(duplicate.size());  // prints: 1
      * }</pre>
      *
      * @param <E> the type of elements
@@ -335,7 +335,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <pre>{@code
      * String[] colors = {"red", "green", "blue", "red"};
      * ImmutableSet<String> colorSet = ImmutableSet.of(colors);
-     * System.out.println(colorSet.size()); // prints: 3 (duplicates removed)
+     * System.out.println(colorSet.size());  // prints: 3 (duplicates removed)
      * }</pre>
      *
      * @param <E> the type of the elements
@@ -364,12 +364,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 1);
      * ImmutableSet<Integer> uniqueNumbers = ImmutableSet.copyOf(numbers);
-     * System.out.println(uniqueNumbers); // order preserved from list: [1, 2, 3]
+     * System.out.println(uniqueNumbers);  // order preserved from list: [1, 2, 3]
      * 
      * Set<String> mutableSet = new HashSet<>();
      * mutableSet.add("apple");
      * ImmutableSet<String> immutableCopy = ImmutableSet.copyOf(mutableSet);
-     * mutableSet.add("banana"); // Does not affect immutableCopy
+     * mutableSet.add("banana");  // Does not affect immutableCopy
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -403,8 +403,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * mutableSet.add("initial");
      *
      * ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
-     * mutableSet.add("added later"); // This WILL be visible in wrapped!
-     * System.out.println(wrapped.contains("added later")); // prints: true
+     * mutableSet.add("added later");                         // This WILL be visible in wrapped!
+     * System.out.println(wrapped.contains("added later"));   // prints: true
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -468,7 +468,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set<Integer> backingSet = new LinkedHashSet<>(); // Preserves insertion order
+     * Set<Integer> backingSet = new LinkedHashSet<>();  // Preserves insertion order
      * ImmutableSet<Integer> numbers = ImmutableSet.builder(backingSet)
      *     .add(1)
      *     .add(2, 3, 4)
@@ -517,7 +517,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * Builder<String> builder = ImmutableSet.<String>builder();
          * builder.add("hello")
          *        .add("world")
-         *        .add("hello"); // Duplicate, won't be added again
+         *        .add("hello");  // Duplicate, won't be added again
          * }</pre>
          *
          * @param element the element to add, may be null
@@ -614,7 +614,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableSet<String> finalSet = builder.build();
-         * System.out.println(finalSet.size()); // Number of distinct elements
+         * System.out.println(finalSet.size());  // Number of distinct elements
          * }</pre>
          *
          * @return a new ImmutableSet containing all distinct elements added to the builder

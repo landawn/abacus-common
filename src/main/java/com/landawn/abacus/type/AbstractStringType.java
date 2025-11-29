@@ -51,8 +51,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractStringType type = ...; // concrete String type instance
-     * Class<?> clazz = type.clazz(); // returns String.class
+     * AbstractStringType type = ...;  // concrete String type instance
+     * Class<?> clazz = type.clazz();  // returns String.class
      * }</pre>
      *
      * @return the Class object for String.class
@@ -69,7 +69,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * boolean isString = type.isString(); // returns true
+     * boolean isString = type.isString();  // returns true
      * }</pre>
      *
      * @return {@code true} indicating this is a string type
@@ -86,8 +86,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * String result = type.stringOf("hello"); // returns "hello"
-     * String nullResult = type.stringOf(null); // returns null
+     * String result = type.stringOf("hello");    // returns "hello"
+     * String nullResult = type.stringOf(null);   // returns null
      * }</pre>
      *
      * @param str the String value to convert, may be {@code null}
@@ -105,8 +105,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * String result = type.valueOf("hello"); // returns "hello"
-     * String nullResult = type.valueOf(null); // returns null
+     * String result = type.valueOf("hello");    // returns "hello"
+     * String nullResult = type.valueOf(null);   // returns null
      * }</pre>
      *
      * @param str the string representation to convert, may be {@code null}
@@ -125,8 +125,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * char[] chars = {'h', 'e', 'l', 'l', 'o'};
-     * String result = type.valueOf(chars, 0, 5); // returns "hello"
-     * String partial = type.valueOf(chars, 0, 3); // returns "hel"
+     * String result = type.valueOf(chars, 0, 5);    // returns "hello"
+     * String partial = type.valueOf(chars, 0, 3);   // returns "hel"
      * }</pre>
      *
      * @param cbuf the character array containing the characters to convert, may be {@code null}
@@ -148,9 +148,9 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * String result1 = type.valueOf(Integer.valueOf(123)); // returns "123"
-     * String result2 = type.valueOf("hello"); // returns "hello"
-     * String nullResult = type.valueOf(null); // returns null
+     * String result1 = type.valueOf(Integer.valueOf(123));   // returns "123"
+     * String result2 = type.valueOf("hello");                // returns "hello"
+     * String nullResult = type.valueOf(null);                // returns null
      * }</pre>
      *
      * @param obj the object to convert to String, may be {@code null}
@@ -191,8 +191,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = ...; // from SQL query
-     * String name = type.get(rs, 1); // retrieves String from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * String name = type.get(rs, 1);  // retrieves String from column 1
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -211,8 +211,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = ...; // from SQL query
-     * String name = type.get(rs, "name"); // retrieves String from "name" column
+     * ResultSet rs = ...;  // from SQL query
+     * String name = type.get(rs, "name");  // retrieves String from "name" column
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -233,7 +233,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET name = ? WHERE id = ?");
-     * type.set(stmt, 1, "John Doe"); // sets parameter 1 to "John Doe"
+     * type.set(stmt, 1, "John Doe");  // sets parameter 1 to "John Doe"
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
@@ -253,7 +253,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * CallableStatement stmt = conn.prepareCall("{call updateUser(?, ?)}");
-     * type.set(stmt, "name", "John Doe"); // sets named parameter "name"
+     * type.set(stmt, "name", "John Doe");  // sets named parameter "name"
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on, must not be {@code null}
@@ -274,8 +274,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, "hello"); // appends "hello" to StringBuilder
-     * type.appendTo(sb, null); // appends "null" to StringBuilder
+     * type.appendTo(sb, "hello");   // appends "hello" to StringBuilder
+     * type.appendTo(sb, null);      // appends "null" to StringBuilder
      * }</pre>
      *
      * @param appendable the Appendable object to append to, must not be {@code null}
@@ -295,8 +295,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, "hello", null); // writes "hello"
-     * type.writeCharacter(writer, null, null); // writes "null"
+     * type.writeCharacter(writer, "hello", null);   // writes "hello"
+     * type.writeCharacter(writer, null, null);      // writes "null"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to, must not be {@code null}

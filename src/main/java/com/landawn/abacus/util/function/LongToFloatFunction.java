@@ -41,8 +41,8 @@ public interface LongToFloatFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToFloatFunction converter = LongToFloatFunction.DEFAULT;
-     * float result = converter.applyAsFloat(42L); // returns 42.0f
-     * float largeResult = converter.applyAsFloat(9223372036854775807L); // precision loss occurs
+     * float result = converter.applyAsFloat(42L);                         // returns 42.0f
+     * float largeResult = converter.applyAsFloat(9223372036854775807L);   // precision loss occurs
      * }</pre>
      */
     LongToFloatFunction DEFAULT = value -> value;

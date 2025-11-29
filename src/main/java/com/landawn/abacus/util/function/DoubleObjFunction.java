@@ -36,7 +36,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleObjFunction<String, String> formatter = (val, unit) -> val + " " + unit;
-     * String result = formatter.apply(3.14, "meters"); // Returns "3.14 meters"
+     * String result = formatter.apply(3.14, "meters");  // Returns "3.14 meters"
      *
      * DoubleObjFunction<List<Double>, List<Double>> adder = (val, list) -> {
      *     list.add(val);
@@ -60,7 +60,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * DoubleObjFunction<String, String> formatter = (val, unit) -> val + " " + unit;
      * Function<String, Integer> length = String::length;
      * DoubleObjFunction<String, Integer> composed = formatter.andThen(length);
-     * Integer result = composed.apply(3.14, "meters"); // Returns 10
+     * Integer result = composed.apply(3.14, "meters");  // Returns 10
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

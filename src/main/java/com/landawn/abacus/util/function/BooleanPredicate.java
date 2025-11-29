@@ -54,7 +54,7 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanPredicate isTrue = value -> value;
-     * boolean result = isTrue.test(true); // Returns true
+     * boolean result = isTrue.test(true);  // Returns true
      * }</pre>
      *
      * @param value the input argument

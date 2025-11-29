@@ -38,7 +38,7 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
      *     for (int j = 0; j < times; j++) list.add(str);
      * };
      * List<String> list = new ArrayList<>();
-     * repeater.accept("hello", list, 3); // Adds "hello" 3 times
+     * repeater.accept("hello", list, 3);  // Adds "hello" 3 times
      * }</pre>
      *
      * @param t the first input argument (object value)

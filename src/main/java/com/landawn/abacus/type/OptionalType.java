@@ -50,7 +50,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * String name = type.declaringName(); // Returns "Optional<String>"
+     * String name = type.declaringName();  // Returns "Optional<String>"
      * }</pre>
      *
      * @return the declaring name with generic type information
@@ -103,7 +103,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * Optional<String> defaultVal = type.defaultValue(); // Returns Optional.empty()
+     * Optional<String> defaultVal = type.defaultValue();  // Returns Optional.empty()
      * }</pre>
      *
      * @return Optional.empty()
@@ -122,10 +122,10 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
      * Optional<String> opt = Optional.of("hello");
-     * String str = type.stringOf(opt); // Returns "hello"
+     * String str = type.stringOf(opt);  // Returns "hello"
      *
      * Optional<String> empty = Optional.empty();
-     * String str2 = type.stringOf(empty); // Returns null
+     * String str2 = type.stringOf(empty);  // Returns null
      * }</pre>
      *
      * @param x the Optional object to convert
@@ -146,9 +146,9 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<Integer>> type = TypeFactory.getType("Optional<Integer>");
-     * Optional<Integer> opt = type.valueOf("42"); // Returns Optional.of(42)
+     * Optional<Integer> opt = type.valueOf("42");  // Returns Optional.of(42)
      *
-     * Optional<Integer> empty = type.valueOf(null); // Returns Optional.empty()
+     * Optional<Integer> empty = type.valueOf(null);  // Returns Optional.empty()
      * }</pre>
      *
      * @param str the string to convert

@@ -40,10 +40,10 @@ public interface ByteToBooleanFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteToBooleanFunction isPositive = value -> value > 0;
-     * boolean result = isPositive.applyAsBoolean((byte) 5); // Returns true
+     * boolean result = isPositive.applyAsBoolean((byte) 5);  // Returns true
      *
      * // Using DEFAULT
-     * boolean defaultResult = ByteToBooleanFunction.DEFAULT.applyAsBoolean((byte) 0); // Returns false
+     * boolean defaultResult = ByteToBooleanFunction.DEFAULT.applyAsBoolean((byte) 0);  // Returns false
      * }</pre>
      *
      * @param value the byte function argument

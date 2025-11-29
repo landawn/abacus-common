@@ -38,7 +38,7 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
      * <pre>{@code
      * CharTriConsumer wordBuilder = (c1, c2, c3) ->
      *     System.out.println("Word: " + c1 + c2 + c3);
-     * wordBuilder.accept('d', 'o', 'g'); // Prints: Word: dog
+     * wordBuilder.accept('d', 'o', 'g');  // Prints: Word: dog
      * }</pre>
      *
      * @param a the first char input argument
@@ -59,7 +59,7 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
      * CharTriConsumer logger = (a, b, c) -> System.out.println("Chars: " + a + ", " + b + ", " + c);
      * CharTriConsumer validator = (a, b, c) -> { if (!Character.isLetter(a)) throw new IllegalArgumentException(); };
      * CharTriConsumer combined = logger.andThen(validator);
-     * combined.accept('A', 'B', 'C'); // Logs then validates
+     * combined.accept('A', 'B', 'C');  // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

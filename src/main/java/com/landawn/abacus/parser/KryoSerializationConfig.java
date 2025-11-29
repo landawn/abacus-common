@@ -77,8 +77,8 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.writeClass(true);  // Include class information
-     * config.writeClass(false); // Omit class information (more compact)
+     * config.writeClass(true);    // Include class information
+     * config.writeClass(false);   // Omit class information (more compact)
      * }</pre>
      *
      * @param writeClass {@code true} to write class information, {@code false} to omit it

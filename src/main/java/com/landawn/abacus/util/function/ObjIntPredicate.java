@@ -49,8 +49,8 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      *     str.length() >= minLen;
      *
      * List<String> items = List.of("a", "b", "c");
-     * boolean valid = hasElementAt.test(items, 5); // Returns false
-     * boolean longEnough = hasMinLength.test("Hello", 3); // Returns true
+     * boolean valid = hasElementAt.test(items, 5);          // Returns false
+     * boolean longEnough = hasMinLength.test("Hello", 3);   // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T

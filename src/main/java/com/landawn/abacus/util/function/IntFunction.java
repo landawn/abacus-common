@@ -43,10 +43,10 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<String> toString = value -> "Number: " + value;
-     * String result = toString.apply(42); // Returns "Number: 42"
+     * String result = toString.apply(42);  // Returns "Number: 42"
      *
      * IntFunction<Integer> square = value -> value * value;
-     * Integer squared = square.apply(5); // Returns 25
+     * Integer squared = square.apply(5);  // Returns 25
      * }</pre>
      *
      * @param value the function argument
@@ -65,7 +65,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * IntFunction<String> intToString = value -> String.valueOf(value);
      * Function<String, Integer> stringLength = String::length;
      * IntFunction<Integer> combined = intToString.andThen(stringLength);
-     * Integer length = combined.apply(12345); // Returns 5
+     * Integer length = combined.apply(12345);  // Returns 5
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -83,7 +83,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Integer> identity = IntFunction.identity();
-     * Integer result = identity.apply(42); // Returns 42 (boxed)
+     * Integer result = identity.apply(42);  // Returns 42 (boxed)
      * int[] array = {1, 2, 3};
      * List<Integer> list = IntStream.of(array).mapToObj(identity).collect(Collectors.toList());
      * }</pre>

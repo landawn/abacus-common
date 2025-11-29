@@ -528,7 +528,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown(); // Gracefully shutdown
+     * executor.shutdown();  // Gracefully shutdown
      * }</pre>
      */
     public synchronized void shutdown() {
@@ -554,7 +554,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown(30, TimeUnit.SECONDS); // Wait up to 30 seconds for tasks to complete
+     * executor.shutdown(30, TimeUnit.SECONDS);  // Wait up to 30 seconds for tasks to complete
      * }</pre>
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,

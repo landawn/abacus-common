@@ -79,30 +79,30 @@ import com.landawn.abacus.util.stream.ByteStream;
  * ByteList range = ByteList.range((byte)0, (byte)256);  // All byte values
  *
  * // Basic operations
- * data.add((byte)42);                     // Append byte value
- * byte first = data.get(0);               // Access by index: 1
- * data.set(1, (byte)100);                 // Modify existing value
+ * data.add((byte)42);  // Append byte value
+ * byte first = data.get(0);  // Access by index: 1
+ * data.set(1, (byte)100);  // Modify existing value
  *
  * // Binary data processing
  * byte[] bytes = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
  * ByteList message = ByteList.copyOf(bytes);
- * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64}); // " World"
+ * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64});  // " World"
  *
  * // Statistical operations
- * OptionalByte min = data.min();          // Find minimum value
- * OptionalByte max = data.max();          // Find maximum value
- * OptionalByte median = data.median();    // Calculate median
+ * OptionalByte min = data.min();  // Find minimum value
+ * OptionalByte max = data.max();  // Find maximum value
+ * OptionalByte median = data.median();  // Calculate median
  *
  * // Set operations for data analysis
  * ByteList set1 = ByteList.of((byte)1, (byte)2, (byte)3);
  * ByteList set2 = ByteList.of((byte)2, (byte)3, (byte)4);
  * ByteList intersection = set1.intersection(set2);  // [2, 3]
- * ByteList difference = set1.difference(set2);      // [1]
+ * ByteList difference = set1.difference(set2);  // [1]
  *
  * // Conversion operations
- * byte[] primitiveArray = data.toArray();           // To primitive array
- * IntList intData = data.toIntList();               // Convert to int values
- * List<Byte> boxedList = data.boxed();              // To boxed collection
+ * byte[] primitiveArray = data.toArray();  // To primitive array
+ * IntList intData = data.toIntList();  // Convert to int values
+ * List<Byte> boxedList = data.boxed();  // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -244,7 +244,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * 
  * // Add packet header
  * packet.addAll(new byte[]{0x01, 0x02});  // Protocol version
- * packet.addAll(intToBytes(payloadLength)); // Payload length
+ * packet.addAll(intToBytes(payloadLength));  // Payload length
  * 
  * // Add payload data
  * packet.addAll(payloadData);
@@ -1092,8 +1092,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * // Move range to end
      * list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
-     * int rangeLen = 3 - 1; // = 2
-     * list.moveRange(1, 3, list.size() - rangeLen); // newPos = 5 - 2 = 3
+     * int rangeLen = 3 - 1;  // = 2
+     * list.moveRange(1, 3, list.size() - rangeLen);  // newPos = 5 - 2 = 3
      * // Result: [1, 4, 5, 2, 3]
      * }</pre>
      *
@@ -1470,7 +1470,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)2, (byte)2, (byte)4);
-     * ByteList result = list1.intersection(list2); // result: [(byte)1, (byte)2]
+     * ByteList result = list1.intersection(list2);  // result: [(byte)1, (byte)2]
      * }</pre>
      *
      * @param b the list to intersect with this list. Can be {@code null}.
@@ -1508,7 +1508,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)2, (byte)2, (byte)4};
-     * ByteList result = list.intersection(array); // result: [(byte)1, (byte)2]
+     * ByteList result = list.intersection(array);  // result: [(byte)1, (byte)2]
      * }</pre>
      *
      * @param b the array to intersect with this list. Can be {@code null}.
@@ -1536,7 +1536,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)4);
-     * ByteList result = list1.difference(list2); // result: [(byte)1, (byte)2, (byte)3]
+     * ByteList result = list1.difference(list2);  // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
      * @param b the list containing elements to be excluded. Can be {@code null}.
@@ -1574,7 +1574,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)4};
-     * ByteList result = list.difference(array); // result: [(byte)1, (byte)2, (byte)3]
+     * ByteList result = list.difference(array);  // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
      * @param b the array containing elements to be excluded. Can be {@code null}.
@@ -2000,9 +2000,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list1 = ByteList.of(1, 2, 3, 4);      // hasDuplicates() returns false
-     * ByteList list2 = ByteList.of(1, 2, 2, 3);      // hasDuplicates() returns true
-     * ByteList list3 = ByteList.of();                // hasDuplicates() returns false
+     * ByteList list1 = ByteList.of(1, 2, 3, 4);   // hasDuplicates() returns false
+     * ByteList list2 = ByteList.of(1, 2, 2, 3);   // hasDuplicates() returns true
+     * ByteList list3 = ByteList.of();             // hasDuplicates() returns false
      * }</pre>
      *
      * @return {@code true} if this list contains at least one duplicate element, {@code false} otherwise
@@ -2024,9 +2024,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList.of(-5, 0, 3, 10).isSorted()     // returns true
-     * ByteList.of(3, 1, 4, 2).isSorted()       // returns false
-     * ByteList.of(1, 1, 2, 2).isSorted()       // returns {@code true} (duplicates allowed)
+     * ByteList.of(-5, 0, 3, 10).isSorted();   // returns true
+     * ByteList.of(3, 1, 4, 2).isSorted();     // returns false
+     * ByteList.of(1, 1, 2, 2).isSorted();     // returns {@code true} (duplicates allowed)
      * }</pre>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise
@@ -2260,8 +2260,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
-     * Random rnd = new Random(12345);  // Seeded for reproducibility
-     * list.shuffle(rnd);  // Will always produce the same shuffle with this seed
+     * Random rnd = new Random(12345);   // Seeded for reproducibility
+     * list.shuffle(rnd);                // Will always produce the same shuffle with this seed
      * }</pre>
      *
      * @param rnd the random number generator to use for shuffling
@@ -2361,8 +2361,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(0, 1, 2, 3, 4, 5);
-     * list.copy(0, 6, 2);   // returns [0, 2, 4] (every other element)
-     * list.copy(5, -1, -2); // returns [5, 3, 1] (reverse, every other)
+     * list.copy(0, 6, 2);     // returns [0, 2, 4] (every other element)
+     * list.copy(5, -1, -2);   // returns [5, 3, 1] (reverse, every other)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
@@ -2840,9 +2840,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList.of().toString()           // Returns "[]"
-     * ByteList.of(1).toString()          // Returns "[1]"
-     * ByteList.of(1, 2, 3).toString()    // Returns "[1, 2, 3]"
+     * ByteList.of().toString();          // Returns "[]"
+     * ByteList.of(1).toString();         // Returns "[1]"
+     * ByteList.of(1, 2, 3).toString();   // Returns "[1, 2, 3]"
      * }</pre>
      *
      * @return a string representation of this list

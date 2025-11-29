@@ -40,13 +40,13 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isValidTriangle =
      *     (a, b, c) -> a + b > c && a + c > b && b + c > a;
-     * boolean valid = isValidTriangle.test(3, 4, 5); // returns true
-     * boolean invalid = isValidTriangle.test(1, 2, 5); // returns false
+     * boolean valid = isValidTriangle.test(3, 4, 5);     // returns true
+     * boolean invalid = isValidTriangle.test(1, 2, 5);   // returns false
      *
      * TriPredicate<String, String, Boolean> conditionalEquals =
      *     (s1, s2, ignoreCase) -> ignoreCase ? s1.equalsIgnoreCase(s2) : s1.equals(s2);
-     * boolean result1 = conditionalEquals.test("Hello", "hello", true); // returns true
-     * boolean result2 = conditionalEquals.test("Hello", "hello", false); // returns false
+     * boolean result1 = conditionalEquals.test("Hello", "hello", true);    // returns true
+     * boolean result2 = conditionalEquals.test("Hello", "hello", false);   // returns false
      * }</pre>
      *
      * @param a the first input argument
@@ -65,9 +65,9 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * TriPredicate<Integer, Integer, Integer> isSum = (a, b, c) -> a + b == c;
      * TriPredicate<Integer, Integer, Integer> isNotSum = isSum.negate();
      *
-     * boolean test1 = isSum.test(2, 3, 5); // returns true
-     * boolean test2 = isNotSum.test(2, 3, 5); // returns false
-     * boolean test3 = isNotSum.test(2, 3, 6); // returns true
+     * boolean test1 = isSum.test(2, 3, 5);      // returns true
+     * boolean test2 = isNotSum.test(2, 3, 5);   // returns false
+     * boolean test3 = isNotSum.test(2, 3, 6);   // returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -90,9 +90,9 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * TriPredicate<Integer, Integer, Integer> sumGreaterThan10 = (a, b, c) -> a + b + c > 10;
      *
      * TriPredicate<Integer, Integer, Integer> combined = isPositive.and(sumGreaterThan10);
-     * boolean test1 = combined.test(3, 4, 5); // returns {@code true} (all positive AND sum=12>10)
-     * boolean test2 = combined.test(1, 2, 3); // returns {@code false} (all positive BUT sum=6<10)
-     * boolean test3 = combined.test(-1, 5, 7); // returns {@code false} (not all positive)
+     * boolean test1 = combined.test(3, 4, 5);    // returns {@code true} (all positive AND sum=12>10)
+     * boolean test2 = combined.test(1, 2, 3);    // returns {@code false} (all positive BUT sum=6<10)
+     * boolean test3 = combined.test(-1, 5, 7);   // returns {@code false} (not all positive)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -119,9 +119,9 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      *     (s1, s2, s3) -> s1.length() + s2.length() + s3.length() > 20;
      *
      * TriPredicate<String, String, String> combined = hasEmptyString.or(hasTotalLengthOverTwenty);
-     * boolean test1 = combined.test("", "hello", "world"); // returns {@code true} (has empty string)
-     * boolean test2 = combined.test("this", "is", "a very long string"); // returns {@code true} (total length > 20)
-     * boolean test3 = combined.test("short", "text", "here"); // returns false
+     * boolean test1 = combined.test("", "hello", "world");                 // returns {@code true} (has empty string)
+     * boolean test2 = combined.test("this", "is", "a very long string");   // returns {@code true} (total length > 20)
+     * boolean test3 = combined.test("short", "text", "here");              // returns false
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

@@ -43,7 +43,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToDoubleFunction converter = LongToDoubleFunction.DEFAULT;
-     * double result = converter.applyAsDouble(42L); // returns 42.0
+     * double result = converter.applyAsDouble(42L);  // returns 42.0
      * }</pre>
      */
     LongToDoubleFunction DEFAULT = value -> value;

@@ -1087,9 +1087,9 @@ public final class Clazz {
      * Class<BlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
      *
      * // Producer-consumer pattern
-     * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100); // capacity of 100
-     * queue.put(new Task()); // blocks if queue is full
-     * Task task = queue.take(); // blocks if queue is empty
+     * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);   // capacity of 100
+     * queue.put(new Task());                                        // blocks if queue is full
+     * Task task = queue.take();                                     // blocks if queue is empty
      * }</pre>
      *
      * @param <T> the element type of the blocking queue
@@ -1565,7 +1565,7 @@ public final class Clazz {
      * BiMap<String, Integer> userIds = BiMap.create();
      * userIds.put("alice", 101);
      * userIds.put("bob", 102);
-     * String name = userIds.inverse().get(101); // returns "alice"
+     * String name = userIds.inverse().get(101);  // returns "alice"
      * }</pre>
      *
      * @param <K> the key type of the bimap
@@ -1642,7 +1642,7 @@ public final class Clazz {
      * words.add("apple");
      * words.add("banana");
      * words.add("apple");
-     * int count = words.count("apple"); // returns 2
+     * int count = words.count("apple");  // returns 2
      * }</pre>
      *
      * @param <T> the element type of the multiset

@@ -59,8 +59,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * String result = type.stringOf(new BigDecimal("123.45")); // returns "123.45"
-     * String nullResult = type.stringOf(null); // returns null
+     * String result = type.stringOf(new BigDecimal("123.45"));   // returns "123.45"
+     * String nullResult = type.stringOf(null);                   // returns null
      * }</pre>
      *
      * @param x the BigDecimal value to convert, may be {@code null}
@@ -78,9 +78,9 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * BigDecimal result = type.valueOf("123.456"); // returns BigDecimal with value 123.456
-     * BigDecimal nullResult = type.valueOf(null); // returns null
-     * BigDecimal emptyResult = type.valueOf(""); // returns null
+     * BigDecimal result = type.valueOf("123.456");   // returns BigDecimal with value 123.456
+     * BigDecimal nullResult = type.valueOf(null);    // returns null
+     * BigDecimal emptyResult = type.valueOf("");     // returns null
      * }</pre>
      *
      * @param str the string to parse as a BigDecimal, may be {@code null}
@@ -102,8 +102,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * char[] chars = "123.45".toCharArray();
-     * BigDecimal result = type.valueOf(chars, 0, 6); // returns BigDecimal with value 123.45
-     * BigDecimal zeroLen = type.valueOf(chars, 0, 0); // returns null
+     * BigDecimal result = type.valueOf(chars, 0, 6);    // returns BigDecimal with value 123.45
+     * BigDecimal zeroLen = type.valueOf(chars, 0, 0);   // returns null
      * }</pre>
      *
      * @param cbuf the character array containing the digits, must not be {@code null}
@@ -124,8 +124,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = ...; // from SQL query
-     * BigDecimal price = type.get(rs, 1); // retrieves BigDecimal from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * BigDecimal price = type.get(rs, 1);  // retrieves BigDecimal from column 1
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -144,8 +144,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = ...; // from SQL query
-     * BigDecimal price = type.get(rs, "price"); // retrieves BigDecimal from "price" column
+     * ResultSet rs = ...;  // from SQL query
+     * BigDecimal price = type.get(rs, "price");  // retrieves BigDecimal from "price" column
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -166,7 +166,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE products SET price = ? WHERE id = ?");
-     * type.set(stmt, 1, new BigDecimal("99.99")); // sets parameter 1 to 99.99
+     * type.set(stmt, 1, new BigDecimal("99.99"));  // sets parameter 1 to 99.99
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
@@ -186,7 +186,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * CallableStatement stmt = conn.prepareCall("{call updatePrice(?, ?)}");
-     * type.set(stmt, "price", new BigDecimal("99.99")); // sets named parameter "price"
+     * type.set(stmt, "price", new BigDecimal("99.99"));  // sets named parameter "price"
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on, must not be {@code null}
@@ -208,8 +208,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, new BigDecimal("123.45"), null); // writes "123.45"
-     * type.writeCharacter(writer, null, null); // writes "null"
+     * type.writeCharacter(writer, new BigDecimal("123.45"), null);   // writes "123.45"
+     * type.writeCharacter(writer, null, null);                       // writes "null"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to, must not be {@code null}

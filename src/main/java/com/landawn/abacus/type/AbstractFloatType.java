@@ -126,11 +126,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive float types
      * PrimitiveFloatType type = TypeFactory.getType(float.class);
-     * float value = type.get(rs, 1); // Returns 0.0f for SQL NULL
+     * float value = type.get(rs, 1);  // Returns 0.0f for SQL NULL
      *
      * // For wrapper Float types
      * FloatType type = TypeFactory.getType(Float.class);
-     * Float value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * Float value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -152,11 +152,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive float types
      * PrimitiveFloatType type = TypeFactory.getType(float.class);
-     * float value = type.get(rs, "ratio"); // Returns 0.0f for SQL NULL
+     * float value = type.get(rs, "ratio");  // Returns 0.0f for SQL NULL
      *
      * // For wrapper Float types
      * FloatType type = TypeFactory.getType(Float.class);
-     * Float value = type.get(rs, "ratio"); // Returns null for SQL NULL (overridden in subclass)
+     * Float value = type.get(rs, "ratio");  // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

@@ -74,9 +74,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setExclusion(Exclusion.NULL); // Exclude null fields
-     * config.setExclusion(Exclusion.DEFAULT); // Exclude fields with default values
-     * config.setExclusion(Exclusion.NONE); // Include all fields
+     * config.setExclusion(Exclusion.NULL);      // Exclude null fields
+     * config.setExclusion(Exclusion.DEFAULT);   // Exclude fields with default values
+     * config.setExclusion(Exclusion.NONE);      // Include all fields
      * }</pre>
      *
      * @param exclusion the exclusion strategy to use, or {@code null} for no exclusion
@@ -110,8 +110,8 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.skipTransientField(true); // Skip transient fields
-     * config.skipTransientField(false); // Include transient fields
+     * config.skipTransientField(true);    // Skip transient fields
+     * config.skipTransientField(false);   // Include transient fields
      * }</pre>
      *
      * @param skipTransientField {@code true} to skip transient fields, {@code false} to include them

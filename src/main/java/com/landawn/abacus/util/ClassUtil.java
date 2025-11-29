@@ -896,7 +896,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getCanonicalClassName(String.class); // Returns "java.lang.String"
+     * String name = ClassUtil.getCanonicalClassName(String.class);  // Returns "java.lang.String"
      * }</pre>
      *
      * @param cls the class whose canonical name is to be retrieved
@@ -925,7 +925,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getClassName(String.class); // Returns "java.lang.String"
+     * String name = ClassUtil.getClassName(String.class);  // Returns "java.lang.String"
      * }</pre>
      *
      * @param cls the class whose name is to be retrieved
@@ -942,7 +942,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getSimpleClassName(String.class); // Returns "String"
+     * String name = ClassUtil.getSimpleClassName(String.class);  // Returns "String"
      * }</pre>
      *
      * @param cls the class whose simple name is to be retrieved
@@ -959,7 +959,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Package pkg = ClassUtil.getPackage(String.class); // Returns java.lang package
+     * Package pkg = ClassUtil.getPackage(String.class);  // Returns java.lang package
      * }</pre>
      *
      * @param cls the class whose package is to be retrieved
@@ -990,7 +990,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String pkgName = ClassUtil.getPackageName(String.class); // Returns "java.lang"
+     * String pkgName = ClassUtil.getPackageName(String.class);  // Returns "java.lang"
      * }</pre>
      *
      * @param cls the class whose package name is to be retrieved
@@ -1340,7 +1340,7 @@ public final class ClassUtil {
     private static List<URL> getResources(final String pkgName) {
         final List<URL> resourceList = new ArrayList<>();
         final String pkgPath = packageName2FilePath(pkgName);
-        final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
+        final ClassLoader localClassLoader = ClassUtil.class.getClassLoader();  // NOSONAR
         final ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
         try {
@@ -1510,7 +1510,7 @@ public final class ClassUtil {
      * class Outer {
      *     class Inner { }
      * }
-     * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class); // Returns Outer.class
+     * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class);  // Returns Outer.class
      * }</pre>
      *
      * @param cls the class whose enclosing class is to be retrieved
@@ -1608,7 +1608,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = ClassUtil.getDeclaredMethod(String.class, "substring", int.class, int.class);
-     * String result = (String) method.invoke("Hello", 0, 2); // Returns "He"
+     * String result = (String) method.invoke("Hello", 0, 2);  // Returns "He"
      * }</pre>
      *
      * @param cls the class object
@@ -2016,7 +2016,7 @@ public final class ClassUtil {
      * <pre>{@code
      * ObjIterator<Class<?>> iter = ClassUtil.hierarchy(ArrayList.class);
      * while (iter.hasNext()) {
-     *     System.out.println(iter.next()); // Prints: ArrayList, AbstractList, AbstractCollection, Object
+     *     System.out.println(iter.next());  // Prints: ArrayList, AbstractList, AbstractCollection, Object
      * }
      * }</pre>
      *
@@ -2164,7 +2164,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = Integer.class.getDeclaredMethod("parseInt", String.class);
-     * int result = ClassUtil.invokeMethod(method, "123"); // Returns 123
+     * int result = ClassUtil.invokeMethod(method, "123");  // Returns 123
      * }</pre>
      *
      * @param <T> the type of the object to be returned
@@ -2228,7 +2228,7 @@ public final class ClassUtil {
      * <pre>{@code
      * Field field = MyClass.class.getDeclaredField("privateField");
      * ClassUtil.setAccessible(field, true);
-     * Object value = field.get(instance); // Can now access private field
+     * Object value = field.get(instance);  // Can now access private field
      * }</pre>
      *
      * @param accessibleObject the object whose accessibility is to be set
@@ -2322,7 +2322,7 @@ public final class ClassUtil {
      * Runnable r = new Runnable() {
      *     public void run() { }
      * };
-     * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass()); // Returns true
+     * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass());  // Returns true
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2342,7 +2342,7 @@ public final class ClassUtil {
      * class Outer {
      *     class Inner { }
      * }
-     * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class); // Returns true
+     * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class);  // Returns true
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2382,8 +2382,8 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveType(int.class); // Returns true
-     * boolean result2 = ClassUtil.isPrimitiveType(Integer.class); // Returns false
+     * boolean result = ClassUtil.isPrimitiveType(int.class);        // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveType(Integer.class);   // Returns false
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2402,8 +2402,8 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveWrapper(Integer.class); // Returns true
-     * boolean result2 = ClassUtil.isPrimitiveWrapper(int.class); // Returns false
+     * boolean result = ClassUtil.isPrimitiveWrapper(Integer.class);   // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveWrapper(int.class);      // Returns false
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2422,8 +2422,8 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveArrayType(int[].class); // Returns true
-     * boolean result2 = ClassUtil.isPrimitiveArrayType(Integer[].class); // Returns false
+     * boolean result = ClassUtil.isPrimitiveArrayType(int[].class);        // Returns true
+     * boolean result2 = ClassUtil.isPrimitiveArrayType(Integer[].class);   // Returns false
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2465,10 +2465,10 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<?> wrapped = ClassUtil.wrap(int.class); // Returns Integer.class
-     * Class<?> wrapped2 = ClassUtil.wrap(Integer.class); // Returns Integer.class
-     * Class<?> wrapped3 = ClassUtil.wrap(String.class); // Returns String.class
-     * Class<?> wrapped4 = ClassUtil.wrap(int[].class); // Returns Integer[].class
+     * Class<?> wrapped = ClassUtil.wrap(int.class);        // Returns Integer.class
+     * Class<?> wrapped2 = ClassUtil.wrap(Integer.class);   // Returns Integer.class
+     * Class<?> wrapped3 = ClassUtil.wrap(String.class);    // Returns String.class
+     * Class<?> wrapped4 = ClassUtil.wrap(int[].class);     // Returns Integer[].class
      * }</pre>
      *
      * @param cls the class to be wrapped
@@ -2489,10 +2489,10 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<?> unwrapped = ClassUtil.unwrap(Integer.class); // Returns int.class
-     * Class<?> unwrapped2 = ClassUtil.unwrap(int.class); // Returns int.class
-     * Class<?> unwrapped3 = ClassUtil.unwrap(String.class); // Returns String.class
-     * Class<?> unwrapped4 = ClassUtil.unwrap(Integer[].class); // Returns int[].class
+     * Class<?> unwrapped = ClassUtil.unwrap(Integer.class);      // Returns int.class
+     * Class<?> unwrapped2 = ClassUtil.unwrap(int.class);         // Returns int.class
+     * Class<?> unwrapped3 = ClassUtil.unwrap(String.class);      // Returns String.class
+     * Class<?> unwrapped4 = ClassUtil.unwrap(Integer[].class);   // Returns int[].class
      * }</pre>
      *
      * @param cls the class to be unwrapped

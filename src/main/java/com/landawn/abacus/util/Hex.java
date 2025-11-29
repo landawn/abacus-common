@@ -30,12 +30,12 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Encoding bytes to hex
- * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello" in ASCII
- * String hexString = Hex.encodeToString(data);   // returns "48656c6c6f"
- * String hexUpper = Hex.encodeToString(data, false); // returns "48656C6C6F"
+ * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
+ * String hexString = Hex.encodeToString(data);  // returns "48656c6c6f"
+ * String hexUpper = Hex.encodeToString(data, false);  // returns "48656C6C6F"
  * 
  * // Decoding hex to bytes
- * byte[] decoded = Hex.decode("48656c6c6f");     // returns original byte array
+ * byte[] decoded = Hex.decode("48656c6c6f");  // returns original byte array
  * }</pre>
  * 
  * <p><b>Attribution:</b>
@@ -86,8 +86,8 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {0x01, (byte)0xAB};
-     * char[] lower = Hex.encode(data, true);   // returns ['0','1','a','b']
-     * char[] upper = Hex.encode(data, false);  // returns ['0','1','A','B']
+     * char[] lower = Hex.encode(data, true);    // returns ['0','1','a','b']
+     * char[] upper = Hex.encode(data, false);   // returns ['0','1','A','B']
      * }</pre>
      *
      * @param data the byte array to convert to hexadecimal characters
@@ -111,8 +111,8 @@ public final class Hex {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello" in ASCII
-     * String hex = Hex.encodeToString(data);         // returns "48656c6c6f"
+     * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
+     * String hex = Hex.encodeToString(data);  // returns "48656c6c6f"
      * }</pre>
      *
      * @param data the byte array to convert to a hexadecimal string
@@ -133,8 +133,8 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {(byte)0xFF, 0x00, 0x42};
-     * String lower = Hex.encodeToString(data, true);   // returns "ff0042"
-     * String upper = Hex.encodeToString(data, false);  // returns "FF0042"
+     * String lower = Hex.encodeToString(data, true);    // returns "ff0042"
+     * String upper = Hex.encodeToString(data, false);   // returns "FF0042"
      * }</pre>
      *
      * @param data the byte array to convert to a hexadecimal string
@@ -175,9 +175,9 @@ public final class Hex {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data1 = Hex.decode("48656c6c6f");     // returns bytes for "Hello"
-     * byte[] data2 = Hex.decode("FF00");           // returns {(byte)0xFF, 0x00}
-     * byte[] data3 = Hex.decode("DeadBeef");       // mixed case is accepted
+     * byte[] data1 = Hex.decode("48656c6c6f");   // returns bytes for "Hello"
+     * byte[] data2 = Hex.decode("FF00");         // returns {(byte)0xFF, 0x00}
+     * byte[] data3 = Hex.decode("DeadBeef");     // mixed case is accepted
      * }</pre>
      *
      * @param data a string containing hexadecimal digits (0-9, A-F, a-f)
@@ -250,9 +250,9 @@ public final class Hex {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int value1 = toDigit('5', 0);  // returns 5
-     * int value2 = toDigit('A', 1);  // returns 10
-     * int value3 = toDigit('f', 2);  // returns 15
+     * int value1 = toDigit('5', 0);   // returns 5
+     * int value2 = toDigit('A', 1);   // returns 10
+     * int value3 = toDigit('f', 2);   // returns 15
      * }</pre>
      *
      * @param ch the hexadecimal character to convert (0-9, A-F, a-f)

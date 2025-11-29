@@ -102,43 +102,43 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Bean validation and introspection
- * boolean isBean = Beans.isBeanClass(User.class);              // Check if class follows bean pattern
- * List<String> properties = Beans.getPropNameList(User.class); // Get all property names
- * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class); // Get builder info
+ * boolean isBean = Beans.isBeanClass(User.class);  // Check if class follows bean pattern
+ * List<String> properties = Beans.getPropNameList(User.class);  // Get all property names
+ * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class);  // Get builder info
  *
  * // Property access operations
  * User user = new User();
- * Beans.setPropValue(user, "name", "John Doe");                // Set property value
- * String name = Beans.getPropValue(user, "name");              // Get property value
+ * Beans.setPropValue(user, "name", "John Doe");  // Set property value
+ * String name = Beans.getPropValue(user, "name");  // Get property value
  *
  * // Object creation and instantiation
- * User newUser = Beans.newBean(User.class);                    // Create new instance
- * User copied = Beans.copy(user, User.class);                  // Create copy with type conversion
- * User cloned = Beans.clone(user);                             // Deep clone existing object
+ * User newUser = Beans.newBean(User.class);  // Create new instance
+ * User copied = Beans.copy(user, User.class);  // Create copy with type conversion
+ * User cloned = Beans.clone(user);  // Deep clone existing object
  *
  * // Bean to Map conversion (various formats)
- * Map<String, Object> flatMap = Beans.bean2Map(user);                    // Map conversion
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);                // Deep map conversion
- * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email")); // Selected properties
+ * Map<String, Object> flatMap = Beans.bean2Map(user);  // Map conversion
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);  // Deep map conversion
+ * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email"));  // Selected properties
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
- * User userFromMap = Beans.map2Bean(userData, User.class);               // Convert map to bean
- * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class); // Ignore unknown properties
+ * User userFromMap = Beans.map2Bean(userData, User.class);  // Convert map to bean
+ * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class);  // Ignore unknown properties
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.merge(source, target);                                          // Merge source into target
- * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);     // Custom merge function
+ * Beans.merge(source, target);  // Merge source into target
+ * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);  // Custom merge function
  *
  * // Object comparison operations
- * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name")); // Equality check by props
+ * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));  // Equality check by props
  *
  * // Null-safe operations
- * Map<String, Object> nullSafeMap = Beans.bean2Map(null);               // Returns empty map
- * User nullSafeUser = Beans.map2Bean(null, User.class);                 // Returns null
- * boolean nullClassCheck = Beans.isBeanClass(null);                     // Returns false
+ * Map<String, Object> nullSafeMap = Beans.bean2Map(null);  // Returns empty map
+ * User nullSafeUser = Beans.map2Bean(null, User.class);  // Returns null
+ * boolean nullClassCheck = Beans.isBeanClass(null);  // Returns false
  * }</pre>
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
@@ -271,25 +271,25 @@ import com.landawn.abacus.util.stream.Stream;
  * user.setRoles(Arrays.asList("admin", "user"));
  *
  * // Deep introspection
- * List<String> allProps = Beans.getPropNameList(User.class);           // [name, age, address, roles]
+ * List<String> allProps = Beans.getPropNameList(User.class);  // [name, age, address, roles]
  *
  * // Complex conversion operations
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);              // Deep nested conversion
- * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));   // Flatten address properties
- * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age")); // Only name and age
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);  // Deep nested conversion
+ * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));  // Flatten address properties
+ * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age"));  // Only name and age
  *
  * // Advanced copying with transformations
- * UserDTO dto = Beans.copy(user, UserDTO.class);                       // Convert to DTO
- * User cloned = Beans.clone(user);                                     // Deep clone
- * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class); // Partial copy
+ * UserDTO dto = Beans.copy(user, UserDTO.class);  // Convert to DTO
+ * User cloned = Beans.clone(user);  // Deep clone
+ * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class);  // Partial copy
  *
  * // Merging with different strategies
  * User updates = new User();
  * updates.setName("Jane Doe");
  *
- * Beans.merge(updates, user);                                          // Merge updates into user
+ * Beans.merge(updates, user);  // Merge updates into user
  * Beans.merge(updates, user, (source, target) ->
- *     source != null && !source.equals("") ? source : target);         // Custom merge logic
+ *     source != null && !source.equals("") ? source : target);  // Custom merge logic
  *
  * // Validation and comparison
  * boolean isValid = Beans.isBeanClass(User.class);
@@ -318,7 +318,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     ));
  *
  * Map<String, Object> properties = loadPropertiesFile("database.properties");
- * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig()); // Get defaults
+ * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig());  // Get defaults
  *
  * // Merge configurations with precedence: env vars > properties > defaults
  * Map<String, Object> finalConfig = new HashMap<>(defaults);
@@ -476,8 +476,8 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean isBean = Beans.isBeanClass(User.class);  // true for typical POJO
-     * boolean isNotBean = Beans.isBeanClass(String.class);  // false
+     * boolean isBean = Beans.isBeanClass(User.class);        // true for typical POJO
+     * boolean isNotBean = Beans.isBeanClass(String.class);   // false
      * }</pre>
      *
      * @param cls the class to be checked
@@ -1958,8 +1958,8 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25);
-     * String name = Beans.getPropValue(user, "name");  // Returns "John"
-     * Integer age = Beans.getPropValue(user, "age");   // Returns 25
+     * String name = Beans.getPropValue(user, "name");   // Returns "John"
+     * Integer age = Beans.getPropValue(user, "age");    // Returns 25
      * }</pre>
      *
      * @param <T> the type of the property value
@@ -2272,9 +2272,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String camel = Beans.toCamelCase("user_name");        // Returns "userName"
-     * String camel2 = Beans.toCamelCase("FIRST_NAME");      // Returns "firstName"
-     * String camel3 = Beans.toCamelCase("address-line-1");  // Returns "addressLine1"
+     * String camel = Beans.toCamelCase("user_name");         // Returns "userName"
+     * String camel2 = Beans.toCamelCase("FIRST_NAME");       // Returns "firstName"
+     * String camel3 = Beans.toCamelCase("address-line-1");   // Returns "addressLine1"
      * }</pre>
      *
      * @param str the property name to be converted
@@ -2301,9 +2301,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String snake = Beans.toLowerCaseWithUnderscore("userName");    // Returns "user_name"
-     * String snake2 = Beans.toLowerCaseWithUnderscore("FirstName");  // Returns "first_name"
-     * String snake3 = Beans.toLowerCaseWithUnderscore("userID");     // Returns "user_id"
+     * String snake = Beans.toLowerCaseWithUnderscore("userName");     // Returns "user_name"
+     * String snake2 = Beans.toLowerCaseWithUnderscore("FirstName");   // Returns "first_name"
+     * String snake3 = Beans.toLowerCaseWithUnderscore("userID");      // Returns "user_id"
      * }</pre>
      *
      * @param str the string to be converted
@@ -2329,9 +2329,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String upper = Beans.toUpperCaseWithUnderscore("userName");    // Returns "USER_NAME"
-     * String upper2 = Beans.toUpperCaseWithUnderscore("firstName");  // Returns "FIRST_NAME"
-     * String upper3 = Beans.toUpperCaseWithUnderscore("userID");     // Returns "USER_ID"
+     * String upper = Beans.toUpperCaseWithUnderscore("userName");     // Returns "USER_NAME"
+     * String upper2 = Beans.toUpperCaseWithUnderscore("firstName");   // Returns "FIRST_NAME"
+     * String upper3 = Beans.toUpperCaseWithUnderscore("userID");      // Returns "USER_ID"
      * }</pre>
      *
      * @param str the string to be converted
@@ -2488,7 +2488,7 @@ public final class Beans {
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", null);
-     * userMap.put("unknownField", "value"); // This field doesn't exist in User class
+     * userMap.put("unknownField", "value");  // This field doesn't exist in User class
      *
      * // Ignore null properties and unmatched properties
      * User user = Beans.map2Bean(userMap, true, true, User.class);
@@ -3863,7 +3863,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control over in-place conversion
-     * Map<String, Object> output = new TreeMap<>(); // Sorted map
+     * Map<String, Object> output = new TreeMap<>();  // Sorted map
      * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
      *
      * Product product = new Product("Widget", 29.99, new Category("Electronics"));
@@ -4315,7 +4315,7 @@ public final class Beans {
      *
      * LinkedHashMap<String, Object> result = bean2FlatMap(order, true, ignored,
      *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES,
-     *     size -> new LinkedHashMap<>(size * 2)); // larger initial capacity
+     *     size -> new LinkedHashMap<>(size * 2));  // larger initial capacity
      * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John,
      * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
      * // (amount null excluded, internal_notes ignored, ordered map)
@@ -4410,7 +4410,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control in-place flattening
-     * Map<String, Object> output = new TreeMap<>(); // sorted output
+     * Map<String, Object> output = new TreeMap<>();  // sorted output
      * Set<String> ignored = new HashSet<>(Arrays.asList("metadata"));
      *
      * Document doc = new Document("Report", null,
@@ -5809,7 +5809,7 @@ public final class Beans {
      * Person person = new Person();
      * Beans.fill(person);
      * // person now has all properties filled with random values
-     * System.out.println(person.getName()); // e.g., "a1b2c3d4-e5f6-78"
+     * System.out.println(person.getName());  // e.g., "a1b2c3d4-e5f6-78"
      * }</pre>
      *
      * @param bean a bean object with getter/setter methods

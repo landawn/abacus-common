@@ -91,30 +91,30 @@ import com.landawn.abacus.util.u.OptionalInt;
  * <pre>{@code
  * // Basic element searching
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2, 1};
- * OptionalInt firstIndex = Index.of(numbers, 3);        // Returns OptionalInt[2]
- * OptionalInt lastIndex = Index.last(numbers, 3);       // Returns OptionalInt[5]
+ * OptionalInt firstIndex = Index.of(numbers, 3);  // Returns OptionalInt[2]
+ * OptionalInt lastIndex = Index.last(numbers, 3);  // Returns OptionalInt[5]
  *
  * // Handle "not found" cases gracefully
  * Index.of(numbers, 10).ifPresent(i -> System.out.println("Found at: " + i));
- * int index = Index.of(numbers, 10).orElse(-1);         // Traditional fallback
- * boolean exists = Index.of(numbers, 3).isPresent();    // Existence check
+ * int index = Index.of(numbers, 10).orElse(-1);  // Traditional fallback
+ * boolean exists = Index.of(numbers, 3).isPresent();  // Existence check
  *
  * // Range-based searching
- * OptionalInt fromIndex = Index.of(numbers, 2, 3);      // Start search from index 3
- * OptionalInt backIndex = Index.last(numbers, 1, 6);    // Search backward from index 6
+ * OptionalInt fromIndex = Index.of(numbers, 2, 3);  // Start search from index 3
+ * OptionalInt backIndex = Index.last(numbers, 1, 6);  // Search backward from index 6
  *
  * // String operations
- * OptionalInt charIndex = Index.of("Hello World", 'o'); // Returns OptionalInt[4]
- * OptionalInt subIndex = Index.of("Hello World", "World"); // Returns OptionalInt[6]
- * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD"); // Returns OptionalInt[6]
+ * OptionalInt charIndex = Index.of("Hello World", 'o');  // Returns OptionalInt[4]
+ * OptionalInt subIndex = Index.of("Hello World", "World");  // Returns OptionalInt[6]
+ * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD");  // Returns OptionalInt[6]
  *
  * // Collection searching
  * List<String> words = Arrays.asList("apple", "banana", "cherry", "apple");
- * OptionalInt wordIndex = Index.of(words, "banana");     // Returns OptionalInt[1]
- * OptionalInt lastApple = Index.last(words, "apple");    // Returns OptionalInt[3]
+ * OptionalInt wordIndex = Index.of(words, "banana");  // Returns OptionalInt[1]
+ * OptionalInt lastApple = Index.last(words, "apple");  // Returns OptionalInt[3]
  *
  * // Find all occurrences
- * BitSet allOccurrences = Index.allOf(numbers, 1);       // Returns BitSet with bits 0 and 7 set
+ * BitSet allOccurrences = Index.allOf(numbers, 1);  // Returns BitSet with bits 0 and 7 set
  * List<Integer> indices = allOccurrences.stream().boxed().collect(Collectors.toList());
  * }</pre>
  *
@@ -123,20 +123,20 @@ import com.landawn.abacus.util.u.OptionalInt;
  * // Subarray searching
  * int[] source = {1, 2, 3, 4, 5, 6, 7};
  * int[] pattern = {3, 4, 5};
- * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern); // Returns OptionalInt[2]
+ * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern);  // Returns OptionalInt[2]
  *
  * // Partial subarray matching
- * OptionalInt partialMatch = Index.ofSubArray(source, 1, pattern, 0, 2); // Match {3, 4} starting from index 1
+ * OptionalInt partialMatch = Index.ofSubArray(source, 1, pattern, 0, 2);  // Match {3, 4} starting from index 1
  *
  * // Sublist operations with custom objects
  * List<String> document = Arrays.asList("The", "quick", "brown", "fox", "jumps");
  * List<String> phrase = Arrays.asList("quick", "brown");
- * OptionalInt phraseIndex = Index.ofSubList(document, phrase); // Returns OptionalInt[1]
+ * OptionalInt phraseIndex = Index.ofSubList(document, phrase);  // Returns OptionalInt[1]
  *
  * // Complex pattern searching
  * boolean[] flags = {true, false, true, true, false, true, true, false};
  * boolean[] pattern = {true, true, false};
- * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern); // Returns OptionalInt[5]
+ * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern);  // Returns OptionalInt[5]
  * }</pre>
  *
  * <p><b>Predicate-Based Searching:</b>
@@ -144,7 +144,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  * // Custom predicate matching
  * String[] words = {"apple", "apricot", "banana", "avocado"};
  * Predicate<String> startsWithA = s -> s.startsWith("a");
- * BitSet aWords = Index.allOf(words, startsWithA); // Returns BitSet with bits 0, 1, 3 set
+ * BitSet aWords = Index.allOf(words, startsWithA);  // Returns BitSet with bits 0, 1, 3 set
  *
  * // Complex predicate combinations
  * Integer[] numbers = {1, 4, 9, 16, 25, 36, 49};
@@ -152,10 +152,10 @@ import com.landawn.abacus.util.u.OptionalInt;
  *     int sqrt = (int) Math.sqrt(n);
  *     return sqrt * sqrt == n;
  * };
- * BitSet perfectSquares = Index.allOf(numbers, isPerfectSquare); // All indices
+ * BitSet perfectSquares = Index.allOf(numbers, isPerfectSquare);  // All indices
  *
  * // Range-based predicate searching
- * BitSet fromIndex = Index.allOf(words, startsWithA, 1); // Start searching from index 1
+ * BitSet fromIndex = Index.allOf(words, startsWithA, 1);  // Start searching from index 1
  * }</pre>
  *
  * <p><b>Floating-Point Operations with Tolerance:</b>
@@ -165,13 +165,13 @@ import com.landawn.abacus.util.u.OptionalInt;
  * double target = 2.0;
  * double tolerance = 0.01;
  *
- * OptionalInt closeMatch = Index.of(measurements, target, tolerance); // Returns OptionalInt[1]
- * OptionalInt lastMatch = Index.last(measurements, target, tolerance); // Returns OptionalInt[3]
- * BitSet allMatches = Index.allOf(measurements, target, tolerance); // BitSet with bits 1, 3 set
+ * OptionalInt closeMatch = Index.of(measurements, target, tolerance);  // Returns OptionalInt[1]
+ * OptionalInt lastMatch = Index.last(measurements, target, tolerance);  // Returns OptionalInt[3]
+ * BitSet allMatches = Index.allOf(measurements, target, tolerance);  // BitSet with bits 1, 3 set
  *
  * // High precision requirements
  * double strictTolerance = 0.001;
- * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance); // May return empty BitSet
+ * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance);  // May return empty BitSet
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -306,9 +306,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true, false};
-     * Index.of(arr, true).get();        // returns 1
-     * Index.of(arr, false).get();       // returns 0
-     * Index.of(null, true).isPresent(); // returns false
+     * Index.of(arr, true).get();          // returns 1
+     * Index.of(arr, false).get();         // returns 0
+     * Index.of(null, true).isPresent();   // returns false
      * }</pre>
      *
      * @param a the boolean array to be searched, may be {@code null}
@@ -331,9 +331,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true, false};
-     * Index.of(arr, true, 0).get();  // returns 1
-     * Index.of(arr, true, 2).get();  // returns 3
-     * Index.of(arr, true, 4).isPresent(); // returns false
+     * Index.of(arr, true, 0).get();         // returns 1
+     * Index.of(arr, true, 2).get();         // returns 3
+     * Index.of(arr, true, 4).isPresent();   // returns false
      * }</pre>
      *
      * @param a the boolean array to be searched, may be {@code null}
@@ -357,9 +357,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.of(arr, 'l').get();       // returns 2
-     * Index.of(arr, 'h').get();       // returns 0
-     * Index.of(arr, 'x').isPresent(); // returns false
+     * Index.of(arr, 'l').get();         // returns 2
+     * Index.of(arr, 'h').get();         // returns 0
+     * Index.of(arr, 'x').isPresent();   // returns false
      * }</pre>
      *
      * @param a the char array to be searched, may be {@code null}
@@ -382,9 +382,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.of(arr, 'l', 0).get();  // returns 2
-     * Index.of(arr, 'l', 3).get();  // returns 3
-     * Index.of(arr, 'l', 4).isPresent(); // returns false
+     * Index.of(arr, 'l', 0).get();         // returns 2
+     * Index.of(arr, 'l', 3).get();         // returns 3
+     * Index.of(arr, 'l', 4).isPresent();   // returns false
      * }</pre>
      *
      * @param a the char array to be searched, may be {@code null}
@@ -668,8 +668,8 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b"};
-     * Index.of(arr, "b").get();        // returns 1
-     * Index.of(arr, "d").isPresent();  // returns false
+     * Index.of(arr, "b").get();         // returns 1
+     * Index.of(arr, "d").isPresent();   // returns false
      * }</pre>
      *
      * @param a the object array to be searched, may be {@code null}
@@ -826,8 +826,8 @@ public final class Index {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.of("hello world", "world").get();  // returns 6
-     * Index.of("hello world", "bye").isPresent();  // returns false
+     * Index.of("hello world", "world").get();       // returns 6
+     * Index.of("hello world", "bye").isPresent();   // returns false
      * }</pre>
      *
      * @param str the string to be searched, may be {@code null}

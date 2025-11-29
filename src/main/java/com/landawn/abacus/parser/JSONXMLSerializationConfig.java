@@ -97,9 +97,9 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setCharQuotation('\'');  // Use single quotes
-     * config.setCharQuotation('"');   // Use double quotes
-     * config.setCharQuotation((char)0); // No quotes
+     * config.setCharQuotation('\'');      // Use single quotes
+     * config.setCharQuotation('"');       // Use double quotes
+     * config.setCharQuotation((char)0);   // No quotes
      * }</pre>
      *
      * @param charQuotation the character to use (', ", or 0)
@@ -132,9 +132,9 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setStringQuotation('"');   // Standard JSON
-     * config.setStringQuotation('\'');  // Single quotes (non-standard)
-     * config.setStringQuotation((char)0); // No quotes (non-standard)
+     * config.setStringQuotation('"');       // Standard JSON
+     * config.setStringQuotation('\'');      // Single quotes (non-standard)
+     * config.setStringQuotation((char)0);   // No quotes (non-standard)
      * }</pre>
      *
      * @param stringQuotation the character to use (', ", or 0)
@@ -287,9 +287,9 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.prettyFormat(true).setIndentation("\t");  // Use tabs
-     * config.prettyFormat(true).setIndentation("  ");  // Use 2 spaces
-     * config.prettyFormat(true).setIndentation("    "); // Use 4 spaces (default)
+     * config.prettyFormat(true).setIndentation("\t");     // Use tabs
+     * config.prettyFormat(true).setIndentation("  ");     // Use 2 spaces
+     * config.prettyFormat(true).setIndentation("    ");   // Use 4 spaces (default)
      * }</pre>
      *
      * @param indentation the indentation string to use
@@ -535,7 +535,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Person parent = new Person("Parent");
      * Person child = new Person("Child");
      * parent.setChild(child);
-     * child.setParent(parent); // Circular reference
+     * child.setParent(parent);  // Circular reference
      * }</pre>
      *
      * @param supportCircularReference {@code true} to support circular references, {@code false} otherwise

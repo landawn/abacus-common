@@ -1649,8 +1649,8 @@ public final class ExcelUtil {
          * );
          *
          * // Access data with original types preserved
-         * List<Object> productCol = dataset.getColumn("Product");  // Strings
-         * List<Object> priceCol = dataset.getColumn("Price");      // Doubles
+         * List<Object> productCol = dataset.getColumn("Product");   // Strings
+         * List<Object> priceCol = dataset.getColumn("Price");       // Doubles
          * }</pre>
          */
         public static final TriConsumer<String[], Row, Object[]> DEFAULT = create(CELL_GETTER);

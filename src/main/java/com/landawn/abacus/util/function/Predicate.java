@@ -43,8 +43,8 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<Integer> isPositive = num -> num > 0;
      *
-     * boolean result1 = isEmpty.test(""); // Returns true
-     * boolean result2 = isPositive.test(5); // Returns true
+     * boolean result1 = isEmpty.test("");     // Returns true
+     * boolean result2 = isPositive.test(5);   // Returns true
      * }</pre>
      *
      * @param value the input argument to be tested
@@ -65,7 +65,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<String> isNotEmpty = isEmpty.negate();
      *
-     * boolean result = isNotEmpty.test("Hello"); // Returns true
+     * boolean result = isNotEmpty.test("Hello");  // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -91,7 +91,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<String> startsWithA = str -> str.startsWith("A");
      *
      * Predicate<String> isNotEmptyAndStartsWithA = isNotEmpty.and(startsWithA);
-     * boolean result = isNotEmptyAndStartsWithA.test("Apple"); // Returns true
+     * boolean result = isNotEmptyAndStartsWithA.test("Apple");  // Returns true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
@@ -119,8 +119,8 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<Integer> isNegative = num -> num < 0;
      *
      * Predicate<Integer> isEvenOrNegative = isEven.or(isNegative);
-     * boolean result1 = isEvenOrNegative.test(4); // Returns true (even)
-     * boolean result2 = isEvenOrNegative.test(-3); // Returns true (negative)
+     * boolean result1 = isEvenOrNegative.test(4);    // Returns true (even)
+     * boolean result2 = isEvenOrNegative.test(-3);   // Returns true (negative)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.

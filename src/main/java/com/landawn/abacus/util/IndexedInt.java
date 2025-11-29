@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedInt indexedInt = IndexedInt.of(42, 5);
- * int value = indexedInt.value(); // 42
- * long index = indexedInt.index(); // 5
+ * int value = indexedInt.value();  // 42
+ * long index = indexedInt.index();  // 5
  * }</pre>
  *
  * @see Indexed
@@ -99,7 +99,7 @@ public final class IndexedInt extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
-     * int value = indexed.value(); // 42
+     * int value = indexed.value();  // 42
      * }</pre>
      *
      * @return the int value
@@ -131,8 +131,8 @@ public final class IndexedInt extends AbstractIndexed {
      * IndexedInt indexed2 = IndexedInt.of(42, 5);
      * IndexedInt indexed3 = IndexedInt.of(43, 5);
      * 
-     * indexed1.equals(indexed2); // true
-     * indexed1.equals(indexed3); // false
+     * indexed1.equals(indexed2);   // true
+     * indexed1.equals(indexed3);   // false
      * }</pre>
      *
      * @param obj the object to compare with
@@ -151,7 +151,7 @@ public final class IndexedInt extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
-     * System.out.println(indexed); // prints: [5]=42
+     * System.out.println(indexed);  // prints: [5]=42
      * }</pre>
      *
      * @return a string representation in the format [index]=value

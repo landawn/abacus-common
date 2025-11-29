@@ -40,7 +40,7 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      *     for (byte v : values) sum += v;
      *     return sum;
      * };
-     * Integer result = summer.apply((byte) 1, (byte) 2, (byte) 3); // Returns 6
+     * Integer result = summer.apply((byte) 1, (byte) 2, (byte) 3);  // Returns 6
      * }</pre>
      *
      * @param args the byte array input arguments. Can be empty but not {@code null}.

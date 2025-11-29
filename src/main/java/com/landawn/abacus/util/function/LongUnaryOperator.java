@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Throwables;
  * LongUnaryOperator doubleValue = x -> x * 2;
  * LongUnaryOperator incrementThenDouble = increment.andThen(doubleValue);
  *
- * long result = incrementThenDouble.applyAsLong(5L); // returns 12L ((5 + 1) * 2)
+ * long result = incrementThenDouble.applyAsLong(5L);  // returns 12L ((5 + 1) * 2)
  * }</pre>
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -58,10 +58,10 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator increment = x -> x + 1;
-     * long result = increment.applyAsLong(5L); // Returns 6L
+     * long result = increment.applyAsLong(5L);  // Returns 6L
      *
      * LongUnaryOperator negate = x -> -x;
-     * long negated = negate.applyAsLong(10L); // Returns -10L
+     * long negated = negate.applyAsLong(10L);  // Returns -10L
      * }</pre>
      *
      * @param operand the operand
@@ -83,7 +83,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * LongUnaryOperator add10 = x -> x + 10;
      * LongUnaryOperator add10ThenMultiplyBy3 = multiplyBy3.compose(add10);
      *
-     * long result = add10ThenMultiplyBy3.applyAsLong(5L); // returns 45L ((5 + 10) * 3)
+     * long result = add10ThenMultiplyBy3.applyAsLong(5L);  // returns 45L ((5 + 10) * 3)
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied
@@ -110,7 +110,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * LongUnaryOperator subtract5 = x -> x - 5;
      * LongUnaryOperator multiplyBy2ThenSubtract5 = multiplyBy2.andThen(subtract5);
      *
-     * long result = multiplyBy2ThenSubtract5.applyAsLong(10L); // returns 15L ((10 * 2) - 5)
+     * long result = multiplyBy2ThenSubtract5.applyAsLong(10L);  // returns 15L ((10 * 2) - 5)
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied
@@ -133,7 +133,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator op = condition ? x -> x * 2 : LongUnaryOperator.identity();
-     * long result = op.applyAsLong(5L); // returns 10L if condition is true, 5L otherwise
+     * long result = op.applyAsLong(5L);  // returns 10L if condition is true, 5L otherwise
      * }</pre>
      *
      * @return a unary operator that always returns its input argument

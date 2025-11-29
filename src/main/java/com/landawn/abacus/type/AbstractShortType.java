@@ -109,7 +109,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <pre>{@code
      * AbstractShortType type = TypeFactory.getType(Short.class);
      * char[] buffer = "1000".toCharArray();
-     * Short value = type.valueOf(buffer, 0, 4); // returns 1000
+     * Short value = type.valueOf(buffer, 0, 4);  // returns 1000
      * }</pre>
      *
      * @param cbuf the character array to convert
@@ -162,11 +162,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive short types
      * PrimitiveShortType type = TypeFactory.getType(short.class);
-     * short value = type.get(rs, 1); // Returns 0 for SQL NULL
+     * short value = type.get(rs, 1);  // Returns 0 for SQL NULL
      *
      * // For wrapper Short types
      * ShortType type = TypeFactory.getType(Short.class);
-     * Short value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * Short value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -188,11 +188,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive short types
      * PrimitiveShortType type = TypeFactory.getType(short.class);
-     * short value = type.get(rs, "port"); // Returns 0 for SQL NULL
+     * short value = type.get(rs, "port");  // Returns 0 for SQL NULL
      *
      * // For wrapper Short types
      * ShortType type = TypeFactory.getType(Short.class);
-     * Short value = type.get(rs, "port"); // Returns null for SQL NULL (overridden in subclass)
+     * Short value = type.get(rs, "port");  // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

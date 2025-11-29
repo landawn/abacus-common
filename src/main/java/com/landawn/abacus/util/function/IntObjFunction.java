@@ -37,11 +37,11 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * <pre>{@code
      * IntObjFunction<String, String> concat = (index, str) ->
      *     str + " at index " + index;
-     * String result = concat.apply(5, "Item"); // Returns "Item at index 5"
+     * String result = concat.apply(5, "Item");  // Returns "Item at index 5"
      *
      * IntObjFunction<List<String>, String> getElement = (index, list) ->
      *     list.get(index);
-     * String element = getElement.apply(2, Arrays.asList("a", "b", "c")); // Returns "c"
+     * String element = getElement.apply(2, Arrays.asList("a", "b", "c"));  // Returns "c"
      * }</pre>
      *
      * @param t the {@code int} argument
@@ -63,7 +63,7 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * Function<String, Integer> getLength = String::length;
      *
      * IntObjFunction<String, Integer> concatAndGetLength = concat.andThen(getLength);
-     * Integer result = concatAndGetLength.apply(5, "Item"); // Returns 10 (length of "Item[5]")
+     * Integer result = concatAndGetLength.apply(5, "Item");  // Returns 10 (length of "Item[5]")
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

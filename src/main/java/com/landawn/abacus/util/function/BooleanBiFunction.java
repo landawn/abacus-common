@@ -33,7 +33,7 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanBiFunction<String> formatter = (a, b) -> "AND: " + (a && b) + ", OR: " + (a || b);
-     * String result = formatter.apply(true, false); // Returns "AND: false, OR: true"
+     * String result = formatter.apply(true, false);  // Returns "AND: false, OR: true"
      * }</pre>
      *
      * @param t the first function argument (boolean value)

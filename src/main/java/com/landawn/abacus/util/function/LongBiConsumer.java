@@ -44,7 +44,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * <pre>{@code
      * LongBiConsumer rangePrinter = (start, end) ->
      *     System.out.println("Range: [" + start + ", " + end + "]");
-     * rangePrinter.accept(100L, 200L); // Prints: Range: [100, 200]
+     * rangePrinter.accept(100L, 200L);  // Prints: Range: [100, 200]
      *
      * Map<Long, Long> timestamps = new HashMap<>();
      * LongBiConsumer recorder = (key, value) -> timestamps.put(key, value);
@@ -73,7 +73,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * LongBiConsumer logger = (a, b) -> System.out.println("Processing: " + a + ", " + b);
      * LongBiConsumer processor = (a, b) -> processValues(a, b);
      * LongBiConsumer combined = processor.andThen(logger);
-     * combined.accept(100L, 200L); // First processes, then logs
+     * combined.accept(100L, 200L);  // First processes, then logs
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

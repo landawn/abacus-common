@@ -43,9 +43,9 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
  * 
- * System.out.println(set.floor(6));        // 5
- * System.out.println(set.higher(5));       // 7
- * System.out.println(set.descendingSet()); // [9, 7, 5, 3, 1]
+ * System.out.println(set.floor(6));  // 5
+ * System.out.println(set.higher(5));  // 7
+ * System.out.println(set.descendingSet());  // [9, 7, 5, 3, 1]
  * }</pre>
  *
  * @param <E> the type of elements maintained by this set
@@ -72,7 +72,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> emptySet = ImmutableNavigableSet.empty();
-     * System.out.println(emptySet.size()); // 0
+     * System.out.println(emptySet.size());  // 0
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -89,7 +89,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> singletonSet = ImmutableNavigableSet.just(42);
-     * System.out.println(singletonSet.first()); // 42
+     * System.out.println(singletonSet.first());  // 42
      * }</pre>
      *
      * @param <E> the type of element, must extend Comparable
@@ -122,7 +122,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("beta", "alpha");
-     * System.out.println(set); // [alpha, beta]
+     * System.out.println(set);  // [alpha, beta]
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -299,7 +299,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * List<String> list = Arrays.asList("charlie", "alpha", "beta");
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(list);
-     * System.out.println(set); // [alpha, beta, charlie]
+     * System.out.println(set);  // [alpha, beta, charlie]
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -334,7 +334,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * NavigableSet<String> mutableSet = new TreeSet<>();
      * ImmutableNavigableSet<String> immutableView = ImmutableNavigableSet.wrap(mutableSet);
-     * mutableSet.add("new element"); // This change is visible in immutableView!
+     * mutableSet.add("new element");  // This change is visible in immutableView!
      * }</pre>
      *
      * @param <E> the type of elements in the NavigableSet
@@ -375,9 +375,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.lower(5));  // 3
-     * System.out.println(set.lower(6));  // 5
-     * System.out.println(set.lower(1));  // null
+     * System.out.println(set.lower(5));   // 3
+     * System.out.println(set.lower(6));   // 5
+     * System.out.println(set.lower(1));   // null
      * }</pre>
      *
      * @param e the value to match
@@ -397,9 +397,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.floor(5));  // 5
-     * System.out.println(set.floor(6));  // 5
-     * System.out.println(set.floor(0));  // null
+     * System.out.println(set.floor(5));   // 5
+     * System.out.println(set.floor(6));   // 5
+     * System.out.println(set.floor(0));   // null
      * }</pre>
      *
      * @param e the value to match
@@ -419,9 +419,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.ceiling(5));  // 5
-     * System.out.println(set.ceiling(6));  // 7
-     * System.out.println(set.ceiling(10)); // null
+     * System.out.println(set.ceiling(5));    // 5
+     * System.out.println(set.ceiling(6));    // 7
+     * System.out.println(set.ceiling(10));   // null
      * }</pre>
      *
      * @param e the value to match
@@ -441,9 +441,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.higher(5));  // 7
-     * System.out.println(set.higher(6));  // 7
-     * System.out.println(set.higher(9));  // null
+     * System.out.println(set.higher(5));   // 7
+     * System.out.println(set.higher(6));   // 7
+     * System.out.println(set.higher(9));   // null
      * }</pre>
      *
      * @param e the value to match
@@ -493,7 +493,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
      * ImmutableNavigableSet<Integer> descending = set.descendingSet();
-     * System.out.println(descending); // [9, 7, 5, 3, 1]
+     * System.out.println(descending);  // [9, 7, 5, 3, 1]
      * }</pre>
      *
      * @return a reverse order view of this set
@@ -512,7 +512,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("a", "b", "c");
      * ObjIterator<String> iter = set.descendingIterator();
      * while (iter.hasNext()) {
-     *     System.out.print(iter.next() + " "); // c b a
+     *     System.out.print(iter.next() + " ");  // c b a
      * }
      * }</pre>
      *
@@ -533,7 +533,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> sub = set.subSet(2, true, 4, false);
-     * System.out.println(sub); // [2, 3]
+     * System.out.println(sub);  // [2, 3]
      * }</pre>
      *
      * @param fromElement low endpoint of the elements in the returned set
@@ -557,7 +557,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> head = set.headSet(3, false);
-     * System.out.println(head); // [1, 2]
+     * System.out.println(head);  // [1, 2]
      * }</pre>
      *
      * @param toElement high endpoint of the elements in the returned set
@@ -579,7 +579,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> tail = set.tailSet(3, false);
-     * System.out.println(tail); // [4, 5]
+     * System.out.println(tail);  // [4, 5]
      * }</pre>
      *
      * @param fromElement low endpoint of the elements in the returned set

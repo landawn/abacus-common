@@ -143,7 +143,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * activity.setLiveTime(7200000); // set to 2 hours
+     * activity.setLiveTime(7200000);  // set to 2 hours
      * }</pre>
      *
      * @param liveTime the new maximum lifetime in milliseconds
@@ -174,7 +174,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * activity.setMaxIdleTime(600000); // set to 10 minutes
+     * activity.setMaxIdleTime(600000);  // set to 10 minutes
      * }</pre>
      *
      * @param maxIdleTime the new maximum idle time in milliseconds

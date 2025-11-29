@@ -41,10 +41,10 @@ public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleToIntFunction truncate = DoubleToIntFunction.DEFAULT;
-     * int result = truncate.applyAsInt(3.14); // Returns 3
+     * int result = truncate.applyAsInt(3.14);  // Returns 3
      *
      * DoubleToIntFunction rounder = val -> (int) Math.round(val);
-     * int result2 = rounder.applyAsInt(3.7); // Returns 4
+     * int result2 = rounder.applyAsInt(3.7);  // Returns 4
      * }</pre>
      *
      * @param value the double function argument

@@ -143,7 +143,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains short value 100
      * OptionalShort opt = type.get(rs, 1);
@@ -173,7 +173,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "quantity" contains short value 50
      * OptionalShort opt = type.get(rs, "quantity");

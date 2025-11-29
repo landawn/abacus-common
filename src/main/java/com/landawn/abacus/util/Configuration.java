@@ -683,9 +683,9 @@ public abstract class Configuration {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long timeout = Configuration.readTimeInMillis("30s"); // 30000
-     * long delay = Configuration.readTimeInMillis("5m");    // 300000
-     * long expr = Configuration.readTimeInMillis("2 * 60 * 1000"); // 120000
+     * long timeout = Configuration.readTimeInMillis("30s");          // 30000
+     * long delay = Configuration.readTimeInMillis("5m");             // 300000
+     * long expr = Configuration.readTimeInMillis("2 * 60 * 1000");   // 120000
      * }</pre>
      *
      * @param value the string value representing time duration
@@ -909,7 +909,7 @@ public abstract class Configuration {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> features = config.string2List("feature1, feature2, feature3");
-     * features.add("feature4"); // Can modify the list
+     * features.add("feature4");  // Can modify the list
      * }</pre>
      *
      * @param st the comma-separated string

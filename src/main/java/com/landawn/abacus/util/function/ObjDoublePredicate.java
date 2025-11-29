@@ -45,7 +45,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * <pre>{@code
      * ObjDoublePredicate<String> isLengthAbove = (str, threshold) ->
      *     str.length() > threshold;
-     * boolean isLong = isLengthAbove.test("Hello World", 5.0); // Returns true
+     * boolean isLong = isLengthAbove.test("Hello World", 5.0);  // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T

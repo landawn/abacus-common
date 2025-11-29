@@ -32,7 +32,7 @@ public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperato
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanTernaryOperator majorityVote = (a, b, c) -> (a && b) || (b && c) || (a && c);
-     * boolean result = majorityVote.applyAsBoolean(true, true, false); // Returns true
+     * boolean result = majorityVote.applyAsBoolean(true, true, false);  // Returns true
      * }</pre>
      *
      * @param a the first operand

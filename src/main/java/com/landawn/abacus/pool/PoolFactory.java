@@ -249,7 +249,7 @@ public abstract class PoolFactory { //NOSONAR
      * <pre>{@code
      * // Example Poolable connection class
      * class DBConnection extends AbstractPoolable {
-     *     private long memoryUsage = 1024; // example size in bytes
+     *     private long memoryUsage = 1024;  // example size in bytes
      *     public long getMemoryUsage() { return memoryUsage; }
      * }
      *

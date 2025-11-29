@@ -38,7 +38,7 @@ public class MillisTimestampType extends TimestampType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021 00:00:00)
      * Timestamp ts = type.get(rs, 1);
@@ -69,7 +69,7 @@ public class MillisTimestampType extends TimestampType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "created_at" contains milliseconds value 1609459200000
      * Timestamp ts = type.get(rs, "created_at");
@@ -103,7 +103,7 @@ public class MillisTimestampType extends TimestampType {
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO events (id, created_at) VALUES (?, ?)");
      *
-     * Timestamp ts = new Timestamp(1609459200000L); // Jan 1, 2021 00:00:00
+     * Timestamp ts = new Timestamp(1609459200000L);  // Jan 1, 2021 00:00:00
      * type.set(stmt, 2, ts);
      * // Sets parameter to 1609459200000
      *
@@ -131,7 +131,7 @@ public class MillisTimestampType extends TimestampType {
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * CallableStatement stmt = connection.prepareCall("{call log_event(?, ?)}");
      *
-     * Timestamp ts = new Timestamp(1609459200000L); // Jan 1, 2021 00:00:00
+     * Timestamp ts = new Timestamp(1609459200000L);  // Jan 1, 2021 00:00:00
      * type.set(stmt, "p_created_at", ts);
      * // Sets parameter to 1609459200000
      *

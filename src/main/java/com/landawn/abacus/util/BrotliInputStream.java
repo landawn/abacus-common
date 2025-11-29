@@ -125,7 +125,7 @@ public final class BrotliInputStream extends InputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
-     * int bytesRead = brotliStream.read(buffer, 0, 512); // Read up to 512 bytes
+     * int bytesRead = brotliStream.read(buffer, 0, 512);  // Read up to 512 bytes
      * }</pre>
      *
      * @param b the buffer into which the data is read
@@ -146,7 +146,7 @@ public final class BrotliInputStream extends InputStream {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long skipped = brotliStream.skip(1024); // Try to skip 1KB
+     * long skipped = brotliStream.skip(1024);  // Try to skip 1KB
      * System.out.println("Actually skipped: " + skipped + " bytes");
      * }</pre>
      *
@@ -191,9 +191,9 @@ public final class BrotliInputStream extends InputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (brotliStream.markSupported()) {
-     *     brotliStream.mark(1024); // Mark with 1KB read limit
+     *     brotliStream.mark(1024);  // Mark with 1KB read limit
      *     // Read some data
-     *     brotliStream.reset(); // Return to marked position
+     *     brotliStream.reset();  // Return to marked position
      * }
      * }</pre>
      *
@@ -212,7 +212,7 @@ public final class BrotliInputStream extends InputStream {
      * brotliStream.mark(100);
      * byte[] preview = new byte[50];
      * brotliStream.read(preview);
-     * brotliStream.reset(); // Go back to marked position
+     * brotliStream.reset();  // Go back to marked position
      * }</pre>
      *
      * @throws IOException if the stream has not been marked or if the mark has been invalidated

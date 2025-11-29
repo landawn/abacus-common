@@ -37,7 +37,7 @@ public interface DoubleNConsumer {
      *     for (double v : values) sum += v;
      *     System.out.println("Average: " + (sum / values.length));
      * };
-     * averager.accept(1.0, 2.0, 3.0); // Prints: Average: 2.0
+     * averager.accept(1.0, 2.0, 3.0);  // Prints: Average: 2.0
      * }</pre>
      *
      * @param args the double input arguments as a varargs array

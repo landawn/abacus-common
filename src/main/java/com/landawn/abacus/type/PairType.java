@@ -41,7 +41,7 @@ import com.landawn.abacus.util.WD;
  *
  * // Serialize a Pair to string
  * Pair<String, Integer> pair = Pair.of("age", 25);
- * String json = type.stringOf(pair); // Returns ["age", 25]
+ * String json = type.stringOf(pair);  // Returns ["age", 25]
  *
  * // Deserialize a string to Pair
  * Pair<String, Integer> restored = type.valueOf("[\"age\", 25]");

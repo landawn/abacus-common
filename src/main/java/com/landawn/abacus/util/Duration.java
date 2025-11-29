@@ -82,20 +82,20 @@ import java.time.temporal.TemporalUnit;
  * Duration halfSecond = Duration.ofMillis(500);
  *
  * // Duration arithmetic
- * Duration total = fiveMinutes.plus(twoHours);              // 2 hours 5 minutes
- * Duration difference = oneDay.minus(twoHours);             // 22 hours
- * Duration doubled = fiveMinutes.multipliedBy(2);           // 10 minutes
- * Duration halved = twoHours.dividedBy(2);                  // 1 hour
+ * Duration total = fiveMinutes.plus(twoHours);  // 2 hours 5 minutes
+ * Duration difference = oneDay.minus(twoHours);  // 22 hours
+ * Duration doubled = fiveMinutes.multipliedBy(2);  // 10 minutes
+ * Duration halved = twoHours.dividedBy(2);  // 1 hour
  *
  * // Duration properties and testing
- * boolean isZero = Duration.ZERO.isZero();                  // true
- * boolean isNegative = fiveMinutes.minus(twoHours).isNegative(); // true
- * Duration positive = fiveMinutes.minus(twoHours).abs();    // 1 hour 55 minutes
+ * boolean isZero = Duration.ZERO.isZero();  // true
+ * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();  // true
+ * Duration positive = fiveMinutes.minus(twoHours).abs();  // 1 hour 55 minutes
  *
  * // Converting to different units
- * long totalMinutes = twoHours.toMinutes();                 // 120
- * long totalSeconds = fiveMinutes.toSeconds();              // 300
- * long totalMillis = halfSecond.toMillis();                 // 500
+ * long totalMinutes = twoHours.toMinutes();  // 120
+ * long totalSeconds = fiveMinutes.toSeconds();  // 300
+ * long totalMillis = halfSecond.toMillis();  // 500
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -104,7 +104,7 @@ import java.time.temporal.TemporalUnit;
  * Duration workDay = Duration.ofHours(8);
  * Duration lunchBreak = Duration.ofMinutes(30);
  * Duration shortBreaks = Duration.ofMinutes(15).multipliedBy(2);
- * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks); // 7 hours
+ * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);  // 7 hours
  *
  * // Performance measurement
  * Duration executionTime = measureExecutionTime(() -> performOperation());
@@ -114,7 +114,7 @@ import java.time.temporal.TemporalUnit;
  *
  * // Duration formatting for display
  * Duration uptime = Duration.ofDays(5).plusHours(3).plusMinutes(45);
- * String formatted = uptime.toString(); // "PT123H45M0S" (ISO 8601 format)
+ * String formatted = uptime.toString();  // "PT123H45M0S" (ISO 8601 format)
  *
  * // Interoperability with java.time.Duration
  * Duration customDuration = Duration.ofMinutes(90);
@@ -933,7 +933,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration d = Duration.ofHours(2);
-     * java.time.Duration jdkDuration = d.toJdkDuration(); // 2 hours
+     * java.time.Duration jdkDuration = d.toJdkDuration();  // 2 hours
      * }</pre>
      *
      * @return a {@code java.time.Duration} with the same milliseconds value, not null

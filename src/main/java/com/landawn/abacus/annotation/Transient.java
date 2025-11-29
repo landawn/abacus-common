@@ -61,10 +61,10 @@ import java.lang.annotation.Target;
  *     private BigDecimal priceWithTax;  // Calculated field
  *
  *     @Transient
- *     private boolean modified;          // Runtime state
+ *     private boolean modified;  // Runtime state
  *
  *     @Transient
- *     private List<Review> reviews;      // Loaded separately
+ *     private List<Review> reviews;  // Loaded separately
  * }
  * }</pre>
  * 

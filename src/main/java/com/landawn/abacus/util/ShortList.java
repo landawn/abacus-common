@@ -78,37 +78,37 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <pre>{@code
  * // Creating and initializing short lists
  * ShortList audioSamples = ShortList.of((short) 1024, (short) -512, (short) 2048);
- * ShortList range = ShortList.range((short) 1, (short) 100);    // [1, 2, 3, ..., 99]
- * ShortList sequence = ShortList.range((short) 0, (short) 50, (short) 5); // [0, 5, 10, ..., 45]
- * ShortList sensorData = new ShortList(1000);                  // Pre-sized for performance
+ * ShortList range = ShortList.range((short) 1, (short) 100);  // [1, 2, 3, ..., 99]
+ * ShortList sequence = ShortList.range((short) 0, (short) 50, (short) 5);  // [0, 5, 10, ..., 45]
+ * ShortList sensorData = new ShortList(1000);  // Pre-sized for performance
  *
  * // Basic operations
- * audioSamples.add((short) 3072);                             // Add audio sample
- * short firstSample = audioSamples.get(0);                    // Access by index: 1024
- * audioSamples.set(1, (short) -1024);                         // Modify existing sample
+ * audioSamples.add((short) 3072);  // Add audio sample
+ * short firstSample = audioSamples.get(0);  // Access by index: 1024
+ * audioSamples.set(1, (short) -1024);  // Modify existing sample
  *
  * // Mathematical operations for 16-bit data
- * OptionalShort min = audioSamples.min();                     // Find minimum sample
- * OptionalShort max = audioSamples.max();                     // Find maximum sample
- * OptionalShort median = audioSamples.median();               // Calculate median sample
+ * OptionalShort min = audioSamples.min();  // Find minimum sample
+ * OptionalShort max = audioSamples.max();  // Find maximum sample
+ * OptionalShort median = audioSamples.median();  // Calculate median sample
  *
  * // Set operations for data analysis
  * ShortList set1 = ShortList.of((short) 100, (short) 200, (short) 300);
  * ShortList set2 = ShortList.of((short) 200, (short) 300, (short) 400);
- * ShortList intersection = set1.intersection(set2);           // [200, 300]
- * ShortList difference = set1.difference(set2);               // [100]
+ * ShortList intersection = set1.intersection(set2);  // [200, 300]
+ * ShortList difference = set1.difference(set2);  // [100]
  *
  * // High-performance sorting and searching
- * audioSamples.sort();                                        // Sort samples
- * audioSamples.parallelSort();                                // Parallel sort for large datasets
- * int index = audioSamples.binarySearch((short) 1024);        // Fast lookup
+ * audioSamples.sort();  // Sort samples
+ * audioSamples.parallelSort();  // Parallel sort for large datasets
+ * int index = audioSamples.binarySearch((short) 1024);  // Fast lookup
  *
  * // Type conversions for different precision needs
- * IntList intValues = audioSamples.toIntList();               // Convert to int (no precision loss)
- * LongList longValues = audioSamples.toLongList();            // Convert to long (no precision loss)
- * FloatList floatValues = audioSamples.toFloatList();         // Convert to float
- * short[] primitiveArray = audioSamples.toArray();            // To primitive array
- * List<Short> boxedList = audioSamples.boxed();               // To boxed collection
+ * IntList intValues = audioSamples.toIntList();  // Convert to int (no precision loss)
+ * LongList longValues = audioSamples.toLongList();  // Convert to long (no precision loss)
+ * FloatList floatValues = audioSamples.toFloatList();  // Convert to float
+ * short[] primitiveArray = audioSamples.toArray();  // To primitive array
+ * List<Short> boxedList = audioSamples.boxed();  // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -267,7 +267,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <p><b>Example: Audio Sample Processing</b>
  * <pre>{@code
  * // Process 16-bit audio samples
- * ShortList leftChannel = new ShortList(44100);   // 1 second at 44.1kHz
+ * ShortList leftChannel = new ShortList(44100);  // 1 second at 44.1kHz
  * ShortList rightChannel = new ShortList(44100);
  *
  * // Read audio samples (simulated)
@@ -1412,12 +1412,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)2, (short)2, (short)4);
-     * ShortList result = list1.intersection(list2); // result will be [(short)1, (short)2, (short)2]
+     * ShortList result = list1.intersection(list2);  // result will be [(short)1, (short)2, (short)2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      *
      * ShortList list3 = ShortList.of((short)5, (short)5, (short)6);
      * ShortList list4 = ShortList.of((short)5, (short)7);
-     * ShortList result2 = list3.intersection(list4); // result will be [(short)5]
+     * ShortList result2 = list3.intersection(list4);  // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
@@ -1459,12 +1459,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
      * short[] array = new short[] {(short)1, (short)2, (short)2, (short)4};
-     * ShortList result = list1.intersection(array); // result will be [(short)1, (short)2, (short)2]
+     * ShortList result = list1.intersection(array);  // result will be [(short)1, (short)2, (short)2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * ShortList list2 = ShortList.of((short)5, (short)5, (short)6);
      * short[] array2 = new short[] {(short)5, (short)7};
-     * ShortList result2 = list2.intersection(array2); // result will be [(short)5]
+     * ShortList result2 = list2.intersection(array2);  // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
@@ -1496,12 +1496,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)4);
-     * ShortList result = list1.difference(list2); // result will be [(short)1, (short)2, (short)3]
+     * ShortList result = list1.difference(list2);  // result will be [(short)1, (short)2, (short)3]
      * // One '1' remains because list1 has two occurrences and list2 has one
      *
      * ShortList list3 = ShortList.of((short)5, (short)6);
      * ShortList list4 = ShortList.of((short)5, (short)5, (short)6);
-     * ShortList result2 = list3.difference(list4); // result will be [] (empty)
+     * ShortList result2 = list3.difference(list4);  // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1542,12 +1542,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * short[] array = new short[] {(short)1, (short)4};
-     * ShortList result = list1.difference(array); // result will be [(short)1, (short)2, (short)3]
+     * ShortList result = list1.difference(array);  // result will be [(short)1, (short)2, (short)3]
      * // One '1' remains because list1 has two occurrences and array has one
      *
      * ShortList list2 = ShortList.of((short)5, (short)6);
      * short[] array2 = new short[] {(short)5, (short)5, (short)6};
-     * ShortList result2 = list2.difference(array2); // result will be [] (empty)
+     * ShortList result2 = list2.difference(array2);  // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *

@@ -53,7 +53,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     try {
  *         // use connection
  *     } finally {
- *         pool.put("database1", borrowed); // return to pool
+ *         pool.put("database1", borrowed);  // return to pool
  *     }
  * }
  * }</pre>
@@ -223,7 +223,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, CachedData> measure = (key, data) ->
-     *     key.length() * 2 + data.getDataSize(); // * 2 for UTF-16 encoding (2 bytes per char)
+     *     key.length() * 2 + data.getDataSize();  // * 2 for UTF-16 encoding (2 bytes per char)
      *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,

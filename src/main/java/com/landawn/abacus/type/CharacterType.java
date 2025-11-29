@@ -59,8 +59,8 @@ public final class CharacterType extends AbstractCharacterType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = ...; // from SQL query
-     * Character initial = type.get(rs, 1); // retrieves Character from column 1
+     * ResultSet rs = ...;  // from SQL query
+     * Character initial = type.get(rs, 1);  // retrieves Character from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -86,8 +86,8 @@ public final class CharacterType extends AbstractCharacterType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = ...; // from SQL query
-     * Character initial = type.get(rs, "initial"); // retrieves Character from "initial" column
+     * ResultSet rs = ...;  // from SQL query
+     * Character initial = type.get(rs, "initial");  // retrieves Character from "initial" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

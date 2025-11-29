@@ -26,8 +26,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedByte ib = IndexedByte.of((byte) 42, 5);
- * System.out.println(ib.value()); // prints: 42
- * System.out.println(ib.index()); // prints: 5
+ * System.out.println(ib.value());  // prints: 42
+ * System.out.println(ib.index());  // prints: 5
  * }</pre>
  * 
  */

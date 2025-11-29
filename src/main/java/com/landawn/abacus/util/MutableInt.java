@@ -59,7 +59,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt(); // value is 0
+     * MutableInt num = new MutableInt();  // value is 0
      * }</pre>
      */
     MutableInt() {
@@ -70,7 +70,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt(42); // value is 42
+     * MutableInt num = new MutableInt(42);  // value is 42
      * }</pre>
      * 
      * @param value the initial value to store
@@ -101,7 +101,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * int val = num.value(); // returns 42
+     * int val = num.value();  // returns 42
      * }</pre>
      * 
      * @return the current int value
@@ -129,7 +129,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * num.setValue(20); // value is now 20
+     * num.setValue(20);  // value is now 20
      * }</pre>
      * 
      * @param value the value to set
@@ -145,7 +145,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int old = num.getAndSet(20); // returns 10, value is now 20
+     * int old = num.getAndSet(20);  // returns 10, value is now 20
      * }</pre>
      * 
      * @param value the new value to set
@@ -164,7 +164,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int newVal = num.setAndGet(20); // returns 20, value is now 20
+     * int newVal = num.setAndGet(20);  // returns 20, value is now 20
      * }</pre>
      * 
      * @param value the new value to set
@@ -182,8 +182,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * boolean updated = num.setIf(20, v -> v < 15); // returns true, value is now 20
-     * updated = num.setIf(30, v -> v < 15); // returns false, value remains 20
+     * boolean updated = num.setIf(20, v -> v < 15);   // returns true, value is now 20
+     * updated = num.setIf(30, v -> v < 15);           // returns false, value remains 20
      * }</pre>
      * 
      * @param <E> the type of exception the predicate may throw
@@ -209,7 +209,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * num.increment(); // value is now 11
+     * num.increment();  // value is now 11
      * }</pre>
      */
     public void increment() {
@@ -222,7 +222,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * num.decrement(); // value is now 9
+     * num.decrement();  // value is now 9
      * }</pre>
      */
     public void decrement() {
@@ -237,7 +237,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * num.add(5); // value is now 15
+     * num.add(5);  // value is now 15
      * }</pre>
      * 
      * @param operand the value to add
@@ -252,7 +252,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * num.subtract(3); // value is now 7
+     * num.subtract(3);  // value is now 7
      * }</pre>
      * 
      * @param operand the value to subtract
@@ -267,7 +267,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int old = num.getAndIncrement(); // returns 10, value is now 11
+     * int old = num.getAndIncrement();  // returns 10, value is now 11
      * }</pre>
      * 
      * @return the value before incrementing
@@ -282,7 +282,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int old = num.getAndDecrement(); // returns 10, value is now 9
+     * int old = num.getAndDecrement();  // returns 10, value is now 9
      * }</pre>
      * 
      * @return the value before decrementing
@@ -297,7 +297,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int newVal = num.incrementAndGet(); // returns 11, value is now 11
+     * int newVal = num.incrementAndGet();  // returns 11, value is now 11
      * }</pre>
      * 
      * @return the value after incrementing
@@ -312,7 +312,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int newVal = num.decrementAndGet(); // returns 9, value is now 9
+     * int newVal = num.decrementAndGet();  // returns 9, value is now 9
      * }</pre>
      * 
      * @return the value after decrementing
@@ -327,7 +327,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int old = num.getAndAdd(5); // returns 10, value is now 15
+     * int old = num.getAndAdd(5);  // returns 10, value is now 15
      * }</pre>
      * 
      * @param delta the value to add
@@ -345,7 +345,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * int newVal = num.addAndGet(5); // returns 15, value is now 15
+     * int newVal = num.addAndGet(5);  // returns 15, value is now 15
      * }</pre>
      * 
      * @param delta the value to add
@@ -365,7 +365,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * int value = num.intValue(); // returns 42
+     * int value = num.intValue();  // returns 42
      * }</pre>
      *
      * @return the int value represented by this object
@@ -383,7 +383,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * long value = num.longValue(); // returns 42L
+     * long value = num.longValue();  // returns 42L
      * }</pre>
      *
      * @return the value represented by this object after conversion to type long
@@ -402,7 +402,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * float value = num.floatValue(); // returns 42.0f
+     * float value = num.floatValue();  // returns 42.0f
      * }</pre>
      *
      * @return the value represented by this object after conversion to type float
@@ -420,7 +420,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * double value = num.doubleValue(); // returns 42.0
+     * double value = num.doubleValue();  // returns 42.0
      * }</pre>
      *
      * @return the value represented by this object after conversion to type double
@@ -441,7 +441,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <pre>{@code
      * MutableInt a = MutableInt.of(10);
      * MutableInt b = MutableInt.of(20);
-     * int result = a.compareTo(b); // returns negative value
+     * int result = a.compareTo(b);  // returns negative value
      * }</pre>
      * 
      * @param other the other MutableInt to compare to, not null
@@ -463,7 +463,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <pre>{@code
      * MutableInt a = MutableInt.of(10);
      * MutableInt b = MutableInt.of(10);
-     * boolean equal = a.equals(b); // returns true
+     * boolean equal = a.equals(b);  // returns true
      * }</pre>
      * 
      * @param obj the object to compare with, {@code null} returns false
@@ -496,7 +496,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(42);
-     * String str = num.toString(); // returns "42"
+     * String str = num.toString();  // returns "42"
      * }</pre>
      * 
      * @return the String representation of the current value

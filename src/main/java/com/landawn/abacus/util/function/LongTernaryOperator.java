@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTernaryOperator sum = (a, b, c) -> a + b + c;
- * long result = sum.applyAsLong(10L, 20L, 30L); // returns 60L
+ * long result = sum.applyAsLong(10L, 20L, 30L);  // returns 60L
  *
  * LongTernaryOperator median = (a, b, c) -> {
  *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;

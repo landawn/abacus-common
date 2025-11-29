@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Throwables;
  *     }
  * };
  * conditionalPrinter.accept("Hello World", true);  // prints "Hello World"
- * conditionalPrinter.accept("Hidden", false);      // prints nothing
+ * conditionalPrinter.accept("Hidden", false);  // prints nothing
  *
  * ObjBooleanConsumer<User> setActiveStatus = (user, isActive) -> {
  *     user.setActive(isActive);

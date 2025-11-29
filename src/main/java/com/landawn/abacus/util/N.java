@@ -175,44 +175,44 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Array operations - null-safe and efficient
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2};
- * int count = N.occurrencesOf(numbers, 3);           // Returns 2
- * boolean hasThree = N.contains(numbers, 3);         // Returns true
- * int index = N.indexOf(numbers, 3);                 // Returns 2
- * int[] sorted = N.sort(numbers);                    // Returns sorted copy
- * int[] reversed = N.reverse(numbers);               // Returns reversed copy
+ * int count = N.occurrencesOf(numbers, 3);  // Returns 2
+ * boolean hasThree = N.contains(numbers, 3);  // Returns true
+ * int index = N.indexOf(numbers, 3);  // Returns 2
+ * int[] sorted = N.sort(numbers);  // Returns sorted copy
+ * int[] reversed = N.reverse(numbers);  // Returns reversed copy
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
- * Map<String, Long> freq = N.occurrencesMap(list);   // {apple=2, banana=1, null=1}
- * List<String> unique = N.distinct(list);            // [apple, banana, null]
- * List<String> filtered = N.filter(list, N::isNotNull); // [apple, banana, apple]
+ * Map<String, Long> freq = N.occurrencesMap(list);  // {apple=2, banana=1, null=1}
+ * List<String> unique = N.distinct(list);  // [apple, banana, null]
+ * List<String> filtered = N.filter(list, N::isNotNull);  // [apple, banana, apple]
  *
  * // Null-safe operations - no exceptions thrown
- * String result = N.reverse(null);                   // Returns null
- * List<String> empty = N.filter(null, x -> true);    // Returns empty list
- * boolean isEmpty = N.isEmpty(null);                 // Returns true
+ * String result = N.reverse(null);  // Returns null
+ * List<String> empty = N.filter(null, x -> true);  // Returns empty list
+ * boolean isEmpty = N.isEmpty(null);  // Returns true
  *
  * // Functional operations with exception handling
  * List<String> items = Arrays.asList("file1.txt", "file2.txt");
- * N.forEach(items, N::processFile);                  // Supports checked exceptions
- * List<Integer> lengths = N.map(items, String::length); // Transform with mapping
+ * N.forEach(items, N::processFile);  // Supports checked exceptions
+ * List<Integer> lengths = N.map(items, String::length);  // Transform with mapping
  *
  * // Mathematical operations
- * double avg = N.average(numbers);                   // Calculate average
- * int max = N.max(numbers);                          // Find maximum
- * int median = N.median(numbers);                    // Calculate median
+ * double avg = N.average(numbers);  // Calculate average
+ * int max = N.max(numbers);  // Find maximum
+ * int median = N.median(numbers);  // Calculate median
  *
  * // Async operations with built-in executor
- * N.sleep(1000);                                     // Thread sleep utility
- * N.asyncRun(() -> doBackgroundTask());              // Async execution
+ * N.sleep(1000);  // Thread sleep utility
+ * N.asyncRun(() -> doBackgroundTask());  // Async execution
  *
  * // Type conversions and parsing
- * int parsed = Numbers.toInt("123");                 // Parse integer (throws NumberFormatException if invalid)
- * List<Integer> converted = N.toList(numbers);       // Array to list conversion
+ * int parsed = Numbers.toInt("123");  // Parse integer (throws NumberFormatException if invalid)
+ * List<Integer> converted = N.toList(numbers);  // Array to list conversion
  *
  * // String operations
- * boolean isValid = N.isNotBlank("  text  ");        // String validation
- * String trimmed = N.trim("  text  ");               // Safe trimming
+ * boolean isValid = N.isNotBlank("  text  ");  // String validation
+ * String trimmed = N.trim("  text  ");  // Safe trimming
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -304,22 +304,22 @@ import com.landawn.abacus.util.stream.Stream;
  *         catch (NumberFormatException e) { return null; }
  *     })
  *     .filter(Objects::nonNull)                                         // Keep valid numbers
- *     .collect(N.toList());                                             // Collect to list
+ *     .collect(N.toList());  // Collect to list
  *
  * // Mathematical analysis
- * double average = N.averageInt(processedNumbers);                      // Calculate average
- * Integer maximum = N.max(processedNumbers);                            // Find maximum
+ * double average = N.averageInt(processedNumbers);  // Calculate average
+ * Integer maximum = N.max(processedNumbers);  // Find maximum
  * Map<Integer, Integer> frequencies = N.occurrencesMap(processedNumbers);  // Count frequencies
  *
  * // Async processing
  * N.asyncRun(() -> {
- *     N.forEach(processedNumbers, number -> processNumber(number));     // Process asynchronously
+ *     N.forEach(processedNumbers, number -> processNumber(number));  // Process asynchronously
  * });
  *
  * // Group and analyze
  * Map<Boolean, List<Integer>> partitioned = N.partition(processedNumbers, n -> n > 2);
- * List<Integer> large = partitioned.get(true);                         // Numbers > 2
- * List<Integer> small = partitioned.get(false);                        // Numbers <= 2
+ * List<Integer> large = partitioned.get(true);  // Numbers > 2
+ * List<Integer> small = partitioned.get(false);  // Numbers <= 2
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -2443,9 +2443,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9).iterator();
      * ObjIterator<List<Integer>> chunks = N.split(numbers, 3);
-     * chunks.next();  // Returns [1, 2, 3]
-     * chunks.next();  // Returns [4, 5, 6]
-     * chunks.next();  // Returns [7, 8, 9]
+     * chunks.next();   // Returns [1, 2, 3]
+     * chunks.next();   // Returns [4, 5, 6]
+     * chunks.next();   // Returns [7, 8, 9]
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -2592,8 +2592,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));    // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));   // [[1, 2], [3, 4], [5], [6], [7]]
      * }</pre>
      *
      * @param <T> the type of the elements in the resulting stream
@@ -2651,8 +2651,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final List<Integer> c = N.asList(1, 2, 3, 4, 5, 6, 7);
-     * splitByChunkCount(c, 5, true); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByChunkCount(c, 5, false); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByChunkCount(c, 5, true);    // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(c, 5, false);   // [[1, 2], [3, 4], [5], [6], [7]]
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -2836,11 +2836,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * char[] result = N.concat(a, b, c);  // Returns {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'}
      *
      * // Handles null/empty arrays gracefully
-     * char[] withNull = N.concat(a, null, b);  // Returns {'a', 'b', 'c', 'd', 'e'}
+     * char[] withNull = N.concat(a, null, b);   // Returns {'a', 'b', 'c', 'd', 'e'}
      * char[] allNull = N.concat(null, null);    // Returns empty array
      *
      * // Single array returns a clone
-     * char[] single = N.concat(a);  // Returns {'a', 'b', 'c'}
+     * char[] single = N.concat(a);              // Returns {'a', 'b', 'c'}
      * }</pre>
      *
      * @param aa the arrays to concatenate
@@ -4251,11 +4251,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * char[] a = {'a', 'b', 'b', 'c'};
      * char[] b = {'a', 'b', 'b', 'b', 'd'};
-     * char[] result = intersection(a, b); // result will be {'a', 'b', 'b'}
+     * char[] result = intersection(a, b);  // result will be {'a', 'b', 'b'}
      *
      * char[] c = {'x', 'y'};
      * char[] d = {'z', 'w'};
-     * char[] result2 = intersection(c, d); // result will be {} (empty array)
+     * char[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first char array
@@ -4283,11 +4283,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * byte[] a = {1, 2, 2, 3, 4};
      * byte[] b = {1, 2, 2, 2, 5, 6};
-     * byte[] result = intersection(a, b); // result will be {1, 2, 2}
+     * byte[] result = intersection(a, b);  // result will be {1, 2, 2}
      *
      * byte[] c = {1, 2, 3};
      * byte[] d = {4, 5, 6};
-     * byte[] result2 = intersection(c, d); // result will be {} (empty array)
+     * byte[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first byte array
@@ -4315,11 +4315,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * short[] a = {1, 2, 2, 3, 4};
      * short[] b = {1, 2, 2, 2, 5, 6};
-     * short[] result = intersection(a, b); // result will be {1, 2, 2}
+     * short[] result = intersection(a, b);  // result will be {1, 2, 2}
      *
      * short[] c = {1, 2, 3};
      * short[] d = {4, 5, 6};
-     * short[] result2 = intersection(c, d); // result will be {} (empty array)
+     * short[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first short array
@@ -4347,11 +4347,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * int[] a = {1, 2, 2, 3, 4};
      * int[] b = {1, 2, 2, 2, 5, 6};
-     * int[] result = intersection(a, b); // result will be {1, 2, 2}
+     * int[] result = intersection(a, b);  // result will be {1, 2, 2}
      * 
      * int[] c = {1, 2, 3};
      * int[] d = {4, 5, 6};
-     * int[] result2 = intersection(c, d); // result will be {} (empty array)
+     * int[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first int array
@@ -4378,11 +4378,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * long[] a = {1, 2, 2, 3, 4};
      * long[] b = {1, 2, 2, 2, 5, 6};
-     * long[] result = intersection(a, b); // result will be {1, 2, 2}
+     * long[] result = intersection(a, b);  // result will be {1, 2, 2}
      *
      * long[] c = {1, 2, 3};
      * long[] d = {4, 5, 6};
-     * long[] result2 = intersection(c, d); // result will be {} (empty array)
+     * long[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first long array
@@ -4410,11 +4410,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
      * float[] b = {1.0f, 2.0f, 2.0f, 2.0f, 5.0f, 6.0f};
-     * float[] result = intersection(a, b); // result will be {1.0f, 2.0f, 2.0f}
+     * float[] result = intersection(a, b);  // result will be {1.0f, 2.0f, 2.0f}
      *
      * float[] c = {1.0f, 2.0f, 3.0f};
      * float[] d = {4.0f, 5.0f, 6.0f};
-     * float[] result2 = intersection(c, d); // result will be {} (empty array)
+     * float[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first float array
@@ -4442,11 +4442,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
      * double[] b = {1.0, 2.0, 2.0, 2.0, 5.0, 6.0};
-     * double[] result = intersection(a, b); // result will be {1.0, 2.0, 2.0}
+     * double[] result = intersection(a, b);  // result will be {1.0, 2.0, 2.0}
      *
      * double[] c = {1.0, 2.0, 3.0};
      * double[] d = {4.0, 5.0, 6.0};
-     * double[] result2 = intersection(c, d); // result will be {} (empty array)
+     * double[] result2 = intersection(c, d);  // result will be {} (empty array)
      * }</pre>
      *
      * @param a the first double array
@@ -4474,11 +4474,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] a = {"A", "B", "B", "C", "D"};
      * String[] b = {"A", "B", "B", "B", "E", "F"};
-     * List<String> result = intersection(a, b); // result will be ["A", "B", "B"]
+     * List<String> result = intersection(a, b);  // result will be ["A", "B", "B"]
      *
      * Integer[] c = {1, 2, 3};
      * Integer[] d = {4, 5, 6};
-     * List<Integer> result2 = intersection(c, d); // result will be [] (empty list)
+     * List<Integer> result2 = intersection(c, d);  // result will be [] (empty list)
      * }</pre>
      *
      * @param <T> the type of the elements in the first array
@@ -4515,11 +4515,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> a = Arrays.asList("A", "B", "B", "C", "D");
      * List<String> b = Arrays.asList("A", "B", "B", "B", "E", "F");
-     * List<String> result = intersection(a, b); // result will be ["A", "B", "B"]
+     * List<String> result = intersection(a, b);  // result will be ["A", "B", "B"]
      *
      * List<Integer> c = Arrays.asList(1, 2, 3);
      * List<Integer> d = Arrays.asList(4, 5, 6);
-     * List<Integer> result2 = intersection(c, d); // result will be [] (empty list)
+     * List<Integer> result2 = intersection(c, d);  // result will be [] (empty list)
      * }</pre>
      *
      * @param <T> the type of elements in the first collection
@@ -4561,13 +4561,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> b = Arrays.asList("A", "B", "B", "B", "D");
      * List<String> c = Arrays.asList("A", "B", "E");
      * List<List<String>> collections = Arrays.asList(a, b, c);
-     * List<String> result = intersection(collections); // result will be ["A", "B"]
+     * List<String> result = intersection(collections);  // result will be ["A", "B"]
      *
      * List<Integer> x = Arrays.asList(1, 2, 2, 3);
      * List<Integer> y = Arrays.asList(2, 2, 4);
      * List<Integer> z = Arrays.asList(1, 2, 5);
      * List<List<Integer>> numbers = Arrays.asList(x, y, z);
-     * List<Integer> result2 = intersection(numbers); // result will be [2]
+     * List<Integer> result2 = intersection(numbers);  // result will be [2]
      * }</pre>
      *
      * @param <T> the type of elements in the collections
@@ -4617,12 +4617,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * boolean[] a = {true, true, false, true};
      * boolean[] b = {true, false};
-     * boolean[] result = difference(a, b); // result will be {true, true}
+     * boolean[] result = difference(a, b);  // result will be {true, true}
      * // Only one 'true' and one 'false' are removed from a
      *
      * boolean[] c = {true, false, false};
      * boolean[] d = {false, false, false};
-     * boolean[] result2 = difference(c, d); // result will be {true}
+     * boolean[] result2 = difference(c, d);  // result will be {true}
      * // All occurrences of 'false' are removed from c
      * }</pre>
      *
@@ -4661,12 +4661,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * char[] a = {'a', 'b', 'b', 'c', 'd'};
      * char[] b = {'a', 'b', 'e'};
-     * char[] result = difference(a, b); // result will be {'b', 'c', 'd'}
+     * char[] result = difference(a, b);  // result will be {'b', 'c', 'd'}
      * // Only one 'a' and one 'b' are removed from a
      *
      * char[] c = {'a', 'b', 'b'};
      * char[] d = {'b', 'b', 'b'};
-     * char[] result2 = difference(c, d); // result will be {'a'}
+     * char[] result2 = difference(c, d);  // result will be {'a'}
      * // All occurrences of 'b' are removed from c
      * }</pre>
      *
@@ -4705,12 +4705,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * byte[] a = {1, 2, 2, 3, 4};
      * byte[] b = {2, 5};
-     * byte[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * byte[] result = difference(a, b);  // result will be {1, 2, 3, 4}
      * // Only one '2' is removed from a because b contains only one '2'
      *
      * byte[] c = {1, 2, 2};
      * byte[] d = {2, 2, 2};
-     * byte[] result2 = difference(c, d); // result will be {1}
+     * byte[] result2 = difference(c, d);  // result will be {1}
      * // All occurrences of '2' are removed from c because d contains at least as many
      * }</pre>
      *
@@ -4749,12 +4749,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * short[] a = {1, 2, 2, 3, 4};
      * short[] b = {2, 5};
-     * short[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * short[] result = difference(a, b);  // result will be {1, 2, 3, 4}
      * // Only one '2' is removed from a because b contains only one '2'
      *
      * short[] c = {1, 2, 2};
      * short[] d = {2, 2, 2};
-     * short[] result2 = difference(c, d); // result will be {1}
+     * short[] result2 = difference(c, d);  // result will be {1}
      * // All occurrences of '2' are removed from c because d contains at least as many
      * }</pre>
      *
@@ -4793,12 +4793,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * int[] a = {1, 2, 2, 3, 4};
      * int[] b = {2, 5};
-     * int[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * int[] result = difference(a, b);  // result will be {1, 2, 3, 4}
      * // Only one '2' is removed from a because b contains only one '2'
      *
      * int[] c = {1, 2, 2};
      * int[] d = {2, 2, 2};
-     * int[] result2 = difference(c, d); // result will be {1}
+     * int[] result2 = difference(c, d);  // result will be {1}
      * // All occurrences of '2' are removed from c because d contains at least as many
      * }</pre>
      *
@@ -4836,12 +4836,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * long[] a = {1, 2, 2, 3, 4};
      * long[] b = {2, 5};
-     * long[] result = difference(a, b); // result will be {1, 2, 3, 4}
+     * long[] result = difference(a, b);  // result will be {1, 2, 3, 4}
      * // Only one '2' is removed from a because b contains only one '2'
      *
      * long[] c = {1, 2, 2};
      * long[] d = {2, 2, 2};
-     * long[] result2 = difference(c, d); // result will be {1}
+     * long[] result2 = difference(c, d);  // result will be {1}
      * // All occurrences of '2' are removed from c because d contains at least as many
      * }</pre>
      *
@@ -4880,12 +4880,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
      * float[] b = {2.0f, 5.0f};
-     * float[] result = difference(a, b); // result will be {1.0f, 2.0f, 3.0f, 4.0f}
+     * float[] result = difference(a, b);  // result will be {1.0f, 2.0f, 3.0f, 4.0f}
      * // Only one '2.0f' is removed from a because b contains only one '2.0f'
      *
      * float[] c = {1.0f, 2.0f, 2.0f};
      * float[] d = {2.0f, 2.0f, 2.0f};
-     * float[] result2 = difference(c, d); // result will be {1.0f}
+     * float[] result2 = difference(c, d);  // result will be {1.0f}
      * // All occurrences of '2.0f' are removed from c because d contains at least as many
      * }</pre>
      *
@@ -5047,13 +5047,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * boolean[] a = {true, true, false};
      * boolean[] b = {true, false, false};
-     * boolean[] result = symmetricDifference(a, b); // result will be {true, false}
+     * boolean[] result = symmetricDifference(a, b);  // result will be {true, false}
      * // One 'true' remains because 'a' has one more occurrence than 'b'
      * // One 'false' remains because 'b' has one more occurrence than 'a'
      *
      * boolean[] c = {true, false};
      * boolean[] d = {true, true, false};
-     * boolean[] result2 = symmetricDifference(c, d); // result will be {true}
+     * boolean[] result2 = symmetricDifference(c, d);  // result will be {true}
      * // One 'true' appears in the result because 'd' has one more occurrence than 'c'
      * }</pre>
      *
@@ -13751,10 +13751,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int sum1 = N.sum('a', 'b', 'c');    // Returns 294 (97 + 98 + 99)
+     * int sum1 = N.sum('a', 'b', 'c');  // Returns 294 (97 + 98 + 99)
      *
      * char[] chars = {'A', 'B', 'C'};
-     * int sum2 = N.sum(chars);            // Returns 198 (65 + 66 + 67)
+     * int sum2 = N.sum(chars);  // Returns 198 (65 + 66 + 67)
      * }</pre>
      *
      * @param a the array or varargs of char values
@@ -13810,10 +13810,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int sum1 = N.sum((byte) 10, (byte) 20, (byte) 30);    // Returns 60
+     * int sum1 = N.sum((byte) 10, (byte) 20, (byte) 30);  // Returns 60
      *
      * byte[] numbers = {5, 10, 15};
-     * int sum2 = N.sum(numbers);                            // Returns 30
+     * int sum2 = N.sum(numbers);  // Returns 30
      * }</pre>
      *
      * @param a the array or varargs of byte values
@@ -13869,10 +13869,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int sum1 = N.sum((short) 100, (short) 200, (short) 300);    // Returns 600
+     * int sum1 = N.sum((short) 100, (short) 200, (short) 300);  // Returns 600
      *
      * short[] numbers = {50, 100, 150};
-     * int sum2 = N.sum(numbers);                                  // Returns 300
+     * int sum2 = N.sum(numbers);  // Returns 300
      * }</pre>
      *
      * @param a the array or varargs of short values
@@ -14036,10 +14036,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long sum1 = N.sum(1000L, 2000L, 3000L);    // Returns 6000L
+     * long sum1 = N.sum(1000L, 2000L, 3000L);  // Returns 6000L
      *
      * long[] numbers = {500L, 1000L, 1500L};
-     * long sum2 = N.sum(numbers);                // Returns 3000L
+     * long sum2 = N.sum(numbers);  // Returns 3000L
      * }</pre>
      *
      * @param a the array or varargs of long values
@@ -14096,10 +14096,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float sum1 = N.sum(10.5f, 20.3f, 30.7f);    // Returns 61.5f
+     * float sum1 = N.sum(10.5f, 20.3f, 30.7f);  // Returns 61.5f
      *
      * float[] numbers = {5.5f, 10.5f, 15.5f};
-     * float sum2 = N.sum(numbers);                // Returns 31.5f
+     * float sum2 = N.sum(numbers);  // Returns 31.5f
      * }</pre>
      *
      * @param a the array or varargs of float values
@@ -14216,10 +14216,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double sum1 = N.sum(10.5, 20.3, 30.7);    // Returns 61.5
+     * double sum1 = N.sum(10.5, 20.3, 30.7);  // Returns 61.5
      *
      * double[] numbers = {5.5, 10.5, 15.5};
-     * double sum2 = N.sum(numbers);             // Returns 31.5
+     * double sum2 = N.sum(numbers);  // Returns 31.5
      * }</pre>
      *
      * @param a the array or varargs of double values
@@ -14277,10 +14277,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average('A', 'B', 'C');    // Returns 66.0 ((65 + 66 + 67) / 3)
+     * double avg1 = N.average('A', 'B', 'C');  // Returns 66.0 ((65 + 66 + 67) / 3)
      *
      * char[] chars = {'a', 'b', 'c'};
-     * double avg2 = N.average(chars);            // Returns 98.0 ((97 + 98 + 99) / 3)
+     * double avg2 = N.average(chars);  // Returns 98.0 ((97 + 98 + 99) / 3)
      * }</pre>
      *
      * @param a the array or varargs of char values
@@ -14331,10 +14331,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average((byte) 10, (byte) 20, (byte) 30);    // Returns 20.0
+     * double avg1 = N.average((byte) 10, (byte) 20, (byte) 30);  // Returns 20.0
      *
      * byte[] numbers = {5, 10, 15};
-     * double avg2 = N.average(numbers);                            // Returns 10.0
+     * double avg2 = N.average(numbers);  // Returns 10.0
      * }</pre>
      *
      * @param a the array or varargs of byte values
@@ -14384,10 +14384,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average((short) 100, (short) 200, (short) 300);    // Returns 200.0
+     * double avg1 = N.average((short) 100, (short) 200, (short) 300);  // Returns 200.0
      *
      * short[] numbers = {50, 100, 150};
-     * double avg2 = N.average(numbers);                                  // Returns 100.0
+     * double avg2 = N.average(numbers);  // Returns 100.0
      * }</pre>
      *
      * @param a the array or varargs of short values
@@ -14437,10 +14437,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average(100, 200, 300);    // Returns 200.0
+     * double avg1 = N.average(100, 200, 300);  // Returns 200.0
      *
      * int[] numbers = {50, 100, 150};
-     * double avg2 = N.average(numbers);          // Returns 100.0
+     * double avg2 = N.average(numbers);  // Returns 100.0
      * }</pre>
      *
      * @param a the array or varargs of int values
@@ -14496,10 +14496,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average(1000L, 2000L, 3000L);    // Returns 2000.0
+     * double avg1 = N.average(1000L, 2000L, 3000L);  // Returns 2000.0
      *
      * long[] numbers = {500L, 1000L, 1500L};
-     * double avg2 = N.average(numbers);                // Returns 1000.0
+     * double avg2 = N.average(numbers);  // Returns 1000.0
      * }</pre>
      *
      * @param a the array or varargs of long values
@@ -14550,10 +14550,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average(10.5f, 20.3f, 30.7f);    // Returns approximately 20.5
+     * double avg1 = N.average(10.5f, 20.3f, 30.7f);  // Returns approximately 20.5
      *
      * float[] numbers = {5.5f, 10.5f, 15.5f};
-     * double avg2 = N.average(numbers);                // Returns approximately 10.5
+     * double avg2 = N.average(numbers);  // Returns approximately 10.5
      * }</pre>
      *
      * @param a the array or varargs of float values
@@ -14611,10 +14611,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double avg1 = N.average(10.5, 20.3, 30.7);    // Returns approximately 20.5
+     * double avg1 = N.average(10.5, 20.3, 30.7);  // Returns approximately 20.5
      *
      * double[] numbers = {5.5, 10.5, 15.5};
-     * double avg2 = N.average(numbers);             // Returns approximately 10.5
+     * double avg2 = N.average(numbers);  // Returns approximately 10.5
      * }</pre>
      *
      * @param a the array or varargs of double values
@@ -15834,9 +15834,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char smaller = N.min('a', 'z');      // Returns 'a'
-     * char digit = N.min('5', '2');        // Returns '2'
-     * char same = N.min('x', 'x');         // Returns 'x'
+     * char smaller = N.min('a', 'z');   // Returns 'a'
+     * char digit = N.min('5', '2');     // Returns '2'
+     * char same = N.min('x', 'x');      // Returns 'x'
      * }</pre>
      *
      * @param a the first char value
@@ -15897,9 +15897,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int smaller = N.min(10, 20);        // Returns 10
-     * int negative = N.min(-5, 3);        // Returns -5
-     * int same = N.min(7, 7);             // Returns 7
+     * int smaller = N.min(10, 20);   // Returns 10
+     * int negative = N.min(-5, 3);   // Returns -5
+     * int same = N.min(7, 7);        // Returns 7
      * }</pre>
      *
      * @param a the first int value
@@ -15919,9 +15919,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long smaller = N.min(1000L, 2000L);       // Returns 1000L
-     * long negative = N.min(-500L, 300L);       // Returns -500L
-     * long same = N.min(999L, 999L);            // Returns 999L
+     * long smaller = N.min(1000L, 2000L);   // Returns 1000L
+     * long negative = N.min(-500L, 300L);   // Returns -500L
+     * long same = N.min(999L, 999L);        // Returns 999L
      * }</pre>
      *
      * @param a the first long value
@@ -15943,9 +15943,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float smaller = N.min(1.5f, 2.3f);           // Returns 1.5f
-     * float nan = N.min(1.0f, Float.NaN);          // Returns NaN
-     * float negZero = N.min(0.0f, -0.0f);          // Returns -0.0f
+     * float smaller = N.min(1.5f, 2.3f);    // Returns 1.5f
+     * float nan = N.min(1.0f, Float.NaN);   // Returns NaN
+     * float negZero = N.min(0.0f, -0.0f);   // Returns -0.0f
      * }</pre>
      *
      * @param a the first float value
@@ -15967,9 +15967,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double smaller = N.min(1.5, 2.3);           // Returns 1.5
-     * double nan = N.min(1.0, Double.NaN);        // Returns NaN
-     * double negZero = N.min(0.0, -0.0);          // Returns -0.0
+     * double smaller = N.min(1.5, 2.3);      // Returns 1.5
+     * double nan = N.min(1.0, Double.NaN);   // Returns NaN
+     * double negZero = N.min(0.0, -0.0);     // Returns -0.0
      * }</pre>
      *
      * @param a the first double value
@@ -15990,9 +15990,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String smaller = N.min("apple", "banana");       // Returns "apple"
-     * Integer min = N.min(10, 20);                     // Returns 10
-     * Integer withNull = N.min(5, null);               // Returns 5 (null is treated as maximum)
+     * String smaller = N.min("apple", "banana");   // Returns "apple"
+     * Integer min = N.min(10, 20);                 // Returns 10
+     * Integer withNull = N.min(5, null);           // Returns 5 (null is treated as maximum)
      * }</pre>
      *
      * @param <T> the type of the comparable values
@@ -16042,9 +16042,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char smallest = N.min('z', 'a', 'm');        // Returns 'a'
-     * char digits = N.min('5', '2', '9');          // Returns '2'
-     * char same = N.min('x', 'x', 'x');            // Returns 'x'
+     * char smallest = N.min('z', 'a', 'm');   // Returns 'a'
+     * char digits = N.min('5', '2', '9');     // Returns '2'
+     * char same = N.min('x', 'x', 'x');       // Returns 'x'
      * }</pre>
      *
      * @param a the first char value
@@ -16090,9 +16090,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short smallest = N.min((short) 150, (short) 50, (short) 100);        // Returns 50
-     * short negative = N.min((short) -50, (short) -200, (short) -100);     // Returns -200
-     * short same = N.min((short) 75, (short) 75, (short) 75);              // Returns 75
+     * short smallest = N.min((short) 150, (short) 50, (short) 100);      // Returns 50
+     * short negative = N.min((short) -50, (short) -200, (short) -100);   // Returns -200
+     * short same = N.min((short) 75, (short) 75, (short) 75);            // Returns 75
      * }</pre>
      *
      * @param a the first short value
@@ -16114,9 +16114,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int smallest = N.min(15, 5, 10);        // Returns 5
-     * int negative = N.min(-5, -20, -10);     // Returns -20
-     * int same = N.min(7, 7, 7);              // Returns 7
+     * int smallest = N.min(15, 5, 10);      // Returns 5
+     * int negative = N.min(-5, -20, -10);   // Returns -20
+     * int same = N.min(7, 7, 7);            // Returns 7
      * }</pre>
      *
      * @param a the first int value
@@ -16138,9 +16138,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long smallest = N.min(1500L, 500L, 1000L);        // Returns 500L
-     * long negative = N.min(-500L, -2000L, -1000L);     // Returns -2000L
-     * long same = N.min(750L, 750L, 750L);              // Returns 750L
+     * long smallest = N.min(1500L, 500L, 1000L);      // Returns 500L
+     * long negative = N.min(-500L, -2000L, -1000L);   // Returns -2000L
+     * long same = N.min(750L, 750L, 750L);            // Returns 750L
      * }</pre>
      *
      * @param a the first long value
@@ -16164,10 +16164,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float smallest = N.min(2.5f, 1.0f, 2.0f);       // Returns 1.0f
-     * float negative = N.min(-1.0f, -2.0f, -0.5f);    // Returns -2.0f
-     * float nan = N.min(1.0f, Float.NaN, 2.0f);       // Returns NaN
-     * float zero = N.min(0.0f, -0.0f, 1.0f);          // Returns -0.0f
+     * float smallest = N.min(2.5f, 1.0f, 2.0f);      // Returns 1.0f
+     * float negative = N.min(-1.0f, -2.0f, -0.5f);   // Returns -2.0f
+     * float nan = N.min(1.0f, Float.NaN, 2.0f);      // Returns NaN
+     * float zero = N.min(0.0f, -0.0f, 1.0f);         // Returns -0.0f
      * }</pre>
      *
      * @param a the first float value
@@ -16190,10 +16190,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double smallest = N.min(2.5, 1.0, 2.0);       // Returns 1.0
-     * double negative = N.min(-1.0, -2.0, -0.5);    // Returns -2.0
-     * double nan = N.min(1.0, Double.NaN, 2.0);     // Returns NaN
-     * double zero = N.min(0.0, -0.0, 1.0);          // Returns -0.0
+     * double smallest = N.min(2.5, 1.0, 2.0);      // Returns 1.0
+     * double negative = N.min(-1.0, -2.0, -0.5);   // Returns -2.0
+     * double nan = N.min(1.0, Double.NaN, 2.0);    // Returns NaN
+     * double zero = N.min(0.0, -0.0, 1.0);         // Returns -0.0
      * }</pre>
      *
      * @param a the first double value
@@ -16215,9 +16215,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String smallest = N.min("mango", "apple", "zebra");     // Returns "apple"
-     * Integer min = N.min(20, 10, 15);                        // Returns 10
-     * Integer withNull = N.min(5, null, 10);                  // Returns 5 (null is treated as maximum)
+     * String smallest = N.min("mango", "apple", "zebra");   // Returns "apple"
+     * Integer min = N.min(20, 10, 15);                      // Returns 10
+     * Integer withNull = N.min(5, null, 10);                // Returns 5 (null is treated as maximum)
      * }</pre>
      *
      * @param <T> the type of the comparable values
@@ -16267,12 +16267,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char min1 = N.min('z', 'a', 'm', 'b');    // Returns 'a'
+     * char min1 = N.min('z', 'a', 'm', 'b');  // Returns 'a'
      *
      * char[] letters = {'x', 'y', 'a', 'z'};
-     * char min2 = N.min(letters);               // Returns 'a'
+     * char min2 = N.min(letters);  // Returns 'a'
      *
-     * char single = N.min('q');                 // Returns 'q'
+     * char single = N.min('q');  // Returns 'q'
      * }</pre>
      *
      * @param a the array or varargs of char values, must not be {@code null} or empty
@@ -16401,12 +16401,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int min1 = N.min(5, 2, 8, 1, 9);      // Returns 1
+     * int min1 = N.min(5, 2, 8, 1, 9);  // Returns 1
      *
      * int[] numbers = {10, 20, 5, 30};
-     * int min2 = N.min(numbers);            // Returns 5
+     * int min2 = N.min(numbers);  // Returns 5
      *
-     * int single = N.min(42);               // Returns 42
+     * int single = N.min(42);  // Returns 42
      * }</pre>
      *
      * @param a the array or varargs of int values, must not be {@code null} or empty
@@ -16495,10 +16495,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float min1 = N.min(1.5f, 2.3f, 0.5f);     // Returns 0.5f
+     * float min1 = N.min(1.5f, 2.3f, 0.5f);  // Returns 0.5f
      *
      * float[] values = {10.5f, 20.3f, 5.1f};
-     * float min2 = N.min(values);               // Returns 5.1f
+     * float min2 = N.min(values);  // Returns 5.1f
      *
      * float withNaN = N.min(1.0f, Float.NaN, 2.0f);  // Returns 1.0f (NaN is skipped)
      * }</pre>
@@ -16555,10 +16555,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double min1 = N.min(1.5, 2.3, 0.5);       // Returns 0.5
+     * double min1 = N.min(1.5, 2.3, 0.5);  // Returns 0.5
      *
      * double[] values = {10.5, 20.3, 5.1};
-     * double min2 = N.min(values);              // Returns 5.1
+     * double min2 = N.min(values);  // Returns 5.1
      *
      * double withNaN = N.min(1.0, Double.NaN, 2.0);  // Returns 1.0 (NaN is skipped)
      * }</pre>
@@ -16615,10 +16615,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"zebra", "apple", "mango"};
-     * String min = N.min(words);           // Returns "apple"
+     * String min = N.min(words);  // Returns "apple"
      *
      * Integer[] nums = {5, null, 2, 8};
-     * Integer minNum = N.min(nums);        // Returns 2 (null is treated as maximum)
+     * Integer minNum = N.min(nums);  // Returns 2 (null is treated as maximum)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -17625,8 +17625,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char larger = N.max('a', 'z');        // Returns 'z'
-     * char same = N.max('m', 'm');          // Returns 'm'
+     * char larger = N.max('a', 'z');   // Returns 'z'
+     * char same = N.max('m', 'm');     // Returns 'm'
      * }</pre>
      *
      * @param a the first char value
@@ -17645,9 +17645,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte larger = N.max((byte) 10, (byte) 20);        // Returns 20
-     * byte negative = N.max((byte) -5, (byte) 3);       // Returns 3
-     * byte same = N.max((byte) 7, (byte) 7);            // Returns 7
+     * byte larger = N.max((byte) 10, (byte) 20);    // Returns 20
+     * byte negative = N.max((byte) -5, (byte) 3);   // Returns 3
+     * byte same = N.max((byte) 7, (byte) 7);        // Returns 7
      * }</pre>
      *
      * @param a the first byte value
@@ -17666,9 +17666,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short larger = N.max((short) 100, (short) 200);        // Returns 200
-     * short negative = N.max((short) -50, (short) 30);       // Returns 30
-     * short same = N.max((short) 75, (short) 75);            // Returns 75
+     * short larger = N.max((short) 100, (short) 200);    // Returns 200
+     * short negative = N.max((short) -50, (short) 30);   // Returns 30
+     * short same = N.max((short) 75, (short) 75);        // Returns 75
      * }</pre>
      *
      * @param a the first short value
@@ -17687,9 +17687,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int larger = N.max(10, 20);        // Returns 20
-     * int negative = N.max(-5, 3);       // Returns 3
-     * int same = N.max(7, 7);            // Returns 7
+     * int larger = N.max(10, 20);    // Returns 20
+     * int negative = N.max(-5, 3);   // Returns 3
+     * int same = N.max(7, 7);        // Returns 7
      * }</pre>
      *
      * @param a the first int value
@@ -17709,9 +17709,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long larger = N.max(1000L, 2000L);        // Returns 2000L
-     * long negative = N.max(-500L, 300L);       // Returns 300L
-     * long same = N.max(750L, 750L);            // Returns 750L
+     * long larger = N.max(1000L, 2000L);    // Returns 2000L
+     * long negative = N.max(-500L, 300L);   // Returns 300L
+     * long same = N.max(750L, 750L);        // Returns 750L
      * }</pre>
      *
      * @param a the first long value
@@ -17733,9 +17733,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float larger = N.max(1.5f, 2.3f);            // Returns 2.3f
-     * float nan = N.max(1.0f, Float.NaN);          // Returns NaN
-     * float posZero = N.max(0.0f, -0.0f);          // Returns 0.0f
+     * float larger = N.max(1.5f, 2.3f);     // Returns 2.3f
+     * float nan = N.max(1.0f, Float.NaN);   // Returns NaN
+     * float posZero = N.max(0.0f, -0.0f);   // Returns 0.0f
      * }</pre>
      *
      * @param a the first float value
@@ -17757,9 +17757,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double larger = N.max(1.5, 2.3);            // Returns 2.3
-     * double nan = N.max(1.0, Double.NaN);        // Returns NaN
-     * double posZero = N.max(0.0, -0.0);          // Returns 0.0
+     * double larger = N.max(1.5, 2.3);       // Returns 2.3
+     * double nan = N.max(1.0, Double.NaN);   // Returns NaN
+     * double posZero = N.max(0.0, -0.0);     // Returns 0.0
      * }</pre>
      *
      * @param a the first double value
@@ -17780,9 +17780,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String larger = N.max("apple", "banana");        // Returns "banana"
-     * Integer max = N.max(10, 20);                     // Returns 20
-     * Integer withNull = N.max(5, null);               // Returns 5 (null is treated as minimum)
+     * String larger = N.max("apple", "banana");   // Returns "banana"
+     * Integer max = N.max(10, 20);                // Returns 20
+     * Integer withNull = N.max(5, null);          // Returns 5 (null is treated as minimum)
      * }</pre>
      *
      * @param <T> the type of the comparable values
@@ -17832,8 +17832,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char largest = N.max('a', 'm', 'z');      // Returns 'z'
-     * char same = N.max('b', 'b', 'b');         // Returns 'b'
+     * char largest = N.max('a', 'm', 'z');   // Returns 'z'
+     * char same = N.max('b', 'b', 'b');      // Returns 'b'
      * }</pre>
      *
      * @param a the first char value
@@ -17855,8 +17855,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte largest = N.max((byte) 5, (byte) 15, (byte) 10);      // Returns 15
-     * byte negative = N.max((byte) -10, (byte) -5, (byte) -20);  // Returns -5
+     * byte largest = N.max((byte) 5, (byte) 15, (byte) 10);       // Returns 15
+     * byte negative = N.max((byte) -10, (byte) -5, (byte) -20);   // Returns -5
      * }</pre>
      *
      * @param a the first byte value
@@ -17878,8 +17878,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short largest = N.max((short) 50, (short) 150, (short) 100);        // Returns 150
-     * short negative = N.max((short) -100, (short) -50, (short) -200);    // Returns -50
+     * short largest = N.max((short) 50, (short) 150, (short) 100);       // Returns 150
+     * short negative = N.max((short) -100, (short) -50, (short) -200);   // Returns -50
      * }</pre>
      *
      * @param a the first short value
@@ -17901,9 +17901,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int largest = N.max(5, 15, 10);        // Returns 15
-     * int negative = N.max(-10, -5, -20);    // Returns -5
-     * int same = N.max(7, 7, 7);             // Returns 7
+     * int largest = N.max(5, 15, 10);       // Returns 15
+     * int negative = N.max(-10, -5, -20);   // Returns -5
+     * int same = N.max(7, 7, 7);            // Returns 7
      * }</pre>
      *
      * @param a the first int value
@@ -17925,9 +17925,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long largest = N.max(500L, 1500L, 1000L);        // Returns 1500L
-     * long negative = N.max(-1000L, -500L, -2000L);    // Returns -500L
-     * long same = N.max(750L, 750L, 750L);             // Returns 750L
+     * long largest = N.max(500L, 1500L, 1000L);       // Returns 1500L
+     * long negative = N.max(-1000L, -500L, -2000L);   // Returns -500L
+     * long same = N.max(750L, 750L, 750L);            // Returns 750L
      * }</pre>
      *
      * @param a the first long value
@@ -17996,9 +17996,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String largest = N.max("apple", "zebra", "mango");        // Returns "zebra"
-     * Integer max = N.max(10, 20, 15);                          // Returns 20
-     * Integer withNull = N.max(5, null, 10);                    // Returns 10 (null is treated as minimum)
+     * String largest = N.max("apple", "zebra", "mango");   // Returns "zebra"
+     * Integer max = N.max(10, 20, 15);                     // Returns 20
+     * Integer withNull = N.max(5, null, 10);               // Returns 10 (null is treated as minimum)
      * }</pre>
      *
      * @param <T> the type of the comparable values
@@ -18048,12 +18048,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char max1 = N.max('a', 'm', 'z', 'b');    // Returns 'z'
+     * char max1 = N.max('a', 'm', 'z', 'b');  // Returns 'z'
      *
      * char[] chars = {'x', 'a', 'p', 'z'};
-     * char max2 = N.max(chars);                 // Returns 'z'
+     * char max2 = N.max(chars);  // Returns 'z'
      *
-     * char single = N.max('q');                 // Returns 'q'
+     * char single = N.max('q');  // Returns 'q'
      * }</pre>
      *
      * @param a the array or varargs of char values, must not be {@code null} or empty
@@ -18106,12 +18106,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte max1 = N.max((byte) 5, (byte) 2, (byte) 8, (byte) 1, (byte) 9);      // Returns 9
+     * byte max1 = N.max((byte) 5, (byte) 2, (byte) 8, (byte) 1, (byte) 9);  // Returns 9
      *
      * byte[] numbers = {10, 20, 5, 30};
-     * byte max2 = N.max(numbers);            // Returns 30
+     * byte max2 = N.max(numbers);  // Returns 30
      *
-     * byte single = N.max((byte) 42);        // Returns 42
+     * byte single = N.max((byte) 42);  // Returns 42
      * }</pre>
      *
      * @param a the array or varargs of byte values, must not be {@code null} or empty
@@ -18164,12 +18164,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short max1 = N.max((short) 50, (short) 20, (short) 80, (short) 10);      // Returns 80
+     * short max1 = N.max((short) 50, (short) 20, (short) 80, (short) 10);  // Returns 80
      *
      * short[] numbers = {100, 200, 50, 300};
-     * short max2 = N.max(numbers);            // Returns 300
+     * short max2 = N.max(numbers);  // Returns 300
      *
-     * short single = N.max((short) 42);       // Returns 42
+     * short single = N.max((short) 42);  // Returns 42
      * }</pre>
      *
      * @param a the array or varargs of short values, must not be {@code null} or empty
@@ -18222,12 +18222,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int max1 = N.max(5, 2, 8, 1, 9);      // Returns 9
+     * int max1 = N.max(5, 2, 8, 1, 9);  // Returns 9
      *
      * int[] numbers = {10, 20, 5, 30};
-     * int max2 = N.max(numbers);            // Returns 30
+     * int max2 = N.max(numbers);  // Returns 30
      *
-     * int single = N.max(42);               // Returns 42
+     * int single = N.max(42);  // Returns 42
      * }</pre>
      *
      * @param a the array or varargs of int values, must not be {@code null} or empty
@@ -18280,12 +18280,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long max1 = N.max(500L, 200L, 800L, 100L);      // Returns 800L
+     * long max1 = N.max(500L, 200L, 800L, 100L);  // Returns 800L
      *
      * long[] numbers = {1000L, 2000L, 500L, 3000L};
-     * long max2 = N.max(numbers);            // Returns 3000L
+     * long max2 = N.max(numbers);  // Returns 3000L
      *
-     * long single = N.max(4200L);            // Returns 4200L
+     * long single = N.max(4200L);  // Returns 4200L
      * }</pre>
      *
      * @param a the array or varargs of long values, must not be {@code null} or empty
@@ -18339,12 +18339,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float max1 = N.max(1.5f, 2.8f, 0.5f, 3.2f);      // Returns 3.2f
+     * float max1 = N.max(1.5f, 2.8f, 0.5f, 3.2f);  // Returns 3.2f
      *
      * float[] numbers = {1.0f, 2.0f, 0.5f, 3.0f};
-     * float max2 = N.max(numbers);            // Returns 3.0f
+     * float max2 = N.max(numbers);  // Returns 3.0f
      *
-     * float single = N.max(4.2f);             // Returns 4.2f
+     * float single = N.max(4.2f);  // Returns 4.2f
      * }</pre>
      *
      * @param a the array or varargs of float values, must not be {@code null} or empty
@@ -18406,12 +18406,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double max1 = N.max(1.5, 2.8, 0.5, 3.2);      // Returns 3.2
+     * double max1 = N.max(1.5, 2.8, 0.5, 3.2);  // Returns 3.2
      *
      * double[] numbers = {1.0, 2.0, 0.5, 3.0};
-     * double max2 = N.max(numbers);            // Returns 3.0
+     * double max2 = N.max(numbers);  // Returns 3.0
      *
-     * double single = N.max(4.2);              // Returns 4.2
+     * double single = N.max(4.2);  // Returns 4.2
      * }</pre>
      *
      * @param a the array or varargs of double values, must not be {@code null} or empty
@@ -19364,8 +19364,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char median1 = N.median('a', 'c', 'b');  // Returns 'b'
-     * char median2 = N.median('x', 'y', 'z');  // Returns 'y'
+     * char median1 = N.median('a', 'c', 'b');   // Returns 'b'
+     * char median2 = N.median('x', 'y', 'z');   // Returns 'y'
      * }</pre>
      *
      * @param a the first char value
@@ -19392,8 +19392,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte median1 = N.median((byte) 10, (byte) 30, (byte) 20);      // Returns 20
-     * byte median2 = N.median((byte) 5, (byte) 1, (byte) 3);         // Returns 3
+     * byte median1 = N.median((byte) 10, (byte) 30, (byte) 20);   // Returns 20
+     * byte median2 = N.median((byte) 5, (byte) 1, (byte) 3);      // Returns 3
      * }</pre>
      *
      * @param a the first byte value
@@ -19420,8 +19420,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short median1 = N.median((short) 100, (short) 300, (short) 200);      // Returns 200
-     * short median2 = N.median((short) 50, (short) 10, (short) 30);         // Returns 30
+     * short median1 = N.median((short) 100, (short) 300, (short) 200);   // Returns 200
+     * short median2 = N.median((short) 50, (short) 10, (short) 30);      // Returns 30
      * }</pre>
      *
      * @param a the first short value
@@ -19448,9 +19448,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int median1 = N.median(10, 30, 20);      // Returns 20
-     * int median2 = N.median(5, 1, 3);         // Returns 3
-     * int median3 = N.median(15, 15, 15);      // Returns 15
+     * int median1 = N.median(10, 30, 20);   // Returns 20
+     * int median2 = N.median(5, 1, 3);      // Returns 3
+     * int median3 = N.median(15, 15, 15);   // Returns 15
      * }</pre>
      *
      * @param a the first int value
@@ -19477,8 +19477,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long median1 = N.median(1000L, 3000L, 2000L);      // Returns 2000L
-     * long median2 = N.median(500L, 100L, 300L);         // Returns 300L
+     * long median1 = N.median(1000L, 3000L, 2000L);   // Returns 2000L
+     * long median2 = N.median(500L, 100L, 300L);      // Returns 300L
      * }</pre>
      *
      * @param a the first long value
@@ -19506,8 +19506,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float median1 = N.median(1.5f, 3.5f, 2.5f);      // Returns 2.5f
-     * float median2 = N.median(0.5f, 0.1f, 0.3f);      // Returns 0.3f
+     * float median1 = N.median(1.5f, 3.5f, 2.5f);   // Returns 2.5f
+     * float median2 = N.median(0.5f, 0.1f, 0.3f);   // Returns 0.3f
      * }</pre>
      *
      * @param a the first float value
@@ -19539,8 +19539,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double median1 = N.median(1.5, 3.5, 2.5);      // Returns 2.5
-     * double median2 = N.median(0.5, 0.1, 0.3);      // Returns 0.3
+     * double median1 = N.median(1.5, 3.5, 2.5);   // Returns 2.5
+     * double median2 = N.median(0.5, 0.1, 0.3);   // Returns 0.3
      * }</pre>
      *
      * @param a the first double value
@@ -19572,8 +19572,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String median1 = N.median("apple", "zebra", "mango");      // Returns "mango"
-     * Integer median2 = N.median(10, 30, 20);                    // Returns 20
+     * String median1 = N.median("apple", "zebra", "mango");   // Returns "mango"
+     * Integer median2 = N.median(10, 30, 20);                 // Returns 20
      * }</pre>
      *
      * @param <T> the type of comparable values
@@ -19640,10 +19640,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char median1 = N.median('a', 'm', 'z', 'b');     // Returns 'b' or 'm'
+     * char median1 = N.median('a', 'm', 'z', 'b');  // Returns 'b' or 'm'
      *
      * char[] chars = {'x', 'a', 'p', 'z', 'm'};
-     * char median2 = N.median(chars);                  // Returns 'p'
+     * char median2 = N.median(chars);  // Returns 'p'
      * }</pre>
      *
      * @param a the array or varargs of char values, must not be {@code null} or empty
@@ -19706,10 +19706,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte median1 = N.median((byte) 10, (byte) 30, (byte) 20);     // Returns 20
+     * byte median1 = N.median((byte) 10, (byte) 30, (byte) 20);  // Returns 20
      *
      * byte[] numbers = {5, 30, 15, 8, 20};
-     * byte median2 = N.median(numbers);                             // Returns 15
+     * byte median2 = N.median(numbers);  // Returns 15
      * }</pre>
      *
      * @param a the array or varargs of byte values, must not be {@code null} or empty
@@ -19772,10 +19772,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short median1 = N.median((short) 100, (short) 300, (short) 200);     // Returns 200
+     * short median1 = N.median((short) 100, (short) 300, (short) 200);  // Returns 200
      *
      * short[] numbers = {50, 300, 150, 80, 200};
-     * short median2 = N.median(numbers);                                   // Returns 150
+     * short median2 = N.median(numbers);  // Returns 150
      * }</pre>
      *
      * @param a the array or varargs of short values, must not be {@code null} or empty
@@ -19838,11 +19838,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int median1 = N.median(10, 30, 20);     // Returns 20
-     * int median2 = N.median(1, 2);           // Returns 1
+     * int median1 = N.median(10, 30, 20);   // Returns 20
+     * int median2 = N.median(1, 2);         // Returns 1
      *
      * int[] numbers = {5, 30, 15, 8, 20};
-     * int median3 = N.median(numbers);        // Returns 15
+     * int median3 = N.median(numbers);  // Returns 15
      * }</pre>
      *
      * @param a the array or varargs of int values, must not be {@code null} or empty
@@ -19905,10 +19905,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long median1 = N.median(1000L, 3000L, 2000L);     // Returns 2000L
+     * long median1 = N.median(1000L, 3000L, 2000L);  // Returns 2000L
      *
      * long[] numbers = {500L, 3000L, 1500L, 800L, 2000L};
-     * long median2 = N.median(numbers);                 // Returns 1500L
+     * long median2 = N.median(numbers);  // Returns 1500L
      * }</pre>
      *
      * @param a the array or varargs of long values, must not be {@code null} or empty
@@ -19971,10 +19971,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float median1 = N.median(1.5f, 3.5f, 2.5f);     // Returns 2.5f
+     * float median1 = N.median(1.5f, 3.5f, 2.5f);  // Returns 2.5f
      *
      * float[] numbers = {0.5f, 3.0f, 1.5f, 0.8f, 2.0f};
-     * float median2 = N.median(numbers);              // Returns 1.5f
+     * float median2 = N.median(numbers);  // Returns 1.5f
      * }</pre>
      *
      * @param a the array or varargs of float values, must not be {@code null} or empty
@@ -20037,10 +20037,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double median1 = N.median(1.5, 3.5, 2.5);     // Returns 2.5
+     * double median1 = N.median(1.5, 3.5, 2.5);  // Returns 2.5
      *
      * double[] numbers = {0.5, 3.0, 1.5, 0.8, 2.0};
-     * double median2 = N.median(numbers);           // Returns 1.5
+     * double median2 = N.median(numbers);  // Returns 1.5
      * }</pre>
      *
      * @param a the array or varargs of double values, must not be {@code null} or empty
@@ -22514,12 +22514,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] grades = {'A', 'A', 'B', 'B', 'C', 'C', 'D', 'F'};
-     * Arrays.sort(grades); // Ensure sorted
+     * Arrays.sort(grades);  // Ensure sorted
      * Map<Percentage, Character> percentiles = N.percentiles(grades);
      *
      * // Access specific percentiles
-     * char median = percentiles.get(Percentage.P50);  // 'B' or 'C'
-     * char p90 = percentiles.get(Percentage.P90);     // High grade threshold
+     * char median = percentiles.get(Percentage.P50);   // 'B' or 'C'
+     * char p90 = percentiles.get(Percentage.P90);      // High grade threshold
      * }</pre>
      *
      * @param sortedArray the sorted array of characters for which to calculate the percentiles
@@ -22552,7 +22552,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] scores = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
-     * Arrays.sort(scores); // Ensure sorted
+     * Arrays.sort(scores);  // Ensure sorted
      * Map<Percentage, Byte> percentiles = N.percentiles(scores);
      *
      * // Find percentile thresholds
@@ -22737,9 +22737,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Float> percentiles = N.percentiles(prices);
      *
      * // Analyze price distribution
-     * float medianPrice = percentiles.get(Percentage.P50);    // Middle price point
-     * float p75 = percentiles.get(Percentage.P75);            // Upper quartile
-     * float p25 = percentiles.get(Percentage.P25);            // Lower quartile
+     * float medianPrice = percentiles.get(Percentage.P50);   // Middle price point
+     * float p75 = percentiles.get(Percentage.P75);           // Upper quartile
+     * float p25 = percentiles.get(Percentage.P25);           // Lower quartile
      * }</pre>
      *
      * @param sortedArray the sorted array of floats for which to calculate the percentiles
@@ -22780,9 +22780,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Double> percentiles = N.percentiles(measurements);
      *
      * // Statistical analysis
-     * double median = percentiles.get(Percentage.P50);       // 50th percentile (median)
-     * double p95 = percentiles.get(Percentage.P95);          // 95th percentile
-     * double p99_9 = percentiles.get(Percentage.P99_9);      // 99.9th percentile
+     * double median = percentiles.get(Percentage.P50);    // 50th percentile (median)
+     * double p95 = percentiles.get(Percentage.P95);       // 95th percentile
+     * double p99_9 = percentiles.get(Percentage.P99_9);   // 99.9th percentile
      *
      * System.out.printf("Median: %.2f, P95: %.2f%n", median, p95);
      * }</pre>
@@ -22823,8 +22823,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, String> percentiles = N.percentiles(names);
      *
      * // Find percentile values in sorted data
-     * String median = percentiles.get(Percentage.P50);    // Middle name alphabetically
-     * String p75 = percentiles.get(Percentage.P75);       // Upper quartile
+     * String median = percentiles.get(Percentage.P50);   // Middle name alphabetically
+     * String p75 = percentiles.get(Percentage.P75);      // Upper quartile
      *
      * // With custom objects
      * Person[] people = {new Person("Alice", 25), new Person("Bob", 30)};
@@ -22878,7 +22878,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int p10 = percentiles.get(Percentage.P10);         // 70 (10th percentile)
      *
      * // Useful for SLA calculations
-     * List<Double> latencies = getResponseLatencies(); // Pre-sorted
+     * List<Double> latencies = getResponseLatencies();   // Pre-sorted
      * Map<Percentage, Double> latencyPercentiles = N.percentiles(latencies);
      * double sla = latencyPercentiles.get(Percentage.P99);  // 99th percentile for SLA
      * }</pre>
@@ -35056,7 +35056,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * ContinuableFuture<Void> future = N.asyncExecute(() -> processData());
      * // Command runs asynchronously, can continue with other work
-     * future.get(); // Wait for completion if needed
+     * future.get();  // Wait for completion if needed
      * }</pre>
      *
      * @param command the command to execute asynchronously
@@ -35122,7 +35122,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * ContinuableFuture<String> future = N.asyncExecute(() -> fetchData());
      * // Command runs asynchronously, can continue with other work
-     * String result = future.get(); // Wait for and retrieve the result
+     * String result = future.get();  // Wait for and retrieve the result
      * }</pre>
      *
      * @param <R> the type of result returned by the command
@@ -36873,7 +36873,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.runUninterruptibly(() -> {
-     *     Thread.sleep(1000); // Must complete even if interrupted
+     *     Thread.sleep(1000);  // Must complete even if interrupted
      * });
      * // Thread interrupted status is restored after completion
      * }</pre>
@@ -37532,7 +37532,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sleep(1000); // Sleeps for 1 second
+     * N.sleep(1000);  // Sleeps for 1 second
      * // Throws RuntimeException if interrupted
      * }</pre>
      *
@@ -37559,8 +37559,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sleep(5, TimeUnit.SECONDS); // Sleeps for 5 seconds
-     * N.sleep(500, TimeUnit.MILLISECONDS); // Sleeps for 500 milliseconds
+     * N.sleep(5, TimeUnit.SECONDS);          // Sleeps for 5 seconds
+     * N.sleep(500, TimeUnit.MILLISECONDS);   // Sleeps for 500 milliseconds
      * // Throws RuntimeException if interrupted
      * }</pre>
      *
@@ -37602,7 +37602,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Rate limiting: ensure minimum delay between operations
-     * N.sleepUninterruptibly(1000); // Always sleeps for 1 second
+     * N.sleepUninterruptibly(1000);  // Always sleeps for 1 second
      * 
      * // Retry with fixed delay - won't be shortened by interrupts
      * for (int attempt = 0; attempt < maxRetries; attempt++) {
@@ -37676,7 +37676,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sleepUninterruptibly(500, TimeUnit.MICROSECONDS);
      * 
      * // Rate limiting with different time units
-     * N.sleepUninterruptibly(2, TimeUnit.MINUTES); // 2 minute delay
+     * N.sleepUninterruptibly(2, TimeUnit.MINUTES);  // 2 minute delay
      * }</pre>
      *
      * @param timeout the time to sleep. If zero or negative, the method returns immediately without sleeping
@@ -37731,14 +37731,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Expensive computation deferred until needed
      * Supplier<List<String>> expensiveData = N.lazyInit(() -> {
      *     System.out.println("Computing expensive data...");
-     *     return loadDataFromDatabase(); // Only called once
+     *     return loadDataFromDatabase();  // Only called once
      * });
      * 
      * // First call triggers computation
-     * List<String> data1 = expensiveData.get(); // Prints "Computing expensive data..."
+     * List<String> data1 = expensiveData.get();  // Prints "Computing expensive data..."
      * 
      * // Subsequent calls return cached result
-     * List<String> data2 = expensiveData.get(); // No computation, returns cached value
+     * List<String> data2 = expensiveData.get();  // No computation, returns cached value
      * 
      * // Resource initialization
      * Supplier<DatabaseConnection> connection = N.lazyInit(() -> {
@@ -37781,8 +37781,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * });
      * 
      * try {
-     *     Connection conn1 = lazyConnection.get(); // May throw SQLException on first call
-     *     Connection conn2 = lazyConnection.get(); // Returns cached connection, no exception
+     *     Connection conn1 = lazyConnection.get();  // May throw SQLException on first call
+     *     Connection conn2 = lazyConnection.get();  // Returns cached connection, no exception
      * } catch (SQLException e) {
      *     // Handle connection error
      * }
@@ -37868,8 +37868,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     .collect(toList());
      * 
      * // Debug intermediate values
-     * int value = N.println(calculateSomething())  // Prints the calculated value
-     *     * 2;
+     * int value = N.println(calculateSomething());  // Prints the calculated value
      * 
      * // Collection debugging
      * Map<String, Integer> map = new HashMap<>();

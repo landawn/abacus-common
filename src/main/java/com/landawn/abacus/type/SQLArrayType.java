@@ -34,7 +34,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * Class<Array> clazz = type.clazz(); // Returns Array.class
+     * Class<Array> clazz = type.clazz();  // Returns Array.class
      * }</pre>
      *
      * @return the Class object for java.sql.Array.class
@@ -51,7 +51,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * boolean serializable = type.isSerializable(); // Returns false
+     * boolean serializable = type.isSerializable();  // Returns false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -111,7 +111,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
-     * Array tags = type.get(rs, 1); // Get array from first column
+     * Array tags = type.get(rs, 1);  // Get array from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -132,7 +132,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
-     * Array tags = type.get(rs, "tags"); // Get array by column name
+     * Array tags = type.get(rs, "tags");  // Get array by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -153,7 +153,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (tags) VALUES (?)");
-     * type.set(stmt, 1, tagsArray); // Set array at parameter index 1
+     * type.set(stmt, 1, tagsArray);  // Set array at parameter index 1
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -175,7 +175,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * CallableStatement stmt = conn.prepareCall("{call update_product_tags(?)}");
-     * type.set(stmt, "tags_param", tagsArray); // Set array by parameter name
+     * type.set(stmt, "tags_param", tagsArray);  // Set array by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

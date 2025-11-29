@@ -45,7 +45,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * <pre>{@code
      * ObjDoubleFunction<String, String> formatter = (str, value) ->
      *     String.format("%s: %.2f", str, value);
-     * String result = formatter.apply("Price", 19.99); // Returns "Price: 19.99"
+     * String result = formatter.apply("Price", 19.99);  // Returns "Price: 19.99"
      * }</pre>
      *
      * @param t the first function argument of type T
@@ -68,14 +68,14 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoubleFunction<String, Double> priceCalculator = (name, discount) ->
-     *     100.0 * (1 - discount); // base price $100
+     *     100.0 * (1 - discount);  // base price $100
      * Function<Double, String> formatter = price ->
      *     String.format("$%.2f", price);
      *
      * ObjDoubleFunction<String, String> discountedPriceFormatter =
      *     priceCalculator.andThen(formatter);
      *
-     * String result = discountedPriceFormatter.apply("Product", 0.2); // Returns "$80.00"
+     * String result = discountedPriceFormatter.apply("Product", 0.2);  // Returns "$80.00"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

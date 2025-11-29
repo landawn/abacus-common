@@ -143,7 +143,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column contains integer value 42
      * OptionalInt opt = type.get(rs, 1);
@@ -173,7 +173,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = ...; // obtained from database query
+     * ResultSet rs = ...;  // obtained from database query
      *
      * // Column "age" contains integer value 25
      * OptionalInt opt = type.get(rs, "age");

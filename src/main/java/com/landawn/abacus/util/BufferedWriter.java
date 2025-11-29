@@ -53,7 +53,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * writer.write(true);
  * writer.write(", Age: ");
  * writer.writeInt(25);
- * String result = writer.toString(); // "Name: true, Age: 25"
+ * String result = writer.toString();  // "Name: true, Age: 25"
  * 
  * // Writing to a file
  * try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
@@ -92,7 +92,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter();
      * writer.write("Hello World");
-     * String content = writer.toString(); // "Hello World"
+     * String content = writer.toString();  // "Hello World"
      * }</pre>
      */
     BufferedWriter() {
@@ -141,8 +141,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(true);  // Writes "true"
-     * writer.write(false); // Writes "false"
+     * writer.write(true);    // Writes "true"
+     * writer.write(false);   // Writes "false"
      * }</pre>
      *
      * @param b the boolean value to write
@@ -157,8 +157,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write((byte) 127); // Writes "127"
-     * writer.write((byte) -1);  // Writes "-1"
+     * writer.write((byte) 127);   // Writes "127"
+     * writer.write((byte) -1);    // Writes "-1"
      * }</pre>
      *
      * @param b the byte value to write
@@ -173,7 +173,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write((short) 32767); // Writes "32767"
+     * writer.write((short) 32767);  // Writes "32767"
      * }</pre>
      *
      * @param s the short value to write
@@ -201,8 +201,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.writeInt(12345);    // Writes "12345"
-     * writer.writeInt(-999);     // Writes "-999"
+     * writer.writeInt(12345);   // Writes "12345"
+     * writer.writeInt(-999);    // Writes "-999"
      * }</pre>
      *
      * @param i the integer value to write
@@ -217,7 +217,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(1234567890L); // Writes "1234567890"
+     * writer.write(1234567890L);  // Writes "1234567890"
      * }</pre>
      *
      * @param lng the long value to write
@@ -234,8 +234,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(3.14f);     // Writes "3.14"
-     * writer.write(1.0f/3.0f); // Writes "0.33333334"
+     * writer.write(3.14f);       // Writes "3.14"
+     * writer.write(1.0f/3.0f);   // Writes "0.33333334"
      * }</pre>
      *
      * @param f the float value to write
@@ -268,7 +268,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(new Date()); // Writes current date/time
+     * writer.write(new Date());  // Writes current date/time
      * }</pre>
      *
      * @param date the date to write
@@ -284,7 +284,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
-     * writer.write(cal); // Writes calendar date/time
+     * writer.write(cal);  // Writes calendar date/time
      * }</pre>
      *
      * @param c the calendar to write
@@ -315,8 +315,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write('A'); // Writes "A"
-     * writer.write('\n'); // Writes newline
+     * writer.write('A');    // Writes "A"
+     * writer.write('\n');   // Writes newline
      * }</pre>
      *
      * @param c the character to write
@@ -347,8 +347,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello");  // Writes "Hello"
-     * writer.write(null);     // Writes "null"
+     * writer.write("Hello");   // Writes "Hello"
+     * writer.write(null);      // Writes "null"
      * }</pre>
      *
      * @param str the string to write
@@ -368,7 +368,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello World", 6, 5); // Writes "World"
+     * writer.write("Hello World", 6, 5);  // Writes "World"
      * }</pre>
      *
      * @param str the string to write
@@ -442,7 +442,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
-     * writer.write(chars); // Writes "Hello"
+     * writer.write(chars);  // Writes "Hello"
      * }</pre>
      *
      * @param cbuf the character array to write
@@ -483,7 +483,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
-     * writer.write(chars, 6, 5); // Writes "World"
+     * writer.write(chars, 6, 5);  // Writes "World"
      * }</pre>
      *
      * @param cbuf the character array
@@ -639,7 +639,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * try {
      *     writer.write("Hello World");
      * } finally {
-     *     writer.close(); // Always close in finally block
+     *     writer.close();  // Always close in finally block
      * }
      * }</pre>
      *
@@ -673,7 +673,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * BufferedWriter writer = new BufferedWriter();
      * writer.write("Hello ");
      * writer.write("World");
-     * String result = writer.toString(); // "Hello World"
+     * String result = writer.toString();  // "Hello World"
      * }</pre>
      *
      * @return the string representation of the written content

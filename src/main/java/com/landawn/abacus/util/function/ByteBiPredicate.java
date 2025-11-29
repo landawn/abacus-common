@@ -64,7 +64,7 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBiPredicate sumGreaterThan10 = (a, b) -> (a + b) > 10;
-     * boolean result = sumGreaterThan10.test((byte)5, (byte)7); // Returns true
+     * boolean result = sumGreaterThan10.test((byte)5, (byte)7);  // Returns true
      * }</pre>
      *
      * @param t the first input argument

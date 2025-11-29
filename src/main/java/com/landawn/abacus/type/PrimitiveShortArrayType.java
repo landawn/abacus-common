@@ -45,8 +45,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * Class clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Output: [S
-     * System.out.println(clazz.isArray()); // Output: true
+     * System.out.println(clazz.getName());   // Output: [S
+     * System.out.println(clazz.isArray());   // Output: true
      * }</pre>
      *
      * @return the Class object for short[] type
@@ -65,7 +65,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * Type<Short> elementType = type.getElementType();
-     * System.out.println(elementType.name()); // Output: short
+     * System.out.println(elementType.name());  // Output: short
      * }</pre>
      *
      * @return the Type instance representing Short type for array elements
@@ -82,8 +82,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * Type<Short>[] paramTypes = type.getParameterTypes();
-     * System.out.println(paramTypes.length); // Output: 1
-     * System.out.println(paramTypes[0].name()); // Output: short
+     * System.out.println(paramTypes.length);      // Output: 1
+     * System.out.println(paramTypes[0].name());   // Output: short
      * }</pre>
      *
      * @return an array containing the Short Type that describes the elements of this array type
@@ -103,12 +103,12 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {1, 2, 3};
      * String str = type.stringOf(array);
-     * System.out.println(str); // Output: [1, 2, 3]
+     * System.out.println(str);  // Output: [1, 2, 3]
      *
      * short[] emptyArray = {};
-     * System.out.println(type.stringOf(emptyArray)); // Output: []
+     * System.out.println(type.stringOf(emptyArray));  // Output: []
      *
-     * System.out.println(type.stringOf(null)); // Output: null
+     * System.out.println(type.stringOf(null));  // Output: null
      * }</pre>
      *
      * @param x the short array to convert to string
@@ -134,14 +134,14 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = type.valueOf("[1, 2, 3]");
-     * System.out.println(array.length); // Output: 3
-     * System.out.println(array[0]); // Output: 1
+     * System.out.println(array.length);   // Output: 3
+     * System.out.println(array[0]);       // Output: 1
      *
      * short[] emptyArray = type.valueOf("[]");
-     * System.out.println(emptyArray.length); // Output: 0
+     * System.out.println(emptyArray.length);  // Output: 0
      *
      * short[] nullArray = type.valueOf(null);
-     * System.out.println(nullArray); // Output: null
+     * System.out.println(nullArray);  // Output: null
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
@@ -181,11 +181,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] array = {10, 20, 30};
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, array);
-     * System.out.println(sb.toString()); // Output: Values: [10, 20, 30]
+     * System.out.println(sb.toString());  // Output: Values: [10, 20, 30]
      *
      * StringBuilder nullSb = new StringBuilder();
      * type.appendTo(nullSb, null);
-     * System.out.println(nullSb.toString()); // Output: null
+     * System.out.println(nullSb.toString());  // Output: null
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -223,11 +223,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
      * type.writeCharacter(writer, array, config);
-     * System.out.println(writer.toString()); // Output: [100, 200, 300]
+     * System.out.println(writer.toString());  // Output: [100, 200, 300]
      *
      * CharacterWriter nullWriter = new CharacterWriter();
      * type.writeCharacter(nullWriter, null, config);
-     * System.out.println(nullWriter.toString()); // Output: null
+     * System.out.println(nullWriter.toString());  // Output: null
      * }</pre>
      *
      * @param writer the CharacterWriter to write to
@@ -263,10 +263,10 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * List<Short> list = Arrays.asList((short) 5, (short) 10, (short) 15);
      * short[] array = type.collection2Array(list);
-     * System.out.println(Arrays.toString(array)); // Output: [5, 10, 15]
+     * System.out.println(Arrays.toString(array));  // Output: [5, 10, 15]
      *
      * short[] nullArray = type.collection2Array(null);
-     * System.out.println(nullArray); // Output: null
+     * System.out.println(nullArray);  // Output: null
      * }</pre>
      *
      * @param c the Collection of Short objects to convert
@@ -301,11 +301,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] array = {1, 2, 3};
      * List<Short> list = new ArrayList<>();
      * type.array2Collection(array, list);
-     * System.out.println(list); // Output: [1, 2, 3]
+     * System.out.println(list);  // Output: [1, 2, 3]
      *
      * Set<Short> set = new HashSet<>();
      * type.array2Collection(array, set);
-     * System.out.println(set); // Output: [1, 2, 3]
+     * System.out.println(set);  // Output: [1, 2, 3]
      * }</pre>
      *
      * @param x the short array to convert
@@ -336,10 +336,10 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] array2 = {1, 2, 3};
      * int hash1 = type.hashCode(array1);
      * int hash2 = type.hashCode(array2);
-     * System.out.println(hash1 == hash2); // Output: true
+     * System.out.println(hash1 == hash2);  // Output: true
      *
      * int nullHash = type.hashCode(null);
-     * System.out.println(nullHash); // Output: 0
+     * System.out.println(nullHash);  // Output: 0
      * }</pre>
      *
      * @param x the short array to compute hash code for
@@ -361,9 +361,9 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] array1 = {1, 2, 3};
      * short[] array2 = {1, 2, 3};
      * short[] array3 = {1, 2, 4};
-     * System.out.println(type.equals(array1, array2)); // Output: true
-     * System.out.println(type.equals(array1, array3)); // Output: false
-     * System.out.println(type.equals(null, null)); // Output: true
+     * System.out.println(type.equals(array1, array2));   // Output: true
+     * System.out.println(type.equals(array1, array3));   // Output: false
+     * System.out.println(type.equals(null, null));       // Output: true
      * }</pre>
      *
      * @param x the first short array to compare

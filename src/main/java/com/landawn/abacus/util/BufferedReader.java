@@ -37,8 +37,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Reading from a string
  * BufferedReader reader = new BufferedReader("Hello\nWorld");
- * String line1 = reader.readLine(); // "Hello"
- * String line2 = reader.readLine(); // "World"
+ * String line1 = reader.readLine();  // "Hello"
+ * String line2 = reader.readLine();  // "World"
  * 
  * // Reading from an InputStream
  * BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"));
@@ -141,10 +141,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("ABC");
-     * int ch1 = reader.read(); // 65 ('A')
-     * int ch2 = reader.read(); // 66 ('B')
-     * int ch3 = reader.read(); // 67 ('C')
-     * int ch4 = reader.read(); // -1 (end of stream)
+     * int ch1 = reader.read();   // 65 ('A')
+     * int ch2 = reader.read();   // 66 ('B')
+     * int ch3 = reader.read();   // 67 ('C')
+     * int ch4 = reader.read();   // -1 (end of stream)
      * }</pre>
      *
      * @return the character read, as an integer in the range 0 to 65535,
@@ -245,8 +245,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello World");
      * char[] buffer = new char[5];
-     * int count = reader.read(buffer, 0, 5); // Reads "Hello"
-     * System.out.println(new String(buffer, 0, count)); // "Hello"
+     * int count = reader.read(buffer, 0, 5);              // Reads "Hello"
+     * System.out.println(new String(buffer, 0, count));   // "Hello"
      * }</pre>
      *
      * @param cbuf destination buffer
@@ -392,10 +392,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
-     * System.out.println(reader.readLine()); // "Line 1"
-     * System.out.println(reader.readLine()); // "Line 2"
-     * System.out.println(reader.readLine()); // "Line 3"
-     * System.out.println(reader.readLine()); // null
+     * System.out.println(reader.readLine());   // "Line 1"
+     * System.out.println(reader.readLine());   // "Line 2"
+     * System.out.println(reader.readLine());   // "Line 3"
+     * System.out.println(reader.readLine());   // null
      * }</pre>
      *
      * @return a String containing the contents of the line, not including
@@ -430,8 +430,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("1234567890");
      * long skipped = reader.skip(5);
-     * System.out.println(skipped); // 5
-     * int ch = reader.read(); // '6' (the 6th character)
+     * System.out.println(skipped);   // 5
+     * int ch = reader.read();        // '6' (the 6th character)
      * }</pre>
      *
      * @param n the number of characters to skip
@@ -553,7 +553,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *     String line = reader.readLine();
      *     // Process line
      * } finally {
-     *     reader.close(); // Always close in finally block
+     *     reader.close();  // Always close in finally block
      * }
      * }</pre>
      *
@@ -585,10 +585,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("First");
-     * System.out.println(reader.readLine()); // "First"
+     * System.out.println(reader.readLine());  // "First"
      * 
      * reader.reinit("Second");
-     * System.out.println(reader.readLine()); // "Second"
+     * System.out.println(reader.readLine());  // "Second"
      * }</pre>
      *
      * @param st the new string to read from

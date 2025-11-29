@@ -96,7 +96,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.empty();
-     * System.out.println(iter.hasNext()); // false
+     * System.out.println(iter.hasNext());  // false
      * }</pre>
      *
      * @return an empty {@code DoubleIterator}
@@ -135,7 +135,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.0, 2.0, 3.0, 4.0, 5.0};
-     * DoubleIterator iter = DoubleIterator.of(values, 1, 4); // iterates over 2.0, 3.0, 4.0
+     * DoubleIterator iter = DoubleIterator.of(values, 1, 4);  // iterates over 2.0, 3.0, 4.0
      * }</pre>
      *
      * @param a the double array (may be {@code null})
@@ -336,8 +336,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
-     * double first = iter.nextDouble(); // 1.0
-     * double second = iter.nextDouble(); // 2.0
+     * double first = iter.nextDouble();    // 1.0
+     * double second = iter.nextDouble();   // 2.0
      * }</pre>
      *
      * @return the next double value
@@ -555,7 +555,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * double[] empty = DoubleIterator.empty().toArray(); // empty.length == 0
+     * double[] empty = DoubleIterator.empty().toArray();  // empty.length == 0
      * }</pre>
      *
      * @return a double array containing all remaining elements
@@ -578,7 +578,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * DoubleList empty = DoubleIterator.empty().toList(); // empty.size() == 0
+     * DoubleList empty = DoubleIterator.empty().toList();  // empty.size() == 0
      * }</pre>
      *
      * @return a DoubleList containing all remaining elements

@@ -54,10 +54,10 @@ import java.lang.annotation.Target;
  *     private Timestamp lastModified;  // Changes on every update
  *
  *     @DiffIgnore
- *     private Integer version;         // Optimistic locking field
+ *     private Integer version;  // Optimistic locking field
  *
  *     @DiffIgnore
- *     private String sessionToken;     // Temporary runtime data
+ *     private String sessionToken;  // Temporary runtime data
  * }
  *
  * // Usage with Difference.BeanDifference:

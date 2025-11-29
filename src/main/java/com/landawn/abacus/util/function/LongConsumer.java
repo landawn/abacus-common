@@ -56,7 +56,7 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongConsumer printer = value -> System.out.println("Value: " + value);
-     * printer.accept(123456789L); // Prints: Value: 123456789
+     * printer.accept(123456789L);  // Prints: Value: 123456789
      *
      * LongStream.range(1, 5).forEach(printer);
      * }</pre>
@@ -82,7 +82,7 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * LongConsumer saveToDatabase = value -> System.out.println("Saving: " + value);
      * LongConsumer logValue = value -> System.out.println("Processed: " + value);
      * LongConsumer combined = saveToDatabase.andThen(logValue);
-     * combined.accept(12345L); // First saves to database, then logs
+     * combined.accept(12345L);  // First saves to database, then logs
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

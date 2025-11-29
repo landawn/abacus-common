@@ -35,7 +35,7 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiObjIntPredicate<String, String> lengthCheck = (s1, s2, len) -> (s1.length() + s2.length()) >= len;
-     * boolean result = lengthCheck.test("Hello", "World", 10); // Returns true (10 >= 10)
+     * boolean result = lengthCheck.test("Hello", "World", 10);  // Returns true (10 >= 10)
      * }</pre>
      *
      * @param t the first input argument (object value)

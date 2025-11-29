@@ -787,7 +787,7 @@ public final class JSONUtil {
      * 
      * // Object type defaults to Map
      * Type<Object> objType = Type.of(Object.class);
-     * Object result2 = JSONUtil.unwrap(json, objType); // Returns Map<String, Object>
+     * Object result2 = JSONUtil.unwrap(json, objType);  // Returns Map<String, Object>
      * }</pre>
      *
      * @param <T> the type of object to return

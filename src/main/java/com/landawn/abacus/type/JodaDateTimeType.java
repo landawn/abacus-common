@@ -46,7 +46,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * <pre>{@code
      * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      * Class<DateTime> clazz = type.clazz();
-     * System.out.println(clazz.getName()); // Outputs: org.joda.time.DateTime
+     * System.out.println(clazz.getName());  // Outputs: org.joda.time.DateTime
      * }</pre>
      *
      * @return the Class object representing org.joda.time.DateTime
@@ -84,7 +84,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * DateTime dt3 = type.valueOf("2021-01-01T00:00:00");
      *
      * // null input returns null
-     * DateTime dt4 = type.valueOf(null); // returns null
+     * DateTime dt4 = type.valueOf(null);  // returns null
      * }</pre>
      *
      * @param obj the object to convert to DateTime
@@ -127,8 +127,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * DateTime dt3 = type.valueOf("SYS_TIME");
      *
      * // Empty or null returns null
-     * DateTime dt4 = type.valueOf(null); // returns null
-     * DateTime dt5 = type.valueOf(""); // returns null
+     * DateTime dt4 = type.valueOf(null);   // returns null
+     * DateTime dt5 = type.valueOf("");     // returns null
      * }</pre>
      *
      * @param str the string to parse
@@ -174,7 +174,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * DateTime dt3 = type.valueOf(buffer, 6, 19);
      *
      * // null or empty array returns null
-     * DateTime dt4 = type.valueOf(null, 0, 0); // returns null
+     * DateTime dt4 = type.valueOf(null, 0, 0);  // returns null
      * }</pre>
      *
      * @param cbuf the character buffer containing the value to parse
@@ -293,7 +293,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * }
      *
      * // Setting null value
-     * type.set(stmt, 2, null); // Sets SQL NULL
+     * type.set(stmt, 2, null);  // Sets SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -327,7 +327,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * }
      *
      * // Setting null value
-     * type.set(stmt, "event_time", null); // Sets SQL NULL
+     * type.set(stmt, "event_time", null);  // Sets SQL NULL
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

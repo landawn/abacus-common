@@ -92,7 +92,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
-     * System.out.println(emptyMap.size()); // 0
+     * System.out.println(emptyMap.size());  // 0
      * }</pre>
      *
      * @param <K> the type of keys
@@ -111,7 +111,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> singleEntry = ImmutableMap.of("count", 42);
-     * System.out.println(singleEntry.get("count")); // 42
+     * System.out.println(singleEntry.get("count"));  // 42
      * }</pre>
      *
      * @param <K> the type of keys
@@ -407,8 +407,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * mutable.put("a", 1);
      * mutable.put("b", 2);
      * ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
-     * mutable.put("c", 3); // Does not affect immutable
-     * System.out.println(immutable.size()); // Still 2
+     * mutable.put("c", 3);                    // Does not affect immutable
+     * System.out.println(immutable.size());   // Still 2
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -441,8 +441,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Map<String, Integer> mutable = new HashMap<>();
      * mutable.put("a", 1);
      * ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
-     * mutable.put("b", 2); // This change IS visible in wrapped!
-     * System.out.println(wrapped.size()); // 2
+     * mutable.put("b", 2);                  // This change IS visible in wrapped!
+     * System.out.println(wrapped.size());   // 2
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -469,9 +469,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.getOrDefault("a", 0));  // 1
-     * System.out.println(map.getOrDefault("c", 0));  // 0
-     * System.out.println(map.getOrDefault("c", 99)); // 99
+     * System.out.println(map.getOrDefault("a", 0));    // 1
+     * System.out.println(map.getOrDefault("c", 0));    // 0
+     * System.out.println(map.getOrDefault("c", 99));   // 99
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -682,8 +682,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> empty = ImmutableMap.empty();
      * ImmutableMap<String, Integer> nonEmpty = ImmutableMap.of("a", 1);
-     * System.out.println(empty.isEmpty());    // true
-     * System.out.println(nonEmpty.isEmpty()); // false
+     * System.out.println(empty.isEmpty());      // true
+     * System.out.println(nonEmpty.isEmpty());   // false
      * }</pre>
      *
      * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise
@@ -702,9 +702,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.containsKey("a"));   // true
-     * System.out.println(map.containsKey("c"));   // false
-     * System.out.println(map.containsKey(null));  // false (unless null key was added)
+     * System.out.println(map.containsKey("a"));    // true
+     * System.out.println(map.containsKey("c"));    // false
+     * System.out.println(map.containsKey(null));   // false (unless null key was added)
      * }</pre>
      *
      * @param key the key whose presence in this map is to be tested
@@ -747,8 +747,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.get("a"));  // 1
-     * System.out.println(map.get("c"));  // null
+     * System.out.println(map.get("a"));   // 1
+     * System.out.println(map.get("c"));   // null
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -770,8 +770,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Set<String> keys = map.keySet();
-     * System.out.println(keys); // [a, b]
-     * // keys.add("c"); // throws UnsupportedOperationException
+     * System.out.println(keys);  // [a, b]
+     * // keys.add("c");  // throws UnsupportedOperationException
      * }</pre>
      *
      * @return an unmodifiable set view of the keys contained in this map
@@ -792,8 +792,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Collection<Integer> values = map.values();
-     * System.out.println(values); // [1, 2]
-     * // values.remove(1); // throws UnsupportedOperationException
+     * System.out.println(values);  // [1, 2]
+     * // values.remove(1);  // throws UnsupportedOperationException
      * }</pre>
      *
      * @return an unmodifiable collection view of the values contained in this map
@@ -835,7 +835,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
-     * System.out.println(map.size()); // 3
+     * System.out.println(map.size());  // 3
      * }</pre>
      *
      * @return the number of key-value mappings in this map
@@ -857,8 +857,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map3 = ImmutableMap.of("a", 1, "c", 3);
-     * System.out.println(map1.equals(map2)); // true
-     * System.out.println(map1.equals(map3)); // false
+     * System.out.println(map1.equals(map2));   // true
+     * System.out.println(map1.equals(map3));   // false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this map
@@ -883,7 +883,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map1.hashCode() == map2.hashCode()); // true
+     * System.out.println(map1.hashCode() == map2.hashCode());  // true
      * }</pre>
      *
      * @return the hash code value for this map
@@ -903,7 +903,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map); // {a=1, b=2}
+     * System.out.println(map);  // {a=1, b=2}
      * }</pre>
      *
      * @return a string representation of this map

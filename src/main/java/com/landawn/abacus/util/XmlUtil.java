@@ -268,7 +268,7 @@ public final class XmlUtil {
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
      * Person person = XmlUtil.unmarshal(Person.class, xml);
-     * System.out.println(person.getName()); // Prints: John
+     * System.out.println(person.getName());  // Prints: John
      * }</pre>
      *
      * @param <T> The type of the object to be returned
@@ -1246,11 +1246,11 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("name");
      * elem.setTextContent("John");
-     * boolean isText = XmlUtil.isTextElement(elem); // Returns true
+     * boolean isText = XmlUtil.isTextElement(elem);  // Returns true
      * 
      * Element parent = doc.createElement("person");
      * parent.appendChild(elem);
-     * boolean isParentText = XmlUtil.isTextElement(parent); // Returns false
+     * boolean isParentText = XmlUtil.isTextElement(parent);  // Returns false
      * }</pre>
      *
      * @param node The node to be checked
@@ -1276,7 +1276,7 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
-     * String content = XmlUtil.getTextContent(elem); // Returns "  Hello World  "
+     * String content = XmlUtil.getTextContent(elem);  // Returns "  Hello World  "
      * }</pre>
      *
      * @param node The XML node from which to get the text content
@@ -1295,8 +1295,8 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello\n\tWorld  ");
-     * String content = XmlUtil.getTextContent(elem, true); // Returns "Hello World"
-     * String rawContent = XmlUtil.getTextContent(elem, false); // Returns "  Hello\n\tWorld  "
+     * String content = XmlUtil.getTextContent(elem, true);       // Returns "Hello World"
+     * String rawContent = XmlUtil.getTextContent(elem, false);   // Returns "  Hello\n\tWorld  "
      * }</pre>
      *
      * @param node The XML node from which to get the text content
@@ -1641,7 +1641,7 @@ public final class XmlUtil {
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
-     * String result = writer.toString(); // "Hello <world>"
+     * String result = writer.toString();  // "Hello <world>"
      * }</pre>
      *
      * @param str The string containing the characters to be written

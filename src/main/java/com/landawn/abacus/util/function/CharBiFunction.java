@@ -37,10 +37,10 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharBiFunction<String> concat = (c1, c2) -> "" + c1 + c2;
-     * String result = concat.apply('H', 'i'); // Returns "Hi"
+     * String result = concat.apply('H', 'i');  // Returns "Hi"
      *
      * CharBiFunction<Integer> sumCodes = (c1, c2) -> (int)c1 + (int)c2;
-     * int sum = sumCodes.apply('A', 'B'); // Returns sum of char codes
+     * int sum = sumCodes.apply('A', 'B');  // Returns sum of char codes
      * }</pre>
      *
      * @param t the first char function argument

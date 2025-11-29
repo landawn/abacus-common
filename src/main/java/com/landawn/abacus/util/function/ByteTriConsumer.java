@@ -37,7 +37,7 @@ public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeExcep
      * <pre>{@code
      * ByteTriConsumer rangePrinter = (min, mid, max) ->
      *     System.out.println("Range: [" + min + ", " + mid + ", " + max + "]");
-     * rangePrinter.accept((byte) 0, (byte) 50, (byte) 100); // Prints: Range: [0, 50, 100]
+     * rangePrinter.accept((byte) 0, (byte) 50, (byte) 100);  // Prints: Range: [0, 50, 100]
      * }</pre>
      *
      * @param a the first byte input argument
@@ -58,7 +58,7 @@ public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeExcep
      * ByteTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
      * ByteTriConsumer sum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
      * ByteTriConsumer combined = logger.andThen(sum);
-     * combined.accept((byte) 1, (byte) 2, (byte) 3); // Logs then calculates sum
+     * combined.accept((byte) 1, (byte) 2, (byte) 3);  // Logs then calculates sum
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
