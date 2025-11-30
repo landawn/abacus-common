@@ -267,8 +267,6 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 
 [What's New in Java 8](https://leanpub.com/whatsnewinjava8/read)
 
-[An introduction to the java.util.stream library](https://www.ibm.com/developerworks/library/j-java-streams-1-brian-goetz/index.html)
-
 [When to use parallel streams](http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html)
 
 [Top Java 8 stream questions on stackoverflow](./Top_java_8_stream_questions_so.md)
