@@ -265,7 +265,7 @@ There are **no plans** to extend *abacus-common* into unrelated domains such as 
 ### Functional Programming:
 To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream API is recommended. Helpful resources include:
 
-[What's New in Java 8](https://leanpub.com/whatsnewinjava8/read)
+[Java Stream API](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html)
 
 [When to use parallel streams](http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html)
 
