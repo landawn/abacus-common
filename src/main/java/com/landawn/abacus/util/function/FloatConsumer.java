@@ -52,7 +52,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatConsumer printer = value -> System.out.println("Value: " + value);
-     * printer.accept(3.14f);  // Prints: Value: 3.14
+     * printer.accept(3.14f);   // Prints: Value: 3.14
      * }</pre>
      *
      * @param t the float value to be processed
@@ -84,7 +84,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * // The value is added to the list AND printed
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default FloatConsumer andThen(final FloatConsumer after) {

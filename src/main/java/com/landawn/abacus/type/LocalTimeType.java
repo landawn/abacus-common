@@ -58,7 +58,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * <pre>{@code
      * Type<LocalTime> type = TypeFactory.getType(LocalTime.class);
      * LocalTime time = LocalTime.of(10, 30, 0);
-     * String str = type.stringOf(time);  // "10:30:00"
+     * String str = type.stringOf(time);   // "10:30:00"
      * }</pre>
      *
      * @param x The LocalTime object to convert

@@ -42,6 +42,10 @@ public class AsciiStreamType extends InputStreamType {
      */
     public static final String ASCII_STREAM = "AsciiStream";
 
+    /**
+     * Package-private constructor for AsciiStreamType.
+     * This constructor is called by the TypeFactory to create AsciiStream type instances.
+     */
     AsciiStreamType() {
         super(ASCII_STREAM);
     }
@@ -156,7 +160,7 @@ public class AsciiStreamType extends InputStreamType {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer) {
-                IOUtil.write(IOUtil.newInputStreamReader(x), (Writer) appendable); // NOSONAR
+                IOUtil.write(IOUtil.newInputStreamReader(x), (Writer) appendable);   // NOSONAR
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }
@@ -183,7 +187,7 @@ public class AsciiStreamType extends InputStreamType {
                 writer.write(config.getStringQuotation());
             }
 
-            final Reader reader = IOUtil.newInputStreamReader(t); // NOSONAR
+            final Reader reader = IOUtil.newInputStreamReader(t);   // NOSONAR
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {

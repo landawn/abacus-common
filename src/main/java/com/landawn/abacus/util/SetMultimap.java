@@ -71,8 +71,8 @@ import com.landawn.abacus.annotation.Internal;
  * SetMultimap<String, String> userRoles = N.newSetMultimap();
  * userRoles.put("alice", "admin");
  * userRoles.put("alice", "user");
- * userRoles.put("alice", "admin");  // duplicate ignored
- * Set<String> aliceRoles = userRoles.get("alice");  // ["admin", "user"]
+ * userRoles.put("alice", "admin");   // duplicate ignored
+ * Set<String> aliceRoles = userRoles.get("alice");   // ["admin", "user"]
  *
  * // Creating from collections with grouping
  * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
@@ -90,7 +90,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * // Finding articles with specific tags
  * SetMultimap<String, String> inverse = articleTags.inverse();
- * Set<String> javaArticles = inverse.get("java");  // ["article1", "article2"]
+ * Set<String> javaArticles = inverse.get("java");   // ["article1", "article2"]
  *
  * // Filtering and transformations
  * SetMultimap<String, String> filtered = articleTags.filter((key, values) -> values.size() > 2);
@@ -592,10 +592,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
     /**
      * Creates a new instance of SetMultimap from a collection by extracting both keys and values using the provided functions.
-     * Elements with the same key will have their extracted values collected into a set.
+     * Elements with the same key will have their extracted values collected into a set, with duplicates automatically eliminated.
      *
      * <p>This method is useful for creating a multimap from a collection of objects by transforming them into
-     * different key-value pairs.
+     * different key-value pairs. The keyExtractor determines how elements are grouped, while the valueExtractor
+     * transforms elements into the values that will be stored in the multimap.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -612,6 +613,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param keyExtractor the function to extract keys from elements; must not be null
      * @param valueExtractor the function to extract values from elements; must not be null
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
+     * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
      */
     public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
@@ -629,6 +631,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from two specified maps.
      *
+     * <p>If the same key appears in both maps, both values will be added to the resulting set for that key.
+     * Since this is a SetMultimap, duplicate values for the same key will be automatically eliminated.
+     * Null maps are treated as empty maps.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
@@ -639,8 +645,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param a the first map containing the key-value pairs to be added to the new SetMultimap
-     * @param b the second map containing the key-value pairs to be added to the new SetMultimap
+     * @param a the first map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
+     * @param b the second map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
      * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
@@ -656,6 +662,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from three specified maps.
      *
+     * <p>If the same key appears in multiple maps, all unique values will be added to the resulting set for that key.
+     * Since this is a SetMultimap, duplicate values for the same key will be automatically eliminated.
+     * Null maps are treated as empty maps.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1);
@@ -667,9 +677,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param a the first map containing the key-value pairs to be added to the new SetMultimap
-     * @param b the second map containing the key-value pairs to be added to the new SetMultimap
-     * @param c the third map containing the key-value pairs to be added to the new SetMultimap
+     * @param a the first map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
+     * @param b the second map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
+     * @param c the third map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
      * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b,
@@ -693,6 +703,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from a collection of maps.
      *
+     * <p>If the same key appears in multiple maps within the collection, all unique values will be added to the
+     * resulting set for that key. Since this is a SetMultimap, duplicate values for the same key will be
+     * automatically eliminated. If the collection is {@code null} or empty, an empty SetMultimap is returned.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Map<String, Integer>> maps = List.of(
@@ -706,7 +720,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param c the collection of maps containing the key-value pairs to be added to the new SetMultimap
+     * @param c the collection of maps containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified collection of maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
@@ -739,7 +753,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Map<String, Set<Integer>> map = new HashMap<>();
      * map.put("a", new HashSet<>(List.of(1, 2)));
      * SetMultimap<String, Integer> multimap = SetMultimap.wrap(map);
-     * multimap.put("a", 3);  // modifies the original map
+     * multimap.put("a", 3);   // modifies the original map
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -772,7 +786,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * SetMultimap<String, Integer> multimap =
      *     SetMultimap.wrap(map, TreeSet::new);
      * multimap.put("a", 3);
-     * multimap.put("a", 1);  // Creates TreeSet, values will be sorted
+     * multimap.put("a", 1);   // Creates TreeSet, values will be sorted
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -795,6 +809,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new SetMultimap with inverted key-value relationships. Each value in the original multimap
      * becomes a key in the result, and each original key becomes a value associated with that new key.
+     *
+     * <p>This operation is useful for creating reverse mappings or index structures. For example, if you have
+     * a mapping of users to roles, inverse() will give you a mapping of roles to users.
      *
      * <p>This operation creates a new multimap and does not modify the original. The new multimap will
      * preserve the ordering characteristics of the original map.
@@ -842,7 +859,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "b", 2);
      * SetMultimap<String, Integer> copy = original.copy();
-     * copy.put("c", 3);  // Does not modify original
+     * copy.put("c", 3);   // Does not modify original
      * }</pre>
      *
      * @return a new SetMultimap containing all the key-value pairs of this SetMultimap

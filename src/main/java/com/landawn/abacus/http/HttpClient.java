@@ -211,7 +211,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * HttpClient optimizedClient = HttpClient.create("https://high-throughput-api.com",
  *     50,      // Maximum concurrent connections
  *     2000,    // 2 seconds connection timeout
- *     15000);  // 15 seconds read timeout
+ *     15000);   // 15 seconds read timeout
  * }</pre>
  *
  * <p><b>Asynchronous Execution and Future Composition:</b>
@@ -699,6 +699,12 @@ public final class HttpClient {
      * Creates an HttpClient instance with a URL object and maximum connections.
      * Uses default values for connection timeout and read timeout.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * HttpClient client = HttpClient.create(apiUrl, 32);
+     * }</pre>
+     *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @return A new HttpClient instance
@@ -711,6 +717,12 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with a URL object and timeout settings.
      * Uses default value for max connections.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * HttpClient client = HttpClient.create(apiUrl, 5000, 10000);
+     * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
@@ -725,6 +737,12 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with a URL object, max connections, and timeout settings.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * HttpClient client = HttpClient.create(apiUrl, 32, 5000, 10000);
+     * }</pre>
+     *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
@@ -738,6 +756,15 @@ public final class HttpClient {
 
     /**
      * Creates an HttpClient instance with a URL object and all basic configuration options.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * HttpSettings settings = HttpSettings.create()
+     *     .setContentType("application/json")
+     *     .header("Authorization", "Bearer token123");
+     * HttpClient client = HttpClient.create(apiUrl, 16, 5000, 10000, settings);
+     * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
@@ -757,6 +784,16 @@ public final class HttpClient {
      * Creates an HttpClient instance with a URL object and shared connection counter.
      * Allows multiple HttpClient instances to share a connection limit.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicInteger sharedCounter = new AtomicInteger(0);
+     * URL apiUrl1 = new URL("https://api1.example.com");
+     * URL apiUrl2 = new URL("https://api2.example.com");
+     * HttpClient client1 = HttpClient.create(apiUrl1, 10, 5000, 10000, null, sharedCounter);
+     * HttpClient client2 = HttpClient.create(apiUrl2, 10, 5000, 10000, null, sharedCounter);
+     * // Both clients share a maximum of 10 concurrent connections total
+     * }</pre>
+     *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
@@ -775,6 +812,14 @@ public final class HttpClient {
      * Creates an HttpClient instance with a URL object and custom executor.
      * The executor will be used for all asynchronous HTTP requests.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * Executor customExecutor = Executors.newFixedThreadPool(4);
+     * HttpClient client = HttpClient.create(apiUrl, 16, 5000, 10000, customExecutor);
+     * client.asyncGet(User.class).thenAccept(user -> System.out.println(user));
+     * }</pre>
+     *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
@@ -791,6 +836,16 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with a URL object, settings, and custom executor.
      * Combines HTTP settings configuration with a custom async executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * HttpSettings settings = HttpSettings.create()
+     *     .setContentFormat(ContentFormat.JSON)
+     *     .header("Authorization", "Bearer token");
+     * Executor executor = Executors.newCachedThreadPool();
+     * HttpClient client = HttpClient.create(apiUrl, 20, 5000, 15000, settings, executor);
+     * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
@@ -810,6 +865,17 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with a URL object and all configuration options.
      * This is the most comprehensive factory method for URL-based clients.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL apiUrl = new URL("https://api.example.com");
+     * AtomicInteger sharedCounter = new AtomicInteger(0);
+     * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
+     * Executor executor = Executors.newFixedThreadPool(10);
+     * HttpClient client = HttpClient.create(
+     *     apiUrl, 20, 5000, 10000, settings, sharedCounter, executor
+     * );
+     * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
@@ -1171,7 +1237,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * client.head();  // Check if resource exists
+     * client.head();   // Check if resource exists
      * }</pre>
      *
      * @throws UncheckedIOException if an I/O error occurs
@@ -1968,6 +2034,13 @@ public final class HttpClient {
     /**
      * Performs an asynchronous PUT request with the specified request body.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = new User("John", "Doe");
+     * client.asyncPut(updatedUser)
+     *     .thenAccept(response -> System.out.println("Updated: " + response));
+     * }</pre>
+     *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @return A ContinuableFuture that will complete with the response body as a String
      */
@@ -1977,6 +2050,13 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous PUT request and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * UpdateUserRequest updateRequest = new UpdateUserRequest("Jane", "Doe");
+     * client.asyncPut(updateRequest, User.class)
+     *     .thenAccept(user -> System.out.println("Updated user: " + user.getName()));
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -1990,6 +2070,15 @@ public final class HttpClient {
     /**
      * Performs an asynchronous PUT request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = new User("John", "Doe");
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("If-Match", "\"abc123\"");
+     * client.asyncPut(updatedUser, settings)
+     *     .thenAccept(response -> System.out.println("Response: " + response));
+     * }</pre>
+     *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
@@ -2000,6 +2089,20 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous PUT request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * UpdateUserRequest updateRequest = new UpdateUserRequest("Jane", "Doe");
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("If-Match", "\"abc123\"")
+     *     .setReadTimeout(30000);
+     * client.asyncPut(updateRequest, settings, User.class)
+     *     .thenAccept(user -> System.out.println("Updated: " + user.getName()))
+     *     .exceptionally(e -> {
+     *         System.err.println("Update failed: " + e.getMessage());
+     *         return null;
+     *     });
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)

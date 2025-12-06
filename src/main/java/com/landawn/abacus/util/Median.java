@@ -97,7 +97,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * }
  *
  * // Range-based median calculation
- * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4);  // Elements at indices 1-3
+ * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4);   // Elements at indices 1-3
  *
  * // Collection with natural ordering
  * List<String> words = Arrays.asList("zebra", "apple", "banana", "cherry");
@@ -304,14 +304,14 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(char[], int, int)
      * @see Pair
      * @see OptionalChar
      * @see N#median(char[])
      */
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty"); //NOSONAR
+        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");   //NOSONAR
 
         return of(a, 0, a.length);
     }
@@ -344,7 +344,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(char...)
@@ -352,7 +352,7 @@ public final class Median {
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("The length of array can't be null or empty");   //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -410,7 +410,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(byte[], int, int)
      * @see Pair
      * @see OptionalByte
@@ -450,7 +450,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(byte...)
@@ -515,7 +515,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(short[], int, int)
      * @see Pair
      * @see OptionalShort
@@ -555,7 +555,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(short...)
@@ -614,14 +614,14 @@ public final class Median {
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
      * int lowerMedian = median.left;  // 10
-     * int upperMedian = median.right.get();  // 15
+     * int upperMedian = median.right.get();   // 15
      * }</pre>
      *
      * @param a the array of integers to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(int[], int, int)
      * @see Pair
      * @see OptionalInt
@@ -661,7 +661,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(int...)
@@ -720,14 +720,14 @@ public final class Median {
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
      * long lowerMedian = median.left;  // 750
-     * long upperMedian = median.right.get();  // 1000
+     * long upperMedian = median.right.get();   // 1000
      * }</pre>
      *
      * @param a the array of long integers to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(long[], int, int)
      * @see Pair
      * @see OptionalLong
@@ -767,7 +767,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(long...)
@@ -834,7 +834,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(float[], int, int)
      * @see Pair
      * @see OptionalFloat
@@ -875,7 +875,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(float...)
@@ -936,14 +936,14 @@ public final class Median {
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
      * double lowerMedian = median.left;  // 10.5
-     * double upperMedian = median.right.get();  // 15.1
+     * double upperMedian = median.right.get();   // 15.1
      * }</pre>
      *
      * @param a the array of double values to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(double[], int, int)
      * @see Pair
      * @see OptionalDouble
@@ -984,7 +984,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(double...)
@@ -1047,12 +1047,12 @@ public final class Median {
      * String medianWord = median.left;  // "banana"
      * }</pre>
      *
-     * @param <T> the type of elements in the array, which must implement Comparable
+     * @param <T> the type of elements in the array., which must implement Comparable.
      * @param a the array of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(Comparable[], int, int)
      * @see #of(Object[], Comparator)
      */
@@ -1083,7 +1083,7 @@ public final class Median {
      * // Considers words[1], words[2], words[3]: "apple", "banana", "cherry". Returns ["banana", Optional.empty()]
      * }</pre>
      *
-     * @param <T> the type of elements in the array, which must implement Comparable
+     * @param <T> the type of elements in the array., which must implement Comparable.
      * @param a the array of Comparable objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
@@ -1092,7 +1092,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Comparable[])
@@ -1128,14 +1128,14 @@ public final class Median {
      * String medianWord = median.left;  // "apple" (middle length)
      * }</pre>
      *
-     * @param <T> the type of elements in the array
+     * @param <T> the type of elements in the array.
      * @param a the array of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, natural ordering is used.
      *            The comparator must be consistent with equals for predictable results.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(Object[], int, int, Comparator)
      * @see #of(Comparable[])
      */
@@ -1173,7 +1173,7 @@ public final class Median {
      * // Considers words[1], words[2], words[3]: "ant", "bee", "tiger". Returns ["bee", Optional.empty()]
      * }</pre>
      *
-     * @param <T> the type of elements in the array
+     * @param <T> the type of elements in the array.
      * @param a the array of objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
@@ -1184,7 +1184,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Object[], Comparator)
@@ -1249,12 +1249,12 @@ public final class Median {
      * int medianValue = median.left;  // 15
      * }</pre>
      *
-     * @param <T> the type of elements in the collection, which must implement Comparable
+     * @param <T> the type of elements in the collection, which must implement Comparable.
      * @param c the collection of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      */
@@ -1291,14 +1291,14 @@ public final class Median {
      * String medianWord = median.left;  // Word with median length
      * }</pre>
      *
-     * @param <T> the type of elements in the collection
+     * @param <T> the type of elements in the collection.
      * @param c the collection of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, natural ordering is used.
      *            The comparator must be consistent with equals for predictable results.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
      */
@@ -1364,7 +1364,7 @@ public final class Median {
      * // Considers elements at indices 1, 2, 3: 50, 75, 25. Returns [50, Optional.empty()]
      * }</pre>
      *
-     * @param <T> the type of elements in the collection, which must implement Comparable
+     * @param <T> the type of elements in the collection, which must implement Comparable.
      * @param c the collection of Comparable objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
@@ -1373,7 +1373,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection)
@@ -1412,7 +1412,7 @@ public final class Median {
      * // Considers words at indices 1, 2, 3: "ant", "bee", "tiger". Returns ["bee", Optional.empty()]
      * }</pre>
      *
-     * @param <T> the type of elements in the collection
+     * @param <T> the type of elements in the collection.
      * @param c the collection of objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
@@ -1423,7 +1423,7 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty
+     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection, Comparator)
@@ -1431,7 +1431,7 @@ public final class Median {
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can't be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("The length of collection can't be null or empty");   //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, c.size());

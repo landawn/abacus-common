@@ -44,7 +44,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimapType<String, Integer> type = new ListMultimapType<>(ListMultimap.class, "String", "Integer");
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
      * ListMultimap<String, Integer> multimap = N.newLinkedListMultimap();
      * multimap.put("scores", 85);
      * multimap.put("scores", 90);
@@ -75,7 +75,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimapType<String, Integer> type = new ListMultimapType<>(ListMultimap.class, "String", "Integer");
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
      *
      * ListMultimap<String, Integer> multimap = type.valueOf("{\"scores\":[85,90,78],\"grades\":[95]}");
      * // Returns: ListMultimap with "scores" -> [85, 90, 78] and "grades" -> [95]

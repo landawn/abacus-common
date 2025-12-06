@@ -35,10 +35,10 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharBinaryOperator max = (a, b) -> a > b ? a : b;
-     * char result = max.applyAsChar('A', 'Z');  // Returns 'Z'
+     * char result = max.applyAsChar('A', 'Z');   // Returns 'Z'
      *
      * CharBinaryOperator concatenateAsChar = (a, b) -> (char)(a + b);
-     * char sum = concatenateAsChar.applyAsChar('A', 'B');  // Returns char sum
+     * char sum = concatenateAsChar.applyAsChar('A', 'B');   // Returns char sum
      * }</pre>
      *
      * @param left the first char operand

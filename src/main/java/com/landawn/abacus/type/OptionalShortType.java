@@ -26,6 +26,11 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
     public static final String OPTIONAL_SHORT = OptionalShort.class.getSimpleName();
 
+    /**
+     * Constructs a new OptionalShortType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected OptionalShortType() {
         super(OPTIONAL_SHORT);
     }

@@ -76,7 +76,7 @@ public class ClobType extends AbstractType<Clob> {
             try {
                 x.free();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                throw new UncheckedSQLException(e);   //NOSONAR
             }
         }
     }

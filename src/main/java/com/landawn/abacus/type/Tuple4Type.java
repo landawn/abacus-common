@@ -58,6 +58,15 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple4Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     * @param t4TypeName the name of the fourth element type
+     */
     Tuple4Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, false));
 
@@ -117,6 +126,13 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
      * Converts the given Tuple4 object to its string representation.
      * The tuple is serialized as a JSON array containing its four elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple4<String, Integer, Double, Boolean>> type = TypeFactory.getType("Tuple4<String, Integer, Double, Boolean>");
+     * Tuple4<String, Integer, Double, Boolean> tuple = Tuple.of("Charlie", 35, 180.2, true);
+     * String str = type.stringOf(tuple);   // Returns ["Charlie", 35, 180.2, true]
+     * }</pre>
+     *
      * @param x the Tuple4 object to convert
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
@@ -129,6 +145,13 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
      * Parses the given string into a Tuple4 object.
      * The string should be a JSON array representation with exactly four elements.
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple4<String, Integer, Double, Boolean>> type = TypeFactory.getType("Tuple4<String, Integer, Double, Boolean>");
+     * Tuple4<String, Integer, Double, Boolean> tuple = type.valueOf("[\"Charlie\", 35, 180.2, true]");
+     * // tuple._1 = "Charlie", tuple._2 = 35, tuple._3 = 180.2, tuple._4 = true
+     * }</pre>
      *
      * @param str the JSON string to parse
      * @return a Tuple4 object parsed from the string, or {@code null} if str is empty
@@ -166,7 +189,7 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

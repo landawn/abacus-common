@@ -46,6 +46,15 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * <p>The implementation should define the condition under which the three float
      * arguments satisfy this predicate.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * boolean result = allPositive.test(1.0f, 2.0f, 3.0f); // Returns true
+     *
+     * FloatTriPredicate sumGreaterThan10 = (a, b, c) -> (a + b + c) > 10.0f;
+     * boolean check = sumGreaterThan10.test(4.0f, 5.0f, 2.0f); // Returns true
+     * }</pre>
+     *
      * @param a the first float input argument
      * @param b the second float input argument
      * @param c the third float input argument
@@ -74,7 +83,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      */
@@ -92,7 +101,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      */

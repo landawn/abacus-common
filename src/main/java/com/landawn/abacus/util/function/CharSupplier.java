@@ -36,8 +36,14 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
     CharSupplier ZERO = () -> 0;
     /**
      * A supplier that returns random char values.
-     * Each invocation returns a new random char value within the valid Unicode range.
-     * The randomness is provided by {@code Util.RAND_CHAR.nextInt() % Util.CHAR_MOD}.
+     * Each invocation returns a new random char value within the valid Unicode range (0 to 65535).
+     * This supplier is useful for generating random characters for testing, simulation, or data generation purposes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char randomChar1 = CharSupplier.RANDOM.getAsChar();   // Returns a random char, e.g., 'k'
+     * char randomChar2 = CharSupplier.RANDOM.getAsChar();   // Returns another random char, e.g., '&'
+     * }</pre>
      */
     CharSupplier RANDOM = () -> {
         int value = Util.RAND_CHAR.nextInt() % Util.CHAR_MOD;
@@ -50,7 +56,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSupplier letterA = () -> 'A';
-     * char value = letterA.getAsChar();  // Returns 'A'
+     * char value = letterA.getAsChar();   // Returns 'A'
      * }</pre>
      *
      * @return a char value

@@ -44,8 +44,8 @@ public final class AndroidUtil {
             Class<?> asyncTaskClass;
             try {
                 asyncTaskClass = Class.forName("android.os.AsyncTask");
-                SERIAL_EXECUTOR = (Executor) asyncTaskClass.getField("SERIAL_EXECUTOR").get(null); // android.os.AsyncTask.SERIAL_EXECUTOR;
-                TP_EXECUTOR = (Executor) asyncTaskClass.getField("THREAD_POOL_EXECUTOR").get(null); // android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+                SERIAL_EXECUTOR = (Executor) asyncTaskClass.getField("SERIAL_EXECUTOR").get(null);   // android.os.AsyncTask.SERIAL_EXECUTOR;
+                TP_EXECUTOR = (Executor) asyncTaskClass.getField("THREAD_POOL_EXECUTOR").get(null);   // android.os.AsyncTask.THREAD_POOL_EXECUTOR;
             } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }

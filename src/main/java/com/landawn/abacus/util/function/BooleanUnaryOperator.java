@@ -31,7 +31,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanUnaryOperator not = b -> !b;
-     * boolean result = not.applyAsBoolean(true);  // Returns false
+     * boolean result = not.applyAsBoolean(true);   // Returns false
      * }</pre>
      *
      * @param operand the operand
@@ -47,7 +47,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanUnaryOperator not = b -> !b;
-     * BooleanUnaryOperator doubleNot = not.compose(not);  // Identity operation
+     * BooleanUnaryOperator doubleNot = not.compose(not);   // Identity operation
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
@@ -65,7 +65,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanUnaryOperator not = b -> !b;
-     * BooleanUnaryOperator doubleNot = not.andThen(not);  // Identity operation
+     * BooleanUnaryOperator doubleNot = not.andThen(not);   // Identity operation
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
@@ -82,7 +82,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanUnaryOperator id = BooleanUnaryOperator.identity();
-     * boolean result = id.applyAsBoolean(true);  // Returns true
+     * boolean result = id.applyAsBoolean(true);   // Returns true
      * }</pre>
      *
      * @return a unary operator that always returns its input argument

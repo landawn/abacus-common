@@ -100,8 +100,8 @@ public class ShortToIntFunction2025Test extends TestBase {
     public void test_applyAsInt_complexCalculation() {
         ShortToIntFunction complexFunction = value -> (value * 3 + 10) / 2;
 
-        assertEquals(20, complexFunction.applyAsInt((short) 10)); // (10 * 3 + 10) / 2 = 40 / 2 = 20
-        assertEquals(5, complexFunction.applyAsInt((short) 0)); // (0 * 3 + 10) / 2 = 10 / 2 = 5
+        assertEquals(20, complexFunction.applyAsInt((short) 10));   // (10 * 3 + 10) / 2 = 40 / 2 = 20
+        assertEquals(5, complexFunction.applyAsInt((short) 0));   // (0 * 3 + 10) / 2 = 10 / 2 = 5
     }
 
     @Test

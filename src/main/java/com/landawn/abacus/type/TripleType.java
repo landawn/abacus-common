@@ -54,6 +54,14 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a TripleType instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param leftTypeName the name of the left element type
+     * @param middleTypeName the name of the middle element type
+     * @param rightTypeName the name of the right element type
+     */
     TripleType(final String leftTypeName, final String middleTypeName, final String rightTypeName) {
         super(getTypeName(leftTypeName, middleTypeName, rightTypeName, false));
 
@@ -67,6 +75,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     /**
      * Returns the declaring name of this type, which uses simple class names.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
+     * String name = type.declaringName();   // Returns "Triple<String, Integer, Double>"
+     * }</pre>
      *
      * @return the declaring name of this Triple type
      */
@@ -89,6 +103,13 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * Returns the parameter types of this generic type.
      * For Triple, this is an array containing three elements: left type, middle type, and right type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // paramTypes[0] is Type<String>, paramTypes[1] is Type<Integer>, paramTypes[2] is Type<Double>
+     * }</pre>
+     *
      * @return an array containing the left, middle, and right types
      */
     @Override
@@ -105,6 +126,13 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * Converts a Triple object to its string representation.
      * The format is a JSON array: [left, middle, right].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
+     * Triple<String, Integer, Double> triple = Triple.of("A", 1, 3.14);
+     * String str = type.stringOf(triple);   // Returns ["A", 1, 3.14]
+     * }</pre>
+     *
      * @param x the Triple object to convert
      * @return the JSON string representation, or {@code null} if x is null
      */
@@ -116,6 +144,13 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     /**
      * Creates a Triple object from its string representation.
      * Expects a JSON array format: [left, middle, right].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
+     * Triple<String, Integer, Double> triple = type.valueOf("[\"A\", 1, 3.14]");
+     * // triple.left() = "A", triple.middle() = 1, triple.right() = 3.14
+     * }</pre>
      *
      * @param str the string to parse
      * @return a Triple object containing the parsed values, or {@code null} if str is empty
@@ -151,7 +186,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

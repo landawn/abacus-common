@@ -69,7 +69,7 @@ public class IndexedBoolean2025Test extends TestBase {
     public void testIndexOverflow() {
         assertThrows(ArithmeticException.class, () -> {
             IndexedBoolean indexed = IndexedBoolean.of(true, Long.MAX_VALUE);
-            indexed.index(); // Should throw ArithmeticException
+            indexed.index();   // Should throw ArithmeticException
         });
     }
 

@@ -57,8 +57,8 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Basic creation and access
  * Indexed<String> indexed = Indexed.of("Hello", 5);
- * String value = indexed.value();  // "Hello"
- * long index = indexed.index();  // 5
+ * String value = indexed.value();   // "Hello"
+ * long index = indexed.index();   // 5
  *
  * // Stream processing with indices
  * List<String> items = Arrays.asList("a", "b", "c");
@@ -174,7 +174,7 @@ package com.landawn.abacus.util;
  *     ));
  * }</pre>
  *
- * @param <T> the type of the value being indexed, can be any type including null
+ * @param <T> the type of the value being indexed, can be any type including null.
  * @see AbstractIndexed
  * @see IndexedBoolean
  * @see IndexedByte
@@ -198,8 +198,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * and stores the value in this class. Both the index and value become immutable after
      * construction.</p>
      *
-     * @param index the index position (non-negative long value)
-     * @param value the value to be associated with the index (can be null)
+     * @param index the index position (non-negative long value).
+     * @param value the value to be associated with the index (can be null).
      */
     Indexed(final long index, final T value) {
         super(index);
@@ -235,11 +235,11 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<List<Integer>> listIndexed = Indexed.of(Arrays.asList(1, 2, 3), 10);
      * }</pre>
      *
-     * @param <T> the type of the value to be indexed
-     * @param value the value to be associated with the index (may be {@code null})
-     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
-     * @return a new immutable Indexed instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index &lt; 0)
+     * @param <T> the type of the value to be indexed.
+     * @param value the value to be associated with the index (may be {@code null}).
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE).
+     * @return a new immutable Indexed instance containing the specified value and index.
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static <T> Indexed<T> of(final T value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -274,18 +274,18 @@ public final class Indexed<T> extends AbstractIndexed {
      *
      * // Combining with int values (automatic widening)
      * int position = 100;
-     * Indexed<String> item = Indexed.of("item", position);  // int automatically converts to long
+     * Indexed<String> item = Indexed.of("item", position);   // int automatically converts to long
      *
      * // Representing positions in distributed systems
      * long globalOffset = 10_000_000_000L;
      * Indexed<Record> record = Indexed.of(recordData, globalOffset);
      * }</pre>
      *
-     * @param <T> the type of the value to be indexed
-     * @param value the value to be associated with the index (may be {@code null})
-     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
-     * @return a new immutable Indexed instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index &lt; 0)
+     * @param <T> the type of the value to be indexed.
+     * @param value the value to be associated with the index (may be {@code null}).
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE).
+     * @return a new immutable Indexed instance containing the specified value and index.
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static <T> Indexed<T> of(final T value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -314,7 +314,7 @@ public final class Indexed<T> extends AbstractIndexed {
      *
      * // Handling null values
      * Indexed<String> nullIndexed = Indexed.of(null, 0);
-     * String nullValue = nullIndexed.value();  // null
+     * String nullValue = nullIndexed.value();   // null
      *
      * // Using in stream operations
      * List<Indexed<String>> indexedItems = Arrays.asList(
@@ -340,7 +340,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * // indicesOfLargeNumbers: [1, 2]
      * }</pre>
      *
-     * @return the value associated with this index, may be {@code null}
+     * @return the value associated with this index, may be {@code null}.
      */
     public T value() {
         return value;
@@ -370,7 +370,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * set.size();                    // 1
      * }</pre>
      *
-     * @return the hash code value for this Indexed instance
+     * @return the hash code value for this Indexed instance.
      */
     @Override
     public int hashCode() {
@@ -418,7 +418,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * // Different types
      * Indexed<String> strIdx = Indexed.of("Hello", 5);
      * String str = "Hello";
-     * strIdx.equals(str);  // false (different types)
+     * strIdx.equals(str);   // false (different types)
      *
      * // Using in collections
      * List<Indexed<String>> list = new ArrayList<>();
@@ -428,8 +428,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * list.contains(Indexed.of("test", 1));   // false
      * }</pre>
      *
-     * @param obj the object to be compared for equality with this Indexed instance
-     * @return {@code true} if the specified object is equal to this Indexed instance, {@code false} otherwise
+     * @param obj the object to be compared for equality with this Indexed instance.
+     * @return {@code true} if the specified object is equal to this Indexed instance, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -463,18 +463,18 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic string representation
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * System.out.println(indexed);  // prints: [5]=Hello
+     * System.out.println(indexed);   // prints: [5]=Hello
      *
      * // With null value
      * Indexed<String> nullIndexed = Indexed.of(null, 0);
-     * System.out.println(nullIndexed);  // prints: [0]=null
+     * System.out.println(nullIndexed);   // prints: [0]=null
      *
      * // With different types
      * Indexed<Integer> intIndexed = Indexed.of(42, 10);
-     * System.out.println(intIndexed);  // prints: [10]=42
+     * System.out.println(intIndexed);   // prints: [10]=42
      *
      * Indexed<List<String>> listIndexed = Indexed.of(Arrays.asList("a", "b"), 3);
-     * System.out.println(listIndexed);  // prints: [3]=[a, b]
+     * System.out.println(listIndexed);   // prints: [3]=[a, b]
      *
      * // Using in logging
      * List<Indexed<String>> items = Arrays.asList(
@@ -490,10 +490,10 @@ public final class Indexed<T> extends AbstractIndexed {
      *
      * // Large index values
      * Indexed<String> largeIdx = Indexed.of("data", 5_000_000_000L);
-     * System.out.println(largeIdx);  // prints: [5000000000]=data
+     * System.out.println(largeIdx);   // prints: [5000000000]=data
      * }</pre>
      *
-     * @return a string representation in the format {@code [index]=value}
+     * @return a string representation in the format {@code [index]=value}.
      */
     @Override
     public String toString() {

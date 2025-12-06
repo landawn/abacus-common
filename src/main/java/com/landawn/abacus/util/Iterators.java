@@ -95,25 +95,25 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic iterator access operations
  * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
- * Nullable<String> element = Iterators.get(iter, 2);  // Nullable["C"]
- * Nullable<String> first = Iterators.getFirst(iter);  // Nullable["A"]
- * Nullable<String> notFound = Iterators.get(iter, 10);  // Nullable.empty()
+ * Nullable<String> element = Iterators.get(iter, 2);     // Nullable["C"]
+ * Nullable<String> first = Iterators.getFirst(iter);     // Nullable["A"]
+ * Nullable<String> notFound = Iterators.get(iter, 10);   // Nullable.empty()
  *
  * // Search operations with predicates
  * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
- * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);  // Nullable[4]
- * int index = Iterators.indexOf(numbers.iterator(), 3);  // Returns 2
+ * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);   // Nullable[4]
+ * int index = Iterators.indexOf(numbers.iterator(), 3);                 // Returns 2
  *
  * // Transformation operations
  * Iterator<String> words = Arrays.asList("hello", "world", "java").iterator();
- * Iterator<Integer> lengths = Iterators.map(words, String::length);  // [5, 5, 4]
- * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4);  // [hello, world]
+ * Iterator<Integer> lengths = Iterators.map(words, String::length);           // [5, 5, 4]
+ * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4);   // [hello, world]
  *
  * // Aggregation operations
  * Iterator<Double> values = Arrays.asList(1.0, 2.0, 3.0, 4.0).iterator();
- * double sum = Iterators.sum(values);  // 10.0
- * double average = Iterators.average(values);  // 2.5
- * Nullable<Double> max = Iterators.max(values);  // Nullable[4.0]
+ * double sum = Iterators.sum(values);             // 10.0
+ * double average = Iterators.average(values);     // 2.5
+ * Nullable<Double> max = Iterators.max(values);   // Nullable[4.0]
  *
  * // Parallel processing operations
  * ExecutorService executor = Executors.newFixedThreadPool(4);
@@ -127,8 +127,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Validation operations with short-circuit
  * Iterator<Integer> nums = Arrays.asList(2, 4, 6, 8).iterator();
- * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);  // true
- * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);  // false
+ * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);   // true
+ * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);    // false
  *
  * // Conversion operations
  * Iterator<String> stringIter = Arrays.asList("a", "b", "c").iterator();
@@ -346,9 +346,9 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code {@code Nullable}.empty()}.
+     * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code Nullable.empty()}.
      * @param index the position in the iterator of the element to be returned. Indexing starts from 0.
-     * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code {@code Nullable}.empty()} if the index is out of bounds.
+     * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable.empty()} if the index is out of bounds.
      * @throws IllegalArgumentException if {@code index} is negative.
      */
     public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
@@ -470,7 +470,7 @@ public final class Iterators {
      * @see N#count(Iterator, Predicate)
      */
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); //NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate);   //NOSONAR
 
         if (iter == null) {
             return 0;
@@ -579,9 +579,9 @@ public final class Iterators {
      * // notEqual => false
      * }</pre>
      *
-     * @param iterator1 the first iterator to compare
-     * @param iterator2 the second iterator to compare
-     * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise
+     * @param iterator1 the first iterator to compare.
+     * @param iterator2 the second iterator to compare.
+     * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise.
      */
     public static boolean elementsEqual(final Iterator<?> iterator1, final Iterator<?> iterator2) {
         final boolean isIterator1Empty = N.isEmpty(iterator1);
@@ -620,11 +620,11 @@ public final class Iterators {
      * @param <T> the type of the element to repeat.
      * @param e the element to repeat (can be {@code null}).
      * @param n the number of times to repeat the element. Must be non-negative.
-     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is {@code 0}.
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
+        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);   //NOSONAR
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -666,11 +666,11 @@ public final class Iterators {
      * @param <T> the type of the element to repeat.
      * @param e the element to repeat (can be {@code null}).
      * @param n the number of times to repeat the element. Must be non-negative.
-     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is 0.
+     * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is {@code 0}.
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
+        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);   //NOSONAR
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -755,6 +755,17 @@ public final class Iterators {
     /**
      * Repeats the entire collection {@code n} times.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B");
+     * ObjIterator<String> iter = Iterators.repeatCollection(list, 3);
+     * // Yields: "A", "B", "A", "B", "A", "B"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2, 3);
+     * ObjIterator<Integer> iter2 = Iterators.repeatCollection(numbers, 2);
+     * // Yields: 1, 2, 3, 1, 2, 3
+     * }</pre>
+     *
      * <p><b>Preconditions:</b></p>
      * <ul>
      *   <li>If {@code n} > 0, then {@code c} must not be {@code null} or empty</li>
@@ -764,7 +775,7 @@ public final class Iterators {
      * <p><b>Common Mistakes:</b></p>
      * <pre>{@code
      * // DON'T: Pass empty collection with n > 0
-     * Iterators.repeatCollection(Collections.emptyList(), 5);  // IllegalArgumentException!
+     * Iterators.repeatCollection(Collections.emptyList(), 5);   // IllegalArgumentException!
      *
      * // DO: Ensure collection has elements
      * if (N.notEmpty(collection)) {
@@ -772,7 +783,7 @@ public final class Iterators {
      * }
      *
      * // DON'T: Pass null collection with n > 0
-     * Iterators.repeatCollection(null, 3);  // IllegalArgumentException!
+     * Iterators.repeatCollection(null, 3);   // IllegalArgumentException!
      *
      * // DO: Check for null first
      * if (collection != null && !collection.isEmpty()) {
@@ -2387,6 +2398,16 @@ public final class Iterators {
     /**
      * Merges multiple iterators into a single {@code ObjIterator}. The order of elements in the resulting iterator is determined by the provided {@code BiFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iters = Arrays.asList(
+     *     Arrays.asList(1, 3, 5).iterator(),
+     *     Arrays.asList(2, 4, 6).iterator()
+     * );
+     * ObjIterator<Integer> merged = Iterators.merge(iters, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+     * // Yields: 1, 2, 3, 4, 5, 6 (sorted merge)
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterators.
      * @param c the collection of iterators to be merged.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
@@ -2420,6 +2441,14 @@ public final class Iterators {
     /**
      * Merges two {@code Iterable} objects into a single {@code ObjIterator}. The order of elements in the resulting iterator is determined by the provided {@code BiFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list1 = Arrays.asList(1, 3, 5);
+     * List<Integer> list2 = Arrays.asList(2, 4, 6);
+     * ObjIterator<Integer> merged = Iterators.merge(list1, list2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+     * // Yields: 1, 2, 3, 4, 5, 6 (sorted merge)
+     * }</pre>
+     *
      * @param <T> the type of elements in the {@code Iterable} objects.
      * @param a the first {@code Iterable} object to be merged.
      * @param b the second {@code Iterable} object to be merged.
@@ -2438,6 +2467,17 @@ public final class Iterators {
 
     /**
      * Merges multiple {@code Iterable} objects into a single {@code ObjIterator}. The order of elements in the resulting iterator is determined by the provided {@code BiFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<Integer>> lists = Arrays.asList(
+     *     Arrays.asList(1, 4, 7),
+     *     Arrays.asList(2, 5, 8),
+     *     Arrays.asList(3, 6, 9)
+     * );
+     * ObjIterator<Integer> merged = Iterators.mergeIterables(lists, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+     * // Yields: 1, 2, 3, 4, 5, 6, 7, 8, 9 (sorted merge)
+     * }</pre>
      *
      * @param <T> the type of elements in the {@code Iterable} objects.
      * @param iterables the collection of {@code Iterable} objects to be merged.
@@ -2664,6 +2704,16 @@ public final class Iterators {
      * Zips three {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in parallel.
      * The resulting elements are determined by the provided {@code TriFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice", "Bob");
+     * List<Integer> ages = Arrays.asList(30, 25);
+     * List<String> cities = Arrays.asList("NYC", "LA");
+     * ObjIterator<String> result = Iterators.zip(names, ages, cities, (name, age, city) -> name + "," + age + "," + city);
+     * // result.next() => "Alice,30,NYC"
+     * // result.next() => "Bob,25,LA"
+     * }</pre>
+     *
      * @param <A> the type of elements in the first {@code Iterable}.
      * @param <B> the type of elements in the second {@code Iterable}.
      * @param <C> the type of elements in the third {@code Iterable}.
@@ -2737,6 +2787,15 @@ public final class Iterators {
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> a = Arrays.asList("a");
+     * List<Integer> b = Arrays.asList(1, 2);
+     * ObjIterator<String> result = Iterators.zip(a, b, "empty", 0, (s, i) -> s + i);
+     * // result.next() => "a1"
+     * // result.next() => "empty2"
+     * }</pre>
+     *
      * @param <A> the type of elements in the first Iterable.
      * @param <B> the type of elements in the second Iterable.
      * @param <R> the type of elements in the resulting ObjIterator.
@@ -2760,6 +2819,17 @@ public final class Iterators {
      * This method can be used to combine three Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> names = Arrays.asList("Alice").iterator();
+     * Iterator<Integer> ages = Arrays.asList(30, 25).iterator();
+     * Iterator<String> cities = Arrays.asList("NYC").iterator();
+     * ObjIterator<String> result = Iterators.zip(names, ages, cities, "Unknown", 0, "N/A",
+     *     (name, age, city) -> name + "," + age + "," + city);
+     * // result.next() => "Alice,30,NYC"
+     * // result.next() => "Unknown,25,N/A"
+     * }</pre>
      *
      * @param <A> the type of elements in the first Iterator.
      * @param <B> the type of elements in the second Iterator.
@@ -2804,6 +2874,17 @@ public final class Iterators {
      * This method can be used to combine three Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice");
+     * List<Integer> ages = Arrays.asList(30, 25);
+     * List<String> cities = Arrays.asList("NYC");
+     * ObjIterator<String> result = Iterators.zip(names, ages, cities, "Unknown", 0, "N/A",
+     *     (name, age, city) -> name + "," + age + "," + city);
+     * // result.next() => "Alice,30,NYC"
+     * // result.next() => "Unknown,25,N/A"
+     * }</pre>
      *
      * @param <A> the type of elements in the first Iterable.
      * @param <B> the type of elements in the second Iterable.
@@ -2909,6 +2990,17 @@ public final class Iterators {
      * Unzips an Iterable into a TriIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a:1:x", "b:2:y");
+     * TriIterator<String, Integer, String> result = Iterators.unzipp(list, (s, triple) -> {
+     *     String[] parts = s.split(":");
+     *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
+     * });
+     * // result.next() => Triple("a", 1, "x")
+     * // result.next() => Triple("b", 2, "y")
+     * }</pre>
+     *
      * @param <T> the type of elements in the original Iterable.
      * @param <A> the type of the first element in the resulting TriIterator.
      * @param <B> the type of the second element in the resulting {@code TriIterator}.
@@ -2931,6 +3023,19 @@ public final class Iterators {
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * long advanced = Iterators.advance(iter, 3);
+     * // advanced => 3
+     * // iter.next() => 4 (iterator is now at position 3)
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B").iterator();
+     * long advanced2 = Iterators.advance(iter2, 10);
+     * // advanced2 => 2 (only 2 elements were available)
+     * // iter2.hasNext() => false
+     * }</pre>
      *
      * @param iterator the iterator to be advanced, or {@code null} to return {@code 0}.
      * @param numberToAdvance the number of elements to advance the iterator.
@@ -2958,6 +3063,17 @@ public final class Iterators {
      * If {@code n} is greater than the size of the iterator, an empty {@code ObjIterator} will be returned.
      *
      * <p>This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * ObjIterator<Integer> result = Iterators.skip(iter, 2);
+     * // Yields: 3, 4, 5 (skips first 2 elements)
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B", "C").iterator();
+     * ObjIterator<String> result2 = Iterators.skip(iter2, 10);
+     * // result2.hasNext() => false (skipped all elements)
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be skipped, or {@code null} to return an empty iterator.
@@ -3009,6 +3125,17 @@ public final class Iterators {
 
     /**
      * Returns an {@code ObjIterator} that is limited to the specified count of elements from the original iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * ObjIterator<Integer> result = Iterators.limit(iter, 3);
+     * // Yields: 1, 2, 3 (limits to first 3 elements)
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B").iterator();
+     * ObjIterator<String> result2 = Iterators.limit(iter2, 10);
+     * // Yields: "A", "B" (count exceeds available elements)
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be limited, or {@code null} to return an empty iterator.
@@ -3122,6 +3249,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} that starts from the specified offset and is limited to the specified count of elements from the original {@code Iterable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
+     * ObjIterator<Integer> result = Iterators.skipAndLimit(list, 2, 3);
+     * // Yields: 3, 4, 5 (skips 2, takes next 3)
+     *
+     * List<String> words = Arrays.asList("A", "B", "C", "D");
+     * ObjIterator<String> result2 = Iterators.skipAndLimit(words, 1, 2);
+     * // Yields: "B", "C"
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param iter the original {@code Iterable} to be skipped and limited, or {@code null} to return an empty iterator.
      * @param offset the number of elements to skip from the beginning of the {@code Iterable}.
@@ -3184,6 +3322,17 @@ public final class Iterators {
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterable.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B", "A", "C", "B", "D");
+     * ObjIterator<String> distinct = Iterators.distinct(list);
+     * // Yields: "A", "B", "C", "D"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2, 2, 3, 1, 4);
+     * ObjIterator<Integer> distinct2 = Iterators.distinct(numbers);
+     * // Yields: 1, 2, 3, 4
+     * }</pre>
      *
      * @param <T> the type of elements in the original Iterable.
      * @param c the original Iterable to be processed for distinct elements.
@@ -3261,6 +3410,21 @@ public final class Iterators {
      * Returns an {@code ObjIterator} with distinct elements from the original {@code Iterable} based on a key derived from each element.
      * The key for each element is determined by the provided {@code Function}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "apricot", "banana", "avocado");
+     * ObjIterator<String> distinct = Iterators.distinctBy(words, s -> s.charAt(0));
+     * // Yields: "apple", "banana" (distinct by first character)
+     *
+     * List<Person> people = Arrays.asList(
+     *     new Person("Alice", 30),
+     *     new Person("Bob", 25),
+     *     new Person("Charlie", 30)
+     * );
+     * ObjIterator<Person> distinctByAge = Iterators.distinctBy(people, Person::getAge);
+     * // Yields: Person("Alice", 30), Person("Bob", 25)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @param keyExtractor a {@code Function} that takes an element from the {@code Iterable} and returns a key. Elements with the same key are considered duplicates.
@@ -3281,6 +3445,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} with distinct elements from the original iterator based on a key derived from each element.
      * The key for each element is determined by the provided {@code Function}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> words = Arrays.asList("apple", "apricot", "banana", "avocado").iterator();
+     * ObjIterator<String> distinct = Iterators.distinctBy(words, s -> s.charAt(0));
+     * // Yields: "apple", "banana" (distinct by first character)
+     *
+     * Iterator<String> names = Arrays.asList("Alice", "Andrew", "Bob", "Anna").iterator();
+     * ObjIterator<String> distinctByLength = Iterators.distinctBy(names, String::length);
+     * // Yields: "Alice", "Bob" (distinct by length)
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
@@ -3334,6 +3509,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} that only includes elements from the original {@code Iterable} that satisfy the provided {@code Predicate}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+     * ObjIterator<Integer> evens = Iterators.filter(numbers, n -> n % 2 == 0);
+     * // Yields: 2, 4, 6
+     *
+     * List<String> words = Arrays.asList("apple", "banana", "apricot", "cherry");
+     * ObjIterator<String> aWords = Iterators.filter(words, s -> s.startsWith("a"));
+     * // Yields: "apple", "apricot"
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be filtered, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the {@code Iterable}. Only elements that return {@code true} are included in the resulting {@code ObjIterator}.
@@ -3353,6 +3539,17 @@ public final class Iterators {
 
     /**
      * Returns an {@code ObjIterator} that only includes elements from the original iterator that satisfy the provided {@code Predicate}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 6).iterator();
+     * ObjIterator<Integer> evens = Iterators.filter(iter, n -> n % 2 == 0);
+     * // Yields: 2, 4, 6
+     *
+     * Iterator<String> words = Arrays.asList("hello", "world", "hi", "java").iterator();
+     * ObjIterator<String> longWords = Iterators.filter(words, s -> s.length() > 3);
+     * // Yields: "hello", "world", "java"
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be filtered, or {@code null} to return an empty iterator.
@@ -3405,6 +3602,17 @@ public final class Iterators {
      * Returns an {@code ObjIterator} that includes elements from the original {@code Iterable} as long as they satisfy the provided {@code Predicate}.
      * The iteration stops when an element that does not satisfy the {@code Predicate} is encountered.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 2, 1);
+     * ObjIterator<Integer> result = Iterators.takeWhile(numbers, n -> n < 4);
+     * // Yields: 1, 2, 3 (stops at 4)
+     *
+     * List<String> words = Arrays.asList("a", "ab", "abc", "b", "c");
+     * ObjIterator<String> shortWords = Iterators.takeWhile(words, s -> s.startsWith("a"));
+     * // Yields: "a", "ab", "abc" (stops at "b")
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the {@code Iterable}. The iteration continues as long as the {@code Predicate} returns {@code true}.
@@ -3425,6 +3633,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} that includes elements from the original iterator as long as they satisfy the provided {@code Predicate}.
      * The iteration stops when an element that does not satisfy the {@code Predicate} is encountered.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 2, 1).iterator();
+     * ObjIterator<Integer> result = Iterators.takeWhile(iter, n -> n < 4);
+     * // Yields: 1, 2, 3 (stops at 4)
+     *
+     * Iterator<String> words = Arrays.asList("short", "text", "verylongword", "a").iterator();
+     * ObjIterator<String> shortWords = Iterators.takeWhile(words, s -> s.length() < 10);
+     * // Yields: "short", "text" (stops at "verylongword")
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
@@ -3477,6 +3696,17 @@ public final class Iterators {
      * Returns an {@code ObjIterator} that includes elements from the original {@code Iterable} as long as they satisfy the provided {@code Predicate}.
      * The iteration stops after the first element that does not satisfy the {@code Predicate} is encountered, but includes that element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 2, 1);
+     * ObjIterator<Integer> result = Iterators.takeWhileInclusive(numbers, n -> n < 4);
+     * // Yields: 1, 2, 3, 4 (includes 4, then stops)
+     *
+     * List<String> words = Arrays.asList("a", "ab", "abc", "b", "c");
+     * ObjIterator<String> result2 = Iterators.takeWhileInclusive(words, s -> s.startsWith("a"));
+     * // Yields: "a", "ab", "abc", "b" (includes "b", then stops)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the {@code Iterable}. The iteration continues as long as the {@code Predicate} returns {@code true}, including the first element that returns {@code false}.
@@ -3497,6 +3727,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} that includes elements from the original iterator as long as they satisfy the provided {@code Predicate}.
      * The iteration stops after the first element that does not satisfy the {@code Predicate} is encountered, but includes that element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 2, 1).iterator();
+     * ObjIterator<Integer> result = Iterators.takeWhileInclusive(iter, n -> n < 4);
+     * // Yields: 1, 2, 3, 4 (includes 4, then stops)
+     *
+     * Iterator<String> words = Arrays.asList("cat", "car", "dog", "cap").iterator();
+     * ObjIterator<String> result2 = Iterators.takeWhileInclusive(words, s -> s.startsWith("ca"));
+     * // Yields: "cat", "car", "dog" (includes "dog", then stops)
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
@@ -3550,6 +3791,17 @@ public final class Iterators {
      * Returns an {@code ObjIterator} that skips elements from the original {@code Iterable} as long as they satisfy the provided {@code Predicate}.
      * The iteration begins when an element that does not satisfy the {@code Predicate} is encountered.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 2, 1);
+     * ObjIterator<Integer> result = Iterators.dropWhile(numbers, n -> n < 4);
+     * // Yields: 4, 5, 2, 1 (drops 1, 2, 3, starts from 4)
+     *
+     * List<String> words = Arrays.asList("a", "ab", "abc", "b", "c");
+     * ObjIterator<String> result2 = Iterators.dropWhile(words, s -> s.length() < 3);
+     * // Yields: "abc", "b", "c" (drops "a", "ab", starts from "abc")
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the {@code Iterable}. The iteration skips elements as long as the {@code Predicate} returns {@code true}.
@@ -3570,6 +3822,17 @@ public final class Iterators {
     /**
      * Returns an {@code ObjIterator} that skips elements from the original iterator as long as they satisfy the provided {@code Predicate}.
      * The iteration begins when an element that does not satisfy the {@code Predicate} is encountered.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 2, 1).iterator();
+     * ObjIterator<Integer> result = Iterators.dropWhile(iter, n -> n < 4);
+     * // Yields: 4, 5, 2, 1 (drops 1, 2, 3, starts from 4)
+     *
+     * Iterator<String> words = Arrays.asList("short", "tiny", "verylongword", "a").iterator();
+     * ObjIterator<String> result2 = Iterators.dropWhile(words, s -> s.length() < 10);
+     * // Yields: "verylongword", "a" (drops "short", "tiny", starts from "verylongword")
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
@@ -3628,6 +3891,17 @@ public final class Iterators {
      * Skips elements in the provided {@code Iterable} until the provided {@code Predicate} returns {@code true}.
      * This method can be used to ignore elements in an {@code Iterable} until a certain condition is met.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 2, 1);
+     * ObjIterator<Integer> result = Iterators.skipUntil(numbers, n -> n >= 4);
+     * // Yields: 4, 5, 2, 1 (skips until finding n >= 4)
+     *
+     * List<String> words = Arrays.asList("a", "ab", "abc", "abcd", "b");
+     * ObjIterator<String> result2 = Iterators.skipUntil(words, s -> s.length() >= 4);
+     * // Yields: "abcd", "b" (skips until finding length >= 4)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests elements from the original {@code Iterable}.
@@ -3648,6 +3922,17 @@ public final class Iterators {
     /**
      * Skips elements in the provided iterator until the provided {@code Predicate} returns {@code true}.
      * This method can be used to ignore elements in an iterator until a certain condition is met.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 2, 1).iterator();
+     * ObjIterator<Integer> result = Iterators.skipUntil(iter, n -> n >= 4);
+     * // Yields: 4, 5, 2, 1 (skips until finding n >= 4)
+     *
+     * Iterator<String> words = Arrays.asList("cat", "dog", "elephant", "ant").iterator();
+     * ObjIterator<String> result2 = Iterators.skipUntil(words, s -> s.length() > 5);
+     * // Yields: "elephant", "ant" (skips until finding length > 5)
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
@@ -3705,6 +3990,17 @@ public final class Iterators {
 
     /**
      * Transforms the elements of the given {@code Iterable} using the provided {@code Function} and returns an {@code ObjIterator} with the transformed elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * ObjIterator<String> uppercase = Iterators.map(list, String::toUpperCase);
+     * // Yields: "A", "B", "C"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4);
+     * ObjIterator<Integer> doubled = Iterators.map(numbers, n -> n * 2);
+     * // Yields: 2, 4, 6, 8
+     * }</pre>
      *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
@@ -3764,6 +4060,17 @@ public final class Iterators {
 
     /**
      * Transforms the elements of the given {@code Iterable} into {@code Iterable}s using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a,b", "c,d");
+     * ObjIterator<String> result = Iterators.flatMap(list, s -> Arrays.asList(s.split(",")));
+     * // Yields: "a", "b", "c", "d"
+     *
+     * List<List<Integer>> nested = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4));
+     * ObjIterator<Integer> flat = Iterators.flatMap(nested, x -> x);
+     * // Yields: 1, 2, 3, 4
+     * }</pre>
      *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
@@ -3840,6 +4147,16 @@ public final class Iterators {
 
     /**
      * Transforms the elements of the given {@code Iterable} into arrays using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a,b", "c,d");
+     * ObjIterator<String> result = Iterators.flatmap(list, s -> s.split(","));
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * // result.next() => "d"
+     * }</pre>
      *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
@@ -3940,6 +4257,14 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given iterator and executes a final action upon completion.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     * List<String> list = new ArrayList<>();
+     * Iterators.forEach(iter, list::add, () -> System.out.println("Done: " + list.size()));
+     * // Adds all elements to list, then prints "Done: 3"
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
@@ -3957,6 +4282,13 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8).iterator();
+     * Iterators.forEach(iter, 2, 3, i -> System.out.println(i));
+     * // Prints: 3, 4, 5 (skips first 2, processes next 3)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iter the original iterator to be processed.
@@ -3973,6 +4305,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "C", "D", "E").iterator();
+     * AtomicInteger processed = new AtomicInteger();
+     * Iterators.forEach(iter, 1, 3,
+     *     s -> processed.incrementAndGet(),
+     *     () -> System.out.println("Processed: " + processed.get())
+     * );
+     * // Processes "B", "C", "D", then prints "Processed: 3"
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -4021,6 +4364,17 @@ public final class Iterators {
      * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads and queue size.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = IntStream.range(0, 100).iterator();
+     * AtomicInteger sum = new AtomicInteger();
+     * Iterators.forEach(iter, 0, 100, 4, 10,
+     *     i -> sum.addAndGet(i),
+     *     () -> System.out.println("Total: " + sum.get())
+     * );
+     * // Processes all elements in parallel with 4 threads
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
@@ -4043,6 +4397,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iterators = Arrays.asList(
+     *     Arrays.asList(1, 2).iterator(),
+     *     Arrays.asList(3, 4).iterator()
+     * );
+     * List<Integer> result = new ArrayList<>();
+     * Iterators.forEach(iterators, result::add);
+     * // result => [1, 2, 3, 4]
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
@@ -4057,6 +4422,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators.
      * After all elements have been processed, a final action is executed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<String>> iterators = Arrays.asList(
+     *     Arrays.asList("A", "B").iterator(),
+     *     Arrays.asList("C", "D").iterator()
+     * );
+     * List<String> result = new ArrayList<>();
+     * Iterators.forEach(iterators, result::add, () -> System.out.println("Total: " + result.size()));
+     * // Adds all elements, then prints "Total: 4"
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -4075,6 +4451,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iterators = Arrays.asList(
+     *     Arrays.asList(1, 2, 3).iterator(),
+     *     Arrays.asList(4, 5, 6).iterator()
+     * );
+     * List<Integer> result = new ArrayList<>();
+     * Iterators.forEach(iterators, 2, 3, result::add);
+     * // result => [3, 4, 5] (skips first 2 elements, processes next 3)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
@@ -4091,6 +4478,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<String>> iterators = Arrays.asList(
+     *     Arrays.asList("A", "B", "C").iterator(),
+     *     Arrays.asList("D", "E", "F").iterator()
+     * );
+     * List<String> result = new ArrayList<>();
+     * Iterators.forEach(iterators, 1, 3, result::add, () -> System.out.println("Done"));
+     * // result => ["B", "C", "D"], then prints "Done"
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -4112,6 +4510,17 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterators.
      * This method also supports multi-threading with a specified number of threads for reading and processing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iterators = Arrays.asList(
+     *     IntStream.range(0, 50).iterator(),
+     *     IntStream.range(50, 100).iterator()
+     * );
+     * AtomicInteger sum = new AtomicInteger();
+     * Iterators.forEach(iterators, 2, 4, 10, i -> sum.addAndGet(i));
+     * // Uses 2 threads to read and 4 threads to process in parallel
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
@@ -4130,6 +4539,20 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterators.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
      * After all elements have been processed, a final action is executed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<String>> iterators = Arrays.asList(
+     *     Files.lines(Paths.get("file1.txt")).iterator(),
+     *     Files.lines(Paths.get("file2.txt")).iterator()
+     * );
+     * AtomicInteger lineCount = new AtomicInteger();
+     * Iterators.forEach(iterators, 2, 4, 100,
+     *     line -> lineCount.incrementAndGet(),
+     *     () -> System.out.println("Total lines: " + lineCount.get())
+     * );
+     * // Reads from 2 files in parallel, processes with 4 threads
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -4152,6 +4575,17 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iterators = Arrays.asList(
+     *     IntStream.range(0, 1000).iterator(),
+     *     IntStream.range(1000, 2000).iterator()
+     * );
+     * AtomicInteger sum = new AtomicInteger();
+     * Iterators.forEach(iterators, 100, 500, 2, 4, 50, i -> sum.addAndGet(i));
+     * // Skips first 100 elements, processes next 500 with 2 read threads and 4 process threads
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.

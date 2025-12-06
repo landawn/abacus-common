@@ -68,7 +68,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * <pre>{@code
      * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date = LocalDate.of(2021, 1, 1);
-     * String str = type.stringOf(date);  // "2021-01-01"
+     * String str = type.stringOf(date);   // "2021-01-01"
      * }</pre>
      *
      * @param x The LocalDate object to convert

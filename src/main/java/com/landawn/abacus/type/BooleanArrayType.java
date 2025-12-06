@@ -138,7 +138,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    appendable.append(x[i] ? TRUE_STRING : FALSE_STRING); //NOSONAR
+                    appendable.append(x[i] ? TRUE_STRING : FALSE_STRING);   //NOSONAR
                 }
             }
 
@@ -171,7 +171,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
+                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);   //NOSONAR
                 }
             }
 

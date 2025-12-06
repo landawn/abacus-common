@@ -546,7 +546,7 @@ public class BooleanList2025Test extends TestBase {
     @Test
     public void test_moveRange() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.moveRange(1, 3, 2); // true, false, false, true, true
+        list.moveRange(1, 3, 2);   // true, false, false, true, true
         assertEquals(BooleanList.of(true, false, false, true, true), list);
     }
 

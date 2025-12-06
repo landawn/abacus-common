@@ -68,10 +68,10 @@ public final class Retry<T> {
      * retry.run(() -> sendNotification());
      * }</pre>
      *
-     * @param retryTimes The maximum number of times to retry the operation if it fails. Must be non-negative. A value of 0 means no retries.
-     * @param retryIntervalInMillis The interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
-     * @param retryCondition A predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried. Must not be {@code null}.
-     * @return A new {@code Retry<Void>} instance configured with the specified parameters.
+     * @param retryTimes the maximum number of times to retry the operation if it fails. Must be non-negative. A value of 0 means no retries.
+     * @param retryIntervalInMillis the interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
+     * @param retryCondition a predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried. Must not be {@code null}.
+     * @return a new {@code Retry<Void>} instance configured with the specified parameters.
      * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static Retry<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
@@ -105,13 +105,13 @@ public final class Retry<T> {
      * Response response = retry.call(() -> httpClient.get(url));
      * }</pre>
      *
-     * @param <T> The type of the result returned by the operation to be retried.
-     * @param retryTimes The maximum number of times to retry the operation if it fails or returns an unsatisfactory result. Must be non-negative. A value of 0 means no retries.
-     * @param retryIntervalInMillis The interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
-     * @param retryCondition A bi-predicate that tests both the result and the exception. The first parameter is the result (or {@code null} if an exception occurred),
+     * @param <T> the type of the result returned by the operation to be retried.
+     * @param retryTimes the maximum number of times to retry the operation if it fails or returns an unsatisfactory result. Must be non-negative. A value of 0 means no retries.
+     * @param retryIntervalInMillis the interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
+     * @param retryCondition a bi-predicate that tests both the result and the exception. The first parameter is the result (or {@code null} if an exception occurred),
      *                       and the second parameter is the exception (or {@code null} if no exception occurred). If it returns {@code true}, the operation will be retried.
      *                       Must not be {@code null}.
-     * @return A new {@code Retry<T>} instance configured with the specified parameters.
+     * @return a new {@code Retry<T>} instance configured with the specified parameters.
      * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static <T> Retry<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
@@ -146,8 +146,8 @@ public final class Retry<T> {
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
-     * @param cmd The runnable operation to execute, which may throw an exception.
-     * @throws Exception Any exception thrown by the {@code cmd} operation. If the operation is retried and all retry attempts
+     * @param cmd the runnable operation to execute, which may throw an exception.
+     * @throws Exception any exception thrown by the {@code cmd} operation. If the operation is retried and all retry attempts
      *                   are exhausted without success, the last exception encountered during the final retry attempt is thrown.
      *                   If the retry condition is not satisfied for a thrown exception, that exception is thrown immediately
      *                   without further retries.
@@ -216,14 +216,14 @@ public final class Retry<T> {
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *
-     * @param callable The callable operation to execute, which may throw an exception or return a result.
-     * @return The result of the successful execution of {@code callable}. If all retry attempts are exhausted and
+     * @param callable the callable operation to execute, which may throw an exception or return a result.
+     * @return the result of the successful execution of {@code callable}. If all retry attempts are exhausted and
      *         the result still does not satisfy the retry condition, the last result obtained is returned (or an exception is thrown).
-     * @throws Exception Any exception thrown by the {@code callable} operation. If the operation is retried and all retry attempts
+     * @throws Exception any exception thrown by the {@code callable} operation. If the operation is retried and all retry attempts
      *                   are exhausted without success, the last exception encountered during the final retry attempt is thrown.
      *                   If the retry condition is not satisfied for a thrown exception, that exception is thrown immediately
      *                   without further retries.
-     * @throws RuntimeException If all retry attempts are exhausted and the {@code retryCondition2} still evaluates to {@code true}
+     * @throws RuntimeException if all retry attempts are exhausted and the {@code retryCondition2} still evaluates to {@code true}
      *                          for the result (indicating the result remains unsatisfactory after all retries). The exception message
      *                          includes the number of retry attempts and the final result value.
      */

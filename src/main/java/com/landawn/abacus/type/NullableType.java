@@ -35,6 +35,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     private final Type<T> elementType;
 
+    /**
+     * Constructs a NullableType for the specified parameter type.
+     * This constructor initializes the type handler for Nullable wrapper objects with a specific element type.
+     *
+     * @param parameterTypeName the fully qualified or simple name of the element type contained in the Nullable
+     */
     protected NullableType(final String parameterTypeName) {
         super(NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
 
@@ -111,7 +117,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public String stringOf(final Nullable<T> x) {
-        return (x == null || x.isNull()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
+        return (x == null || x.isNull()) ? null : N.stringOf(x.get());   // elementType.stringOf(x.get());
     }
 
     /**

@@ -20,7 +20,7 @@ public class BooleanBiFunction2025Test extends TestBase {
         BooleanBiFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
         String result = chainedFunction.apply(true, false);
 
-        assertEquals("2", result); // (1 + 0) * 2 = 2
+        assertEquals("2", result);   // (1 + 0) * 2 = 2
     }
 
     @Test

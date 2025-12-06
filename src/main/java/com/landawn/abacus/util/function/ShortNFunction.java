@@ -40,7 +40,7 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      *     for (short value : args) total += value;
      *     return total;
      * };
-     * Integer result1 = sum.apply((short) 1, (short) 2, (short) 3);  // returns 6
+     * Integer result1 = sum.apply((short) 1, (short) 2, (short) 3);   // returns 6
      *
      * ShortNFunction<Short> max = args -> {
      *     if (args.length == 0) return 0;
@@ -48,7 +48,7 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      *     for (short v : args) if (v > maxVal) maxVal = v;
      *     return maxVal;
      * };
-     * Short result2 = max.apply((short) 5, (short) 2, (short) 8, (short) 1);  // returns 8
+     * Short result2 = max.apply((short) 5, (short) 2, (short) 8, (short) 1);   // returns 8
      * }</pre>
      *
      * @param args the function arguments as a variable-length array of short values

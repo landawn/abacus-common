@@ -186,18 +186,18 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * BufferedJSONWriter writer = new BufferedJSONWriter();
+     * JSONXMLSerializationConfig<?> config = null;
      *
      * Long[] array = {100L, 200L, 300L};
      * type.writeCharacter(writer, array, config);
      * String result = writer.toString();
      * // result: "[100, 200, 300]"
      *
-     * writer.reset();
-     * type.writeCharacter(writer, null, config);
-     * result = writer.toString();
-     * // result: "null"
+     * BufferedJSONWriter writer2 = new BufferedJSONWriter();
+     * type.writeCharacter(writer2, null, config);
+     * String result2 = writer2.toString();
+     * // result2: "null"
      * }</pre>
      *
      * @param writer The CharacterWriter to write to

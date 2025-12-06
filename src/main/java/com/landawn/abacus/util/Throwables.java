@@ -91,18 +91,16 @@ import com.landawn.abacus.util.u.Nullable;
  *     connection.close();
  * });
  *
- * // Optional with exception-throwing operations
- * Optional<String> content = Optional.of(filePath)
- *     .map((Throwables.Function<Path, String, IOException>) Files::readString);
+ * // Safe call with fallback for exception-throwing operations
+ * String content = Throwables.call(() -> Files.readString(filePath), "");
  *
  * // Lazy initialization with exception handling
  * Throwables.Supplier<DatabaseConnection, SQLException> connectionSupplier =
  *     Throwables.LazyInitializer.of(() -> createDatabaseConnection());
  *
- * // Primitive operations with exceptions
- * IntStream.range(0, 100)
- *     .filter((Throwables.IntPredicate<IOException>) this::isValidIndex)
- *     .forEach((Throwables.IntConsumer<IOException>) this::processIndex);
+ * // Processing with exception-aware operations
+ * List<Integer> indices = IntStream.range(0, 100).boxed().collect(Collectors.toList());
+ * indices.forEach(i -> Throwables.run(() -> processIndex(i)));
  * }</pre>
  *
  * <p><b>Functional Interface Categories:</b>
@@ -5393,7 +5391,7 @@ public final class Throwables {
      */
     public static final class EE {
         private EE() {
-            // Singleton. Utility class.
+            // Utility class.
         }
 
         /**
@@ -5668,7 +5666,7 @@ public final class Throwables {
     public static final class EEE {
 
         private EEE() {
-            // Singleton. Utility class.
+            // Utility class.
         }
 
         /**

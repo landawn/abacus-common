@@ -35,10 +35,10 @@ public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteTernaryOperator average = (a, b, c) -> (byte) ((a + b + c) / 3);
-     * byte avg = average.applyAsByte((byte) 10, (byte) 20, (byte) 30);  // Returns 20
+     * byte avg = average.applyAsByte((byte) 10, (byte) 20, (byte) 30);   // Returns 20
      *
      * ByteTernaryOperator maxOfThree = (a, b, c) -> (byte) Math.max(a, Math.max(b, c));
-     * byte max = maxOfThree.applyAsByte((byte) 5, (byte) 15, (byte) 10);  // Returns 15
+     * byte max = maxOfThree.applyAsByte((byte) 5, (byte) 15, (byte) 10);   // Returns 15
      * }</pre>
      *
      * @param a the first byte operand

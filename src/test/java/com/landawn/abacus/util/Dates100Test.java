@@ -1333,9 +1333,10 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testIsSameYear() {
-        java.util.Date date1 = new java.util.Date();
+        // Use a fixed date in the middle of the year to avoid year boundary issues
         Calendar cal = Calendar.getInstance();
-        cal.setTime(date1);
+        cal.set(2024, Calendar.JUNE, 15, 12, 0, 0);
+        java.util.Date date1 = cal.getTime();
         cal.add(Calendar.MONTH, 1);
         java.util.Date date2 = cal.getTime();
 
@@ -1921,3 +1922,4 @@ public class Dates100Test extends TestBase {
         }
     }
 }
+

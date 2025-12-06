@@ -134,9 +134,9 @@ public class DoubleBiPredicate2025Test extends TestBase {
     public void testComplex_AndOrNegate() {
         DoubleBiPredicate predicate = ((DoubleBiPredicate) (t, u) -> t > 5.0).and((t, u) -> u < 10.0).or((t, u) -> t == u).negate();
 
-        assertFalse(predicate.test(6.0, 8.0)); // (6>5 && 8<10) = true, negated = false
-        assertFalse(predicate.test(3.0, 3.0)); // (3==3) = true, negated = false
-        assertTrue(predicate.test(3.0, 15.0)); // (3>5 && 15<10) = false, (3==15) = false, negated = true
+        assertFalse(predicate.test(6.0, 8.0));   // (6>5 && 8<10) = true, negated = false
+        assertFalse(predicate.test(3.0, 3.0));   // (3==3) = true, negated = false
+        assertTrue(predicate.test(3.0, 15.0));   // (3>5 && 15<10) = false, (3==15) = false, negated = true
     }
 
     @Test

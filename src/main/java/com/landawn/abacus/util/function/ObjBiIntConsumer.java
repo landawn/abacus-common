@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * ObjBiIntConsumer<String> printSubstring = (str, start, end) ->
  *     System.out.println(str.substring(start, end));
- * printSubstring.accept("Hello World", 0, 5);  // prints "Hello"
+ * printSubstring.accept("Hello World", 0, 5);   // prints "Hello"
  *
  * ObjBiIntConsumer<int[]> setRange = (array, start, value) -> {
  *     for (int i = start; i < array.length && i < start + value; i++) {

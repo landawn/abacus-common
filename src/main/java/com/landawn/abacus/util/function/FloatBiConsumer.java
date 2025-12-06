@@ -41,7 +41,7 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * <pre>{@code
      * FloatBiConsumer pointPrinter = (x, y) ->
      *     System.out.printf("Point: (%.2f, %.2f)%n", x, y);
-     * pointPrinter.accept(3.5f, 7.2f);  // Prints: Point: (3.50, 7.20)
+     * pointPrinter.accept(3.5f, 7.2f);   // Prints: Point: (3.50, 7.20)
      *
      * Map<Float, Float> coords = new HashMap<>();
      * FloatBiConsumer coordRecorder = (lat, lon) -> coords.put(lat, lon);

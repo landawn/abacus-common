@@ -79,29 +79,29 @@ import com.landawn.abacus.util.stream.Stream;
  * BooleanList withCapacity = new BooleanList(100);
  *
  * // Basic operations
- * flags.add(true);  // Append boolean value
- * boolean first = flags.get(0);  // Access by index: true
- * flags.set(1, true);  // Modify existing value
+ * flags.add(true);   // Append boolean value
+ * boolean first = flags.get(0);   // Access by index: true
+ * flags.set(1, true);   // Modify existing value
  *
  * // Boolean-specific operations
- * int trueCount = flags.occurrencesOf(true);  // Count true values
- * int falseCount = flags.occurrencesOf(false);  // Count false values
- * boolean hasTrue = flags.contains(true);  // Check for true values
+ * int trueCount = flags.occurrencesOf(true);   // Count true values
+ * int falseCount = flags.occurrencesOf(false);   // Count false values
+ * boolean hasTrue = flags.contains(true);   // Check for true values
  *
  * // Set operations for boolean logic
  * BooleanList set1 = BooleanList.of(true, false, true);
  * BooleanList set2 = BooleanList.of(false, true, true);
- * BooleanList and = set1.intersection(set2);  // Logical AND operation
- * BooleanList or = set1.symmetricDifference(set2);  // Logical XOR operation
+ * BooleanList and = set1.intersection(set2);   // Logical AND operation
+ * BooleanList or = set1.symmetricDifference(set2);   // Logical XOR operation
  *
  * // Bulk operations
  * boolean[] array = {true, true, false, true};
- * flags.addAll(array);  // Add array elements
- * flags.replaceAll(true, false);  // Replace all true with false
+ * flags.addAll(array);   // Add array elements
+ * flags.replaceAll(true, false);   // Replace all true with false
  *
  * // Conversion operations
- * boolean[] primitiveArray = flags.toArray();  // To primitive array
- * List<Boolean> boxedList = flags.boxed();  // To boxed collection
+ * boolean[] primitiveArray = flags.toArray();   // To primitive array
+ * List<Boolean> boxedList = flags.boxed();   // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -250,15 +250,15 @@ import com.landawn.abacus.util.stream.Stream;
  * BooleanList b = BooleanList.of(false, true, true, false);
  *
  * // AND operation: intersection finds positions where both are true
- * BooleanList and = a.intersection(b);  // [false, false, true, false]
+ * BooleanList and = a.intersection(b);   // [false, false, true, false]
  *
  * // OR operation: combine all true positions
  * BooleanList or = a.copy();
  * or.addAll(b);
- * or = or.distinct();  // [true, false, true, false, true]
+ * or = or.distinct();   // [true, false, true, false, true]
  *
  * // XOR operation: symmetric difference
- * BooleanList xor = a.symmetricDifference(b);  // [true, true, false, false]
+ * BooleanList xor = a.symmetricDifference(b);   // [true, true, false, false]
  * }</pre>
  *
  * @see PrimitiveList
@@ -410,7 +410,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BooleanList list = BooleanList.repeat(true, 5);  // [true, true, true, true, true]
+     * BooleanList list = BooleanList.repeat(true, 5);   // [true, true, true, true, true]
      * }</pre>
      *
      * @param element the boolean value to be repeated
@@ -430,7 +430,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BooleanList randomList = BooleanList.random(10);  // list with 10 random boolean values
+     * BooleanList randomList = BooleanList.random(10);   // list with 10 random boolean values
      * }</pre>
      *
      * @param len the number of random boolean values to generate. Must be non-negative.
@@ -596,7 +596,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -649,7 +649,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -710,7 +710,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.removeAllOccurrences(true);  // list is now [false, false]
+     * list.removeAllOccurrences(true);   // list is now [false, false]
      * }</pre>
      *
      * @param e the element to be removed from this list
@@ -800,7 +800,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.removeIf(b -> b);  // removes all true values, list is now [false, false]
+     * list.removeIf(b -> b);   // removes all true values, list is now [false, false]
      * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
@@ -835,7 +835,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.removeDuplicates();  // list is now [true, false]
+     * list.removeDuplicates();   // list is now [true, false]
      * }</pre>
      *
      * @return {@code true} if the list was modified (i.e., duplicates were removed);
@@ -988,7 +988,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.deleteAllByIndices(1, 3);  // removes elements at indices 1 and 3
+     * list.deleteAllByIndices(1, 3);   // removes elements at indices 1 and 3
      * // list is now [true, true, true]
      * }</pre>
      *
@@ -1024,7 +1024,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.deleteRange(1, 4);  // removes elements at indices 1, 2, and 3
+     * list.deleteRange(1, 4);   // removes elements at indices 1, 2, and 3
      * // list is now [true, true]
      * }</pre>
      *
@@ -1062,7 +1062,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.moveRange(1, 3, 2);  // moves elements at indices 1-2 to start at index 2
+     * list.moveRange(1, 3, 2);   // moves elements at indices 1-2 to start at index 2
      * // list is now [true, false, false, true, true]
      * }</pre>
      *
@@ -1177,7 +1177,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * int count = list.replaceAll(true, false);  // returns 2
+     * int count = list.replaceAll(true, false);   // returns 2
      * // list is now [false, false, false, false]
      * }</pre>
      *
@@ -1211,7 +1211,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.replaceAll(b -> !b);  // negates all values
+     * list.replaceAll(b -> !b);   // negates all values
      * // list is now [false, true, false, true]
      * }</pre>
      *
@@ -1232,7 +1232,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * boolean modified = list.replaceIf(b -> b, false);  // replace all true with false
+     * boolean modified = list.replaceIf(b -> b, false);   // replace all true with false
      * // list is now [false, false, false, false], modified is true
      * }</pre>
      *
@@ -1522,7 +1522,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false, true);
      * BooleanList list2 = BooleanList.of(true, false);
-     * BooleanList result = list1.difference(list2);  // result is [true, true]
+     * BooleanList result = list1.difference(list2);   // result is [true, true]
      * }</pre>
      *
      * @param b the BooleanList whose elements will be subtracted from this list
@@ -1649,7 +1649,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * int count = list.occurrencesOf(true);  // returns 3
+     * int count = list.occurrencesOf(true);   // returns 3
      * }</pre>
      *
      * @param valueToFind the value whose frequency is to be determined
@@ -2132,6 +2132,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return size == 0;
     }
 
+    /**
+     * Returns the number of elements in this list.
+     *
+     * @return the number of elements in this list
+     */
     @Override
     public int size() {
         return size;

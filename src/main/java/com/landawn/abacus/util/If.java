@@ -302,15 +302,15 @@ public final class If {
 
     /**
      * Creates an If instance based on the given boolean condition.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.is(temperature > 30)
      *   .then(() -> System.out.println("It's hot!"));
      * }</pre>
      *
-     * @param b the boolean condition to evaluate
-     * @return an If instance representing the condition
+     * @param b the boolean condition to evaluate.
+     * @return an If instance representing the condition.
      */
     public static If is(final boolean b) {
         return b ? TRUE : FALSE;
@@ -318,17 +318,17 @@ public final class If {
 
     /**
      * Creates an If instance with the negation of the given boolean condition.
-     * 
+     *
      * <p>This is equivalent to {@code is(!b)} but can be more readable in certain contexts.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.not(list.isEmpty())
      *   .then(() -> processList(list));
      * }</pre>
      *
-     * @param b the boolean condition to negate
-     * @return an If instance representing the negated condition
+     * @param b the boolean condition to negate.
+     * @return an If instance representing the negated condition.
      */
     public static If not(final boolean b) {
         return b ? FALSE : TRUE;
@@ -336,10 +336,10 @@ public final class If {
 
     /**
      * Creates an If instance that checks if an index is valid (non-negative).
-     * 
+     *
      * <p>Returns {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
      * This is commonly used for checking the result of indexOf operations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.exists(list.indexOf(element))
@@ -347,8 +347,8 @@ public final class If {
      *   .orElse(() -> System.out.println("Element not found"));
      * }</pre>
      *
-     * @param index the index value to check
-     * @return an If instance that is {@code true} if the index is non-negative
+     * @param index the index value to check.
+     * @return an If instance that is {@code true} if the index is non-negative.
      */
     public static If exists(final int index) {
         return index >= 0 ? TRUE : FALSE;
@@ -356,7 +356,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given object is {@code null}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isNull(result)
@@ -364,8 +364,8 @@ public final class If {
      *   .orElse(() -> processResult(result));
      * }</pre>
      *
-     * @param obj the object to check for null
-     * @return an If instance that is {@code true} if the object is null
+     * @param obj the object to check for null.
+     * @return an If instance that is {@code true} if the object is null.
      */
     public static If isNull(final Object obj) {
         return is(obj == null);
@@ -373,17 +373,17 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given CharSequence is {@code null} or empty.
-     * 
+     *
      * <p>A CharSequence is considered empty if it is {@code null} or has zero length.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(username)
      *   .then(() -> System.out.println("Username is required"));
      * }</pre>
      *
-     * @param s the CharSequence to check
-     * @return an If instance that is {@code true} if the CharSequence is {@code null} or empty
+     * @param s the CharSequence to check.
+     * @return an If instance that is {@code true} if the CharSequence is {@code null} or empty.
      */
     public static If isEmpty(final CharSequence s) {
         return is(Strings.isEmpty(s));
@@ -399,8 +399,8 @@ public final class If {
      * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
-     * @param a the boolean array to check
-     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
+     * @param a the boolean array to check.
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length.
      */
     public static If isEmpty(final boolean[] a) {
         return is(N.isEmpty(a));
@@ -416,8 +416,8 @@ public final class If {
      * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
-     * @param a the char array to check
-     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
+     * @param a the char array to check.
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length.
      */
     public static If isEmpty(final char[] a) {
         return is(N.isEmpty(a));
@@ -956,15 +956,32 @@ public final class If {
     }
 
     /**
-     * Executes no action if the condition is {@code true}, but allows chaining to an orElse clause.
-     * 
-     * <p>This method is useful when you only want to execute an action in the {@code false} case.</p>
-     * 
+     * Executes no action if the condition is {@code true}, but allows chaining to an {@code orElse} clause.
+     *
+     * <p>This method is useful when you only want to execute an action in the {@code false} case.
+     * It provides a way to explicitly document the intent that no action should be taken when
+     * the condition is {@code true}, while still providing a fluent API for handling the
+     * {@code false} case.</p>
+     *
+     * <p><b>Note:</b> In most cases, you can use the negated condition instead for better readability.
+     * For example, {@code If.not(condition).then(action)} is often clearer than
+     * {@code If.is(condition).thenDoNothing().orElse(action)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Example 1: Cache check - only load if not cached
      * If.is(cache.contains(key))
      *   .thenDoNothing()
      *   .orElse(() -> cache.load(key));
+     *
+     * // Example 2: Better alternative using negation
+     * If.not(cache.contains(key))
+     *   .then(() -> cache.load(key));
+     *
+     * // Example 3: Explicit no-op with fallback
+     * If.isNull(config)
+     *   .thenDoNothing()
+     *   .orElse(() -> loadDefaultConfig());
      * }</pre>
      *
      * @return an OrElse instance for chaining the else clause
@@ -975,19 +992,34 @@ public final class If {
 
     /**
      * Executes the given runnable if the condition is {@code true}.
-     * 
+     *
+     * <p>This is the primary method for performing conditional actions in the {@code If} fluent API.
+     * The provided runnable will be executed immediately if the condition evaluates to {@code true},
+     * otherwise it will be skipped. The method returns an {@link OrElse} instance that allows you
+     * to chain an alternative action to be executed when the condition is {@code false}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Example 1: Simple conditional execution
      * If.is(debugMode)
      *   .then(() -> logger.debug("Debug information"))
      *   .orElse(() -> logger.info("Normal operation"));
+     *
+     * // Example 2: Validation and processing
+     * If.notEmpty(items)
+     *   .then(() -> processItems(items))
+     *   .orElseThrow(() -> new IllegalStateException("No items to process"));
+     *
+     * // Example 3: Conditional side effects
+     * If.is(shouldCache)
+     *   .then(() -> cache.put(key, value));
      * }</pre>
      *
-     * @param <E> the type of exception that the runnable may throw
-     * @param cmd the runnable to execute if the condition is true
-     * @return an OrElse instance for optional chaining of an else clause
-     * @throws IllegalArgumentException if cmd is null
-     * @throws E if the runnable throws an exception
+     * @param <E> the type of exception that the runnable may throw.
+     * @param cmd the runnable to execute if the condition is true (must not be {@code null}).
+     * @return an OrElse instance for optional chaining of an else clause.
+     * @throws IllegalArgumentException if cmd is null.
+     * @throws E if the runnable throws an exception during execution.
      */
     public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -1001,23 +1033,38 @@ public final class If {
 
     /**
      * Executes the given consumer with the provided input if the condition is {@code true}.
-     * 
-     * <p>This method is useful for conditional processing of a value.</p>
-     * 
+     *
+     * <p>This method is useful for conditional processing of a value, allowing you to pass
+     * an initialization parameter that will be consumed if the condition evaluates to {@code true}.
+     * This is particularly valuable when you need to perform an action with a specific context
+     * or parameter only when certain conditions are met.</p>
+     *
+     * <p><b>⚠️ Beta Feature:</b> This API is experimental and may change in future versions.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Example 1: Conditional processing with context
      * If.notNull(user)
      *   .then(user, u -> saveUser(u))
      *   .orElse(() -> createNewUser());
+     *
+     * // Example 2: Conditional initialization with parameter
+     * ProcessingContext context = new ProcessingContext();
+     * If.notEmpty(dataList)
+     *   .then(context, (ctx, list) -> {
+     *       ctx.initialize();
+     *       processDataWithContext(ctx, dataList);
+     *   })
+     *   .orElse(ctx -> handleEmptyData(ctx));
      * }</pre>
      *
-     * @param <T> the type of the input to the consumer
-     * @param <E> the type of exception that the consumer may throw
-     * @param init the input value to pass to the consumer
-     * @param action the consumer to execute if the condition is true
-     * @return an OrElse instance for optional chaining of an else clause
-     * @throws IllegalArgumentException if action is null
-     * @throws E if the consumer throws an exception
+     * @param <T> the type of the input to the consumer.
+     * @param <E> the type of exception that the consumer may throw.
+     * @param init the input value to pass to the consumer (can be {@code null}).
+     * @param action the consumer to execute if the condition is true (must not be {@code null}).
+     * @return an OrElse instance for optional chaining of an else clause.
+     * @throws IllegalArgumentException if action is null.
+     * @throws E if the consumer throws an exception during execution.
      */
     @Beta
     public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -1032,21 +1079,44 @@ public final class If {
 
     /**
      * Throws the exception provided by the supplier if the condition is {@code true}.
-     * 
+     *
      * <p>This method is useful for validation scenarios where an exception should be thrown
-     * when a certain condition is met.</p>
-     * 
+     * when a certain condition is met. It provides a fluent way to express guard clauses and
+     * validation logic, making the code more readable and self-documenting.</p>
+     *
+     * <p>The exception supplier is only invoked if the condition is {@code true}, allowing
+     * for lazy creation of exception instances with dynamic messages or context.</p>
+     *
+     * <p><b>Note:</b> While this method returns an {@link OrElse} instance to maintain API
+     * consistency, it will never be reached if the condition is {@code true} since an exception
+     * will be thrown. The {@code orElse()} methods can only be invoked if the condition is
+     * {@code false}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Example 1: Validation with custom exception
      * If.isEmpty(requiredField)
      *   .thenThrow(() -> new ValidationException("Required field is empty"));
+     *
+     * // Example 2: Guard clause pattern
+     * If.isNull(user)
+     *   .thenThrow(() -> new IllegalArgumentException("User cannot be null"));
+     *
+     * // Example 3: Business rule validation with dynamic message
+     * If.is(amount < 0)
+     *   .thenThrow(() -> new IllegalArgumentException("Amount must be positive: " + amount));
+     *
+     * // Example 4: With orElse fallback (only executes if condition is false)
+     * If.isEmpty(data)
+     *   .thenThrow(() -> new DataNotFoundException("No data available"))
+     *   .orElse(() -> processData(data));
      * }</pre>
      *
-     * @param <E> the type of exception to throw
-     * @param exceptionSupplier the supplier that provides the exception to throw
-     * @return an OrElse instance (though it will never be reached if exception is thrown)
-     * @throws IllegalArgumentException if exceptionSupplier is null
-     * @throws E if the condition is true
+     * @param <E> the type of exception to throw.
+     * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null}).
+     * @return an OrElse instance (though it will never be reached if the condition is true and exception is thrown).
+     * @throws IllegalArgumentException if exceptionSupplier is null.
+     * @throws E if the condition is true.
      */
     public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier);
@@ -1062,9 +1132,24 @@ public final class If {
     /**
      * Represents the else clause in a conditional chain, allowing actions to be executed
      * when the initial condition is {@code false}.
-     * 
-     * <p>This class is returned by the then() methods of the If class and provides methods
+     *
+     * <p>This class is returned by the {@code then()} methods of the {@code If} class and provides methods
      * to specify what should happen when the initial condition evaluates to {@code false}.</p>
+     *
+     * <p><b>Key Features:</b>
+     * <ul>
+     *   <li><b>Lazy Evaluation:</b> Actions are only executed if the initial condition was {@code false}</li>
+     *   <li><b>Multiple Options:</b> Supports actions, exception throwing, and no-operation alternatives</li>
+     *   <li><b>Type Safety:</b> Maintains generic type information through the chain</li>
+     *   <li><b>Immutable State:</b> The condition state is immutable once created</li>
+     * </ul>
+     *
+     * <p><b>Usage Pattern:</b>
+     * <pre>{@code
+     * If.is(condition)
+     *   .then(() -> actionIfTrue())
+     *   .orElse(() -> actionIfFalse());
+     * }</pre>
      */
     public static final class OrElse {
         /**
@@ -1089,7 +1174,7 @@ public final class If {
          * <p>This constructor is package-private and used internally by the If class
          * to create OrElse instances representing the state of the conditional chain.</p>
          *
-         * @param b the boolean state indicating whether the initial If condition was true
+         * @param b the boolean state indicating whether the initial If condition was true.
          */
         OrElse(final boolean b) {
             isIfTrue = b;
@@ -1101,8 +1186,8 @@ public final class If {
          * <p>This method uses cached instances (TRUE or FALSE) for performance optimization,
          * avoiding object creation for repeated conditional evaluations.</p>
          *
-         * @param b the boolean state indicating whether the initial If condition was true
-         * @return an OrElse instance representing the given state (cached instance)
+         * @param b the boolean state indicating whether the initial If condition was true.
+         * @return an OrElse instance representing the given state (cached instance).
          */
         static OrElse of(final boolean b) {
             return b ? TRUE : FALSE;
@@ -1110,10 +1195,17 @@ public final class If {
 
         /**
          * Executes no action in the else case.
-         * 
+         *
          * <p>This method completes the conditional chain without performing any action
-         * when the initial condition is {@code false}. It's implicitly called when no orElse
+         * when the initial condition is {@code false}. It's implicitly called when no {@code orElse}
          * method is chained.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * If.is(condition)
+         *   .then(() -> doSomething())
+         *   .orElseDoNothing();  // Explicit no-op (optional, as it's the default behavior)
+         * }</pre>
          */
         void orElseDoNothing() {
             // Do nothing.
@@ -1121,18 +1213,36 @@ public final class If {
 
         /**
          * Executes the given runnable if the initial condition was {@code false}.
-         * 
+         *
+         * <p>This method completes the conditional chain by providing an alternative action
+         * to be executed when the initial {@code If} condition evaluates to {@code false}.
+         * It represents the "else" branch in the traditional if-else statement.</p>
+         *
+         * <p>The provided runnable will only be executed if the initial condition was {@code false}.
+         * If the condition was {@code true}, this method does nothing.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * // Example 1: Simple if-else pattern
          * If.is(hasPermission)
          *   .then(() -> performAction())
          *   .orElse(() -> showAccessDeniedMessage());
+         *
+         * // Example 2: Fallback logic
+         * If.notEmpty(cache)
+         *   .then(() -> loadFromCache())
+         *   .orElse(() -> loadFromDatabase());
+         *
+         * // Example 3: Default value assignment
+         * If.notNull(userPreference)
+         *   .then(() -> setting = userPreference)
+         *   .orElse(() -> setting = DEFAULT_VALUE);
          * }</pre>
          *
-         * @param <E> the type of exception that the runnable may throw
-         * @param cmd the runnable to execute if the initial condition was false
-         * @throws IllegalArgumentException if cmd is null
-         * @throws E if the runnable throws an exception
+         * @param <E> the type of exception that the runnable may throw.
+         * @param cmd the runnable to execute if the initial condition was false (must not be {@code null}).
+         * @throws IllegalArgumentException if cmd is null.
+         * @throws E if the runnable throws an exception during execution.
          */
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
             N.checkArgNotNull(cmd);
@@ -1144,20 +1254,33 @@ public final class If {
 
         /**
          * Executes the given consumer with the provided input if the initial condition was {@code false}.
-         * 
+         *
+         * <p>This method allows you to pass an initialization parameter that will be consumed
+         * if the initial condition evaluates to {@code false}. This is particularly useful when
+         * you need to provide a fallback action with specific context or parameters.</p>
+         *
+         * <p><b>⚠️ Beta Feature:</b> This API is experimental and may change in future versions.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * // Example 1: Fallback with parameter
          * If.isNull(cachedValue)
          *   .then(() -> value = loadFromCache())
          *   .orElse(key, k -> value = loadFromDatabase(k));
+         *
+         * // Example 2: Context-based fallback
+         * ProcessingContext context = new ProcessingContext();
+         * If.notEmpty(dataList)
+         *   .then(context, (ctx, list) -> processData(ctx, list))
+         *   .orElse(context, ctx -> setDefaultProcessingMode(ctx));
          * }</pre>
          *
-         * @param <T> the type of the input to the consumer
-         * @param <E> the type of exception that the consumer may throw
-         * @param init the input value to pass to the consumer
-         * @param action the consumer to execute if the initial condition was false
-         * @throws IllegalArgumentException if action is null
-         * @throws E if the consumer throws an exception
+         * @param <T> the type of the input to the consumer.
+         * @param <E> the type of exception that the consumer may throw.
+         * @param init the input value to pass to the consumer (can be {@code null}).
+         * @param action the consumer to execute if the initial condition was false (must not be {@code null}).
+         * @throws IllegalArgumentException if action is null.
+         * @throws E if the consumer throws an exception during execution.
          */
         @Beta
         public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -1170,21 +1293,42 @@ public final class If {
 
         /**
          * Throws the exception provided by the supplier if the initial condition was {@code false}.
-         * 
+         *
          * <p>This method is useful for validation scenarios where an exception should be thrown
-         * when a required condition is not met.</p>
-         * 
+         * when a required condition is not met. It provides a fluent way to express validation
+         * requirements and ensures that execution cannot continue when expected conditions fail.</p>
+         *
+         * <p>The exception supplier is only invoked if the initial condition was {@code false},
+         * allowing for lazy creation of exception instances with dynamic messages or context.
+         * If the condition was {@code true}, this method does nothing and execution continues normally.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * // Example 1: Validation after processing
          * If.notEmpty(results)
          *   .then(() -> processResults(results))
          *   .orElseThrow(() -> new NoResultsException("No results found"));
+         *
+         * // Example 2: Required condition check
+         * If.notNull(user)
+         *   .then(() -> authenticateUser(user))
+         *   .orElseThrow(() -> new IllegalStateException("User must not be null"));
+         *
+         * // Example 3: Business rule enforcement
+         * If.is(balance >= amount)
+         *   .then(() -> processWithdrawal(amount))
+         *   .orElseThrow(() -> new InsufficientFundsException("Balance: " + balance + ", Required: " + amount));
+         *
+         * // Example 4: Data validation
+         * If.notBlank(email)
+         *   .then(() -> sendEmail(email))
+         *   .orElseThrow(() -> new ValidationException("Email address is required"));
          * }</pre>
          *
-         * @param <E> the type of exception to throw
-         * @param exceptionSupplier the supplier that provides the exception to throw
-         * @throws IllegalArgumentException if exceptionSupplier is null
-         * @throws E if the initial condition was false
+         * @param <E> the type of exception to throw.
+         * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null}).
+         * @throws IllegalArgumentException if exceptionSupplier is null.
+         * @throws E if the initial condition was false.
          */
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier);

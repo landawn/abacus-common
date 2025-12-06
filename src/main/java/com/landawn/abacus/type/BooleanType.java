@@ -31,6 +31,10 @@ public final class BooleanType extends AbstractBooleanType {
      */
     public static final String BOOLEAN = Boolean.class.getSimpleName();
 
+    /**
+     * Package-private constructor for BooleanType.
+     * This constructor is called by the TypeFactory to create Boolean type instances.
+     */
     BooleanType() {
         super(BOOLEAN);
     }
@@ -65,7 +69,7 @@ public final class BooleanType extends AbstractBooleanType {
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType(Boolean.class);
      * ResultSet rs = ...;  // from SQL query
-     * Boolean isActive = type.get(rs, 1);  // retrieves Boolean from column 1
+     * Boolean isActive = type.get(rs, 1);   // retrieves Boolean from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -93,7 +97,7 @@ public final class BooleanType extends AbstractBooleanType {
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType(Boolean.class);
      * ResultSet rs = ...;  // from SQL query
-     * Boolean isActive = type.get(rs, "is_active");  // retrieves Boolean from "is_active" column
+     * Boolean isActive = type.get(rs, "is_active");   // retrieves Boolean from "is_active" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

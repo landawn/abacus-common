@@ -18,21 +18,18 @@ package com.landawn.abacus.type;
  * Type handler for Short wrapper type.
  * This class provides functionality to handle Short objects in database operations and type conversions.
  * It extends AbstractShortType to inherit common short type handling behavior.
- *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Getting a Type instance
- * Type<Short> type = TypeFactory.getType(Short.class);
- *
- * // Converting values
- * Short value = type.valueOf("123");
- * String str = type.stringOf(value);
- * }</pre>
  */
 public final class ShortType extends AbstractShortType {
 
+    /**
+     * The type name constant for Short type identification.
+     */
     public static final String SHORT = Short.class.getSimpleName();
 
+    /**
+     * Package-private constructor for ShortType.
+     * This constructor is called by the TypeFactory to create Short type instances.
+     */
     ShortType() {
         super(SHORT);
     }

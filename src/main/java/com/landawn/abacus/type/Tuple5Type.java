@@ -61,6 +61,16 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple5Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     * @param t4TypeName the name of the fourth element type
+     * @param t5TypeName the name of the fifth element type
+     */
     Tuple5Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, false));
 
@@ -121,6 +131,13 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      * Converts the given Tuple5 object to its string representation.
      * The tuple is serialized as a JSON array containing its five elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple5<String, Integer, Double, Boolean, Long>> type = TypeFactory.getType("Tuple5<String, Integer, Double, Boolean, Long>");
+     * Tuple5<String, Integer, Double, Boolean, Long> tuple = Tuple.of("Diana", 28, 165.5, false, 12345L);
+     * String str = type.stringOf(tuple);   // Returns ["Diana", 28, 165.5, false, 12345]
+     * }</pre>
+     *
      * @param x the Tuple5 object to convert
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
@@ -133,6 +150,13 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      * Parses the given string into a Tuple5 object.
      * The string should be a JSON array representation with exactly five elements.
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple5<String, Integer, Double, Boolean, Long>> type = TypeFactory.getType("Tuple5<String, Integer, Double, Boolean, Long>");
+     * Tuple5<String, Integer, Double, Boolean, Long> tuple = type.valueOf("[\"Diana\", 28, 165.5, false, 12345]");
+     * // tuple._1 = "Diana", tuple._2 = 28, tuple._3 = 165.5, tuple._4 = false, tuple._5 = 12345L
+     * }</pre>
      *
      * @param str the JSON string to parse
      * @return a Tuple5 object parsed from the string, or {@code null} if str is empty
@@ -171,7 +195,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

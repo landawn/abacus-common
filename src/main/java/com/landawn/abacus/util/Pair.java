@@ -43,8 +43,8 @@ import com.landawn.abacus.util.u.Optional;
  * nameAge.setRight(30);
  * }</pre>
  *
- * @param <L> the type of the left element
- * @param <R> the type of the right element
+ * @param <L> the type of the left element.
+ * @param <R> the type of the right element.
  * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.u.Nullable
  * @see com.landawn.abacus.util.Holder
@@ -89,14 +89,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> coordinates = Pair.of("X", 10);
-     * Pair<String, String> nullPair = Pair.of(null, null);  // Valid
+     * Pair<String, String> nullPair = Pair.of(null, null);   // Valid
      * }</pre>
      *
-     * @param <L> the type of the left element
-     * @param <R> the type of the right element
-     * @param l the left element of the pair, may be {@code null}
-     * @param r the right element of the pair, may be {@code null}
-     * @return a new Pair instance containing the specified left and right elements
+     * @param <L> the type of the left element.
+     * @param <R> the type of the right element.
+     * @param l the left element of the pair, may be {@code null}.
+     * @param r the right element of the pair, may be {@code null}.
+     * @return a new Pair instance containing the specified left and right elements.
      */
     public static <L, R> Pair<L, R> of(final L l, final R r) {
         return new Pair<>(l, r);
@@ -119,10 +119,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // pair.left returns "age", pair.right returns 25
      * }</pre>
      *
-     * @param <K> the key type of the Map.Entry, which becomes the left element type
-     * @param <V> the value type of the Map.Entry, which becomes the right element type
-     * @param entry the Map.Entry to convert to a Pair, must not be {@code null}
-     * @return a new Pair instance with the key as the left element and the value as the right element
+     * @param <K> the key type of the Map.Entry, which becomes the left element type.
+     * @param <V> the value type of the Map.Entry, which becomes the right element type.
+     * @param entry the Map.Entry to convert to a Pair, must not be {@code null}.
+     * @return a new Pair instance with the key as the left element and the value as the right element.
      */
     public static <K, V> Pair<K, V> create(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
@@ -151,9 +151,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }
      * }</pre>
      *
-     * @param <L> the type of the left elements in the array
-     * @param <R> the type of the right elements in the array
-     * @return an empty, immutable array of Pair instances
+     * @param <L> the type of the left elements in the array.
+     * @param <R> the type of the right elements in the array.
+     * @return an empty, immutable array of Pair instances.
      */
     @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R>[] emptyArray() {
@@ -169,10 +169,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * String left = pair.left();  // Returns "Hello"
+     * String left = pair.left();   // Returns "Hello"
      * }</pre>
      *
-     * @return the left element of this pair, may be {@code null}
+     * @return the left element of this pair, may be {@code null}.
      */
     public L left() {
         return this.left;
@@ -187,10 +187,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * Integer right = pair.right();  // Returns 42
+     * Integer right = pair.right();   // Returns 42
      * }</pre>
      *
-     * @return the right element of this pair, may be {@code null}
+     * @return the right element of this pair, may be {@code null}.
      */
     public R right() {
         return this.right;
@@ -202,10 +202,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * String left = pair.getLeft();  // Returns "Hello"
+     * String left = pair.getLeft();   // Returns "Hello"
      * }</pre>
      *
-     * @return the left element of the pair, may be {@code null}
+     * @return the left element of the pair, may be {@code null}.
      * @deprecated This method is deprecated in favor of the more concise {@link #left()} method.
      * @see #left()
      */
@@ -226,7 +226,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // pair.left() now returns "New"
      * }</pre>
      *
-     * @param left the new value for the left element, may be {@code null}
+     * @param left the new value for the left element, may be {@code null}.
      */
     public void setLeft(final L left) {
         this.left = left;
@@ -238,10 +238,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * Integer right = pair.getRight();  // Returns 42
+     * Integer right = pair.getRight();   // Returns 42
      * }</pre>
      *
-     * @return the right element of the pair, may be {@code null}
+     * @return the right element of the pair, may be {@code null}.
      * @deprecated This method is deprecated in favor of the more concise {@link #right()} method.
      * @see #right()
      */
@@ -262,7 +262,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // pair.right() now returns 20
      * }</pre>
      *
-     * @param right the new value for the right element, may be {@code null}
+     * @param right the new value for the right element, may be {@code null}.
      */
     public void setRight(final R right) {
         this.right = right;
@@ -281,8 +281,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // pair.left() returns "New", pair.right() returns 20
      * }</pre>
      *
-     * @param left the new value for the left element, may be {@code null}
-     * @param right the new value for the right element, may be {@code null}
+     * @param left the new value for the left element, may be {@code null}.
+     * @param right the new value for the right element, may be {@code null}.
      */
     public void set(final L left, final R right) {
         this.setLeft(left);
@@ -302,8 +302,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // oldLeft contains "Old", pair.left() returns "New"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element, may be {@code null}
-     * @return the previous value of the left element, may be {@code null}
+     * @param newLeft the new value to set for the left element, may be {@code null}.
+     * @return the previous value of the left element, may be {@code null}.
      */
     public L getAndSetLeft(final L newLeft) {
         final L res = left;
@@ -324,8 +324,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // newLeft contains "New", pair.left() also returns "New"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element, may be {@code null}
-     * @return the new value of the left element (same as the parameter), may be {@code null}
+     * @param newLeft the new value to set for the left element, may be {@code null}.
+     * @return the new value of the left element (same as the parameter), may be {@code null}.
      */
     public L setAndGetLeft(final L newLeft) {
         setLeft(newLeft);
@@ -345,8 +345,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // oldRight contains 10, pair.right() returns 20
      * }</pre>
      *
-     * @param newRight the new value to set for the right element, may be {@code null}
-     * @return the previous value of the right element, may be {@code null}
+     * @param newRight the new value to set for the right element, may be {@code null}.
+     * @return the previous value of the right element, may be {@code null}.
      */
     public R getAndSetRight(final R newRight) {
         final R res = right;
@@ -367,8 +367,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // newRight contains 20, pair.right() also returns 20
      * }</pre>
      *
-     * @param newRight the new value to set for the right element, may be {@code null}
-     * @return the new value of the right element (same as the parameter), may be {@code null}
+     * @param newRight the new value to set for the right element, may be {@code null}.
+     * @return the new value of the right element (same as the parameter), may be {@code null}.
      */
     public R setAndGetRight(final R newRight) {
         setRight(newRight);
@@ -393,12 +393,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // updated is false, pair.left() still returns "World" because 10 is not > 20
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}
-     * @param predicate the condition to test; receives the current pair as the first parameter
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
+     * @param predicate the condition to test; receives the current pair as the first parameter.
      *                  and the new left value as the second parameter
-     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
@@ -427,12 +427,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // updated is false, pair.right() still returns 20 because 30 is not < 20
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newRight the new value to potentially set for the right element, may be {@code null}
-     * @param predicate the condition to test; receives the current pair as the first parameter
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newRight the new value to potentially set for the right element, may be {@code null}.
+     * @param predicate the condition to test; receives the current pair as the first parameter.
      *                  and the new right value as the second parameter
-     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
@@ -464,14 +464,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // updated is false, pair remains ("World", 20) because 4 is not > 5
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}
-     * @param newRight the new value to potentially set for the right element, may be {@code null}
-     * @param predicate the condition to test; receives the current pair as the first parameter,
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
+     * @param newRight the new value to potentially set for the right element, may be {@code null}.
+     * @param predicate the condition to test; receives the current pair as the first parameter,.
      *                  the new left value as the second parameter, and the new right value as
      *                  the third parameter
-     * @return {@code true} if both values were updated (predicate returned true), {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if both values were updated (predicate returned true), {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
             final Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate) throws E {
@@ -497,7 +497,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // original remains unchanged
      * }</pre>
      *
-     * @return a new Pair with the right element as the left and the left element as the right
+     * @return a new Pair with the right element as the left and the left element as the right.
      */
     @Beta
     public Pair<R, L> reverse() {
@@ -523,7 +523,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // original.left() still returns "Numbers", copy.left() returns "NewNumbers"
      * }</pre>
      *
-     * @return a new Pair containing the same left and right elements as this pair
+     * @return a new Pair containing the same left and right elements as this pair.
      */
     public Pair<L, R> copy() {
         return new Pair<>(left, right);
@@ -542,7 +542,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // array.length equals 2
      * }</pre>
      *
-     * @return a new Object array of length 2 containing [left, right]
+     * @return a new Object array of length 2 containing [left, right].
      */
     public Object[] toArray() {
         return new Object[] { left, right };
@@ -571,11 +571,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // result2 != small, result2.length = 2, result2[0] = "Hello", result2[1] = "World"
      * }</pre>
      *
-     * @param <A> the component type of the array
-     * @param a the array into which the elements are to be stored, if it is big enough;
+     * @param <A> the component type of the array.
+     * @param a the array into which the elements are to be stored, if it is big enough;.
      *          otherwise, a new array of the same runtime type is allocated for this purpose
-     * @return an array containing the left element at index 0 and the right element at index 1
-     * @throws ArrayStoreException if the runtime type of the specified array is not a
+     * @return an array containing the left element at index 0 and the right element at index 1.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a.
      *         supertype of the runtime type of the elements in this pair
      */
     public <A> A[] toArray(A[] a) {
@@ -607,11 +607,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // Prints "Count" then "42"
      * }</pre>
      *
-     * @param <E> the type of exception that the consumer may throw
-     * @param consumer the action to be performed on each element; must accept a common
+     * @param <E> the type of exception that the consumer may throw.
+     * @param consumer the action to be performed on each element; must accept a common.
      *                 supertype of both L and R (typically Object)
-     * @throws E if the consumer throws an exception
-     * @throws ClassCastException if the consumer cannot accept the types of the elements
+     * @throws E if the consumer throws an exception.
+     * @throws ClassCastException if the consumer cannot accept the types of the elements.
      */
     public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
@@ -638,9 +638,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // Prints "Age = 25"
      * }</pre>
      *
-     * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with the left and right elements as arguments
-     * @throws E if the action throws an exception
+     * @param <E> the type of exception that the action may throw.
+     * @param action the action to be performed with the left and right elements as arguments.
+     * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
         action.accept(left, right);
@@ -666,9 +666,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // Prints "Score is high"
      * }</pre>
      *
-     * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with this pair as the argument
-     * @throws E if the action throws an exception
+     * @param <E> the type of exception that the action may throw.
+     * @param action the action to be performed with this pair as the argument.
+     * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E {
         action.accept(this);
@@ -690,11 +690,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // fullName equals "John Doe"
      * }</pre>
      *
-     * @param <U> the type of the result
-     * @param <E> the type of exception that the mapper function may throw
-     * @param mapper the function to apply to the left and right elements
-     * @return the result of applying the mapper function to both elements
-     * @throws E if the mapper function throws an exception
+     * @param <U> the type of the result.
+     * @param <E> the type of exception that the mapper function may throw.
+     * @param mapper the function to apply to the left and right elements.
+     * @return the result of applying the mapper function to both elements.
+     * @throws E if the mapper function throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E {
         return mapper.apply(left, right);
@@ -715,11 +715,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // isValid equals true
      * }</pre>
      *
-     * @param <U> the type of the result
-     * @param <E> the type of exception that the mapper function may throw
-     * @param mapper the function to apply to this pair
-     * @return the result of applying the mapper function to this pair
-     * @throws E if the mapper function throws an exception
+     * @param <U> the type of the result.
+     * @param <E> the type of exception that the mapper function may throw.
+     * @param mapper the function to apply to this pair.
+     * @return the result of applying the mapper function to this pair.
+     * @throws E if the mapper function throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E {
         return mapper.apply(this);
@@ -746,11 +746,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // filtered2.isPresent() is false because 5 is not > 10
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the condition to test with the left and right elements
-     * @return an Optional containing this pair if the predicate returns {@code true},
+     * @param <E> the type of exception that the predicate may throw.
+     * @param predicate the condition to test with the left and right elements.
+     * @return an Optional containing this pair if the predicate returns {@code true},.
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
         return predicate.test(left, right) ? Optional.of(this) : Optional.empty();
@@ -778,11 +778,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // filtered2.isPresent() is false because 4 + 10 = 14, which is not > 20
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the condition to test with this pair
-     * @return an Optional containing this pair if the predicate returns {@code true},
+     * @param <E> the type of exception that the predicate may throw.
+     * @param predicate the condition to test with this pair.
+     * @return an Optional containing this pair if the predicate returns {@code true},.
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
@@ -800,7 +800,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // tuple._1 equals "Hello", tuple._2 equals 42
      * }</pre>
      *
-     * @return a new Tuple2 containing the same elements as this pair
+     * @return a new Tuple2 containing the same elements as this pair.
      */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
@@ -822,7 +822,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // entry.setValue(31) would throw UnsupportedOperationException
      * }</pre>
      *
-     * @return a new immutable Map.Entry with the same key-value mapping as this pair
+     * @return a new immutable Map.Entry with the same key-value mapping as this pair.
      */
     public ImmutableEntry<L, R> toImmutableEntry() {
         return ImmutableEntry.of(left, right);
@@ -840,11 +840,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("key", 100);
      * Map.Entry<String, Integer> entry = pair;
-     * String key = entry.getKey();  // Returns "key"
+     * String key = entry.getKey();   // Returns "key"
      * }</pre>
      *
-     * @return the left element of this pair, may be {@code null}
-     * @deprecated Use {@link #left()} instead for cleaner code
+     * @return the left element of this pair, may be {@code null}.
+     * @deprecated Use {@link #left()} instead for cleaner code.
      */
     @Deprecated
     @Override
@@ -864,11 +864,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("key", 100);
      * Map.Entry<String, Integer> entry = pair;
-     * Integer value = entry.getValue();  // Returns 100
+     * Integer value = entry.getValue();   // Returns 100
      * }</pre>
      *
-     * @return the right element of this pair, may be {@code null}
-     * @deprecated Use {@link #right()} instead for cleaner code
+     * @return the right element of this pair, may be {@code null}.
+     * @deprecated Use {@link #right()} instead for cleaner code.
      */
     @Deprecated
     @Override
@@ -894,9 +894,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // oldValue equals 100, pair.right() now returns 200
      * }</pre>
      *
-     * @param value the new value to set for the right element, may be {@code null}
-     * @return the previous value of the right element, may be {@code null}
-     * @deprecated Use {@link #setRight(Object)} or {@link #getAndSetRight(Object)} instead
+     * @param value the new value to set for the right element, may be {@code null}.
+     * @return the previous value of the right element, may be {@code null}.
+     * @deprecated Use {@link #setRight(Object)} or {@link #getAndSetRight(Object)} instead.
      */
     @Deprecated
     @Override
@@ -921,10 +921,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Map<Pair<String, Integer>, String> map = new HashMap<>();
      * map.put(pair1, "value");
      * // Can retrieve using pair2 because they have the same hash code and are equal
-     * String value = map.get(pair2);  // Returns "value"
+     * String value = map.get(pair2);   // Returns "value"
      * }</pre>
      *
-     * @return a hash code value for this pair
+     * @return a hash code value for this pair.
      */
     @Override
     public int hashCode() {
@@ -954,11 +954,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * 
      * Pair<String, Integer> pair4 = Pair.of(null, null);
      * Pair<String, Integer> pair5 = Pair.of(null, null);
-     * pair4.equals(pair5);  // returns true
+     * pair4.equals(pair5);   // returns true
      * }</pre>
      *
-     * @param obj the object to be compared for equality with this pair
-     * @return {@code true} if the specified object is equal to this pair, {@code false} otherwise
+     * @param obj the object to be compared for equality with this pair.
+     * @return {@code true} if the specified object is equal to this pair, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -986,13 +986,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * System.out.println(pair);  // Prints: (Hello, 42)
+     * System.out.println(pair);   // Prints: (Hello, 42)
      * 
      * Pair<String, String> nullPair = Pair.of(null, "World");
-     * System.out.println(nullPair);  // Prints: (null, World)
+     * System.out.println(nullPair);   // Prints: (null, World)
      * }</pre>
      *
-     * @return a string representation of this pair in the format (left, right)
+     * @return a string representation of this pair in the format (left, right).
      */
     @Override
     public String toString() {

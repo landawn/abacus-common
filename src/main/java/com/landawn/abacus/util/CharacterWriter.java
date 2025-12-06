@@ -43,7 +43,7 @@ import java.io.Writer;
  * // ... more replacements
  * 
  * CharacterWriter writer = new BufferedJSONWriter();
- * writer.writeCharacter("Hello \"World\"");  // Outputs: Hello \"World\"
+ * writer.writeCharacter("Hello \"World\"");   // Outputs: Hello \"World\"
  * }</pre>
  * 
  * @see BufferedJSONWriter
@@ -136,7 +136,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Hello \"World\"".toCharArray();
-     * writer.writeCharacter(chars);  // Writes: Hello \"World\"
+     * writer.writeCharacter(chars);   // Writes: Hello \"World\"
      * }</pre>
      *
      * @param cbuf the character array to write
@@ -182,7 +182,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "prefix<data>suffix".toCharArray();
-     * writer.writeCharacter(chars, 6, 6);  // Writes: <data> (with escaping)
+     * writer.writeCharacter(chars, 6, 6);   // Writes: <data> (with escaping)
      * }</pre>
      *
      * @param cbuf the character array containing data to write
@@ -254,7 +254,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "prefix<data>suffix";
-     * writer.writeCharacter(text, 6, 6);  // Writes: <data> (with escaping)
+     * writer.writeCharacter(text, 6, 6);   // Writes: <data> (with escaping)
      * }</pre>
      *
      * @param str the string containing data to write
@@ -278,7 +278,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hex = getHexString(0x1F);  // Returns "&#x1f;"
+     * String hex = getHexString(0x1F);   // Returns "&#x1f;"
      * }</pre>
      *
      * @param ch the character code to convert
@@ -294,7 +294,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String unicode = getCharNum('\u2028');  // Returns "\\u2028"
+     * String unicode = getCharNum('\u2028');   // Returns "\\u2028"
      * }</pre>
      *
      * @param ch the character to convert

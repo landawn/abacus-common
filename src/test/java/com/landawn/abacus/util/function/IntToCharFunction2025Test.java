@@ -42,6 +42,6 @@ public class IntToCharFunction2025Test extends TestBase {
     public void test_applyAsChar_lambda() {
         IntToCharFunction function = value -> (char) (value + 32);
 
-        assertEquals('a', function.applyAsChar(65)); // 'A' + 32 = 'a'
+        assertEquals('a', function.applyAsChar(65));   // 'A' + 32 = 'a'
     }
 }

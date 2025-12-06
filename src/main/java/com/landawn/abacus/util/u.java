@@ -107,7 +107,7 @@ import com.landawn.abacus.util.stream.Stream;
  * OptionalBoolean maybeFlag = OptionalBoolean.of(true);
  * OptionalBoolean result = maybeFlag
  *     .filter(b -> b == true)
- *     .map(b -> !b);  // false
+ *     .map(b -> !b);   // false
  *
  * // Integer optional with mathematical operations
  * OptionalInt score = OptionalInt.of(85);
@@ -127,7 +127,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Cross-type transformations
  * OptionalChar letter = OptionalInt.of(65)
- *     .mapToChar(i -> (char) i);  // 'A'
+ *     .mapToChar(i -> (char) i);   // 'A'
  *
  * // Exception-safe operations
  * OptionalInt parsed = OptionalInt.empty()
@@ -140,8 +140,8 @@ import com.landawn.abacus.util.stream.Stream;
  *     });
  *
  * // Collection conversion
- * List<Integer> list = OptionalInt.of(42).toList();  // [42]
- * Set<Boolean> set = OptionalBoolean.of(true).toSet();  // {true}
+ * List<Integer> list = OptionalInt.of(42).toList();   // [42]
+ * Set<Boolean> set = OptionalBoolean.of(true).toSet();   // {true}
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -323,7 +323,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalBoolean empty = OptionalBoolean.empty();
-         * empty.isPresent();  // returns false
+         * empty.isPresent();   // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalBoolean}
@@ -339,7 +339,7 @@ public class u { // NOSONAR
          * <pre>{@code
          * OptionalBoolean optTrue = OptionalBoolean.of(true);
          * OptionalBoolean optFalse = OptionalBoolean.of(false);
-         * optTrue.get();  // returns true
+         * optTrue.get();   // returns true
          * }</pre>
          *
          * @param value the value to describe
@@ -630,7 +630,7 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to a value, if present
          * @return an {@code Optional} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -681,6 +681,8 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalBoolean}, if a value is present, otherwise the
          *         {@code OptionalBoolean} produced by the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) {
             if (isPresent) {
@@ -1070,7 +1072,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar empty = OptionalChar.empty();
-         * empty.isPresent();  // returns false
+         * empty.isPresent();   // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalChar}
@@ -1085,7 +1087,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar optChar = OptionalChar.of('A');
-         * optChar.get();  // returns 'A'
+         * optChar.get();   // returns 'A'
          * }</pre>
          *
          * @param value the value to describe
@@ -1166,6 +1168,12 @@ public class u { // NOSONAR
          * If a value is present, performs the given action with the value,
          * otherwise does nothing.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalChar.of('A').ifPresent(val -> System.out.println("Value: " + val));   // prints "Value: A"
+         * OptionalChar.empty().ifPresent(val -> System.out.println("Value: " + val));   // does nothing
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalChar}
@@ -1185,6 +1193,19 @@ public class u { // NOSONAR
         /**
          * If a value is present, performs the given action with the value,
          * otherwise performs the given empty-based action.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalChar.of('A').ifPresentOrElse(
+         *     val -> System.out.println("Value: " + val),
+         *     () -> System.out.println("No value")
+         * );  // prints "Value: A"
+         *
+         * OptionalChar.empty().ifPresentOrElse(
+         *     val -> System.out.println("Value: " + val),
+         *     () -> System.out.println("No value")
+         * );  // prints "No value"
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param <E2> the type of exception that the empty action may throw
@@ -1213,6 +1234,12 @@ public class u { // NOSONAR
          * If a value is present, and the value matches the given predicate,
          * returns an {@code OptionalChar} describing the value, otherwise returns an
          * empty {@code OptionalChar}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalChar.of('A').filter(ch -> Character.isUpperCase(ch));   // returns OptionalChar with 'A'
+         * OptionalChar.of('a').filter(ch -> Character.isUpperCase(ch));   // returns empty OptionalChar
+         * }</pre>
          *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to a value, if present
@@ -1311,8 +1338,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to a value, if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalChar}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -1359,10 +1386,14 @@ public class u { // NOSONAR
          * If a value is present, returns this {@code OptionalChar}, otherwise
          * returns the {@code OptionalChar} produced by the supplying function.
          *
+         * <p>This method is useful for chaining alternative {@code OptionalChar} sources,
+         * allowing fallback to another optional value when the current one is empty.
+         *
          * @param supplier the supplying function that produces an {@code OptionalChar}
          *        to be returned
          * @return this {@code OptionalChar}, if a value is present, otherwise the
          *         {@code OptionalChar} produced by the supplying function
+         * @throws NullPointerException if the supplier or the supplier's result is null
          */
         public OptionalChar or(final Supplier<OptionalChar> supplier) {
             if (isPresent()) {
@@ -1375,6 +1406,9 @@ public class u { // NOSONAR
         /**
          * If a value is present, returns the value, otherwise returns zero.
          *
+         * <p>This is a convenience method equivalent to {@code orElse((char) 0)},
+         * providing a concise way to retrieve a value with a default of the null character ('\u0000').
+         *
          * @return the value, if present, otherwise zero
          */
         public char orElseZero() {
@@ -1383,6 +1417,12 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, returns the value, otherwise returns {@code other}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalChar.of('A').orElse('Z');   // returns 'A'
+         * OptionalChar.empty().orElse('Z');   // returns 'Z'
+         * }</pre>
          *
          * @param other the value to be returned, if no value is present
          * @return the value, if present, otherwise {@code other}
@@ -1545,6 +1585,9 @@ public class u { // NOSONAR
          * If a value is present, returns a sequential {@link CharStream} containing
          * only that value, otherwise returns an empty {@code CharStream}.
          *
+         * <p>This method allows {@code OptionalChar} to be seamlessly integrated into
+         * stream processing pipelines, enabling functional-style operations on optional values.
+         *
          * @return the optional value as a {@code CharStream}
          */
         public CharStream stream() {
@@ -1558,6 +1601,8 @@ public class u { // NOSONAR
         /**
          * If a value is present, returns a {@code List} containing only
          * that value, otherwise returns an empty {@code List}.
+         *
+         * <p>The returned list is mutable and can be freely modified without affecting this {@code OptionalChar}.
          *
          * @return a {@code List} containing the value if present, otherwise an empty {@code List}
          */
@@ -1573,6 +1618,8 @@ public class u { // NOSONAR
          * If a value is present, returns a {@code Set} containing only
          * that value, otherwise returns an empty {@code Set}.
          *
+         * <p>The returned set is mutable and can be freely modified without affecting this {@code OptionalChar}.
+         *
          * @return a {@code Set} containing the value if present, otherwise an empty {@code Set}
          */
         public Set<Character> toSet() {
@@ -1586,6 +1633,8 @@ public class u { // NOSONAR
         /**
          * If a value is present, returns an {@code ImmutableList} containing only
          * that value, otherwise returns an empty {@code ImmutableList}.
+         *
+         * <p>The returned list is immutable and cannot be modified. Any attempt to modify it will throw an exception.
          *
          * @return an {@code ImmutableList} containing the value if present, otherwise an empty {@code ImmutableList}
          */
@@ -1601,6 +1650,8 @@ public class u { // NOSONAR
          * If a value is present, returns an {@code ImmutableSet} containing only
          * that value, otherwise returns an empty {@code ImmutableSet}.
          *
+         * <p>The returned set is immutable and cannot be modified. Any attempt to modify it will throw an exception.
+         *
          * @return an {@code ImmutableSet} containing the value if present, otherwise an empty {@code ImmutableSet}
          */
         public ImmutableSet<Character> toImmutableSet() {
@@ -1614,6 +1665,9 @@ public class u { // NOSONAR
         /**
          * If a value is present, returns an {@code Optional} containing the value,
          * otherwise returns an empty {@code Optional}.
+         *
+         * <p>This method converts the primitive {@code OptionalChar} to an object-based {@code Optional<Character>},
+         * which may be useful when interfacing with APIs that expect the standard Java {@code Optional} type.
          *
          * @return an {@code Optional} containing the value if present, otherwise an empty {@code Optional}
          */
@@ -1810,6 +1864,23 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if a value is present, otherwise {@code false}.
          *
+         * <p>This method is typically used to conditionally execute actions based on the presence of a value,
+         * although {@link #ifPresent(Throwables.ByteConsumer)} or {@link #ifPresentOrElse(Throwables.ByteConsumer, Throwables.Runnable)}
+         * are often more appropriate for such cases.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalByte opt = OptionalByte.of((byte) 42);
+         * if (opt.isPresent()) {
+         *     System.out.println("Value: " + opt.get());
+         * }
+         *
+         * OptionalByte empty = OptionalByte.empty();
+         * if (empty.isPresent()) {
+         *     // This block will not execute
+         * }
+         * }</pre>
+         *
          * @return {@code true} if a value is present, otherwise {@code false}
          */
         public boolean isPresent() {
@@ -1818,6 +1889,22 @@ public class u { // NOSONAR
 
         /**
          * Returns {@code true} if no value is present, otherwise {@code false}.
+         *
+         * <p>This method is the negation of {@link #isPresent()} and is provided as a convenience
+         * for improved code readability when checking for absent values.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalByte opt = OptionalByte.empty();
+         * if (opt.isEmpty()) {
+         *     System.out.println("No value present");
+         * }
+         *
+         * OptionalByte withValue = OptionalByte.of((byte) 42);
+         * if (withValue.isEmpty()) {
+         *     // This block will not execute
+         * }
+         * }</pre>
          *
          * @return {@code true} if no value is present, otherwise {@code false}
          */
@@ -1951,8 +2038,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception the mapping function may throw
          * @param mapper the mapping function to apply to the value, if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalByte}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -1998,6 +2085,8 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalByte} if a value is present, otherwise an
          *         {@code OptionalByte} produced by the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalByte or(final Supplier<OptionalByte> supplier) {
             if (isPresent) {
@@ -2174,6 +2263,20 @@ public class u { // NOSONAR
          * Returns a {@code ByteStream} containing only the value if present,
          * otherwise returns an empty {@code ByteStream}.
          *
+         * <p>This method is useful for converting the optional value into a stream for further processing
+         * with stream operations like filtering, mapping, or collecting.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalByte opt = OptionalByte.of((byte) 42);
+         * ByteStream stream = opt.stream();
+         * stream.forEach(System.out::println);  // prints: 42
+         *
+         * OptionalByte empty = OptionalByte.empty();
+         * ByteStream emptyStream = empty.stream();
+         * // emptyStream contains no elements
+         * }</pre>
+         *
          * @return the optional value as a {@code ByteStream}
          */
         public ByteStream stream() {
@@ -2188,6 +2291,20 @@ public class u { // NOSONAR
          * Returns a {@code List} containing only the value if present,
          * otherwise returns an empty {@code List}.
          *
+         * <p>The returned list is mutable and can be modified after creation.
+         * This method is useful for integrating optional values with APIs that expect collections.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalByte opt = OptionalByte.of((byte) 42);
+         * List<Byte> list = opt.toList();
+         * System.out.println(list);  // prints: [42]
+         *
+         * OptionalByte empty = OptionalByte.empty();
+         * List<Byte> emptyList = empty.toList();
+         * System.out.println(emptyList);  // prints: []
+         * }</pre>
+         *
          * @return a {@code List} containing the optional value if present, otherwise an empty list
          */
         public List<Byte> toList() {
@@ -2201,6 +2318,20 @@ public class u { // NOSONAR
         /**
          * Returns a {@code Set} containing only the value if present,
          * otherwise returns an empty {@code Set}.
+         *
+         * <p>The returned set is mutable and can be modified after creation.
+         * This method is useful for integrating optional values with APIs that expect set collections.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalByte opt = OptionalByte.of((byte) 42);
+         * Set<Byte> set = opt.toSet();
+         * System.out.println(set);  // prints: [42]
+         *
+         * OptionalByte empty = OptionalByte.empty();
+         * Set<Byte> emptySet = empty.toSet();
+         * System.out.println(emptySet);  // prints: []
+         * }</pre>
          *
          * @return a {@code Set} containing the optional value if present, otherwise an empty set
          */
@@ -2575,8 +2706,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception the mapping function may throw
          * @param mapper the mapping function to apply to the value, if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalShort}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -2622,6 +2753,8 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalShort} if a value is present, otherwise an
          *         {@code OptionalShort} produced by the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalShort or(final Supplier<OptionalShort> supplier) {
             if (isPresent) {
@@ -3003,7 +3136,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalInt empty = OptionalInt.empty();
-         * empty.isPresent();  // returns false
+         * empty.isPresent();   // returns false
          * }</pre>
          *
          * @return an empty {@code OptionalInt}
@@ -3018,7 +3151,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalInt opt = OptionalInt.of(42);
-         * opt.get();  // returns 42
+         * opt.get();   // returns 42
          * }</pre>
          *
          * @param value the int value to be present
@@ -3313,8 +3446,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalInt}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -3353,10 +3486,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns this OptionalInt if a value is present, otherwise returns the OptionalInt produced by the supplying function.
+         * Returns this {@code OptionalInt} if a value is present, otherwise returns the {@code OptionalInt} produced by the supplying function.
          *
-         * @param supplier the supplying function that produces an OptionalInt to be returned
-         * @return this OptionalInt if a value is present, otherwise the result of the supplying function
+         * @param supplier the supplying function that produces an {@code OptionalInt} to be returned
+         * @return this {@code OptionalInt} if a value is present, otherwise the result of the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalInt or(final Supplier<OptionalInt> supplier) {
             if (isPresent) {
@@ -3969,8 +4104,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalLong}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -4009,10 +4144,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns this OptionalLong if a value is present, otherwise returns the OptionalLong produced by the supplying function.
+         * Returns this {@code OptionalLong} if a value is present, otherwise returns the {@code OptionalLong} produced by the supplying function.
          *
-         * @param supplier the supplying function that produces an OptionalLong to be returned
-         * @return this OptionalLong if a value is present, otherwise the result of the supplying function
+         * @param supplier the supplying function that produces an {@code OptionalLong} to be returned
+         * @return this {@code OptionalLong} if a value is present, otherwise the result of the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalLong or(final Supplier<OptionalLong> supplier) {
             if (isPresent) {
@@ -4595,8 +4732,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalFloat}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -4635,10 +4772,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns this OptionalFloat if a value is present, otherwise returns the OptionalFloat produced by the supplying function.
+         * Returns this {@code OptionalFloat} if a value is present, otherwise returns the {@code OptionalFloat} produced by the supplying function.
          *
-         * @param supplier the supplying function that produces an OptionalFloat to be returned
-         * @return this OptionalFloat if a value is present, otherwise the result of the supplying function
+         * @param supplier the supplying function that produces an {@code OptionalFloat} to be returned
+         * @return this {@code OptionalFloat} if a value is present, otherwise the result of the supplying function
+         * @throws NullPointerException if no value is present and the supplying function is {@code null}
+         *         or returns {@code null}
          */
         public OptionalFloat or(final Supplier<OptionalFloat> supplier) {
             if (isPresent) {
@@ -4996,6 +5135,9 @@ public class u { // NOSONAR
         /**
          * Returns an {@code OptionalDouble} containing the specified value.
          *
+         * <p><b>Note:</b> This method caches the value {@code 0.0} for performance optimization.
+         * When {@code value} is {@code 0.0}, the same cached instance is returned.
+         *
          * @param value the value to store
          * @return an {@code OptionalDouble} containing the specified value
          */
@@ -5046,7 +5188,8 @@ public class u { // NOSONAR
          *
          * @return the value if present
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
+         * @deprecated Use {@link #get()} instead. This method is maintained for compatibility with {@code java.util.OptionalDouble}
+         *             but the simpler {@code get()} method is preferred in new code.
          * @see #get()
          */
         @Deprecated
@@ -5074,6 +5217,12 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, performs the given action with the value, otherwise does nothing.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(3.14).ifPresent(val -> System.out.println("Value: " + val));   // Prints: Value: 3.14
+         * OptionalDouble.empty().ifPresent(val -> System.out.println("Value: " + val));    // Does nothing
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
@@ -5120,6 +5269,13 @@ public class u { // NOSONAR
         /**
          * If a value is present, and the value matches the given predicate, returns an {@code OptionalDouble} describing the value, otherwise returns an empty {@code OptionalDouble}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(5.0).filter(x -> x > 3.0);   // Returns OptionalDouble[5.0]
+         * OptionalDouble.of(2.0).filter(x -> x > 3.0);   // Returns OptionalDouble.empty
+         * OptionalDouble.empty().filter(x -> x > 3.0);   // Returns OptionalDouble.empty
+         * }</pre>
+         *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if present
          * @return an {@code OptionalDouble} describing the value if present and matching the predicate, otherwise an empty {@code OptionalDouble}
@@ -5138,6 +5294,12 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, returns an {@code OptionalDouble} describing the result of applying the given mapping function to the value, otherwise returns an empty {@code OptionalDouble}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(5.0).map(x -> x * 2);   // Returns OptionalDouble[10.0]
+         * OptionalDouble.empty().map(x -> x * 2);   // Returns OptionalDouble.empty
+         * }</pre>
          *
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
@@ -5199,12 +5361,18 @@ public class u { // NOSONAR
          * the value, otherwise returns an empty {@code Optional}.
          * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(3.14).mapToObj(String::valueOf);   // Returns Optional["3.14"]
+         * OptionalDouble.empty().mapToObj(String::valueOf);    // Returns Optional.empty
+         * }</pre>
+         *
          * @param <T> the type of the value returned from the mapping function
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code OptionalDouble}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
@@ -5221,6 +5389,14 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, returns the result of applying the given {@code OptionalDouble}-bearing mapping function to the value, otherwise returns an empty {@code OptionalDouble}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(5.0).flatMap(x -> x > 0 ? OptionalDouble.of(Math.sqrt(x)) : OptionalDouble.empty());
+         * // Returns OptionalDouble[2.23606797749979]
+         * OptionalDouble.empty().flatMap(x -> OptionalDouble.of(Math.sqrt(x)));
+         * // Returns OptionalDouble.empty
+         * }</pre>
          *
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
@@ -5241,8 +5417,15 @@ public class u { // NOSONAR
         /**
          * If a value is present, returns this {@code OptionalDouble}, otherwise returns the {@code OptionalDouble} produced by the supplying function.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(3.14).or(() -> OptionalDouble.of(2.71));   // Returns OptionalDouble[3.14]
+         * OptionalDouble.empty().or(() -> OptionalDouble.of(2.71));    // Returns OptionalDouble[2.71]
+         * }</pre>
+         *
          * @param supplier the supplying function that produces an {@code OptionalDouble} to be returned
          * @return this {@code OptionalDouble} if a value is present, otherwise the {@code OptionalDouble} produced by the supplying function
+         * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
          */
         public OptionalDouble or(final Supplier<OptionalDouble> supplier) {
             if (isPresent) {
@@ -5263,6 +5446,12 @@ public class u { // NOSONAR
 
         /**
          * Returns the value if present, otherwise returns the specified default value.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(3.14).orElse(0.0);   // Returns 3.14
+         * OptionalDouble.empty().orElse(0.0);    // Returns 0.0
+         * }</pre>
          *
          * @param other the value to be returned if no value is present
          * @return the value if present, otherwise {@code other}
@@ -5392,6 +5581,14 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise throws an exception produced by the exception supplying function.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * OptionalDouble.of(3.14).orElseThrow(() -> new IllegalStateException("No value"));
+         * // Returns 3.14
+         * OptionalDouble.empty().orElseThrow(() -> new IllegalStateException("No value"));
+         * // Throws IllegalStateException
+         * }</pre>
+         *
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
@@ -5500,9 +5697,13 @@ public class u { // NOSONAR
         }
 
         /**
+         * Converts this {@code OptionalDouble} to a {@code java.util.OptionalDouble}.
+         *
+         * <p><b>Note:</b> This is a deprecated convenience method. Use {@link #toJdkOptional()} instead.
          *
          * @return a {@code java.util.OptionalDouble} containing the value if present, otherwise an empty {@code java.util.OptionalDouble}
-         * @deprecated to be removed in a future version.
+         * @deprecated Use {@link #toJdkOptional()} instead. This method will be removed in a future version.
+         * @see #toJdkOptional()
          */
         @Deprecated
         public java.util.OptionalDouble __() {//NOSONAR
@@ -5632,7 +5833,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<String> empty = Optional.empty();
-         * empty.isPresent();  // returns false
+         * empty.isPresent();   // returns false
          * }</pre>
          *
          * @param <T> the type of the non-existent value
@@ -5649,7 +5850,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<String> opt = Optional.of("Hello");
-         * opt.get();  // returns "Hello"
+         * opt.get();   // returns "Hello"
          * }</pre>
          *
          * @param value the {@code non-null} value to store
@@ -5673,7 +5874,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional<Integer> opt = Optional.of(42);
-         * opt.get();  // returns 42
+         * opt.get();   // returns 42
          * }</pre>
          *
          * @param <T> the type of the value
@@ -5835,8 +6036,8 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}. 
+         *         function to the value of this {@code Optional}, if a value is
+         *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
@@ -6073,9 +6274,9 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result produced by the supplying function.
          *
-         * @param other a {@code Supplier} whose result is returned if no value is present
+         * @param other the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if no value is present and the supplying function is null
+         * @throws IllegalArgumentException if {@code other} is {@code null}
          */
         public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
             N.checkArgNotNull(other, cs.other);
@@ -6504,8 +6705,9 @@ public class u { // NOSONAR
          * otherwise returns an empty {@code Nullable}.
          *
          * @param <T> the type of the value
-         * @param optional the {@code java.util.Optional} to convert
+         * @param optional the {@code java.util.Optional} to convert, must not be {@code null}
          * @return a {@code Nullable} containing the value if present in the {@code java.util.Optional}, otherwise an empty {@code Nullable}
+         * @throws NullPointerException if {@code optional} is {@code null}
          */
         public static <T> Nullable<T> from(final java.util.Optional<T> optional) {
             return optional.map(Nullable::new).orElseGet(Nullable::empty);

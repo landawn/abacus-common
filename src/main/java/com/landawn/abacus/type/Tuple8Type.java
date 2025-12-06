@@ -70,6 +70,19 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple8Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     * @param t4TypeName the name of the fourth element type
+     * @param t5TypeName the name of the fifth element type
+     * @param t6TypeName the name of the sixth element type
+     * @param t7TypeName the name of the seventh element type
+     * @param t8TypeName the name of the eighth element type
+     */
     Tuple8Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
             final String t6TypeName, final String t7TypeName, final String t8TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, false));
@@ -188,7 +201,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

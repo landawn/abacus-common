@@ -88,7 +88,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * QuadPredicate<Integer, Integer, Integer, Integer> hasNegative =
      *     allPositive.negate();
      *
-     * boolean result = hasNegative.test(1, -2, 3, 4);  // Returns true
+     * boolean result = hasNegative.test(1, -2, 3, 4);   // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate

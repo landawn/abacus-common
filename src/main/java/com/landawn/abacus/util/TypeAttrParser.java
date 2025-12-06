@@ -85,7 +85,7 @@ public final class TypeAttrParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeAttrParser parser = TypeAttrParser.parse("ArrayList<String>(10)");
-     * String name = parser.getClassName();  // Returns "ArrayList"
+     * String name = parser.getClassName();   // Returns "ArrayList"
      * }</pre>
      *
      * @return the class name portion of the parsed type attribute
@@ -102,7 +102,7 @@ public final class TypeAttrParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeAttrParser parser = TypeAttrParser.parse("Map<String, List<Integer>>");
-     * String[] types = parser.getTypeParameters();  // Returns ["String", "List<Integer>"]
+     * String[] types = parser.getTypeParameters();   // Returns ["String", "List<Integer>"]
      * }</pre>
      *
      * @return an array of generic type parameter strings, never null
@@ -119,10 +119,10 @@ public final class TypeAttrParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeAttrParser parser = TypeAttrParser.parse("StringBuilder(100)");
-     * String[] params = parser.getParameters();  // Returns ["100"]
+     * String[] params = parser.getParameters();   // Returns ["100"]
      *
      * parser = TypeAttrParser.parse("HashMap(16, 0.75f)");
-     * params = parser.getParameters();  // Returns ["16", "0.75f"]
+     * params = parser.getParameters();   // Returns ["16", "0.75f"]
      * }</pre>
      *
      * @return an array of constructor parameter strings, never null

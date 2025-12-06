@@ -24,6 +24,11 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractAtomicType<T> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractAtomicType with the specified type name.
+     *
+     * @param typeName the name of the atomic type (e.g., "AtomicInteger", "AtomicLong", "AtomicBoolean")
+     */
     protected AbstractAtomicType(final String typeName) {
         super(typeName);
     }

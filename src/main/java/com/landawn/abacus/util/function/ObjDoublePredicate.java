@@ -45,13 +45,12 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * <pre>{@code
      * ObjDoublePredicate<String> isLengthAbove = (str, threshold) ->
      *     str.length() > threshold;
-     * boolean isLong = isLengthAbove.test("Hello World", 5.0);  // Returns true
+     * boolean isLong = isLengthAbove.test("Hello World", 5.0);   // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive double value
-     * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(T t, double u);
@@ -98,7 +97,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *     isPriceInRange.and(isAvailable);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      */
@@ -127,7 +126,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *     isCheap.or(isOnSale);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      */

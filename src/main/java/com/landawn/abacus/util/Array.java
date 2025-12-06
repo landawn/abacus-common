@@ -79,26 +79,26 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Boxing operations - primitive to wrapper arrays
  * int[] primitives = {1, 2, 3, 4, 5};
- * Integer[] boxed = Array.box(primitives);  // [1, 2, 3, 4, 5]
+ * Integer[] boxed = Array.box(primitives);         // [1, 2, 3, 4, 5]
  *
  * // Unboxing operations - wrapper to primitive arrays
  * Integer[] wrappers = {1, null, 3, null, 5};
- * int[] unboxed = Array.unbox(wrappers, -1);  // [1, -1, 3, -1, 5] (null replaced with -1)
+ * int[] unboxed = Array.unbox(wrappers, -1);       // [1, -1, 3, -1, 5] (null replaced with -1)
  *
  * // Range-based unboxing
- * int[] subset = Array.unbox(wrappers, 1, 4, 0);  // [0, 3, 0] (from index 1 to 4)
+ * int[] subset = Array.unbox(wrappers, 1, 4, 0);   // [0, 3, 0] (from index 1 to 4)
  *
  * // Matrix operations - 2D array transpose
  * int[][] matrix = {{1, 2, 3}, {4, 5, 6}};
- * int[][] transposed = Array.transpose(matrix);  // {{1, 4}, {2, 5}, {3, 6}}
+ * int[][] transposed = Array.transpose(matrix);    // {{1, 4}, {2, 5}, {3, 6}}
  *
  * // Multi-dimensional array operations
  * Integer[][][] cube = new Integer[2][3][4];
  * int[][][] unboxedCube = Array.unbox(cube, 0);
  *
  * // Null-safe operations
- * int[] result = Array.unbox((Integer[]) null, 42);  // Returns null
- * int[][] transposed2 = Array.transpose((int[][]) null);  // Returns null
+ * int[] result = Array.unbox((Integer[]) null, 42);        // Returns null
+ * int[][] transposed2 = Array.transpose((int[][]) null);   // Returns null
  * }</pre>
  *
  * <p><b>Boxing Operations:</b>
@@ -209,15 +209,15 @@ import com.landawn.abacus.annotation.NullSafe;
  * Integer[] rawData = {1, null, 3, null, 5, 6, null, 8};
  *
  * // Safe unboxing with default value for nulls
- * int[] processedData = Array.unbox(rawData, 0);  // [1, 0, 3, 0, 5, 6, 0, 8]
+ * int[] processedData = Array.unbox(rawData, 0);   // [1, 0, 3, 0, 5, 6, 0, 8]
  *
  * // Process subset of data
- * int[] subset = Array.unbox(rawData, 2, 6, -1);  // [3, -1, 5, 6]
+ * int[] subset = Array.unbox(rawData, 2, 6, -1);   // [3, -1, 5, 6]
  *
  * // Work with 2D arrays
  * Integer[][] matrix = {{1, 2, 3}, {4, null, 6}, {7, 8, 9}};
- * int[][] cleanMatrix = Array.unbox(matrix, 0);  // Replace nulls with 0
- * int[][] transposed = Array.transpose(cleanMatrix);  // Transpose the matrix
+ * int[][] cleanMatrix = Array.unbox(matrix, 0);        // Replace nulls with 0
+ * int[][] transposed = Array.transpose(cleanMatrix);   // Transpose the matrix
  *
  * // Dynamic array creation
  * double[] doubles = Array.newInstance(double.class, 10);
@@ -236,18 +236,18 @@ import com.landawn.abacus.annotation.NullSafe;
  * double[][] matrixB = {{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
  *
  * // Transpose matrices for multiplication compatibility
- * double[][] transposedA = Array.transpose(matrixA);  // 3x2 matrix
- * double[][] transposedB = Array.transpose(matrixB);  // 2x3 matrix
+ * double[][] transposedA = Array.transpose(matrixA);   // 3x2 matrix
+ * double[][] transposedB = Array.transpose(matrixB);   // 2x3 matrix
  *
  * // Working with null-containing matrices
  * Double[][] sparseMatrix = {{1.0, null, 3.0}, {null, 5.0, null}};
- * double[][] denseMatrix = Array.unbox(sparseMatrix, 0.0);  // Fill nulls with 0.0
+ * double[][] denseMatrix = Array.unbox(sparseMatrix, 0.0);   // Fill nulls with 0.0
  * double[][] result = Array.transpose(denseMatrix);
  *
  * // Validate matrix structure
  * try {
- *     double[][] invalid = {{1.0, 2.0}, {3.0}};  // Irregular matrix
- *     double[][] transposed = Array.transpose(invalid);  // Will handle gracefully
+ *     double[][] invalid = {{1.0, 2.0}, {3.0}};           // Irregular matrix
+ *     double[][] transposed = Array.transpose(invalid);   // Will handle gracefully
  * } catch (Exception e) {
  *     // Handle validation errors
  * }
@@ -320,7 +320,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> the type of the array.
      * @param componentType the Class object representing the component type of the new array.
      * @param dimensions the dimensions of the new array.
-     * @return the new array
+     * @return the new array.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -338,7 +338,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * int length = Array.getLength(array);  // returns 3
+     * int length = Array.getLength(array);   // returns 3
      * int[] nums = {1, 2, 3, 4};
      * int numLength = Array.getLength(nums);    // returns 4
      * int nullLength = Array.getLength(null);   // returns 0
@@ -362,7 +362,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3};
-     * Integer element = Array.get(array, 1);  // returns 2
+     * Integer element = Array.get(array, 1);   // returns 2
      * }</pre>
      *
      * @param <T> the type of the array.
@@ -386,7 +386,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * boolean element = Array.getBoolean(array, 1);  // returns false
+     * boolean element = Array.getBoolean(array, 1);   // returns false
      * }</pre>
      *
      * @param array the array from which to retrieve the boolean value.
@@ -409,7 +409,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * byte element = Array.getByte(array, 1);  // returns 2
+     * byte element = Array.getByte(array, 1);   // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the byte value.
@@ -432,7 +432,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * char element = Array.getChar(array, 1);  // returns 'b'
+     * char element = Array.getChar(array, 1);   // returns 'b'
      * }</pre>
      *
      * @param array the array from which to retrieve the char value.
@@ -455,7 +455,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * short element = Array.getShort(array, 1);  // returns 2
+     * short element = Array.getShort(array, 1);   // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the short value.
@@ -478,7 +478,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * int element = Array.getInt(array, 1);  // returns 2
+     * int element = Array.getInt(array, 1);   // returns 2
      * }</pre>
      *
      * @param array the array from which to retrieve the integer value.
@@ -501,7 +501,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * long element = Array.getLong(array, 1);  // returns 2L
+     * long element = Array.getLong(array, 1);   // returns 2L
      * }</pre>
      *
      * @param array the array from which to retrieve the long value.
@@ -524,7 +524,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
-     * float element = Array.getFloat(array, 1);  // returns 2.2f
+     * float element = Array.getFloat(array, 1);   // returns 2.2f
      * }</pre>
      *
      * @param array the array from which to retrieve the float value.
@@ -547,7 +547,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
-     * double element = Array.getDouble(array, 1);  // returns 2.2
+     * double element = Array.getDouble(array, 1);   // returns 2.2
      * }</pre>
      *
      * @param array the array from which to retrieve the double value.
@@ -570,7 +570,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3};
-     * Array.set(array, 1, 4);  // array now is {1, 4, 3}
+     * Array.set(array, 1, 4);   // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the value.
@@ -593,7 +593,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * Array.setBoolean(array, 1, true);  // array now is {true, true, true}
+     * Array.setBoolean(array, 1, true);   // array now is {true, true, true}
      * }</pre>
      *
      * @param array the array in which to set the boolean value.
@@ -616,7 +616,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * Array.setByte(array, 1, (byte)4);  // array now is {1, 4, 3}
+     * Array.setByte(array, 1, (byte)4);   // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the byte value.
@@ -639,7 +639,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * Array.setChar(array, 1, 'd');  // array now is {'a', 'd', 'c'}
+     * Array.setChar(array, 1, 'd');   // array now is {'a', 'd', 'c'}
      * }</pre>
      *
      * @param array the array in which to set the char value.
@@ -662,7 +662,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * Array.setShort(array, 1, (short)4);  // array now is {1, 4, 3}
+     * Array.setShort(array, 1, (short)4);   // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the short value.
@@ -685,7 +685,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * Array.setInt(array, 1, 4);  // array now is {1, 4, 3}
+     * Array.setInt(array, 1, 4);   // array now is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the integer value.
@@ -708,7 +708,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * Array.setLong(array, 1, 4L);  // array now is {1L, 4L, 3L}
+     * Array.setLong(array, 1, 4L);   // array now is {1L, 4L, 3L}
      * }</pre>
      *
      * @param array the array in which to set the long value.
@@ -731,7 +731,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
-     * Array.setFloat(array, 1, 4.4f);  // array now is {1.1f, 4.4f, 3.3f}
+     * Array.setFloat(array, 1, 4.4f);   // array now is {1.1f, 4.4f, 3.3f}
      * }</pre>
      *
      * @param array the array in which to set the float value.
@@ -754,7 +754,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
-     * Array.setDouble(array, 1, 4.4);  // array now is {1.1, 4.4, 3.3}
+     * Array.setDouble(array, 1, 4.4);   // array now is {1.1, 4.4, 3.3}
      * }</pre>
      *
      * @param array the array in which to set the double value.
@@ -788,18 +788,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = Array.asList(array);
-     * list.set(0, "x");  // Modifies both list and original array
+     * list.set(0, "x");   // Modifies both list and original array
      * 
      * String[] emptyArray = {};
-     * List<String> emptyList = Array.asList(emptyArray);  // Returns empty list
+     * List<String> emptyList = Array.asList(emptyArray);   // Returns empty list
      * 
      * String[] nullArray = null;
-     * List<String> nullList = Array.asList(nullArray);  // Returns empty list
+     * List<String> nullList = Array.asList(nullArray);   // Returns empty list
      * }</pre>
      *
-     * @param <T> the type of elements in the array and returned list
+     * @param <T> the type of elements in the array and returned list.
      * @param a the array to be converted to a list. Can be {@code null} or empty.
-     * @return a fixed-size list backed by the specified array, or an empty list if the array is {@code null} or empty
+     * @return a fixed-size list backed by the specified array, or an empty list if the array is {@code null} or empty.
      * @see Arrays#asList(Object...)
      * @see N#asList(Object...)
      * @see List#of(Object...)
@@ -820,8 +820,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * boolean[] empty = Array.of();                    // returns empty boolean array
      * }</pre>
      *
-     * @param a the input array of booleans
-     * @return the same input array
+     * @param a the input array of booleans.
+     * @return the same input array.
      */
     public static boolean[] of(final boolean... a) {
         return a;
@@ -836,8 +836,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * char[] vowels = Array.of('a', 'e', 'i', 'o', 'u');   // returns char array of vowels
      * }</pre>
      *
-     * @param a the input array of characters
-     * @return the same input array
+     * @param a the input array of characters.
+     * @return the same input array.
      */
     public static char[] of(final char... a) {
         return a;
@@ -852,8 +852,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * byte[] empty = Array.of();                               // returns empty byte array
      * }</pre>
      *
-     * @param a the input array of bytes
-     * @return the same input array
+     * @param a the input array of bytes.
+     * @return the same input array.
      */
     public static byte[] of(final byte... a) {
         return a;
@@ -868,8 +868,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * short[] empty = Array.of();                                     // returns empty short array
      * }</pre>
      *
-     * @param a the input array of shorts
-     * @return the same input array
+     * @param a the input array of shorts.
+     * @return the same input array.
      */
     public static short[] of(final short... a) {
         return a;
@@ -884,8 +884,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * int[] primes = Array.of(2, 3, 5, 7, 11);   // returns int array of prime numbers
      * }</pre>
      *
-     * @param a the input array of integers
-     * @return the same input array
+     * @param a the input array of integers.
+     * @return the same input array.
      */
     public static int[] of(final int... a) {
         return a;
@@ -900,8 +900,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * long[] timestamps = Array.of(1609459200000L, 1612137600000L);   // returns long array of timestamps
      * }</pre>
      *
-     * @param a the input array of longs
-     * @return the same input array
+     * @param a the input array of longs.
+     * @return the same input array.
      */
     public static long[] of(final long... a) {
         return a;
@@ -916,8 +916,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * float[] empty = Array.of();                   // returns empty float array
      * }</pre>
      *
-     * @param a the input array of floats
-     * @return the same input array
+     * @param a the input array of floats.
+     * @return the same input array.
      */
     public static float[] of(final float... a) {
         return a;
@@ -932,8 +932,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * double[] prices = Array.of(19.99, 29.99, 39.99);   // returns double array of prices
      * }</pre>
      *
-     * @param a the input array of doubles
-     * @return the same input array
+     * @param a the input array of doubles.
+     * @return the same input array.
      */
     public static double[] of(final double... a) {
         return a;
@@ -948,8 +948,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] names = Array.of("Alice", "Bob", "Charlie");     // returns String array of names
      * }</pre>
      *
-     * @param a the input array of strings
-     * @return the same input array
+     * @param a the input array of strings.
+     * @return the same input array.
      * @see N#asArray(Object...)
      */
     public static String[] of(final String... a) {
@@ -959,9 +959,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the input array
-     * @return the same input array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Date[] dates = Array.of(new Date(), new Date(System.currentTimeMillis() + 86400000));
+     * java.sql.Date[] sqlDates = Array.of(java.sql.Date.valueOf("2025-01-01"));
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -972,9 +978,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the input array
-     * @return the same input array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Calendar[] calendars = Array.of(Calendar.getInstance(), Calendar.getInstance());
+     * GregorianCalendar[] gregorians = Array.of(new GregorianCalendar());
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -985,9 +997,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the input array
-     * @return the same input array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LocalDateTime[] dateTimes = Array.of(LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+     * Instant[] instants = Array.of(Instant.now(), Instant.now().plusSeconds(3600));
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -998,9 +1016,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the input array
-     * @return the same input array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DayOfWeek[] days = Array.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY);
+     * TimeUnit[] units = Array.of(TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS);
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -1011,9 +1035,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
-     * @param <T> the type of the elements in the array
-     * @param a the input array
-     * @return the same input array
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
      * @deprecated replaced by {@code N.asArray(Object...)}.
      * @see N#asArray(Object...)
      */
@@ -1060,6 +1084,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = Array.range((byte) 1, (byte) 5);     // returns {1, 2, 3, 4}
+     * byte[] range = Array.range((byte) 10, (byte) 15);   // returns {10, 11, 12, 13, 14}
+     * byte[] empty = Array.range((byte) 5, (byte) 5);     // returns empty array
+     * }</pre>
+     *
      * @param startInclusive the first byte (inclusive) in the byte array.
      * @param endExclusive the upper bound (exclusive) of the byte array.
      * @return a byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
@@ -1083,6 +1114,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
      * The short integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = Array.range((short) 1, (short) 5);      // returns {1, 2, 3, 4}
+     * short[] range = Array.range((short) 100, (short) 105);   // returns {100, 101, 102, 103, 104}
+     * short[] empty = Array.range((short) 5, (short) 5);       // returns empty array
+     * }</pre>
      *
      * @param startInclusive the first short integer (inclusive) in the short array.
      * @param endExclusive the upper bound (exclusive) of the short array.
@@ -1126,7 +1164,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         }
 
         if ((long) endExclusive - startInclusive > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow"); //NOSONAR
+            throw new IllegalArgumentException("overflow");   //NOSONAR
         }
 
         final int[] a = new int[endExclusive - startInclusive];
@@ -1183,6 +1221,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = Array.range('a', 'z', 2);      // returns {'a', 'c', 'e', ..., 'y'}
+     * char[] reverse = Array.range('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'd'}
+     * char[] digits = Array.range('0', '9', 3);     // returns {'0', '3', '6'}
+     * }</pre>
+     *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endExclusive the upper bound (exclusive) of the char array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent character.
@@ -1191,7 +1236,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero"); //NOSONAR
+            throw new IllegalArgumentException("The input parameter 'by' can't be zero");   //NOSONAR
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1220,6 +1265,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = Array.range((byte) 0, (byte) 10, (byte) 2);       // returns {0, 2, 4, 6, 8}
+     * byte[] reverse = Array.range((byte) 20, (byte) 10, (byte) -3);   // returns {20, 17, 14, 11}
+     * byte[] single = Array.range((byte) 5, (byte) 10, (byte) 10);     // returns {5}
+     * }</pre>
      *
      * @param startInclusive the first byte (inclusive) in the byte array.
      * @param endExclusive the upper bound (exclusive) of the byte array.
@@ -1258,6 +1310,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = Array.range((short) 0, (short) 100, (short) 20);     // returns {0, 20, 40, 60, 80}
+     * short[] reverse = Array.range((short) 50, (short) 10, (short) -15);   // returns {50, 35, 20}
+     * short[] single = Array.range((short) 5, (short) 10, (short) 10);      // returns {5}
+     * }</pre>
+     *
      * @param startInclusive the first short integer (inclusive) in the short array.
      * @param endExclusive the upper bound (exclusive) of the short array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent short integer.
@@ -1294,6 +1353,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] nums = Array.range(0, 100, 10);     // returns {0, 10, 20, 30, ..., 90}
+     * int[] reverse = Array.range(50, 0, -5);   // returns {50, 45, 40, ..., 5}
+     * int[] evens = Array.range(0, 20, 2);      // returns {0, 2, 4, ..., 18}
+     * }</pre>
      *
      * @param startInclusive the first integer (inclusive) in the integer array.
      * @param endExclusive the upper bound (exclusive) of the integer array.
@@ -1337,6 +1403,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * This method handles potential overflow scenarios using BigInteger for large ranges.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] longs = Array.range(0L, 1000L, 100L);                // returns {0, 100, 200, ..., 900}
+     * long[] reverse = Array.range(5000L, 1000L, -500L);          // returns {5000, 4500, 4000, ..., 1500}
+     * long[] timestamps = Array.range(0L, 86400000L, 3600000L);   // hourly timestamps for a day
+     * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endExclusive the upper bound (exclusive) of the long array.
@@ -1393,6 +1466,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The characters are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = Array.rangeClosed('a', 'e');    // returns {'a', 'b', 'c', 'd', 'e'}
+     * char[] digits = Array.rangeClosed('0', '5');   // returns {'0', '1', '2', '3', '4', '5'}
+     * char[] single = Array.rangeClosed('x', 'x');   // returns {'x'}
+     * }</pre>
+     *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endInclusive the upper bound (inclusive) of the char array.
      * @return a char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
@@ -1419,6 +1499,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
      * The bytes are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = Array.rangeClosed((byte) 1, (byte) 5);     // returns {1, 2, 3, 4, 5}
+     * byte[] range = Array.rangeClosed((byte) 10, (byte) 15);   // returns {10, 11, 12, 13, 14, 15}
+     * byte[] single = Array.rangeClosed((byte) 7, (byte) 7);    // returns {7}
+     * }</pre>
      *
      * @param startInclusive the first byte (inclusive) in the byte array.
      * @param endInclusive the upper bound (inclusive) of the byte array.
@@ -1447,6 +1534,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The short integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = Array.rangeClosed((short) 1, (short) 5);      // returns {1, 2, 3, 4, 5}
+     * short[] range = Array.rangeClosed((short) 100, (short) 105);   // returns {100, 101, 102, 103, 104, 105}
+     * short[] single = Array.rangeClosed((short) 50, (short) 50);    // returns {50}
+     * }</pre>
+     *
      * @param startInclusive the first short integer (inclusive) in the short array.
      * @param endInclusive the upper bound (inclusive) of the short array.
      * @return a short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
@@ -1473,6 +1567,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
      * The integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] nums = Array.rangeClosed(0, 5);      // returns {0, 1, 2, 3, 4, 5}
+     * int[] range = Array.rangeClosed(10, 15);   // returns {10, 11, 12, 13, 14, 15}
+     * int[] single = Array.rangeClosed(7, 7);    // returns {7}
+     * }</pre>
      *
      * @param startInclusive the first integer (inclusive) in the integer array.
      * @param endInclusive the upper bound (inclusive) of the integer array.
@@ -1505,6 +1606,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
      * The long integers are generated in ascending order. If start is greater than end, an empty array is returned.
      * If start equals end, a single-element array containing that value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] longs = Array.rangeClosed(0L, 5L);       // returns {0, 1, 2, 3, 4, 5}
+     * long[] range = Array.rangeClosed(100L, 105L);   // returns {100, 101, 102, 103, 104, 105}
+     * long[] single = Array.rangeClosed(42L, 42L);    // returns {42}
+     * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endInclusive the upper bound (inclusive) of the long array.
@@ -1540,6 +1648,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = Array.rangeClosed('a', 'z', 2);      // returns {'a', 'c', 'e', ..., 'y', 'z'}
+     * char[] reverse = Array.rangeClosed('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'c', 'a'}
+     * char[] single = Array.rangeClosed('x', 'x', 5);     // returns {'x'}
+     * }</pre>
      *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endInclusive the upper bound (inclusive) of the char array.
@@ -1582,6 +1697,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = Array.rangeClosed((byte) 0, (byte) 10, (byte) 2);       // returns {0, 2, 4, 6, 8, 10}
+     * byte[] reverse = Array.rangeClosed((byte) 20, (byte) 10, (byte) -3);   // returns {20, 17, 14, 11}
+     * byte[] single = Array.rangeClosed((byte) 5, (byte) 5, (byte) 10);      // returns {5}
+     * }</pre>
+     *
      * @param startInclusive the first byte (inclusive) in the byte array.
      * @param endInclusive the upper bound (inclusive) of the byte array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent byte.
@@ -1622,6 +1744,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = Array.rangeClosed((short) 0, (short) 100, (short) 20);     // returns {0, 20, 40, 60, 80, 100}
+     * short[] reverse = Array.rangeClosed((short) 50, (short) 10, (short) -15);   // returns {50, 35, 20}
+     * short[] single = Array.rangeClosed((short) 42, (short) 42, (short) 5);      // returns {42}
+     * }</pre>
+     *
      * @param startInclusive the first short integer (inclusive) in the short array.
      * @param endInclusive the upper bound (inclusive) of the short array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent short integer.
@@ -1661,6 +1790,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] nums = Array.rangeClosed(0, 100, 10);     // returns {0, 10, 20, 30, ..., 90, 100}
+     * int[] reverse = Array.rangeClosed(50, 0, -5);   // returns {50, 45, 40, ..., 5, 0}
+     * int[] evens = Array.rangeClosed(0, 20, 2);      // returns {0, 2, 4, ..., 18, 20}
+     * }</pre>
      *
      * @param startInclusive the first integer (inclusive) in the integer array.
      * @param endInclusive the upper bound (inclusive) of the integer array.
@@ -1707,6 +1843,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
      * This method handles potential overflow scenarios using BigInteger for large ranges.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] longs = Array.rangeClosed(0L, 1000L, 100L);                // returns {0, 100, 200, ..., 900, 1000}
+     * long[] reverse = Array.rangeClosed(5000L, 1000L, -500L);          // returns {5000, 4500, 4000, ..., 1500, 1000}
+     * long[] timestamps = Array.rangeClosed(0L, 86400000L, 3600000L);   // hourly timestamps for a day (inclusive)
+     * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endInclusive the upper bound (inclusive) of the long array.
@@ -1760,10 +1903,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new boolean array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] trues = Array.repeat(true, 5);     // returns {true, true, true, true, true}
+     * boolean[] falses = Array.repeat(false, 3);   // returns {false, false, false}
+     * boolean[] empty = Array.repeat(true, 0);     // returns empty array
+     * }</pre>
+     *
      * @param element the boolean value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a boolean array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative..
      */
     public static boolean[] repeat(final boolean element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1796,10 +1946,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input boolean array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new boolean array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input boolean array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new boolean array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative. or if the resulting length exceeds Integer.MAX_VALUE.
      * @see #repeat(boolean, int)
      */
     public static boolean[] repeat(final boolean[] a, final int n) {
@@ -1828,10 +1978,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new char array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] stars = Array.repeat('*', 5);     // returns {'*', '*', '*', '*', '*'}
+     * char[] dashes = Array.repeat('-', 10);   // returns {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-'}
+     * char[] empty = Array.repeat('a', 0);     // returns empty array
+     * }</pre>
+     *
      * @param element the char value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a char array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative..
      */
     public static char[] repeat(final char element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1864,10 +2021,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input char array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new char array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input char array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new char array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative. or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static char[] repeat(final char[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1895,10 +2052,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new byte array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = Array.repeat((byte) 5, 10);   // returns {5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+     * byte[] zeros = Array.repeat((byte) 0, 5);    // returns {0, 0, 0, 0, 0}
+     * byte[] empty = Array.repeat((byte) 1, 0);    // returns empty array
+     * }</pre>
+     *
      * @param element the byte value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a byte array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static byte[] repeat(final byte element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1931,10 +2095,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input byte array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new byte array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input byte array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new byte array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static byte[] repeat(final byte[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1962,10 +2126,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new short array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = Array.repeat((short) 100, 5);   // returns {100, 100, 100, 100, 100}
+     * short[] zeros = Array.repeat((short) 0, 10);     // returns {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+     * short[] empty = Array.repeat((short) 42, 0);     // returns empty array
+     * }</pre>
+     *
      * @param element the short value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a short array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static short[] repeat(final short element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -1998,10 +2169,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input short array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new short array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input short array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new short array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static short[] repeat(final short[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2029,10 +2200,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new integer array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] ints = Array.repeat(42, 5);    // returns {42, 42, 42, 42, 42}
+     * int[] ones = Array.repeat(1, 10);    // returns {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+     * int[] empty = Array.repeat(99, 0);   // returns empty array
+     * }</pre>
+     *
      * @param element the integer value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return an integer array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static int[] repeat(final int element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2065,10 +2243,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input integer array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new integer array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input integer array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new integer array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static int[] repeat(final int[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2096,10 +2274,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new long array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] longs = Array.repeat(1000L, 5);      // returns {1000, 1000, 1000, 1000, 1000}
+     * long[] timestamps = Array.repeat(0L, 10);   // returns {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+     * long[] empty = Array.repeat(42L, 0);        // returns empty array
+     * }</pre>
+     *
      * @param element the long value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a long array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static long[] repeat(final long element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2132,10 +2317,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input long array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new long array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input long array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new long array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static long[] repeat(final long[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2163,10 +2348,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new float array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] floats = Array.repeat(3.14f, 5);   // returns {3.14, 3.14, 3.14, 3.14, 3.14}
+     * float[] zeros = Array.repeat(0.0f, 10);    // returns {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+     * float[] empty = Array.repeat(1.5f, 0);     // returns empty array
+     * }</pre>
+     *
      * @param element the float value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a float array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static float[] repeat(final float element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2199,10 +2391,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input float array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new float array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input float array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new float array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static float[] repeat(final float[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2230,10 +2422,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new double array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] doubles = Array.repeat(3.14159, 5);   // returns {3.14159, 3.14159, 3.14159, 3.14159, 3.14159}
+     * double[] zeros = Array.repeat(0.0, 10);        // returns {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+     * double[] empty = Array.repeat(2.718, 0);       // returns empty array
+     * }</pre>
+     *
      * @param element the double value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a double array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static double[] repeat(final double element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2266,10 +2465,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input double array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new double array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input double array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new double array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static double[] repeat(final double[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2297,10 +2496,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new String array of a specified length, with all elements set to the <i>element</i> value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] strings = Array.repeat("hello", 3);   // returns {"hello", "hello", "hello"}
+     * String[] nulls = Array.repeat(null, 5);        // returns {null, null, null, null, null}
+     * String[] empty = Array.repeat("world", 0);     // returns empty array
+     * }</pre>
+     *
      * @param element the String value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a String array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static String[] repeat(final String element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2333,10 +2539,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input String array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
-     * @return a new String array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @param a the input String array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
+     * @return a new String array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static String[] repeat(final String[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2430,11 +2636,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the elements in the array.
-     * @param a the input array to be repeated
-     * @param n the number of times to repeat the array (must be non-negative)
+     * @param a the input array to be repeated.
+     * @param n the number of times to repeat the array (must be non-negative).
      * @param elementClass the class of the elements in the array.
-     * @return a new array containing the input array repeated n times
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE
+     * @return a new array containing the input array repeated n times.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static <T> T[] repeat(final T[] a, final int n, final Class<? extends T> elementClass) {
         N.checkArgNotNegative(n, cs.n);
@@ -2467,6 +2673,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * by explicitly indicating in its name that {@code null} elements are not allowed. Unlike the deprecated method which
      * may throw NullPointerException, this method consistently throws IllegalArgumentException for {@code null} elements.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] integers = Array.repeatNonNull(42, 5);               // returns {42, 42, 42, 42, 42}
+     * String[] strings = Array.repeatNonNull("hello", 3);            // returns {"hello", "hello", "hello"}
+     * LocalDate[] dates = Array.repeatNonNull(LocalDate.now(), 4);   // returns {today, today, today, today}
+     * // Array.repeatNonNull(null, 5);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array.
      * @param element the value to be repeated in the array. Must not be {@code null}.
      * @param n the length of the array to be generated. Must be non-negative.
@@ -2497,8 +2711,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param len the length of the array to be generated. Must be non-negative.
-     * @return an array of random integers of the specified length
-     * @throws NegativeArraySizeException if len is negative
+     * @return an array of random integers of the specified length.
+     * @throws NegativeArraySizeException if len is negative.
      * @see Random#nextInt()
      * @see IntList#random(int)
      * @see #random(int, int, int)
@@ -2526,12 +2740,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // e.g., [42, 7, 99, 23, 65]
      * }</pre>
      *
-     * @param startInclusive the lower bound (inclusive) of the random integers
-     * @param endExclusive the upper bound (exclusive) of the random integers
+     * @param startInclusive the lower bound (inclusive) of the random integers.
+     * @param endExclusive the upper bound (exclusive) of the random integers.
      * @param len the length of the array to be generated. Must be non-negative.
-     * @return an array of random integers within the specified range
-     * @throws IllegalArgumentException if startInclusive is not less than endExclusive
-     * @throws NegativeArraySizeException if len is negative
+     * @return an array of random integers within the specified range.
+     * @throws IllegalArgumentException if startInclusive is not less than endExclusive.
+     * @throws NegativeArraySizeException if len is negative.
      * @see Random#nextInt(int)
      * @see IntList#random(int, int, int)
      * @see #random(int)
@@ -3673,7 +3887,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the array of primitive booleans to be converted. May be {@code null}.
-     * @return an array of Boolean objects, or {@code null} if the input array is {@code null}
+     * @return an array of Boolean objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Boolean[] box(final boolean... a) {
@@ -3715,8 +3929,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive chars to an array of Character objects.
      *
-     * @param a the array of primitive chars to be converted.
-     * @return an array of Character objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] primitives = {'a', 'b', 'c'};
+     * Character[] objects = Array.box(primitives);   // returns {Character.valueOf('a'), Character.valueOf('b'), Character.valueOf('c')}
+     * Character[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive chars to be converted. May be {@code null}.
+     * @return an array of Character objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Character[] box(final char... a) {
@@ -3730,9 +3951,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive chars to an array of Character objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] primitives = {'a', 'b', 'c', 'd', 'e'};
+     * Character[] objects = Array.box(primitives, 1, 4);   // returns {Character.valueOf('b'), Character.valueOf('c'), Character.valueOf('d')}
+     * Character[] empty = Array.box(primitives, 2, 2);     // returns empty Character array
+     * }</pre>
+     *
      * @param a the array of primitive chars to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -3758,8 +3986,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * @param a the array of primitive bytes to be converted.
-     * @return an array of Byte objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] primitives = {1, 2, 3};
+     * Byte[] objects = Array.box(primitives);   // returns {Byte.valueOf(1), Byte.valueOf(2), Byte.valueOf(3)}
+     * Byte[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive bytes to be converted. May be {@code null}.
+     * @return an array of Byte objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Byte[] box(final byte... a) {
@@ -3773,9 +4008,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive bytes to an array of Byte objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] primitives = {1, 2, 3, 4, 5};
+     * Byte[] objects = Array.box(primitives, 1, 4);   // returns {Byte.valueOf(2), Byte.valueOf(3), Byte.valueOf(4)}
+     * Byte[] empty = Array.box(primitives, 2, 2);     // returns empty Byte array
+     * }</pre>
+     *
      * @param a the array of primitive bytes to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -3801,8 +4043,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive shorts to an array of Short objects.
      *
-     * @param a the array of primitive shorts to be converted.
-     * @return an array of Short objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] primitives = {10, 20, 30};
+     * Short[] objects = Array.box(primitives);   // returns {Short.valueOf(10), Short.valueOf(20), Short.valueOf(30)}
+     * Short[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive shorts to be converted. May be {@code null}.
+     * @return an array of Short objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Short[] box(final short... a) {
@@ -3816,9 +4065,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive shorts to an array of Short objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] primitives = {10, 20, 30, 40, 50};
+     * Short[] objects = Array.box(primitives, 1, 4);   // returns {Short.valueOf(20), Short.valueOf(30), Short.valueOf(40)}
+     * Short[] empty = Array.box(primitives, 2, 2);     // returns empty Short array
+     * }</pre>
+     *
      * @param a the array of primitive shorts to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -3852,7 +4108,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the array of primitive integers to be converted. May be {@code null}.
-     * @return an array of Integer objects, or {@code null} if the input array is {@code null}
+     * @return an array of Integer objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Integer[] box(final int... a) {
@@ -3894,8 +4150,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive longs to an array of Long objects.
      *
-     * @param a the array of primitive longs to be converted.
-     * @return an array of Long objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] primitives = {100L, 200L, 300L};
+     * Long[] objects = Array.box(primitives);   // returns {Long.valueOf(100L), Long.valueOf(200L), Long.valueOf(300L)}
+     * Long[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive longs to be converted. May be {@code null}.
+     * @return an array of Long objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Long[] box(final long... a) {
@@ -3909,9 +4172,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive longs to an array of Long objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] primitives = {100L, 200L, 300L, 400L, 500L};
+     * Long[] objects = Array.box(primitives, 1, 4);   // returns {Long.valueOf(200L), Long.valueOf(300L), Long.valueOf(400L)}
+     * Long[] empty = Array.box(primitives, 2, 2);     // returns empty Long array
+     * }</pre>
+     *
      * @param a the array of primitive longs to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -3937,8 +4207,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive floats to an array of Float objects.
      *
-     * @param a the array of primitive floats to be converted.
-     * @return an array of Float objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] primitives = {1.1f, 2.2f, 3.3f};
+     * Float[] objects = Array.box(primitives);   // returns {Float.valueOf(1.1f), Float.valueOf(2.2f), Float.valueOf(3.3f)}
+     * Float[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive floats to be converted. May be {@code null}.
+     * @return an array of Float objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Float[] box(final float... a) {
@@ -3952,9 +4229,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive floats to an array of Float objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] primitives = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
+     * Float[] objects = Array.box(primitives, 1, 4);   // returns {Float.valueOf(2.2f), Float.valueOf(3.3f), Float.valueOf(4.4f)}
+     * Float[] empty = Array.box(primitives, 2, 2);     // returns empty Float array
+     * }</pre>
+     *
      * @param a the array of primitive floats to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -3980,8 +4264,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive doubles to an array of Double objects.
      *
-     * @param a the array of primitive doubles to be converted.
-     * @return an array of Double objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] primitives = {1.1, 2.2, 3.3};
+     * Double[] objects = Array.box(primitives);   // returns {Double.valueOf(1.1), Double.valueOf(2.2), Double.valueOf(3.3)}
+     * Double[] nullResult = Array.box(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive doubles to be converted. May be {@code null}.
+     * @return an array of Double objects, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static Double[] box(final double... a) {
@@ -3995,9 +4286,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive doubles to an array of Double objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] primitives = {1.1, 2.2, 3.3, 4.4, 5.5};
+     * Double[] objects = Array.box(primitives, 1, 4);   // returns {Double.valueOf(2.2), Double.valueOf(3.3), Double.valueOf(4.4)}
+     * Double[] empty = Array.box(primitives, 2, 2);     // returns empty Double array
+     * }</pre>
+     *
      * @param a the array of primitive doubles to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
@@ -4394,7 +4692,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the array of Boolean objects to be converted. May be {@code null}.
-     * @return an array of primitive booleans, or {@code null} if the input array is {@code null}
+     * @return an array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], boolean)
      * @see #unbox(Boolean[], int, int, boolean)
      */
@@ -4405,6 +4703,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[] objects = {true, null, false};
+     * boolean[] primitives = Array.unbox(objects, true);   // returns {true, true, false}
+     * boolean[] zeros = Array.unbox(objects, false);       // returns {true, false, false}
+     * }</pre>
      *
      * @param a the array of Boolean objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4423,6 +4728,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[] objects = {true, null, false, true, null};
+     * boolean[] subset = Array.unbox(objects, 1, 4, false);    // returns {false, false, true}
+     * boolean[] withTrue = Array.unbox(objects, 0, 3, true);   // returns {true, true, false}
+     * }</pre>
      *
      * @param a the array of Boolean objects to be converted.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -4652,7 +4964,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the array of Integer objects to be converted. May be {@code null}.
-     * @return an array of primitive integers, or {@code null} if the input array is {@code null}
+     * @return an array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer[], int, int, int)
      */
@@ -4663,6 +4975,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] objects = {1, null, 3, null, 5};
+     * int[] primitives = Array.unbox(objects, -1);   // returns {1, -1, 3, -1, 5}
+     * int[] withZeros = Array.unbox(objects, 0);     // returns {1, 0, 3, 0, 5}
+     * }</pre>
      *
      * @param a the array of Integer objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4682,6 +5001,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] objects = {1, null, 3, null, 5, 6};
+     * int[] subset = Array.unbox(objects, 1, 5, -1);   // returns {-1, 3, -1, 5}
+     * int[] empty = Array.unbox(objects, 2, 2, 0);     // returns empty int array
+     * }</pre>
      *
      * @param a the array of Integer objects to be converted.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -4715,8 +5041,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a the array of Long objects to be converted.
-     * @return an array of primitive longs, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[] objects = {100L, null, 300L};
+     * long[] primitives = Array.unbox(objects);   // returns {100L, 0L, 300L}
+     * long[] nullResult = Array.unbox(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of Long objects to be converted. May be {@code null}.
+     * @return an array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], long)
      * @see #unbox(Long[], int, int, long)
      */
@@ -4727,6 +5060,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[] objects = {100L, null, 300L, null, 500L};
+     * long[] primitives = Array.unbox(objects, -1L);   // returns {100L, -1L, 300L, -1L, 500L}
+     * long[] withZeros = Array.unbox(objects, 0L);     // returns {100L, 0L, 300L, 0L, 500L}
+     * }</pre>
      *
      * @param a the array of Long objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4746,6 +5086,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Long objects into an array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[] objects = {100L, null, 300L, null, 500L, 600L};
+     * long[] subset = Array.unbox(objects, 1, 5, -1L);   // returns {-1L, 300L, -1L, 500L}
+     * long[] empty = Array.unbox(objects, 2, 2, 0L);     // returns empty long array
+     * }</pre>
      *
      * @param a the array of Long objects to be converted.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -4843,8 +5190,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a the array of Double objects to be converted.
-     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[] objects = {1.1, null, 3.3};
+     * double[] primitives = Array.unbox(objects);   // returns {1.1, 0.0, 3.3}
+     * double[] nullResult = Array.unbox(null);      // returns null
+     * }</pre>
+     *
+     * @param a the array of Double objects to be converted. May be {@code null}.
+     * @return an array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], double)
      * @see #unbox(Double[], int, int, double)
      */
@@ -4855,6 +5209,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[] objects = {1.1, null, 3.3, null, 5.5};
+     * double[] primitives = Array.unbox(objects, -1.0);   // returns {1.1, -1.0, 3.3, -1.0, 5.5}
+     * double[] withZeros = Array.unbox(objects, 0.0);     // returns {1.1, 0.0, 3.3, 0.0, 5.5}
+     * }</pre>
      *
      * @param a the array of Double objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4874,6 +5235,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Double objects into an array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[] objects = {1.1, null, 3.3, null, 5.5, 6.6};
+     * double[] subset = Array.unbox(objects, 1, 5, -1.0);   // returns {-1.0, 3.3, -1.0, 5.5}
+     * double[] empty = Array.unbox(objects, 2, 2, 0.0);     // returns empty double array
+     * }</pre>
      *
      * @param a the array of Double objects to be converted.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -5505,7 +5873,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Original matrix is 2x3, transposed is 3x2
      * }</pre>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5548,7 +5916,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5591,7 +5959,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5634,7 +6002,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5677,7 +6045,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5720,7 +6088,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5763,7 +6131,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
@@ -5806,7 +6174,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed
+     * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull

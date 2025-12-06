@@ -35,7 +35,7 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
      * <pre>{@code
      * BiIntObjConsumer<StringBuilder> appender = (i, j, sb) -> sb.append(i).append(", ").append(j);
      * StringBuilder sb = new StringBuilder();
-     * appender.accept(10, 20, sb);  // sb becomes "10, 20"
+     * appender.accept(10, 20, sb);   // sb becomes "10, 20"
      * }</pre>
      *
      * @param i the first input argument (int value)

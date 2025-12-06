@@ -86,7 +86,7 @@ public final class ExceptionUtil {
     static {
         toRuntimeExceptionFuncMap.put(RuntimeException.class, e -> (RuntimeException) e);
 
-        toRuntimeExceptionFuncMap.put(Error.class, RuntimeException::new); // right or not?
+        toRuntimeExceptionFuncMap.put(Error.class, RuntimeException::new);   // right or not?
 
         toRuntimeExceptionFuncMap.put(IOException.class, e -> new UncheckedIOException((IOException) e));
 

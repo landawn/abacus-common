@@ -307,15 +307,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Generates the type name for a Map with the specified implementation class, key and value types.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String typeName = MapType.getTypeName(HashMap.class, "String", "Integer", false);
-     * // Returns: "java.util.HashMap<String, Integer>"
-     *
-     * typeName = MapType.getTypeName(Map.class, "String", "Integer", true);
-     * // Returns: "Map<String, Integer>" (using declaring names)
-     * }</pre>
+     * This is an internal method used by the type system.
      *
      * @param typeClass The Map implementation class
      * @param keyTypeName The name of the key type

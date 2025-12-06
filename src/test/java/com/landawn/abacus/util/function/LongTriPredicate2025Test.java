@@ -56,8 +56,8 @@ public class LongTriPredicate2025Test extends TestBase {
         final LongTriPredicate combined = allPositive.and(sumLessThan100);
 
         assertTrue(combined.test(10L, 20L, 30L));
-        assertFalse(combined.test(40L, 50L, 20L)); // sum >= 100
-        assertFalse(combined.test(-10L, 20L, 30L)); // not all positive
+        assertFalse(combined.test(40L, 50L, 20L));   // sum >= 100
+        assertFalse(combined.test(-10L, 20L, 30L));   // not all positive
     }
 
     @Test
@@ -67,9 +67,9 @@ public class LongTriPredicate2025Test extends TestBase {
 
         final LongTriPredicate combined = anyZero.or(sumGreaterThan1000);
 
-        assertTrue(combined.test(0L, 50L, 50L)); // has zero
-        assertTrue(combined.test(400L, 400L, 300L)); // sum > 1000
-        assertFalse(combined.test(10L, 20L, 30L)); // neither
+        assertTrue(combined.test(0L, 50L, 50L));   // has zero
+        assertTrue(combined.test(400L, 400L, 300L));   // sum > 1000
+        assertFalse(combined.test(10L, 20L, 30L));   // neither
     }
 
     @Test
@@ -112,7 +112,7 @@ public class LongTriPredicate2025Test extends TestBase {
         assertFalse(combined.test(1L, 2L, 3L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
@@ -133,16 +133,16 @@ public class LongTriPredicate2025Test extends TestBase {
         assertTrue(combined.test(1L, 2L, 3L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
     public void testComplexChaining() {
         final LongTriPredicate predicate = LongTriPredicate.ALWAYS_TRUE.and((a, b, c) -> a + b + c < 100).or((a, b, c) -> a == b && b == c);
 
-        assertTrue(predicate.test(10L, 20L, 30L)); // sum < 100
-        assertTrue(predicate.test(50L, 50L, 50L)); // all equal
-        assertFalse(predicate.test(40L, 50L, 20L)); // sum >= 100 and not all equal
+        assertTrue(predicate.test(10L, 20L, 30L));   // sum < 100
+        assertTrue(predicate.test(50L, 50L, 50L));   // all equal
+        assertFalse(predicate.test(40L, 50L, 20L));   // sum >= 100 and not all equal
     }
 
     @Test

@@ -26,9 +26,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, User> indexed = IndexedKeyed.of(0, "user123", new User("John"));
- * System.out.println(indexed.index());  // prints: 0
- * System.out.println(indexed.key());  // prints: "user123"
- * System.out.println(indexed.val());  // prints: User object
+ * System.out.println(indexed.index());   // prints: 0
+ * System.out.println(indexed.key());   // prints: "user123"
+ * System.out.println(indexed.val());   // prints: User object
  * }</pre>
  *
  * @param <K> the type of the key
@@ -66,12 +66,12 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * IndexedKeyed<String, String> nullValue = IndexedKeyed.of(0, "key", null);
      * }</pre>
      *
-     * @param <K> the type of the key
-     * @param <T> the type of the value
-     * @param index the index position of this element (can be any integer including negative)
-     * @param key the key used for hashing and equality comparisons (can be null)
-     * @param val the value associated with the key (can be null)
-     * @return a new immutable {@code IndexedKeyed} instance containing the provided index, key, and value
+     * @param <K> the type of the key.
+     * @param <T> the type of the value.
+     * @param index the index position of this element (can be any integer including negative).
+     * @param key the key used for hashing and equality comparisons (can be null).
+     * @param val the value associated with the key (can be null).
+     * @return a new immutable {@code IndexedKeyed} instance containing the provided index, key, and value.
      */
     public static <K, T> IndexedKeyed<K, T> of(final int index, final K key, final T val) {
         return new IndexedKeyed<>(index, key, val);
@@ -87,10 +87,10 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, String> item = IndexedKeyed.of(3, "key", "value");
-     * int pos = item.index();  // returns 3
+     * int pos = item.index();   // returns 3
      * }</pre>
      *
-     * @return the index value, which can be any integer including negative values
+     * @return the index value, which can be any integer including negative values.
      */
     public int index() {
         return index;
@@ -117,7 +117,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * assert item1.hashCode() == item2.hashCode();
      * }</pre>
      *
-     * @return a hash code value for this object based on index and key only
+     * @return a hash code value for this object based on index and key only.
      */
     @Override
     public int hashCode() {
@@ -151,9 +151,9 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * item1.equals(item3);   // false - same index but different key
      * }</pre>
      *
-     * @param obj the reference object with which to compare
+     * @param obj the reference object with which to compare.
      * @return {@code true} if this object has the same index and key as the obj argument;
-     *         {@code false} otherwise
+     *         {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -186,13 +186,13 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, Integer> item1 = IndexedKeyed.of(2, "abc", 42);
-     * System.out.println(item1);  // Output: {index=2, key=abc, val=42}
+     * System.out.println(item1);   // Output: {index=2, key=abc, val=42}
      *
      * IndexedKeyed<String, String> item2 = IndexedKeyed.of(0, null, "test");
-     * System.out.println(item2);  // Output: {index=0, key=null, val=test}
+     * System.out.println(item2);   // Output: {index=0, key=null, val=test}
      * }</pre>
      *
-     * @return a string representation of this object showing index, key, and value
+     * @return a string representation of this object showing index, key, and value.
      */
     @Override
     public String toString() {

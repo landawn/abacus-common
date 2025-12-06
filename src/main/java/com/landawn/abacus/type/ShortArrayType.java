@@ -24,6 +24,10 @@ import com.landawn.abacus.util.WD;
 
 public final class ShortArrayType extends ObjectArrayType<Short> {
 
+    /**
+     * Constructs a new ShortArrayType instance for handling Short object arrays.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     ShortArrayType() {
         super(Short[].class);
     }
@@ -37,7 +41,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * Short[] array = {1, null, 3};
-     * String str = type.stringOf(array);  // Returns "[1, null, 3]"
+     * String str = type.stringOf(array);   // Returns "[1, null, 3]"
      * }</pre>
      *
      * @param x the Short array to convert to string
@@ -63,7 +67,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
-     * Short[] array = type.valueOf("[1, null, 3]");  // Returns {1, null, 3}
+     * Short[] array = type.valueOf("[1, null, 3]");   // Returns {1, null, 3}
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
@@ -105,7 +109,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, new Short[] {1, 2, 3});  // Appends "[1, 2, 3]"
+     * type.appendTo(sb, new Short[] {1, 2, 3});   // Appends "[1, 2, 3]"
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -145,7 +149,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, new Short[] {1, 2, 3}, config);  // Writes "[1, 2, 3]"
+     * type.writeCharacter(writer, new Short[] {1, 2, 3}, config);   // Writes "[1, 2, 3]"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

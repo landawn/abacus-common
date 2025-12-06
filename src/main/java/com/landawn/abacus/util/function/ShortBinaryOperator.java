@@ -61,7 +61,7 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      * // Using with reduce operations
      * short[] values = {1, 2, 3, 4, 5};
      * short total = Arrays.stream(values)
-     *     .reduce((short) 0, add);  // Sum all values
+     *     .reduce((short) 0, add);   // Sum all values
      * }</pre>
      *
      * @param left the first operand

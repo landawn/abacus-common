@@ -184,7 +184,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 try {
                     clob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);   //NOSONAR
                 }
             }
         } else {

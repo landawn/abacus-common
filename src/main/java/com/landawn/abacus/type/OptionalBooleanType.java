@@ -25,6 +25,10 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 
+    /**
+     * Constructs an OptionalBooleanType.
+     * This constructor initializes the type handler for OptionalBoolean objects.
+     */
     protected OptionalBooleanType() {
         super(OPTIONAL_BOOLEAN);
     }

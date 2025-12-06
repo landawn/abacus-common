@@ -297,7 +297,7 @@ public final class HttpUtil {
      * 
      * // Multiple values
      * List<String> values = Arrays.asList("gzip", "deflate");
-     * String header2 = HttpUtil.readHttpHeadValue(values);  // "gzip,deflate"
+     * String header2 = HttpUtil.readHttpHeadValue(values);   // "gzip,deflate"
      * }</pre>
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)
@@ -323,7 +323,22 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Type header value from HTTP headers.
-     * Looks for both "Content-Type" and "content-type" keys.
+     * Looks for both "Content-Type" and "content-type" keys (case-insensitive lookup).
+     *
+     * <p>Note: When using a Map parameter, this method checks for both standard and lowercase
+     * header names. For case-insensitive header handling, ensure your Map implementation
+     * supports case-insensitive keys or use the HttpHeaders parameter overload.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Content-Type", "application/json");
+     * String contentType = HttpUtil.getContentType(headers);  // "application/json"
+     *
+     * // Works with either case
+     * headers.put("content-type", "text/html");
+     * contentType = HttpUtil.getContentType(headers);  // "text/html"
+     * }</pre>
      *
      * @param httpHeaders The HTTP headers map
      * @return The Content-Type value, or {@code null} if not found
@@ -344,6 +359,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Type header value from HttpHeaders.
+     * Looks for both "Content-Type" and "content-type" keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create();
+     * headers.set("Content-Type", "application/xml");
+     * String contentType = HttpUtil.getContentType(headers);  // "application/xml"
+     * }</pre>
      *
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Type value, or {@code null} if not found
@@ -364,6 +387,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Type from HttpSettings.
+     * Extracts the Content-Type from the headers within the settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Content-Type", "application/json");
+     * String contentType = HttpUtil.getContentType(settings);  // "application/json"
+     * }</pre>
      *
      * @param httpSettings The HttpSettings object
      * @return The Content-Type value, or {@code null} if not found
@@ -378,6 +409,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Type from an HttpURLConnection.
+     * Extracts the Content-Type from the connection's header fields.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * conn.setRequestProperty("Content-Type", "application/json");
+     * String contentType = HttpUtil.getContentType(conn);  // "application/json"
+     * }</pre>
      *
      * @param connection The HTTP connection
      * @return The Content-Type value, or {@code null} if not found
@@ -388,7 +427,22 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Encoding header value from HTTP headers.
-     * Looks for both "Content-Encoding" and "content-encoding" keys.
+     * Looks for both "Content-Encoding" and "content-encoding" keys (case-insensitive lookup).
+     *
+     * <p>Note: When using a Map parameter, this method checks for both standard and lowercase
+     * header names. For case-insensitive header handling, ensure your Map implementation
+     * supports case-insensitive keys or use the HttpHeaders parameter overload.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Content-Encoding", "gzip");
+     * String encoding = HttpUtil.getContentEncoding(headers);  // "gzip"
+     *
+     * // Works with either case
+     * headers.put("content-encoding", "deflate");
+     * encoding = HttpUtil.getContentEncoding(headers);  // "deflate"
+     * }</pre>
      *
      * @param httpHeaders The HTTP headers map
      * @return The Content-Encoding value, or {@code null} if not found
@@ -409,6 +463,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Encoding header value from HttpHeaders.
+     * Looks for both "Content-Encoding" and "content-encoding" keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create();
+     * headers.set("Content-Encoding", "gzip");
+     * String encoding = HttpUtil.getContentEncoding(headers);  // "gzip"
+     * }</pre>
      *
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Encoding value, or {@code null} if not found
@@ -429,6 +491,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Encoding from HttpSettings.
+     * Extracts the Content-Encoding from the headers within the settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Content-Encoding", "gzip");
+     * String encoding = HttpUtil.getContentEncoding(settings);  // "gzip"
+     * }</pre>
      *
      * @param httpSettings The HttpSettings object
      * @return The Content-Encoding value, or {@code null} if not found
@@ -443,6 +513,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Encoding from an HttpURLConnection.
+     * Extracts the Content-Encoding from the connection's header fields.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * conn.setRequestProperty("Content-Encoding", "gzip");
+     * String encoding = HttpUtil.getContentEncoding(conn);  // "gzip"
+     * }</pre>
      *
      * @param connection The HTTP connection
      * @return The Content-Encoding value, or {@code null} if not found
@@ -453,7 +531,22 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept header value from HTTP headers.
-     * Looks for both "Accept" and "accept" keys.
+     * Looks for both "Accept" and "accept" keys (case-insensitive lookup).
+     *
+     * <p>Note: When using a Map parameter, this method checks for both standard and lowercase
+     * header names. For case-insensitive header handling, ensure your Map implementation
+     * supports case-insensitive keys or use the HttpHeaders parameter overload.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Accept", "application/json");
+     * String accept = HttpUtil.getAccept(headers);  // "application/json"
+     *
+     * // Works with either case
+     * headers.put("accept", "text/html");
+     * accept = HttpUtil.getAccept(headers);  // "text/html"
+     * }</pre>
      *
      * @param httpHeaders The HTTP headers map
      * @return The Accept value, or {@code null} if not found
@@ -474,6 +567,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept header value from HttpHeaders.
+     * Looks for both "Accept" and "accept" keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create();
+     * headers.set("Accept", "application/json");
+     * String accept = HttpUtil.getAccept(headers);  // "application/json"
+     * }</pre>
      *
      * @param httpHeaders The HttpHeaders object
      * @return The Accept value, or {@code null} if not found
@@ -494,6 +595,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept header from HttpSettings.
+     * Extracts the Accept header from the headers within the settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Accept", "application/xml");
+     * String accept = HttpUtil.getAccept(settings);  // "application/xml"
+     * }</pre>
      *
      * @param httpSettings The HttpSettings object
      * @return The Accept value, or {@code null} if not found
@@ -508,6 +617,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept header from an HttpURLConnection.
+     * Extracts the Accept header from the connection's header fields.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * conn.setRequestProperty("Accept", "application/json");
+     * String accept = HttpUtil.getAccept(conn);  // "application/json"
+     * }</pre>
      *
      * @param connection The HTTP connection
      * @return The Accept value, or {@code null} if not found
@@ -518,7 +635,22 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Encoding header value from HTTP headers.
-     * Looks for both "Accept-Encoding" and "accept-encoding" keys.
+     * Looks for both "Accept-Encoding" and "accept-encoding" keys (case-insensitive lookup).
+     *
+     * <p>Note: When using a Map parameter, this method checks for both standard and lowercase
+     * header names. For case-insensitive header handling, ensure your Map implementation
+     * supports case-insensitive keys or use the HttpHeaders parameter overload.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Accept-Encoding", "gzip, deflate");
+     * String acceptEncoding = HttpUtil.getAcceptEncoding(headers);  // "gzip, deflate"
+     *
+     * // Works with either case
+     * headers.put("accept-encoding", "br");
+     * acceptEncoding = HttpUtil.getAcceptEncoding(headers);  // "br"
+     * }</pre>
      *
      * @param httpHeaders The HTTP headers map
      * @return The Accept-Encoding value, or {@code null} if not found
@@ -539,6 +671,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Encoding header value from HttpHeaders.
+     * Looks for both "Accept-Encoding" and "accept-encoding" keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create();
+     * headers.set("Accept-Encoding", "gzip, deflate");
+     * String acceptEncoding = HttpUtil.getAcceptEncoding(headers);  // "gzip, deflate"
+     * }</pre>
      *
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Encoding value, or {@code null} if not found
@@ -559,6 +699,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Encoding header from HttpSettings.
+     * Extracts the Accept-Encoding header from the headers within the settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Accept-Encoding", "gzip");
+     * String acceptEncoding = HttpUtil.getAcceptEncoding(settings);  // "gzip"
+     * }</pre>
      *
      * @param httpSettings The HttpSettings object
      * @return The Accept-Encoding value, or {@code null} if not found
@@ -573,6 +721,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Encoding header from an HttpURLConnection.
+     * Extracts the Accept-Encoding header from the connection's header fields.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * conn.setRequestProperty("Accept-Encoding", "gzip");
+     * String acceptEncoding = HttpUtil.getAcceptEncoding(conn);  // "gzip"
+     * }</pre>
      *
      * @param connection The HTTP connection
      * @return The Accept-Encoding value, or {@code null} if not found
@@ -583,7 +739,22 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Charset header value from HTTP headers.
-     * Looks for both "Accept-Charset" and "accept-charset" keys.
+     * Looks for both "Accept-Charset" and "accept-charset" keys (case-insensitive lookup).
+     *
+     * <p>Note: When using a Map parameter, this method checks for both standard and lowercase
+     * header names. For case-insensitive header handling, ensure your Map implementation
+     * supports case-insensitive keys or use the HttpHeaders parameter overload.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * headers.put("Accept-Charset", "utf-8");
+     * String acceptCharset = HttpUtil.getAcceptCharset(headers);  // "utf-8"
+     *
+     * // Works with either case
+     * headers.put("accept-charset", "iso-8859-1");
+     * acceptCharset = HttpUtil.getAcceptCharset(headers);  // "iso-8859-1"
+     * }</pre>
      *
      * @param httpHeaders The HTTP headers map
      * @return The Accept-Charset value, or {@code null} if not found
@@ -604,6 +775,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Charset header value from HttpHeaders.
+     * Looks for both "Accept-Charset" and "accept-charset" keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create();
+     * headers.set("Accept-Charset", "utf-8");
+     * String acceptCharset = HttpUtil.getAcceptCharset(headers);  // "utf-8"
+     * }</pre>
      *
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Charset value, or {@code null} if not found
@@ -624,6 +803,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Charset header from HttpSettings.
+     * Extracts the Accept-Charset header from the headers within the settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Accept-Charset", "utf-8");
+     * String acceptCharset = HttpUtil.getAcceptCharset(settings);  // "utf-8"
+     * }</pre>
      *
      * @param httpSettings The HttpSettings object
      * @return The Accept-Charset value, or {@code null} if not found
@@ -638,6 +825,14 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Charset header from an HttpURLConnection.
+     * Extracts the Accept-Charset header from the connection's header fields.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * conn.setRequestProperty("Accept-Charset", "utf-8");
+     * String acceptCharset = HttpUtil.getAcceptCharset(conn);  // "utf-8"
+     * }</pre>
      *
      * @param connection The HTTP connection
      * @return The Accept-Charset value, or {@code null} if not found
@@ -1048,7 +1243,7 @@ public final class HttpUtil {
 
         try {
             // Install the all-trusting trust manager
-            final SSLContext sc = SSLContext.getInstance("SSL"); //NOSONAR
+            final SSLContext sc = SSLContext.getInstance("SSL");   //NOSONAR
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
@@ -1086,9 +1281,18 @@ public final class HttpUtil {
      * <p>Copied from OkHttp under Apache License, Version 2.0.</p>
      */
     public static final class HttpDate {
-        /** GMT and UTC are equivalent for our purposes. */
+        /**
+         * The UTC timezone used for HTTP date formatting and parsing.
+         * GMT and UTC are equivalent for HTTP date purposes.
+         * All HTTP dates should be in GMT/UTC according to RFC 7231.
+         */
         public static final TimeZone UTC = TimeZone.getTimeZone("GMT");
-        /** The last four-digit year: "Fri, 31 Dec 9999 23:59:59 GMT". */
+
+        /**
+         * The maximum representable HTTP date in milliseconds since epoch.
+         * Represents the last four-digit year: "Fri, 31 Dec 9999 23:59:59 GMT".
+         * This is the value 253,402,300,799,999 milliseconds (December 31, 9999 23:59:59.999 GMT).
+         */
         public static final long MAX_DATE = 253_402_300_799_999L;
 
         /**

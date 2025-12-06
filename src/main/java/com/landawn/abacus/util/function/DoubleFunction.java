@@ -38,7 +38,7 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleFunction<Double> boxer = DoubleFunction.BOX;
-     * Double boxed = boxer.apply(3.14);  // Returns Double.valueOf(3.14)
+     * Double boxed = boxer.apply(3.14);   // Returns Double.valueOf(3.14)
      * }</pre>
      */
     DoubleFunction<Double> BOX = value -> value;
@@ -59,13 +59,13 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleFunction<String> formatter = d -> String.format("%.2f", d);
-     * String result = formatter.apply(3.14159);  // Returns "3.14"
+     * String result = formatter.apply(3.14159);   // Returns "3.14"
      *
      * DoubleFunction<Integer> rounder = d -> (int) Math.round(d);
-     * Integer rounded = rounder.apply(42.7);  // Returns 43
+     * Integer rounded = rounder.apply(42.7);   // Returns 43
      *
      * DoubleFunction<Boolean> isPositive = d -> d > 0.0;
-     * Boolean positive = isPositive.apply(-1.5);  // Returns false
+     * Boolean positive = isPositive.apply(-1.5);   // Returns false
      * }</pre>
      *
      * @param value the double function argument
@@ -83,7 +83,7 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
      * DoubleFunction<String> doubleToString = d -> String.valueOf(d);
      * Function<String, Integer> stringLength = String::length;
      * DoubleFunction<Integer> combined = doubleToString.andThen(stringLength);
-     * Integer length = combined.apply(123.456);  // Returns 7 (length of "123.456")
+     * Integer length = combined.apply(123.456);   // Returns 7 (length of "123.456")
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -104,7 +104,7 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleFunction<Double> identity = DoubleFunction.identity();
-     * Double result = identity.apply(42.5);  // Returns 42.5 (boxed)
+     * Double result = identity.apply(42.5);   // Returns 42.5 (boxed)
      * }</pre>
      *
      * @return a function that always returns its double input argument as a {@link Double}

@@ -86,10 +86,10 @@ import com.landawn.abacus.util.function.TriPredicate;
  * List<String> list2 = Arrays.asList("b", "c", "d", "c");
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
  *
- * List<String> common = diff.inCommon();  // ["b", "c"]
- * List<String> leftOnly = diff.onLeftOnly();  // ["a", "b"]
- * List<String> rightOnly = diff.onRightOnly();  // ["d", "c"]
- * boolean equal = diff.areEqual();  // false
+ * List<String> common = diff.inCommon();   // ["b", "c"]
+ * List<String> leftOnly = diff.onLeftOnly();   // ["a", "b"]
+ * List<String> rightOnly = diff.onRightOnly();   // ["d", "c"]
+ * boolean equal = diff.areEqual();   // false
  *
  * // Array comparison with primitive types
  * int[] array1 = {1, 2, 3, 2};
@@ -183,8 +183,8 @@ import com.landawn.abacus.util.function.TriPredicate;
  *   <li>Results maintain null safety with proper type checking</li>
  * </ul>
  *
- * @param <L> the type of the collection containing elements from the left (first) structure
- * @param <R> the type of the collection containing elements from the right (second) structure
+ * @param <L> the type of the collection containing elements from the left (first) structure.
+ * @param <R> the type of the collection containing elements from the right (second) structure.
  *
  * @see KeyValueDifference
  * @see MapDifference
@@ -2564,11 +2564,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             if (bean1 != null && !Beans.isBeanClass(bean1.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class");   // NOSONAR
             }
 
             if (bean2 != null && !Beans.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
+                throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class");   // NOSONAR
             }
 
             final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
@@ -2971,11 +2971,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final Class<T2> clsB = firstB != null ? (Class<T2>) firstB.getClass() : null;
 
             if (clsA != null && !Beans.isBeanClass(clsA)) {
-                throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class"); // NOSONAR
+                throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class");   // NOSONAR
             }
 
             if (clsB != null && !Beans.isBeanClass(clsB)) {
-                throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class"); // NOSONAR
+                throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class");   // NOSONAR
             }
 
             final boolean isEmptyPropNamesToCompare = N.isEmpty(propNamesToCompare);

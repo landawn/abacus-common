@@ -25,6 +25,10 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 
+    /**
+     * Constructs an OptionalCharType.
+     * This constructor initializes the type handler for OptionalChar objects.
+     */
     protected OptionalCharType() {
         super(OPTIONAL_CHAR);
     }

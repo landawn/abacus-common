@@ -716,7 +716,7 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "hello world".toCharArray();
-     * int hash = ParserUtil.hashCode(chars, 0, 5);  // Hash of "hello"
+     * int hash = ParserUtil.hashCode(chars, 0, 5);   // Hash of "hello"
      * }</pre>
      * 
      * @param a the character array
@@ -1038,7 +1038,7 @@ public final class ParserUtil {
                             break;
                         } else if (field != null) {
                             try { //NOSONAR
-                                field.set(tmp, N.defaultValueOf(field.getType())); //NOSONAR
+                                field.set(tmp, N.defaultValueOf(field.getType()));   //NOSONAR
                                 localIsImmutable = false;
 
                                 break;
@@ -1671,7 +1671,7 @@ public final class ParserUtil {
 
                         if (propInfo == null) {
                             if (i == 0) {
-                                return N.emptyList(); // return directly because the first part is not valid property/field name of the target bean class.
+                                return N.emptyList();   // return directly because the first part is not valid property/field name of the target bean class.
                             }
 
                             propInfoQueue.clear();
@@ -2386,7 +2386,7 @@ public final class ParserUtil {
          * <pre>{@code
          * Person person = new Person("John", 30);
          * PropInfo nameProp = ... // property info for "name"
-         * String name = nameProp.getPropValue(person);  // returns "John"
+         * String name = nameProp.getPropValue(person);   // returns "John"
          * }</pre>
          *
          * @param <T> the expected type of the property value
@@ -2432,7 +2432,7 @@ public final class ParserUtil {
          * Person person = new Person();
          * PropInfo ageProp = ... // property info for "age"
          * ageProp.setPropValue(person, 25);
-         * ageProp.setPropValue(person, "30");  // automatic conversion from String
+         * ageProp.setPropValue(person, "30");   // automatic conversion from String
          * }</pre>
          *
          * @param obj the object to set the property value on
@@ -3344,7 +3344,7 @@ public final class ParserUtil {
                     Beans.setPropValueByGet(obj, getMethod, propValue);
                 } else {
                     try {
-                        field.set(obj, propValue); //NOSONAR
+                        field.set(obj, propValue);   //NOSONAR
                     } catch (final IllegalAccessException e) {
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
@@ -3363,7 +3363,7 @@ public final class ParserUtil {
                     } else if (canSetFieldByGetMethod) {
                         Beans.setPropValueByGet(obj, getMethod, propValue);
                     } else {
-                        field.set(obj, propValue); //NOSONAR
+                        field.set(obj, propValue);   //NOSONAR
                     }
 
                     if (failureCountForSetProp > 0) {
@@ -3396,7 +3396,7 @@ public final class ParserUtil {
                         Beans.setPropValueByGet(obj, getMethod, propValue);
                     } else {
                         try {
-                            field.set(obj, propValue); //NOSONAR
+                            field.set(obj, propValue);   //NOSONAR
                         } catch (final IllegalAccessException e2) {
                             throw ExceptionUtil.toRuntimeException(e, true);
                         }
@@ -3455,7 +3455,7 @@ public final class ParserUtil {
         public XmlNameTag(final String name, final String typeName, final boolean isBean) {
             this.name = name.toCharArray();
 
-            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
+            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;");   //NOSONAR
 
             if (isBean) {
                 epStart = ("<bean name=\"" + name + "\">").toCharArray();

@@ -37,7 +37,7 @@ public interface DoubleNConsumer {
      *     for (double v : values) sum += v;
      *     System.out.println("Average: " + (sum / values.length));
      * };
-     * averager.accept(1.0, 2.0, 3.0);  // Prints: Average: 2.0
+     * averager.accept(1.0, 2.0, 3.0);   // Prints: Average: 2.0
      * }</pre>
      *
      * @param args the double input arguments as a varargs array
@@ -48,6 +48,21 @@ public interface DoubleNConsumer {
      * Returns a composed {@code DoubleNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleNConsumer logger = values -> System.out.println("Values: " + Arrays.toString(values));
+     * DoubleNConsumer summer = values -> {
+     *     double sum = 0;
+     *     for (double v : values) sum += v;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * DoubleNConsumer combined = logger.andThen(summer);
+     * combined.accept(1.0, 2.0, 3.0);
+     * // Prints:
+     * // Values: [1.0, 2.0, 3.0]
+     * // Sum: 6.0
+     * }</pre>
      *
      * @param after the operation to perform after this operation
      * @return a composed {@code DoubleNConsumer} that performs in sequence this operation followed by the {@code after} operation

@@ -55,7 +55,7 @@ public class DoubleFunction2025Test extends TestBase {
         DoubleFunction<Integer> composed = function.andThen(after);
         Integer result = composed.apply(5.5);
 
-        assertEquals(9, result); // "value=5.5".length() = 9
+        assertEquals(9, result);   // "value=5.5".length() = 9
     }
 
     @Test
@@ -67,7 +67,7 @@ public class DoubleFunction2025Test extends TestBase {
         DoubleFunction<Integer> composed = function.andThen(after1).andThen(after2);
         Integer result = composed.apply(5.0);
 
-        assertEquals(11, result); // "result=10.0".length() = 11
+        assertEquals(11, result);   // "result=10.0".length() = 11
     }
 
     @Test

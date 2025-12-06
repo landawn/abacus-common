@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * <pre>{@code
  * // Execute code that throws checked exceptions
  * Try.run(() -> {
- *     Thread.sleep(1000);  // throws InterruptedException
+ *     Thread.sleep(1000);   // throws InterruptedException
  * });
  * 
  * // Call code with return value and default on exception
@@ -86,10 +86,10 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param <T> the type of the resource that extends AutoCloseable
-     * @param targetResource the resource to be managed by the Try instance
-     * @return a new Try instance managing the specified target resource
-     * @throws IllegalArgumentException if the targetResource is null
+     * @param <T> the type of the resource that extends AutoCloseable.
+     * @param targetResource the resource to be managed by the Try instance.
+     * @return a new Try instance managing the specified target resource.
+     * @throws IllegalArgumentException if the targetResource is null.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -113,11 +113,11 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param <T> the type of the resource that extends AutoCloseable
-     * @param targetResource the resource to be managed by the Try instance
-     * @param finalAction the action to be executed after the resource is closed
-     * @return a new Try instance managing the specified target resource and final action
-     * @throws IllegalArgumentException if the targetResource or finalAction is null
+     * @param <T> the type of the resource that extends AutoCloseable.
+     * @param targetResource the resource to be managed by the Try instance.
+     * @param finalAction the action to be executed after the resource is closed.
+     * @return a new Try instance managing the specified target resource and final action.
+     * @throws IllegalArgumentException if the targetResource or finalAction is null.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -142,10 +142,10 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param <T> the type of the resource that extends AutoCloseable
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null
-     * @return a new Try instance managing the specified target resource supplier
-     * @throws IllegalArgumentException if the targetResourceSupplier is null
+     * @param <T> the type of the resource that extends AutoCloseable.
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null.
+     * @return a new Try instance managing the specified target resource supplier.
+     * @throws IllegalArgumentException if the targetResourceSupplier is null.
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
             throws IllegalArgumentException {
@@ -168,11 +168,11 @@ public final class Try<T extends AutoCloseable> {
      * ).call(conn -> conn.sendRequest(data));
      * }</pre>
      *
-     * @param <T> the type of the resource that extends AutoCloseable
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null
-     * @param finalAction the action to be executed after the resource is closed, must not be null
-     * @return a new Try instance managing the specified target resource supplier and final action
-     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is null
+     * @param <T> the type of the resource that extends AutoCloseable.
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null.
+     * @param finalAction the action to be executed after the resource is closed, must not be null.
+     * @return a new Try instance managing the specified target resource supplier and final action.
+     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is null.
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
             throws IllegalArgumentException {
@@ -264,9 +264,9 @@ public final class Try<T extends AutoCloseable> {
      * Config config = Try.call(() -> objectMapper.readValue(json, Config.class));
      * }</pre>
      *
-     * @param <R> The type of the result.
+     * @param <R> the type of the result.
      * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @return The result of the {@code cmd}.
+     * @return the result of the {@code cmd}.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#call(Throwables.Callable)
      */
@@ -301,10 +301,10 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param actionOnError The function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
+     * @param <R> the type of the result.
+     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param actionOnError the function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
+     * @return the result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
      * @see Throwables#call(Throwables.Callable, Function)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
@@ -339,10 +339,10 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param supplier The supplier to provide a return value when an exception occurs. Must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
+     * @param <R> the type of the result.
+     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param supplier the supplier to provide a return value when an exception occurs. Must not be {@code null}.
+     * @return the result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
      * @see Throwables#call(Throwables.Callable, Supplier)
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Supplier<R> supplier) {
@@ -374,10 +374,10 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
-     * @return The result of the {@code cmd} or the default value if an exception occurs.
+     * @param <R> the type of the result.
+     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param defaultValue the default value to return if an exception occurs during the execution of the {@code cmd}.
+     * @return the result of the {@code cmd} or the default value if an exception occurs.
      * @see #call(java.util.concurrent.Callable, Supplier)
      */
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
@@ -414,11 +414,11 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception, must not be {@code null}.
-     * @param predicate The predicate to test the exception, must not be {@code null}.
-     * @param supplier The supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
-     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
+     * @param <R> the type of the result.
+     * @param cmd the callable task that might throw an exception, must not be {@code null}.
+     * @param predicate the predicate to test the exception, must not be {@code null}.
+     * @param supplier the supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
+     * @return the result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see Throwables#call(Throwables.Callable, Predicate, Supplier)
      */
@@ -461,11 +461,11 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param predicate The predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown. Must not be {@code null}.
-     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
-     * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
+     * @param <R> the type of the result.
+     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param predicate the predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown. Must not be {@code null}.
+     * @param defaultValue the default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
+     * @return the result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      */
@@ -503,8 +503,8 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource
-     * @throws RuntimeException if an exception occurs during execution
+     * @param cmd the consumer that operates on the managed resource.
+     * @throws RuntimeException if an exception occurs during execution.
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -533,8 +533,8 @@ public final class Try<T extends AutoCloseable> {
      *    );
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource
-     * @param actionOnError the error handler for any exceptions that occur
+     * @param cmd the consumer that operates on the managed resource.
+     * @param actionOnError the error handler for any exceptions that occur.
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -563,10 +563,10 @@ public final class Try<T extends AutoCloseable> {
      *     .call(reader -> reader.lines().collect(Collectors.toList()));
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @return the result produced by the function
-     * @throws RuntimeException if an exception occurs during execution
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @return the result produced by the function.
+     * @throws RuntimeException if an exception occurs during execution.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -595,10 +595,10 @@ public final class Try<T extends AutoCloseable> {
      *     );
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @param actionOnError the function to transform exceptions into return values
-     * @return the result from the command or from the error handler if an exception occurs
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param actionOnError the function to transform exceptions into return values.
+     * @return the result from the command or from the error handler if an exception occurs.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
             final Function<? super Exception, ? extends R> actionOnError) {
@@ -628,10 +628,10 @@ public final class Try<T extends AutoCloseable> {
      *     );
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @param supplier the supplier to provide a fallback value if an exception occurs
-     * @return the result from the command or from the supplier if an exception occurs
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param supplier the supplier to provide a fallback value if an exception occurs.
+     * @return the result from the command or from the supplier if an exception occurs.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -659,10 +659,10 @@ public final class Try<T extends AutoCloseable> {
      *     );
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @param defaultValue the value to return if an exception occurs
-     * @return the result from the command or the default value if an exception occurs
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param defaultValue the value to return if an exception occurs.
+     * @return the result from the command or the default value if an exception occurs.
      * @see #call(Throwables.Function, Supplier)
      */
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
@@ -694,12 +694,12 @@ public final class Try<T extends AutoCloseable> {
      *     );
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @param predicate the predicate to test exceptions
-     * @param supplier the supplier to provide a fallback value for matching exceptions
-     * @return the result from the command or from the supplier if a matching exception occurs
-     * @throws RuntimeException if an exception occurs that doesn't match the predicate
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param predicate the predicate to test exceptions.
+     * @param supplier the supplier to provide a fallback value for matching exceptions.
+     * @return the result from the command or from the supplier if a matching exception occurs.
+     * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
             final Supplier<R> supplier) {
@@ -734,12 +734,12 @@ public final class Try<T extends AutoCloseable> {
      *     );
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param cmd the function that operates on the managed resource and returns a result
-     * @param predicate the predicate to test exceptions
-     * @param defaultValue the value to return for matching exceptions
-     * @return the result from the command or the default value if a matching exception occurs
-     * @throws RuntimeException if an exception occurs that doesn't match the predicate
+     * @param <R> the type of the result.
+     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param predicate the predicate to test exceptions.
+     * @param defaultValue the value to return for matching exceptions.
+     * @return the result from the command or the default value if a matching exception occurs.
+     * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      * @see #call(Throwables.Function, Predicate, Supplier)
      */
     // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.

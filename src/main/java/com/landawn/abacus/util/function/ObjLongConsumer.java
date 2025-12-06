@@ -56,7 +56,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive long value if the operation cannot be completed
+     * @param value the second input argument, a primitive long value
      */
     @Override
     void accept(T t, long value);
@@ -84,7 +84,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * logBoth.accept("Event", System.currentTimeMillis());
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjLongConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

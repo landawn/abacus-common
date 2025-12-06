@@ -368,6 +368,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.debug("Loading configuration from: {}", configPath);
@@ -515,7 +517,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     @Override
@@ -616,6 +618,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at INFO level with one parameter.
+     *
+     * <p>The message template can use {} or %s as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -764,7 +768,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     @Override
@@ -865,6 +869,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at WARN level with one parameter.
+     *
+     * <p>The message template can use {} or %s as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1013,7 +1019,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     @Override
@@ -1114,6 +1120,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at ERROR level with one parameter.
+     *
+     * <p>The message template can use {} or %s as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1262,7 +1270,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     @Override
@@ -1380,7 +1388,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg) {
-        template = String.valueOf(template); // null -> "null"
+        template = String.valueOf(template);   // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16);
@@ -1431,7 +1439,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2) {
-        template = String.valueOf(template); // null -> "null"
+        template = String.valueOf(template);   // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 32);
@@ -1505,7 +1513,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
-        template = String.valueOf(template); // null -> "null"
+        template = String.valueOf(template);   // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 48);
@@ -1594,7 +1602,7 @@ public abstract class AbstractLogger implements Logger {
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, final Object... args) {
-        template = String.valueOf(template); // null -> "null"
+        template = String.valueOf(template);   // null -> "null"
 
         if (N.isEmpty(args)) {
             return template;

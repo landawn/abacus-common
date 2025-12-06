@@ -144,8 +144,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed int array, or {@code null} if the input string is {@code null}.
-     *         Returns an empty array for empty string or "[]".
+     * @return the parsed int array, or {@code null} if the input string is {@code null}, empty, or blank.
+     *         Returns an empty array for "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
      */
     @Override

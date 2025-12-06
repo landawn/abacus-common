@@ -60,7 +60,7 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntTriPredicate isValidTriangle = (a, b, c) -> a + b > c && a + c > b && b + c > a;
-     * boolean result = isValidTriangle.test(3, 4, 5);  // Returns true
+     * boolean result = isValidTriangle.test(3, 4, 5);   // Returns true
      * }</pre>
      *
      * @param a the first input argument

@@ -35,6 +35,45 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
+/**
+ * Type handler for java.io.Reader and its subclasses.
+ * Provides functionality for converting between Reader instances and their string representations,
+ * as well as handling database operations with character streams (CLOB, LONGVARCHAR, etc.).
+ *
+ * <p>This type handler supports:
+ * <ul>
+ *   <li>Reading content from Reader instances and converting to strings</li>
+ *   <li>Creating Reader instances from strings</li>
+ *   <li>Database operations with character streams (getCharacterStream/setCharacterStream)</li>
+ *   <li>Handling both abstract Reader class and concrete subclasses</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Reader> type = TypeFactory.getType(Reader.class);
+ *
+ * // Convert Reader to string
+ * Reader reader = new StringReader("Sample content");
+ * String content = type.stringOf(reader);   // Returns "Sample content"
+ *
+ * // Convert string to Reader
+ * Reader newReader = type.valueOf("New content");
+ *
+ * // Database operations
+ * try (ResultSet rs = stmt.executeQuery("SELECT document FROM docs WHERE id = 1")) {
+ *     if (rs.next()) {
+ *         Reader docReader = type.get(rs, 1);
+ *         String document = IOUtil.readAllToString(docReader);
+ *     }
+ * }
+ *
+ * // Storing large text in database
+ * PreparedStatement stmt = conn.prepareStatement("INSERT INTO docs (content) VALUES (?)");
+ * Reader largeText = new StringReader(veryLargeString);
+ * type.set(stmt, 1, largeText);
+ * stmt.executeUpdate();
+ * }</pre>
+ */
 @SuppressWarnings("java:S2160")
 public class ReaderType extends AbstractType<Reader> {
 
@@ -46,10 +85,20 @@ public class ReaderType extends AbstractType<Reader> {
 
     private final Constructor<?> readerConstructor;
 
+    /**
+     * Constructs a new ReaderType instance for the base Reader class.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     ReaderType() {
         this(READER);
     }
 
+    /**
+     * Constructs a new ReaderType with the specified type name.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     *
+     * @param typeName the name of the Reader type
+     */
     ReaderType(final String typeName) {
         super(typeName);
 
@@ -59,6 +108,13 @@ public class ReaderType extends AbstractType<Reader> {
         readerConstructor = null;
     }
 
+    /**
+     * Constructs a new ReaderType for a specific Reader subclass.
+     * Attempts to locate constructors that accept String or Reader parameters for instantiation.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     *
+     * @param cls the specific Reader subclass to create a type handler for
+     */
     ReaderType(final Class<Reader> cls) {
         super(ClassUtil.getSimpleClassName(cls));
 
@@ -80,7 +136,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Class<Reader> clazz = type.clazz();
-     * System.out.println(clazz.getName());  // Output: java.io.Reader
+     * System.out.println(clazz.getName());   // Output: java.io.Reader
      * }</pre>
      *
      * @return the Class object for Reader.class or the specific Reader subclass
@@ -98,7 +154,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * boolean isReader = type.isReader();
-     * System.out.println(isReader);  // Output: true
+     * System.out.println(isReader);   // Output: true
      * }</pre>
      *
      * @return {@code true}, indicating this is a Reader type
@@ -117,10 +173,10 @@ public class ReaderType extends AbstractType<Reader> {
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Hello World");
      * String content = type.stringOf(reader);
-     * System.out.println(content);  // Output: Hello World
+     * System.out.println(content);   // Output: Hello World
      *
      * String nullStr = type.stringOf(null);
-     * System.out.println(nullStr);  // Output: null
+     * System.out.println(nullStr);   // Output: null
      * }</pre>
      *
      * @param x the Reader to convert to string
@@ -142,10 +198,10 @@ public class ReaderType extends AbstractType<Reader> {
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = type.valueOf("Sample text");
      * String content = IOUtil.readAllToString(reader);
-     * System.out.println(content);  // Output: Sample text
+     * System.out.println(content);   // Output: Sample text
      *
      * Reader nullReader = type.valueOf(null);
-     * System.out.println(nullReader);  // Output: null
+     * System.out.println(nullReader);   // Output: null
      * }</pre>
      *
      * @param str the string to create a Reader from
@@ -178,14 +234,14 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * // From String
      * Reader reader1 = type.valueOf("Hello");
-     * System.out.println(IOUtil.readAllToString(reader1));  // Output: Hello
+     * System.out.println(IOUtil.readAllToString(reader1));   // Output: Hello
      *
      * // From Clob (assuming clob is a valid SQL Clob object)
      * Reader reader2 = type.valueOf(clob);
      *
      * // From null
      * Reader nullReader = type.valueOf((Object) null);
-     * System.out.println(nullReader);  // Output: null
+     * System.out.println(nullReader);   // Output: null
      * }</pre>
      *
      * @param obj the object to convert to a Reader
@@ -217,7 +273,7 @@ public class ReaderType extends AbstractType<Reader> {
      * // Assuming rs is a ResultSet with a character stream in column 1
      * Reader reader = type.get(rs, 1);
      * String content = IOUtil.readAllToString(reader);
-     * System.out.println(content);  // Output: content from the database
+     * System.out.println(content);   // Output: content from the database
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -239,7 +295,7 @@ public class ReaderType extends AbstractType<Reader> {
      * // Assuming rs is a ResultSet with a character stream in column "content"
      * Reader reader = type.get(rs, "content");
      * String text = IOUtil.readAllToString(reader);
-     * System.out.println(text);  // Output: content from the database
+     * System.out.println(text);   // Output: content from the database
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -360,13 +416,13 @@ public class ReaderType extends AbstractType<Reader> {
      * Reader reader = new StringReader("Hello World");
      * StringBuilder sb = new StringBuilder("Message: ");
      * type.appendTo(sb, reader);
-     * System.out.println(sb.toString());  // Output: Message: Hello World
+     * System.out.println(sb.toString());   // Output: Message: Hello World
      *
      * // With Writer
      * StringWriter writer = new StringWriter();
      * Reader reader2 = new StringReader("Content");
      * type.appendTo(writer, reader2);
-     * System.out.println(writer.toString());  // Output: Content
+     * System.out.println(writer.toString());   // Output: Content
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -399,13 +455,13 @@ public class ReaderType extends AbstractType<Reader> {
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
      * config.setStringQuotation('"');
      * type.writeCharacter(writer, reader, config);
-     * System.out.println(writer.toString());  // Output: "Sample text"
+     * System.out.println(writer.toString());   // Output: "Sample text"
      *
      * // Without quotation
      * Reader reader2 = new StringReader("No quotes");
      * CharacterWriter writer2 = new CharacterWriter();
      * type.writeCharacter(writer2, reader2, null);
-     * System.out.println(writer2.toString());  // Output: No quotes
+     * System.out.println(writer2.toString());   // Output: No quotes
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

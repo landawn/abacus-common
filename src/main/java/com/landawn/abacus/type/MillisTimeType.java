@@ -22,8 +22,16 @@ import java.sql.Time;
 
 import com.landawn.abacus.util.Dates;
 
+/**
+ * Type handler for {@link Time} objects that stores and retrieves them as milliseconds
+ * in the database. This implementation converts between java.sql.Time instances and their
+ * millisecond representation (time since epoch).
+ */
 public class MillisTimeType extends TimeType {
 
+    /**
+     * The type name identifier for this Time type handler that uses milliseconds.
+     */
     public static final String MILLIS_TIME = "MillisTime";
 
     MillisTimeType() {
@@ -103,7 +111,7 @@ public class MillisTimeType extends TimeType {
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO schedule (id, start_time) VALUES (?, ?)");
      *
-     * Time time = new Time(3600000L);  // 01:00:00
+     * Time time = new Time(3600000L);   // 01:00:00
      * type.set(stmt, 2, time);
      * // Sets parameter to 3600000
      *
@@ -131,7 +139,7 @@ public class MillisTimeType extends TimeType {
      * Type<Time> type = TypeFactory.getType(Time.class);
      * CallableStatement stmt = connection.prepareCall("{call set_schedule(?, ?)}");
      *
-     * Time time = new Time(3600000L);  // 01:00:00
+     * Time time = new Time(3600000L);   // 01:00:00
      * type.set(stmt, "p_start_time", time);
      * // Sets parameter to 3600000
      *

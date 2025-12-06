@@ -167,7 +167,7 @@ public final class Hashing {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HashFunction murmur = Hashing.murmur3_32(42);  // seed = 42
+     * HashFunction murmur = Hashing.murmur3_32(42);   // seed = 42
      * HashCode hash = murmur.hash("example".getBytes());
      * }</pre>
      *
@@ -331,7 +331,7 @@ public final class Hashing {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha256Hash = Hashing.sha256().hash("secure data".getBytes());
-     * byte[] hashBytes = sha256Hash.asBytes();  // 32 bytes
+     * byte[] hashBytes = sha256Hash.asBytes();   // 32 bytes
      * }</pre>
      *
      * @return a hash function implementing SHA-256

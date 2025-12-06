@@ -33,6 +33,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractCharacterType extends AbstractPrimaryType<Character> {
 
+    /**
+     * Constructs an AbstractCharacterType with the specified type name.
+     *
+     * @param typeName the name of the Character type (e.g., "Character", "char")
+     */
     protected AbstractCharacterType(String typeName) {
         super(typeName);
     }

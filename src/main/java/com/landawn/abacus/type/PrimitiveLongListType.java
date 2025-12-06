@@ -42,7 +42,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * Class<LongList> clazz = type.clazz();
-     * System.out.println(clazz.getName());  // Output: com.landawn.abacus.util.LongList
+     * System.out.println(clazz.getName());   // Output: com.landawn.abacus.util.LongList
      * }</pre>
      *
      * @return the Class object for LongList.class
@@ -60,7 +60,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * Type<?> elementType = type.getElementType();
-     * System.out.println(elementType.name());  // Output: long
+     * System.out.println(elementType.name());   // Output: long
      * }</pre>
      *
      * @return the Type instance representing long type for list elements
@@ -99,10 +99,10 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(1L, 2L, 3L);
      * String str = type.stringOf(list);
-     * System.out.println(str);  // Output: [1, 2, 3]
+     * System.out.println(str);   // Output: [1, 2, 3]
      *
      * String nullStr = type.stringOf(null);
-     * System.out.println(nullStr);  // Output: null
+     * System.out.println(nullStr);   // Output: null
      * }</pre>
      *
      * @param x the LongList to convert to string
@@ -125,10 +125,10 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * System.out.println(list.get(0));   // Output: 1
      *
      * LongList emptyList = type.valueOf("[]");
-     * System.out.println(emptyList.isEmpty());  // Output: true
+     * System.out.println(emptyList.isEmpty());   // Output: true
      *
      * LongList nullList = type.valueOf(null);
-     * System.out.println(nullList);  // Output: null
+     * System.out.println(nullList);   // Output: null
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
@@ -151,11 +151,11 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * LongList list = LongList.of(10L, 20L, 30L);
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, list);
-     * System.out.println(sb.toString());  // Output: Values: [10, 20, 30]
+     * System.out.println(sb.toString());   // Output: Values: [10, 20, 30]
      *
      * StringBuilder nullSb = new StringBuilder();
      * type.appendTo(nullSb, null);
-     * System.out.println(nullSb.toString());  // Output: null
+     * System.out.println(nullSb.toString());   // Output: null
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -181,14 +181,14 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(100L, 200L, 300L);
-     * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * BufferedJSONWriter writer = new BufferedJSONWriter();
+     * JSONXMLSerializationConfig<?> config = null;
      * type.writeCharacter(writer, list, config);
-     * System.out.println(writer.toString());  // Output: [100, 200, 300]
+     * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * CharacterWriter nullWriter = new CharacterWriter();
+     * BufferedJSONWriter nullWriter = new BufferedJSONWriter();
      * type.writeCharacter(nullWriter, null, config);
-     * System.out.println(nullWriter.toString());  // Output: null
+     * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

@@ -38,12 +38,12 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortConsumer printer = value -> System.out.println("Value: " + value);
-     * printer.accept((short) 42);  // Prints "Value: 42"
+     * printer.accept((short) 42);   // Prints "Value: 42"
      *
      * List<Short> results = new ArrayList<>();
      * ShortConsumer collector = value -> results.add(value);
      * collector.accept((short) 10);
-     * collector.accept((short) 20);  // results now contains [10, 20]
+     * collector.accept((short) 20);   // results now contains [10, 20]
      * }</pre>
      *
      * @param t the input argument
@@ -64,8 +64,8 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * };
      *
      * ShortConsumer combined = logger.andThen(validator);
-     * combined.accept((short) 10);  // Prints "Processing: 10", then validates
-     * // combined.accept((short) -5);  // Prints "Processing: -5", then throws exception
+     * combined.accept((short) 10);   // Prints "Processing: 10", then validates
+     * // combined.accept((short) -5);   // Prints "Processing: -5", then throws exception
      * }</pre>
      *
      * @param after the operation to perform after this operation

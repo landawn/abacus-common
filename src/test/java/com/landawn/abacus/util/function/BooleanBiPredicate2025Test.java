@@ -113,7 +113,7 @@ public class BooleanBiPredicate2025Test extends TestBase {
 
         BooleanBiPredicate combined = firstFalse.and(shouldNotExecute);
 
-        assertFalse(combined.test(true, true)); // Should not throw exception
+        assertFalse(combined.test(true, true));   // Should not throw exception
     }
 
     @Test
@@ -138,7 +138,7 @@ public class BooleanBiPredicate2025Test extends TestBase {
 
         BooleanBiPredicate combined = firstTrue.or(shouldNotExecute);
 
-        assertTrue(combined.test(true, true)); // Should not throw exception
+        assertTrue(combined.test(true, true));   // Should not throw exception
     }
 
     @Test

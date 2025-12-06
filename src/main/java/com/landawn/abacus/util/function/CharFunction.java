@@ -37,7 +37,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharFunction<Character> boxer = CharFunction.BOX;
-     * Character boxed = boxer.apply('A');  // Returns Character.valueOf('A')
+     * Character boxed = boxer.apply('A');   // Returns Character.valueOf('A')
      * }</pre>
      */
     CharFunction<Character> BOX = value -> value;
@@ -57,10 +57,10 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharFunction<String> toString = c -> String.valueOf(c);
-     * String result = toString.apply('x');  // Returns "x"
+     * String result = toString.apply('x');   // Returns "x"
      *
      * CharFunction<Boolean> isDigit = Character::isDigit;
-     * Boolean digit = isDigit.apply('5');  // Returns true
+     * Boolean digit = isDigit.apply('5');   // Returns true
      * }</pre>
      *
      * @param value the char input argument
@@ -80,7 +80,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * CharFunction<String> charToString = c -> String.valueOf(c);
      * Function<String, Integer> stringLength = String::length;
      * CharFunction<Integer> combined = charToString.andThen(stringLength);
-     * Integer length = combined.apply('A');  // Returns 1
+     * Integer length = combined.apply('A');   // Returns 1
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -102,7 +102,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharFunction<Character> identity = CharFunction.identity();
-     * Character result = identity.apply('A');  // Returns 'A' (boxed)
+     * Character result = identity.apply('A');   // Returns 'A' (boxed)
      * }</pre>
      *
      * @return a function that always returns its input argument as a Character

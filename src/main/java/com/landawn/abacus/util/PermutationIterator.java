@@ -43,7 +43,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
  * List<String> items = Arrays.asList("A", "B", "C");
  * ObjIterator<List<String>> perms = PermutationIterator.of(items);
  * while (perms.hasNext()) {
- *     System.out.println(perms.next());  // Prints each permutation
+ *     System.out.println(perms.next());   // Prints each permutation
  * }
  * }</pre>
  *

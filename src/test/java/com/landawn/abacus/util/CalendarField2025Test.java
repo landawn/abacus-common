@@ -41,8 +41,8 @@ public class CalendarField2025Test extends TestBase {
     public void testOf_withInvalidValues() {
         assertThrows(IllegalArgumentException.class, () -> CalendarField.of(999));
         assertThrows(IllegalArgumentException.class, () -> CalendarField.of(-1));
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.HOUR)); // Not supported
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.AM_PM)); // Not supported
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.HOUR));   // Not supported
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.AM_PM));   // Not supported
     }
 
     @Test

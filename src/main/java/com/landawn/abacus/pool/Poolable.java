@@ -37,7 +37,7 @@ package com.landawn.abacus.pool;
  *
  *     public PooledConnection(Connection conn) {
  *         this.connection = conn;
- *         this.activityPrint = new ActivityPrint(3600000, 600000);  // 1hr live, 10min idle
+ *         this.activityPrint = new ActivityPrint(3600000, 600000);   // 1hr live, 10min idle
  *     }
  *
  *     @Override
@@ -69,7 +69,7 @@ public interface Poolable {
      * <p>The returned ActivityPrint should be the same instance throughout the object's lifetime
      * to ensure consistent tracking of access patterns and expiration.
      * 
-     * @return the ActivityPrint for this object, never null
+     * @return the ActivityPrint for this object, never {@code null}
      */
     ActivityPrint activityPrint();
 
@@ -96,22 +96,22 @@ public interface Poolable {
     /**
      * Wraps the provided object in a PoolableWrapper with maximum lifetime and idle time.
      * This is a convenience method for creating poolable objects from existing instances.
-     * 
+     *
      * <p>The wrapped object will have:
      * <ul>
      *   <li>Live time: Long.MAX_VALUE (effectively infinite)</li>
      *   <li>Max idle time: Long.MAX_VALUE (effectively infinite)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "some data";
      * PoolableWrapper<String> poolable = Poolable.wrap(data);
      * pool.add(poolable);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, must not be null
+     * @param srcObject the object to wrap, can be {@code null}
      * @return a PoolableWrapper containing the source object
      */
     static <T> PoolableWrapper<T> wrap(final T srcObject) {
@@ -121,7 +121,7 @@ public interface Poolable {
     /**
      * Wraps the provided object in a PoolableWrapper with specified lifetime and idle time limits.
      * This allows fine-grained control over when wrapped objects expire.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a buffer that expires after 5 minutes or 1 minute of inactivity
@@ -129,9 +129,9 @@ public interface Poolable {
      * PoolableWrapper<ByteBuffer> poolable = Poolable.wrap(buffer, 300000, 60000);
      * pool.add(poolable);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, must not be null
+     * @param srcObject the object to wrap, can be {@code null}
      * @param liveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
      * @return a PoolableWrapper containing the source object with the specified expiration settings

@@ -31,11 +31,11 @@ import com.landawn.abacus.util.function.ShortConsumer;
  *     stats.accept(value);
  * }
  * 
- * System.out.println("Count: " + stats.getCount());  // 5
- * System.out.println("Sum: " + stats.getSum());  // 150
- * System.out.println("Min: " + stats.getMin());  // 10
- * System.out.println("Max: " + stats.getMax());  // 50
- * System.out.println("Average: " + stats.getAverage());  // 30.0
+ * System.out.println("Count: " + stats.getCount());   // 5
+ * System.out.println("Sum: " + stats.getSum());   // 150
+ * System.out.println("Min: " + stats.getMin());   // 10
+ * System.out.println("Max: " + stats.getMax());   // 50
+ * System.out.println("Average: " + stats.getAverage());   // 30.0
  * }</pre>
  * 
  * @see java.util.IntSummaryStatistics
@@ -140,7 +140,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
      * stats.accept((short)5);
-     * short min = stats.getMin();  // Returns 5
+     * short min = stats.getMin();   // Returns 5
      * }</pre>
      *
      * @return the minimum value, or {@code Short.MAX_VALUE} if none
@@ -157,7 +157,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
      * stats.accept((short)20);
-     * short max = stats.getMax();  // Returns 20
+     * short max = stats.getMax();   // Returns 20
      * }</pre>
      *
      * @return the maximum value, or {@code Short.MIN_VALUE} if none
@@ -174,7 +174,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
      * stats.accept((short)20);
-     * long count = stats.getCount();  // Returns 2
+     * long count = stats.getCount();   // Returns 2
      * }</pre>
      *
      * @return the count of values
@@ -192,7 +192,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * stats.accept((short)10);
      * stats.accept((short)20);
      * stats.accept((short)30);
-     * Long sum = stats.getSum();  // Returns 60
+     * Long sum = stats.getSum();   // Returns 60
      * }</pre>
      *
      * @return the sum of values as a Long
@@ -210,7 +210,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * stats.accept((short)10);
      * stats.accept((short)20);
      * stats.accept((short)30);
-     * Double avg = stats.getAverage();  // Returns 20.0
+     * Double avg = stats.getAverage();   // Returns 20.0
      * }</pre>
      *
      * @return the arithmetic mean of values, or 0.0 if none

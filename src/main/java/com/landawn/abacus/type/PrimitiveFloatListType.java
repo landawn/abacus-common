@@ -43,6 +43,13 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Returns the Class object representing the FloatList type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * Class<FloatList> clazz = type.clazz();
+     * // Returns: FloatList.class
+     * }</pre>
+     *
      * @return the Class object for FloatList
      */
     @Override
@@ -52,6 +59,13 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
 
     /**
      * Returns the Type object for the float element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * Type<Float> elementType = type.getElementType();
+     * // Returns: Type instance for float
+     * }</pre>
      *
      * @return the Type object representing float elements
      */
@@ -76,6 +90,14 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * The list is first converted to a float array, then serialized using the array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * FloatList list = FloatList.of(1.5f, 2.7f, 3.14f);
+     * String result = type.stringOf(list);
+     * // Returns: "[1.5, 2.7, 3.14]"
+     * }</pre>
+     *
      * @param x the FloatList to convert
      * @return the string representation of the list, or {@code null} if input is null
      */
@@ -89,6 +111,16 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * The string is first parsed as a float array, then wrapped in a FloatList.
      * Returns {@code null} if the input string is {@code null} or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * FloatList result = type.valueOf("[1.5, 2.7, 3.14]");
+     * // Returns: FloatList containing {1.5f, 2.7f, 3.14f}
+     *
+     * FloatList empty = type.valueOf("[]");
+     * // Returns: empty FloatList
+     * }</pre>
+     *
      * @param str the string to parse
      * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or empty
      */
@@ -101,6 +133,15 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * Appends the string representation of a FloatList to an Appendable.
      * Delegates to the array type handler after converting the list to an array.
      * Appends "null" if the list is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * StringBuilder sb = new StringBuilder();
+     * FloatList list = FloatList.of(1.5f, 2.7f, 3.14f);
+     * type.appendTo(sb, list);
+     * // sb now contains: "[1.5, 2.7, 3.14]"
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the FloatList to append
@@ -119,6 +160,15 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * Writes the character representation of a FloatList to a CharacterWriter.
      * Delegates to the array type handler after converting the list to an array.
      * Writes "null" if the list is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<FloatList> type = TypeFactory.getType(FloatList.class);
+     * CharacterWriter writer = new CharacterWriter();
+     * FloatList list = FloatList.of(1.5f, 2.7f, 3.14f);
+     * type.writeCharacter(writer, list, null);
+     * // Writer contains: "[1.5, 2.7, 3.14]"
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the FloatList to write

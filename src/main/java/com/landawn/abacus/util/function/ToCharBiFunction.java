@@ -40,11 +40,11 @@ public interface ToCharBiFunction<T, U> {
      *
      * ToCharBiFunction<Integer, Integer> digitToChar = (digit, base) ->
      *     Character.forDigit(digit, base);
-     * char result3 = digitToChar.applyAsChar(10, 16);  // returns 'a' (hex)
+     * char result3 = digitToChar.applyAsChar(10, 16);   // returns 'a' (hex)
      *
      * ToCharBiFunction<Character, Integer> shift = (ch, offset) ->
      *     (char) (ch + offset);
-     * char result4 = shift.applyAsChar('A', 2);  // returns 'C'
+     * char result4 = shift.applyAsChar('A', 2);   // returns 'C'
      * }</pre>
      *
      * @param t the first function argument

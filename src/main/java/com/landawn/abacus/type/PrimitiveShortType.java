@@ -57,7 +57,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(short.class);
      * boolean isPrimitive = type.isPrimitiveType();
-     * System.out.println(isPrimitive);  // Output: true
+     * System.out.println(isPrimitive);   // Output: true
      * }</pre>
      *
      * @return {@code true}, indicating this is a primitive type
@@ -75,7 +75,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(short.class);
      * Short defaultVal = type.defaultValue();
-     * System.out.println(defaultVal);  // Output: 0
+     * System.out.println(defaultVal);   // Output: 0
      * }</pre>
      *
      * @return Short object containing the value 0
@@ -95,11 +95,11 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Type<Short> type = TypeFactory.getType(short.class);
      * // Assuming rs is a ResultSet with a short value in column 1
      * Short value = type.get(rs, 1);
-     * System.out.println(value);  // Output: the short value from the database
+     * System.out.println(value);   // Output: the short value from the database
      *
      * // If the column contains NULL
      * Short nullValue = type.get(rs, 2);
-     * System.out.println(nullValue);  // Output: null
+     * System.out.println(nullValue);   // Output: null
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -133,11 +133,11 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Type<Short> type = TypeFactory.getType(short.class);
      * // Assuming rs is a ResultSet with a short value in column "age"
      * Short age = type.get(rs, "age");
-     * System.out.println(age);  // Output: the short value from the database
+     * System.out.println(age);   // Output: the short value from the database
      *
      * // If the column contains NULL
      * Short nullValue = type.get(rs, "missing_column");
-     * System.out.println(nullValue);  // Output: null
+     * System.out.println(nullValue);   // Output: null
      * }</pre>
      *
      * @param rs the ResultSet to read from

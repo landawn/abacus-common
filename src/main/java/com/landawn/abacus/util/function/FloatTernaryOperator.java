@@ -38,6 +38,15 @@ public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<Ru
      * the result. Common uses include mathematical operations like fused multiply-add
      * (a * b + c) or conditional operations.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTernaryOperator fusedMultiplyAdd = (a, b, c) -> a * b + c;
+     * float result = fusedMultiplyAdd.applyAsFloat(2.5f, 3.0f, 1.5f); // Returns 9.0
+     *
+     * FloatTernaryOperator averageOfThree = (a, b, c) -> (a + b + c) / 3.0f;
+     * float avg = averageOfThree.applyAsFloat(1.0f, 2.0f, 3.0f); // Returns 2.0
+     * }</pre>
+     *
      * @param a the first float operand
      * @param b the second float operand
      * @param c the third float operand

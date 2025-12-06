@@ -89,22 +89,22 @@ import com.landawn.abacus.util.TypeReference;
  * <pre>{@code
  * // Basic type operations
  * Type<String> stringType = Type.of(String.class);
- * String value = stringType.valueOf("Hello");  // Parse from string
- * String repr = stringType.stringOf(value);  // Convert to string
+ * String value = stringType.valueOf("Hello");   // Parse from string
+ * String repr = stringType.stringOf(value);   // Convert to string
  *
  * // Generic type handling
  * Type<List<Integer>> listType = Type.of(new TypeReference<List<Integer>>(){});
- * List<Integer> numbers = listType.valueOf("[1,2,3]");  // Parse JSON array
+ * List<Integer> numbers = listType.valueOf("[1,2,3]");   // Parse JSON array
  *
  * // Database operations
  * Type<Date> dateType = Type.of(Date.class);
- * Date date = dateType.get(resultSet, "created_date");  // Get from ResultSet
- * dateType.set(preparedStmt, 1, date);  // Set parameter
+ * Date date = dateType.get(resultSet, "created_date");   // Get from ResultSet
+ * dateType.set(preparedStmt, 1, date);   // Set parameter
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3));  // Collection to array
- * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class);  // Array to collection
+ * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3));   // Collection to array
+ * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class);   // Array to collection
  *
  * // Type checking and metadata
  * if (type.isNumber()) {
@@ -252,6 +252,16 @@ public interface Type<T> {
      * Returns a list of Type instances for the given array of classes.
      * Convenient for obtaining multiple types at once.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get types for multiple classes
+     * List<Type<Object>> types = Type.ofAll(String.class, Integer.class, Date.class);
+     * // types: [Type<String>, Type<Integer>, Type<Date>]
+     *
+     * // Get types for custom classes
+     * List<Type<MyClass>> customTypes = Type.ofAll(User.class, Order.class);
+     * }</pre>
+     *
      * @param <T> the type parameter
      * @param classes the array of classes
      * @return list of corresponding Type instances
@@ -263,6 +273,17 @@ public interface Type<T> {
 
     /**
      * Returns a list of Type instances for the given collection of classes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get types from a collection
+     * Collection<Class<?>> classList = Arrays.asList(String.class, Integer.class);
+     * List<Type<Object>> types = Type.ofAll(classList);
+     *
+     * // Process types from a set
+     * Set<Class<Number>> numberClasses = new HashSet<>(Arrays.asList(Integer.class, Long.class));
+     * List<Type<Number>> numberTypes = Type.ofAll(numberClasses);
+     * }</pre>
      *
      * @param <T> the type parameter
      * @param classes the collection of classes
@@ -283,6 +304,18 @@ public interface Type<T> {
     /**
      * Returns a List type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a List<String> type
+     * Type<List<String>> listType = Type.ofList(String.class);
+     *
+     * // Create a List<Integer> type
+     * Type<List<Integer>> intListType = Type.ofList(Integer.class);
+     *
+     * // Use for parsing
+     * List<String> names = listType.valueOf("[\"Alice\", \"Bob\"]");
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for List of the specified element type
@@ -294,6 +327,15 @@ public interface Type<T> {
     /**
      * Returns a LinkedList type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a LinkedList<String> type
+     * Type<LinkedList<String>> linkedListType = Type.ofLinkedList(String.class);
+     *
+     * // Parse JSON into LinkedList
+     * LinkedList<Integer> numbers = Type.ofLinkedList(Integer.class).valueOf("[1, 2, 3]");
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for LinkedList of the specified element type
@@ -304,6 +346,16 @@ public interface Type<T> {
 
     /**
      * Returns a List of Map type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a List<Map<String, Object>> type
+     * Type<List<Map<String, Object>>> listMapType = Type.ofListOfMap(String.class, Object.class);
+     *
+     * // Parse JSON array of objects
+     * String json = "[{\"name\":\"Alice\",\"age\":30}, {\"name\":\"Bob\",\"age\":25}]";
+     * List<Map<String, Object>> users = listMapType.valueOf(json);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -318,6 +370,16 @@ public interface Type<T> {
     /**
      * Returns a List of LinkedHashMap type with the specified key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a List<LinkedHashMap<String, String>> type (maintains insertion order)
+     * Type<List<Map<String, String>>> listMapType = Type.ofListOfLinkedHashMap(String.class, String.class);
+     *
+     * // Parse JSON with order preservation
+     * String json = "[{\"first\":\"A\",\"second\":\"B\"}, {\"third\":\"C\"}]";
+     * List<Map<String, String>> data = listMapType.valueOf(json);
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
@@ -330,6 +392,16 @@ public interface Type<T> {
 
     /**
      * Returns a Set type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a Set<String> type
+     * Type<Set<String>> setType = Type.ofSet(String.class);
+     *
+     * // Parse JSON into Set (duplicates removed)
+     * Set<Integer> numbers = Type.ofSet(Integer.class).valueOf("[1, 2, 2, 3]");
+     * // numbers: [1, 2, 3]
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -479,6 +551,20 @@ public interface Type<T> {
      * Returns a Map type for properties (LinkedHashMap&lt;String, Object&gt;).
      * Commonly used for property maps in configuration and data transfer.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a properties map type
+     * Type<Map<String, Object>> propsType = Type.ofPropsMap();
+     *
+     * // Parse JSON object into properties map
+     * String json = "{\"name\":\"Alice\",\"age\":30,\"active\":true}";
+     * Map<String, Object> props = propsType.valueOf(json);
+     * // props: {name=Alice, age=30, active=true}
+     *
+     * // Serialize properties to JSON
+     * String output = propsType.stringOf(props);
+     * }</pre>
+     *
      * @return Type instance for LinkedHashMap&lt;String, Object&gt;
      */
     static Type<Map<String, Object>> ofPropsMap() {
@@ -487,6 +573,19 @@ public interface Type<T> {
 
     /**
      * Returns a Map type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a Map<String, Integer> type
+     * Type<Map<String, Integer>> mapType = Type.ofMap(String.class, Integer.class);
+     *
+     * // Parse JSON object
+     * String json = "{\"apple\":5,\"banana\":3,\"orange\":7}";
+     * Map<String, Integer> inventory = mapType.valueOf(json);
+     *
+     * // Serialize map to string
+     * String output = mapType.stringOf(inventory);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -839,7 +938,7 @@ public interface Type<T> {
      * @return {@code true} if this is an array type, {@code false} otherwise
      */
     default boolean isArray() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return isPrimitiveArray() || isObjectArray();   // Default implementation, can be overridden by specific types
     }
 
     /**
@@ -1019,7 +1118,7 @@ public interface Type<T> {
      *
      * @return the element type, or {@code null} if not applicable
      */
-    Type<?> getElementType(); //NOSONAR
+    Type<?> getElementType();   //NOSONAR
 
     /**
      * Gets the parameter types for generic types.
@@ -1027,7 +1126,7 @@ public interface Type<T> {
      *
      * @return array of parameter types, empty if none
      */
-    Type<?>[] getParameterTypes(); //NOSONAR
+    Type<?>[] getParameterTypes();   //NOSONAR
 
     /**
      * Returns the default value for this type.

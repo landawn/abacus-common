@@ -67,7 +67,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      *     }
      *     return (double) sum / args.length;
      * };
-     * Double avg = average.apply(10L, 20L, 30L, 40L);  // Returns 25.0
+     * Double avg = average.apply(10L, 20L, 30L, 40L);   // Returns 25.0
      * }</pre>
      *
      * @param args the function arguments as a varargs array. Can be empty, contain
@@ -98,7 +98,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      *     return total;
      * };
      * LongNFunction<String> sumAsString = sum.andThen(String::valueOf);
-     * String result = sumAsString.apply(1L, 2L, 3L, 4L);  // "10"
+     * String result = sumAsString.apply(1L, 2L, 3L, 4L);   // "10"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

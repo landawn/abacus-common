@@ -90,55 +90,55 @@ import java.math.BigInteger;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Creating fractions using static factory methods
- * Fraction half = Fraction.of(1, 2);  // 1/2
- * Fraction twoThirds = Fraction.of(2, 3);  // 2/3
- * Fraction mixedNumber = Fraction.of(2, 1, 4);  // 2 1/4 = 9/4
+ * Fraction half = Fraction.of(1, 2);   // 1/2
+ * Fraction twoThirds = Fraction.of(2, 3);   // 2/3
+ * Fraction mixedNumber = Fraction.of(2, 1, 4);   // 2 1/4 = 9/4
  *
  * // Creating from decimal values
- * Fraction fromDecimal = Fraction.of(0.75);  // 3/4
- * Fraction fromString = Fraction.of("3/4");  // 3/4
- * Fraction mixedFromString = Fraction.of("2 1/4");  // 9/4
+ * Fraction fromDecimal = Fraction.of(0.75);   // 3/4
+ * Fraction fromString = Fraction.of("3/4");   // 3/4
+ * Fraction mixedFromString = Fraction.of("2 1/4");   // 9/4
  *
  * // Accessing fraction components
- * int num = half.numerator();  // 1
- * int denom = half.denominator();  // 2
- * int whole = mixedNumber.properWhole();  // 2
- * int properNum = mixedNumber.properNumerator();  // 1
+ * int num = half.numerator();   // 1
+ * int denom = half.denominator();   // 2
+ * int whole = mixedNumber.properWhole();   // 2
+ * int properNum = mixedNumber.properNumerator();   // 1
  *
  * // Arithmetic operations
- * Fraction sum = half.add(twoThirds);  // 7/6
- * Fraction difference = twoThirds.subtract(half);  // 1/6
- * Fraction product = half.multipliedBy(twoThirds);  // 1/3
- * Fraction quotient = twoThirds.dividedBy(half);  // 4/3
+ * Fraction sum = half.add(twoThirds);   // 7/6
+ * Fraction difference = twoThirds.subtract(half);   // 1/6
+ * Fraction product = half.multipliedBy(twoThirds);   // 1/3
+ * Fraction quotient = twoThirds.dividedBy(half);   // 4/3
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
  * <pre>{@code
  * // Complex fraction arithmetic
- * Fraction recipe = Fraction.of(2, 3);  // 2/3 cup flour
- * Fraction scalingFactor = Fraction.of(3, 2);  // 1.5x recipe
- * Fraction scaledAmount = recipe.multipliedBy(scalingFactor);  // 1 cup flour
+ * Fraction recipe = Fraction.of(2, 3);   // 2/3 cup flour
+ * Fraction scalingFactor = Fraction.of(3, 2);   // 1.5x recipe
+ * Fraction scaledAmount = recipe.multipliedBy(scalingFactor);   // 1 cup flour
  *
  * // Financial calculations (avoiding floating-point errors)
- * Fraction interestRate = Fraction.of(3, 100);  // 3% as exact fraction
- * Fraction principal = Fraction.of(1000);  // $1000
- * Fraction interest = principal.multipliedBy(interestRate);  // Exact $30
+ * Fraction interestRate = Fraction.of(3, 100);   // 3% as exact fraction
+ * Fraction principal = Fraction.of(1000);   // $1000
+ * Fraction interest = principal.multipliedBy(interestRate);   // Exact $30
  *
  * // Mathematical operations
- * Fraction negative = half.negate();  // -1/2
- * Fraction reciprocal = twoThirds.invert();  // 3/2
- * Fraction absolute = negative.abs();  // 1/2
- * Fraction reduced = Fraction.of(6, 8, false).reduce();  // 3/4
- * Fraction squared = half.pow(2);  // 1/4
+ * Fraction negative = half.negate();   // -1/2
+ * Fraction reciprocal = twoThirds.invert();   // 3/2
+ * Fraction absolute = negative.abs();   // 1/2
+ * Fraction reduced = Fraction.of(6, 8, false).reduce();   // 3/4
+ * Fraction squared = half.pow(2);   // 1/4
  *
  * // Comparisons and ordering
- * int comparison = half.compareTo(twoThirds);  // negative (1/2 < 2/3)
+ * int comparison = half.compareTo(twoThirds);   // negative (1/2 < 2/3)
  * List<Fraction> fractions = Arrays.asList(half, twoThirds, Fraction.ONE_QUARTER);
- * Collections.sort(fractions);  // [1/4, 1/2, 2/3]
+ * Collections.sort(fractions);   // [1/4, 1/2, 2/3]
  *
  * // String representations
- * String simple = half.toString();  // "1/2"
- * String proper = mixedNumber.toProperString();  // "2 1/4"
+ * String simple = half.toString();   // "1/2"
+ * String proper = mixedNumber.toProperString();   // "2 1/4"
  * }</pre>
  *
  * <p><b>Fraction Creation Methods:</b>
@@ -265,8 +265,8 @@ import java.math.BigInteger;
  *     }
  *
  *     public static void main(String[] args) {
- *         Fraction principal = Fraction.of(1000);  // $1000
- *         Fraction rate = Fraction.of(5, 100);  // 5% as exact fraction
+ *         Fraction principal = Fraction.of(1000);   // $1000
+ *         Fraction rate = Fraction.of(5, 100);   // 5% as exact fraction
  *         int years = 3;
  *
  *         Fraction finalAmount = calculateCompoundInterest(principal, rate, years);
@@ -670,7 +670,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f = Fraction.of(7, 4);
-     * int n = f.getNumerator();  // Returns 7
+     * int n = f.getNumerator();   // Returns 7
      * }</pre>
      *
      * @return the numerator of the fraction
@@ -689,7 +689,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f = Fraction.of(7, 4);
-     * int n = f.numerator();  // Returns 7
+     * int n = f.numerator();   // Returns 7
      * }</pre>
      *
      * @return the numerator of the fraction
@@ -704,7 +704,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f = Fraction.of(3, 8);
-     * int d = f.getDenominator();  // Returns 8
+     * int d = f.getDenominator();   // Returns 8
      * }</pre>
      *
      * @return the denominator of the fraction
@@ -721,7 +721,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f = Fraction.of(3, 8);
-     * int d = f.denominator();  // Returns 8
+     * int d = f.denominator();   // Returns 8
      * }</pre>
      *
      * @return the denominator of the fraction
@@ -923,10 +923,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(6, 8);
-     * Fraction r1 = f1.reduce();  // Returns 3/4
+     * Fraction r1 = f1.reduce();   // Returns 3/4
      * 
      * Fraction f2 = Fraction.of(7, 13);
-     * Fraction r2 = f2.reduce();  // Returns 7/13 (already in simplest form)
+     * Fraction r2 = f2.reduce();   // Returns 7/13 (already in simplest form)
      * }</pre>
      *
      * @return a new reduced fraction instance, or this instance if already in simplest form
@@ -952,10 +952,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(3, 4);
-     * Fraction i1 = f1.invert();  // Returns 4/3
+     * Fraction i1 = f1.invert();   // Returns 4/3
      * 
      * Fraction f2 = Fraction.of(-2, 5);
-     * Fraction i2 = f2.invert();  // Returns -5/2
+     * Fraction i2 = f2.invert();   // Returns -5/2
      * }</pre>
      *
      * @return a new fraction that is the inverse of this fraction
@@ -983,10 +983,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(3, 4);
-     * Fraction n1 = f1.negate();  // Returns -3/4
+     * Fraction n1 = f1.negate();   // Returns -3/4
      * 
      * Fraction f2 = Fraction.of(-2, 5);
-     * Fraction n2 = f2.negate();  // Returns 2/5
+     * Fraction n2 = f2.negate();   // Returns 2/5
      * }</pre>
      *
      * @return a new fraction with the opposite sign
@@ -1010,10 +1010,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(-3, 4);
-     * Fraction a1 = f1.abs();  // Returns 3/4
+     * Fraction a1 = f1.abs();   // Returns 3/4
      * 
      * Fraction f2 = Fraction.of(2, 5);
-     * Fraction a2 = f2.abs();  // Returns 2/5 (same instance)
+     * Fraction a2 = f2.abs();   // Returns 2/5 (same instance)
      * }</pre>
      *
      * @return this instance if positive or zero, otherwise a new positive fraction
@@ -1137,7 +1137,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             // |u| larger: t positive (replace u)
             // |v| larger: t negative (replace v)
         } while (t != 0);
-        return -u * (1 << k); // gcd is u*2^k
+        return -u * (1 << k);   // gcd is u*2^k
     }
 
     // Arithmetic
@@ -1273,7 +1273,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      */
     private Fraction addSub(final Fraction fraction, final boolean isAdd) {
         if (fraction == null) {
-            throw new IllegalArgumentException("The fraction must not be null"); //NOSONAR
+            throw new IllegalArgumentException("The fraction must not be null");   //NOSONAR
         }
         // zero is identity for addition.
         if (numerator == 0) {

@@ -42,7 +42,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<String, String> id = Function.identity();
-     * String result = id.apply("test");  // Returns "test"
+     * String result = id.apply("test");   // Returns "test"
      * }</pre>
      *
      * @param <T> the type of the input and output objects to the function
@@ -63,7 +63,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * Function<String, Integer> length = String::length;
      * Function<Integer, String> toString = Object::toString;
      * Function<Integer, Integer> composed = length.compose(toString);
-     * Integer result = composed.apply(123);  // Returns 3 (length of "123")
+     * Integer result = composed.apply(123);   // Returns 3 (length of "123")
      * }</pre>
      *
      * @param <V> the type of input to the {@code before} function, and to the
@@ -90,7 +90,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * Function<String, Integer> length = String::length;
      * Function<Integer, String> toString = Object::toString;
      * Function<String, String> combined = length.andThen(toString);
-     * String result = combined.apply("hello");  // Returns "5"
+     * String result = combined.apply("hello");   // Returns "5"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

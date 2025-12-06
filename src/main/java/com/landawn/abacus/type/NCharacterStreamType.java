@@ -29,6 +29,10 @@ public class NCharacterStreamType extends ReaderType {
 
     public static final String N_CHARACTER_STREAM = "NCharacterStream";
 
+    /**
+     * Constructs an NCharacterStreamType.
+     * This constructor initializes the type handler for national character stream objects.
+     */
     NCharacterStreamType() {
         super(N_CHARACTER_STREAM);
     }

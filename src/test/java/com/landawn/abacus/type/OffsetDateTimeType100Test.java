@@ -278,7 +278,7 @@ public class OffsetDateTimeType100Test extends TestBase {
         when(config.getStringQuotation()).thenReturn('"');
 
         offsetDateTimeType.writeCharacter(writer, dateTime, config);
-        verify(writer, times(2)).write('"'); // Opening and closing quotes
+        verify(writer, times(2)).write('"');   // Opening and closing quotes
         verify(writer).write(anyString());
     }
 }

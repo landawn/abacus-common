@@ -82,7 +82,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.empty();
-     * System.out.println(iter.hasNext());  // false
+     * System.out.println(iter.hasNext());   // false
      * }</pre>
      *
      * @return an empty {@code LongIterator}
@@ -296,6 +296,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * with the Iterator interface but should be avoided in favor of nextLong() for better performance.
      *
      * @return the next long value as a boxed Long
+     * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@code nextLong()} instead to avoid boxing overhead
      */
     @Deprecated
@@ -531,7 +532,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * long[] empty = LongIterator.empty().toArray();  // empty.length == 0
+     * long[] empty = LongIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a long array containing all remaining elements
@@ -554,7 +555,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * LongList empty = LongIterator.empty().toList();  // empty.size() == 0
+     * LongList empty = LongIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a LongList containing all remaining elements
@@ -644,6 +645,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Performs the given action for each remaining element. This method is provided for
      * compatibility with the Iterator interface but should be avoided in favor of
      * foreachRemaining(LongConsumer) for better performance.
+     *
+     * <p>This method consumes all remaining elements in the iterator. After calling this method,
+     * the iterator will be empty (hasNext() returns false).</p>
      *
      * @param action the action to be performed for each element
      * @deprecated use {@link #foreachRemaining(Throwables.LongConsumer)} instead to avoid boxing

@@ -150,6 +150,22 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Converts an immutable set to its string representation.
      * Delegates the serialization to the underlying set type handler.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
+     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana", "cherry");
+     * String result = type.stringOf(set);
+     * // Returns: ["apple","banana","cherry"] (order may vary)
+     *
+     * ImmutableSet<Integer> intSet = ImmutableSet.of(1, 2, 3);
+     * Type<ImmutableSet<Integer>> intType = TypeFactory.getType("ImmutableSet<Integer>");
+     * result = intType.stringOf(intSet);
+     * // Returns: [1,2,3] (order may vary)
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the immutable set to convert to string
      * @return the string representation of the immutable set, or {@code null} if the input is null
      */
@@ -163,6 +179,20 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * First deserializes to a mutable set using the set type handler,
      * then wraps it in an ImmutableSet to ensure immutability.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
+     * ImmutableSet<String> result = type.valueOf("[\"apple\",\"banana\",\"cherry\"]");
+     * // Returns: ImmutableSet containing [apple, banana, cherry]
+     *
+     * Type<ImmutableSet<Integer>> intType = TypeFactory.getType("ImmutableSet<Integer>");
+     * ImmutableSet<Integer> intResult = intType.valueOf("[1,2,3]");
+     * // Returns: ImmutableSet containing [1, 2, 3]
+     *
+     * result = type.valueOf(null);
+     * // Returns: null (wrapped as ImmutableSet)
+     * }</pre>
+     *
      * @param str the string to parse
      * @return a new immutable set instance containing the parsed elements
      */
@@ -174,6 +204,15 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     /**
      * Appends the string representation of an immutable set to an Appendable.
      * Delegates to the underlying set type handler for the actual appending logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
+     * StringBuilder sb = new StringBuilder();
+     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
+     * type.appendTo(sb, set);
+     * // sb contains: ["apple","banana"] (order may vary)
+     * }</pre>
      *
      * @param writer the Appendable to write to
      * @param x the immutable set to append
@@ -187,6 +226,17 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     /**
      * Writes the character representation of an immutable set to a CharacterWriter.
      * Delegates to the underlying set type handler for the actual writing logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
+     * type.writeCharacter(writer, set, config);
+     * String result = writer.toString();
+     * // result: ["apple","banana"] (order may vary)
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the immutable set to write

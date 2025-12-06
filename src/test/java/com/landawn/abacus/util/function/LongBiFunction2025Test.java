@@ -58,7 +58,7 @@ public class LongBiFunction2025Test extends TestBase {
         final LongBiFunction<String> composed = function.andThen(multiply).andThen(toString);
         final String result = composed.apply(20L, 5L);
 
-        assertEquals("30", result); // (20 - 5) * 2 = 30
+        assertEquals("30", result);   // (20 - 5) * 2 = 30
     }
 
     @Test
@@ -111,7 +111,7 @@ public class LongBiFunction2025Test extends TestBase {
         final LongBiFunction<Integer> composed = function.andThen(after);
         final Integer result = composed.apply(123L, 456L);
 
-        assertEquals(7, result); // "123,456".length()
+        assertEquals(7, result);   // "123,456".length()
     }
 
     @Test

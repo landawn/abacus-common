@@ -49,10 +49,10 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleUnaryOperator square = x -> x * x;
-     * double result = square.applyAsDouble(5.0);  // Returns 25.0
+     * double result = square.applyAsDouble(5.0);   // Returns 25.0
      *
      * DoubleUnaryOperator toRadians = Math::toRadians;
-     * double radians = toRadians.applyAsDouble(180.0);  // Returns Math.PI
+     * double radians = toRadians.applyAsDouble(180.0);   // Returns Math.PI
      * }</pre>
      *
      * @param operand the operand to which the operation is applied
@@ -76,7 +76,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * // First adds 3, then multiplies by 2: (x + 3) * 2
      * DoubleUnaryOperator composed = multiplyBy2.compose(add3);
-     * double result = composed.applyAsDouble(5);  // Result: 16.0
+     * double result = composed.applyAsDouble(5);   // Result: 16.0
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied
@@ -104,7 +104,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * // First multiplies by 2, then adds 3: (x * 2) + 3
      * DoubleUnaryOperator composed = multiplyBy2.andThen(add3);
-     * double result = composed.applyAsDouble(5);  // Result: 13.0
+     * double result = composed.applyAsDouble(5);   // Result: 13.0
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied
@@ -127,7 +127,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleUnaryOperator identity = DoubleUnaryOperator.identity();
-     * double result = identity.applyAsDouble(42.5);  // Returns 42.5
+     * double result = identity.applyAsDouble(42.5);   // Returns 42.5
      *
      * // Useful in conditional operations
      * DoubleUnaryOperator operation = shouldTransform ? x -> x * 2 : DoubleUnaryOperator.identity();

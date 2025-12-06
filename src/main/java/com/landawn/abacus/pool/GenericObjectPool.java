@@ -71,7 +71,7 @@ import com.landawn.abacus.util.Objectory;
  * try {
  *     // use resource
  * } finally {
- *     pool.add(resource);  // return to pool
+ *     pool.add(resource);   // return to pool
  * }
  * }</pre>
  *
@@ -110,7 +110,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
@@ -122,7 +122,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
@@ -137,7 +137,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Does not use memory-based constraints.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
@@ -151,7 +151,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Constructs a new GenericObjectPool with full configuration options.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
@@ -227,7 +227,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * }
      * }</pre>
      *
-     * @param e the object to add, must not be null
+     * @param e the object to add, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
@@ -272,7 +272,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     }
 
                     pool.push(e);
-                    totalDataSize.addAndGet(elementSize); //NOSONAR
+                    totalDataSize.addAndGet(elementSize);   //NOSONAR
                 } catch (final Exception ex) {
                     logger.warn("Error measuring memory size of element", ex);
                     return false;
@@ -293,7 +293,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Adds an object to the pool with optional automatic destruction on failure.
      * This method ensures proper cleanup of resources if the object cannot be added.
      *
-     * @param e the object to add, must not be null
+     * @param e the object to add, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
@@ -336,7 +336,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * }
      * }</pre>
      *
-     * @param e the object to add, must not be null
+     * @param e the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
@@ -378,7 +378,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         pool.push(e);
 
                         if (memoryMeasure != null) {
-                            totalDataSize.addAndGet(memoryMeasure.sizeOf(e)); //NOSONAR
+                            totalDataSize.addAndGet(memoryMeasure.sizeOf(e));   //NOSONAR
                         }
 
                         notEmpty.signal();
@@ -404,7 +404,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
      * Combines timeout waiting with automatic resource cleanup.
      *
-     * @param e the object to add, must not be null
+     * @param e the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
@@ -448,7 +448,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);  // return to pool
+     *         pool.add(obj);   // return to pool
      *     }
      * } else {
      *     // pool is empty, create new object if needed
@@ -481,7 +481,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(e));   //NOSONAR
                     }
                 }
 
@@ -538,7 +538,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         activityPrint.updateAccessCount();
 
                         if (memoryMeasure != null) {
-                            totalDataSize.addAndGet(-memoryMeasure.sizeOf(e)); //NOSONAR
+                            totalDataSize.addAndGet(-memoryMeasure.sizeOf(e));   //NOSONAR
                         }
                     }
 
@@ -600,6 +600,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Removes a portion of objects from the pool based on the configured balance factor.
      * Objects are selected for removal according to the eviction policy.
+     * After vacating, signals waiting threads that space is now available in the pool.
      *
      * @throws IllegalStateException if the pool has been closed
      */
@@ -610,7 +611,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
+            vacate((int) (pool.size() * balanceFactor));   // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -802,7 +803,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Destroys all objects in the provided collection.
-     * This is a convenience method that calls {@link #destroy(Poolable, Caller)} for each object.
      *
      * @param c the collection of objects to destroy
      * @param caller the reason for destruction

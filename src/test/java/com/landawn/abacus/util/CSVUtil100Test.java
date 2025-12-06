@@ -231,11 +231,11 @@ public class CSVUtil100Test extends TestBase {
         Dataset dataset = CSVUtil.loadCSV(testCsvFile, columnTypeMap);
 
         assertNotNull(dataset);
-        assertEquals(3, dataset.columnCount());
+        assertEquals(4, dataset.columnCount());
 
         assertTrue(dataset.get(0, 0) instanceof Integer);
-        assertTrue(dataset.get(0, 1) instanceof Integer);
-        assertTrue(dataset.get(0, 2) instanceof Boolean);
+        assertTrue(dataset.get(0, 2) instanceof Integer);
+        assertTrue(dataset.get(0, 3) instanceof Boolean);
     }
 
     @Test

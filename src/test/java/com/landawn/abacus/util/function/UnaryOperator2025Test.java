@@ -70,7 +70,7 @@ public class UnaryOperator2025Test extends TestBase {
         UnaryOperator<Integer> composed = subtract3.compose(multiplyBy2).compose(add1);
         Integer result = composed.apply(5);
 
-        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9, result);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test
@@ -82,7 +82,7 @@ public class UnaryOperator2025Test extends TestBase {
         UnaryOperator<Integer> composed = add1.andThen(multiplyBy2).andThen(subtract3);
         Integer result = composed.apply(5);
 
-        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9, result);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test

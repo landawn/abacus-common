@@ -24,11 +24,11 @@ package com.landawn.abacus.type;
  * Type<Float> type = TypeFactory.getType(float.class);
  *
  * // Convert string to float
- * Float value = type.valueOf("3.14");  // Returns 3.14f
- * Float value2 = type.valueOf("-0.5");  // Returns -0.5f
+ * Float value = type.valueOf("3.14");   // Returns 3.14f
+ * Float value2 = type.valueOf("-0.5");   // Returns -0.5f
  *
  * // Get default value
- * Float defaultVal = type.defaultValue();  // Returns 0.0f
+ * Float defaultVal = type.defaultValue();   // Returns 0.0f
  *
  * // Read from database
  * try (ResultSet rs = stmt.executeQuery("SELECT price FROM products")) {
@@ -53,6 +53,13 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      * Returns the Class object representing the primitive float type.
      * Note that this returns float.class, not Float.class.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float> type = TypeFactory.getType(float.class);
+     * Class<?> clazz = type.clazz();
+     * // Returns: float.class (primitive type)
+     * }</pre>
+     *
      * @return the Class object for the primitive float type
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -65,6 +72,13 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      * Indicates whether this type represents a primitive type.
      * Always returns {@code true} for PrimitiveFloatType.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float> type = TypeFactory.getType(float.class);
+     * boolean isPrimitive = type.isPrimitiveType();
+     * // Returns: true
+     * }</pre>
+     *
      * @return {@code true}, as this type handler is for primitive float
      */
     @Override
@@ -75,6 +89,13 @@ public final class PrimitiveFloatType extends AbstractFloatType {
     /**
      * Returns the default value for the primitive float type.
      * The default value for float primitives is 0.0f.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float> type = TypeFactory.getType(float.class);
+     * Float defaultVal = type.defaultValue();
+     * // Returns: 0.0f
+     * }</pre>
      *
      * @return Float value of 0.0f as the default value for primitive float
      */

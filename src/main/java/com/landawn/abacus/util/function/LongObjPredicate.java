@@ -39,6 +39,16 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * <p>This method takes a primitive long value as the first argument and an object of type T
      * as the second argument, then evaluates them to produce a boolean result.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongObjPredicate<String> isLongGreaterThanLength = (l, s) -> l > s.length();
+     * boolean result = isLongGreaterThanLength.test(10L, "hello");  // Returns true (10 > 5)
+     *
+     * LongObjPredicate<List<Integer>> containsLongValue = (l, list) ->
+     *     list.contains((int)l);
+     * boolean found = containsLongValue.test(3L, Arrays.asList(1, 2, 3));  // Returns true
+     * }</pre>
+     *
      * @param t the long-valued first argument
      * @param u the object second argument of type T
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -56,7 +66,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * <pre>{@code
      * LongObjPredicate<String> isLongGreaterThanLength = (l, s) -> l > s.length();
      * LongObjPredicate<String> isLongNotGreaterThanLength = isLongGreaterThanLength.negate();
-     * // isLongNotGreaterThanLength.test(3L, "hello") returns {@code true} (3 is not > 5)
+     * // isLongNotGreaterThanLength.test(3L, "hello") returns true (3 is not > 5)
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -81,7 +91,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * LongObjPredicate<String> isPositive = (l, s) -> l > 0;
      * LongObjPredicate<String> isLongerThanLong = (l, s) -> s.length() > l;
      * LongObjPredicate<String> both = isPositive.and(isLongerThanLong);
-     * // both.test(3L, "hello") returns {@code true} (3 > 0 AND "hello".length() > 3)
+     * // both.test(3L, "hello") returns true (3 > 0 AND "hello".length() > 3)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -108,8 +118,8 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * LongObjPredicate<String> isZero = (l, s) -> l == 0;
      * LongObjPredicate<String> isEmpty = (l, s) -> s.isEmpty();
      * LongObjPredicate<String> either = isZero.or(isEmpty);
-     * // either.test(0L, "hello") returns {@code true} (0 == 0)
-     * // either.test(5L, "") returns {@code true} (string is empty)
+     * // either.test(0L, "hello") returns true (0 == 0)
+     * // either.test(5L, "") returns true (string is empty)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

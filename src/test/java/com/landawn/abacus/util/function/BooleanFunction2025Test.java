@@ -57,8 +57,8 @@ public class BooleanFunction2025Test extends TestBase {
 
         BooleanFunction<Integer> chainedFunction = function.andThen(afterFunction);
 
-        assertEquals(3, chainedFunction.apply(true)); // "yes" has length 3
-        assertEquals(2, chainedFunction.apply(false)); // "no" has length 2
+        assertEquals(3, chainedFunction.apply(true));   // "yes" has length 3
+        assertEquals(2, chainedFunction.apply(false));   // "no" has length 2
     }
 
     @Test
@@ -69,8 +69,8 @@ public class BooleanFunction2025Test extends TestBase {
 
         BooleanFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
 
-        assertEquals("200", chainedFunction.apply(true)); // 100 * 2 = 200
-        assertEquals("0", chainedFunction.apply(false)); // 0 * 2 = 0
+        assertEquals("200", chainedFunction.apply(true));   // 100 * 2 = 200
+        assertEquals("0", chainedFunction.apply(false));   // 0 * 2 = 0
     }
 
     @Test

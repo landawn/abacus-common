@@ -82,7 +82,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * boolean result4 = inRange.test((short) 5);    // returns false
      *
      * ShortPredicate isEven = value -> value % 2 == 0;
-     * boolean result5 = isEven.test((short) 4);  // returns true
+     * boolean result5 = isEven.test((short) 4);   // returns true
      * }</pre>
      *
      * @param value the input argument
@@ -95,6 +95,17 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * Returns the specified predicate instance.
      * This method exists primarily for consistency and readability in method chains.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate isPositive = value -> value > 0;
+     * ShortPredicate wrapped = ShortPredicate.of(isPositive);   // returns the same instance
+     *
+     * // Useful for method references and composition
+     * Stream.of(predicates)
+     *       .map(ShortPredicate::of)
+     *       .forEach(System.out::println);
+     * }</pre>
+     *
      * @param predicate the predicate to return
      * @return the specified predicate
      */
@@ -104,6 +115,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate isPositive = ShortPredicate.IS_POSITIVE;
+     * ShortPredicate isNotPositive = isPositive.negate();
+     * boolean result = isNotPositive.test((short) -5);   // returns true
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -119,7 +137,15 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate isPositive = ShortPredicate.IS_POSITIVE;
+     * ShortPredicate lessThan100 = ShortPredicate.lessThan((short) 100);
+     * ShortPredicate combined = isPositive.and(lessThan100);
+     * boolean result = combined.test((short) 50);   // returns true
+     * }</pre>
+     *
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ShortPredicate and(final ShortPredicate other) {
@@ -134,7 +160,15 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate isNegative = ShortPredicate.IS_NEGATIVE;
+     * ShortPredicate isZero = ShortPredicate.IS_ZERO;
+     * ShortPredicate notPositive = isNegative.or(isZero);
+     * boolean result = notPositive.test((short) 0);   // returns true
+     * }</pre>
+     *
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ShortPredicate or(final ShortPredicate other) {
@@ -143,6 +177,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns a predicate that tests if a short value is equal to the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate is42 = ShortPredicate.equal((short) 42);
+     * boolean result1 = is42.test((short) 42);   // returns true
+     * boolean result2 = is42.test((short) 0);    // returns false
+     * }</pre>
      *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is equal to {@code targetShort}
@@ -154,6 +195,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Returns a predicate that tests if a short value is not equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate notZero = ShortPredicate.notEqual((short) 0);
+     * boolean result1 = notZero.test((short) 5);   // returns true
+     * boolean result2 = notZero.test((short) 0);   // returns false
+     * }</pre>
+     *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is not equal to {@code targetShort}
      */
@@ -163,6 +211,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns a predicate that tests if a short value is greater than the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate greaterThan10 = ShortPredicate.greaterThan((short) 10);
+     * boolean result1 = greaterThan10.test((short) 15);   // returns true
+     * boolean result2 = greaterThan10.test((short) 5);    // returns false
+     * }</pre>
      *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is greater than {@code targetShort}
@@ -174,6 +229,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Returns a predicate that tests if a short value is greater than or equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate greaterOrEqual10 = ShortPredicate.greaterEqual((short) 10);
+     * boolean result1 = greaterOrEqual10.test((short) 10);   // returns true
+     * boolean result2 = greaterOrEqual10.test((short) 5);    // returns false
+     * }</pre>
+     *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetShort}
      */
@@ -183,6 +245,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns a predicate that tests if a short value is less than the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate lessThan100 = ShortPredicate.lessThan((short) 100);
+     * boolean result1 = lessThan100.test((short) 50);    // returns true
+     * boolean result2 = lessThan100.test((short) 150);   // returns false
+     * }</pre>
      *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is less than {@code targetShort}
@@ -194,6 +263,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Returns a predicate that tests if a short value is less than or equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate lessOrEqual100 = ShortPredicate.lessEqual((short) 100);
+     * boolean result1 = lessOrEqual100.test((short) 100);   // returns true
+     * boolean result2 = lessOrEqual100.test((short) 150);   // returns false
+     * }</pre>
+     *
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetShort}
      */
@@ -204,6 +280,14 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Returns a predicate that tests if a short value is between the specified minimum and maximum values (exclusive).
      * The predicate returns {@code true} if and only if {@code minValue < value < maxValue}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate between10And100 = ShortPredicate.between((short) 10, (short) 100);
+     * boolean result1 = between10And100.test((short) 50);    // returns true
+     * boolean result2 = between10And100.test((short) 10);    // returns false (exclusive)
+     * boolean result3 = between10And100.test((short) 100);   // returns false (exclusive)
+     * }</pre>
      *
      * @param minValue the exclusive lower bound
      * @param maxValue the exclusive upper bound

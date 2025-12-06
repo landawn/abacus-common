@@ -31,11 +31,11 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Encoding bytes to hex
  * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
- * String hexString = Hex.encodeToString(data);  // returns "48656c6c6f"
- * String hexUpper = Hex.encodeToString(data, false);  // returns "48656C6C6F"
+ * String hexString = Hex.encodeToString(data);   // returns "48656c6c6f"
+ * String hexUpper = Hex.encodeToString(data, false);   // returns "48656C6C6F"
  * 
  * // Decoding hex to bytes
- * byte[] decoded = Hex.decode("48656c6c6f");  // returns original byte array
+ * byte[] decoded = Hex.decode("48656c6c6f");   // returns original byte array
  * }</pre>
  * 
  * <p><b>Attribution:</b>
@@ -66,12 +66,12 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {0x01, 0x23, (byte)0xAB, (byte)0xCD};
-     * char[] hex = Hex.encode(data);  // returns ['0','1','2','3','a','b','c','d']
+     * char[] hex = Hex.encode(data);   // returns ['0','1','2','3','a','b','c','d']
      * }</pre>
      *
-     * @param data the byte array to convert to hexadecimal characters
-     * @return a char array containing lowercase hexadecimal characters representing the input bytes
-     * @throws IllegalArgumentException if data is null
+     * @param data the byte array to convert to hexadecimal characters.
+     * @return a char array containing lowercase hexadecimal characters representing the input bytes.
+     * @throws IllegalArgumentException if data is null.
      */
     public static char[] encode(final byte[] data) {
         return encode(data, true);
@@ -90,10 +90,10 @@ public final class Hex {
      * char[] upper = Hex.encode(data, false);   // returns ['0','1','A','B']
      * }</pre>
      *
-     * @param data the byte array to convert to hexadecimal characters
-     * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase
-     * @return a char array containing hexadecimal characters representing the input bytes
-     * @throws IllegalArgumentException if data is null
+     * @param data the byte array to convert to hexadecimal characters.
+     * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase.
+     * @return a char array containing hexadecimal characters representing the input bytes.
+     * @throws IllegalArgumentException if data is null.
      */
     public static char[] encode(final byte[] data, final boolean toLowerCase) {
         if (data == null) {
@@ -112,12 +112,12 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
-     * String hex = Hex.encodeToString(data);  // returns "48656c6c6f"
+     * String hex = Hex.encodeToString(data);   // returns "48656c6c6f"
      * }</pre>
      *
-     * @param data the byte array to convert to a hexadecimal string
-     * @return a string containing lowercase hexadecimal characters representing the input bytes
-     * @throws IllegalArgumentException if data is null
+     * @param data the byte array to convert to a hexadecimal string.
+     * @return a string containing lowercase hexadecimal characters representing the input bytes.
+     * @throws IllegalArgumentException if data is null.
      */
     public static String encodeToString(final byte[] data) {
         return String.valueOf(encode(data));
@@ -137,10 +137,10 @@ public final class Hex {
      * String upper = Hex.encodeToString(data, false);   // returns "FF0042"
      * }</pre>
      *
-     * @param data the byte array to convert to a hexadecimal string
-     * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase
-     * @return a string containing hexadecimal characters representing the input bytes
-     * @throws IllegalArgumentException if data is null
+     * @param data the byte array to convert to a hexadecimal string.
+     * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase.
+     * @return a string containing hexadecimal characters representing the input bytes.
+     * @throws IllegalArgumentException if data is null.
      */
     public static String encodeToString(final byte[] data, final boolean toLowerCase) {
         return String.valueOf(encode(data, toLowerCase));
@@ -151,9 +151,9 @@ public final class Hex {
      * The returned array will be double the length of the passed array, as it takes two characters to represent any
      * given byte.
      *
-     * @param data a byte[] to convert to Hex characters
-     * @param toDigits the output alphabet (either DIGITS_LOWER or DIGITS_UPPER)
-     * @return a char[] containing hexadecimal characters
+     * @param data a byte[] to convert to Hex characters.
+     * @param toDigits the output alphabet (either DIGITS_LOWER or DIGITS_UPPER).
+     * @return a char[] containing hexadecimal characters.
      */
     static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;
@@ -180,9 +180,9 @@ public final class Hex {
      * byte[] data3 = Hex.decode("DeadBeef");     // mixed case is accepted
      * }</pre>
      *
-     * @param data a string containing hexadecimal digits (0-9, A-F, a-f)
-     * @return a byte array containing the binary data decoded from the hexadecimal string
-     * @throws IllegalArgumentException if data is {@code null}, the string has an odd number of characters, or contains non-hexadecimal characters
+     * @param data a string containing hexadecimal digits (0-9, A-F, a-f).
+     * @return a byte array containing the binary data decoded from the hexadecimal string.
+     * @throws IllegalArgumentException if data is {@code null}, the string has an odd number of characters, or contains non-hexadecimal characters.
      * @see #decode(char[])
      */
     public static byte[] decode(final String data) throws IllegalArgumentException {
@@ -210,12 +210,12 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] hex = {'4', '8', '6', '5', '6', 'C', '6', 'C', '6', 'F'};
-     * byte[] data = Hex.decode(hex);  // returns bytes for "Hello"
+     * byte[] data = Hex.decode(hex);   // returns bytes for "Hello"
      * }</pre>
      *
-     * @param data an array of characters containing hexadecimal digits
-     * @return a byte array containing the binary data decoded from the hexadecimal characters
-     * @throws IllegalArgumentException if data is {@code null}, the array has an odd number of elements, or contains non-hexadecimal characters
+     * @param data an array of characters containing hexadecimal digits.
+     * @return a byte array containing the binary data decoded from the hexadecimal characters.
+     * @throws IllegalArgumentException if data is {@code null}, the array has an odd number of elements, or contains non-hexadecimal characters.
      */
     public static byte[] decode(final char[] data) throws IllegalArgumentException {
         if (data == null) {
@@ -255,10 +255,10 @@ public final class Hex {
      * int value3 = toDigit('f', 2);   // returns 15
      * }</pre>
      *
-     * @param ch the hexadecimal character to convert (0-9, A-F, a-f)
-     * @param index the position of the character in the source string (used for error reporting)
-     * @return the integer value (0-15) represented by the hexadecimal character
-     * @throws IllegalArgumentException if the character is not a valid hexadecimal digit
+     * @param ch the hexadecimal character to convert (0-9, A-F, a-f).
+     * @param index the position of the character in the source string (used for error reporting).
+     * @return the integer value (0-15) represented by the hexadecimal character.
+     * @throws IllegalArgumentException if the character is not a valid hexadecimal digit.
      */
     static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);

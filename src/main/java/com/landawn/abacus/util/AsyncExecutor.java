@@ -122,12 +122,12 @@ public class AsyncExecutor {
      * AsyncExecutor executor = new AsyncExecutor(10, 20, 60L, TimeUnit.SECONDS);
      * }</pre>
      *
-     * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle
-     * @param maxThreadPoolSize the maximum number of threads to allow in the pool
-     * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
-     * @param unit the time unit for the keepAliveTime argument
+     * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle.
+     * @param maxThreadPoolSize the maximum number of threads to allow in the pool.
+     * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
+     * @param unit the time unit for the keepAliveTime argument.
      * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is negative,
-     *         if {@code keepAliveTime} is negative, or if {@code unit} is {@code null}
+     *         if {@code keepAliveTime} is negative, or if {@code unit} is {@code null}.
      */
     public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -154,7 +154,7 @@ public class AsyncExecutor {
      * AsyncExecutor asyncExecutor = new AsyncExecutor(customExecutor);
      * }</pre>
      *
-     * @param executor the Executor to be used for executing tasks
+     * @param executor the Executor to be used for executing tasks.
      */
     public AsyncExecutor(final Executor executor) {
         this(getCorePoolSize(executor), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
@@ -192,8 +192,8 @@ public class AsyncExecutor {
      * future.thenRun(() -> System.out.println("Task completed"));
      * }</pre>
      *
-     * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
-     * @return a ContinuableFuture representing the pending completion of this action
+     * @param command the Runnable command to be executed asynchronously; may throw checked exceptions.
+     * @return a ContinuableFuture representing the pending completion of this action.
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) {
         return execute(new FutureTask<>(() -> {
@@ -217,10 +217,10 @@ public class AsyncExecutor {
      * );
      * }</pre>
      *
-     * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
+     * @param command the Runnable command to be executed asynchronously; may throw checked exceptions.
      * @param actionInFinal the Runnable to be executed after the command completes (in a finally block);
-     *                      must not throw exceptions
-     * @return a ContinuableFuture representing the pending completion of this action
+     *                      must not throw exceptions.
+     * @return a ContinuableFuture representing the pending completion of this action.
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable actionInFinal) {
         return execute(new FutureTask<>(() -> {
@@ -255,9 +255,9 @@ public class AsyncExecutor {
      * Futures.allOf(futures).get();
      * }</pre>
      *
-     * @param commands the list of Runnable commands to be executed asynchronously; may be {@code null} or empty
+     * @param commands the list of Runnable commands to be executed asynchronously; may be {@code null} or empty.
      * @return a list of ContinuableFutures representing the pending completion of this action for each command;
-     *         returns an empty list if commands is {@code null} or empty
+     *         returns an empty list if commands is {@code null} or empty.
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         if (N.isEmpty(commands)) {
@@ -290,9 +290,9 @@ public class AsyncExecutor {
      * String result = future.get();
      * }</pre>
      *
-     * @param <R> the type of the result returned by the Callable
-     * @param command the Callable command to be executed asynchronously; may throw exceptions
-     * @return a ContinuableFuture representing the pending result of this computation
+     * @param <R> the type of the result returned by the Callable.
+     * @param command the Callable command to be executed asynchronously; may throw exceptions.
+     * @return a ContinuableFuture representing the pending result of this computation.
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> command) {
         return execute(new FutureTask<>(command));
@@ -313,11 +313,11 @@ public class AsyncExecutor {
      * );
      * }</pre>
      *
-     * @param <R> the type of the result returned by the Callable
-     * @param command the Callable command to be executed asynchronously; may throw exceptions
+     * @param <R> the type of the result returned by the Callable.
+     * @param command the Callable command to be executed asynchronously; may throw exceptions.
      * @param actionInFinal the Runnable to be executed after the command completes (in a finally block);
-     *                      must not throw exceptions
-     * @return a ContinuableFuture representing the pending result of this computation
+     *                      must not throw exceptions.
+     * @return a ContinuableFuture representing the pending result of this computation.
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actionInFinal) {
         return execute(new FutureTask<>(() -> {
@@ -351,10 +351,10 @@ public class AsyncExecutor {
      * List<Integer> results = Futures.allOf(futures).get();
      * }</pre>
      *
-     * @param <R> the type of the result returned by the Callables
-     * @param commands the collection of Callable commands to be executed asynchronously; may be {@code null} or empty
+     * @param <R> the type of the result returned by the Callables.
+     * @param commands the collection of Callable commands to be executed asynchronously; may be {@code null} or empty.
      * @return a list of ContinuableFutures representing the pending result of this computation for each command;
-     *         returns an empty list if commands is {@code null} or empty
+     *         returns an empty list if commands is {@code null} or empty.
      */
     public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
         if (N.isEmpty(commands)) {
@@ -388,12 +388,12 @@ public class AsyncExecutor {
      * );
      * }</pre>
      *
-     * @param action the Runnable to be executed asynchronously; may throw checked exceptions
-     * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
-     * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
+     * @param action the Runnable to be executed asynchronously; may throw checked exceptions.
+     * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt).
+     * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts.
      * @param retryCondition the predicate to determine whether to retry based on the caught exception;
-     *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
-     * @return a ContinuableFuture representing the pending completion of this action (including retries)
+     *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately.
+     * @return a ContinuableFuture representing the pending completion of this action (including retries).
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
@@ -422,13 +422,13 @@ public class AsyncExecutor {
      * );
      * }</pre>
      *
-     * @param <R> the type of the result returned by the Callable
-     * @param action the Callable to be executed asynchronously; may throw exceptions
-     * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
-     * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
+     * @param <R> the type of the result returned by the Callable.
+     * @param action the Callable to be executed asynchronously; may throw exceptions.
+     * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt).
+     * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts.
      * @param retryCondition the bi-predicate to determine whether to retry based on the result and exception;
-     *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
-     * @return a ContinuableFuture representing the pending result of this computation (including retries)
+     *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete.
+     * @return a ContinuableFuture representing the pending result of this computation (including retries).
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
@@ -445,12 +445,12 @@ public class AsyncExecutor {
      * It submits the FutureTask to the executor and wraps it in a ContinuableFuture
      * for enhanced composability.</p>
      *
-     * @param <R> the type of the result produced by the FutureTask
-     * @param futureTask the FutureTask to be executed asynchronously
-     * @return a ContinuableFuture representing the pending result of this computation
+     * @param <R> the type of the result produced by the FutureTask.
+     * @param futureTask the FutureTask to be executed asynchronously.
+     * @return a ContinuableFuture representing the pending result of this computation.
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
-        final Executor executor = getExecutor(); //NOSONAR
+        final Executor executor = getExecutor();   //NOSONAR
 
         executor.execute(futureTask);
 
@@ -478,7 +478,7 @@ public class AsyncExecutor {
      * executor.execute(() -> System.out.println("Direct execution"));
      * }</pre>
      *
-     * @return the Executor instance used by this AsyncExecutor for executing tasks
+     * @return the Executor instance used by this AsyncExecutor for executing tasks.
      */
     @Internal
     public Executor getExecutor() {
@@ -528,7 +528,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown();  // Gracefully shutdown
+     * executor.shutdown();   // Gracefully shutdown
      * }</pre>
      */
     public synchronized void shutdown() {
@@ -554,12 +554,12 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown(30, TimeUnit.SECONDS);  // Wait up to 30 seconds for tasks to complete
+     * executor.shutdown(30, TimeUnit.SECONDS);   // Wait up to 30 seconds for tasks to complete
      * }</pre>
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,
-     *                           does not wait for termination
-     * @param timeUnit the time unit of the terminationTimeout argument
+     *                           does not wait for termination.
+     * @param timeUnit the time unit of the terminationTimeout argument.
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
@@ -603,7 +603,7 @@ public class AsyncExecutor {
      * }
      * }</pre>
      *
-     * @return {@code true} if all tasks have completed following shutdown, {@code false} otherwise
+     * @return {@code true} if all tasks have completed following shutdown, {@code false} otherwise.
      */
     public boolean isTerminated() {
         return executor == null || !(executor instanceof ExecutorService executorService) || executorService.isTerminated();
@@ -626,7 +626,7 @@ public class AsyncExecutor {
      * // Output: {coreThreadPoolSize: 10, maxThreadPoolSize: 20, activeCount: 0, keepAliveTime: 60000ms, Executor: ...}
      * }</pre>
      *
-     * @return a string representation containing the configuration and state of this AsyncExecutor
+     * @return a string representation containing the configuration and state of this AsyncExecutor.
      */
     @Override
     public String toString() {

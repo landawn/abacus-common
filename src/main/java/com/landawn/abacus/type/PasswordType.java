@@ -35,13 +35,13 @@ import com.landawn.abacus.util.Password;
  * stmt.setString(1, "john");
  *
  * Type<String> passwordType = TypeFactory.getType("Password");
- * passwordType.set(stmt, 2, plainPassword);  // Password is encrypted before storage
+ * passwordType.set(stmt, 2, plainPassword);   // Password is encrypted before storage
  * stmt.executeUpdate();
  *
  * // Retrieving a password (returns encrypted form)
  * ResultSet rs = stmt.executeQuery("SELECT password FROM users WHERE username = 'john'");
  * if (rs.next()) {
- *     String encryptedPassword = passwordType.get(rs, 1);  // Returns encrypted password
+ *     String encryptedPassword = passwordType.get(rs, 1);   // Returns encrypted password
  * }
  * }</pre>
  */
@@ -54,10 +54,21 @@ public class PasswordType extends AbstractStringType {
 
     private final Password password; //NOSONAR
 
+    /**
+     * Constructs a new PasswordType with the default SHA-256 encryption algorithm.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PasswordType() {
         this(DEFAULT_ALGORITHM);
     }
 
+    /**
+     * Constructs a new PasswordType with the specified encryption algorithm.
+     * This constructor is protected to allow subclassing with custom encryption algorithms
+     * while maintaining controlled instantiation through the TypeFactory.
+     *
+     * @param algorithm the encryption algorithm to use for password hashing (e.g., "SHA-256", "MD5")
+     */
     protected PasswordType(final String algorithm) {
         super(PASSWORD);
         password = new Password(algorithm);

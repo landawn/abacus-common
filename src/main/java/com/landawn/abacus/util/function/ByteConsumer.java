@@ -37,7 +37,7 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteConsumer printer = value -> System.out.println("Byte value: " + value);
-     * printer.accept((byte) 42);  // Prints: Byte value: 42
+     * printer.accept((byte) 42);   // Prints: Byte value: 42
      *
      * List<Byte> bytes = new ArrayList<>();
      * ByteConsumer collector = bytes::add;
@@ -59,7 +59,7 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      * ByteConsumer logger = value -> System.out.println("Processing: " + value);
      * ByteConsumer validator = value -> { if (value < 0) throw new IllegalArgumentException(); };
      * ByteConsumer combined = logger.andThen(validator);
-     * combined.accept((byte) 5);  // Logs then validates
+     * combined.accept((byte) 5);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

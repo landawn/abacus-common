@@ -74,7 +74,7 @@ public final class Password {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
-     * String algo = password.getAlgorithm();  // Returns "SHA-256"
+     * String algo = password.getAlgorithm();   // Returns "SHA-256"
      * }</pre>
      *
      * @return the algorithm name (e.g., "SHA-256", "MD5")

@@ -37,7 +37,7 @@ public interface ShortNConsumer {
      *     for (short value : args) sum += value;
      *     System.out.println("Sum: " + sum);
      * };
-     * sumPrinter.accept((short) 1, (short) 2, (short) 3);  // Prints "Sum: 6"
+     * sumPrinter.accept((short) 1, (short) 2, (short) 3);   // Prints "Sum: 6"
      *
      * ShortNConsumer minMaxPrinter = args -> {
      *     if (args.length == 0) return;
@@ -51,7 +51,7 @@ public interface ShortNConsumer {
      * minMaxPrinter.accept((short) 5, (short) 2, (short) 8, (short) 1);
      * }</pre>
      *
-     * @param args the input arguments as a variable-length array of short values if the operation cannot be completed
+     * @param args the input arguments as a variable-length array of short values
      */
     void accept(short... args);
 
@@ -63,7 +63,7 @@ public interface ShortNConsumer {
      * <p>Note that both operations will receive the same array reference, so if either operation
      * modifies the array, the changes will be visible to the other operation.
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortNConsumer andThen(final ShortNConsumer after) {

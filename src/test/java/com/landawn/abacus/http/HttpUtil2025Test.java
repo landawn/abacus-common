@@ -290,7 +290,7 @@ public class HttpUtil2025Test extends TestBase {
 
     @Test
     public void testHttpDateFormat() {
-        Date date = new Date(1445412480000L); // Wed, 21 Oct 2015 07:28:00 GMT
+        Date date = new Date(1445412480000L);   // Wed, 21 Oct 2015 07:28:00 GMT
         String formatted = HttpUtil.HttpDate.format(date);
         assertNotNull(formatted);
         assertTrue(formatted.contains("GMT"));

@@ -320,7 +320,7 @@ import com.landawn.abacus.util.function.TriFunction;
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR
 
-    static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
+    static final Object NONE = ClassUtil.createNullMask();   //NOSONAR
 
     static final Characteristics[] CH_NOID = {};
 
@@ -1475,7 +1475,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Create an immutable list from stream elements
      * ImmutableList<String> immutable = Stream.of("a", "b", "c")
      *     .collect(Collectors.toImmutableList());
-     * // immutable.add("d");  // This would throw UnsupportedOperationException
+     * // immutable.add("d");   // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1502,13 +1502,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableList()} method
      * and provides the same guarantees. Elements are preserved in encounter order.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector does not accept null elements. If the stream
+     * contains any null values, a {@code NullPointerException} will be thrown.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable list
      * List<Integer> unmodifiable = Stream.of(1, 2, 3)
      *     .collect(Collectors.toUnmodifiableList());
-     * // unmodifiable.add(4);  // This would throw UnsupportedOperationException
+     * // unmodifiable.add(4);   // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1606,7 +1612,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * ImmutableSet<String> immutable = Stream.of("a", "b", "b", "c")
      *     .collect(Collectors.toImmutableSet());
      * // Result contains: ["a", "b", "c"]
-     * // immutable.add("d");  // This would throw UnsupportedOperationException
+     * // immutable.add("d");   // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1630,14 +1636,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableSet()} method
      * and provides the same guarantees.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector does not accept null elements. If the stream
+     * contains any null values, a {@code NullPointerException} will be thrown.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable set
      * Set<Integer> unmodifiable = Stream.of(1, 2, 2, 3)
      *     .collect(Collectors.toUnmodifiableSet());
      * // Result contains: [1, 2, 3]
-     * // unmodifiable.add(4);  // This would throw UnsupportedOperationException
+     * // unmodifiable.add(4);   // This would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1657,7 +1669,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned queue supports all optional {@code Queue} operations. There are no
      * guarantees on the thread-safety of the {@code Queue} returned.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements as the underlying
+     * {@code Queue} implementation supports null values.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect elements into a queue for FIFO processing
@@ -1684,7 +1702,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>Elements are added to the deque in encounter order. The deque can be used for
      * both FIFO and LIFO (Last-In-First-Out) operations.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements as the underlying
+     * {@code Deque} implementation supports null values.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect elements into a deque for flexible processing
@@ -2497,7 +2521,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     private static final BinaryOperator<Holder<Object>> first_last_combiner = (t, u) -> {
         if (t.value() != NONE && u.value() != NONE) {
-            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream"); //NOSONAR
+            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream");   //NOSONAR
         }
 
         return t.value() != NONE ? t : u;
@@ -4531,7 +4555,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     * It's copied from StreamEx: <a href="https://github.com/amaembo/streamex">streamex</a> under Apache License v2 and may be modified.
+     * It's copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License v2 and may be modified.
      * <br />
      *
      * Returns a {@code Collector} which finds all the elements which are equal
@@ -5395,21 +5419,41 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of an integer-valued
      * function applied to the input elements.
-     * 
-     * <p>If no elements are present, the result is 0.0.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to an integer value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * If no elements are present in the stream, the result is 0.0. The average is computed
+     * and returned as a double-precision floating-point value to preserve fractional precision.</p>
+     *
+     * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingInt(ToIntFunction)}
+     * implementation for compatibility with the Java Stream API.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average length of strings
      * Double avgLength = Stream.of("hello", "world", "!")
      *     .collect(Collectors.averagingInt(String::length));
-     * // Result: 3.6666666666666665
+     * // Result: 3.6666666666666665 (average of 5, 5, and 1)
+     *
+     * // Calculate average age of people
+     * List<Person> people = Arrays.asList(
+     *     new Person("Alice", 25),
+     *     new Person("Bob", 30),
+     *     new Person("Charlie", 35)
+     * );
+     * Double avgAge = people.stream()
+     *     .collect(Collectors.averagingInt(Person::getAge));
+     * // Result: 30.0
+     *
+     * // Empty stream returns 0.0
+     * Double emptyAvg = Stream.<String>empty()
+     *     .collect(Collectors.averagingInt(String::length));
+     * // Result: 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract an integer value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting an integer value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted integer values as a {@code Double}
      * @see #averagingIntOrEmpty(ToIntFunction)
      * @see #averagingIntOrElseThrow(ToIntFunction)
      * @see java.util.stream.Collectors#averagingInt(ToIntFunction)
@@ -5421,21 +5465,42 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of an integer-valued
      * function applied to the input elements, wrapped in an {@code OptionalDouble}.
-     * 
-     * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to an integer value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingInt(ToIntFunction)}, this method returns an {@code OptionalDouble}
+     * which will be empty if no elements are present in the stream. This allows for safer
+     * handling of empty streams without having to distinguish between a true zero average
+     * and the absence of elements.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value
+     * to preserve fractional precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average length of strings
+     * // Calculate average length of strings with Optional result
      * OptionalDouble avgLength = Stream.of("hello", "world", "!")
-     *     .collect(Collectors.averagingInt(String::length));
+     *     .collect(Collectors.averagingIntOrEmpty(String::length));
      * // Result: OptionalDouble[3.6666666666666665]
+     * avgLength.ifPresent(avg -> System.out.println("Average: " + avg));
+     *
+     * // Empty stream returns empty Optional
+     * OptionalDouble emptyAvg = Stream.<String>empty()
+     *     .collect(Collectors.averagingIntOrEmpty(String::length));
+     * // Result: OptionalDouble.empty
+     * System.out.println(emptyAvg.isPresent()); // false
+     *
+     * // Safe handling with orElse
+     * double result = Stream.of("a", "bb")
+     *     .collect(Collectors.averagingIntOrEmpty(String::length))
+     *     .orElse(0.0);
+     * // Result: 1.5
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract an integer value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting an integer value from each input element
+     * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
+     *         or an empty {@code OptionalDouble} if no elements were present
      * @see #averagingInt(ToIntFunction)
      * @see #averagingIntOrElseThrow(ToIntFunction)
      */
@@ -5451,21 +5516,47 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of an integer-valued
      * function applied to the input elements, throwing an exception if no elements are present.
-     * 
-     * <p>This collector is useful when an empty stream represents an error condition.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to an integer value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingInt(ToIntFunction)} which returns 0.0 for empty streams and
+     * {@link #averagingIntOrEmpty(ToIntFunction)} which returns an empty Optional, this method
+     * throws a {@code NoSuchElementException} if the stream is empty. This is useful when an
+     * empty stream represents an error condition and you want to fail fast rather than return
+     * a default value.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value
+     * to preserve fractional precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average age (throws if no people)
+     * List<Person> people = Arrays.asList(
+     *     new Person("Alice", 25),
+     *     new Person("Bob", 30)
+     * );
      * Double avgAge = people.stream()
+     *     .collect(Collectors.averagingIntOrElseThrow(Person::getAge));
+     * // Result: 27.5
+     *
+     * // Empty stream throws exception
+     * try {
+     *     Double avg = Stream.<Person>empty()
+     *         .collect(Collectors.averagingIntOrElseThrow(Person::getAge));
+     * } catch (NoSuchElementException e) {
+     *     System.out.println("Cannot compute average of empty stream");
+     * }
+     *
+     * // Using with filtering - throws if no elements match
+     * Double avgAdultAge = people.stream()
+     *     .filter(p -> p.getAge() >= 18)
      *     .collect(Collectors.averagingIntOrElseThrow(Person::getAge));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract an integer value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
-     * @throws NoSuchElementException if no elements are present
+     * @param mapper a function extracting an integer value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted integer values as a {@code Double}
+     * @throws NoSuchElementException if no elements are present in the stream
      * @see #averagingInt(ToIntFunction)
      * @see #averagingIntOrEmpty(ToIntFunction)
      */
@@ -5481,20 +5572,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a long-valued
      * function applied to the input elements.
-     * 
-     * <p>If no elements are present, the result is 0.0.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a long value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * If no elements are present in the stream, the result is 0.0. The average is computed
+     * and returned as a double-precision floating-point value to preserve fractional precision.</p>
+     *
+     * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingLong(ToLongFunction)}
+     * implementation for compatibility with the Java Stream API.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average file size
+     * // Calculate average file size in bytes
+     * List<File> files = Arrays.asList(
+     *     new File("file1.txt"),
+     *     new File("file2.txt"),
+     *     new File("file3.txt")
+     * );
      * Double avgSize = files.stream()
      *     .collect(Collectors.averagingLong(File::length));
+     *
+     * // Calculate average timestamp values
+     * List<Event> events = getEvents();
+     * Double avgTimestamp = events.stream()
+     *     .collect(Collectors.averagingLong(Event::getTimestamp));
+     *
+     * // Empty stream returns 0.0
+     * Double emptyAvg = Stream.<File>empty()
+     *     .collect(Collectors.averagingLong(File::length));
+     * // Result: 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a long value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting a long value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted long values as a {@code Double}
      * @see #averagingLongOrEmpty(ToLongFunction)
      * @see #averagingLongOrElseThrow(ToLongFunction)
      * @see java.util.stream.Collectors#averagingLong(ToLongFunction)
@@ -5506,20 +5617,43 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a long-valued
      * function applied to the input elements, wrapped in an {@code OptionalDouble}.
-     * 
-     * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a long value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingLong(ToLongFunction)}, this method returns an {@code OptionalDouble}
+     * which will be empty if no elements are present in the stream. This allows for safer
+     * handling of empty streams without having to distinguish between a true zero average
+     * and the absence of elements.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value
+     * to preserve fractional precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average file size
+     * // Calculate average file size with Optional result
+     * List<File> files = Arrays.asList(
+     *     new File("file1.txt"),
+     *     new File("file2.txt")
+     * );
      * OptionalDouble avgSize = files.stream()
-     *     .collect(Collectors.averagingLong(File::length));
+     *     .collect(Collectors.averagingLongOrEmpty(File::length));
+     * avgSize.ifPresent(size -> System.out.println("Average size: " + size));
+     *
+     * // Empty stream returns empty Optional
+     * OptionalDouble emptyAvg = Stream.<File>empty()
+     *     .collect(Collectors.averagingLongOrEmpty(File::length));
+     * System.out.println(emptyAvg.isPresent()); // false
+     *
+     * // Safe handling with orElse
+     * double result = files.stream()
+     *     .collect(Collectors.averagingLongOrEmpty(File::length))
+     *     .orElse(0.0);
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a long value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting a long value from each input element
+     * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
+     *         or an empty {@code OptionalDouble} if no elements were present
      * @see #averagingLong(ToLongFunction)
      * @see #averagingLongOrElseThrow(ToLongFunction)
      */
@@ -5535,21 +5669,43 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a long-valued
      * function applied to the input elements, throwing an exception if no elements are present.
-     * 
-     * <p>This collector is useful when an empty stream represents an error condition.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a long value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingLong(ToLongFunction)} which returns 0.0 for empty streams and
+     * {@link #averagingLongOrEmpty(ToLongFunction)} which returns an empty Optional, this method
+     * throws a {@code NoSuchElementException} if the stream is empty. This is useful when an
+     * empty stream represents an error condition and you want to fail fast rather than return
+     * a default value.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value
+     * to preserve fractional precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average processing time (throws if no data)
+     * List<Record> records = getRecords();
      * Double avgTime = records.stream()
      *     .collect(Collectors.averagingLongOrElseThrow(Record::getProcessingTime));
+     *
+     * // Empty stream throws exception
+     * try {
+     *     Double avg = Stream.<Record>empty()
+     *         .collect(Collectors.averagingLongOrElseThrow(Record::getProcessingTime));
+     * } catch (NoSuchElementException e) {
+     *     System.out.println("Cannot compute average of empty stream");
+     * }
+     *
+     * // Using with filtering - throws if no elements match
+     * Double avgLargeFileSize = files.stream()
+     *     .filter(f -> f.length() > 1000000)
+     *     .collect(Collectors.averagingLongOrElseThrow(File::length));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a long value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
-     * @throws NoSuchElementException if no elements are present
+     * @param mapper a function extracting a long value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted long values as a {@code Double}
+     * @throws NoSuchElementException if no elements are present in the stream
      * @see #averagingLong(ToLongFunction)
      * @see #averagingLongOrEmpty(ToLongFunction)
      */
@@ -5562,23 +5718,45 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return create(AveragingLong_Supplier, accumulator, AveragingLong_Combiner, AveragingLong_Finisher_orElseThrow, CH_UNORDERED_NOID);
     }
 
-    /** 
+    /**
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements.
      *
-     * <p>If no elements are present, the result is 0.0.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     * <p>This collector computes the average by mapping each element to a double value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * If no elements are present in the stream, the result is 0.0. The average is computed
+     * and returned as a double-precision floating-point value.</p>
+     *
+     * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingDouble(ToDoubleFunction)}
+     * implementation for compatibility with the Java Stream API.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average price
+     * // Calculate average price of products
+     * List<Product> products = Arrays.asList(
+     *     new Product("Laptop", 999.99),
+     *     new Product("Mouse", 29.99),
+     *     new Product("Keyboard", 79.99)
+     * );
      * Double avgPrice = products.stream()
      *     .collect(Collectors.averagingDouble(Product::getPrice));
+     * // Result: 369.99
+     *
+     * // Calculate average score
+     * List<Double> scores = Arrays.asList(85.5, 90.0, 78.3, 92.7);
+     * Double avgScore = scores.stream()
+     *     .collect(Collectors.averagingDouble(d -> d));
+     * // Result: 86.625
+     *
+     * // Empty stream returns 0.0
+     * Double emptyAvg = Stream.<Product>empty()
+     *     .collect(Collectors.averagingDouble(Product::getPrice));
+     * // Result: 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a double value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting a double value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted double values as a {@code Double}
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
@@ -5591,19 +5769,42 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, wrapped in an {@code OptionalDouble}.
      *
-     * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
-     * The average is calculated as a double to preserve precision.</p>
-     * 
+     * <p>This collector computes the average by mapping each element to a double value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingDouble(ToDoubleFunction)}, this method returns an {@code OptionalDouble}
+     * which will be empty if no elements are present in the stream. This allows for safer
+     * handling of empty streams without having to distinguish between a true zero average
+     * and the absence of elements.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average price
+     * // Calculate average price with Optional result
+     * List<Product> products = Arrays.asList(
+     *     new Product("Laptop", 999.99),
+     *     new Product("Mouse", 29.99)
+     * );
      * OptionalDouble avgPrice = products.stream()
-     *     .collect(Collectors.averagingDouble(Product::getPrice));
+     *     .collect(Collectors.averagingDoubleOrEmpty(Product::getPrice));
+     * avgPrice.ifPresent(price -> System.out.println("Average: $" + price));
+     * // Output: Average: $514.99
+     *
+     * // Empty stream returns empty Optional
+     * OptionalDouble emptyAvg = Stream.<Product>empty()
+     *     .collect(Collectors.averagingDoubleOrEmpty(Product::getPrice));
+     * System.out.println(emptyAvg.isPresent()); // false
+     *
+     * // Safe handling with orElse
+     * double result = products.stream()
+     *     .collect(Collectors.averagingDoubleOrEmpty(Product::getPrice))
+     *     .orElse(0.0);
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a double value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
+     * @param mapper a function extracting a double value from each input element
+     * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
+     *         or an empty {@code OptionalDouble} if no elements were present
      * @see #averagingDouble(ToDoubleFunction)
      * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      */
@@ -5617,20 +5818,46 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, throwing an exception if no elements are present.
      *
-     * <p>This collector is useful when an empty stream represents an error condition.
-     * The average is calculated as a double to preserve precision.</p>
+     * <p>This collector computes the average by mapping each element to a double value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingDouble(ToDoubleFunction)} which returns 0.0 for empty streams and
+     * {@link #averagingDoubleOrEmpty(ToDoubleFunction)} which returns an empty Optional, this method
+     * throws a {@code NoSuchElementException} if the stream is empty. This is useful when an
+     * empty stream represents an error condition and you want to fail fast rather than return
+     * a default value.</p>
+     *
+     * <p>The average is computed and returned as a double-precision floating-point value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average score (throws if no scores)
+     * List<Student> students = Arrays.asList(
+     *     new Student("Alice", 85.5),
+     *     new Student("Bob", 92.0),
+     *     new Student("Charlie", 78.3)
+     * );
      * Double avgScore = students.stream()
+     *     .collect(Collectors.averagingDoubleOrElseThrow(Student::getScore));
+     * // Result: 85.26666666666667
+     *
+     * // Empty stream throws exception
+     * try {
+     *     Double avg = Stream.<Student>empty()
+     *         .collect(Collectors.averagingDoubleOrElseThrow(Student::getScore));
+     * } catch (NoSuchElementException e) {
+     *     System.out.println("Cannot compute average of empty stream");
+     * }
+     *
+     * // Using with filtering - throws if no elements match
+     * Double avgHighScore = students.stream()
+     *     .filter(s -> s.getScore() >= 90.0)
      *     .collect(Collectors.averagingDoubleOrElseThrow(Student::getScore));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a double value from an element
-     * @return a {@code Collector} that produces the average of the extracted values
-     * @throws NoSuchElementException if no elements are present
+     * @param mapper a function extracting a double value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean of the extracted double values as a {@code Double}
+     * @throws NoSuchElementException if no elements are present in the stream
      * @see #averagingDouble(ToDoubleFunction)
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      */
@@ -5643,21 +5870,38 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigInteger}
      * values extracted from the input elements.
-     * 
-     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
-     * If no elements are present, the result is {@code BigDecimal.ZERO}.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a {@code BigInteger} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * The average is calculated as a {@code BigDecimal} to preserve precision, which is essential
+     * when working with arbitrary-precision integers. If no elements are present in the stream,
+     * the result is {@code BigDecimal.ZERO}.</p>
+     *
+     * <p>This collector is particularly useful when dealing with very large integer values that
+     * exceed the capacity of primitive types (int, long) or when precision is critical.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average of very large numbers
-     * BigDecimal avg = Stream.of("1000000000000", "2000000000000")
-     *     .collect(Collectors.averagingBigInteger(BigInteger::new));
-     * // Result: 1500000000000
+     * BigDecimal avg = Stream.of("1000000000000000000", "2000000000000000000", "3000000000000000000")
+     *     .map(BigInteger::new)
+     *     .collect(Collectors.averagingBigInteger(n -> n));
+     * // Result: 2000000000000000000
+     *
+     * // Average account balances with precise arithmetic
+     * List<Account> accounts = getAccounts();
+     * BigDecimal avgBalance = accounts.stream()
+     *     .collect(Collectors.averagingBigInteger(Account::getBalanceBigInt));
+     *
+     * // Empty stream returns BigDecimal.ZERO
+     * BigDecimal emptyAvg = Stream.<BigInteger>empty()
+     *     .collect(Collectors.averagingBigInteger(n -> n));
+     * // Result: BigDecimal.ZERO
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigInteger} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @param mapper a function extracting a {@code BigInteger} value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @see #averagingBigIntegerOrEmpty(Function)
      * @see #averagingBigIntegerOrElseThrow(Function)
      * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
@@ -5674,21 +5918,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigInteger}
      * values extracted from the input elements, wrapped in an {@code Optional<BigDecimal>}.
-     * 
-     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
-     * If no elements are present, the result is an empty {@code Optional}.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a {@code BigInteger} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingBigInteger(Function)}, this method returns an {@code Optional<BigDecimal>}
+     * which will be empty if no elements are present in the stream. This allows for safer handling
+     * of empty streams without having to distinguish between a true zero average and the absence
+     * of elements.</p>
+     *
+     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average of very large numbers
-     * Optional<BigDecimal> avg = Stream.of("1000000000000", "2000000000000")
-     *     .collect(Collectors.averagingBigInteger(BigInteger::new));
-     * // Result: Optional[1500000000000]
+     * // Calculate average of very large numbers with Optional result
+     * Optional<BigDecimal> avg = Stream.of("1000000000000000000", "2000000000000000000")
+     *     .map(BigInteger::new)
+     *     .collect(Collectors.averagingBigIntegerOrEmpty(n -> n));
+     * avg.ifPresent(a -> System.out.println("Average: " + a));
+     * // Output: Average: 1500000000000000000
+     *
+     * // Empty stream returns empty Optional
+     * Optional<BigDecimal> emptyAvg = Stream.<BigInteger>empty()
+     *     .collect(Collectors.averagingBigIntegerOrEmpty(n -> n));
+     * System.out.println(emptyAvg.isPresent()); // false
+     *
+     * // Safe handling with orElse
+     * BigDecimal result = Stream.of(BigInteger.TEN, BigInteger.valueOf(20))
+     *     .collect(Collectors.averagingBigIntegerOrEmpty(n -> n))
+     *     .orElse(BigDecimal.ZERO);
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigInteger} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @param mapper a function extracting a {@code BigInteger} value from each input element
+     * @return a {@code Collector} that produces an {@code Optional<BigDecimal>} containing the arithmetic mean,
+     *         or an empty {@code Optional} if no elements were present
      * @see #averagingBigInteger(Function)
      * @see #averagingBigIntegerOrElseThrow(Function)
      */
@@ -5705,20 +5968,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigInteger}
      * values extracted from the input elements, throwing an exception if no elements are present.
      *
-     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
-     * This collector is useful when an empty stream represents an error condition.</p>
+     * <p>This collector computes the average by mapping each element to a {@code BigInteger} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingBigInteger(Function)} which returns {@code BigDecimal.ZERO} for empty streams
+     * and {@link #averagingBigIntegerOrEmpty(Function)} which returns an empty Optional, this method
+     * throws a {@code NoSuchElementException} if the stream is empty. This is useful when an empty
+     * stream represents an error condition and you want to fail fast rather than return a default value.</p>
+     *
+     * <p>The average is calculated as a {@code BigDecimal} to preserve precision.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average balance (throws if no accounts)
+     * List<Account> accounts = getAccounts();
      * BigDecimal avgBalance = accounts.stream()
-     *     .collect(Collectors.averagingBigIntegerOrElseThrow(Account::getBalance));
+     *     .collect(Collectors.averagingBigIntegerOrElseThrow(Account::getBalanceBigInt));
+     *
+     * // Empty stream throws exception
+     * try {
+     *     BigDecimal avg = Stream.<Account>empty()
+     *         .collect(Collectors.averagingBigIntegerOrElseThrow(Account::getBalanceBigInt));
+     * } catch (NoSuchElementException e) {
+     *     System.out.println("Cannot compute average of empty stream");
+     * }
+     *
+     * // Using with filtering - throws if no elements match
+     * BigDecimal avgLargeBalance = accounts.stream()
+     *     .filter(a -> a.getBalanceBigInt().compareTo(BigInteger.valueOf(1000000)) > 0)
+     *     .collect(Collectors.averagingBigIntegerOrElseThrow(Account::getBalanceBigInt));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigInteger} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
-     * @throws NoSuchElementException if no elements are present
+     * @param mapper a function extracting a {@code BigInteger} value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
+     * @throws NoSuchElementException if no elements are present in the stream
      * @see #averagingBigInteger(Function)
      * @see #averagingBigIntegerOrEmpty(Function)
      */
@@ -5734,21 +6017,47 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigDecimal}
      * values extracted from the input elements.
-     * 
-     * <p>This collector is useful for precise decimal arithmetic, especially for
-     * financial calculations. If no elements are present, the result is
-     * {@code BigDecimal.ZERO}.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a {@code BigDecimal} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * The result is returned as a {@code BigDecimal} to preserve maximum precision. If no elements
+     * are present in the stream, the result is {@code BigDecimal.ZERO}.</p>
+     *
+     * <p>This collector is particularly useful for precise decimal arithmetic, especially in
+     * financial calculations, scientific computations, or any scenario where precision loss
+     * from floating-point arithmetic is unacceptable.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average transaction amount
+     * // Calculate average transaction amount with precise decimal arithmetic
+     * List<Transaction> transactions = Arrays.asList(
+     *     new Transaction(new BigDecimal("100.50")),
+     *     new Transaction(new BigDecimal("250.75")),
+     *     new Transaction(new BigDecimal("175.25"))
+     * );
      * BigDecimal avgAmount = transactions.stream()
      *     .collect(Collectors.averagingBigDecimal(Transaction::getAmount));
+     * // Result: 175.50 (precise)
+     *
+     * // Average prices with full precision
+     * List<BigDecimal> prices = Arrays.asList(
+     *     new BigDecimal("19.99"),
+     *     new BigDecimal("29.99"),
+     *     new BigDecimal("39.99")
+     * );
+     * BigDecimal avgPrice = prices.stream()
+     *     .collect(Collectors.averagingBigDecimal(p -> p));
+     * // Result: 29.99 (exact)
+     *
+     * // Empty stream returns BigDecimal.ZERO
+     * BigDecimal emptyAvg = Stream.<BigDecimal>empty()
+     *     .collect(Collectors.averagingBigDecimal(d -> d));
+     * // Result: BigDecimal.ZERO
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigDecimal} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @param mapper a function extracting a {@code BigDecimal} value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @see #averagingBigDecimalOrEmpty(Function)
      * @see #averagingBigDecimalOrElseThrow(Function)
      * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
@@ -5765,20 +6074,44 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigDecimal}
      * values extracted from the input elements, wrapped in an {@code Optional<BigDecimal>}.
-     * 
-     * <p>This collector is useful for precise decimal arithmetic, especially for
-     * financial calculations. If no elements are present, the result is an empty {@code Optional}.</p>
-     * 
+     *
+     * <p>This collector computes the average by mapping each element to a {@code BigDecimal} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingBigDecimal(Function)}, this method returns an {@code Optional<BigDecimal>}
+     * which will be empty if no elements are present in the stream. This allows for safer handling
+     * of empty streams without having to distinguish between a true zero average and the absence
+     * of elements.</p>
+     *
+     * <p>This collector is particularly useful for precise decimal arithmetic in scenarios where
+     * empty inputs are valid and need to be handled distinctly.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate average transaction amount
+     * // Calculate average transaction amount with Optional result
+     * List<Transaction> transactions = Arrays.asList(
+     *     new Transaction(new BigDecimal("100.50")),
+     *     new Transaction(new BigDecimal("250.75"))
+     * );
      * Optional<BigDecimal> avgAmount = transactions.stream()
-     *     .collect(Collectors.averagingBigDecimal(Transaction::getAmount));
+     *     .collect(Collectors.averagingBigDecimalOrEmpty(Transaction::getAmount));
+     * avgAmount.ifPresent(amt -> System.out.println("Average: $" + amt));
+     * // Output: Average: $175.625
+     *
+     * // Empty stream returns empty Optional
+     * Optional<BigDecimal> emptyAvg = Stream.<Transaction>empty()
+     *     .collect(Collectors.averagingBigDecimalOrEmpty(Transaction::getAmount));
+     * System.out.println(emptyAvg.isPresent()); // false
+     *
+     * // Safe handling with orElse
+     * BigDecimal result = transactions.stream()
+     *     .collect(Collectors.averagingBigDecimalOrEmpty(Transaction::getAmount))
+     *     .orElse(BigDecimal.ZERO);
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigDecimal} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
+     * @param mapper a function extracting a {@code BigDecimal} value from each input element
+     * @return a {@code Collector} that produces an {@code Optional<BigDecimal>} containing the arithmetic mean,
+     *         or an empty {@code Optional} if no elements were present
      * @see #averagingBigDecimal(Function)
      * @see #averagingBigDecimalOrElseThrow(Function)
      */
@@ -5795,20 +6128,41 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigDecimal}
      * values extracted from the input elements, throwing an exception if no elements are present.
      *
-     * <p>This collector is useful for precise decimal arithmetic when an empty stream
-     * represents an error condition.</p>
+     * <p>This collector computes the average by mapping each element to a {@code BigDecimal} value
+     * using the provided mapper function, then calculating the arithmetic mean of all values.
+     * Unlike {@link #averagingBigDecimal(Function)} which returns {@code BigDecimal.ZERO} for empty streams
+     * and {@link #averagingBigDecimalOrEmpty(Function)} which returns an empty Optional, this method
+     * throws a {@code NoSuchElementException} if the stream is empty. This is useful when an empty
+     * stream represents an error condition and you want to fail fast rather than return a default value.</p>
+     *
+     * <p>This collector is particularly useful for precise decimal arithmetic in scenarios where
+     * the presence of data is a precondition.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average price (throws if no items)
+     * List<Item> items = getItems();
      * BigDecimal avgPrice = items.stream()
+     *     .collect(Collectors.averagingBigDecimalOrElseThrow(Item::getPrice));
+     *
+     * // Empty stream throws exception
+     * try {
+     *     BigDecimal avg = Stream.<Item>empty()
+     *         .collect(Collectors.averagingBigDecimalOrElseThrow(Item::getPrice));
+     * } catch (NoSuchElementException e) {
+     *     System.out.println("Cannot compute average of empty stream");
+     * }
+     *
+     * // Using with filtering - throws if no elements match
+     * BigDecimal avgExpensivePrice = items.stream()
+     *     .filter(i -> i.getPrice().compareTo(new BigDecimal("100")) > 0)
      *     .collect(Collectors.averagingBigDecimalOrElseThrow(Item::getPrice));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigDecimal} value from an element
-     * @return a {@code Collector} that produces the average as a {@code BigDecimal}
-     * @throws NoSuchElementException if no elements are present
+     * @param mapper a function extracting a {@code BigDecimal} value from each input element
+     * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
+     * @throws NoSuchElementException if no elements are present in the stream
      * @see #averagingBigDecimal(Function)
      * @see #averagingBigDecimalOrEmpty(Function)
      */
@@ -5824,22 +6178,36 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for char values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code CharSummaryStatistics} contains count, sum, min, max,
-     * and average of the char values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a char value
+     * using the provided mapper function. The resulting {@code CharSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all char values encountered.
+     * This is particularly useful for analyzing character data and obtaining multiple statistical
+     * measures in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get statistics of first characters
+     * // Get statistics of first characters in words
+     * List<String> words = Arrays.asList("apple", "banana", "cherry", "date");
      * CharSummaryStatistics stats = words.stream()
      *     .collect(Collectors.summarizingChar(s -> s.charAt(0)));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());       // 4
+     * System.out.println("Min: " + stats.getMin());           // 'a'
+     * System.out.println("Max: " + stats.getMax());           // 'd'
+     * System.out.println("Average: " + stats.getAverage());   // average of char values
+     *
+     * // Analyze character codes
+     * String text = "Hello";
+     * CharSummaryStatistics charStats = text.chars()
+     *     .mapToObj(c -> (char) c)
+     *     .collect(Collectors.summarizingChar(c -> c));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a char value from an element
-     * @return a {@code Collector} that produces {@code CharSummaryStatistics}
+     * @param mapper a function extracting a char value from each input element
+     * @return a {@code Collector} that produces {@code CharSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) { // NOSONAR
@@ -5855,22 +6223,37 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for byte values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code ByteSummaryStatistics} contains count, sum, min, max,
-     * and average of the byte values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a byte value
+     * using the provided mapper function. The resulting {@code ByteSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all byte values encountered.
+     * This is useful for analyzing byte data and obtaining multiple statistical measures in a single,
+     * efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of byte values
-     * ByteSummaryStatistics stats = Stream.of((byte)1, (byte)2, (byte)3)
+     * List<Byte> bytes = Arrays.asList((byte)1, (byte)5, (byte)3, (byte)9, (byte)2);
+     * ByteSummaryStatistics stats = bytes.stream()
      *     .collect(Collectors.summarizingByte(b -> b));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());       // 5
+     * System.out.println("Sum: " + stats.getSum());           // 20
+     * System.out.println("Min: " + stats.getMin());           // 1
+     * System.out.println("Max: " + stats.getMax());           // 9
+     * System.out.println("Average: " + stats.getAverage());   // 4.0
+     *
+     * // Analyze byte array data
+     * byte[] data = {10, 20, 30, 40, 50};
+     * ByteSummaryStatistics byteStats = IntStream.range(0, data.length)
+     *     .mapToObj(i -> data[i])
+     *     .collect(Collectors.summarizingByte(b -> b));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a byte value from an element
-     * @return a {@code Collector} that produces {@code ByteSummaryStatistics}
+     * @param mapper a function extracting a byte value from each input element
+     * @return a {@code Collector} that produces {@code ByteSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) { // NOSONAR
@@ -5886,22 +6269,36 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for short values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code ShortSummaryStatistics} contains count, sum, min, max,
-     * and average of the short values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a short value
+     * using the provided mapper function. The resulting {@code ShortSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all short values encountered.
+     * This is useful for analyzing short integer data and obtaining multiple statistical measures
+     * in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of short values
-     * ShortSummaryStatistics stats = Stream.of((short)100, (short)200, (short)300)
+     * List<Short> shorts = Arrays.asList((short)100, (short)200, (short)300, (short)150);
+     * ShortSummaryStatistics stats = shorts.stream()
      *     .collect(Collectors.summarizingShort(s -> s));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());       // 4
+     * System.out.println("Sum: " + stats.getSum());           // 750
+     * System.out.println("Min: " + stats.getMin());           // 100
+     * System.out.println("Max: " + stats.getMax());           // 300
+     * System.out.println("Average: " + stats.getAverage());   // 187.5
+     *
+     * // Analyze port numbers
+     * List<Server> servers = getServers();
+     * ShortSummaryStatistics portStats = servers.stream()
+     *     .collect(Collectors.summarizingShort(Server::getPort));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a short value from an element
-     * @return a {@code Collector} that produces {@code ShortSummaryStatistics}
+     * @param mapper a function extracting a short value from each input element
+     * @return a {@code Collector} that produces {@code ShortSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) { // NOSONAR
@@ -5917,22 +6314,36 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for integer values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code IntSummaryStatistics} contains count, sum, min, max,
-     * and average of the integer values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to an integer value
+     * using the provided mapper function. The resulting {@code IntSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all integer values encountered.
+     * This is useful for analyzing integer data and obtaining multiple statistical measures in a single,
+     * efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of string lengths
+     * List<String> strings = Arrays.asList("a", "abc", "ab", "abcde");
      * IntSummaryStatistics stats = strings.stream()
      *     .collect(Collectors.summarizingInt(String::length));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());       // 4
+     * System.out.println("Sum: " + stats.getSum());           // 11
+     * System.out.println("Min: " + stats.getMin());           // 1
+     * System.out.println("Max: " + stats.getMax());           // 5
+     * System.out.println("Average: " + stats.getAverage());   // 2.75
+     *
+     * // Analyze ages
+     * List<Person> people = getPeople();
+     * IntSummaryStatistics ageStats = people.stream()
+     *     .collect(Collectors.summarizingInt(Person::getAge));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract an integer value from an element
-     * @return a {@code Collector} that produces {@code IntSummaryStatistics}
+     * @param mapper a function extracting an integer value from each input element
+     * @return a {@code Collector} that produces {@code IntSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) {
@@ -5948,22 +6359,39 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for long values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code LongSummaryStatistics} contains count, sum, min, max,
-     * and average of the long values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a long value
+     * using the provided mapper function. The resulting {@code LongSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all long values encountered.
+     * This is useful for analyzing long integer data and obtaining multiple statistical measures
+     * in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of file sizes
+     * List<File> files = Arrays.asList(
+     *     new File("file1.txt"),
+     *     new File("file2.txt"),
+     *     new File("file3.txt")
+     * );
      * LongSummaryStatistics stats = files.stream()
      *     .collect(Collectors.summarizingLong(File::length));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Total size: " + stats.getSum());
+     * System.out.println("Largest file: " + stats.getMax());
+     * System.out.println("Smallest file: " + stats.getMin());
+     * System.out.println("Average size: " + stats.getAverage());
+     *
+     * // Analyze timestamps
+     * List<Event> events = getEvents();
+     * LongSummaryStatistics timestampStats = events.stream()
+     *     .collect(Collectors.summarizingLong(Event::getTimestamp));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a long value from an element
-     * @return a {@code Collector} that produces {@code LongSummaryStatistics}
+     * @param mapper a function extracting a long value from each input element
+     * @return a {@code Collector} that produces {@code LongSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) {
@@ -5979,22 +6407,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for float values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code FloatSummaryStatistics} contains count, sum, min, max,
-     * and average of the float values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a float value
+     * using the provided mapper function. The resulting {@code FloatSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all float values encountered.
+     * This is useful for analyzing floating-point data and obtaining multiple statistical measures
+     * in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get statistics of float values
+     * // Get statistics of float measurements
+     * List<Measurement> measurements = Arrays.asList(
+     *     new Measurement(12.5f),
+     *     new Measurement(15.8f),
+     *     new Measurement(9.3f)
+     * );
      * FloatSummaryStatistics stats = measurements.stream()
      *     .collect(Collectors.summarizingFloat(Measurement::getValue));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());       // 3
+     * System.out.println("Sum: " + stats.getSum());           // 37.6
+     * System.out.println("Min: " + stats.getMin());           // 9.3
+     * System.out.println("Max: " + stats.getMax());           // 15.8
+     * System.out.println("Average: " + stats.getAverage());   // 12.533...
+     *
+     * // Analyze sensor readings
+     * List<Float> readings = Arrays.asList(98.6f, 100.2f, 99.1f);
+     * FloatSummaryStatistics readingStats = readings.stream()
+     *     .collect(Collectors.summarizingFloat(f -> f));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a float value from an element
-     * @return a {@code Collector} that produces {@code FloatSummaryStatistics}
+     * @param mapper a function extracting a float value from each input element
+     * @return a {@code Collector} that produces {@code FloatSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) { // NOSONAR
@@ -6010,22 +6456,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for double values
      * extracted from the input elements.
-     * 
-     * <p>The resulting {@code DoubleSummaryStatistics} contains count, sum, min, max,
-     * and average of the double values. This is useful for getting multiple statistics
-     * in a single pass through the data.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a double value
+     * using the provided mapper function. The resulting {@code DoubleSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all double values encountered.
+     * This is useful for analyzing double-precision floating-point data and obtaining multiple
+     * statistical measures in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get statistics of prices
+     * // Get statistics of product prices
+     * List<Product> products = Arrays.asList(
+     *     new Product("Laptop", 999.99),
+     *     new Product("Mouse", 29.99),
+     *     new Product("Keyboard", 79.99)
+     * );
      * DoubleSummaryStatistics stats = products.stream()
      *     .collect(Collectors.summarizingDouble(Product::getPrice));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());        // 3
+     * System.out.println("Total: $" + stats.getSum());         // $1109.97
+     * System.out.println("Min: $" + stats.getMin());           // $29.99
+     * System.out.println("Max: $" + stats.getMax());           // $999.99
+     * System.out.println("Average: $" + stats.getAverage());   // $369.99
+     *
+     * // Analyze test scores
+     * List<Student> students = getStudents();
+     * DoubleSummaryStatistics scoreStats = students.stream()
+     *     .collect(Collectors.summarizingDouble(Student::getScore));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a double value from an element
-     * @return a {@code Collector} that produces {@code DoubleSummaryStatistics}
+     * @param mapper a function extracting a double value from each input element
+     * @return a {@code Collector} that produces {@code DoubleSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) {
@@ -6041,22 +6505,42 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for {@code BigInteger}
      * values extracted from the input elements.
-     * 
-     * <p>The resulting {@code BigIntegerSummaryStatistics} contains count, sum, min, max,
-     * and average of the {@code BigInteger} values. This is useful for getting multiple
-     * statistics for very large integer values in a single pass.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a {@code BigInteger} value
+     * using the provided mapper function. The resulting {@code BigIntegerSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average (as {@code BigDecimal}) of all {@code BigInteger}
+     * values encountered. This is particularly useful for analyzing very large integer values that exceed the
+     * capacity of primitive types and obtaining multiple statistical measures in a single, efficient pass
+     * through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get statistics of large numbers
-     * BigIntegerSummaryStatistics stats = Stream.of("1000000000000", "2000000000000")
-     *     .collect(Collectors.summarizingBigInteger(BigInteger::new));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * // Get statistics of very large numbers
+     * List<String> largeNumbers = Arrays.asList(
+     *     "1000000000000000000",
+     *     "2000000000000000000",
+     *     "3000000000000000000"
+     * );
+     * BigIntegerSummaryStatistics stats = largeNumbers.stream()
+     *     .map(BigInteger::new)
+     *     .collect(Collectors.summarizingBigInteger(n -> n));
+     * System.out.println("Count: " + stats.getCount());       // 3
+     * System.out.println("Sum: " + stats.getSum());           // 6000000000000000000
+     * System.out.println("Min: " + stats.getMin());           // 1000000000000000000
+     * System.out.println("Max: " + stats.getMax());           // 3000000000000000000
+     * System.out.println("Average: " + stats.getAverage());   // 2000000000000000000
+     *
+     * // Analyze account balances
+     * List<Account> accounts = getAccounts();
+     * BigIntegerSummaryStatistics balanceStats = accounts.stream()
+     *     .collect(Collectors.summarizingBigInteger(Account::getBalanceBigInt));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigInteger} value from an element
-     * @return a {@code Collector} that produces {@code BigIntegerSummaryStatistics}
+     * @param mapper a function extracting a {@code BigInteger} value from each input element
+     * @return a {@code Collector} that produces {@code BigIntegerSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, BigIntegerSummaryStatistics> summarizingBigInteger(final Function<? super T, BigInteger> mapper) {
@@ -6072,22 +6556,41 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces summary statistics for {@code BigDecimal}
      * values extracted from the input elements.
-     * 
-     * <p>The resulting {@code BigDecimalSummaryStatistics} contains count, sum, min, max,
-     * and average of the {@code BigDecimal} values. This is useful for getting multiple
-     * statistics for precise decimal values in a single pass.</p>
-     * 
+     *
+     * <p>This collector computes comprehensive statistics by mapping each element to a {@code BigDecimal} value
+     * using the provided mapper function. The resulting {@code BigDecimalSummaryStatistics} object contains
+     * the count, sum, minimum value, maximum value, and average of all {@code BigDecimal} values encountered.
+     * This is particularly useful for precise decimal arithmetic, especially in financial calculations, and
+     * for obtaining multiple statistical measures in a single, efficient pass through the stream.</p>
+     *
+     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get statistics of monetary amounts
+     * // Get statistics of monetary transaction amounts
+     * List<Transaction> transactions = Arrays.asList(
+     *     new Transaction(new BigDecimal("100.50")),
+     *     new Transaction(new BigDecimal("250.75")),
+     *     new Transaction(new BigDecimal("175.25")),
+     *     new Transaction(new BigDecimal("89.99"))
+     * );
      * BigDecimalSummaryStatistics stats = transactions.stream()
      *     .collect(Collectors.summarizingBigDecimal(Transaction::getAmount));
-     * // Access: stats.getCount(), stats.getSum(), stats.getMin(), etc.
+     * System.out.println("Count: " + stats.getCount());        // 4
+     * System.out.println("Total: $" + stats.getSum());         // $616.49
+     * System.out.println("Min: $" + stats.getMin());           // $89.99
+     * System.out.println("Max: $" + stats.getMax());           // $250.75
+     * System.out.println("Average: $" + stats.getAverage());   // $154.1225
+     *
+     * // Analyze invoice amounts
+     * List<Invoice> invoices = getInvoices();
+     * BigDecimalSummaryStatistics invoiceStats = invoices.stream()
+     *     .collect(Collectors.summarizingBigDecimal(Invoice::getAmount));
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param mapper function to extract a {@code BigDecimal} value from an element
-     * @return a {@code Collector} that produces {@code BigDecimalSummaryStatistics}
+     * @param mapper a function extracting a {@code BigDecimal} value from each input element
+     * @return a {@code Collector} that produces {@code BigDecimalSummaryStatistics} containing comprehensive statistics
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, BigDecimalSummaryStatistics> summarizingBigDecimal(final Function<? super T, BigDecimal> mapper) {
@@ -6101,25 +6604,55 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     * Returns a {@code Collector} that performs a reduction on the elements using
+     * Returns a {@code Collector} that performs a reduction on the input elements using
      * the provided identity value and binary operator.
-     * 
+     *
      * <p>This collector accumulates elements by repeatedly applying the binary operator,
-     * starting with the identity value. The identity value must be an identity for
-     * the combiner function, meaning {@code op.apply(identity, x)} equals {@code x}.</p>
-     * 
+     * starting with the identity value. The identity value serves as both the initial accumulation
+     * value and the result when no elements are present. The identity must be an identity for
+     * the combiner function, meaning {@code op.apply(identity, x)} must equal {@code x} for any value {@code x}.</p>
+     *
+     * <p>The reduction operation is equivalent to:
+     * <pre>{@code
+     *     T result = identity;
+     *     for (T element : stream)
+     *         result = op.apply(result, element);
+     *     return result;
+     * }</pre>
+     *
+     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
+     * operator is associative.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate product of all numbers
      * Integer product = Stream.of(1, 2, 3, 4)
      *     .collect(Collectors.reducing(1, (a, b) -> a * b));
      * // Result: 24
+     *
+     * // Concatenate strings with a seed value
+     * String result = Stream.of("a", "b", "c")
+     *     .collect(Collectors.reducing("start:", (s1, s2) -> s1 + s2));
+     * // Result: "start:abc"
+     *
+     * // Find maximum with default value
+     * Integer max = Stream.of(5, 3, 8, 1)
+     *     .collect(Collectors.reducing(Integer.MIN_VALUE, Integer::max));
+     * // Result: 8
+     *
+     * // Empty stream returns identity
+     * Integer emptyProduct = Stream.<Integer>empty()
+     *     .collect(Collectors.reducing(1, (a, b) -> a * b));
+     * // Result: 1
      * }</pre>
      *
-     * @param <T> the type of input elements
-     * @param identity the identity value for the reduction
-     * @param op binary operator used to reduce elements
-     * @return a {@code Collector} that reduces elements to a single value
+     * @param <T> the type of input elements and the result
+     * @param identity the identity value for the reduction operation (also returned when no elements are present)
+     * @param op an associative, stateless binary operator for combining two values
+     * @return a {@code Collector} that reduces the input elements using the binary operator
+     * @see #reducing(BinaryOperator)
+     * @see #reducing(Object, Function, BinaryOperator)
+     * @see java.util.stream.Collectors#reducing(Object, BinaryOperator)
      */
     public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) {
         final BiConsumer<Holder<T>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), t));
@@ -6136,25 +6669,52 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     * Returns a {@code Collector} that performs a reduction on the elements using
+     * Returns a {@code Collector} that performs a reduction on the input elements using
      * the provided binary operator, with no identity value.
-     * 
+     *
      * <p>This collector accumulates elements by repeatedly applying the binary operator.
-     * If the stream is empty, an empty {@code Optional} is returned. The first element
-     * encountered becomes the initial value for the reduction.</p>
-     * 
+     * Unlike {@link #reducing(Object, BinaryOperator)}, this method does not require an identity value.
+     * The first element encountered in the stream becomes the initial value for the reduction,
+     * and subsequent elements are combined with it using the binary operator.</p>
+     *
+     * <p>If the stream is empty, an empty {@code Optional} is returned. This allows for safe
+     * handling of the case where no reduction can be performed.</p>
+     *
+     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
+     * operator is associative.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the longest string
      * Optional<String> longest = Stream.of("a", "abc", "ab")
-     *     .collect(Collectors.reducing((s1, s2) -> 
-     *         s1.length() > s2.length() ? s1 : s2));
+     *     .collect(Collectors.reducing((s1, s2) ->
+     *         s1.length() >= s2.length() ? s1 : s2));
      * // Result: Optional["abc"]
+     *
+     * // Find maximum number
+     * Optional<Integer> max = Stream.of(5, 3, 8, 1, 9)
+     *     .collect(Collectors.reducing(Integer::max));
+     * // Result: Optional[9]
+     *
+     * // Concatenate all strings
+     * Optional<String> concatenated = Stream.of("Hello", " ", "World")
+     *     .collect(Collectors.reducing(String::concat));
+     * // Result: Optional["Hello World"]
+     *
+     * // Empty stream returns empty Optional
+     * Optional<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.reducing(Integer::max));
+     * // Result: Optional.empty
      * }</pre>
      *
      * @param <T> the type of input elements
-     * @param op binary operator used to reduce elements
-     * @return a {@code Collector} that reduces elements to an {@code Optional} value
+     * @param op an associative, stateless binary operator for combining two values
+     * @return a {@code Collector} that reduces the input elements into an {@code Optional} containing the reduced value,
+     *         or an empty {@code Optional} if no elements were present
+     * @see #reducing(Object, BinaryOperator)
+     * @see #reducingOrElseGet(BinaryOperator, Supplier)
+     * @see #reducingOrElseThrow(BinaryOperator)
+     * @see java.util.stream.Collectors#reducing(BinaryOperator)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> reducing(final BinaryOperator<T> op) {
@@ -6170,11 +6730,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that performs a reduction on the elements using
      * the provided binary operator, returning a default value if the stream is empty.
-     * 
+     *
      * <p>This collector is similar to {@link #reducing(BinaryOperator)} but returns
      * the result of the supplier function instead of an empty {@code Optional} when
      * the stream is empty.</p>
-     * 
+     *
+     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
+     * operator is associative.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with default
@@ -6203,10 +6766,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that performs a reduction on the elements using
      * the provided binary operator, throwing an exception if the stream is empty.
-     * 
+     *
      * <p>This collector is useful when an empty stream represents an error condition.
      * It guarantees that a result will be produced or an exception will be thrown.</p>
-     * 
+     *
+     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
+     * operator is associative.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum (throws if empty)
@@ -6640,12 +7206,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that groups input elements by a classifier function,
      * collecting the elements in each group into a {@code List}.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
-     * its group key, then collects all elements with the same key into a list. The returned
-     * map preserves the encounter order of keys, and the lists preserve the encounter order
-     * of elements within each group.</p>
-     * 
+     * its group key, then collects all elements with the same key into a list. The lists
+     * preserve the encounter order of elements within each group.</p>
+     *
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -6720,13 +7285,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by their length
-     * Map<Integer, Long> countByLength = 
+     * Map<Integer, Long> countByLength =
      *     Stream.of("apple", "pie", "banana", "cat", "dog")
      *         .collect(Collectors.groupingBy(
      *             String::length,
      *             Collectors.counting()
      *         ));
-     * // Result: {3=2, 5=1, 6=1}
+     * // Result: {3=3, 5=1, 6=1}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7030,8 +7595,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then counts the number of elements for each key. The returned map
      * contains the count for each distinct key.</p>
-     * 
-     * <p>The returned collector is unordered and produces a map with no guaranteed order.</p>
+     *
+     * <p>The returned collector is not concurrent and produces an unordered map.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7095,8 +7660,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is similar to {@link #countingBy(Function)}, but returns counts
      * as {@code Integer} values instead of {@code Long}. This is useful when you know
      * the counts will not exceed {@code Integer.MAX_VALUE}.</p>
-     * 
-     * <p>The returned collector is unordered and produces a map with no guaranteed order.</p>
+     *
+     * <p>The returned collector is not concurrent and produces an unordered map.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8989,7 +9554,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two double-valued functions
          * applied to the input elements.
-         * 
+         *
+         * <p>This collector applies two different double mapping functions to each input
+         * element and maintains separate sums for each. The result is a tuple containing
+         * both sums. This is useful when you need to calculate multiple double sums from
+         * the same stream in a single pass.</p>
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
@@ -9022,7 +9592,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three double-valued functions
          * applied to the input elements.
-         * 
+         *
+         * <p>This collector applies three different double mapping functions to each input
+         * element and maintains separate sums for each. The result is a tuple containing
+         * all three sums. This is useful when you need to calculate multiple double sums
+         * from the same stream in a single pass.</p>
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
@@ -9380,12 +9955,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of two double-valued
          * functions applied to the input elements.
-         * 
-         * <p>This collector calculates the average of values extracted by three different
+         *
+         * <p>This collector calculates the average of values extracted by two different
          * mapping functions from each element. The averages are computed using double
-         * arithmetic to handle the division. If no elements are collected, all averages
+         * arithmetic to handle the division. If no elements are collected, both averages
          * will be 0.0.</p>
-         * 
+         *
+         * <p>The computation uses Kahan summation for improved numerical accuracy,
+         * minimizing rounding errors during parallel computation.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average temperatures
@@ -9414,12 +9992,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of three double-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector calculates the average of values extracted by three different
          * mapping functions from each element. The averages are computed using double
          * arithmetic to handle the division. If no elements are collected, all averages
          * will be 0.0.</p>
-         * 
+         *
+         * <p>The computation uses Kahan summation for improved numerical accuracy,
+         * minimizing rounding errors during parallel computation.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average sensor readings
@@ -9656,6 +10237,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param downstream2 the second downstream collector
          * @return a {@code Collector} which combines the results of two downstream collectors
          *         into a {@code Tuple2<R1, R2>}
+         * @throws IllegalArgumentException if any downstream collector is null
          */
         public static <T, R1, R2> Collector<T, ?, Tuple2<R1, R2>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2) {
@@ -9696,6 +10278,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param downstream3 the third downstream collector
          * @return a {@code Collector} which combines the results of three downstream collectors
          *         into a {@code Tuple3<R1, R2, R3>}
+         * @throws IllegalArgumentException if any downstream collector is null
          */
         public static <T, R1, R2, R3> Collector<T, ?, Tuple3<R1, R2, R3>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3) {
@@ -9740,6 +10323,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param downstream4 the fourth downstream collector
          * @return a {@code Collector} which combines the results of four downstream collectors
          *         into a {@code Tuple4<R1, R2, R3, R4>}
+         * @throws IllegalArgumentException if any downstream collector is null
          */
         public static <T, R1, R2, R3, R4> Collector<T, ?, Tuple4<R1, R2, R3, R4>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4) {
@@ -9792,11 +10376,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final Collector<? super T, ?, R5> downstream5) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1"); //NOSONAR
-            N.checkArgNotNull(downstream2, "downstream2"); //NOSONAR
-            N.checkArgNotNull(downstream3, "downstream3"); //NOSONAR
-            N.checkArgNotNull(downstream4, "downstream4"); //NOSONAR
-            N.checkArgNotNull(downstream5, "downstream5"); //NOSONAR
+            N.checkArgNotNull(downstream1, "downstream1");   //NOSONAR
+            N.checkArgNotNull(downstream2, "downstream2");   //NOSONAR
+            N.checkArgNotNull(downstream3, "downstream3");   //NOSONAR
+            N.checkArgNotNull(downstream4, "downstream4");   //NOSONAR
+            N.checkArgNotNull(downstream5, "downstream5");   //NOSONAR
 
             final List<Collector<? super T, ?, ?>> downstreams = Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5);
 
@@ -9886,17 +10470,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Comprehensive order statistics
-         * Tuple7<Long, Double, Double, LocalDate, LocalDate, 
-         *        Map<String, Long>, Set<String>> stats = 
+         * Tuple7<Long, Double, Double, LocalDate, LocalDate,
+         *        Map<String, Long>, Set<String>> stats =
          *     orders.stream()
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
          *             Collectors.summingDouble(Order::getTotal),
          *             Collectors.averagingDouble(Order::getTotal),
-         *             Collectors.mapping(Order::getDate, 
-         *                 Collectors.minBy(LocalDate::compareTo)).map(Optional::get),
-         *             Collectors.mapping(Order::getDate, 
-         *                 Collectors.maxBy(LocalDate::compareTo)).map(Optional::get),
+         *             Collectors.collectingAndThen(
+         *                 Collectors.mapping(Order::getDate, Collectors.minBy(LocalDate::compareTo)),
+         *                 opt -> opt.orElse(null)),
+         *             Collectors.collectingAndThen(
+         *                 Collectors.mapping(Order::getDate, Collectors.maxBy(LocalDate::compareTo)),
+         *                 opt -> opt.orElse(null)),
          *             Collectors.groupingBy(Order::getStatus, Collectors.counting()),
          *             Collectors.mapping(Order::getCustomerId, Collectors.toSet())
          *         ));
@@ -9984,7 +10570,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, cs.downstream1);
             N.checkArgNotNull(downstream2, cs.downstream2);
-            N.checkArgNotNull(merger, "merger"); //NOSONAR
+            N.checkArgNotNull(merger, "merger");   //NOSONAR
 
             final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
             final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
@@ -10267,7 +10853,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * // Convert stream of objects to Dataset
+         * // Convert stream of entities to Dataset with auto-generated column names
+         * List<Person> persons = Arrays.asList(
+         *     new Person("John", 25),
+         *     new Person("Jane", 30)
+         * );
          * Dataset dataset = persons.stream()
          *     .collect(MoreCollectors.toDataset());
          * }</pre>
@@ -10284,8 +10874,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * with specified column names.
          * 
          * <p>This collector is useful when you need to convert a stream of elements into a
-         * {@code Dataset} structure with custom column names. The collector creates a
-         * {@code Dataset} using the provided column names for the resulting data structure.</p>
+         * {@code Dataset} structure with explicitly specified column names. The collector
+         * uses the provided column names for the resulting data structure.</p>
          * 
          * <p>The returned collector accumulates elements into a list and then creates a
          * {@code Dataset} from that list using the specified column names. If column names
@@ -10293,9 +10883,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * // Convert stream to Dataset with custom column names
-         * List<String> columnNames = Arrays.asList("ID", "Name", "Age", "Department");
-         * Dataset dataset = employees.stream()
+         * // Convert stream to Dataset with specified column names
+         * List<String> columnNames = Arrays.asList("Name", "Age");
+         * List<Person> persons = Arrays.asList(
+         *     new Person("John", 25),
+         *     new Person("Jane", 30)
+         * );
+         * Dataset dataset = persons.stream()
          *     .collect(MoreCollectors.toDataset(columnNames));
          * }</pre>
          *

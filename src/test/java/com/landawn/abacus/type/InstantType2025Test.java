@@ -54,7 +54,7 @@ public class InstantType2025Test extends TestBase {
 
     @Test
     public void test_stringOf() {
-        Instant instant = Instant.ofEpochMilli(1609459200000L); // 2021-01-01T00:00:00Z
+        Instant instant = Instant.ofEpochMilli(1609459200000L);   // 2021-01-01T00:00:00Z
         String result = type.stringOf(instant);
         assertNotNull(result);
         assertTrue(result.contains("2021-01-01"));

@@ -74,9 +74,9 @@ public class BiConsumer2025Test extends TestBase {
         chainedConsumer.accept(10, 5);
 
         assertEquals(3, results.size());
-        assertEquals(15, results.get(0)); // 10 + 5
-        assertEquals(5, results.get(1)); // 10 - 5
-        assertEquals(50, results.get(2)); // 10 * 5
+        assertEquals(15, results.get(0));   // 10 + 5
+        assertEquals(5, results.get(1));   // 10 - 5
+        assertEquals(50, results.get(2));   // 10 * 5
     }
 
     @Test
@@ -90,7 +90,7 @@ public class BiConsumer2025Test extends TestBase {
         BiConsumer<String, Integer> chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept("test", 5));
-        assertEquals(1, results.size()); // First consumer should have executed
+        assertEquals(1, results.size());   // First consumer should have executed
         assertEquals("test:5", results.get(0));
     }
 
@@ -105,7 +105,7 @@ public class BiConsumer2025Test extends TestBase {
         BiConsumer<String, Integer> chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept("test", 5));
-        assertEquals(0, results.size()); // Second consumer should not have executed
+        assertEquals(0, results.size());   // Second consumer should not have executed
     }
 
     @Test

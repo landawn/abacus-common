@@ -40,7 +40,7 @@ public class DoubleUnaryOperator2025Test extends TestBase {
         // compose: first add3, then multiplyBy2: (x + 3) * 2
         DoubleUnaryOperator composed = multiplyBy2.compose(add3);
         double result = composed.applyAsDouble(5.0);
-        assertEquals(16.0, result, 0.0001); // (5 + 3) * 2 = 16
+        assertEquals(16.0, result, 0.0001);   // (5 + 3) * 2 = 16
     }
 
     @Test
@@ -51,7 +51,7 @@ public class DoubleUnaryOperator2025Test extends TestBase {
         // andThen: first multiplyBy2, then add3: (x * 2) + 3
         DoubleUnaryOperator composed = multiplyBy2.andThen(add3);
         double result = composed.applyAsDouble(5.0);
-        assertEquals(13.0, result, 0.0001); // (5 * 2) + 3 = 13
+        assertEquals(13.0, result, 0.0001);   // (5 * 2) + 3 = 13
     }
 
     @Test
@@ -71,7 +71,7 @@ public class DoubleUnaryOperator2025Test extends TestBase {
         // ((x + 1) * 2) - 3
         DoubleUnaryOperator composed = subtract3.compose(multiplyBy2).compose(add1);
         double result = composed.applyAsDouble(5.0);
-        assertEquals(9.0, result, 0.0001); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9.0, result, 0.0001);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DoubleUnaryOperator2025Test extends TestBase {
         // (x + 1) * 2 - 3
         DoubleUnaryOperator composed = add1.andThen(multiplyBy2).andThen(subtract3);
         double result = composed.applyAsDouble(5.0);
-        assertEquals(9.0, result, 0.0001); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9.0, result, 0.0001);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test

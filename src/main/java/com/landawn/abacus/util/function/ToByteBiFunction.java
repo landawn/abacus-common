@@ -35,14 +35,14 @@ public interface ToByteBiFunction<T, U> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToByteBiFunction<Integer, Integer> adder = (a, b) -> (byte) (a + b);
-     * byte result1 = adder.applyAsByte(10, 20);  // returns 30
+     * byte result1 = adder.applyAsByte(10, 20);   // returns 30
      *
      * ToByteBiFunction<String, Integer> charAt = (str, index) ->
      *     (byte) str.charAt(index);
-     * byte result2 = charAt.applyAsByte("Hello", 0);  // returns 72 (ASCII 'H')
+     * byte result2 = charAt.applyAsByte("Hello", 0);   // returns 72 (ASCII 'H')
      *
      * ToByteBiFunction<Byte, Byte> max = (a, b) -> (byte) Math.max(a, b);
-     * byte result3 = max.applyAsByte((byte) 5, (byte) 10);  // returns 10
+     * byte result3 = max.applyAsByte((byte) 5, (byte) 10);   // returns 10
      * }</pre>
      *
      * @param t the first function argument

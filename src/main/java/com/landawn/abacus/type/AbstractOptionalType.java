@@ -26,6 +26,11 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     /** Cached instance of the Map type used for internal operations */
     private static Type<Map<Object, Object>> mapType = null;
 
+    /**
+     * Constructs an AbstractOptionalType with the specified type name.
+     *
+     * @param typeName the name of the Optional type (e.g., "Optional", "OptionalInt", "OptionalLong")
+     */
     protected AbstractOptionalType(final String typeName) {
         super(typeName);
     }

@@ -225,7 +225,7 @@ import com.landawn.abacus.util.stream.Stream;
  *                      .result();
  * }</pre>
  *
- * @param <T> the type of the value this Builder wraps and manipulates
+ * @param <T> the type of the value this Builder wraps and manipulates.
  *
  * @see BooleanListBuilder
  * @see ListBuilder
@@ -252,10 +252,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized BooleanListBuilder for the given BooleanList.
+     * This builder provides fluent methods for adding, removing, and modifying boolean elements.
      *
-     * @param val the BooleanList to wrap in a builder
-     * @return a new BooleanListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanList list = BooleanList.of(true, false, true);
+     * BooleanList result = Builder.of(list)
+     *     .add(false)
+     *     .addAll(BooleanList.of(true, true))
+     *     .remove(false)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the BooleanList to wrap in a builder.
+     * @return a new BooleanListBuilder instance..
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}..
      */
     public static BooleanListBuilder of(final BooleanList val) throws IllegalArgumentException {
         return new BooleanListBuilder(val);
@@ -263,10 +274,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized CharListBuilder for the given CharList.
+     * This builder provides fluent methods for adding, removing, and modifying char elements.
      *
-     * @param val the CharList to wrap in a builder
-     * @return a new CharListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * CharList result = Builder.of(list)
+     *     .add('d')
+     *     .addAll(CharList.of('e', 'f'))
+     *     .remove('b')
+     *     .val();
+     * }</pre>
+     *
+     * @param val the CharList to wrap in a builder.
+     * @return a new CharListBuilder instance..
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}..
      */
     public static CharListBuilder of(final CharList val) throws IllegalArgumentException {
         return new CharListBuilder(val);
@@ -274,10 +296,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized ByteListBuilder for the given ByteList.
+     * This builder provides fluent methods for adding, removing, and modifying byte elements.
      *
-     * @param val the ByteList to wrap in a builder
-     * @return a new ByteListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+     * ByteList result = Builder.of(list)
+     *     .add((byte) 4)
+     *     .addAll(ByteList.of((byte) 5, (byte) 6))
+     *     .remove((byte) 2)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the ByteList to wrap in a builder.
+     * @return a new ByteListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static ByteListBuilder of(final ByteList val) throws IllegalArgumentException {
         return new ByteListBuilder(val);
@@ -285,10 +318,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized ShortListBuilder for the given ShortList.
+     * This builder provides fluent methods for adding, removing, and modifying short elements.
      *
-     * @param val the ShortList to wrap in a builder
-     * @return a new ShortListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
+     * ShortList result = Builder.of(list)
+     *     .add((short) 40)
+     *     .addAll(ShortList.of((short) 50, (short) 60))
+     *     .remove((short) 20)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the ShortList to wrap in a builder.
+     * @return a new ShortListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static ShortListBuilder of(final ShortList val) throws IllegalArgumentException {
         return new ShortListBuilder(val);
@@ -296,10 +340,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized IntListBuilder for the given IntList.
+     * This builder provides fluent methods for adding, removing, and modifying int elements.
      *
-     * @param val the IntList to wrap in a builder
-     * @return a new IntListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * IntList result = Builder.of(list)
+     *     .add(4)
+     *     .addAll(IntList.of(5, 6, 7))
+     *     .remove(2)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the IntList to wrap in a builder.
+     * @return a new IntListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static IntListBuilder of(final IntList val) throws IllegalArgumentException {
         return new IntListBuilder(val);
@@ -307,10 +362,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized LongListBuilder for the given LongList.
+     * This builder provides fluent methods for adding, removing, and modifying long elements.
      *
-     * @param val the LongList to wrap in a builder
-     * @return a new LongListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(100L, 200L, 300L);
+     * LongList result = Builder.of(list)
+     *     .add(400L)
+     *     .addAll(LongList.of(500L, 600L))
+     *     .remove(200L)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the LongList to wrap in a builder.
+     * @return a new LongListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static LongListBuilder of(final LongList val) throws IllegalArgumentException {
         return new LongListBuilder(val);
@@ -318,10 +384,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized FloatListBuilder for the given FloatList.
+     * This builder provides fluent methods for adding, removing, and modifying float elements.
      *
-     * @param val the FloatList to wrap in a builder
-     * @return a new FloatListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f);
+     * FloatList result = Builder.of(list)
+     *     .add(4.5f)
+     *     .addAll(FloatList.of(5.5f, 6.5f))
+     *     .remove(2.5f)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the FloatList to wrap in a builder.
+     * @return a new FloatListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static FloatListBuilder of(final FloatList val) throws IllegalArgumentException {
         return new FloatListBuilder(val);
@@ -329,10 +406,21 @@ public class Builder<T> {
 
     /**
      * Creates a specialized DoubleListBuilder for the given DoubleList.
+     * This builder provides fluent methods for adding, removing, and modifying double elements.
      *
-     * @param val the DoubleList to wrap in a builder
-     * @return a new DoubleListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * DoubleList result = Builder.of(list)
+     *     .add(4.0)
+     *     .addAll(DoubleList.of(5.0, 6.0))
+     *     .remove(2.0)
+     *     .val();
+     * }</pre>
+     *
+     * @param val the DoubleList to wrap in a builder.
+     * @return a new DoubleListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static DoubleListBuilder of(final DoubleList val) throws IllegalArgumentException {
         return new DoubleListBuilder(val);
@@ -340,12 +428,25 @@ public class Builder<T> {
 
     /**
      * Creates a specialized ListBuilder for the given List.
+     * This builder provides fluent methods for adding, removing, and modifying elements with
+     * support for indexed operations.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = new ArrayList<>();
+     * List<String> result = Builder.of(list)
+     *     .add("Alice")
+     *     .add("Bob")
+     *     .addAll(Arrays.asList("Charlie", "David"))
+     *     .remove("Bob")
+     *     .val();
+     * }</pre>
      *
      * @param <T> the element type of the list
      * @param <L> the list type
      * @param val the List to wrap in a builder
-     * @return a new ListBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new ListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static <T, L extends List<T>> ListBuilder<T, L> of(final L val) throws IllegalArgumentException {
         return new ListBuilder<>(val);
@@ -353,12 +454,24 @@ public class Builder<T> {
 
     /**
      * Creates a specialized CollectionBuilder for the given Collection.
+     * This builder provides fluent methods for adding and removing elements from any collection type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = new HashSet<>();
+     * Set<String> result = Builder.of(set)
+     *     .add("apple")
+     *     .add("banana")
+     *     .addAll(Arrays.asList("cherry", "date"))
+     *     .remove("banana")
+     *     .val();
+     * }</pre>
      *
      * @param <T> the element type of the collection
      * @param <C> the collection type
      * @param val the Collection to wrap in a builder
-     * @return a new CollectionBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new CollectionBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static <T, C extends Collection<T>> CollectionBuilder<T, C> of(final C val) throws IllegalArgumentException {
         return new CollectionBuilder<>(val);
@@ -366,13 +479,25 @@ public class Builder<T> {
 
     /**
      * Creates a specialized MapBuilder for the given Map.
+     * This builder provides fluent methods for adding, removing, and modifying key-value pairs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> result = Builder.of(map)
+     *     .put("Alice", 95)
+     *     .put("Bob", 87)
+     *     .putAll(Map.of("Charlie", 92, "David", 88))
+     *     .remove("Bob")
+     *     .val();
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <M> the map type
      * @param val the Map to wrap in a builder
-     * @return a new MapBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new MapBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(final M val) throws IllegalArgumentException {
         return new MapBuilder<>(val);
@@ -380,11 +505,23 @@ public class Builder<T> {
 
     /**
      * Creates a specialized MultisetBuilder for the given Multiset.
+     * This builder provides fluent methods for managing element occurrences in a multiset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = new Multiset<>();
+     * Multiset<String> result = Builder.of(multiset)
+     *     .add("apple")
+     *     .add("apple", 2)
+     *     .setCount("banana", 3)
+     *     .remove("apple")
+     *     .val();
+     * }</pre>
      *
      * @param <T> the element type of the multiset
      * @param val the Multiset to wrap in a builder
-     * @return a new MultisetBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new MultisetBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static <T> MultisetBuilder<T> of(final Multiset<T> val) throws IllegalArgumentException {
         return new MultisetBuilder<>(val);
@@ -392,14 +529,26 @@ public class Builder<T> {
 
     /**
      * Creates a specialized MultimapBuilder for the given Multimap.
+     * This builder provides fluent methods for managing one-to-many key-value mappings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multimap<String, String> multimap = new ListMultimap<>();
+     * Multimap<String, String> result = Builder.of(multimap)
+     *     .put("fruits", "apple")
+     *     .put("fruits", "banana")
+     *     .putMany("colors", Arrays.asList("red", "blue"))
+     *     .removeOne("fruits", "apple")
+     *     .val();
+     * }</pre>
      *
      * @param <K> the key type
      * @param <E> the element type of the value collection
      * @param <V> the value collection type
      * @param <M> the multimap type
      * @param val the Multimap to wrap in a builder
-     * @return a new MultimapBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new MultimapBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(final M val) throws IllegalArgumentException {
         return new MultimapBuilder<>(val);
@@ -407,10 +556,22 @@ public class Builder<T> {
 
     /**
      * Creates a specialized DatasetBuilder for the given Dataset.
+     * This builder provides fluent methods for manipulating tabular data including adding/removing
+     * columns, renaming, filtering, and transforming data.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.empty();
+     * Dataset result = Builder.of(dataset)
+     *     .addColumn("name", Arrays.asList("Alice", "Bob", "Charlie"))
+     *     .addColumn("age", Arrays.asList(25, 30, 35))
+     *     .renameColumn("age", "years")
+     *     .val();
+     * }</pre>
      *
      * @param val the Dataset to wrap in a builder
-     * @return a new DatasetBuilder instance
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @return a new DatasetBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static DatasetBuilder of(final Dataset val) throws IllegalArgumentException {
         return new DatasetBuilder(val);
@@ -466,7 +627,7 @@ public class Builder<T> {
      * @param <T> the type of the value
      * @param val the value to wrap in a builder
      * @return an appropriate Builder instance for the given value
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static <T> Builder<T> of(final T val) throws IllegalArgumentException {
@@ -3598,7 +3759,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare("apple", "banana")
-         *     .result();  // returns negative value
+         *     .result();   // returns negative value
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3671,7 +3832,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareNullLess(null, "value")
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3707,7 +3868,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareNullBigger("value", null)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param <T> the type of objects being compared, must implement Comparable
@@ -3742,7 +3903,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareFalseLess(false, true)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first boolean value
@@ -3776,7 +3937,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compareTrueLess(true, false)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first boolean value
@@ -3803,7 +3964,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare('a', 'b')
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first char value
@@ -3830,7 +3991,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare((byte)10, (byte)20)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first byte value
@@ -3857,7 +4018,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare((short)100, (short)200)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first short value
@@ -3881,7 +4042,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(42, 100)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first int value
@@ -3908,7 +4069,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1000L, 2000L)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first long value
@@ -3941,7 +4102,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.5f, 2.5f)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first float value
@@ -3971,7 +4132,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.0001f, 1.0002f, 0.001f)
-         *     .result();  // returns 0 (considered equal)
+         *     .result();   // returns 0 (considered equal)
          * }</pre>
          *
          * @param left the first float to compare
@@ -4005,7 +4166,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.5, 2.5)
-         *     .result();  // returns -1
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first double value
@@ -4035,7 +4196,7 @@ public class Builder<T> {
          * <pre>{@code
          * ComparisonBuilder.create()
          *     .compare(1.00001, 1.00002, 0.0001)
-         *     .result();  // returns 0 (considered equal)
+         *     .result();   // returns 0 (considered equal)
          * }</pre>
          *
          * @param left the first double to compare
@@ -4137,7 +4298,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals("hello", "hello")
          *     .equals(null, null)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first object to compare, may be null
@@ -4199,7 +4360,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(true, true)
          *     .equals(false, false)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first boolean value
@@ -4227,7 +4388,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals('a', 'a')
          *     .equals('X', 'X')
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first char value
@@ -4254,7 +4415,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals((byte)10, (byte)10)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first byte value
@@ -4281,7 +4442,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals((short)100, (short)100)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first short value
@@ -4309,7 +4470,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(42, 42)
          *     .equals(100, 100)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first int value
@@ -4336,7 +4497,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1000L, 1000L)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first long value
@@ -4367,7 +4528,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(1.5f, 1.5f)
          *     .equals(Float.NaN, Float.NaN)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first float value
@@ -4397,7 +4558,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1.0001f, 1.0002f, 0.001f)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first float to compare
@@ -4429,7 +4590,7 @@ public class Builder<T> {
          * EquivalenceBuilder.create()
          *     .equals(1.5, 1.5)
          *     .equals(Double.NaN, Double.NaN)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first double value
@@ -4459,7 +4620,7 @@ public class Builder<T> {
          * <pre>{@code
          * EquivalenceBuilder.create()
          *     .equals(1.00001, 1.00002, 0.0001)
-         *     .result();  // returns true
+         *     .result();   // returns true
          * }</pre>
          *
          * @param left the first double to compare

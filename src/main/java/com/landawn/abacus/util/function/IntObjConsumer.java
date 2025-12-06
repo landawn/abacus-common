@@ -37,7 +37,7 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      * <pre>{@code
      * IntObjConsumer<StringBuilder> appender = (value, sb) -> sb.append(value);
      * StringBuilder sb = new StringBuilder("Value: ");
-     * appender.accept(42, sb);  // sb becomes "Value: 42"
+     * appender.accept(42, sb);   // sb becomes "Value: 42"
      * }</pre>
      *
      * @param i the {@code int} argument

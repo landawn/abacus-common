@@ -21,6 +21,10 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      */
     public static final String STRING_BUILDER = StringBuilder.class.getSimpleName();
 
+    /**
+     * Constructs a StringBuilderType instance.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     StringBuilderType() {
         super(STRING_BUILDER);
     }
@@ -28,7 +32,13 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     /**
      * Returns the Class object representing the StringBuilder type.
      *
-     * @return the Class object for StringBuilder
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuilder> type = TypeFactory.getType(StringBuilder.class);
+     * Class<StringBuilder> clazz = type.clazz();   // Returns StringBuilder.class
+     * }</pre>
+     *
+     * @return the Class object for StringBuilder.class
      */
     @Override
     public Class<StringBuilder> clazz() {
@@ -39,8 +49,15 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * Converts a StringBuilder object to its string representation.
      * This method returns the string content of the StringBuilder.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuilder> type = TypeFactory.getType(StringBuilder.class);
+     * StringBuilder sb = new StringBuilder("Hello World");
+     * String str = type.stringOf(sb);   // Returns "Hello World"
+     * }</pre>
+     *
      * @param x the StringBuilder object to convert
-          * @return the string representation of the StringBuilder's content, or {@code null} if x is null
+     * @return the string representation of the StringBuilder's content, or {@code null} if x is null
      */
     @Override
     public String stringOf(final StringBuilder x) {
@@ -51,8 +68,14 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * Creates a StringBuilder object from its string representation.
      * This method creates a new StringBuilder containing the provided string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuilder> type = TypeFactory.getType(StringBuilder.class);
+     * StringBuilder sb = type.valueOf("Hello World");   // Creates StringBuilder with "Hello World"
+     * }</pre>
+     *
      * @param str the string to convert to a StringBuilder
-          * @return a new StringBuilder containing the string content, or {@code null} if str is null
+     * @return a new StringBuilder containing the string content, or {@code null} if str is null
      */
     @Override
     public StringBuilder valueOf(final String str) {

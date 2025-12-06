@@ -26,8 +26,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedFloat ifloat = IndexedFloat.of(3.14f, 2);
- * System.out.println(ifloat.value());  // prints: 3.14
- * System.out.println(ifloat.index());  // prints: 2
+ * System.out.println(ifloat.value());   // prints: 3.14
+ * System.out.println(ifloat.index());   // prints: 2
  * }</pre>
  * 
  */
@@ -101,7 +101,7 @@ public final class IndexedFloat extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + (int) (value * 31); // NOSONAR
+        return (int) index + (int) (value * 31);   // NOSONAR
     }
 
     /**

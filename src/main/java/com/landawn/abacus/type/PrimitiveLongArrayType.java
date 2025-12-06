@@ -219,13 +219,16 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * CharacterWriter writer = new CharacterWriter();
+     * BufferedJSONWriter writer = new BufferedJSONWriter();
      * long[] arr = {5L, 10L, 15L};
      * type.writeCharacter(writer, arr, null);
-     * // Writes: [5, 10, 15]
+     * String result = writer.toString();
+     * // result: "[5, 10, 15]"
      *
-     * type.writeCharacter(writer, {@code null}, null);
-     * // Writes: null
+     * BufferedJSONWriter writer2 = new BufferedJSONWriter();
+     * type.writeCharacter(writer2, null, null);
+     * String result2 = writer2.toString();
+     * // result2: "null"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

@@ -33,16 +33,16 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortUnaryOperator identity = ShortUnaryOperator.identity();
-     * short result1 = identity.applyAsShort((short) 42);  // returns 42
+     * short result1 = identity.applyAsShort((short) 42);   // returns 42
      *
      * ShortUnaryOperator doubler = x -> (short) (x * 2);
-     * short result2 = doubler.applyAsShort((short) 21);  // returns 42
+     * short result2 = doubler.applyAsShort((short) 21);   // returns 42
      *
      * ShortUnaryOperator negate = x -> (short) -x;
-     * short result3 = negate.applyAsShort((short) 10);  // returns -10
+     * short result3 = negate.applyAsShort((short) 10);   // returns -10
      *
      * ShortUnaryOperator abs = x -> (short) Math.abs(x);
-     * short result4 = abs.applyAsShort((short) -25);  // returns 25
+     * short result4 = abs.applyAsShort((short) -25);   // returns 25
      * }</pre>
      *
      * @param operand the operand
@@ -56,7 +56,15 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * and then applies this operator to the result. If evaluation of either operator throws an
      * exception, it is relayed to the caller of the composed operator.
      *
-     * @param before the operator to apply before this operator is applied
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortUnaryOperator doubler = x -> (short) (x * 2);
+     * ShortUnaryOperator addTen = x -> (short) (x + 10);
+     * ShortUnaryOperator doubleThenAddTen = addTen.compose(doubler);
+     * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
+     * }</pre>
+     *
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
      *
      * @see #andThen(ShortUnaryOperator)
@@ -70,7 +78,15 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * the {@code after} operator to the result. If evaluation of either operator throws an exception,
      * it is relayed to the caller of the composed operator.
      *
-     * @param after the operator to apply after this operator is applied
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortUnaryOperator doubler = x -> (short) (x * 2);
+     * ShortUnaryOperator addTen = x -> (short) (x + 10);
+     * ShortUnaryOperator doubleThenAddTen = doubler.andThen(addTen);
+     * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
+     * }</pre>
+     *
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
      *
      * @see #compose(ShortUnaryOperator)
@@ -81,6 +97,15 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
 
     /**
      * Returns a unary operator that always returns its input argument.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortUnaryOperator identity = ShortUnaryOperator.identity();
+     * short result = identity.applyAsShort((short) 42);   // returns 42
+     *
+     * // Useful in stream operations or as a default operator
+     * ShortUnaryOperator op = condition ? doubler : ShortUnaryOperator.identity();
+     * }</pre>
      *
      * @return a unary operator that always returns its input argument
      */

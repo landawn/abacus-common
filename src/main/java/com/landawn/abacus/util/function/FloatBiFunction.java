@@ -52,7 +52,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiFunction<Float> average = (a, b) -> (a + b) / 2.0f;
-     * Float result = average.apply(10.0f, 20.0f);  // Returns 15.0f
+     * Float result = average.apply(10.0f, 20.0f);   // Returns 15.0f
      * }</pre>
      *
      * @param t the first float argument
@@ -81,7 +81,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * // Composed function that calculates hypotenuse and formats it
      * FloatBiFunction<String> hypotenuseWithFormat = hypotenuse.andThen(formatter);
      *
-     * String result = hypotenuseWithFormat.apply(3.0f, 4.0f);  // "Hypotenuse: 5.00"
+     * String result = hypotenuseWithFormat.apply(3.0f, 4.0f);   // "Hypotenuse: 5.00"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

@@ -64,8 +64,8 @@ public class ShortUnaryOperator2025Test extends TestBase {
         ShortUnaryOperator composed = multiplyByTwo.compose(addTen);
 
         // First adds 10, then multiplies by 2
-        assertEquals(30, composed.applyAsShort((short) 5)); // (5 + 10) * 2 = 30
-        assertEquals(20, composed.applyAsShort((short) 0)); // (0 + 10) * 2 = 20
+        assertEquals(30, composed.applyAsShort((short) 5));   // (5 + 10) * 2 = 30
+        assertEquals(20, composed.applyAsShort((short) 0));   // (0 + 10) * 2 = 20
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ShortUnaryOperator2025Test extends TestBase {
         ShortUnaryOperator composed = subtractFive.compose(multiplyByTwo).compose(addOne);
 
         // First adds 1, then multiplies by 2, then subtracts 5
-        assertEquals(7, composed.applyAsShort((short) 5)); // ((5 + 1) * 2) - 5 = 7
+        assertEquals(7, composed.applyAsShort((short) 5));   // ((5 + 1) * 2) - 5 = 7
     }
 
     @Test
@@ -88,8 +88,8 @@ public class ShortUnaryOperator2025Test extends TestBase {
         ShortUnaryOperator composed = addTen.andThen(multiplyByTwo);
 
         // First adds 10, then multiplies by 2
-        assertEquals(30, composed.applyAsShort((short) 5)); // (5 + 10) * 2 = 30
-        assertEquals(20, composed.applyAsShort((short) 0)); // (0 + 10) * 2 = 20
+        assertEquals(30, composed.applyAsShort((short) 5));   // (5 + 10) * 2 = 30
+        assertEquals(20, composed.applyAsShort((short) 0));   // (0 + 10) * 2 = 20
     }
 
     @Test
@@ -101,7 +101,7 @@ public class ShortUnaryOperator2025Test extends TestBase {
         ShortUnaryOperator composed = addOne.andThen(multiplyByTwo).andThen(subtractFive);
 
         // First adds 1, then multiplies by 2, then subtracts 5
-        assertEquals(7, composed.applyAsShort((short) 5)); // ((5 + 1) * 2) - 5 = 7
+        assertEquals(7, composed.applyAsShort((short) 5));   // ((5 + 1) * 2) - 5 = 7
     }
 
     @Test

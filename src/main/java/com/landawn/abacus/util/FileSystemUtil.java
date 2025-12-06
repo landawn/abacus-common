@@ -310,7 +310,7 @@ final class FileSystemUtil {
             }
         }
         // all lines are blank
-        throw new IOException("Command line 'dir /-c' did not return any info " + "for path '" + path + "'"); //NOSONAR
+        throw new IOException("Command line 'dir /-c' did not return any info " + "for path '" + path + "'");   //NOSONAR
     }
 
     /**
@@ -397,25 +397,25 @@ final class FileSystemUtil {
         final List<String> lines = performCommand(cmdAttrs, 3, timeout);
         if (lines.size() < 2) {
             // unknown problem, throw exception
-            throw new IOException("Command line '" + DF + "' did not return info as expected " + "for path '" + path + "'- response was " + lines); //NOSONAR
+            throw new IOException("Command line '" + DF + "' did not return info as expected " + "for path '" + path + "'- response was " + lines);   //NOSONAR
         }
-        final String line2 = lines.get(1); // the line we're interested in
+        final String line2 = lines.get(1);   // the line we're interested in
 
         // Now, we tokenize the string. The fourth element is what we want.
         StringTokenizer tok = new StringTokenizer(line2, " ");
         if (tok.countTokens() < 4) {
             // could be long Filesystem, thus data on third line
             if (tok.countTokens() == 1 && lines.size() >= 3) {
-                final String line3 = lines.get(2); // the line may be interested in
+                final String line3 = lines.get(2);   // the line may be interested in
                 tok = new StringTokenizer(line3, " ");
             } else {
-                throw new IOException("Command line '" + DF + "' did not return data as expected " + "for path '" + path + "'- check path is valid"); //NOSONAR
+                throw new IOException("Command line '" + DF + "' did not return data as expected " + "for path '" + path + "'- check path is valid");   //NOSONAR
             }
         } else {
-            tok.nextToken(); // Ignore Filesystem
+            tok.nextToken();   // Ignore Filesystem
         }
-        tok.nextToken(); // Ignore 1K-blocks
-        tok.nextToken(); // Ignore Used
+        tok.nextToken();   // Ignore 1K-blocks
+        tok.nextToken();   // Ignore Used
         final String freeSpace = tok.nextToken();
         return parseBytes(freeSpace, path);
     }

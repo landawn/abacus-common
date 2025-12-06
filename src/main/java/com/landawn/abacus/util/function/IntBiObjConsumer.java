@@ -34,6 +34,23 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
     /**
      * Performs this operation on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Setting a value in a map at a specific index
+     * IntBiObjConsumer<Map<String, String>, String> mapSetter =
+     *     (index, map, value) -> map.put("key" + index, value);
+     * Map<String, String> map = new HashMap<>();
+     * mapSetter.accept(1, map, "firstValue");   // map now contains {"key1": "firstValue"}
+     *
+     * // Updating a list element at an index
+     * IntBiObjConsumer<List<String>, String> listUpdater =
+     *     (index, list, value) -> {
+     *         if (index < list.size()) list.set(index, value);
+     *     };
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * listUpdater.accept(1, list, "updated");   // list is now ["a", "updated", "c"]
+     * }</pre>
+     *
      * @param i the {@code int} argument
      * @param t the first object argument
      * @param u the second object argument

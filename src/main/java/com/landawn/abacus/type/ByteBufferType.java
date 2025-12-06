@@ -114,6 +114,17 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Reads from position 0 to the current position of the buffer,
      * then resets the position back to its original value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBuffer buffer = ByteBuffer.allocate(10);
+     * buffer.put("Hello".getBytes());
+     * // buffer position is now 5
+     *
+     * byte[] data = ByteBufferType.byteArrayOf(buffer);
+     * // data: [72, 101, 108, 108, 111] (bytes for "Hello")
+     * // buffer position is still 5 after the call
+     * }</pre>
+     *
      * @param x the ByteBuffer to extract bytes from
      * @return a byte array containing the buffer's content from 0 to current position
      */
@@ -131,6 +142,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Creates a ByteBuffer from a byte array.
      * The resulting buffer wraps the input array with position set to the array length,
      * limit set to array length, and capacity equal to array length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = "Hello".getBytes();
+     * ByteBuffer buffer = ByteBufferType.valueOf(data);
+     * // buffer: ByteBuffer with capacity=5, position=5, limit=5
+     * // Wraps the data array
+     * }</pre>
      *
      * @param bytes the byte array to wrap in a ByteBuffer
      * @return a ByteBuffer wrapping the input array with position at the end

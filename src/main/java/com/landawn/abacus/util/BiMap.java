@@ -69,18 +69,18 @@ import com.landawn.abacus.annotation.Internal;
  * );
  *
  * // Forward lookup (key to value)
- * Integer aliceId = userIdMap.get("alice");  // 1001
+ * Integer aliceId = userIdMap.get("alice");   // 1001
  * 
  * // Reverse lookup (value to key)
- * String userName = userIdMap.getByValue(1002);  // "bob"
+ * String userName = userIdMap.getByValue(1002);   // "bob"
  *
  * // Inverse view with swapped keys and values
  * BiMap<Integer, String> idUserMap = userIdMap.inversed();
- * String user = idUserMap.get(1003);  // "charlie"
+ * String user = idUserMap.get(1003);   // "charlie"
  *
  * // Bijective constraint enforcement
- * userIdMap.put("david", 1001);  // Removes "alice" -> 1001 mapping
- * userIdMap.forcePut("eve", 1002);  // Forces mapping, removes conflicting entries
+ * userIdMap.put("david", 1001);   // Removes "alice" -> 1001 mapping
+ * userIdMap.forcePut("eve", 1002);   // Forces mapping, removes conflicting entries
  *
  * // Builder pattern for complex construction
  * BiMap<String, String> countryMap = BiMap.<String, String>builder()
@@ -226,7 +226,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>vs Google Guava BiMap:</b> Similar API with builder pattern and force operations</li>
  *   <li><b>vs Apache Commons BidiMap:</b> Type-safe generics and modern Java features</li>
  * </ul>
- *
+ * 
  * @param <K> the type of keys maintained by this BiMap
  * @param <V> the type of mapped values
  *
@@ -282,7 +282,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = new BiMap<>(100);  // Pre-size for 100 entries
+     * BiMap<String, Integer> map = new BiMap<>(100);   // Pre-size for 100 entries
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the BiMap
@@ -296,11 +296,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = new BiMap<>(100, 0.9f);  // Custom capacity and load factor
+     * BiMap<String, Integer> map = new BiMap<>(100, 0.9f);   // Custom capacity and load factor
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the BiMap
-     * @param loadFactor the load factor for the BiMap
+     * @param loadFactor the load factor of the BiMap
      */
     @SuppressWarnings("deprecation")
     public BiMap(final int initialCapacity, final float loadFactor) {
@@ -317,8 +317,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * // Uses LinkedHashMap for keys and TreeMap for values
      * }</pre>
      *
-     * @param keyMapType the Class object representing the type of the Map to be used for storing keys
-     * @param valueMapType the Class object representing the type of the Map to be used for storing values
+     * @param keyMapType the Class object representing the type of Map to be used for storing keys. Must not be {@code null}.
+     * @param valueMapType the Class object representing the type of Map to be used for storing values. Must not be {@code null}. 
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -349,8 +349,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Constructs a BiMap with the specified key and value maps.
      * This constructor allows the user to directly provide the underlying maps used to store keys and values.
      *
-     * @param keyMap The Map to be used for storing keys.
-     * @param valueMap The Map to be used for storing values.
+     * @param keyMap the Map to be used for storing keys.
+     * @param valueMap the Map to be used for storing values.
      */
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap) {
@@ -364,9 +364,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Constructs a BiMap with the specified key and value maps, and an inverse BiMap.
      * This constructor allows the user to provide the underlying maps used to store keys and values, as well as an inverse BiMap.
      *
-     * @param keyMap The Map to be used for storing keys.
-     * @param valueMap The Map to be used for storing values.
-     * @param inverse The inverse BiMap containing the same entries as this BiMap but with reversed keys and values.
+     * @param keyMap the Map to be used for storing keys.
+     * @param valueMap the Map to be used for storing values.
+     * @param inverse the inverse BiMap containing the same entries as this BiMap but with reversed keys and values.
      */
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap, BiMap<V, K> inverse) {
@@ -386,12 +386,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1);
      * }</pre>
      *
-     * @param <K> The type of the key.
-     * @param <V> The type of the value.
-     * @param k1 The key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the key in the BiMap.
-     * @return A BiMap containing the specified key-value pair.
-     * @throws IllegalArgumentException if the key or value is {@code null}
+     * @param <K> the type of the key.
+     * @param <V> the type of the value.
+     * @param k1 the key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the key in the BiMap.
+     * @return a BiMap containing the specified key-value pair.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> map = new BiMap<>(1);
@@ -410,14 +409,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> map = new BiMap<>(2);
@@ -437,16 +435,15 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3);
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> map = new BiMap<>(3);
@@ -467,18 +464,17 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4);
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> map = new BiMap<>(4);
@@ -500,20 +496,19 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4, "five", 5);
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -540,22 +535,21 @@ public final class BiMap<K, V> implements Map<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @param k6 The sixth key to be inserted into the BiMap.
-     * @param v6 The value to be associated with the sixth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @param k6 the sixth key to be inserted into the BiMap.
+     * @param v6 the value to be associated with the sixth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
@@ -584,24 +578,24 @@ public final class BiMap<K, V> implements Map<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @param k6 The sixth key to be inserted into the BiMap.
-     * @param v6 The value to be associated with the sixth key in the BiMap.
-     * @param k7 The seventh key to be inserted into the BiMap.
-     * @param v7 The value to be associated with the seventh key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @param k6 the sixth key to be inserted into the BiMap.
+     * @param v6 the value to be associated with the sixth key in the BiMap.
+     * @param k7 the seventh key to be inserted into the BiMap.
+     * @param v7 the value to be associated with the seventh key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
+     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -630,26 +624,26 @@ public final class BiMap<K, V> implements Map<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @param k6 The sixth key to be inserted into the BiMap.
-     * @param v6 The value to be associated with the sixth key in the BiMap.
-     * @param k7 The seventh key to be inserted into the BiMap.
-     * @param v7 The value to be associated with the seventh key in the BiMap.
-     * @param k8 The eighth key to be inserted into the BiMap.
-     * @param v8 The value to be associated with the eighth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @param k6 the sixth key to be inserted into the BiMap.
+     * @param v6 the value to be associated with the sixth key in the BiMap.
+     * @param k7 the seventh key to be inserted into the BiMap.
+     * @param v7 the value to be associated with the seventh key in the BiMap.
+     * @param k8 the eighth key to be inserted into the BiMap.
+     * @param v8 the value to be associated with the eighth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
+     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -680,28 +674,28 @@ public final class BiMap<K, V> implements Map<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @param k6 The sixth key to be inserted into the BiMap.
-     * @param v6 The value to be associated with the sixth key in the BiMap.
-     * @param k7 The seventh key to be inserted into the BiMap.
-     * @param v7 The value to be associated with the seventh key in the BiMap.
-     * @param k8 The eighth key to be inserted into the BiMap.
-     * @param v8 The value to be associated with the eighth key in the BiMap.
-     * @param k9 The ninth key to be inserted into the BiMap.
-     * @param v9 The value to be associated with the ninth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @param k6 the sixth key to be inserted into the BiMap.
+     * @param v6 the value to be associated with the sixth key in the BiMap.
+     * @param k7 the seventh key to be inserted into the BiMap.
+     * @param v7 the value to be associated with the seventh key in the BiMap.
+     * @param k8 the eighth key to be inserted into the BiMap.
+     * @param v8 the value to be associated with the eighth key in the BiMap.
+     * @param k9 the ninth key to be inserted into the BiMap.
+     * @param v9 the value to be associated with the ninth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
+     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -732,30 +726,30 @@ public final class BiMap<K, V> implements Map<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> The type of the keys.
-     * @param <V> The type of the values.
-     * @param k1 The first key to be inserted into the BiMap.
-     * @param v1 The value to be associated with the first key in the BiMap.
-     * @param k2 The second key to be inserted into the BiMap.
-     * @param v2 The value to be associated with the second key in the BiMap.
-     * @param k3 The third key to be inserted into the BiMap.
-     * @param v3 The value to be associated with the third key in the BiMap.
-     * @param k4 The fourth key to be inserted into the BiMap.
-     * @param v4 The value to be associated with the fourth key in the BiMap.
-     * @param k5 The fifth key to be inserted into the BiMap.
-     * @param v5 The value to be associated with the fifth key in the BiMap.
-     * @param k6 The sixth key to be inserted into the BiMap.
-     * @param v6 The value to be associated with the sixth key in the BiMap.
-     * @param k7 The seventh key to be inserted into the BiMap.
-     * @param v7 The value to be associated with the seventh key in the BiMap.
-     * @param k8 The eighth key to be inserted into the BiMap.
-     * @param v8 The value to be associated with the eighth key in the BiMap.
-     * @param k9 The ninth key to be inserted into the BiMap.
-     * @param v9 The value to be associated with the ninth key in the BiMap.
-     * @param k10 The tenth key to be inserted into the BiMap.
-     * @param v10 The value to be associated with the tenth key in the BiMap.
-     * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key to be inserted into the BiMap.
+     * @param v1 the value to be associated with the first key in the BiMap.
+     * @param k2 the second key to be inserted into the BiMap.
+     * @param v2 the value to be associated with the second key in the BiMap.
+     * @param k3 the third key to be inserted into the BiMap.
+     * @param v3 the value to be associated with the third key in the BiMap.
+     * @param k4 the fourth key to be inserted into the BiMap.
+     * @param v4 the value to be associated with the fourth key in the BiMap.
+     * @param k5 the fifth key to be inserted into the BiMap.
+     * @param v5 the value to be associated with the fifth key in the BiMap.
+     * @param k6 the sixth key to be inserted into the BiMap.
+     * @param v6 the value to be associated with the sixth key in the BiMap.
+     * @param k7 the seventh key to be inserted into the BiMap.
+     * @param v7 the value to be associated with the seventh key in the BiMap.
+     * @param k8 the eighth key to be inserted into the BiMap.
+     * @param v8 the value to be associated with the eighth key in the BiMap.
+     * @param k9 the ninth key to be inserted into the BiMap.
+     * @param v9 the value to be associated with the ninth key in the BiMap.
+     * @param k10 the tenth key to be inserted into the BiMap.
+     * @param v10 the value to be associated with the tenth key in the BiMap.
+     * @return a BiMap containing the specified key-value pairs.
+     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -787,11 +781,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> biMap = BiMap.copyOf(map);
      * }</pre>
      *
-     * @param <K> The type of the keys in the map.
-     * @param <V> The type of the values in the map.
-     * @param map The map whose entries are to be placed into the new BiMap.
-     * @return A new BiMap containing the same entries as the provided map.
-     * @throws IllegalArgumentException if any key or value in the map is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys in the map.
+     * @param <V> the type of the values in the map.
+     * @param map the map whose entries are to be placed into the new BiMap.
+     * @return a new BiMap containing the same entries as the provided map.
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         //noinspection rawtypes
@@ -809,10 +802,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * Integer value = map.get("one");  // returns 1
+     * Integer value = map.get("one");   // returns 1
      * }</pre>
      *
-     * @param key The key whose associated value is to be returned.
+     * @param key the key whose associated value is to be returned.
      * @return The value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key.
      */
     @Override
@@ -828,10 +821,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * String key = map.getByValue(1);  // returns "one"
+     * String key = map.getByValue(1);   // returns "one"
      * }</pre>
      *
-     * @param value The value whose associated key is to be returned.
+     * @param value the value whose associated key is to be returned.
      * @return The key to which the specified value is mapped, or {@code null} if this map contains no mapping for the value.
      */
     public K getByValue(final Object value) {
@@ -846,11 +839,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * String key = map.getByValueOrDefault(2, "unknown");  // returns "unknown"
+     * String key = map.getByValueOrDefault(2, "unknown");   // returns "unknown"
      * }</pre>
      *
-     * @param value The value whose associated key is to be returned.
-     * @param defaultValue The default key to be returned if the map contains no mapping for the value.
+     * @param value the value whose associated key is to be returned.
+     * @param defaultValue the default key to be returned if the map contains no mapping for the value.
      * @return The key to which the specified value is mapped, or the default key if this map contains no mapping for the value.
      */
     public K getByValueOrDefault(final Object value, final K defaultValue) {
@@ -880,14 +873,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * map.put("one", 2);        // replaces value for "one": "one" -> 2
      *
      * // This throws IllegalArgumentException because 2 is already mapped to "one"
-     * // map.put("two", 2);  // ERROR!
+     * // map.put("two", 2);   // ERROR!
      *
      * // Use forcePut to override the conflict
      * map.forcePut("two", 2);   // removes ("one", 2), adds ("two", 2)
      * }</pre>
      *
-     * @param key The key with which the specified value is to be associated.
-     * @param value The value to be associated with the specified key.
+     * @param key the key with which the specified value is to be associated.
+     * @param value the value to be associated with the specified key.
      * @return The previous value associated with the key, or {@code null} if there was no mapping for the key.
      * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event. To avoid this exception, call {@link #forcePut} instead.
      * @see #forcePut(Object, Object)
@@ -931,22 +924,21 @@ public final class BiMap<K, V> implements Map<K, V> {
      * map.put("two", 2);
      *
      * // Using put() would throw IllegalArgumentException here
-     * // map.put("three", 1);  // ERROR: value 1 already exists!
+     * // map.put("three", 1);   // ERROR: value 1 already exists!
      *
      * // forcePut() removes conflicting entry and adds new one
-     * map.forcePut("three", 1);  // removes ("one", 1), adds ("three", 1)
+     * map.forcePut("three", 1);   // removes ("one", 1), adds ("three", 1)
      * // Result: {"two"=2, "three"=1}
      *
      * // Force put with both key and value existing elsewhere
      * map.put("four", 4);
-     * map.forcePut("three", 4);  // removes ("three", 1) and ("four", 4), adds ("three", 4)
+     * map.forcePut("three", 4);   // removes ("three", 1) and ("four", 4), adds ("three", 4)
      * // Result: {"two"=2, "three"=4}
      * }</pre>
      *
-     * @param key the key with which the specified value is to be associated
-     * @param value the value to be associated with the specified key
-     * @return the previous value associated with the key, or {@code null} if there was no mapping for the key.
-     * @throws IllegalArgumentException if the key or value is {@code null}
+     * @param key the key with which the specified value is to be associated.
+     * @param value the value to be associated with the specified key. 
+     * @return the previous value associated with the key, or {@code null} if there was no mapping for the key. 
      * @see #put(Object, Object)
      */
     public V forcePut(final K key, final V value) {
@@ -993,7 +985,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * biMap.putAll(map);
      * }</pre>
      *
-     * @param m The map whose entries are to be added to this BiMap.
+     * @param m the map whose entries are to be added to this BiMap.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
      * @see #put(Object, Object)
      */
@@ -1011,10 +1003,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * Integer value = map.remove("one");  // returns 1, removes mapping
+     * Integer value = map.remove("one");   // returns 1, removes mapping
      * }</pre>
      *
-     * @param key The key whose mapping is to be removed from the BiMap.
+     * @param key the key whose mapping is to be removed from the BiMap.
      * @return The previous value associated with the key, or {@code null} if there was no mapping for the key.
      */
     @Override
@@ -1036,10 +1028,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * String key = map.removeByValue(1);  // returns "one", removes mapping
+     * String key = map.removeByValue(1);   // returns "one", removes mapping
      * }</pre>
      *
-     * @param value The value whose mapping is to be removed from the BiMap.
+     * @param value the value whose mapping is to be removed from the BiMap.
      * @return The key associated with the value, or {@code null} if there was no mapping for the value.
      */
     public K removeByValue(final Object value) {
@@ -1059,10 +1051,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * boolean exists = map.containsKey("one");  // returns true
+     * boolean exists = map.containsKey("one");   // returns true
      * }</pre>
      *
-     * @param key The key whose presence in this BiMap is to be tested.
+     * @param key the key whose presence in this BiMap is to be tested.
      * @return {@code true} if this BiMap contains a mapping for the specified key, {@code false} otherwise.
      */
     @Override
@@ -1077,10 +1069,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * boolean exists = map.containsValue(1);  // returns true
+     * boolean exists = map.containsValue(1);   // returns true
      * }</pre>
      *
-     * @param value The value whose presence in this BiMap is to be tested.
+     * @param value the value whose presence in this BiMap is to be tested.
      * @return {@code true} if this BiMap contains a mapping for the specified value, {@code false} otherwise.
      */
     @Override
@@ -1097,7 +1089,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * Set<String> keys = map.keySet();  // returns ["one", "two"]
+     * Set<String> keys = map.keySet();   // returns ["one", "two"]
      * }</pre>
      *
      * @return An immutable set of the keys contained in this BiMap.
@@ -1116,7 +1108,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * Set<Integer> values = map.values();  // returns [1, 2]
+     * Set<Integer> values = map.values();   // returns [1, 2]
      * }</pre>
      *
      * @return An immutable set of the values contained in this BiMap.
@@ -1176,7 +1168,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
      * BiMap<Integer, String> inverse = map.inversed();
-     * String key = inverse.get(1);  // returns "one"
+     * String key = inverse.get(1);   // returns "one"
      * }</pre>
      *
      * @return The inverse view of this BiMap where keys and values are swapped.
@@ -1197,7 +1189,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> copy = original.copy();
      * }</pre>
      *
-     * @return A new BiMap containing the same entries as the current BiMap.
+     * @return a new BiMap containing the same entries as the current BiMap.
      */
     public BiMap<K, V> copy() {
         final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
@@ -1216,7 +1208,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
      * map.clear();
-     * map.isEmpty();  // returns true
+     * map.isEmpty();   // returns true
      * }</pre>
      */
     @Override
@@ -1231,10 +1223,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = new BiMap<>();
-     * boolean empty = map.isEmpty();  // returns true
+     * boolean empty = map.isEmpty();   // returns true
      * }</pre>
      *
-     * @return {@code true} if this BiMap contains no entries, {@code false} otherwise
+     * @return {@code true} if this BiMap contains no key-value mappings, {@code false} otherwise.
      */
     @Override
     public boolean isEmpty() {
@@ -1248,10 +1240,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * int count = map.size();  // returns 2
+     * int count = map.size();   // returns 2
      * }</pre>
-     *
-     * @return the number of key-value mappings in this BiMap
+     * 
+     * @return the number of key-value mappings in this BiMap.
      */
     @Override
     public int size() {
@@ -1279,8 +1271,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Returns {@code true} if the given object is also a BiMap and the two BiMaps represent the same mappings.
      * Two BiMaps are considered equal if they have the same key-value mappings.
      *
-     * @param obj the object to be compared for equality with this BiMap
-     * @return {@code true} if the specified object is equal to this BiMap, {@code false} otherwise
+     * @param obj the object to be compared for equality with this BiMap.
+     * @return {@code true} if the specified object is equal to this BiMap, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -1315,9 +1307,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      *     .build();
      * }</pre>
      *
-     * @param <K> The type of the keys in the BiMap.
-     * @param <V> The type of the values in the BiMap.
-     * @return A new Builder instance for a BiMap.
+     * @param <K> the type of the keys in the BiMap.
+     * @param <V> the type of the values in the BiMap.
+     * @return a new Builder instance for a BiMap.
      */
     public static <K, V> Builder<K, V> builder() {
         return new Builder<>();
@@ -1335,11 +1327,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      *     .build();
      * }</pre>
      *
-     * @param <K> The type of the keys in the BiMap.
-     * @param <V> The type of the values in the BiMap.
-     * @param map The map whose entries are to be placed into the new BiMap.
-     * @return A new Builder instance for a BiMap with the specified map as its initial data.
-     * @throws IllegalArgumentException if the specified map is {@code null}, or if any key or value in the map is {@code null}, or if any value is duplicated
+     * @param <K> the type of the keys in the BiMap.
+     * @param <V> the type of the values in the BiMap.
+     * @param map the map whose entries are to be placed into the new BiMap.
+     * @return a new Builder instance for a BiMap with the specified map as its initial data.
+     *
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
@@ -1352,8 +1344,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * The Builder design pattern allows for the creation of complex objects step by step.
      * This Builder class provides methods to set the keys and values for the BiMap and build the BiMap when ready.
      *
-     * @param <K> The type of the keys in the BiMap.
-     * @param <V> The type of the values in the BiMap.
+     * @param <K> the type of the keys in the BiMap.
+     * @param <V> the type of the values in the BiMap.
      */
     public static final class Builder<K, V> {
         private final BiMap<K, V> biMap;
@@ -1378,8 +1370,8 @@ public final class BiMap<K, V> implements Map<K, V> {
          *     .build();
          * }</pre>
          *
-         * @param key The key with which the specified value is to be associated.
-         * @param value The value to be associated with the specified key.
+         * @param key the key with which the specified value is to be associated.
+         * @param value the value to be associated with the specified key.
          * @return This Builder instance to allow for chaining of calls to builder methods.
          * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event.
          * @see #forcePut(Object, Object)
@@ -1409,10 +1401,10 @@ public final class BiMap<K, V> implements Map<K, V> {
          *     .build();
          * }</pre>
          *
-         * @param key The key with which the specified value is to be associated.
-         * @param value The value to be associated with the specified key.
+         * @param key the key with which the specified value is to be associated.
+         * @param value the value to be associated with the specified key.
          * @return This Builder instance to allow for chaining of calls to builder methods.
-         * @throws IllegalArgumentException if the key or value is null
+         *
          * @see #put(Object, Object)
          */
         public Builder<K, V> forcePut(final K key, final V value) {
@@ -1434,7 +1426,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          *     .build();
          * }</pre>
          *
-         * @param m The map whose entries are to be added to this BiMap.
+         * @param m the map whose entries are to be added to this BiMap.
          * @return This Builder instance to allow for chaining of calls to builder methods.
          * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
          * @see #put(Object, Object)

@@ -43,7 +43,7 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * or performing calculations where the result is stored within the object.
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive double value if the operation cannot be completed
+     * @param value the second input argument, a primitive double value
      */
     @Override
     void accept(T t, double value);
@@ -69,7 +69,7 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * combined.accept(numbers, 3.14);
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjDoubleConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

@@ -25,16 +25,16 @@ package com.landawn.abacus.util.function;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NPredicate<Integer> allPositive = args -> {
-     *     for (Integer n : args) {
+ *     for (Integer n : args) {
  *         if (n <= 0) return false;
  *     }
  *     return true;
  * };
- * boolean result1 = allPositive.test(1, 2, 3, 4);  // returns true
- * boolean result2 = allPositive.test(1, -2, 3);  // returns false
+ * boolean result1 = allPositive.test(1, 2, 3, 4);   // returns true
+ * boolean result2 = allPositive.test(1, -2, 3);   // returns false
  *
  * NPredicate<String> anyEmpty = args -> {
-     *     for (String s : args) {
+ *     for (String s : args) {
  *         if (s.isEmpty()) return true;
  *     }
  *     return false;
@@ -88,7 +88,7 @@ public interface NPredicate<T> {
      *     return true;
      * };
      * NPredicate<Integer> notAllEven = allEven.negate();
-     * notAllEven.test(2, 4, 5);  // returns {@code true} (not all are even)
+     * notAllEven.test(2, 4, 5);   // returns {@code true} (not all are even)
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -124,7 +124,7 @@ public interface NPredicate<T> {
      *     return sum < 100;
      * };
      * NPredicate<Integer> combined = allPositive.and(sumLessThan100);
-     * combined.test(10, 20, 30);  // returns {@code true} (all positive AND sum < 100)
+     * combined.test(10, 20, 30);   // returns {@code true} (all positive AND sum < 100)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -161,7 +161,7 @@ public interface NPredicate<T> {
      *     return false;
      * };
      * NPredicate<String> anyInvalid = anyEmpty.or(anyNull);
-     * anyInvalid.test("hello", "", "world");  // returns {@code true} (one is empty)
+     * anyInvalid.test("hello", "", "world");   // returns {@code true} (one is empty)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

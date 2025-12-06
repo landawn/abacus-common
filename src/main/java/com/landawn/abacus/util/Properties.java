@@ -56,6 +56,8 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Constructs an empty Properties instance with a LinkedHashMap as the underlying map.
      * The LinkedHashMap preserves the insertion order of properties.
+     *
+     * @see #create(Map)
      */
     public Properties() {
         this(new LinkedHashMap<>());
@@ -93,7 +95,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
-     * Object name = props.get("name");  // Returns "John"
+     * Object name = props.get("name");   // Returns "John"
      * }</pre>
      *
      * @param propName the name of the property whose associated value is to be returned
@@ -231,7 +233,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Integer> props = new Properties<>();
      * props.put("count", 10);
-     * Integer old = props.put("count", 20);  // Returns 10
+     * Integer old = props.put("count", 20);   // Returns 10
      * }</pre>
      *
      * @param key the key with which the specified value is to be associated
@@ -257,7 +259,7 @@ public class Properties<K, V> implements Map<K, V> {
      * map.put("b", 2);
      * map.put("c", 3);
      * 
-     * props1.putAll(map);  // props1 now contains: a=1, b=2, c=3
+     * props1.putAll(map);   // props1 now contains: a=1, b=2, c=3
      * }</pre>
      *
      * @param m the mappings to be stored in this map
@@ -301,7 +303,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("temp", "value");
-     * Object removed = props.remove("temp");  // Returns "value"
+     * Object removed = props.remove("temp");   // Returns "value"
      * }</pre>
      *
      * @param key key whose mapping is to be removed from the map
@@ -426,7 +428,7 @@ public class Properties<K, V> implements Map<K, V> {
      * props.put("host", "localhost");
      * props.put("backup", "localhost");
      * 
-     * boolean hasLocalhost = props.containsValue("localhost");  // Returns true
+     * boolean hasLocalhost = props.containsValue("localhost");   // Returns true
      * }</pre>
      *
      * @param value value whose presence in this map is to be tested
@@ -446,7 +448,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
      * props.put("age", 30);
-     * Set<String> keys = props.keySet();  // Returns ["name", "age"]
+     * Set<String> keys = props.keySet();   // Returns ["name", "age"]
      * }</pre>
      *
      * @return a set view of the keys contained in this map
@@ -465,7 +467,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Integer> props = new Properties<>();
      * props.put("a", 1);
      * props.put("b", 2);
-     * Collection<Integer> vals = props.values();  // Returns [1, 2]
+     * Collection<Integer> vals = props.values();   // Returns [1, 2]
      * }</pre>
      *
      * @return a collection view of the values contained in this map
@@ -502,10 +504,10 @@ public class Properties<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
-     * boolean empty1 = props.isEmpty();  // Returns true
+     * boolean empty1 = props.isEmpty();   // Returns true
      * 
      * props.put("key", "value");
-     * boolean empty2 = props.isEmpty();  // Returns false
+     * boolean empty2 = props.isEmpty();   // Returns false
      * }</pre>
      *
      * @return {@code true} if this map contains no key-value mappings
@@ -523,7 +525,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props = new Properties<>();
      * props.put("a", 1);
      * props.put("b", 2);
-     * int count = props.size();  // Returns 2
+     * int count = props.size();   // Returns 2
      * }</pre>
      *
      * @return the number of key-value mappings in this map
@@ -542,7 +544,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props = new Properties<>();
      * props.put("a", 1);
      * props.clear();
-     * boolean empty = props.isEmpty();  // Returns true
+     * boolean empty = props.isEmpty();   // Returns true
      * }</pre>
      */
     @Override
@@ -560,7 +562,7 @@ public class Properties<K, V> implements Map<K, V> {
      * original.put("key", "value");
      * 
      * Properties<String, Object> copy = original.copy();
-     * copy.put("key2", "value2");  // Doesn't affect original
+     * copy.put("key2", "value2");   // Doesn't affect original
      * }</pre>
      *
      * @return a shallow copy of this Properties instance
@@ -604,7 +606,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props2 = new Properties<>();
      * props2.put("key", "value");
      *
-     * boolean same = props1.equals(props2);  // Returns true
+     * boolean same = props1.equals(props2);   // Returns true
      * }</pre>
      *
      * @param obj object to be compared for equality with this Properties
@@ -624,7 +626,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
      * props.put("age", 30);
-     * String str = props.toString();  // Returns "{name=John, age=30}"
+     * String str = props.toString();   // Returns "{name=John, age=30}"
      * }</pre>
      *
      * @return a string representation of this Properties object

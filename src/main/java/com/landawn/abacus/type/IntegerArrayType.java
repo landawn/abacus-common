@@ -67,8 +67,8 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      * Parses a string representation into an Integer array.
      * The string should be in JSON array format. Handles the following cases:
-     * - {@code null} string: returns null
-     * - empty string or "[]": returns empty Integer array
+     * - {@code null}, empty, or blank string: returns null
+     * - "[]": returns empty Integer array
      * - JSON array: parses each element, treating "null" strings as {@code null} values
      *
      * <p><b>Usage Examples:</b></p>

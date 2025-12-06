@@ -26,6 +26,11 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = OptionalLong.class.getSimpleName();
 
+    /**
+     * Constructs a new OptionalLongType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected OptionalLongType() {
         super(OPTIONAL_LONG);
     }
@@ -203,6 +208,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * Connection connection = ...;  // obtained from database connection
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO transactions (id, user_id) VALUES (?, ?)");
      *
@@ -236,6 +242,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * Connection connection = ...;  // obtained from database connection
      * CallableStatement stmt = connection.prepareCall("{call update_user_id(?, ?)}");
      *
      * OptionalLong opt = OptionalLong.of(987654321L);

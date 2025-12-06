@@ -36,10 +36,20 @@ public class TimeType extends AbstractDateType<Time> {
      */
     public static final String TIME = Time.class.getSimpleName();
 
+    /**
+     * Constructs a TimeType instance with the default type name.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     TimeType() {
         super(TIME);
     }
 
+    /**
+     * Constructs a TimeType instance with the specified type name.
+     * This constructor is package-private and should only be called by TypeFactory or subclasses.
+     *
+     * @param typeName the name to use for this type
+     */
     TimeType(final String typeName) {
         super(typeName);
     }
@@ -58,6 +68,14 @@ public class TimeType extends AbstractDateType<Time> {
      * Converts an object to a Time.
      * Supports conversion from Number (as milliseconds), java.util.Date, and String types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * Time time1 = type.valueOf(1609459200000L);   // From milliseconds
+     * Time time2 = type.valueOf(new Date());       // From Date
+     * Time time3 = type.valueOf("12:30:45");       // From String
+     * }</pre>
+     *
      * @param obj the object to convert
      * @return a Time object, or {@code null} if obj is null
      */
@@ -75,6 +93,14 @@ public class TimeType extends AbstractDateType<Time> {
     /**
      * Creates a Time from its string representation.
      * Supports parsing various time formats and the special value "sysTime" for current time.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * Time time1 = type.valueOf("12:30:45");
+     * Time time2 = type.valueOf("SYS_TIME");   // Returns current system time
+     * Time time3 = type.valueOf(null);         // Returns null
+     * }</pre>
      *
      * @param str the string to parse
      * @return a Time object, or {@code null} if str is empty
@@ -114,6 +140,17 @@ public class TimeType extends AbstractDateType<Time> {
     /**
      * Retrieves a Time value from the specified column in the ResultSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * try (ResultSet rs = stmt.executeQuery("SELECT start_time FROM events")) {
+     *     if (rs.next()) {
+     *         Time startTime = type.get(rs, 1);
+     *         System.out.println("Start time: " + startTime);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
      * @return a Time object, or {@code null} if the database value is null
@@ -139,6 +176,16 @@ public class TimeType extends AbstractDateType<Time> {
 
     /**
      * Sets a Time value at the specified parameter index in the PreparedStatement.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * Time startTime = Time.valueOf("09:00:00");
+     * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (start_time) VALUES (?)")) {
+     *     type.set(stmt, 1, startTime);
+     *     stmt.executeUpdate();
+     * }
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)

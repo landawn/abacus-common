@@ -26,6 +26,11 @@ import com.landawn.abacus.util.PrimitiveList;
  */
 public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractPrimitiveListType with the specified type name.
+     *
+     * @param typeName the name of the primitive list type (e.g., "IntList", "DoubleList", "BooleanList")
+     */
     protected AbstractPrimitiveListType(final String typeName) {
         super(typeName);
     }

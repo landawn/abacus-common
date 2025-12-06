@@ -88,7 +88,7 @@ public class AbstractPoolable2025Test extends TestBase {
         ActivityPrint secondCall = poolable.activityPrint();
 
         assertEquals(firstCall, secondCall);
-        assertTrue(firstCall == secondCall); // same instance
+        assertTrue(firstCall == secondCall);   // same instance
     }
 
     @Test

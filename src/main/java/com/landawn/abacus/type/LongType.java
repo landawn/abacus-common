@@ -26,8 +26,14 @@ import com.landawn.abacus.util.Numbers;
  */
 public final class LongType extends AbstractLongType {
 
+    /**
+     * The type name constant for Long type identification.
+     */
     public static final String LONG = Long.class.getSimpleName();
-
+    /**
+     * Package-private constructor for LongType.
+     * This constructor is called by the TypeFactory to create Long type instances.
+     */
     LongType() {
         super(LONG);
     }
@@ -62,7 +68,7 @@ public final class LongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
      * ResultSet rs = ...;  // from SQL query
-     * Long userId = type.get(rs, 1);  // retrieves Long from column 1
+     * Long userId = type.get(rs, 1);   // retrieves Long from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -93,7 +99,7 @@ public final class LongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
      * ResultSet rs = ...;  // from SQL query
-     * Long userId = type.get(rs, "user_id");  // retrieves Long from "user_id" column
+     * Long userId = type.get(rs, "user_id");   // retrieves Long from "user_id" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

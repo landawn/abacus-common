@@ -40,7 +40,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanTriPredicate allTrue = (a, b, c) -> a && b && c;
-     * boolean result = allTrue.test(true, true, false);  // Returns false
+     * boolean result = allTrue.test(true, true, false);   // Returns false
      * }</pre>
      *
      * @param a the first input argument

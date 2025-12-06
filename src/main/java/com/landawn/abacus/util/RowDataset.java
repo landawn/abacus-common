@@ -423,7 +423,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
-        return _columnIndexMap.containsKey(columnName); // || _columnIndexMap.containsKey(NameUtil.getSimpleName(columnName));
+        return _columnIndexMap.containsKey(columnName);   // || _columnIndexMap.containsKey(NameUtil.getSimpleName(columnName));
     }
 
     @Override
@@ -3212,14 +3212,14 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         if (propInfo == null) {
-            propInfo = beanInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
+            propInfo = beanInfo.getPropInfo(prefix + "s");   // Trying to do something smart?
             final int len = prefix.length() + 1;
 
             if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean()))
                     && N.noneMatch(_columnNameList, it -> it.length() > len && it.charAt(len) == '.' && Strings.startsWithIgnoreCase(it, prefix + "s."))) {
                 // good
             } else {
-                propInfo = beanInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
+                propInfo = beanInfo.getPropInfo(prefix + "es");   // Trying to do something smart?
                 final int len2 = prefix.length() + 2;
 
                 if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean())) && N
@@ -4145,7 +4145,7 @@ public final class RowDataset implements Dataset, Cloneable {
         Writer writer = null;
 
         try {
-            writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
+            writer = IOUtil.newOutputStreamWriter(output);   // NOSONAR
 
             toCsv(fromRowIndex, toRowIndex, columnNames, writer);
 
@@ -6432,7 +6432,7 @@ public final class RowDataset implements Dataset, Cloneable {
         //    if (kryoParser != null) {
         //        dataset = kryoParser.clone(this);
         //    } else {
-        //        dataset = jsonParser.deserialize(jsonParser.serialize(this), RowDataset.class); // column type could be different by json Serialization/Deserialization
+        //        dataset = jsonParser.deserialize(jsonParser.serialize(this), RowDataset.class);   // column type could be different by json Serialization/Deserialization
         //    }
 
         final RowDataset dataset = kryoParser.clone(this);
@@ -9265,12 +9265,12 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public void println(final int fromRowIndex, final int toRowIndex) {
-        println(fromRowIndex, toRowIndex, _columnNameList); // NOSONAR
+        println(fromRowIndex, toRowIndex, _columnNameList);   // NOSONAR
     }
 
     @Override
     public void println(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        println(fromRowIndex, toRowIndex, columnNames, System.out); // NOSONAR
+        println(fromRowIndex, toRowIndex, columnNames, System.out);   // NOSONAR
     }
 
     @Override
@@ -9537,7 +9537,7 @@ public final class RowDataset implements Dataset, Cloneable {
         //    private int currentPageNum;
 
         private PaginatedDataset(final Collection<String> columnNames, final int pageSize) {
-            // N.checkArgNotEmpty(columnNames, "columnNames"); // empty Dataset.
+            // N.checkArgNotEmpty(columnNames, "columnNames");   // empty Dataset.
             N.checkArgPositive(pageSize, cs.pageSize);
 
             this.columnNames = columnNames;

@@ -49,7 +49,7 @@ import com.landawn.abacus.util.WD;
  * Type<List<String>> listType = TypeFactory.getType("List<String>");
  *
  * // Serialize collection to string
- * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+ * List<String> names = N.asList("Alice", "Bob", "Charlie");
  * String json = listType.stringOf(names);
  * // Result: ["Alice","Bob","Charlie"]
  *
@@ -59,7 +59,10 @@ import com.landawn.abacus.util.WD;
  *
  * // Works with complex element types
  * Type<Set<Integer>> setType = TypeFactory.getType("Set<Integer>");
- * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
+ * Set<Integer> numbers = new HashSet<>();
+ * numbers.add(1);
+ * numbers.add(2);
+ * numbers.add(3);
  * String setJson = setType.stringOf(numbers);
  * }</pre>
  *
@@ -313,7 +316,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
@@ -406,6 +409,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Generates a type name string for a collection type with the specified element type.
      * The format depends on whether a declaring name (simplified) or full name is requested.
+     * This is an internal method used by the type system.
      *
      * @param typeClass the collection class
      * @param parameterTypeName the name of the element type

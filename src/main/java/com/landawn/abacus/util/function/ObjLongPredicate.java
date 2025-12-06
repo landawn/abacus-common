@@ -48,15 +48,14 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * ObjLongPredicate<List<Integer>> hasSizeAbove = (list, minSize) ->
      *     list.size() >= minSize;
      *
-     * boolean isLong = isLengthAbove.test("Hello World", 5L);  // Returns true
+     * boolean isLong = isLengthAbove.test("Hello World", 5L);   // Returns true
      * List<Integer> numbers = List.of(1, 2, 3);
-     * boolean isBig = hasSizeAbove.test(numbers, 2L);  // Returns true
+     * boolean isBig = hasSizeAbove.test(numbers, 2L);   // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive long value
-     * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(T t, long u);
@@ -103,7 +102,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *     hasId.and(isActive);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      */
@@ -132,7 +131,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *     isExpired.or(isInvalid);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      */

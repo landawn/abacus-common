@@ -38,6 +38,16 @@ public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, Runt
      * <p>The function implementation should define how the three float arguments
      * are processed to produce the result.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriFunction<String> formatter = (a, b, c) ->
+     *     String.format("%.2f, %.2f, %.2f", a, b, c);
+     * String result = formatter.apply(1.5f, 2.5f, 3.5f); // Returns "1.50, 2.50, 3.50"
+     *
+     * FloatTriFunction<Float> sum = (a, b, c) -> a + b + c;
+     * Float total = sum.apply(1.0f, 2.0f, 3.0f); // Returns 6.0
+     * }</pre>
+     *
      * @param a the first float function argument
      * @param b the second float function argument
      * @param c the third float function argument

@@ -78,32 +78,32 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <pre>{@code
  * // Creating and initializing double lists
  * DoubleList prices = DoubleList.of(100.50, 101.25, 99.75, 102.10);
- * DoubleList range = DoubleList.range(0.0, 10.0, 0.1);  // [0.0, 0.1, 0.2, ..., 9.9]
- * DoubleList measurements = new DoubleList(10000);  // Pre-sized for large dataset
- * DoubleList random = DoubleList.random(0.0, 1.0, 1000);  // 1000 random doubles [0.0, 1.0)
+ * DoubleList range = DoubleList.range(0.0, 10.0, 0.1);   // [0.0, 0.1, 0.2, ..., 9.9]
+ * DoubleList measurements = new DoubleList(10000);   // Pre-sized for large dataset
+ * DoubleList random = DoubleList.random(0.0, 1.0, 1000);   // 1000 random doubles [0.0, 1.0)
  *
  * // Basic operations
- * prices.add(103.45);  // Append double value
- * double firstPrice = prices.get(0);  // Access by index: 100.50
- * prices.set(1, 101.50);  // Modify existing value
+ * prices.add(103.45);   // Append double value
+ * double firstPrice = prices.get(0);   // Access by index: 100.50
+ * prices.set(1, 101.50);   // Modify existing value
  *
  * // Mathematical operations for high-precision data
- * OptionalDouble min = prices.min();  // Find minimum value
- * OptionalDouble max = prices.max();  // Find maximum value
- * OptionalDouble median = prices.median();  // Calculate median value
- * double sum = prices.stream().sum();  // Calculate sum
- * double average = prices.stream().average().orElse(0.0);  // Calculate average
+ * OptionalDouble min = prices.min();   // Find minimum value
+ * OptionalDouble max = prices.max();   // Find maximum value
+ * OptionalDouble median = prices.median();   // Calculate median value
+ * double sum = prices.stream().sum();   // Calculate sum
+ * double average = prices.stream().average().orElse(0.0);   // Calculate average
  *
  * // Set operations for data analysis
  * DoubleList set1 = DoubleList.of(1.0, 2.5, 3.7, 4.2);
  * DoubleList set2 = DoubleList.of(3.7, 4.2, 5.1, 6.8);
- * DoubleList intersection = set1.intersection(set2);  // [3.7, 4.2]
- * DoubleList difference = set1.difference(set2);  // [1.0, 2.5]
+ * DoubleList intersection = set1.intersection(set2);   // [3.7, 4.2]
+ * DoubleList difference = set1.difference(set2);   // [1.0, 2.5]
  *
  * // High-performance sorting and searching
- * prices.sort();  // Sort in ascending order
- * prices.parallelSort();  // Parallel sort for large datasets
- * int index = prices.binarySearch(101.25);  // Fast lookup
+ * prices.sort();   // Sort in ascending order
+ * prices.parallelSort();   // Parallel sort for large datasets
+ * int index = prices.binarySearch(101.25);   // Fast lookup
  *
  * // Statistical and functional operations
  * DoubleList returns = prices.stream()                     // Calculate returns
@@ -115,8 +115,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * FloatList floatValues = prices.stream()                  // Convert to float (precision loss)
  *     .mapToFloat(d -> (float) d)
  *     .collect(FloatList::new, FloatList::add, FloatList::addAll);
- * double[] primitiveArray = prices.toArray();  // To primitive array
- * List<Double> boxedList = prices.boxed();  // To boxed collection
+ * double[] primitiveArray = prices.toArray();   // To primitive array
+ * List<Double> boxedList = prices.boxed();   // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -629,7 +629,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -677,7 +677,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -1029,7 +1029,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p><b>Usage Examples:</b></p> 
      * <pre>{@code
      * DoubleList list = DoubleList.of(0, 1, 2, 3, 4, 5);
-     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
+     * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
      * }</pre>
      *
@@ -1369,12 +1369,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 2.0, 2.0, 4.0);
-     * DoubleList result = list1.intersection(list2);  // result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(list2);   // result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both lists) and one occurrence of '2.0'
      *
      * DoubleList list3 = DoubleList.of(5.0, 5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 7.0);
-     * DoubleList result2 = list3.intersection(list4);  // result will be [5.0]
+     * DoubleList result2 = list3.intersection(list4);   // result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both lists)
      * }</pre>
      *
@@ -1416,12 +1416,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 2.0, 2.0, 4.0};
-     * DoubleList result = list1.intersection(array);  // result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(array);   // result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both sources) and one occurrence of '2.0'
      *
      * DoubleList list2 = DoubleList.of(5.0, 5.0, 6.0);
      * double[] array2 = new double[] {5.0, 7.0};
-     * DoubleList result2 = list2.intersection(array2);  // result will be [5.0]
+     * DoubleList result2 = list2.intersection(array2);   // result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both sources)
      * }</pre>
      *
@@ -1454,12 +1454,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 4.0);
-     * DoubleList result = list1.difference(list2);  // result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(list2);   // result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and list2 has one
      *
      * DoubleList list3 = DoubleList.of(5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 5.0, 6.0);
-     * DoubleList result2 = list3.difference(list4);  // result will be [] (empty)
+     * DoubleList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1501,12 +1501,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 4.0};
-     * DoubleList result = list1.difference(array);  // result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(array);   // result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and array has one
      *
      * DoubleList list2 = DoubleList.of(5.0, 6.0);
      * double[] array2 = new double[] {5.0, 5.0, 6.0};
-     * DoubleList result2 = list2.difference(array2);  // result will be [] (empty)
+     * DoubleList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -2312,6 +2312,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return size == 0;
     }
 
+    /**
+     * Returns the number of elements in this list.
+     *
+     * @return the number of elements in this list
+     */
     @Override
     public int size() {
         return size;

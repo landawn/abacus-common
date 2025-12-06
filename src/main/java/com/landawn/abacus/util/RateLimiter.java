@@ -49,10 +49,10 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *  final RateLimiter rateLimiter = RateLimiter.create(2.0);  // rate is "2 permits per second"
+ *  final RateLimiter rateLimiter = RateLimiter.create(2.0);   // rate is "2 permits per second"
  *  void submitTasks(List<Runnable> tasks, Executor executor) {
  *    for (Runnable task : tasks) {
- *      rateLimiter.acquire();  // may wait
+ *      rateLimiter.acquire();   // may wait
  *      executor.execute(task);
  *    }
  *  }}</pre>
@@ -60,7 +60,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * <p>As another example, imagine that we produce a stream of data, and we want to cap it at 5kb per
  * second. This could be accomplished by requiring a permit per byte, and specifying a rate of 5000
  * permits per second: <pre>   {@code
- *  final RateLimiter rateLimiter = RateLimiter.create(5000.0);  // rate = 5000 permits per second
+ *  final RateLimiter rateLimiter = RateLimiter.create(5000.0);   // rate = 5000 permits per second
  *  void submitPacket(byte[] packet) {
  *    rateLimiter.acquire(packet.length);
  *    networkService.send(packet);
@@ -170,7 +170,7 @@ public abstract class RateLimiter {
      * <pre>{@code
      * // Create a rate limiter with 10 permits/sec and 3 second warmup
      * RateLimiter limiter = RateLimiter.create(10.0, 3, TimeUnit.SECONDS);
-     * limiter.acquire();  // Initial requests will be slower during warmup
+     * limiter.acquire();   // Initial requests will be slower during warmup
      * }</pre>
      *
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
@@ -251,7 +251,7 @@ public abstract class RateLimiter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0);
-     * limiter.setRate(10.0);  // Increase rate to 10 permits/second
+     * limiter.setRate(10.0);   // Increase rate to 10 permits/second
      * }</pre>
      *
      * @param permitsPerSecond the new stable rate of this {@code RateLimiter}, must be positive and not NaN
@@ -299,7 +299,7 @@ public abstract class RateLimiter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0);
-     * double currentRate = limiter.getRate();  // Returns 5.0
+     * double currentRate = limiter.getRate();   // Returns 5.0
      * }</pre>
      *
      * @return the current stable rate in permits per second
@@ -658,10 +658,29 @@ public abstract class RateLimiter {
         protected SleepingStopwatch() {
         }
 
-        /*
-         * We always hold the mutex when calling this. TODO(cpovirk): Is that important? Perhaps we need
-         * to guarantee that each call to reserveEarliestAvailable, etc. sees a value &gt;= the previous?
-         * Also, is it OK that we don't hold the mutex when sleeping?
+        /**
+         * Returns the elapsed time in microseconds since this stopwatch was created or started.
+         * This method is used by {@code RateLimiter} to track time for permit distribution and throttling.
+         *
+         * <p><b>Implementation Requirements:</b>
+         * <ul>
+         * <li>Implementations must return a monotonically increasing value representing elapsed time
+         *     in microseconds.</li>
+         * <li>The returned value should be consistent with the time base used for sleeping operations
+         *     in {@link #sleepMicrosUninterruptibly(long)}.</li>
+         * <li>This method is typically called while the {@code RateLimiter} holds its internal mutex,
+         *     but implementations should not rely on external synchronization.</li>
+         * <li>The implementation should be efficient and non-blocking, as it is called frequently
+         *     during rate limiter operations.</li>
+         * </ul>
+         *
+         * <p><i>Note:</i> We always hold the mutex when calling this. TODO(cpovirk): Is that important?
+         * Perhaps we need to guarantee that each call to reserveEarliestAvailable, etc. sees a value
+         * &gt;= the previous? Also, is it OK that we don't hold the mutex when sleeping?
+         *
+         * @return the elapsed time in microseconds, must be monotonically increasing
+         * @see #sleepMicrosUninterruptibly(long)
+         * @see RateLimiter
          */
         protected abstract long readMicros();
 

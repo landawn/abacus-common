@@ -1223,7 +1223,7 @@ public final class XmlMappers {
      * 
      * // Use the wrapped mapper for multiple operations
      * String xml1 = xmlMappers.toXml(object1);
-     * String xml2 = xmlMappers.toXml(object2, true);  // with pretty print
+     * String xml2 = xmlMappers.toXml(object2, true);   // with pretty print
      * Person person = xmlMappers.fromXml(xmlString, Person.class);
      * }</pre>
      */

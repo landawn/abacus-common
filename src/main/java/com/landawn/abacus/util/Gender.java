@@ -24,13 +24,13 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get gender from integer value
- * Gender gender = Gender.valueOf(1);  // Returns FEMALE
+ * Gender gender = Gender.valueOf(1);   // Returns FEMALE
  * 
  * // Get integer value from gender
- * int value = Gender.MALE.intValue();  // Returns 2
+ * int value = Gender.MALE.intValue();   // Returns 2
  * 
  * // Get integer value from gender
- * int value = Gender.X.intValue();  // Returns 3
+ * int value = Gender.X.intValue();   // Returns 3
  * 
  * // Use in switch statements
  * switch(gender) {

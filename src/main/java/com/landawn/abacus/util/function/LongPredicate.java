@@ -98,7 +98,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate isEven = value -> value % 2 == 0;
-     * boolean result = isEven.test(4L);  // Returns true
+     * boolean result = isEven.test(4L);   // Returns true
      * }</pre>
      *
      * @param value the input argument

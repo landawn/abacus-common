@@ -26,8 +26,14 @@ import com.landawn.abacus.util.Numbers;
  */
 public final class FloatType extends AbstractFloatType {
 
+    /**
+     * The type name constant for Float type identification.
+     */
     public static final String FLOAT = Float.class.getSimpleName();
-
+    /**
+     * Package-private constructor for FloatType.
+     * This constructor is called by the TypeFactory to create Float type instances.
+     */
     FloatType() {
         super(FLOAT);
     }
@@ -62,7 +68,7 @@ public final class FloatType extends AbstractFloatType {
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
      * ResultSet rs = ...;  // from SQL query
-     * Float temperature = type.get(rs, 1);  // retrieves Float from column 1
+     * Float temperature = type.get(rs, 1);   // retrieves Float from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -91,7 +97,7 @@ public final class FloatType extends AbstractFloatType {
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
      * ResultSet rs = ...;  // from SQL query
-     * Float temperature = type.get(rs, "temperature");  // retrieves Float from "temperature" column
+     * Float temperature = type.get(rs, "temperature");   // retrieves Float from "temperature" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

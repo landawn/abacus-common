@@ -26,6 +26,11 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
     public static final String OPTIONAL_FLOAT = OptionalFloat.class.getSimpleName();
 
+    /**
+     * Constructs a new OptionalFloatType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected OptionalFloatType() {
         super(OPTIONAL_FLOAT);
     }

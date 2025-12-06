@@ -57,7 +57,7 @@ public class LongTriFunction2025Test extends TestBase {
         final java.util.function.Function<String, Integer> toLength = String::length;
 
         final LongTriFunction<Integer> composed = function.andThen(toString).andThen(toLength);
-        final Integer result = composed.apply(2L, 3L, 4L); // 2*3*4 = 24, "24".length() = 2
+        final Integer result = composed.apply(2L, 3L, 4L);   // 2*3*4 = 24, "24".length() = 2
 
         assertEquals(2, result);
     }

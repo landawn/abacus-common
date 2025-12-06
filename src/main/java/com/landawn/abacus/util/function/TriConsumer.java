@@ -46,7 +46,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * TriConsumer<List<String>, String, Integer> listInserter =
      *     (list, element, index) -> list.add(index, element);
      * List<String> myList = new ArrayList<>(Arrays.asList("a", "b", "c"));
-     * listInserter.accept(myList, "x", 1);  // list becomes ["a", "x", "b", "c"]
+     * listInserter.accept(myList, "x", 1);   // list becomes ["a", "x", "b", "c"]
      * }</pre>
      *
      * @param a the first input argument

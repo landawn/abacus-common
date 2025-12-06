@@ -75,7 +75,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Constructs an ImmutableSet instance with the provided set.
      * This constructor determines if the set is already unmodifiable.
      *
-     * @param set the set of elements to be included in the ImmutableSet
+     * @param set the set of elements to be included in the ImmutableSet.
      */
     ImmutableSet(final Set<? extends E> set) {
         this(set, ClassUtil.isPossibleImmutable(set.getClass()));
@@ -85,8 +85,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Constructs an ImmutableSet instance with the provided set and unmodifiable flag.
      * If the set is not already unmodifiable, it will be wrapped in an unmodifiable view.
      *
-     * @param set the set of elements to be included in the ImmutableSet
-     * @param isUnmodifiable a boolean value indicating if the set is already unmodifiable
+     * @param set the set of elements to be included in the ImmutableSet.
+     * @param isUnmodifiable a boolean value indicating if the set is already unmodifiable.
      */
     ImmutableSet(final Set<? extends E> set, final boolean isUnmodifiable) {
         super(isUnmodifiable ? set : Collections.unmodifiableSet(set));
@@ -103,8 +103,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(empty.isEmpty());   // prints: true
      * }</pre>
      *
-     * @param <E> the type of elements in the set
-     * @return an empty ImmutableSet instance
+     * @param <E> the type of elements in the set.
+     * @return an empty ImmutableSet instance.
      */
     public static <E> ImmutableSet<E> empty() {
         return EMPTY;
@@ -122,9 +122,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(single.size());              // prints: 1
      * }</pre>
      *
-     * @param <E> the type of the element
-     * @param e the single element to be contained in the ImmutableSet
-     * @return an ImmutableSet containing only the specified element
+     * @param <E> the type of the element.
+     * @param e the single element to be contained in the ImmutableSet.
+     * @return an ImmutableSet containing only the specified element.
      */
     public static <E> ImmutableSet<E> just(final E e) {
         return new ImmutableSet<>(N.asLinkedHashSet(e), false);
@@ -138,12 +138,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Integer> single = ImmutableSet.of(42);
-     * // single.add(43);  // Would throw UnsupportedOperationException
+     * // single.add(43);   // Would throw UnsupportedOperationException
      * }</pre>
      *
-     * @param <E> the type of the element
-     * @param e1 the single element to be contained in the ImmutableSet
-     * @return an ImmutableSet containing only the specified element
+     * @param <E> the type of the element.
+     * @param e1 the single element to be contained in the ImmutableSet.
+     * @return an ImmutableSet containing only the specified element.
      */
     public static <E> ImmutableSet<E> of(final E e1) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1), false);
@@ -158,16 +158,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> pair = ImmutableSet.of("first", "second");
-     * System.out.println(pair.size());  // prints: 2
+     * System.out.println(pair.size());   // prints: 2
      *
      * ImmutableSet<String> duplicate = ImmutableSet.of("same", "same");
-     * System.out.println(duplicate.size());  // prints: 1
+     * System.out.println(duplicate.size());   // prints: 1
      * }</pre>
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @return an ImmutableSet containing the specified distinct elements
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2), false);
@@ -178,11 +178,17 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<String> trio = ImmutableSet.of("red", "green", "blue");
+     * System.out.println(trio.size());   // prints: 3
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3), false);
@@ -193,12 +199,18 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<Integer> numbers = ImmutableSet.of(1, 2, 3, 4);
+     * System.out.println(numbers.contains(3));   // prints: true
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4), false);
@@ -209,13 +221,19 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<String> days = ImmutableSet.of("Mon", "Tue", "Wed", "Thu", "Fri");
+     * System.out.println(days.size());   // prints: 5
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5), false);
@@ -226,14 +244,20 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<Integer> dice = ImmutableSet.of(1, 2, 3, 4, 5, 6);
+     * System.out.println(dice.size());   // prints: 6
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6), false);
@@ -244,15 +268,21 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<String> week = ImmutableSet.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun");
+     * System.out.println(week.size());   // prints: 7
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false);
@@ -263,16 +293,22 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<Integer> octave = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8);
+     * System.out.println(octave.size());   // prints: 8
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false);
@@ -283,17 +319,23 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @param e9 the ninth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<Integer> digits = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * System.out.println(digits.size());   // prints: 9
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @param e9 the ninth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
@@ -305,18 +347,24 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      * Unlike some set implementations, this method supports {@code null} elements.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @param e9 the ninth element
-     * @param e10 the tenth element
-     * @return an ImmutableSet containing the specified distinct elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<Integer> tenDigits = ImmutableSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * System.out.println(tenDigits.size());   // prints: 10
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @param e9 the ninth element.
+     * @param e10 the tenth element.
+     * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
@@ -335,12 +383,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <pre>{@code
      * String[] colors = {"red", "green", "blue", "red"};
      * ImmutableSet<String> colorSet = ImmutableSet.of(colors);
-     * System.out.println(colorSet.size());  // prints: 3 (duplicates removed)
+     * System.out.println(colorSet.size());   // prints: 3 (duplicates removed)
      * }</pre>
      *
-     * @param <E> the type of the elements
-     * @param a the array of elements to include in the ImmutableSet, may be {@code null} or empty
-     * @return an ImmutableSet containing all distinct elements from the array, or empty set if array is null/empty
+     * @param <E> the type of the elements.
+     * @param a the array of elements to include in the ImmutableSet, may be {@code null} or empty.
+     * @return an ImmutableSet containing all distinct elements from the array, or empty set if array is null/empty.
      * @see Set#of(Object...)
      */
     @SafeVarargs
@@ -348,7 +396,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         if (N.isEmpty(a)) {
             return empty();
         } else {
-            // return new ImmutableSet<>(Set.of(a), true); // Doesn't support null element
+            // return new ImmutableSet<>(Set.of(a), true);   // Doesn't support null element
             return new ImmutableSet<>(N.asLinkedHashSet(a), false);
         }
     }
@@ -364,17 +412,17 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 1);
      * ImmutableSet<Integer> uniqueNumbers = ImmutableSet.copyOf(numbers);
-     * System.out.println(uniqueNumbers);  // order preserved from list: [1, 2, 3]
+     * System.out.println(uniqueNumbers);   // order preserved from list: [1, 2, 3]
      * 
      * Set<String> mutableSet = new HashSet<>();
      * mutableSet.add("apple");
      * ImmutableSet<String> immutableCopy = ImmutableSet.copyOf(mutableSet);
-     * mutableSet.add("banana");  // Does not affect immutableCopy
+     * mutableSet.add("banana");   // Does not affect immutableCopy
      * }</pre>
      *
-     * @param <E> the type of elements in the collection
-     * @param c the collection whose distinct elements are to be placed into the ImmutableSet
-     * @return an ImmutableSet containing all distinct elements from the collection, or the same instance if already an ImmutableSet
+     * @param <E> the type of elements in the collection.
+     * @param c the collection whose distinct elements are to be placed into the ImmutableSet.
+     * @return an ImmutableSet containing all distinct elements from the collection, or the same instance if already an ImmutableSet.
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSet) {
@@ -407,9 +455,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(wrapped.contains("added later"));   // prints: true
      * }</pre>
      *
-     * @param <E> the type of elements in the set
-     * @param set the set to be wrapped into an ImmutableSet
-     * @return an ImmutableSet view of the provided set, or the same instance if already an ImmutableSet
+     * @param <E> the type of elements in the set.
+     * @param set the set to be wrapped into an ImmutableSet.
+     * @return an ImmutableSet view of the provided set, or the same instance if already an ImmutableSet.
      */
     @Beta
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {
@@ -426,11 +474,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * This method is deprecated and will always throw an UnsupportedOperationException.
      * Use {@link #wrap(Set)} or {@link #copyOf(Collection)} instead.
      *
-     * @param <E> the type of elements
-     * @param c the collection to wrap
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated Use {@link #wrap(Set)} for sets or {@link #copyOf(Collection)} for general collections
+     * @param <E> the type of elements.
+     * @param c the collection to wrap.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated Use {@link #wrap(Set)} for sets or {@link #copyOf(Collection)} for general collections.
      */
     @Deprecated
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
@@ -453,8 +501,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements to be maintained by the set
-     * @return a new Builder instance for creating an ImmutableSet
+     * @param <E> the type of elements to be maintained by the set.
+     * @return a new Builder instance for creating an ImmutableSet.
      */
     public static <E> Builder<E> builder() {
         return new Builder<>(new HashSet<>());
@@ -468,16 +516,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set<Integer> backingSet = new LinkedHashSet<>();  // Preserves insertion order
+     * Set<Integer> backingSet = new LinkedHashSet<>();   // Preserves insertion order
      * ImmutableSet<Integer> numbers = ImmutableSet.builder(backingSet)
      *     .add(1)
      *     .add(2, 3, 4)
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements to be maintained by the set
-     * @param holder the set to be used as the backing storage for the Builder
-     * @return a new Builder instance that will use the provided set
+     * @param <E> the type of elements to be maintained by the set.
+     * @param holder the set to be used as the backing storage for the Builder.
+     * @return a new Builder instance that will use the provided set.
      */
     public static <E> Builder<E> builder(final Set<E> holder) {
         return new Builder<>(holder);
@@ -498,7 +546,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements in the set being built
+     * @param <E> the type of elements in the set being built.
      */
     public static final class Builder<E> {
         private final Set<E> set;
@@ -517,11 +565,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * Builder<String> builder = ImmutableSet.<String>builder();
          * builder.add("hello")
          *        .add("world")
-         *        .add("hello");  // Duplicate, won't be added again
+         *        .add("hello");   // Duplicate, won't be added again
          * }</pre>
          *
-         * @param element the element to add, may be null
-         * @return this builder instance for method chaining
+         * @param element the element to add, may be null.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> add(final E element) {
             set.add(element);
@@ -541,8 +589,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.add("one", "two", "three");
          * }</pre>
          *
-         * @param elements the elements to add, may be {@code null} or empty
-         * @return this builder instance for method chaining
+         * @param elements the elements to add, may be {@code null} or empty.
+         * @return this builder instance for method chaining.
          */
         @SafeVarargs
         public final Builder<E> add(final E... elements) {
@@ -566,8 +614,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.addAll(moreElements);
          * }</pre>
          *
-         * @param c the collection containing elements to add, may be {@code null} or empty
-         * @return this builder instance for method chaining
+         * @param c the collection containing elements to add, may be {@code null} or empty.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
             if (N.notEmpty(c)) {
@@ -589,8 +637,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be null
-         * @return this builder instance for method chaining
+         * @param iter the iterator over elements to add, may be null.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Iterator<? extends E> iter) {
             if (iter != null) {
@@ -614,10 +662,10 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableSet<String> finalSet = builder.build();
-         * System.out.println(finalSet.size());  // Number of distinct elements
+         * System.out.println(finalSet.size());   // Number of distinct elements
          * }</pre>
          *
-         * @return a new ImmutableSet containing all distinct elements added to the builder
+         * @return a new ImmutableSet containing all distinct elements added to the builder.
          */
         public ImmutableSet<E> build() {
             return new ImmutableSet<>(set);

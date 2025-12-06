@@ -56,7 +56,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanBiPredicate xor = (a, b) -> a != b;
-     * boolean result = xor.test(true, false);  // Returns true
+     * boolean result = xor.test(true, false);   // Returns true
      * }</pre>
      *
      * @param t the first input argument
@@ -93,7 +93,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * <pre>{@code
      * BooleanBiPredicate bothTrue = (a, b) -> a && b;
      * BooleanBiPredicate bothFalse = (a, b) -> !a && !b;
-     * BooleanBiPredicate combined = bothTrue.and(bothFalse);  // Always false
+     * BooleanBiPredicate combined = bothTrue.and(bothFalse);   // Always false
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.

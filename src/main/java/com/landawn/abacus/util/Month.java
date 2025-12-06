@@ -24,9 +24,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Month month = Month.JANUARY;
- * int monthNumber = month.intValue();  // returns 1
+ * int monthNumber = month.intValue();   // returns 1
  * 
- * Month decoded = Month.valueOf(3);  // returns MARCH
+ * Month decoded = Month.valueOf(3);   // returns MARCH
  * }</pre>
  * 
  */

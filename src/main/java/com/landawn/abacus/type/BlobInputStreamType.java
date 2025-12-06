@@ -33,6 +33,10 @@ public class BlobInputStreamType extends InputStreamType {
      */
     public static final String BLOB_INPUT_STREAM = "BlobInputStream";
 
+    /**
+     * Package-private constructor for BlobInputStreamType.
+     * This constructor is intended to be called only by the TypeFactory.
+     */
     BlobInputStreamType() {
         super(BLOB_INPUT_STREAM);
     }
@@ -128,6 +132,17 @@ public class BlobInputStreamType extends InputStreamType {
     /**
      * Converts a SQL Blob object to an InputStream for reading its binary content.
      * This static utility method extracts the binary stream from the Blob.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // In a DAO method
+     * ResultSet rs = stmt.executeQuery("SELECT document FROM files WHERE id = ?");
+     * if (rs.next()) {
+     *     Blob blob = rs.getBlob("document");
+     *     InputStream stream = BlobInputStreamType.blob2InputStream(blob);
+     *     // Read from stream...
+     * }
+     * }</pre>
      *
      * @param blob the SQL Blob to convert
      * @return an InputStream for reading the Blob's content, or {@code null} if the blob is null

@@ -71,7 +71,7 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      * <pre>{@code
      * IntTriFunction<Integer> sum = (a, b, c) -> a + b + c;
      * IntTriFunction<String> sumToString = sum.andThen(String::valueOf);
-     * String result = sumToString.apply(1, 2, 3);  // "6"
+     * String result = sumToString.apply(1, 2, 3);   // "6"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

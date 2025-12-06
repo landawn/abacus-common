@@ -26,6 +26,10 @@ public class URIType extends AbstractType<URI> {
 
     public static final String URI = URI.class.getSimpleName();
 
+    /**
+     * Constructs a URIType instance.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     URIType() {
         super(URI);
     }
@@ -40,7 +44,7 @@ public class URIType extends AbstractType<URI> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
-     * Class<URI> clazz = type.clazz();  // Returns URI.class
+     * Class<URI> clazz = type.clazz();   // Returns URI.class
      * }</pre>
      *
      * @return the Class object for URI.class
@@ -61,7 +65,7 @@ public class URIType extends AbstractType<URI> {
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
      * URI uri = URI.create("https://example.com/path");
-     * String str = type.stringOf(uri);  // Returns "https://example.com/path"
+     * String str = type.stringOf(uri);   // Returns "https://example.com/path"
      * }</pre>
      *
      * @param x the URI instance to convert to string
@@ -82,7 +86,7 @@ public class URIType extends AbstractType<URI> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
-     * URI uri = type.valueOf("https://example.com/path");  // Creates a URI
+     * URI uri = type.valueOf("https://example.com/path");   // Creates a URI
      * }</pre>
      *
      * @param str the string to convert to a URI
@@ -95,7 +99,7 @@ public class URIType extends AbstractType<URI> {
             return null; // NOSONAR
         }
 
-        return java.net.URI.create(str); // NOSONAR
+        return java.net.URI.create(str);   // NOSONAR
     }
 
     /**
@@ -109,7 +113,7 @@ public class URIType extends AbstractType<URI> {
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
-     * URI homepage = type.get(rs, 1);  // Get URI from first column
+     * URI homepage = type.get(rs, 1);   // Get URI from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -133,7 +137,7 @@ public class URIType extends AbstractType<URI> {
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
-     * URI homepage = type.get(rs, "homepage");  // Get URI by column name
+     * URI homepage = type.get(rs, "homepage");   // Get URI by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -157,7 +161,7 @@ public class URIType extends AbstractType<URI> {
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO websites (homepage) VALUES (?)");
-     * type.set(stmt, 1, URI.create("https://example.com"));  // Set URI at parameter index 1
+     * type.set(stmt, 1, URI.create("https://example.com"));   // Set URI at parameter index 1
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
@@ -181,7 +185,7 @@ public class URIType extends AbstractType<URI> {
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
      * CallableStatement stmt = conn.prepareCall("{call update_website(?)}");
-     * type.set(stmt, "homepage", URI.create("https://example.com"));  // Set URI by parameter name
+     * type.set(stmt, "homepage", URI.create("https://example.com"));   // Set URI by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in

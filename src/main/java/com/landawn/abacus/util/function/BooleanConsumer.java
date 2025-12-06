@@ -33,7 +33,7 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanConsumer logger = value -> System.out.println("Boolean value: " + value);
-     * logger.accept(true);  // Prints: Boolean value: true
+     * logger.accept(true);   // Prints: Boolean value: true
      *
      * List<Boolean> results = new ArrayList<>();
      * BooleanConsumer collector = results::add;
@@ -55,7 +55,7 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      * BooleanConsumer logger = value -> System.out.println("Value: " + value);
      * BooleanConsumer validator = value -> { if (!value) throw new IllegalArgumentException(); };
      * BooleanConsumer combined = logger.andThen(validator);
-     * combined.accept(true);  // Logs then validates
+     * combined.accept(true);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

@@ -62,14 +62,14 @@ public class LongToFloatFunction2025Test extends TestBase {
     public void testApplyAsFloat_withMaxValue() {
         final LongToFloatFunction function = value -> (float) value;
         final float result = function.applyAsFloat(Long.MAX_VALUE);
-        assertNotNull(result); // Will have precision loss
+        assertNotNull(result);   // Will have precision loss
     }
 
     @Test
     public void testApplyAsFloat_withMinValue() {
         final LongToFloatFunction function = value -> (float) value;
         final float result = function.applyAsFloat(Long.MIN_VALUE);
-        assertNotNull(result); // Will have precision loss
+        assertNotNull(result);   // Will have precision loss
     }
 
     @Test

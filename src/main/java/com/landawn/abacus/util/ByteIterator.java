@@ -86,7 +86,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.empty();
-     * System.out.println(iter.hasNext());  // false
+     * System.out.println(iter.hasNext());   // false
      * }</pre>
      *
      * @return an empty {@code ByteIterator}
@@ -105,7 +105,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * byte first = iter.nextByte();  // 1
+     * byte first = iter.nextByte();   // 1
      * }</pre>
      *
      * @param a the byte array (may be {@code null})
@@ -236,7 +236,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * ByteIterator iter = ByteIterator.generate(() -> (byte)42);
      * // Infinite iterator that always returns 42
      * for (int i = 0; i < 5 && iter.hasNext(); i++) {
-     *     System.out.print(iter.nextByte() + " ");  // 42 42 42 42 42
+     *     System.out.print(iter.nextByte() + " ");   // 42 42 42 42 42
      * }
      * }</pre>
      *
@@ -353,7 +353,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator skipped = iter.skip(2);
      * // skipped will iterate over 3, 4, 5
-     * byte first = skipped.nextByte();  // 3
+     * byte first = skipped.nextByte();   // 3
      * }</pre>
      *
      * @param n the number of elements to skip (must be non-negative)
@@ -413,7 +413,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator limited = iter.limit(3);
-     * byte[] result = limited.toArray();  // [1, 2, 3]
+     * byte[] result = limited.toArray();   // [1, 2, 3]
      * }</pre>
      *
      * @param count the maximum number of elements to iterate (must be non-negative)
@@ -460,7 +460,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator evens = iter.filter(b -> b % 2 == 0);
-     * byte[] result = evens.toArray();  // [2, 4]
+     * byte[] result = evens.toArray();   // [2, 4]
      * }</pre>
      *
      * @param predicate the predicate to test each element (must not be {@code null})
@@ -572,7 +572,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * byte[] empty = ByteIterator.empty().toArray();  // empty.length == 0
+     * byte[] empty = ByteIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a byte array containing all remaining elements
@@ -595,7 +595,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * ByteList empty = ByteIterator.empty().toList();  // empty.size() == 0
+     * ByteList empty = ByteIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a ByteList containing all remaining elements
@@ -621,7 +621,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * ByteStream stream = iter.stream();
-     * int sum = stream.sum();  // 6
+     * int sum = stream.sum();   // 6
      * }</pre>
      *
      * @return a sequential ByteStream backed by this iterator
@@ -668,8 +668,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * ObjIterator<IndexedByte> indexed = iter.indexed(100);
-     * IndexedByte first = indexed.next()    =100, value=10
-     * IndexedByte second = indexed.next()   =101, value=20
+     * IndexedByte first = indexed.next();
+     * // first.index() = 100, first.value() = 10
+     * IndexedByte second = indexed.next();
+     * // second.index() = 101, second.value() = 20
      * }</pre>
      *
      * @param startIndex the starting index value (must be non-negative)
@@ -708,7 +710,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
-     * iter.forEachRemaining((Byte b) -> System.out.print(b + " "));  // Avoid - causes boxing
+     * iter.forEachRemaining((Byte b) -> System.out.print(b + " "));   // Avoid - causes boxing
      * }</pre>
      *
      * @param action the action to perform on each boxed element
@@ -731,7 +733,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * iter.foreachRemaining(b -> System.out.print(b + " "));  // Output: 1 2 3
+     * iter.foreachRemaining(b -> System.out.print(b + " "));   // Output: 1 2 3
      * }</pre>
      *
      * @param <E> the type of exception the action may throw

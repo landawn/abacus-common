@@ -107,6 +107,6 @@ public class IntSupplier2025Test extends TestBase {
         assertEquals(10, supplier.getAsInt());
         assertEquals(20, supplier.getAsInt());
         assertEquals(30, supplier.getAsInt());
-        assertEquals(10, supplier.getAsInt()); // Wraps around
+        assertEquals(10, supplier.getAsInt());   // Wraps around
     }
 }

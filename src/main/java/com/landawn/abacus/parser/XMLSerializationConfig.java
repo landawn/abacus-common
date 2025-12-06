@@ -65,8 +65,8 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * </ul>
      */
     public XMLSerializationConfig() {
-        setCharQuotation(WD.CHAR_ZERO); // NOSONAR
-        setStringQuotation(WD.CHAR_ZERO); // NOSONAR
+        setCharQuotation(WD.CHAR_ZERO);   // NOSONAR
+        setStringQuotation(WD.CHAR_ZERO);   // NOSONAR
     }
 
     @Deprecated

@@ -115,7 +115,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * 
      * // Original entry can be modified (if supported), but copy remains unchanged
      * map.put("count", 200);
-     * System.out.println(immutableCopy.getValue());  // still prints: 100
+     * System.out.println(immutableCopy.getValue());   // still prints: 100
      * }</pre>
      *
      * @param <K> the type of the key

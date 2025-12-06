@@ -112,7 +112,7 @@ public class MillisCalendarType extends CalendarType {
      *     "INSERT INTO events (id, event_date) VALUES (?, ?)");
      *
      * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L);  // Jan 1, 2021
+     * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021
      * type.set(stmt, 2, cal);
      * // Sets parameter to 1609459200000
      *
@@ -141,7 +141,7 @@ public class MillisCalendarType extends CalendarType {
      * CallableStatement stmt = connection.prepareCall("{call set_event(?, ?)}");
      *
      * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L);  // Jan 1, 2021
+     * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021
      * type.set(stmt, "p_event_date", cal);
      * // Sets parameter to 1609459200000
      *

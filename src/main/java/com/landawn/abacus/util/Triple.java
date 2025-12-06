@@ -32,14 +32,14 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
- * String left = triple.left();  // "Hello"
- * Integer middle = triple.middle();  // 42
- * Boolean right = triple.right();  // true
+ * String left = triple.left();   // "Hello"
+ * Integer middle = triple.middle();   // 42
+ * Boolean right = triple.right();   // true
  * }</pre>
  *
- * @param <L> the type of the left element
- * @param <M> the type of the middle element
- * @param <R> the type of the right element
+ * @param <L> the type of the left element.
+ * @param <M> the type of the middle element.
+ * @param <R> the type of the right element.
  * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.u.Nullable
  * @see com.landawn.abacus.util.Holder
@@ -67,9 +67,9 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Constructs a Triple with the specified left, middle, and right values.
      *
-     * @param l the left element value, may be {@code null}
-     * @param m the middle element value, may be {@code null}
-     * @param r the right element value, may be {@code null}
+     * @param l the left element value, may be {@code null}.
+     * @param m the middle element value, may be {@code null}.
+     * @param r the right element value, may be {@code null}.
      */
     Triple(final L l, final M m, final R r) {
         setLeft(l);
@@ -90,13 +90,13 @@ public final class Triple<L, M, R> implements Mutable {
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 100, false);
      * }</pre>
      *
-     * @param <L> the type of the left element
-     * @param <M> the type of the middle element
-     * @param <R> the type of the right element
-     * @param l the left element, may be {@code null}
-     * @param m the middle element, may be {@code null}
-     * @param r the right element, may be {@code null}
-     * @return a new Triple instance containing the specified elements
+     * @param <L> the type of the left element.
+     * @param <M> the type of the middle element.
+     * @param <R> the type of the right element.
+     * @param l the left element, may be {@code null}.
+     * @param m the middle element, may be {@code null}.
+     * @param r the right element, may be {@code null}.
+     * @return a new Triple instance containing the specified elements.
      */
     public static <L, M, R> Triple<L, M, R> of(final L l, final M m, final R r) {
         return new Triple<>(l, m, r);
@@ -117,10 +117,10 @@ public final class Triple<L, M, R> implements Mutable {
      * // emptyTriples.length == 0
      * }</pre>
      *
-     * @param <L> the type of the left element
-     * @param <M> the type of the middle element
-     * @param <R> the type of the right element
-     * @return an empty, immutable array of Triple instances
+     * @param <L> the type of the left element.
+     * @param <M> the type of the middle element.
+     * @param <R> the type of the right element.
+     * @return an empty, immutable array of Triple instances.
      */
     @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R>[] emptyArray() {
@@ -136,10 +136,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * String left = triple.left();  // returns "Hello"
+     * String left = triple.left();   // returns "Hello"
      * }</pre>
      *
-     * @return the left element of this triple, may be {@code null}
+     * @return the left element of this triple, may be {@code null}.
      */
     public L left() {
         return left;
@@ -154,10 +154,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Integer middle = triple.middle();  // returns 42
+     * Integer middle = triple.middle();   // returns 42
      * }</pre>
      *
-     * @return the middle element of this triple, may be {@code null}
+     * @return the middle element of this triple, may be {@code null}.
      */
     public M middle() {
         return middle;
@@ -172,10 +172,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Boolean right = triple.right();  // returns true
+     * Boolean right = triple.right();   // returns true
      * }</pre>
      *
-     * @return the right element of this triple, may be {@code null}
+     * @return the right element of this triple, may be {@code null}.
      */
     public R right() {
         return right;
@@ -188,10 +188,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * String left = triple.getLeft();  // returns "Hello"
+     * String left = triple.getLeft();   // returns "Hello"
      * }</pre>
      *
-     * @return the left element, may be {@code null}
+     * @return the left element, may be {@code null}.
      * @deprecated This method is deprecated in favor of the more concise {@link #left()} method.
      * @see #left()
      */
@@ -212,7 +212,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.left() now returns "new"
      * }</pre>
      *
-     * @param left the new value for the left element, may be {@code null}
+     * @param left the new value for the left element, may be {@code null}.
      */
     public void setLeft(final L left) {
         this.left = left;
@@ -225,10 +225,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Integer middle = triple.getMiddle();  // returns 42
+     * Integer middle = triple.getMiddle();   // returns 42
      * }</pre>
      *
-     * @return the middle element, may be {@code null}
+     * @return the middle element, may be {@code null}.
      * @deprecated This method is deprecated in favor of the more concise {@link #middle()} method.
      * @see #middle()
      */
@@ -249,7 +249,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.middle() now returns 100
      * }</pre>
      *
-     * @param middle the new value for the middle element, may be {@code null}
+     * @param middle the new value for the middle element, may be {@code null}.
      */
     public void setMiddle(final M middle) {
         this.middle = middle;
@@ -262,10 +262,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
-     * Boolean right = triple.getRight();  // returns true
+     * Boolean right = triple.getRight();   // returns true
      * }</pre>
      *
-     * @return the right element, may be {@code null}
+     * @return the right element, may be {@code null}.
      * @deprecated This method is deprecated in favor of the more concise {@link #right()} method.
      * @see #right()
      */
@@ -286,7 +286,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.right() now returns false
      * }</pre>
      *
-     * @param right the new value for the right element, may be {@code null}
+     * @param right the new value for the right element, may be {@code null}.
      */
     public void setRight(final R right) {
         this.right = right;
@@ -303,9 +303,9 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple now contains ("new", 2, false)
      * }</pre>
      *
-     * @param left the new value for the left element, may be {@code null}
-     * @param middle the new value for the middle element, may be {@code null}
-     * @param right the new value for the right element, may be {@code null}
+     * @param left the new value for the left element, may be {@code null}.
+     * @param middle the new value for the middle element, may be {@code null}.
+     * @param right the new value for the right element, may be {@code null}.
      */
     public void set(final L left, final M middle, final R right) {
         this.setLeft(left);
@@ -325,8 +325,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // oldValue is "old", triple.left() is now "new"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element, may be {@code null}
-     * @return the previous value of the left element, may be {@code null}
+     * @param newLeft the new value to set for the left element, may be {@code null}.
+     * @return the previous value of the left element, may be {@code null}.
      */
     public L getAndSetLeft(final L newLeft) {
         final L res = left;
@@ -346,8 +346,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // newValue is "new", triple.left() is also "new"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element, may be {@code null}
-     * @return the new value of the left element (same as the parameter), may be {@code null}
+     * @param newLeft the new value to set for the left element, may be {@code null}.
+     * @return the new value of the left element (same as the parameter), may be {@code null}.
      */
     public L setAndGetLeft(final L newLeft) {
         setLeft(newLeft);
@@ -366,8 +366,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // oldValue is 42, triple.middle() is now 100
      * }</pre>
      *
-     * @param newMiddle the new value to set for the middle element, may be {@code null}
-     * @return the previous value of the middle element, may be {@code null}
+     * @param newMiddle the new value to set for the middle element, may be {@code null}.
+     * @return the previous value of the middle element, may be {@code null}.
      */
     public M getAndSetMiddle(final M newMiddle) {
         final M res = middle;
@@ -387,8 +387,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // newValue is 100, triple.middle() is also 100
      * }</pre>
      *
-     * @param newMiddle the new value to set for the middle element, may be {@code null}
-     * @return the new value of the middle element (same as the parameter), may be {@code null}
+     * @param newMiddle the new value to set for the middle element, may be {@code null}.
+     * @return the new value of the middle element (same as the parameter), may be {@code null}.
      */
     public M setAndGetMiddle(final M newMiddle) {
         setMiddle(newMiddle);
@@ -407,8 +407,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // oldValue is true, triple.right() is now false
      * }</pre>
      *
-     * @param newRight the new value to set for the right element, may be {@code null}
-     * @return the previous value of the right element, may be {@code null}
+     * @param newRight the new value to set for the right element, may be {@code null}.
+     * @return the previous value of the right element, may be {@code null}.
      */
     public R getAndSetRight(final R newRight) {
         final R res = right;
@@ -428,8 +428,8 @@ public final class Triple<L, M, R> implements Mutable {
      * // newValue is false, triple.right() is also false
      * }</pre>
      *
-     * @param newRight the new value to set for the right element, may be {@code null}
-     * @return the new value of the right element (same as the parameter), may be {@code null}
+     * @param newRight the new value to set for the right element, may be {@code null}.
+     * @return the new value of the right element (same as the parameter), may be {@code null}.
      */
     public R setAndGetRight(final R newRight) {
         setRight(newRight);
@@ -447,12 +447,12 @@ public final class Triple<L, M, R> implements Mutable {
      * // wasSet is true if "old".length() < "new".length()
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}
-     * @param predicate a bi-predicate that takes the current Triple and the new left value;
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
+     * @param predicate a bi-predicate that takes the current Triple and the new left value;.
      *                  returns {@code true} if the left element should be updated
-     * @return {@code true} if the left element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if the left element was updated, {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
@@ -474,12 +474,12 @@ public final class Triple<L, M, R> implements Mutable {
      * // wasSet is true if 100 > 42
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newMiddle the new value to potentially set for the middle element, may be {@code null}
-     * @param predicate a bi-predicate that takes the current Triple and the new middle value;
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newMiddle the new value to potentially set for the middle element, may be {@code null}.
+     * @param predicate a bi-predicate that takes the current Triple and the new middle value;.
      *                  returns {@code true} if the middle element should be updated
-     * @return {@code true} if the middle element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if the middle element was updated, {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setMiddleIf(final M newMiddle, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super M, E> predicate)
             throws E {
@@ -502,12 +502,12 @@ public final class Triple<L, M, R> implements Mutable {
      * // wasSet is true because true != false
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newRight the new value to potentially set for the right element, may be {@code null}
-     * @param predicate a bi-predicate that takes the current Triple and the new right value;
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newRight the new value to potentially set for the right element, may be {@code null}.
+     * @param predicate a bi-predicate that takes the current Triple and the new right value;.
      *                  returns {@code true} if the right element should be updated
-     * @return {@code true} if the right element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if the right element was updated, {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
@@ -531,14 +531,14 @@ public final class Triple<L, M, R> implements Mutable {
      * // Updates all values if "new".length() > "old".length() AND 100 > 42
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}
-     * @param newMiddle the new value to potentially set for the middle element, may be {@code null}
-     * @param newRight the new value to potentially set for the right element, may be {@code null}
-     * @param predicate a quad-predicate that takes the current Triple and the three new values;
+     * @param <E> the type of exception that the predicate may throw.
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
+     * @param newMiddle the new value to potentially set for the middle element, may be {@code null}.
+     * @param newRight the new value to potentially set for the right element, may be {@code null}.
+     * @param predicate a quad-predicate that takes the current Triple and the three new values;.
      *                  returns {@code true} if all elements should be updated
-     * @return {@code true} if all elements were updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
+     * @return {@code true} if all elements were updated, {@code false} otherwise.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setIf(final L newLeft, final M newMiddle, final R newRight,
             final Throwables.QuadPredicate<? super Triple<L, M, R>, ? super L, ? super M, ? super R, E> predicate) throws E {
@@ -565,7 +565,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // original still contains ("left", 42, true)
      * }</pre>
      *
-     * @return a new Triple instance with type Triple&lt;R, M, L&gt; where the left and right
+     * @return a new Triple instance with type Triple&lt;R, M, L&gt; where the left and right.
      *         elements are swapped
      */
     @Beta
@@ -588,7 +588,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // original.left() still returns "text"
      * }</pre>
      *
-     * @return a new Triple instance containing the same elements as this Triple
+     * @return a new Triple instance containing the same elements as this Triple.
      */
     public Triple<L, M, R> copy() {
         return new Triple<>(left, middle, right);
@@ -605,7 +605,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // array[0] is "text", array[1] is 42, array[2] is true
      * }</pre>
      *
-     * @return a new Object array of length 3 containing the left, middle, and right elements
+     * @return a new Object array of length 3 containing the left, middle, and right elements.
      */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
@@ -624,11 +624,11 @@ public final class Triple<L, M, R> implements Mutable {
      * // array[0] is "one", array[1] is "two", array[2] is "three"
      * }</pre>
      *
-     * @param <A> the component type of the array
-     * @param a the array into which the elements are to be stored, if it has length &gt;= 3;
+     * @param <A> the component type of the array.
+     * @param a the array into which the elements are to be stored, if it has length &gt;= 3;.
      *          otherwise, a new array of the same runtime type is allocated
-     * @return an array containing the three elements of this Triple
-     * @throws ArrayStoreException if the runtime type of the specified array is not a
+     * @return an array containing the three elements of this Triple.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a.
      *         supertype of the runtime type of the elements in this Triple
      */
     public <A> A[] toArray(A[] a) {
@@ -658,10 +658,10 @@ public final class Triple<L, M, R> implements Mutable {
      * // three
      * }</pre>
      *
-     * @param <E> the type of exception that the consumer may throw
-     * @param consumer the consumer function to apply to each element; must accept
+     * @param <E> the type of exception that the consumer may throw.
+     * @param consumer the consumer function to apply to each element; must accept.
      *                 a common supertype of L, M, and R
-     * @throws E if the consumer throws an exception
+     * @throws E if the consumer throws an exception.
      */
     public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
@@ -685,9 +685,9 @@ public final class Triple<L, M, R> implements Mutable {
      * });
      * }</pre>
      *
-     * @param <E> the type of exception that the action may throw
-     * @param action the tri-consumer action to apply to the three elements
-     * @throws E if the action throws an exception
+     * @param <E> the type of exception that the action may throw.
+     * @param action the tri-consumer action to apply to the three elements.
+     * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
         action.accept(left, middle, right);
@@ -706,9 +706,9 @@ public final class Triple<L, M, R> implements Mutable {
      * });
      * }</pre>
      *
-     * @param <E> the type of exception that the action may throw
-     * @param action the consumer action to apply to this Triple
-     * @throws E if the action throws an exception
+     * @param <E> the type of exception that the action may throw.
+     * @param action the consumer action to apply to this Triple.
+     * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super Triple<L, M, R>, E> action) throws E {
         action.accept(this);
@@ -725,11 +725,11 @@ public final class Triple<L, M, R> implements Mutable {
      * // result is "Hello has 5 letters: true"
      * }</pre>
      *
-     * @param <U> the type of the result
-     * @param <E> the type of exception that the mapper may throw
-     * @param mapper the tri-function to apply to the three elements
-     * @return the result of applying the mapper function, may be {@code null}
-     * @throws E if the mapper throws an exception
+     * @param <U> the type of the result.
+     * @param <E> the type of exception that the mapper may throw.
+     * @param mapper the tri-function to apply to the three elements.
+     * @return the result of applying the mapper function, may be {@code null}.
+     * @throws E if the mapper throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> mapper) throws E {
         return mapper.apply(left, middle, right);
@@ -748,11 +748,11 @@ public final class Triple<L, M, R> implements Mutable {
      * // result is "(text, 42, true)"
      * }</pre>
      *
-     * @param <U> the type of the result
-     * @param <E> the type of exception that the mapper may throw
-     * @param mapper the function to apply to this Triple
-     * @return the result of applying the mapper function, may be {@code null}
-     * @throws E if the mapper throws an exception
+     * @param <U> the type of the result.
+     * @param <E> the type of exception that the mapper may throw.
+     * @param mapper the function to apply to this Triple.
+     * @return the result of applying the mapper function, may be {@code null}.
+     * @throws E if the mapper throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws E {
         return mapper.apply(this);
@@ -771,11 +771,11 @@ public final class Triple<L, M, R> implements Mutable {
      * // filtered contains the triple because all conditions are met
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the tri-predicate to test the three elements
-     * @return an Optional containing this Triple if the predicate returns {@code true},
+     * @param <E> the type of exception that the predicate may throw.
+     * @param predicate the tri-predicate to test the three elements.
+     * @return an Optional containing this Triple if the predicate returns {@code true},.
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
         return predicate.test(left, middle, right) ? Optional.of(this) : Optional.empty();
@@ -794,11 +794,11 @@ public final class Triple<L, M, R> implements Mutable {
      * // filtered contains the triple because both conditions are met
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test this Triple
-     * @return an Optional containing this Triple if the predicate returns {@code true},
+     * @param <E> the type of exception that the predicate may throw.
+     * @param predicate the predicate to test this Triple.
+     * @return an Optional containing this Triple if the predicate returns {@code true},.
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.Predicate<? super Triple<L, M, R>, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
@@ -816,7 +816,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // tuple contains the same elements as triple
      * }</pre>
      *
-     * @return a new Tuple3 instance containing the same elements as this Triple
+     * @return a new Tuple3 instance containing the same elements as this Triple.
      */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
@@ -828,7 +828,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Two Triple objects with equal elements (as determined by their equals methods)
      * will have the same hash code.
      *
-     * @return a hash code value for this Triple
+     * @return a hash code value for this Triple.
      */
     @Override
     public int hashCode() {
@@ -857,8 +857,8 @@ public final class Triple<L, M, R> implements Mutable {
      * t1.equals(null);   // returns false
      * }</pre>
      *
-     * @param obj the object to compare with this Triple for equality
-     * @return {@code true} if the specified object is a Triple with equal elements,
+     * @param obj the object to compare with this Triple for equality.
+     * @return {@code true} if the specified object is a Triple with equal elements,.
      *         {@code false} otherwise
      */
     @Override
@@ -883,13 +883,13 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
-     * System.out.println(triple);  // prints: (text, 42, true)
+     * System.out.println(triple);   // prints: (text, 42, true)
      *
      * Triple<String, Integer, Boolean> nullTriple = Triple.of(null, null, null);
-     * System.out.println(nullTriple);  // prints: (null, null, null)
+     * System.out.println(nullTriple);   // prints: (null, null, null)
      * }</pre>
      *
-     * @return a string representation of this Triple
+     * @return a string representation of this Triple.
      */
     @Override
     public String toString() {

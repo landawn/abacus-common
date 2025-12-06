@@ -51,7 +51,7 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      *
      * String formatted = formatTimestamp.apply("Timestamp: %d", System.currentTimeMillis());
      * Map<Long, String> dataMap = Map.of(12345L, "Value1", 67890L, "Value2");
-     * String value = getById.apply(dataMap, 12345L);  // Returns "Value1"
+     * String value = getById.apply(dataMap, 12345L);   // Returns "Value1"
      * }</pre>
      *
      * @param t the first function argument of type T

@@ -135,7 +135,7 @@ public abstract class AbstractPool implements Pool {
 
     /**
      * Maximum total memory size in bytes the pool can use.
-     * A value of 0 or less indicates no memory limit.
+     * A value of 0 indicates no memory limit.
      */
     final long maxMemorySize;
 
@@ -165,7 +165,7 @@ public abstract class AbstractPool implements Pool {
      * This protected constructor is used by subclasses to initialize core pool functionality.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy for determining which objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)

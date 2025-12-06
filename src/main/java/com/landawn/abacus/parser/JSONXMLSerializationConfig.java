@@ -535,7 +535,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Person parent = new Person("Parent");
      * Person child = new Person("Child");
      * parent.setChild(child);
-     * child.setParent(parent);  // Circular reference
+     * child.setParent(parent);   // Circular reference
      * }</pre>
      *
      * @param supportCircularReference {@code true} to support circular references, {@code false} otherwise

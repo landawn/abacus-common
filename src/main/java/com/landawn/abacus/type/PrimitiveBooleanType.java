@@ -24,11 +24,11 @@ package com.landawn.abacus.type;
  * Type<Boolean> type = TypeFactory.getType(boolean.class);
  *
  * // Convert string to boolean
- * Boolean value = type.valueOf("true");  // Returns true
- * Boolean value2 = type.valueOf("false");  // Returns false
+ * Boolean value = type.valueOf("true");   // Returns true
+ * Boolean value2 = type.valueOf("false");   // Returns false
  *
  * // Get default value
- * Boolean defaultVal = type.defaultValue();  // Returns false
+ * Boolean defaultVal = type.defaultValue();   // Returns false
  *
  * // Read from database
  * try (ResultSet rs = stmt.executeQuery("SELECT active FROM users")) {
@@ -44,6 +44,10 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     public static final String BOOL = "bool";
 
+    /**
+     * Constructs a new PrimitiveBooleanType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveBooleanType() {
         super(BOOLEAN);
     }

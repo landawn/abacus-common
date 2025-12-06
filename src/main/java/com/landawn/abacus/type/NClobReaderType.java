@@ -31,6 +31,10 @@ public class NClobReaderType extends ReaderType {
 
     public static final String NCLOB_READER = "NClobReader";
 
+    /**
+     * Constructs an NClobReaderType.
+     * This constructor initializes the type handler for NCLOB reader objects.
+     */
     NClobReaderType() {
         super(NCLOB_READER);
     }

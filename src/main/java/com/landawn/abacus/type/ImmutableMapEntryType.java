@@ -109,6 +109,19 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Converts an immutable map entry to its string representation.
      * The entry is serialized as a JSON object with a single key-value pair.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
+     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
+     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
+     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
+     * String result = type.stringOf(entry);
+     * // Returns: {"age":25}
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the immutable map entry to convert to string
      * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or {@code null} if the input is null
      */
@@ -121,6 +134,18 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Parses a string representation into an immutable map entry instance.
      * The string should be in JSON object format with a single key-value pair.
      * Empty strings or empty JSON objects ("{}") result in {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
+     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
+     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
+     *     type.valueOf("{\"age\":25}");
+     * // entry.getKey() returns "age", entry.getValue() returns 25
+     *
+     * entry = type.valueOf("{}");
+     * // Returns: null
+     * }</pre>
      *
      * @param str the JSON string to parse (e.g., "{\"key\":\"value\"}")
      * @return a new immutable map entry instance, or {@code null} if the input is {@code null}, empty, or "{}"
@@ -138,6 +163,17 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Appends the string representation of an immutable map entry to an Appendable.
      * The output format is a JSON object with the key and value.
      * Handles Writer instances specially for better performance with buffering.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
+     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
+     * StringBuilder sb = new StringBuilder();
+     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
+     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
+     * type.appendTo(sb, entry);
+     * // sb contains: {"age":25}
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the immutable map entry to append
@@ -187,6 +223,19 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Writes the character representation of an immutable map entry to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
      * The entry is serialized as a JSON object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
+     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
+     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
+     * type.writeCharacter(writer, entry, config);
+     * String result = writer.toString();
+     * // result: {"age":25}
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the immutable map entry to write

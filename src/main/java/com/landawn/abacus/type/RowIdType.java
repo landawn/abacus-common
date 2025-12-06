@@ -24,10 +24,60 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+/**
+ * Type handler for java.sql.RowId objects.
+ * A SQL ROWID is a unique identifier for a row in a database table, representing the physical
+ * address of the row. RowId values are database-specific and typically used for efficient
+ * row identification and retrieval.
+ *
+ * <p>This type handler provides limited functionality because RowId objects are database-specific
+ * identifiers that cannot be reliably reconstructed from strings across different database sessions
+ * or database restarts. The primary use cases are for reading RowId values from ResultSets and
+ * setting them in PreparedStatements or CallableStatements.
+ *
+ * <p><b>Important Notes:</b></p>
+ * <ul>
+ *   <li>This type is NOT serializable (isSerializable() returns false)</li>
+ *   <li>valueOf(String) operation is not supported and will throw UnsupportedOperationException</li>
+ *   <li>stringOf() is supported for display purposes but the result cannot be converted back to RowId</li>
+ *   <li>RowId values are typically only valid within a single database session</li>
+ *   <li>RowId lifetime and validity are database-specific</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<RowId> type = TypeFactory.getType(RowId.class);
+ *
+ * // Reading a RowId from database (Oracle example)
+ * try (ResultSet rs = stmt.executeQuery("SELECT ROWID, name FROM employees WHERE id = 1")) {
+ *     if (rs.next()) {
+ *         RowId rowId = type.get(rs, 1);
+ *         String name = rs.getString(2);
+ *
+ *         // Use RowId for quick row access
+ *         PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET name = ? WHERE ROWID = ?");
+ *         updateStmt.setString(1, "New Name");
+ *         type.set(updateStmt, 2, rowId);
+ *         updateStmt.executeUpdate();
+ *     }
+ * }
+ *
+ * // Converting to string for logging (one-way conversion)
+ * String rowIdStr = type.stringOf(rowId);   // OK for display
+ * System.out.println("Row ID: " + rowIdStr);
+ *
+ * // Note: This operation is NOT supported
+ * // RowId restored = type.valueOf(rowIdStr);   // Throws UnsupportedOperationException
+ * }</pre>
+ */
 public class RowIdType extends AbstractType<RowId> {
 
     public static final String ROW_ID = RowId.class.getSimpleName();
 
+    /**
+     * Constructs a new RowIdType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     RowIdType() {
         super(ROW_ID);
     }
@@ -38,7 +88,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * Class<RowId> clazz = type.clazz();  // Returns RowId.class
+     * Class<RowId> clazz = type.clazz();   // Returns RowId.class
      * }</pre>
      *
      * @return the Class object for java.sql.RowId.class
@@ -55,7 +105,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * boolean serializable = type.isSerializable();  // Returns false
+     * boolean serializable = type.isSerializable();   // Returns false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -73,7 +123,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * RowId rowId = resultSet.getRowId(1);
-     * String str = type.stringOf(rowId);  // Converts RowId to String
+     * String str = type.stringOf(rowId);   // Converts RowId to String
      * }</pre>
      *
      * @param x the RowId object to convert
@@ -113,7 +163,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users");
-     * RowId rowId = type.get(rs, 1);  // Get RowId from first column
+     * RowId rowId = type.get(rs, 1);   // Get RowId from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -134,7 +184,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users");
-     * RowId rowId = type.get(rs, "row_id");  // Get RowId by column name
+     * RowId rowId = type.get(rs, "row_id");   // Get RowId by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -155,7 +205,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET status = ? WHERE ROWID = ?");
-     * type.set(stmt, 2, rowId);  // Set RowId at parameter index 2
+     * type.set(stmt, 2, rowId);   // Set RowId at parameter index 2
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -176,7 +226,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CallableStatement stmt = conn.prepareCall("{call update_user_status(?, ?)}");
-     * type.set(stmt, "user_rowid", rowId);  // Set RowId by parameter name
+     * type.set(stmt, "user_rowid", rowId);   // Set RowId by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -198,7 +248,7 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, rowId, config);  // Writes RowId to character stream
+     * type.writeCharacter(writer, rowId, config);   // Writes RowId to character stream
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

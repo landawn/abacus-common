@@ -85,19 +85,19 @@ public class LongBinaryOperator2025Test extends TestBase {
     @Test
     public void testApplyAsLong_bitwiseAnd() {
         final LongBinaryOperator and = (a, b) -> a & b;
-        assertEquals(8L, and.applyAsLong(12L, 10L)); // 1100 & 1010 = 1000
+        assertEquals(8L, and.applyAsLong(12L, 10L));   // 1100 & 1010 = 1000
     }
 
     @Test
     public void testApplyAsLong_bitwiseOr() {
         final LongBinaryOperator or = (a, b) -> a | b;
-        assertEquals(14L, or.applyAsLong(12L, 10L)); // 1100 | 1010 = 1110
+        assertEquals(14L, or.applyAsLong(12L, 10L));   // 1100 | 1010 = 1110
     }
 
     @Test
     public void testApplyAsLong_bitwiseXor() {
         final LongBinaryOperator xor = (a, b) -> a ^ b;
-        assertEquals(6L, xor.applyAsLong(12L, 10L)); // 1100 ^ 1010 = 0110
+        assertEquals(6L, xor.applyAsLong(12L, 10L));   // 1100 ^ 1010 = 0110
     }
 
     @Test

@@ -80,15 +80,15 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result2 = equals.test((short) 3, (short) 7);   // returns false
      *
      * ShortBiPredicate lessThan = ShortBiPredicate.LESS_THAN;
-     * boolean result3 = lessThan.test((short) 3, (short) 7);  // returns true
+     * boolean result3 = lessThan.test((short) 3, (short) 7);   // returns true
      *
      * ShortBiPredicate inRange = (value, max) -> value >= 0 && value <= max;
-     * boolean result4 = inRange.test((short) 50, (short) 100);  // returns true
+     * boolean result4 = inRange.test((short) 50, (short) 100);   // returns true
      * }</pre>
      *
      * @param t the first input argument
      * @param u the second input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(short t, short u);
@@ -135,7 +135,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result3 = inRange.test((short) 150, (short) 200);   // returns false (not both < 100)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ShortBiPredicate and(final ShortBiPredicate other) {
@@ -161,7 +161,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result3 = equalsOrBothZero.test((short) 3, (short) 7);   // returns false
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ShortBiPredicate or(final ShortBiPredicate other) {

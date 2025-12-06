@@ -19,6 +19,8 @@ package com.landawn.abacus.util.function;
  * transformation operation, similar to flatMap. The LongConsumer parameter can be
  * invoked multiple times to pass multiple values downstream.
  *
+ * <p>This is a functional interface whose functional method is {@link #accept(long, java.util.function.LongConsumer)}.
+ *
  * @see java.util.stream.LongStream.LongMapMultiConsumer
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>

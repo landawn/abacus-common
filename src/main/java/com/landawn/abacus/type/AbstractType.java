@@ -141,12 +141,27 @@ public abstract class AbstractType<T> implements Type<T> {
         }
 
         name = simpleName;
-        xmlName = name.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
+        xmlName = name.replace("<", "&lt;").replace(">", "&gt;");   //NOSONAR
     }
 
     /**
      * Extracts type parameters from a generic type name.
      * For example, "Map&lt;String, Integer&gt;" returns ["String", "Integer"].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Extract type parameters from Map
+     * String[] params1 = getTypeParameters("Map<String, Integer>");
+     * // params1: ["String", "Integer"]
+     *
+     * // Extract type parameter from List
+     * String[] params2 = getTypeParameters("List<Long>");
+     * // params2: ["Long"]
+     *
+     * // No type parameters
+     * String[] params3 = getTypeParameters("String");
+     * // params3: [] (empty array)
+     * }</pre>
      *
      * @param typeName the type name to parse
      * @return array of type parameter names
@@ -158,6 +173,17 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Extracts all parameters from a type name.
      * This includes both type parameters and other attributes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Extract all parameters from a type name
+     * String[] params = getParameters("Map<String, Integer>");
+     * // params: ["String", "Integer"]
+     *
+     * // Complex type with nested parameters
+     * String[] params2 = getParameters("List<Map<String, Object>>");
+     * // Returns all extracted parameters
+     * }</pre>
      *
      * @param typeName the type name to parse
      * @return array of parameter names
@@ -946,6 +972,21 @@ public abstract class AbstractType<T> implements Type<T> {
      * Splits a string using the specified separator.
      * Handles regex special characters by escaping them.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Split with simple separator
+     * String[] result1 = split("a,b,c", ",");
+     * // result1: ["a", "b", "c"]
+     *
+     * // Split with regex special character (automatically escaped)
+     * String[] result2 = split("a.b.c", ".");
+     * // result2: ["a", "b", "c"]
+     *
+     * // Split with pipe (automatically escaped)
+     * String[] result3 = split("a|b|c", "|");
+     * // result3: ["a", "b", "c"]
+     * }</pre>
+     *
      * @param st the string to split
      * @param separator the separator
      * @return array of split strings
@@ -960,6 +1001,25 @@ public abstract class AbstractType<T> implements Type<T> {
      * Checks if a date string represents a {@code null} date/time.
      * Returns {@code true} for empty strings or the literal "null".
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Check null string
+     * boolean result1 = isNullDateTime(null);
+     * // result1: true
+     *
+     * // Check empty string
+     * boolean result2 = isNullDateTime("");
+     * // result2: true
+     *
+     * // Check "null" literal (case-insensitive)
+     * boolean result3 = isNullDateTime("null");
+     * // result3: true
+     *
+     * // Check valid date
+     * boolean result4 = isNullDateTime("2023-01-01");
+     * // result4: false
+     * }</pre>
+     *
      * @param date the date string to check
      * @return {@code true} if the date represents null
      */
@@ -970,6 +1030,21 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if a character sequence possibly represents a long timestamp.
      * A string is considered a possible long if positions 2 and 4 contain digits.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Check numeric timestamp
+     * boolean result1 = isPossibleLong("1234567890");
+     * // result1: true (positions 2 and 4 are digits)
+     *
+     * // Check ISO date format
+     * boolean result2 = isPossibleLong("2023-01-01");
+     * // result2: false (position 4 is '-', not a digit)
+     *
+     * // Check short string
+     * boolean result3 = isPossibleLong("123");
+     * // result3: false (length <= 4)
+     * }</pre>
      *
      * @param dateTime the character sequence to check
      * @return {@code true} if it could be a long timestamp
@@ -1037,7 +1112,7 @@ public abstract class AbstractType<T> implements Type<T> {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
+                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
             }
         }
 
@@ -1049,7 +1124,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 1: {
                 ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
-                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
+                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
                 }
 
                 return ch - '0';
@@ -1102,7 +1177,7 @@ public abstract class AbstractType<T> implements Type<T> {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
+                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
             }
         }
 
@@ -1177,6 +1252,18 @@ public abstract class AbstractType<T> implements Type<T> {
      * Gets a column value from a ResultSet with type conversion.
      * Uses the type system to retrieve and convert the value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get String value from column 1
+     * String name = getColumnValue(resultSet, 1, String.class);
+     *
+     * // Get Integer value from column 2
+     * Integer age = getColumnValue(resultSet, 2, Integer.class);
+     *
+     * // Get Date value from column 3
+     * Date createdDate = getColumnValue(resultSet, 3, Date.class);
+     * }</pre>
+     *
      * @param <T> the target type
      * @param rs the ResultSet
      * @param columnIndex the column index (1-based)
@@ -1192,6 +1279,18 @@ public abstract class AbstractType<T> implements Type<T> {
      * Gets a column value from a ResultSet by label with type conversion.
      * Uses the type system to retrieve and convert the value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get String value by column name
+     * String name = getColumnValue(resultSet, "user_name", String.class);
+     *
+     * // Get Integer value by column name
+     * Integer age = getColumnValue(resultSet, "age", Integer.class);
+     *
+     * // Get Date value by column name
+     * Date createdDate = getColumnValue(resultSet, "created_at", Date.class);
+     * }</pre>
+     *
      * @param <T> the target type
      * @param rs the ResultSet
      * @param columnLabel the column label
@@ -1206,6 +1305,21 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Calculates buffer size for string operations.
      * Prevents integer overflow by checking against MAX_VALUE.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Calculate buffer size for 100 elements, each 20 chars
+     * int bufferSize1 = calculateBufferSize(100, 20);
+     * // bufferSize1: 2000
+     *
+     * // Calculate with potential overflow
+     * int bufferSize2 = calculateBufferSize(Integer.MAX_VALUE / 10, 20);
+     * // bufferSize2: Integer.MAX_VALUE (overflow prevented)
+     *
+     * // Small calculation
+     * int bufferSize3 = calculateBufferSize(5, 10);
+     * // bufferSize3: 50
+     * }</pre>
      *
      * @param len the number of elements
      * @param elementPlusDelimiterLen the length of each element plus delimiter

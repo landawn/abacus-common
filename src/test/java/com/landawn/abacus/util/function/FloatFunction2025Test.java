@@ -34,7 +34,7 @@ public class FloatFunction2025Test extends TestBase {
         final FloatFunction<Integer> composed = function.andThen(after);
         final Integer result = composed.apply(123.45f);
 
-        assertEquals(6, result); // "123.45".length()
+        assertEquals(6, result);   // "123.45".length()
     }
 
     @Test

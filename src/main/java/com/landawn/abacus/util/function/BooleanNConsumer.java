@@ -34,7 +34,7 @@ public interface BooleanNConsumer {
      *     for (boolean v : values) System.out.print(v + " ");
      *     System.out.println();
      * };
-     * logger.accept(true, false, true);  // Prints: true false true
+     * logger.accept(true, false, true);   // Prints: true false true
      * }</pre>
      *
      * @param args the input arguments as a variable-length array of {@code boolean} values.

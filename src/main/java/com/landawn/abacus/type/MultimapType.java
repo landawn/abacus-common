@@ -95,10 +95,9 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultimapType<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> type =
-     *     new MultimapType<>(Multimap.class, "String", "Integer", "List<Integer>");
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
      * String name = type.declaringName();
-     * // Returns: "Multimap<String, Integer, List<Integer>>"
+     * // Returns: "ListMultimap<String, Integer>"
      * }</pre>
      *
      * @return The declaring name in format "MultimapClass&lt;KeyDeclaringName[, ElementDeclaringName][, ValueDeclaringName]&gt;"
@@ -113,10 +112,9 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultimapType<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> type =
-     *     new MultimapType<>(Multimap.class, "String", "Integer", "List<Integer>");
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
      * Class<?> clazz = type.clazz();
-     * // Returns: Multimap.class
+     * // Returns: ListMultimap.class
      * }</pre>
      *
      * @return The Class object for the Multimap implementation
@@ -135,13 +133,11 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultimapType<String, Integer, List<Integer>, Multimap<String, Integer, List<Integer>>> type =
-     *     new MultimapType<>(Multimap.class, "String", "Integer", "List<Integer>");
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
      * Type<?>[] paramTypes = type.getParameterTypes();
-     * // Returns: [StringType, IntegerType, ListType<Integer>]
+     * // Returns: [StringType, IntegerType]
      * // paramTypes[0] is the key type (String)
      * // paramTypes[1] is the element type (Integer)
-     * // paramTypes[2] is the value collection type (List<Integer>)
      * }</pre>
      *
      * @return An array containing the parameter types
@@ -180,8 +176,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultimapType<String, String, List<String>, ListMultimap<String, String>> type =
-     *     new MultimapType<>(ListMultimap.class, "String", "String", null);
+     * Type<ListMultimap<String, String>> type = TypeFactory.getType("ListMultimap<String, String>");
      * ListMultimap<String, String> multimap = N.newLinkedListMultimap();
      * multimap.put("colors", "red");
      * multimap.put("colors", "blue");
@@ -210,8 +205,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultimapType<String, String, List<String>, ListMultimap<String, String>> type =
-     *     new MultimapType<>(ListMultimap.class, "String", "String", null);
+     * Type<ListMultimap<String, String>> type = TypeFactory.getType("ListMultimap<String, String>");
      *
      * ListMultimap<String, String> multimap = type.valueOf("{\"colors\":[\"red\",\"blue\"],\"sizes\":[\"large\"]}");
      * // Returns: ListMultimap with "colors" -> ["red", "blue"] and "sizes" -> ["large"]
@@ -256,6 +250,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     /**
      * Generates the type name for a Multimap with the specified implementation class, key, element and value types.
+     * This is an internal method used by the type system.
      *
      * @param typeClass The Multimap implementation class
      * @param keyTypeName The name of the key type

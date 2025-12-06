@@ -113,7 +113,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * <pre>{@code
      * AbstractIntegerType type = TypeFactory.getType(Integer.class);
      * char[] buffer = "12345".toCharArray();
-     * Integer value = type.valueOf(buffer, 0, 5);  // returns 12345
+     * Integer value = type.valueOf(buffer, 0, 5);   // returns 12345
      * }</pre>
      *
      * @param cbuf the character array to convert
@@ -155,11 +155,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive int types
      * PrimitiveIntType type = TypeFactory.getType(int.class);
-     * int value = type.get(rs, 1);  // Returns 0 for SQL NULL
+     * int value = type.get(rs, 1);   // Returns 0 for SQL NULL
      *
      * // For wrapper Integer types
      * IntegerType type = TypeFactory.getType(Integer.class);
-     * Integer value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
+     * Integer value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -181,11 +181,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive int types
      * PrimitiveIntType type = TypeFactory.getType(int.class);
-     * int value = type.get(rs, "count");  // Returns 0 for SQL NULL
+     * int value = type.get(rs, "count");   // Returns 0 for SQL NULL
      *
      * // For wrapper Integer types
      * IntegerType type = TypeFactory.getType(Integer.class);
-     * Integer value = type.get(rs, "count");  // Returns null for SQL NULL (overridden in subclass)
+     * Integer value = type.get(rs, "count");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

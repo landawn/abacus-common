@@ -35,7 +35,7 @@ import java.io.OutputStream;
  * try (FileOutputStream fileOut = new FileOutputStream("data.lz4");
  *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut)) {
  *     lz4Out.write(data);
- *     lz4Out.finish();  // Ensure all data is compressed and written
+ *     lz4Out.finish();   // Ensure all data is compressed and written
  * }
  * }</pre>
  * 
@@ -89,7 +89,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lz4Out.write(65);  // Write the byte 'A'
+     * lz4Out.write(65);   // Write the byte 'A'
      * }</pre>
      * 
      * @param b the byte to write (the 8 low-order bits are written)
@@ -165,7 +165,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * lz4Out.write(data);
-     * lz4Out.finish();  // Ensure all data is compressed
+     * lz4Out.finish();   // Ensure all data is compressed
      * // The underlying stream is still open for other uses
      * }</pre>
      * 

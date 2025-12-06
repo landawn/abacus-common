@@ -38,6 +38,10 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     public static final String ATOMIC_LONG = AtomicLong.class.getSimpleName();
 
+    /**
+     * Package-private constructor for AtomicLongType.
+     * This constructor is called by the TypeFactory to create AtomicLong type instances.
+     */
     AtomicLongType() {
         super(ATOMIC_LONG);
     }

@@ -43,7 +43,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Consumer<String> printer = System.out::println;
-     * printer.accept("Hello, World!");  // Prints: Hello, World!
+     * printer.accept("Hello, World!");   // Prints: Hello, World!
      *
      * List<String> list = new ArrayList<>();
      * Consumer<String> listAdder = list::add;
@@ -68,7 +68,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * Consumer<String> logger = s -> System.out.println("Processing: " + s);
      * Consumer<String> validator = s -> { if (s.isEmpty()) throw new IllegalArgumentException(); };
      * Consumer<String> combined = logger.andThen(validator);
-     * combined.accept("data");  // Logs then validates
+     * combined.accept("data");   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

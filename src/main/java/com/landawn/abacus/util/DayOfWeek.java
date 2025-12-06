@@ -25,10 +25,10 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get day from integer value
- * DayOfWeek monday = DayOfWeek.valueOf(1);  // Returns MONDAY
+ * DayOfWeek monday = DayOfWeek.valueOf(1);   // Returns MONDAY
  * 
  * // Get integer value from day
- * int dayValue = DayOfWeek.FRIDAY.intValue();  // Returns 5
+ * int dayValue = DayOfWeek.FRIDAY.intValue();   // Returns 5
  * 
  * // Use in switch statements
  * DayOfWeek today = DayOfWeek.WEDNESDAY;

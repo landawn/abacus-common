@@ -44,6 +44,15 @@ public interface FloatToIntFunction {
      * <p>The implementation should define how the float value is transformed into an int value.
      * Common implementations include truncation, rounding, or custom mapping logic.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatToIntFunction truncate = value -> (int) value;
+     * int result = truncate.applyAsInt(3.14f); // Returns 3
+     *
+     * FloatToIntFunction round = value -> Math.round(value);
+     * int rounded = round.applyAsInt(3.7f); // Returns 4
+     * }</pre>
+     *
      * @param value the float function argument
      * @return the int function result
      */

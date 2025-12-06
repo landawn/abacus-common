@@ -47,10 +47,10 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      * char result2 = unbox.applyAsChar(null);   // returns '\0' (0)
      *
      * ToCharFunction<String> firstChar = str -> str.charAt(0);
-     * char result3 = firstChar.applyAsChar("Hello");  // returns 'H'
+     * char result3 = firstChar.applyAsChar("Hello");   // returns 'H'
      *
      * ToCharFunction<Integer> digitToChar = n -> Character.forDigit(n, 10);
-     * char result4 = digitToChar.applyAsChar(5);  // returns '5'
+     * char result4 = digitToChar.applyAsChar(5);   // returns '5'
      * }</pre>
      *
      * @param value the function argument

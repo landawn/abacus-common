@@ -64,7 +64,7 @@ public class ShortBiConsumer2025Test extends TestBase {
     private void acceptHelper(short t, short u) {
         // Helper method for method reference test
         short sum = (short) (t + u);
-        assertTrue(sum > 0 || sum <= 0); // Always true, just using the values
+        assertTrue(sum > 0 || sum <= 0);   // Always true, just using the values
     }
 
     @Test

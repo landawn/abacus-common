@@ -47,13 +47,13 @@ public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntBinaryOperator adder = (a, b) -> a + b;
-     * int sum = adder.applyAsInt(5, 3);  // Returns 8
+     * int sum = adder.applyAsInt(5, 3);   // Returns 8
      *
      * IntBinaryOperator multiplier = (a, b) -> a * b;
-     * int product = multiplier.applyAsInt(4, 7);  // Returns 28
+     * int product = multiplier.applyAsInt(4, 7);   // Returns 28
      *
      * IntBinaryOperator max = Math::max;
-     * int maximum = max.applyAsInt(10, 20);  // Returns 20
+     * int maximum = max.applyAsInt(10, 20);   // Returns 20
      * }</pre>
      *
      * @param left the first operand

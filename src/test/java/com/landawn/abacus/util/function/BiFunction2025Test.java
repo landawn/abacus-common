@@ -43,7 +43,7 @@ public class BiFunction2025Test extends TestBase {
         BiFunction<String, Integer, Integer> chainedFunction = biFunction.andThen(afterFunction);
         Integer finalResult = chainedFunction.apply("value", 10);
 
-        assertEquals(8, finalResult); // "value:10" has length 8
+        assertEquals(8, finalResult);   // "value:10" has length 8
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BiFunction2025Test extends TestBase {
         BiFunction<Integer, Integer, String> chainedFunction = biFunction.andThen(multiply).andThen(toString);
         String result = chainedFunction.apply(5, 10);
 
-        assertEquals("30", result); // (5 + 10) * 2 = 30
+        assertEquals("30", result);   // (5 + 10) * 2 = 30
     }
 
     @Test

@@ -76,7 +76,7 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
      * // Composed function that calculates volume and formats it
      * DoubleTriFunction<String> volumeWithFormat = volume.andThen(formatter);
      *
-     * String result = volumeWithFormat.apply(2.0, 3.0, 4.0);  // "Volume: 24.00 cubic units"
+     * String result = volumeWithFormat.apply(2.0, 3.0, 4.0);   // "Volume: 24.00 cubic units"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

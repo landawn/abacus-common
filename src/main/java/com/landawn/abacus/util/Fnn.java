@@ -104,7 +104,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Rate-limited operations
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi = 
- *     Fnn.rateLimiter(10.0);  // 10 requests per second
+ *     Fnn.rateLimiter(10.0);   // 10 requests per second
  *
  * // Map entry manipulation
  * Map<String, Integer> scores = data.stream()
@@ -253,43 +253,79 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Supplier which returns a single instance created by calling the specified supplier.get().
-     * The instance is created lazily on the first call and cached for subsequent calls.
+     * Returns a memoized Supplier that caches the result of the first invocation and returns the cached value
+     * on subsequent calls. The supplier creates a single instance lazily on the first call to {@code get()},
+     * and all subsequent calls return the same cached instance without re-executing the underlying supplier logic.
+     * This is particularly useful for expensive initialization operations that should only execute once.
+     *
+     * <p>The returned supplier is <b>thread-safe</b> and guarantees that the underlying supplier is called
+     * at most once, even when accessed concurrently from multiple threads. The implementation uses
+     * double-checked locking to ensure thread safety with minimal synchronization overhead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Expensive database connection initialization
+     * Throwables.Supplier<Connection, SQLException> dbSupplier =
+     *     Fnn.memoize(() -> DriverManager.getConnection(url, user, pass));
+     * Connection conn1 = dbSupplier.get();   // Creates connection
+     * Connection conn2 = dbSupplier.get();   // Returns same connection
+     * }</pre>
      *
      * @param <T> the type of results supplied by this supplier
-     * @param <E> the type of exception that may be thrown
-     * @param supplier the supplier to memorize
-     * @return a memorized version of the supplier that caches the result
+     * @param <E> the type of exception that may be thrown by the supplier
+     * @param supplier the supplier whose result should be memoized; must not be null
+     * @return a memoized version of the supplier that caches the result after the first call
+     * @throws IllegalArgumentException if supplier is null
+     * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
+     * @see Throwables.LazyInitializer#of(Throwables.Supplier)
      */
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
         return Throwables.LazyInitializer.of(supplier);
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+     * Returns a memoized Supplier with time-based expiration that caches the supplied value for a specified duration.
+     * The returned supplier caches the result from the first invocation and returns the cached value on subsequent
+     * calls until the specified time has elapsed. After expiration, the next call triggers a fresh computation,
+     * which is then cached for another duration period. This is ideal for expensive operations where stale data
+     * is acceptable for a limited time window.
      *
-     * Returns a supplier that caches the instance supplied by the delegate and removes the cached
-     * value after the specified time has passed. Subsequent calls to get() return the cached
-     * value if the expiration time has not passed. After the expiration time, a new value is
-     * retrieved, cached, and returned. See: <a
-     * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
+     * <p><b>Thread Safety:</b> The returned supplier is <b>thread-safe</b> and uses double-checked locking with
+     * volatile variables to ensure correct behavior under concurrent access. Multiple threads may safely call
+     * {@code get()} simultaneously.</p>
      *
-     * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
-     * cached value, which will be recalculated when get() is called on the reserialized
-     * instance. The actual memoization does not happen when the underlying delegate throws an
-     * exception.
+     * <p><b>Exception Handling:</b> If the underlying supplier throws an exception, the value is not cached and
+     * subsequent calls will retry the computation. The memoization only occurs upon successful completion,
+     * ensuring that transient failures don't permanently cache error states.</p>
      *
-     * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
-     * delegating calls until it returns valid data.
+     * <p><b>Serialization Note:</b> The supplier's serialized form does not contain the cached value.
+     * Deserialization will result in a fresh supplier that recomputes the value on first access.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Cache expensive API call results for 5 minutes
+     * Throwables.Supplier<ApiResponse, IOException> apiSupplier =
+     *     Fnn.memoizeWithExpiration(() -> fetchFromAPI(), 5, TimeUnit.MINUTES);
+     *
+     * // Refresh configuration periodically
+     * Throwables.Supplier<Config, Exception> configSupplier =
+     *     Fnn.memoizeWithExpiration(() -> loadConfig(), 1, TimeUnit.HOURS);
+     * }</pre>
+     *
+     * <p><b>Note:</b> This implementation is inspired by Google Guava's memoization utilities
+     * (Apache License 2.0) and adapted for exception-throwing suppliers.</p>
      *
      * @param <T> the type of results supplied by this supplier
-     * @param <E> the type of exception that may be thrown
-     * @param supplier the delegate supplier
-     * @param duration the length of time after a value is created that it should stop being returned
-     *     by subsequent get() calls
-     * @param unit the unit that duration is expressed in
-     * @return a supplier that caches with expiration
-     * @throws IllegalArgumentException if duration is not positive
+     * @param <E> the type of exception that may be thrown by the supplier
+     * @param supplier the delegate supplier whose results should be memoized; must not be null
+     * @param duration the length of time after a value is created before it expires and must be recomputed
+     * @param unit the time unit for the duration parameter; must not be null
+     * @return a supplier that caches results with time-based expiration
+     * @throws IllegalArgumentException if supplier is null, unit is null, or duration is not positive
+     * @see #memoize(Throwables.Supplier)
+     * @see #memoize(Throwables.Function)
+     * @see TimeUnit
+     * @see <a href="http://en.wikipedia.org/wiki/Memoization">Memoization on Wikipedia</a>
      */
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
             final TimeUnit unit) throws IllegalArgumentException {
@@ -334,14 +370,43 @@ public final class Fnn {
     }
 
     /**
-     * Returns a memoized version of the input function that caches the result of each distinct input.
-     * The function uses a ConcurrentHashMap internally to cache results, making it thread-safe.
+     * Returns a memoized version of the input Function that caches results for each distinct input value.
+     * The returned function maintains an internal cache mapping input values to their computed results,
+     * ensuring that the underlying function is called at most once per unique input. Subsequent calls
+     * with the same input return the cached result immediately without re-executing the function logic.
+     * This is particularly valuable for expensive computations or I/O operations with deterministic results.
+     *
+     * <p><b>Thread Safety:</b> The returned function is <b>thread-safe</b> and uses a {@link ConcurrentHashMap}
+     * internally to store cached results, allowing safe concurrent access from multiple threads.</p>
+     *
+     * <p><b>Null Handling:</b> The function correctly handles {@code null} input values and {@code null}
+     * return values. Null inputs are cached separately from non-null inputs, and null results are
+     * distinguished from cache misses using a sentinel value.</p>
+     *
+     * <p><b>Memory Considerations:</b> The cache grows unbounded as new distinct inputs are encountered.
+     * For applications with a large or unbounded input space, consider the memory implications or use
+     * alternative caching strategies with size limits or expiration.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Expensive computation with memoization
+     * Throwables.Function<Integer, BigInteger, Exception> factorial =
+     *     Fnn.memoize(n -> calculateFactorial(n));
+     *
+     * // Database lookup with caching
+     * Throwables.Function<String, User, SQLException> userLookup =
+     *     Fnn.memoize(id -> database.findUserById(id));
+     * }</pre>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
-     * @param <E> the type of exception that may be thrown
-     * @param func the function to memoize
-     * @return a memoized version of the function that caches results by input
+     * @param <E> the type of exception that may be thrown by the function
+     * @param func the function to memoize; must not be null
+     * @return a memoized version of the function that caches results by input value
+     * @throws IllegalArgumentException if func is null
+     * @see #memoize(Throwables.Supplier)
+     * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
+     * @see ConcurrentHashMap
      */
     public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> func) {
         return new Throwables.Function<>() {
@@ -381,57 +446,128 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Function that always returns its input argument unchanged.
-     * This is the identity function for Throwables.Function.
+     * Returns the identity Function that always returns its input argument unchanged.
+     * This is the identity transformation {@code f(x) = x}, useful as a placeholder or default
+     * function in functional compositions where no transformation is desired.
+     *
+     * <p>The identity function is a fundamental building block in functional programming, often
+     * used as a neutral element in function composition or as a default mapping function.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Use as default mapper
+     * Throwables.Function<String, String, IOException> mapper =
+     *     shouldTransform ? Fnn.ff(customTransform) : Fnn.identity();
+     *
+     * // In stream operations
+     * stream.map(Fnn.identity()); // No-op transformation
+     * }</pre>
      *
      * @param <T> the type of the input and output of the function
      * @param <E> the type of exception that may be thrown
-     * @return a function that always returns its input argument
+     * @return a function that always returns its input argument unchanged
+     * @see java.util.function.Function#identity()
      */
     public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
         return Fn.IDENTITY;
     }
 
     /**
-     * Returns a Throwables.Predicate that always returns {@code true} regardless of input.
+     * Returns a Predicate that always evaluates to {@code true} regardless of the input.
+     * This constant predicate accepts all values and never throws exceptions (despite the generic exception type).
+     * It's useful as a default or placeholder predicate when all elements should pass a filter.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Conditional filtering
+     * Throwables.Predicate<String, IOException> filter =
+     *     enableFiltering ? Fnn.pp(customFilter) : Fnn.alwaysTrue();
+     *
+     * // Accept all elements in stream
+     * stream.filter(Fnn.alwaysTrue())
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
-     * @param <E> the type of exception that may be thrown
-     * @return a predicate that always returns true
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a predicate that always returns {@code true}
+     * @see #alwaysFalse()
      */
     public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysTrue() {
         return Fn.ALWAYS_TRUE;
     }
 
     /**
-     * Returns a Throwables.Predicate that always returns {@code false} regardless of input.
+     * Returns a Predicate that always evaluates to {@code false} regardless of the input.
+     * This constant predicate rejects all values and never throws exceptions (despite the generic exception type).
+     * It's useful as a default or placeholder predicate when all elements should be filtered out.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Conditional filtering
+     * Throwables.Predicate<String, IOException> filter =
+     *     enableFiltering ? Fnn.pp(customFilter) : Fnn.alwaysFalse();
+     *
+     * // Reject all elements in stream
+     * stream.filter(Fnn.alwaysFalse()); // Results in empty stream
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
-     * @param <E> the type of exception that may be thrown
-     * @return a predicate that always returns false
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a predicate that always returns {@code false}
+     * @see #alwaysTrue()
      */
     public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysFalse() {
         return Fn.ALWAYS_FALSE;
     }
 
     /**
-     * Returns a Throwables.Function that converts its input to a String using String.valueOf().
+     * Returns a Function that converts its input to a String representation using {@link String#valueOf(Object)}.
+     * This function handles {@code null} inputs safely, returning the string {@code "null"} for null input.
+     * The conversion never throws exceptions despite the generic exception type parameter.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Convert stream elements to strings
+     * Seq<Object, IOException> objects = ...;
+     * Seq<String, IOException> strings = objects.map(Fnn.toStr());
+     *
+     * // Use in exception-throwing context
+     * Throwables.Function<Integer, String, SQLException> converter = Fnn.toStr();
+     * }</pre>
      *
      * @param <T> the type of the input to the function
-     * @param <E> the type of exception that may be thrown
-     * @return a function that converts its input to String
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a function that converts its input to a String using {@code String.valueOf()}
+     * @see String#valueOf(Object)
      */
     public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
         return Fn.TO_STRING;
     }
 
     /**
-     * Returns a Throwables.Function that extracts the key from a Map.Entry.
+     * Returns a Function that extracts the key component from a {@link Map.Entry}.
+     * This function applies {@link Map.Entry#getKey()} to transform an entry into its key.
+     * It's particularly useful in stream operations for extracting keys from entry collections.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Extract keys from map entries
+     * Map<String, Integer> map = ...;
+     * List<String> keys = map.entrySet().stream()
+     *     .map(Fnn.key())
+     *     .collect(Collectors.toList());
+     *
+     * // Use in exception-throwing context
+     * Seq<Map.Entry<String, User>, IOException> entries = ...;
+     * Seq<String, IOException> keys = entries.map(Fnn.key());
+     * }</pre>
      *
      * @param <K> the type of keys in the entry
      * @param <V> the type of values in the entry
-     * @param <E> the type of exception that may be thrown
-     * @return a function that returns the key of a Map.Entry
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a function that extracts and returns the key from a Map.Entry
+     * @see Map.Entry#getKey()
+     * @see #value()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, K, E> key() {
@@ -439,12 +575,29 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Function that extracts the value from a Map.Entry.
+     * Returns a Function that extracts the value component from a {@link Map.Entry}.
+     * This function applies {@link Map.Entry#getValue()} to transform an entry into its value.
+     * It's particularly useful in stream operations for extracting values from entry collections.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Extract values from map entries
+     * Map<String, Integer> map = ...;
+     * List<Integer> values = map.entrySet().stream()
+     *     .map(Fnn.value())
+     *     .collect(Collectors.toList());
+     *
+     * // Use in exception-throwing context
+     * Seq<Map.Entry<String, User>, IOException> entries = ...;
+     * Seq<User, IOException> users = entries.map(Fnn.value());
+     * }</pre>
      *
      * @param <K> the type of keys in the entry
      * @param <V> the type of values in the entry
-     * @param <E> the type of exception that may be thrown
-     * @return a function that returns the value of a Map.Entry
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a function that extracts and returns the value from a Map.Entry
+     * @see Map.Entry#getValue()
+     * @see #key()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, V, E> value() {
@@ -452,12 +605,31 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Function that inverts a Map.Entry by swapping its key and value.
+     * Returns a Function that inverts a {@link Map.Entry} by swapping its key and value.
+     * The returned function transforms {@code Entry<K, V>} into {@code Entry<V, K>}, creating
+     * a new entry where the original value becomes the key and the original key becomes the value.
+     * This is useful for reversing map relationships or creating inverse indices.
      *
-     * @param <K> the type of keys in the entry
-     * @param <V> the type of values in the entry
-     * @param <E> the type of exception that may be thrown
-     * @return a function that returns an inverted Entry with key and value swapped
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create inverse map
+     * Map<String, Integer> original = ...;
+     * Map<Integer, String> inverse = original.entrySet().stream()
+     *     .map(Fnn.inverse())
+     *     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+     *
+     * // Reverse lookup
+     * Seq<Entry<UserId, UserName>, Exception> entries = ...;
+     * Seq<Entry<UserName, UserId>, Exception> reversed = entries.map(Fnn.inverse());
+     * }</pre>
+     *
+     * @param <K> the type of keys in the original entry (becomes value type in result)
+     * @param <V> the type of values in the original entry (becomes key type in result)
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a function that returns a new Entry with key and value swapped
+     * @see Map.Entry
+     * @see #key()
+     * @see #value()
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
@@ -465,12 +637,27 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.BiFunction that creates a Map.Entry from a key and value.
+     * Returns a BiFunction that creates a {@link Map.Entry} from a key and value pair.
+     * This factory function combines two separate values into a single Map.Entry, useful
+     * for constructing entries in stream operations or when building maps programmatically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create entries from parallel lists
+     * List<String> keys = ...;
+     * List<Integer> values = ...;
+     * Map<String, Integer> map = IntStream.range(0, keys.size())
+     *     .mapToObj(i -> Fnn.<String, Integer, RuntimeException>entry()
+     *         .apply(keys.get(i), values.get(i)))
+     *     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+     * }</pre>
      *
      * @param <K> the type of keys in the entry
      * @param <V> the type of values in the entry
-     * @param <E> the type of exception that may be thrown
-     * @return a BiFunction that creates a Map.Entry from key and value
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a BiFunction that creates a Map.Entry from a key and value
+     * @see Map.Entry
+     * @see java.util.AbstractMap.SimpleEntry
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
@@ -478,12 +665,32 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.BiFunction that creates a Pair from two values.
+     * Returns a BiFunction that creates a {@link Pair} from two values.
+     * This factory function combines a left and right value into a Pair tuple, useful for
+     * pairing related values in functional operations while maintaining type safety and immutability.
      *
-     * @param <L> the type of the left element
-     * @param <R> the type of the right element
-     * @param <E> the type of exception that may be thrown
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create pairs from stream elements
+     * Seq<String, Exception> names = ...;
+     * Seq<Pair<String, Integer>, Exception> namesWithLengths = names
+     *     .map(name -> Fnn.<String, Integer, Exception>pair()
+     *         .apply(name, name.length()));
+     *
+     * // Combine two streams
+     * List<Pair<String, Integer>> pairs = Stream.of("a", "b", "c")
+     *     .map(s -> Fnn.<String, Integer, RuntimeException>pair()
+     *         .apply(s, s.length()))
+     *     .collect(Collectors.toList());
+     * }</pre>
+     *
+     * @param <L> the type of the left (first) element in the pair
+     * @param <R> the type of the right (second) element in the pair
+     * @param <E> the type of exception that may be thrown (though none will be)
      * @return a BiFunction that creates a Pair from left and right values
+     * @see Pair
+     * @see #triple()
+     * @see #entry()
      */
     @SuppressWarnings("rawtypes")
     public static <L, R, E extends Exception> Throwables.BiFunction<L, R, Pair<L, R>, E> pair() {
@@ -491,13 +698,29 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.TriFunction that creates a Triple from three values.
+     * Returns a TriFunction that creates a {@link Triple} from three values.
+     * This factory function combines left, middle, and right values into a Triple tuple,
+     * useful for grouping three related values in functional operations while maintaining
+     * type safety and immutability.
      *
-     * @param <L> the type of the left element
-     * @param <M> the type of the middle element
-     * @param <R> the type of the right element
-     * @param <E> the type of exception that may be thrown
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create triples from stream elements
+     * List<Triple<String, Integer, Boolean>> triples =
+     *     Stream.of("a", "b", "c")
+     *         .map(s -> Fnn.<String, Integer, Boolean, RuntimeException>triple()
+     *             .apply(s, s.length(), s.isEmpty()))
+     *         .collect(Collectors.toList());
+     * }</pre>
+     *
+     * @param <L> the type of the left (first) element in the triple
+     * @param <M> the type of the middle (second) element in the triple
+     * @param <R> the type of the right (third) element in the triple
+     * @param <E> the type of exception that may be thrown (though none will be)
      * @return a TriFunction that creates a Triple from left, middle, and right values
+     * @see Triple
+     * @see #pair()
+     * @see #tuple3()
      */
     @SuppressWarnings("rawtypes")
     public static <L, M, R, E extends Exception> Throwables.TriFunction<L, M, R, Triple<L, M, R>, E> triple() {
@@ -505,11 +728,24 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Function that wraps a single value in a Tuple1.
+     * Returns a Function that wraps a single value in a {@link Tuple1}.
+     * This factory function creates a single-element tuple, useful for maintaining consistency
+     * in APIs that work with tuples of various arities.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Wrap values in Tuple1
+     * List<Tuple1<String>> tuples = Stream.of("a", "b", "c")
+     *     .map(Fnn.<String, RuntimeException>tuple1())
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @param <T> the type of the element
-     * @param <E> the type of exception that may be thrown
+     * @param <E> the type of exception that may be thrown (though none will be)
      * @return a Function that creates a Tuple1 from a single value
+     * @see Tuple1
+     * @see #tuple2()
+     * @see #tuple3()
      */
     @SuppressWarnings("rawtypes")
     public static <T, E extends Exception> Throwables.Function<T, Tuple1<T>, E> tuple1() {
@@ -517,12 +753,27 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.BiFunction that wraps two values in a Tuple2.
+     * Returns a BiFunction that wraps two values in a {@link Tuple2}.
+     * This factory function combines two values into a two-element tuple, providing an
+     * alternative to {@link Pair} with indexed access semantics.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create Tuple2 from two values
+     * List<Tuple2<String, Integer>> tuples = Stream.of("a", "b", "c")
+     *     .map(s -> Fnn.<String, Integer, RuntimeException>tuple2()
+     *         .apply(s, s.length()))
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @param <T> the type of the first element
      * @param <U> the type of the second element
-     * @param <E> the type of exception that may be thrown
+     * @param <E> the type of exception that may be thrown (though none will be)
      * @return a BiFunction that creates a Tuple2 from two values
+     * @see Tuple2
+     * @see #tuple1()
+     * @see #tuple3()
+     * @see #pair()
      */
     @SuppressWarnings("rawtypes")
     public static <T, U, E extends Exception> Throwables.BiFunction<T, U, Tuple2<T, U>, E> tuple2() {
@@ -530,13 +781,28 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.TriFunction that wraps three values in a Tuple3.
+     * Returns a TriFunction that wraps three values in a {@link Tuple3}.
+     * This factory function combines three values into a three-element tuple, providing an
+     * alternative to {@link Triple} with indexed access semantics.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create Tuple3 from three values
+     * List<Tuple3<String, Integer, Boolean>> tuples = Stream.of("a", "b", "c")
+     *     .map(s -> Fnn.<String, Integer, Boolean, RuntimeException>tuple3()
+     *         .apply(s, s.length(), s.isEmpty()))
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @param <A> the type of the first element
      * @param <B> the type of the second element
      * @param <C> the type of the third element
-     * @param <E> the type of exception that may be thrown
+     * @param <E> the type of exception that may be thrown (though none will be)
      * @return a TriFunction that creates a Tuple3 from three values
+     * @see Tuple3
+     * @see #tuple1()
+     * @see #tuple2()
+     * @see #triple()
      */
     @SuppressWarnings("rawtypes")
     public static <A, B, C, E extends Exception> Throwables.TriFunction<A, B, C, Tuple3<A, B, C>, E> tuple3() {
@@ -544,21 +810,49 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Runnable that performs no operation when executed.
+     * Returns a no-op Runnable that performs no operation when executed.
+     * This empty action is useful as a placeholder or default operation in contexts where
+     * a Runnable is required but no action is needed. The runnable never throws exceptions
+     * despite the generic exception type parameter.
      *
-     * @param <E> the type of exception that may be thrown
-     * @return a Runnable that does nothing
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Use as default callback
+     * Throwables.Runnable<IOException> callback =
+     *     needsCallback ? Fnn.r(actualCallback) : Fnn.emptyAction();
+     *
+     * // No-op operation in stream
+     * actions.forEach(action -> action.run());
+     * }</pre>
+     *
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a Runnable that performs no operation
+     * @see #doNothing()
      */
     public static <E extends Exception> Throwables.Runnable<E> emptyAction() {
         return (Throwables.Runnable<E>) Fn.EMPTY_ACTION;
     }
 
     /**
-     * Returns a Throwables.Consumer that performs no operation on its input.
+     * Returns a no-op Consumer that performs no operation on its input.
+     * This empty consumer ignores its input and never throws exceptions despite the generic
+     * exception type parameter. It's useful as a placeholder or default consumer when an
+     * operation is required but no action should be taken.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Conditional processing
+     * Throwables.Consumer<String, IOException> processor =
+     *     enableProcessing ? Fnn.cc(actualProcessor) : Fnn.doNothing();
+     *
+     * // No-op in stream operations
+     * stream.forEach(Fnn.doNothing());
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
-     * @param <E> the type of exception that may be thrown
-     * @return a Consumer that does nothing
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a Consumer that performs no operation
+     * @see #emptyAction()
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
         return Fn.EMPTY_CONSUMER;
@@ -1497,7 +1791,14 @@ public final class Fnn {
     /**
      * Converts a standard Java UnaryOperator to a Throwables.UnaryOperator.
      * If the input is already a Throwables.UnaryOperator, it is returned as-is.
-     * 
+     * This allows seamless integration of standard Java operators in contexts requiring exception-throwing operators.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * UnaryOperator<String> javaOp = String::toUpperCase;
+     * Throwables.UnaryOperator<String, IOException> throwableOp = Fnn.from(javaOp);
+     * }</pre>
+     *
      * @param <T> the type of the operand and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param op the Java UnaryOperator to convert
@@ -1513,7 +1814,14 @@ public final class Fnn {
     /**
      * Converts a standard Java BinaryOperator to a Throwables.BinaryOperator.
      * If the input is already a Throwables.BinaryOperator, it is returned as-is.
-     * 
+     * This allows seamless integration of standard Java operators in contexts requiring exception-throwing operators.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BinaryOperator<Integer> javaOp = Integer::sum;
+     * Throwables.BinaryOperator<Integer, IOException> throwableOp = Fnn.from(javaOp);
+     * }</pre>
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param op the Java BinaryOperator to convert
@@ -1528,8 +1836,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.Supplier as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Supplier<String, IOException> supplier = Fnn.s(() -> readFromFile());
+     * }</pre>
+     *
      * @param <T> the type of results supplied by the supplier
      * @param <E> the type of the exception that may be thrown
      * @param supplier the supplier to return
@@ -1543,7 +1857,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Supplier by partially applying a function to a fixed argument.
      * The returned supplier will invoke the function with the provided argument when called.
-     * 
+     * This is useful for converting a function with a known argument into a parameterless supplier.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<Integer, String, IOException> func = i -> readLine(i);
+     * Throwables.Supplier<String, IOException> supplier = Fnn.s(5, func); // Reads line 5
+     * }</pre>
+     *
      * @param <A> the type of the fixed argument
      * @param <T> the type of the result
      * @param <E> the type of the exception that may be thrown
@@ -1558,8 +1879,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.Predicate as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Predicate<String, IOException> predicate = Fnn.p(s -> validateWithIO(s));
+     * }</pre>
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param predicate the predicate to return
@@ -1574,7 +1901,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Predicate by partially applying a BiPredicate to a fixed first argument.
      * The returned predicate will invoke the bi-predicate with the fixed argument and the test input.
-     * 
+     * This is useful for creating specialized predicates from more general bi-predicates.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiPredicate<String, Integer, IOException> biPred = (prefix, len) -> checkLength(prefix, len);
+     * Throwables.Predicate<Integer, IOException> pred = Fnn.p("test", biPred); // Fixed prefix "test"
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the input to the resulting predicate
      * @param <E> the type of the exception that may be thrown
@@ -1594,7 +1928,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Predicate by partially applying a TriPredicate to fixed first and second arguments.
      * The returned predicate will invoke the tri-predicate with the fixed arguments and the test input.
-     * 
+     * This enables converting a three-argument predicate into a single-argument predicate by fixing two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriPredicate<String, Integer, String, IOException> triPred = (prefix, len, str) -> validate(prefix, len, str);
+     * Throwables.Predicate<String, IOException> pred = Fnn.p("prefix", 10, triPred);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <B> the type of the fixed second argument
      * @param <T> the type of the input to the resulting predicate
@@ -1615,8 +1956,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.BiPredicate as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiPredicate<String, Integer, IOException> biPred = Fnn.p((s, i) -> checkWithIO(s, i));
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1632,7 +1979,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.BiPredicate by partially applying a TriPredicate to a fixed first argument.
      * The returned bi-predicate will invoke the tri-predicate with the fixed argument and the two test inputs.
-     * 
+     * This is useful for creating specialized bi-predicates from more general tri-predicates.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriPredicate<String, Integer, String, IOException> triPred = (prefix, len, suffix) -> validate(prefix, len, suffix);
+     * Throwables.BiPredicate<Integer, String, IOException> biPred = Fnn.p("prefix", triPred);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the first argument to the resulting bi-predicate
      * @param <U> the type of the second argument to the resulting bi-predicate
@@ -1652,8 +2006,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.TriPredicate as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriPredicate<String, Integer, Boolean, IOException> triPred = Fnn.p((s, i, b) -> checkWithIO(s, i, b));
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
      * @param <C> the type of the third argument to the predicate
@@ -1668,8 +2028,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.Consumer as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, IOException> consumer = Fnn.c(s -> writeToFile(s));
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the exception that may be thrown
      * @param consumer the consumer to return
@@ -1684,7 +2050,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Consumer by partially applying a BiConsumer to a fixed first argument.
      * The returned consumer will invoke the bi-consumer with the fixed argument and the consumed input.
-     * 
+     * This is useful for creating specialized consumers from more general bi-consumers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiConsumer<String, Integer, IOException> biCons = (prefix, num) -> write(prefix, num);
+     * Throwables.Consumer<Integer, IOException> cons = Fnn.c("Log:", biCons); // Fixed prefix
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the input to the resulting consumer
      * @param <E> the type of the exception that may be thrown
@@ -1704,7 +2077,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Consumer by partially applying a TriConsumer to fixed first and second arguments.
      * The returned consumer will invoke the tri-consumer with the fixed arguments and the consumed input.
-     * 
+     * This enables converting a three-argument consumer into a single-argument consumer by fixing two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriConsumer<String, Integer, String, IOException> triCons = (prefix, level, msg) -> log(prefix, level, msg);
+     * Throwables.Consumer<String, IOException> cons = Fnn.c("APP", 1, triCons);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <B> the type of the fixed second argument
      * @param <T> the type of the input to the resulting consumer
@@ -1725,8 +2105,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.BiConsumer as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiConsumer<String, Integer, IOException> biCons = Fnn.c((s, i) -> writeWithIO(s, i));
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param <E> the type of the exception that may be thrown
@@ -1742,7 +2128,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.BiConsumer by partially applying a TriConsumer to a fixed first argument.
      * The returned bi-consumer will invoke the tri-consumer with the fixed argument and the two consumed inputs.
-     * 
+     * This is useful for creating specialized bi-consumers from more general tri-consumers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriConsumer<String, Integer, String, IOException> triCons = (prefix, level, msg) -> log(prefix, level, msg);
+     * Throwables.BiConsumer<Integer, String, IOException> biCons = Fnn.c("APP", triCons);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the first argument to the resulting bi-consumer
      * @param <U> the type of the second argument to the resulting bi-consumer
@@ -1762,8 +2155,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.TriConsumer as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriConsumer<String, Integer, Boolean, IOException> triCons = Fnn.c((s, i, b) -> processWithIO(s, i, b));
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the consumer
      * @param <B> the type of the second argument to the consumer
      * @param <C> the type of the third argument to the consumer
@@ -1778,8 +2177,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.Function as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<String, Integer, IOException> func = Fnn.f(s -> parseWithIO(s));
+     * }</pre>
+     *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
@@ -1795,7 +2200,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Function by partially applying a BiFunction to a fixed first argument.
      * The returned function will invoke the bi-function with the fixed argument and the function input.
-     * 
+     * This is useful for creating specialized functions from more general bi-functions.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiFunction<String, Integer, String, IOException> biFunc = (prefix, num) -> format(prefix, num);
+     * Throwables.Function<Integer, String, IOException> func = Fnn.f("Value:", biFunc);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the input to the resulting function
      * @param <R> the type of the result of the function
@@ -1816,7 +2228,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Function by partially applying a TriFunction to fixed first and second arguments.
      * The returned function will invoke the tri-function with the fixed arguments and the function input.
-     * 
+     * This enables converting a three-argument function into a single-argument function by fixing two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriFunction<String, Integer, String, String, IOException> triFunc = (prefix, num, suffix) -> format(prefix, num, suffix);
+     * Throwables.Function<String, String, IOException> func = Fnn.f("Start:", 42, triFunc);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <B> the type of the fixed second argument
      * @param <T> the type of the input to the resulting function
@@ -1838,8 +2257,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.BiFunction as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiFunction<String, Integer, String, IOException> biFunc = Fnn.f((s, i) -> combineWithIO(s, i));
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
@@ -1856,7 +2281,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.BiFunction by partially applying a TriFunction to a fixed first argument.
      * The returned bi-function will invoke the tri-function with the fixed argument and the two function inputs.
-     * 
+     * This is useful for creating specialized bi-functions from more general tri-functions.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriFunction<String, Integer, String, String, IOException> triFunc = (prefix, num, suffix) -> format(prefix, num, suffix);
+     * Throwables.BiFunction<Integer, String, String, IOException> biFunc = Fnn.f("Start:", triFunc);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the first argument to the resulting bi-function
      * @param <U> the type of the second argument to the resulting bi-function
@@ -1877,8 +2309,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.TriFunction as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriFunction<String, Integer, Boolean, String, IOException> triFunc = Fnn.f((s, i, b) -> processWithIO(s, i, b));
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
      * @param <C> the type of the third argument to the function
@@ -1894,8 +2332,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.UnaryOperator as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.UnaryOperator<String, IOException> op = Fnn.o(s -> transformWithIO(s));
+     * }</pre>
+     *
      * @param <T> the type of the operand and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param unaryOperator the unary operator to return
@@ -1910,8 +2354,14 @@ public final class Fnn {
 
     /**
      * Returns the provided Throwables.BinaryOperator as-is.
-     * This is a shorthand identity method that can help with type inference in certain contexts.
-     * 
+     * This is a shorthand identity method that can help with type inference in certain contexts,
+     * particularly when passing lambda expressions or method references to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BinaryOperator<Integer, IOException> op = Fnn.o((a, b) -> addWithIO(a, b));
+     * }</pre>
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param binaryOperator the binary operator to return
@@ -1963,7 +2413,14 @@ public final class Fnn {
     /**
      * Casts a standard Java Predicate to a Throwables.Predicate.
      * This method performs an unchecked cast and should be used with caution.
-     * 
+     * It enables using standard Java predicates in contexts that expect exception-throwing predicates.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Predicate<String> javaPred = String::isEmpty;
+     * Throwables.Predicate<String, IOException> throwablePred = Fnn.pp(javaPred);
+     * }</pre>
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param predicate the Java Predicate to cast
@@ -1981,7 +2438,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Predicate by partially applying a standard Java BiPredicate to a fixed first argument.
      * The returned predicate will invoke the bi-predicate with the fixed argument and the test input.
-     * 
+     * This enables creating specialized predicates from standard Java bi-predicates.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, Integer> javaBiPred = (s, len) -> s.length() > len;
+     * Throwables.Predicate<Integer, IOException> pred = Fnn.pp("test", javaBiPred);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <T> the type of the input to the resulting predicate
      * @param <E> the type of the exception that may be thrown
@@ -2001,7 +2465,14 @@ public final class Fnn {
     /**
      * Creates a Throwables.Predicate by partially applying a TriPredicate to fixed first and second arguments.
      * The returned predicate will invoke the tri-predicate with the fixed arguments and the test input.
-     * 
+     * This enables converting standard TriPredicates into single-argument predicates.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriPredicate<String, Integer, String> triPred = (prefix, len, str) -> str.startsWith(prefix) && str.length() > len;
+     * Throwables.Predicate<String, IOException> pred = Fnn.pp("test", 5, triPred);
+     * }</pre>
+     *
      * @param <A> the type of the fixed first argument
      * @param <B> the type of the fixed second argument
      * @param <T> the type of the input to the resulting predicate
@@ -2343,6 +2814,13 @@ public final class Fnn {
     /**
      * Returns a synchronized Predicate that executes the provided predicate within a synchronized block.
      * All calls to the returned predicate's test method will be synchronized on the specified mutex object.
+     * This is useful for making predicates thread-safe when accessing shared mutable state.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.Predicate<String, IOException> syncPred = Fnn.sp(lock, s -> sharedState.check(s));
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the checked exception that the predicate may throw
@@ -2574,7 +3052,13 @@ public final class Fnn {
     /**
      * Converts a Consumer to a Function that returns {@code null} after executing the consumer.
      * The returned function will execute the consumer's accept method on its input
-     * and then return {@code null}.
+     * and then return {@code null}. This is useful when you need a function interface but only have side effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, IOException> consumer = s -> writeToFile(s);
+     * Throwables.Function<String, Void, IOException> func = Fnn.c2f(consumer);
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
@@ -2596,7 +3080,13 @@ public final class Fnn {
     /**
      * Converts a Consumer to a Function that returns a specified value after executing the consumer.
      * The returned function will execute the consumer's accept method on its input
-     * and then return the specified value.
+     * and then return the specified value. This is useful for chaining operations.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, IOException> consumer = s -> writeToFile(s);
+     * Throwables.Function<String, Boolean, IOException> func = Fnn.c2f(consumer, true);
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer/function
      * @param <R> the type of the result of the function
@@ -2723,7 +3213,13 @@ public final class Fnn {
     /**
      * Converts a Function to a Consumer that ignores the function's return value.
      * The returned consumer will execute the function's apply method on its input
-     * and discard the result.
+     * and discard the result. This is useful when you need a consumer interface but have a function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<String, Integer, IOException> func = s -> parseAndSave(s);
+     * Throwables.Consumer<String, IOException> consumer = Fnn.f2c(func);
+     * }</pre>
      *
      * @param <T> the type of the input to the function/consumer
      * @param <R> the type of the result of the function (ignored)
@@ -2785,6 +3281,12 @@ public final class Fnn {
     /**
      * Returns the provided Runnable as a Throwables.Runnable.
      * This is an identity function that simply returns the input runnable.
+     * This helps with type inference when passing runnables to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Runnable<IOException> runnable = Fnn.r(() -> performIOOperation());
+     * }</pre>
      *
      * @param <E> the type of the checked exception that the runnable may throw
      * @param runnable the runnable to return
@@ -2800,6 +3302,12 @@ public final class Fnn {
     /**
      * Returns the provided Callable as a Throwables.Callable.
      * This is an identity function that simply returns the input callable.
+     * This helps with type inference when passing callables to generic methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Callable<String, IOException> callable = Fnn.c(() -> readFromFile());
+     * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param <E> the type of the checked exception that the callable may throw
@@ -2816,6 +3324,13 @@ public final class Fnn {
     /**
      * Converts a Runnable to a Callable that returns {@code null} after executing the runnable.
      * The returned callable will execute the runnable's run method and then return {@code null}.
+     * This is useful for adapting runnables to callable interfaces.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Runnable<IOException> runnable = () -> writeToFile();
+     * Throwables.Callable<Void, IOException> callable = Fnn.r2c(runnable);
+     * }</pre>
      *
      * @param <E> the type of the checked exception that may be thrown
      * @param runnable the runnable to convert to a callable
@@ -2834,6 +3349,13 @@ public final class Fnn {
     /**
      * Converts a Runnable to a Callable that returns a specified value after executing the runnable.
      * The returned callable will execute the runnable's run method and then return the specified value.
+     * This is useful for adapting runnables to callables when you need a specific return value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Runnable<IOException> runnable = () -> writeToFile();
+     * Throwables.Callable<Boolean, IOException> callable = Fnn.r2c(runnable, true);
+     * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param <E> the type of the checked exception that may be thrown
@@ -2855,6 +3377,13 @@ public final class Fnn {
     /**
      * Converts a Callable to a Runnable that ignores the callable's return value.
      * The returned runnable will execute the callable's call method and discard the result.
+     * This is useful for adapting callables to runnable interfaces when you don't need the return value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Callable<String, IOException> callable = () -> readFromFile();
+     * Throwables.Runnable<IOException> runnable = Fnn.c2r(callable);
+     * }</pre>
      *
      * @param <R> the type of the result of the callable (ignored)
      * @param <E> the type of the checked exception that may be thrown
@@ -2871,6 +3400,13 @@ public final class Fnn {
     /**
      * Casts a standard java.lang.Runnable to a Throwables.Runnable that can throw checked exceptions.
      * This method performs an unchecked cast and should be used with caution.
+     * It enables using standard Java runnables in exception-throwing contexts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Runnable javaRunnable = () -> System.out.println("Hello");
+     * Throwables.Runnable<IOException> throwableRunnable = Fnn.rr(javaRunnable);
+     * }</pre>
      *
      * @param <E> the type of the checked exception that the returned runnable may throw
      * @param runnable the standard Runnable to cast
@@ -2883,6 +3419,13 @@ public final class Fnn {
     /**
      * Casts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
      * This method performs an unchecked cast and should be used with caution.
+     * It enables using standard Java callables in exception-throwing contexts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Callable<String> javaCallable = () -> "result";
+     * Throwables.Callable<String, IOException> throwableCallable = Fnn.cc(javaCallable);
+     * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param <E> the type of the checked exception that the returned callable may throw
@@ -2897,6 +3440,13 @@ public final class Fnn {
      * Converts a standard java.lang.Runnable to a Throwables.Runnable that can throw checked exceptions.
      * If the input is already a Throwables.Runnable, it is returned as-is.
      * Otherwise, a new Throwables.Runnable is created that wraps the standard Runnable.
+     * This provides safe conversion between standard and exception-throwing runnables.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Runnable javaRunnable = () -> System.out.println("Hello");
+     * Throwables.Runnable<IOException> throwableRunnable = Fnn.jr2r(javaRunnable);
+     * }</pre>
      *
      * @param <E> the type of the checked exception that the returned runnable may throw
      * @param runnable the standard Runnable to convert
@@ -2918,6 +3468,14 @@ public final class Fnn {
      * If the input is already a java.lang.Runnable, it is returned as-is.
      * Otherwise, a new java.lang.Runnable is created that wraps the Throwables.Runnable
      * and converts any checked exceptions to runtime exceptions.
+     * This enables using exception-throwing runnables in standard Java contexts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Runnable<IOException> throwableRunnable = () -> writeToFile();
+     * Runnable javaRunnable = Fnn.r2jr(throwableRunnable);
+     * executor.execute(javaRunnable);
+     * }</pre>
      *
      * @param <E> the type of the checked exception that the input runnable may throw
      * @param runnable the Throwables.Runnable to convert
@@ -2944,6 +3502,13 @@ public final class Fnn {
      * Converts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
      * If the input is already a Throwables.Callable, it is returned as-is.
      * Otherwise, a new Throwables.Callable is created that wraps the standard Callable.
+     * This provides safe conversion between standard and exception-throwing callables.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Callable<String> javaCallable = () -> "result";
+     * Throwables.Callable<String, Exception> throwableCallable = Fnn.jc2c(javaCallable);
+     * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param callable the standard Callable to convert
@@ -2964,6 +3529,14 @@ public final class Fnn {
      * Converts a Throwables.Callable to a standard java.util.concurrent.Callable.
      * If the input is already a java.util.concurrent.Callable, it is returned as-is.
      * Otherwise, a new java.util.concurrent.Callable is created that wraps the Throwables.Callable.
+     * This enables using exception-throwing callables in standard Java contexts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Callable<String, IOException> throwableCallable = () -> readFromFile();
+     * Callable<String> javaCallable = Fnn.c2jc(throwableCallable);
+     * executor.submit(javaCallable);
+     * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param callable the Throwables.Callable to convert

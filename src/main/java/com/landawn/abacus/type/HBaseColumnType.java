@@ -58,6 +58,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * String declaringName = type.declaringName();
+     * // Returns: "HBaseColumn<String>"
+     * }</pre>
+     *
      * @return the declaring name of this type (e.g., "HBaseColumn&lt;String&gt;")
      */
     @Override
@@ -67,6 +74,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     /**
      * Returns the Class object representing the HBaseColumn type handled by this type handler.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * Class<?> clazz = type.clazz();
+     * // Returns: HBaseColumn.class
+     * }</pre>
      *
      * @return the Class object for HBaseColumn
      */
@@ -79,6 +93,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * Returns the type handler for the value element stored in the HBaseColumn.
      * This represents the type of the actual data value, not including the version information.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * Type<String> elementType = type.getElementType();
+     * // Returns: Type instance for String
+     * }</pre>
+     *
      * @return the Type instance representing the value type of this HBaseColumn
      */
     @Override
@@ -90,6 +111,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * Returns an array containing the parameter types of this generic HBaseColumn type.
      * For HBaseColumn types, this array contains a single element representing the value type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // Returns: [Type<String>]
+     * }</pre>
+     *
      * @return an array containing the value type as the only parameter type
      */
     @Override
@@ -97,6 +125,12 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * HBaseColumn types are always generic types as they have a value type parameter.
+     *
+     * @return {@code true}, as HBaseColumn is a generic type
+     */
     @Override
     public boolean isGenericType() {
         return true;

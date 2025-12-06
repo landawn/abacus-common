@@ -39,10 +39,10 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharTriFunction<String> concat = (c1, c2, c3) -> "" + c1 + c2 + c3;
-     * String result = concat.apply('a', 'b', 'c');  // Returns "abc"
+     * String result = concat.apply('a', 'b', 'c');   // Returns "abc"
      *
      * CharTriFunction<Integer> sumValues = (c1, c2, c3) -> (int)c1 + c2 + c3;
-     * Integer total = sumValues.apply('a', 'b', 'c');  // Returns 294 (97+98+99)
+     * Integer total = sumValues.apply('a', 'b', 'c');   // Returns 294 (97+98+99)
      * }</pre>
      *
      * @param a the first char function argument
@@ -64,7 +64,7 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * CharTriFunction<String> concat = (c1, c2, c3) -> "" + c1 + c2 + c3;
      * Function<String, Integer> length = String::length;
      * CharTriFunction<Integer> concatAndGetLength = concat.andThen(length);
-     * Integer result = concatAndGetLength.apply('a', 'b', 'c');  // Returns 3
+     * Integer result = concatAndGetLength.apply('a', 'b', 'c');   // Returns 3
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

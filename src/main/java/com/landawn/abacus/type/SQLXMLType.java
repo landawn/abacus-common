@@ -34,7 +34,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * Class<SQLXML> clazz = type.clazz();  // Returns SQLXML.class
+     * Class<SQLXML> clazz = type.clazz();   // Returns SQLXML.class
      * }</pre>
      *
      * @return the Class object for java.sql.SQLXML.class
@@ -51,7 +51,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * boolean serializable = type.isSerializable();  // Returns false
+     * boolean serializable = type.isSerializable();   // Returns false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -111,7 +111,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
-     * SQLXML xml = type.get(rs, 1);  // Get XML from first column
+     * SQLXML xml = type.get(rs, 1);   // Get XML from first column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -132,7 +132,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
-     * SQLXML xml = type.get(rs, "config_xml");  // Get XML by column name
+     * SQLXML xml = type.get(rs, "config_xml");   // Get XML by column name
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -153,7 +153,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO settings (config_xml) VALUES (?)");
-     * type.set(stmt, 1, xmlData);  // Set XML at parameter index 1
+     * type.set(stmt, 1, xmlData);   // Set XML at parameter index 1
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -174,7 +174,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * CallableStatement stmt = conn.prepareCall("{call update_config(?)}");
-     * type.set(stmt, "xml_param", xmlData);  // Set XML by parameter name
+     * type.set(stmt, "xml_param", xmlData);   // Set XML by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

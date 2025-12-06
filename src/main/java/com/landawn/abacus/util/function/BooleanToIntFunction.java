@@ -36,7 +36,7 @@ public interface BooleanToIntFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanToIntFunction converter = b -> b ? 1 : 0;
-     * int result = converter.applyAsInt(true);  // Returns 1
+     * int result = converter.applyAsInt(true);   // Returns 1
      * }</pre>
      *
      * @param value the function argument

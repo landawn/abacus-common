@@ -39,8 +39,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Formatting
  * Date date = new Date();
- * String iso = ISO8601Util.format(date);  // "2023-12-25T10:30:45Z"
- * String isoWithMillis = ISO8601Util.format(date, true);  // "2023-12-25T10:30:45.123Z"
+ * String iso = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
+ * String isoWithMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
  * 
  * // Parsing
  * Date parsed = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
@@ -78,7 +78,7 @@ final class ISO8601Util {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
-     * String formatted = ISO8601Util.format(date);  // "2023-12-25T10:30:45Z"
+     * String formatted = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
      * }</pre>
      *
      * @param date the date to format
@@ -215,7 +215,7 @@ final class ISO8601Util {
      * <pre>{@code
      * ParsePosition pos = new ParsePosition(0);
      * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);
-     * int endIndex = pos.getIndex();  // Position after the parsed date
+     * int endIndex = pos.getIndex();   // Position after the parsed date
      * }</pre>
      *
      * @param date the ISO8601 string to parse
@@ -283,8 +283,8 @@ final class ISO8601Util {
                         // milliseconds can be optional in the format
                         if (checkOffset(date, offset, '.')) {
                             offset += 1;
-                            final int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
-                            final int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
+                            final int endOffset = indexOfNonDigit(date, offset + 1);   // assume at least one digit
+                            final int parseEndOffset = Math.min(endOffset, offset + 3);   // parse up to 3 digits
                             final int fraction = parseInt(date, offset, parseEndOffset);
                             // compensate for "missing" digits
                             switch (parseEndOffset - offset) { // number of digits parsed

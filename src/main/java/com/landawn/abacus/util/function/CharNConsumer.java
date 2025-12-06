@@ -39,7 +39,7 @@ public interface CharNConsumer {
      *         System.out.print(c);
      *     }
      * };
-     * printer.accept('H', 'e', 'l', 'l', 'o');  // Prints: Hello
+     * printer.accept('H', 'e', 'l', 'l', 'o');   // Prints: Hello
      *
      * List<Character> charList = new ArrayList<>();
      * CharNConsumer collector = chars -> {

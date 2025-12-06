@@ -37,7 +37,7 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharNFunction<String> toString = chars -> new String(chars);
-     * String result = toString.apply('h', 'e', 'l', 'l', 'o');  // Returns "hello"
+     * String result = toString.apply('h', 'e', 'l', 'l', 'o');   // Returns "hello"
      *
      * CharNFunction<Integer> sumValues = chars -> {
      *     int sum = 0;
@@ -46,7 +46,7 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      *     }
      *     return sum;
      * };
-     * Integer total = sumValues.apply('a', 'b', 'c');  // Returns 294 (97+98+99)
+     * Integer total = sumValues.apply('a', 'b', 'c');   // Returns 294 (97+98+99)
      * }</pre>
      *
      * @param args the char array input arguments. Can be empty but not {@code null}.
@@ -66,7 +66,7 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * CharNFunction<String> toString = chars -> new String(chars);
      * Function<String, Integer> length = String::length;
      * CharNFunction<Integer> toLength = toString.andThen(length);
-     * Integer result = toLength.apply('a', 'b', 'c');  // Returns 3
+     * Integer result = toLength.apply('a', 'b', 'c');   // Returns 3
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

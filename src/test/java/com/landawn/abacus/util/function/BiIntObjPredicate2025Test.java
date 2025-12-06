@@ -17,8 +17,8 @@ public class BiIntObjPredicate2025Test extends TestBase {
     public void testTest() {
         BiIntObjPredicate<String> predicate = (i, j, s) -> (i + j) == s.length();
 
-        assertTrue(predicate.test(2, 3, "hello")); // 2 + 3 = 5
-        assertFalse(predicate.test(2, 3, "hi")); // 2 + 3 != 2
+        assertTrue(predicate.test(2, 3, "hello"));   // 2 + 3 = 5
+        assertFalse(predicate.test(2, 3, "hi"));   // 2 + 3 != 2
     }
 
     @Test
@@ -34,8 +34,8 @@ public class BiIntObjPredicate2025Test extends TestBase {
         BiIntObjPredicate<String> predicate = (i, j, s) -> s.startsWith("test") && i > j;
 
         assertTrue(predicate.test(10, 5, "test123"));
-        assertFalse(predicate.test(5, 10, "test123")); // i not > j
-        assertFalse(predicate.test(10, 5, "other")); // doesn't start with "test"
+        assertFalse(predicate.test(5, 10, "test123"));   // i not > j
+        assertFalse(predicate.test(10, 5, "other"));   // doesn't start with "test"
     }
 
     @Test
@@ -43,8 +43,8 @@ public class BiIntObjPredicate2025Test extends TestBase {
         BiIntObjPredicate<String> predicate = (i, j, s) -> (i + j) == s.length();
         BiIntObjPredicate<String> negated = predicate.negate();
 
-        assertFalse(negated.test(2, 3, "hello")); // original returns true, negated returns false
-        assertTrue(negated.test(2, 3, "hi")); // original returns false, negated returns true
+        assertFalse(negated.test(2, 3, "hello"));   // original returns true, negated returns false
+        assertTrue(negated.test(2, 3, "hi"));   // original returns false, negated returns true
     }
 
     @Test
@@ -54,9 +54,9 @@ public class BiIntObjPredicate2025Test extends TestBase {
 
         BiIntObjPredicate<String> combined = greaterThan.and(lengthMatch);
 
-        assertTrue(combined.test(5, 3, "hello")); // 5 > 3 && "hello".length() == 5
-        assertFalse(combined.test(3, 5, "hello")); // 3 > 5 is false
-        assertFalse(combined.test(5, 3, "hi")); // 5 > 3 but "hi".length() != 5
+        assertTrue(combined.test(5, 3, "hello"));   // 5 > 3 && "hello".length() == 5
+        assertFalse(combined.test(3, 5, "hello"));   // 3 > 5 is false
+        assertFalse(combined.test(5, 3, "hi"));   // 5 > 3 but "hi".length() != 5
     }
 
     @Test
@@ -68,7 +68,7 @@ public class BiIntObjPredicate2025Test extends TestBase {
 
         BiIntObjPredicate<String> combined = firstFalse.and(shouldNotExecute);
 
-        assertFalse(combined.test(10, 5, "test")); // Should not throw exception
+        assertFalse(combined.test(10, 5, "test"));   // Should not throw exception
     }
 
     @Test
@@ -78,9 +78,9 @@ public class BiIntObjPredicate2025Test extends TestBase {
 
         BiIntObjPredicate<String> combined = sumEquals.or(isNull);
 
-        assertTrue(combined.test(2, 3, "hello")); // sum equals length
-        assertTrue(combined.test(1, 1, null)); // is null
-        assertFalse(combined.test(1, 1, "hello")); // neither condition
+        assertTrue(combined.test(2, 3, "hello"));   // sum equals length
+        assertTrue(combined.test(1, 1, null));   // is null
+        assertFalse(combined.test(1, 1, "hello"));   // neither condition
     }
 
     @Test
@@ -92,7 +92,7 @@ public class BiIntObjPredicate2025Test extends TestBase {
 
         BiIntObjPredicate<String> combined = firstTrue.or(shouldNotExecute);
 
-        assertTrue(combined.test(10, 5, "test")); // Should not throw exception
+        assertTrue(combined.test(10, 5, "test"));   // Should not throw exception
     }
 
     @Test
@@ -104,9 +104,9 @@ public class BiIntObjPredicate2025Test extends TestBase {
         BiIntObjPredicate<String> complex = sumPositive.and(notEmpty).and(iGreaterJ);
 
         assertTrue(complex.test(10, 5, "test"));
-        assertFalse(complex.test(10, 5, "")); // empty string
-        assertFalse(complex.test(5, 10, "test")); // i not > j
-        assertFalse(complex.test(-10, -5, "test")); // sum not positive
+        assertFalse(complex.test(10, 5, ""));   // empty string
+        assertFalse(complex.test(5, 10, "test"));   // i not > j
+        assertFalse(complex.test(-10, -5, "test"));   // sum not positive
     }
 
     @Test
@@ -116,8 +116,8 @@ public class BiIntObjPredicate2025Test extends TestBase {
 
         BiIntObjPredicate<Integer> combined = sumEquals.and(positive).negate();
 
-        assertFalse(combined.test(10, 20, 30)); // negation of (true && true)
-        assertTrue(combined.test(10, 20, 25)); // negation of (false && ...)
+        assertFalse(combined.test(10, 20, 30));   // negation of (true && true)
+        assertTrue(combined.test(10, 20, 25));   // negation of (false && ...)
     }
 
     @Test
@@ -138,8 +138,8 @@ public class BiIntObjPredicate2025Test extends TestBase {
             }
         };
 
-        assertTrue(predicate.test(2, 3, "hello world")); // 11 > 5
-        assertFalse(predicate.test(5, 5, "hello")); // 5 not > 10
+        assertTrue(predicate.test(2, 3, "hello world"));   // 11 > 5
+        assertFalse(predicate.test(5, 5, "hello"));   // 5 not > 10
     }
 
     @Test
@@ -168,9 +168,9 @@ public class BiIntObjPredicate2025Test extends TestBase {
             return s.length() >= i && s.length() <= j;
         };
 
-        assertTrue(predicate.test(3, 7, "hello")); // 5 is between 3 and 7
-        assertFalse(predicate.test(6, 10, "hello")); // 5 < 6
-        assertFalse(predicate.test(1, 3, "hello")); // 5 > 3
-        assertFalse(predicate.test(-1, 10, "hello")); // negative i
+        assertTrue(predicate.test(3, 7, "hello"));   // 5 is between 3 and 7
+        assertFalse(predicate.test(6, 10, "hello"));   // 5 < 6
+        assertFalse(predicate.test(1, 3, "hello"));   // 5 > 3
+        assertFalse(predicate.test(-1, 10, "hello"));   // negative i
     }
 }

@@ -39,7 +39,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongSupplier zeroSupplier = LongSupplier.ZERO;
-     * long value = zeroSupplier.getAsLong();  // returns 0L
+     * long value = zeroSupplier.getAsLong();   // returns 0L
      * }</pre>
      */
     LongSupplier ZERO = () -> 0;
@@ -68,7 +68,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongSupplier timestamp = System::currentTimeMillis;
-     * long time = timestamp.getAsLong();  // Returns current time in milliseconds
+     * long time = timestamp.getAsLong();   // Returns current time in milliseconds
      * }</pre>
      *
      * @return a long value

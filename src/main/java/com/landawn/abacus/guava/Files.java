@@ -333,11 +333,11 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to read from
-     * @param charset the charset used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants)
-     * @return a BufferedReader instance for reading from the file
+     * @param file the file to read from.
+     * @param charset the charset used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
+     * @return a BufferedReader instance for reading from the file.
      * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,
-     *     or for some other reason cannot be opened for reading
+     *     or for some other reason cannot be opened for reading.
      */
     public static BufferedReader newReader(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newReader(file, charset);
@@ -363,11 +363,11 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to write to
-     * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants)
-     * @return a BufferedWriter instance for writing to the file
+     * @param file the file to write to.
+     * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants).
+     * @return a BufferedWriter instance for writing to the file.
      * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,
-     *     does not exist but cannot be created, or cannot be opened for any other reason
+     *     does not exist but cannot be created, or cannot be opened for any other reason.
      */
     public static BufferedWriter newWriter(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
@@ -386,8 +386,8 @@ public abstract class Files { //NOSONAR
      * byte[] bytes = source.read();
      * }</pre>
      *
-     * @param file the file to create a ByteSource for
-     * @return a ByteSource that reads from the given file
+     * @param file the file to create a ByteSource for.
+     * @return a ByteSource that reads from the given file.
      */
     public static ByteSource asByteSource(final File file) {
         return com.google.common.io.Files.asByteSource(file);
@@ -409,9 +409,9 @@ public abstract class Files { //NOSONAR
      * long size = source.size();
      * }</pre>
      *
-     * @param path the path to create a ByteSource for
-     * @param options zero or more open options that control how the file is opened
-     * @return a ByteSource that reads from the given path
+     * @param path the path to create a ByteSource for.
+     * @param options zero or more open options that control how the file is opened.
+     * @return a ByteSource that reads from the given path.
      */
     public static ByteSource asByteSource(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
@@ -437,9 +437,9 @@ public abstract class Files { //NOSONAR
      * appendSink.write(moreBytes);
      * }</pre>
      *
-     * @param file the file to create a ByteSink for
-     * @param modes optional file write modes; if empty, the file will be truncated
-     * @return a ByteSink that writes to the given file
+     * @param file the file to create a ByteSink for.
+     * @param modes optional file write modes; if empty, the file will be truncated.
+     * @return a ByteSink that writes to the given file.
      */
     public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
         return com.google.common.io.Files.asByteSink(file, modes);
@@ -463,9 +463,9 @@ public abstract class Files { //NOSONAR
      * sink.write(byteArray);
      * }</pre>
      *
-     * @param path the path to create a ByteSink for
-     * @param options zero or more open options that control how the file is opened
-     * @return a ByteSink that writes to the given path
+     * @param path the path to create a ByteSink for.
+     * @param options zero or more open options that control how the file is opened.
+     * @return a ByteSink that writes to the given path.
      */
     public static ByteSink asByteSink(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSink(path, options);
@@ -486,9 +486,9 @@ public abstract class Files { //NOSONAR
      * List<String> lines = source.readLines();
      * }</pre>
      *
-     * @param file the file to create a CharSource for
-     * @param charset the character set to use when reading the file
-     * @return a CharSource that reads from the given file using the specified charset
+     * @param file the file to create a CharSource for.
+     * @param charset the character set to use when reading the file.
+     * @return a CharSource that reads from the given file using the specified charset.
      */
     public static CharSource asCharSource(final File file, final Charset charset) {
         return com.google.common.io.Files.asCharSource(file, charset);
@@ -512,10 +512,10 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param path the path to create a CharSource for
-     * @param charset the character set to use when reading the file
-     * @param options zero or more open options that control how the file is opened
-     * @return a CharSource that reads from the given path using the specified charset
+     * @param path the path to create a CharSource for.
+     * @param charset the character set to use when reading the file.
+     * @param options zero or more open options that control how the file is opened.
+     * @return a CharSource that reads from the given path using the specified charset.
      */
     public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSource(path, charset, options);
@@ -541,10 +541,10 @@ public abstract class Files { //NOSONAR
      * appendSink.writeLines(Arrays.asList("Line 1", "Line 2"));
      * }</pre>
      *
-     * @param file the file to create a CharSink for
-     * @param charset the character set to use when writing to the file
-     * @param modes optional file write modes; if empty, the file will be truncated
-     * @return a CharSink that writes to the given file using the specified charset
+     * @param file the file to create a CharSink for.
+     * @param charset the character set to use when writing to the file.
+     * @param modes optional file write modes; if empty, the file will be truncated.
+     * @return a CharSink that writes to the given file using the specified charset.
      */
     public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) {
         return com.google.common.io.Files.asCharSink(file, charset, modes);
@@ -569,10 +569,10 @@ public abstract class Files { //NOSONAR
      * sink.write("Appended text");
      * }</pre>
      *
-     * @param path the path to create a CharSink for
-     * @param charset the character set to use when writing to the file
-     * @param options zero or more open options that control how the file is opened
-     * @return a CharSink that writes to the given path using the specified charset
+     * @param path the path to create a CharSink for.
+     * @param charset the character set to use when writing to the file.
+     * @param options zero or more open options that control how the file is opened.
+     * @return a CharSink that writes to the given path using the specified charset.
      */
     public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSink(path, charset, options);
@@ -591,10 +591,10 @@ public abstract class Files { //NOSONAR
      * byte[] fileData = Files.toByteArray(new File("image.png"));
      * }</pre>
      *
-     * @param file the file to read
-     * @return a byte array containing all bytes from the file
-     * @throws IOException if an I/O error occurs while reading the file
-     * @throws OutOfMemoryError if the file is larger than the available heap space
+     * @param file the file to read.
+     * @return a byte array containing all bytes from the file.
+     * @throws IOException if an I/O error occurs while reading the file.
+     * @throws OutOfMemoryError if the file is larger than the available heap space.
      */
     public static byte[] toByteArray(final File file) throws IOException {
         return com.google.common.io.Files.toByteArray(file);
@@ -616,10 +616,10 @@ public abstract class Files { //NOSONAR
      * Files.write(data, new File("output.txt"));
      * }</pre>
      *
-     * @param from the byte array containing data to write to the file
-     * @param to the destination file to write to
-     * @throws FileNotFoundException if the parent directory of {@code to} doesn't exist
-     * @throws IOException if an I/O error occurs while writing to the file
+     * @param from the byte array containing data to write to the file.
+     * @param to the destination file to write to.
+     * @throws FileNotFoundException if the parent directory of {@code to} doesn't exist.
+     * @throws IOException if an I/O error occurs while writing to the file.
      */
     public static void write(final byte[] from, final File to) throws IOException {
         com.google.common.io.Files.write(from, to);
@@ -640,10 +640,10 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file1 the first file to compare
-     * @param file2 the second file to compare
-     * @return {@code true} if the files contain the same bytes, {@code false} otherwise
-     * @throws IOException if an I/O error occurs while reading either file
+     * @param file1 the first file to compare.
+     * @param file2 the second file to compare.
+     * @return {@code true} if the files contain the same bytes, {@code false} otherwise.
+     * @throws IOException if an I/O error occurs while reading either file.
      */
     public static boolean equal(final File file1, final File file2) throws IOException { //NOSONAR
         return com.google.common.io.Files.equal(file1, file2);
@@ -663,10 +663,10 @@ public abstract class Files { //NOSONAR
      * boolean identical = Files.equal(path1, path2);
      * }</pre>
      *
-     * @param path1 the first path to compare
-     * @param path2 the second path to compare
-     * @return {@code true} if the files contain the same bytes, {@code false} otherwise
-     * @throws IOException if an I/O error occurs while reading either file
+     * @param path1 the first path to compare.
+     * @param path2 the second path to compare.
+     * @return {@code true} if the files contain the same bytes, {@code false} otherwise.
+     * @throws IOException if an I/O error occurs while reading either file.
      */
     public static boolean equal(final Path path1, final Path path2) throws IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
@@ -686,8 +686,8 @@ public abstract class Files { //NOSONAR
      * // File now exists (if it didn't) and has current timestamp
      * }</pre>
      *
-     * @param file the file to create or update
-     * @throws IOException if an I/O error occurs while creating or updating the file
+     * @param file the file to create or update.
+     * @throws IOException if an I/O error occurs while creating or updating the file.
      */
     public static void touch(final File file) throws IOException {
         com.google.common.io.Files.touch(file);
@@ -708,8 +708,8 @@ public abstract class Files { //NOSONAR
      * // File now exists (if it didn't) and has current timestamp
      * }</pre>
      *
-     * @param path the path of the file to create or update
-     * @throws IOException if an I/O error occurs while creating or updating the file
+     * @param path the path of the file to create or update.
+     * @throws IOException if an I/O error occurs while creating or updating the file.
      */
     public static void touch(final Path path) throws IOException {
         com.google.common.io.MoreFiles.touch(path);
@@ -745,9 +745,9 @@ public abstract class Files { //NOSONAR
      * // Remember to delete when done
      * }</pre>
      *
-     * @return the newly created directory
+     * @return the newly created directory.
      * @throws IllegalStateException if the directory could not be created, such as if the system does
-     *     not support creating temporary directories securely
+     *     not support creating temporary directories securely.
      * @deprecated For Android users, see the
      *     <a href="https://developer.android.com/training/data-storage" target="_blank">Data and File
      *     Storage overview</a> to select an appropriate temporary directory (perhaps {@code
@@ -763,7 +763,7 @@ public abstract class Files { //NOSONAR
      */
     @Deprecated
     public static File createTempDir() {
-        return com.google.common.io.Files.createTempDir(); //NOSONAR
+        return com.google.common.io.Files.createTempDir();   //NOSONAR
     }
 
     /**
@@ -782,9 +782,9 @@ public abstract class Files { //NOSONAR
      * // Now /path/to/deep/directory/ exists
      * }</pre>
      *
-     * @param file the file whose parent directories should be created
+     * @param file the file whose parent directories should be created.
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created
+     *     directories of the specified file could not be created.
      */
     public static void createParentDirs(final File file) throws IOException {
         com.google.common.io.Files.createParentDirs(file);
@@ -805,10 +805,10 @@ public abstract class Files { //NOSONAR
      * // Now /path/to/deep/directory/ exists
      * }</pre>
      *
-     * @param path the path whose parent directories should be created
-     * @param attrs an optional list of file attributes to set atomically when creating the directories
+     * @param path the path whose parent directories should be created.
+     * @param attrs an optional list of file attributes to set atomically when creating the directories.
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created
+     *     directories of the specified file could not be created.
      */
     public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
@@ -829,9 +829,9 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param from the source file
-     * @param to the output stream to write to
-     * @throws IOException if an I/O error occurs while reading from the file or writing to the stream
+     * @param from the source file.
+     * @param to the output stream to write to.
+     * @throws IOException if an I/O error occurs while reading from the file or writing to the stream.
      */
     public static void copy(final File from, final OutputStream to) throws IOException {
         com.google.common.io.Files.copy(from, to);
@@ -859,10 +859,10 @@ public abstract class Files { //NOSONAR
      * Files.copy(source, backup);
      * }</pre>
      *
-     * @param from the source file
-     * @param to the destination file
-     * @throws IOException if an I/O error occurs during the copy operation
-     * @throws IllegalArgumentException if {@code from.equals(to)}
+     * @param from the source file.
+     * @param to the destination file.
+     * @throws IOException if an I/O error occurs during the copy operation.
+     * @throws IllegalArgumentException if {@code from.equals(to)}.
      */
     public static void copy(final File from, final File to) throws IOException {
         com.google.common.io.Files.copy(from, to);
@@ -887,10 +887,10 @@ public abstract class Files { //NOSONAR
      * Files.move(new File("file.txt"), new File("archive/file.txt"));
      * }</pre>
      *
-     * @param from the source file
-     * @param to the destination file (must be the complete target path, not just a directory)
-     * @throws IOException if an I/O error occurs during the move operation
-     * @throws IllegalArgumentException if {@code from.equals(to)}
+     * @param from the source file.
+     * @param to the destination file (must be the complete target path, not just a directory).
+     * @throws IOException if an I/O error occurs during the move operation.
+     * @throws IllegalArgumentException if {@code from.equals(to)}.
      */
     public static void move(final File from, final File to) throws IOException {
         com.google.common.io.Files.move(from, to);
@@ -917,11 +917,11 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to read from
+     * @param file the file to read from.
      * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return a mutable {@link List} containing all the lines
-     * @throws IOException if an I/O error occurs while reading the file
+     *     helpful predefined constants.
+     * @return a mutable {@link List} containing all the lines.
+     * @throws IOException if an I/O error occurs while reading the file.
      */
     public static List<String> readLines(final File file, final Charset charset) throws IOException {
         return com.google.common.io.Files.readLines(file, charset);
@@ -945,10 +945,10 @@ public abstract class Files { //NOSONAR
      * int firstInt = buffer.getInt();
      * }</pre>
      *
-     * @param file the file to map
-     * @return a read-only buffer reflecting {@code file}
-     * @throws FileNotFoundException if the {@code file} does not exist
-     * @throws IOException if an I/O error occurs
+     * @param file the file to map.
+     * @return a read-only buffer reflecting {@code file}.
+     * @throws FileNotFoundException if the {@code file} does not exist.
+     * @throws IOException if an I/O error occurs.
      * @see FileChannel#map(MapMode, long, long)
      */
     public static MappedByteBuffer map(final File file) throws IOException {
@@ -968,14 +968,14 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Create a read-write mapping
      * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
-     * buffer.putInt(0, 42);  // Write to the beginning of the file
+     * buffer.putInt(0, 42);   // Write to the beginning of the file
      * }</pre>
      *
-     * @param file the file to map
-     * @param mode the mode to use when mapping {@code file} (READ_ONLY, READ_WRITE, or PRIVATE)
-     * @return a buffer reflecting {@code file}
-     * @throws FileNotFoundException if the {@code file} does not exist
-     * @throws IOException if an I/O error occurs
+     * @param file the file to map.
+     * @param mode the mode to use when mapping {@code file} (READ_ONLY, READ_WRITE, or PRIVATE).
+     * @return a buffer reflecting {@code file}.
+     * @throws FileNotFoundException if the {@code file} does not exist.
+     * @throws IOException if an I/O error occurs.
      * @see FileChannel#map(MapMode, long, long)
      */
     public static MappedByteBuffer map(final File file, final MapMode mode) throws IOException {
@@ -1001,11 +1001,11 @@ public abstract class Files { //NOSONAR
      * MappedByteBuffer buffer = Files.map(new File("new.bin"), MapMode.READ_WRITE, 1024 * 1024);
      * }</pre>
      *
-     * @param file the file to map
-     * @param mode the mode to use when mapping {@code file}
-     * @param size the number of bytes to map starting from offset 0
-     * @return a buffer reflecting {@code file}
-     * @throws IOException if an I/O error occurs
+     * @param file the file to map.
+     * @param mode the mode to use when mapping {@code file}.
+     * @param size the number of bytes to map starting from offset 0.
+     * @return a buffer reflecting {@code file}.
+     * @throws IOException if an I/O error occurs.
      * @see FileChannel#map(MapMode, long, long)
      */
     public static MappedByteBuffer map(final File file, final MapMode mode, final long size) throws IOException {
@@ -1036,8 +1036,8 @@ public abstract class Files { //NOSONAR
      * // Returns: "/foo/baz"
      * }</pre>
      *
-     * @param pathname the path to simplify
-     * @return the simplified path
+     * @param pathname the path to simplify.
+     * @return the simplified path.
      */
     public static String simplifyPath(final String pathname) {
         return com.google.common.io.Files.simplifyPath(pathname);
@@ -1057,9 +1057,9 @@ public abstract class Files { //NOSONAR
      * // Returns: "archive.tar"
      * }</pre>
      *
-     * @param file The name of the file to trim the extension from. This can be either a fully
+     * @param file the name of the file to trim the extension from. This can be either a fully
      *     qualified file name (including a path) or just a file name.
-     * @return The file name without its path or extension.
+     * @return the file name without its path or extension.
      */
     public static String getNameWithoutExtension(final String file) {
         return com.google.common.io.Files.getNameWithoutExtension(file);
@@ -1077,8 +1077,8 @@ public abstract class Files { //NOSONAR
      * // Returns: "document"
      * }</pre>
      *
-     * @param path the path whose file name should be extracted without extension
-     * @return the file name without its extension
+     * @param path the path whose file name should be extracted without extension.
+     * @return the file name without its extension.
      */
     public static String getNameWithoutExtension(final Path path) {
         return com.google.common.io.MoreFiles.getNameWithoutExtension(path);
@@ -1110,8 +1110,8 @@ public abstract class Files { //NOSONAR
      * // Returns: ""
      * }</pre>
      *
-     * @param fullName the file name to extract the extension from
-     * @return the file extension (without the dot), or empty string if none
+     * @param fullName the file name to extract the extension from.
+     * @return the file extension (without the dot), or empty string if none.
      */
     public static String getFileExtension(final String fullName) {
         return com.google.common.io.Files.getFileExtension(fullName);
@@ -1138,8 +1138,8 @@ public abstract class Files { //NOSONAR
      * // Returns: "pdf"
      * }</pre>
      *
-     * @param path the path whose file extension should be extracted
-     * @return the file extension (without the dot), or empty string if none
+     * @param path the path whose file extension should be extracted.
+     * @return the file extension (without the dot), or empty string if none.
      */
     public static String getFileExtension(final Path path) {
         return com.google.common.io.MoreFiles.getFileExtension(path);
@@ -1174,7 +1174,7 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @return a traverser for traversing file trees starting from File objects
+     * @return a traverser for traversing file trees starting from File objects.
      */
     public static Traverser<File> fileTraverser() {
         return com.google.common.io.Files.fileTraverser();
@@ -1208,7 +1208,7 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @return a traverser for traversing file trees starting from Path objects
+     * @return a traverser for traversing file trees starting from Path objects.
      */
     public static Traverser<Path> pathTraverser() {
         return com.google.common.io.MoreFiles.fileTraverser();
@@ -1230,12 +1230,12 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param dir the directory whose files should be listed
-     * @return an immutable list of paths to files in the directory
-     * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>
+     * @param dir the directory whose files should be listed.
+     * @return an immutable list of paths to files in the directory.
+     * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>.
      * @throws NotDirectoryException if the file could not be opened because it is not a directory
-     *     <i>(optional specific exception)</i>
-     * @throws IOException if an I/O error occurs
+     *     <i>(optional specific exception)</i>.
+     * @throws IOException if an I/O error occurs.
      * @see IOUtil#listFiles(File)
      */
     public static ImmutableList<Path> listFiles(final Path dir) throws IOException {
@@ -1272,14 +1272,14 @@ public abstract class Files { //NOSONAR
      * Files.deleteRecursively(Paths.get("/tmp/old_data"), RecursiveDeleteOption.ALLOW_INSECURE);
      * }</pre>
      *
-     * @param path the path to delete (file or directory)
-     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}
-     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>
+     * @param path the path to delete (file or directory).
+     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}.
+     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>.
      * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be
      *     guaranteed for the file system and {@link RecursiveDeleteOption#ALLOW_INSECURE} was not
-     *     specified
+     *     specified.
      * @throws IOException if {@code path} or any file in the subtree rooted at it can't be deleted
-     *     for any reason
+     *     for any reason.
      */
     public static void deleteRecursively(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteRecursively(path, options);
@@ -1316,15 +1316,15 @@ public abstract class Files { //NOSONAR
      * // tempDir still exists but is now empty
      * }</pre>
      *
-     * @param path the directory whose contents should be deleted
-     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}
-     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>
+     * @param path the directory whose contents should be deleted.
+     * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}.
+     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>.
      * @throws NotDirectoryException if the file at {@code path} is not a directory <i>(optional
-     *     specific exception)</i>
+     *     specific exception)</i>.
      * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be
      *     guaranteed for the file system and {@link RecursiveDeleteOption#ALLOW_INSECURE} was not
-     *     specified
-     * @throws IOException if one or more files can't be deleted for any reason
+     *     specified.
+     * @throws IOException if one or more files can't be deleted for any reason.
      */
     public static void deleteDirectoryContents(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteDirectoryContents(path, options);
@@ -1345,8 +1345,8 @@ public abstract class Files { //NOSONAR
      * Predicate<Path> isRealDir = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
      * }</pre>
      *
-     * @param options link options to use when checking if a path is a directory
-     * @return a predicate that tests if a path is a directory
+     * @param options link options to use when checking if a path is a directory.
+     * @return a predicate that tests if a path is a directory.
      */
     public static Predicate<Path> isDirectory(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isDirectory(options);
@@ -1367,8 +1367,8 @@ public abstract class Files { //NOSONAR
      * Predicate<Path> isRealFile = Files.isRegularFile(LinkOption.NOFOLLOW_LINKS);
      * }</pre>
      *
-     * @param options link options to use when checking if a path is a regular file
-     * @return a predicate that tests if a path is a regular file
+     * @param options link options to use when checking if a path is a regular file.
+     * @return a predicate that tests if a path is a regular file.
      */
     public static Predicate<Path> isRegularFile(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isRegularFile(options);
@@ -1388,14 +1388,14 @@ public abstract class Files { //NOSONAR
      * byte[] data = Files.readAllBytes(new File("image.jpg"));
      * }</pre>
      *
-     * @param   file the file to read from 
-     * @return  a byte array containing the content read from the file 
+     * @param   file the file to read from.
+     * @return  a byte array containing the content read from the file.
      * @throws  IOException
-     *          if an I/O error occurs reading from the file
+     *          if an I/O error occurs reading from the file.
      * @throws  OutOfMemoryError
-     *          if the file is extremely large, for example larger than {@code 2GB}
+     *          if the file is extremely large, for example larger than {@code 2GB}.
      * @throws  SecurityException
-     *          In the case of the default provider, and a security manager is installed, the {@link
+     *          in the case of the default provider, and a security manager is installed, the {@link
      *          SecurityManager#checkRead(String) checkRead} method is invoked to check read access to
      *          the file.
      * @see #readString(File)
@@ -1421,12 +1421,12 @@ public abstract class Files { //NOSONAR
      * String content = Files.readString(new File("config.json"));
      * }</pre>
      *
-     * @param file the file to read from
-     * @return a string containing the content read from the file
-     * @throws IOException if an I/O error occurs reading from the file
-     * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}
-     * @throws SecurityException In the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
+     * @param file the file to read from.
+     * @return a string containing the content read from the file.
+     * @throws IOException if an I/O error occurs reading from the file.
+     * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}.
+     * @throws SecurityException in the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readString(File, Charset)
      * @see java.nio.file.Files#readString(Path)
      * @see IOUtil#readAllToString(File)
@@ -1450,14 +1450,14 @@ public abstract class Files { //NOSONAR
      * String content = Files.readString(new File("document.txt"), StandardCharsets.ISO_8859_1);
      * }</pre>
      *
-     * @param file the file to read from
+     * @param file the file to read from.
      * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return a string containing the content read from the file
-     * @throws IOException if an I/O error occurs reading from the file
-     * @throws OutOfMemoryError if the file is extremely large, for example, larger than {@code 2GB}
-     * @throws SecurityException In the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
+     *     helpful predefined constants.
+     * @return a string containing the content read from the file.
+     * @throws IOException if an I/O error occurs reading from the file.
+     * @throws OutOfMemoryError if the file is extremely large, for example, larger than {@code 2GB}.
+     * @throws SecurityException in the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
      */
@@ -1488,14 +1488,15 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to read from
-     * @return a mutable {@link List} containing all the lines
-     * @throws IOException if an I/O error occurs
-     * @throws SecurityException In the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
+     * @param file the file to read from.
+     * @return a mutable {@link List} containing all the lines.
+     * @throws IOException if an I/O error occurs.
+     * @throws SecurityException in the case of the default provider, and a security manager is
+     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readAllLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
-     * @see IOUtil#readAllLines(File)        */
+     * @see IOUtil#readAllLines(File)
+     */
     public static List<String> readAllLines(final File file) throws IOException {
         return readAllLines(file, StandardCharsets.UTF_8);
     }
@@ -1522,13 +1523,13 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to read from
-     * @param cs the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants)
-     * @return a mutable {@link List} containing all the lines from the file
-     * @throws IOException if an I/O error occurs while reading from the file
+     * @param file the file to read from.
+     * @param cs the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
+     * @return a mutable {@link List} containing all the lines from the file.
+     * @throws IOException if an I/O error occurs while reading from the file.
      * @throws SecurityException in the case of the default provider, and a security manager is
      *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
-     *         to check read access to the file
+     *         to check read access to the file.
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */

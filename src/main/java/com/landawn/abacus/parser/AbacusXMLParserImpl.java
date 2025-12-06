@@ -1600,7 +1600,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     if (ignoreUnmatchedProperty) {
                                         continue;
                                     } else {
-                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass); //NOSONAR
+                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass);   //NOSONAR
                                     }
                                 }
 
@@ -1741,7 +1741,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error"); //NOSONAR
+                throw new ParseException("Unknown parser error");   //NOSONAR
             }
 
             case MAP: {
@@ -2350,7 +2350,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME);   //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -3233,7 +3233,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 default:
-                    throw new ParseException("only array, collection, map and bean nodes are supported"); //NOSONAR
+                    throw new ParseException("only array, collection, map and bean nodes are supported");   //NOSONAR
             }
 
             if (isFirstCall) {

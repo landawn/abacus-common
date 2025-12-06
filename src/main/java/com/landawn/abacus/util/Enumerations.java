@@ -89,7 +89,7 @@ public final class Enumerations {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Enumeration<String> empty = Enumerations.empty();
-     * empty.hasMoreElements();  // false
+     * empty.hasMoreElements();   // false
      * }</pre>
      *
      * @param <T> the type of elements (not) enumerated

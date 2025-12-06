@@ -24,11 +24,11 @@ package com.landawn.abacus.type;
  * Type<Byte> type = TypeFactory.getType(byte.class);
  *
  * // Convert string to byte
- * Byte value = type.valueOf("42");  // Returns 42
- * Byte value2 = type.valueOf("-128");  // Returns -128
+ * Byte value = type.valueOf("42");   // Returns 42
+ * Byte value2 = type.valueOf("-128");   // Returns -128
  *
  * // Get default value
- * Byte defaultVal = type.defaultValue();  // Returns 0
+ * Byte defaultVal = type.defaultValue();   // Returns 0
  *
  * // Read from database
  * try (ResultSet rs = stmt.executeQuery("SELECT status_code FROM statuses")) {

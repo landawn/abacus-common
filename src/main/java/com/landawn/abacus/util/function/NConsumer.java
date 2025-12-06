@@ -26,7 +26,7 @@ package com.landawn.abacus.util.function;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NConsumer<String> printAll = args -> {
-     *     for (String s : args) {
+ *     for (String s : args) {
  *         System.out.println(s);
  *     }
  * };

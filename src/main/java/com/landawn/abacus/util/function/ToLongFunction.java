@@ -54,15 +54,15 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 100;
-     * long result1 = ToLongFunction.FROM_NUM.applyAsLong(intValue);  // returns 100L
+     * long result1 = ToLongFunction.FROM_NUM.applyAsLong(intValue);   // returns 100L
      *
      * Double doubleValue = 123.456;
-     * long result2 = ToLongFunction.FROM_NUM.applyAsLong(doubleValue);  // returns 123L (truncated)
+     * long result2 = ToLongFunction.FROM_NUM.applyAsLong(doubleValue);   // returns 123L (truncated)
      *
      * BigDecimal bigDecimal = new BigDecimal("9999999999");
-     * long result3 = ToLongFunction.FROM_NUM.applyAsLong(bigDecimal);  // returns 9999999999L
+     * long result3 = ToLongFunction.FROM_NUM.applyAsLong(bigDecimal);   // returns 9999999999L
      *
-     * long defaultValue = ToLongFunction.FROM_NUM.applyAsLong(null);  // returns 0L
+     * long defaultValue = ToLongFunction.FROM_NUM.applyAsLong(null);   // returns 0L
      * }</pre>
      */
     ToLongFunction<Number> FROM_NUM = value -> value == null ? 0 : value.longValue();
@@ -73,13 +73,13 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToLongFunction<String> lengthFunction = str -> str.length();
-     * long length = lengthFunction.applyAsLong("Hello World");  // Returns 11L
+     * long length = lengthFunction.applyAsLong("Hello World");   // Returns 11L
      *
      * ToLongFunction<Date> timestampFunction = Date::getTime;
-     * long timestamp = timestampFunction.applyAsLong(new Date());  // Returns milliseconds since epoch
+     * long timestamp = timestampFunction.applyAsLong(new Date());   // Returns milliseconds since epoch
      *
      * ToLongFunction<List<Integer>> sizeFunction = list -> list.size();
-     * long size = sizeFunction.applyAsLong(Arrays.asList(1, 2, 3, 4));  // Returns 4L
+     * long size = sizeFunction.applyAsLong(Arrays.asList(1, 2, 3, 4));   // Returns 4L
      * }</pre>
      *
      * @param value the function argument

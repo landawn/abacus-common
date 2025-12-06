@@ -88,7 +88,6 @@ import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
@@ -179,7 +178,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * String trimmed = N.trim(text);
  * 
  * // Type conversions
- * int parsed = Numbers.toInt(value);  // Throws NumberFormatException if invalid
+ * int parsed = Numbers.toInt(value);   // Throws NumberFormatException if invalid
  * List<String> converted = N.map(list, converter);
  * }</pre>
  *
@@ -986,6 +985,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String value = "test";
+     * checkArgNotNull(value);   // returns "test"
+     *
+     * checkArgNotNull(null);    // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the argument
      * @param obj the argument to check
      * @return the {@code non-null} argument
@@ -1001,6 +1008,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String value = checkArgNotNull("test", "value");   // returns "test"
+     *
+     * checkArgNotNull(null, "value");                    // throws IllegalArgumentException: 'value' cannot be null
+     * checkArgNotNull(null, "Value must not be null");   // throws IllegalArgumentException: Value must not be null
+     * }</pre>
      *
      * @param <T> the type of the argument
      * @param obj the argument to check
@@ -1064,7 +1079,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new boolean[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");             // throws IllegalArgumentException
@@ -1091,7 +1106,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b'};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new char[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
@@ -1118,7 +1133,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new byte[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
@@ -1145,7 +1160,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new short[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");           // throws IllegalArgumentException
@@ -1172,7 +1187,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new int[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");         // throws IllegalArgumentException
@@ -1199,7 +1214,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new long[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
@@ -1226,7 +1241,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new float[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");           // throws IllegalArgumentException
@@ -1253,7 +1268,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new double[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");            // throws IllegalArgumentException
@@ -1280,7 +1295,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkArgNotEmpty(array, "array");  // returns array
+     * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new String[0], "array");   // throws IllegalArgumentException
      * checkArgNotEmpty(null, "array");            // throws IllegalArgumentException
@@ -1343,7 +1358,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Valid - no exception thrown
      * Iterable<String> iterable = Arrays.asList("a", "b");
-     * checkArgNotEmpty(iterable, "iterable");  // Returns iterable
+     * checkArgNotEmpty(iterable, "iterable");   // Returns iterable
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyList(), "iterable");   // Empty iterable
@@ -1376,7 +1391,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Valid - no exception thrown
      * Iterator<String> iterator = Arrays.asList("a", "b").iterator();
-     * checkArgNotEmpty(iterator, "iterator");  // Returns iterator
+     * checkArgNotEmpty(iterator, "iterator");   // Returns iterator
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyIterator(), "iterator");   // Empty iterator
@@ -1403,6 +1418,19 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified Map argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key", "value");
+     * checkArgNotEmpty(map, "map");   // Returns map
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(Collections.emptyMap(), "map");   // Empty map
+     * checkArgNotEmpty(new HashMap<>(), "map");          // Empty map
+     * checkArgNotEmpty(null, "map");                     // Null
+     * }</pre>
+     *
      * @param <T> the type of the Map
      * @param arg the Map argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1428,7 +1456,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Valid - no exception thrown
      * IntList intList = IntList.of(1, 2, 3);
-     * checkArgNotEmpty(intList, "intList");  // Returns intList
+     * checkArgNotEmpty(intList, "intList");   // Returns intList
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(IntList.empty(), "intList");   // Empty list
@@ -1459,7 +1487,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Valid - no exception thrown
      * Multiset<String> multiset = Multiset.of("a", "b", "a");
-     * checkArgNotEmpty(multiset, "multiset");  // Returns multiset
+     * checkArgNotEmpty(multiset, "multiset");   // Returns multiset
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Multiset.of(), "multiset");   // Empty multiset
@@ -1490,7 +1518,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Valid - no exception thrown
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "b", 2);
-     * checkArgNotEmpty(multimap, "multimap");  // Returns multimap
+     * checkArgNotEmpty(multimap, "multimap");   // Returns multimap
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(ListMultimap.of(), "multimap");   // Empty multimap
@@ -1522,7 +1550,7 @@ sealed class CommonUtil permits N {
      * // Valid - no exception thrown
      * Dataset dataset = Dataset.builder().column("name", String.class).build();
      * dataset.addRow("Alice");
-     * checkArgNotEmpty(dataset, "dataset");  // Returns dataset
+     * checkArgNotEmpty(dataset, "dataset");   // Returns dataset
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Dataset.builder().build(), "dataset");   // Empty dataset
@@ -1556,6 +1584,17 @@ sealed class CommonUtil permits N {
      * Checks if the specified charSequence argument is not {@code null}, empty, or blank (whitespace only), and throws {@code IllegalArgumentException} if it is.
      *
      * <p>A string is considered blank if it contains only whitespace characters as defined by {@link Character#isWhitespace(char)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * checkArgNotBlank("hello", "username");   // Regular string
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotBlank("", "username");      // Empty string
+     * checkArgNotBlank("   ", "username");   // Blank (whitespace-only)
+     * checkArgNotBlank(null, "username");    // Null
+     * }</pre>
      *
      * @param <T> the type of the argument, which extends CharSequence
      * @param arg the argument to check
@@ -1757,7 +1796,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive((byte) 1, "value");  // returns 1
+     * checkArgPositive((byte) 1, "value");   // returns 1
      *
      * checkArgPositive((byte) 0, "value");    // throws IllegalArgumentException
      * checkArgPositive((byte) -1, "value");   // throws IllegalArgumentException
@@ -1786,7 +1825,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive((short) 1, "value");  // returns 1
+     * checkArgPositive((short) 1, "value");   // returns 1
      *
      * checkArgPositive((short) 0, "value");    // throws IllegalArgumentException
      * checkArgPositive((short) -1, "value");   // throws IllegalArgumentException
@@ -1815,7 +1854,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1, "value");  // returns 1
+     * checkArgPositive(1, "value");   // returns 1
      *
      * checkArgPositive(0, "value");    // throws IllegalArgumentException
      * checkArgPositive(-1, "value");   // throws IllegalArgumentException
@@ -1845,7 +1884,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1L, "value");  // returns 1L
+     * checkArgPositive(1L, "value");   // returns 1L
      *
      * checkArgPositive(0L, "value");    // throws IllegalArgumentException
      * checkArgPositive(-1L, "value");   // throws IllegalArgumentException
@@ -1875,7 +1914,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1.0f, "value");  // returns 1.0f
+     * checkArgPositive(1.0f, "value");   // returns 1.0f
      *
      * checkArgPositive(0.0f, "value");    // throws IllegalArgumentException
      * checkArgPositive(-1.0f, "value");   // throws IllegalArgumentException
@@ -1904,7 +1943,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1.0, "value");  // returns 1.0
+     * checkArgPositive(1.0, "value");   // returns 1.0
      *
      * checkArgPositive(0.0, "value");    // throws IllegalArgumentException
      * checkArgPositive(-1.0, "value");   // throws IllegalArgumentException
@@ -1935,10 +1974,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkElementNotNull(array);  // Valid
+     * checkElementNotNull(array);   // Valid
      *
      * String[] arrayWithNull = {"a", null};
-     * checkElementNotNull(arrayWithNull);  // throws IllegalArgumentException
+     * checkElementNotNull(arrayWithNull);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to check
@@ -1962,10 +2001,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkElementNotNull(array, "array");  // Valid
+     * checkElementNotNull(array, "array");   // Valid
      *
      * String[] arrayWithNull = {"a", null};
-     * checkElementNotNull(arrayWithNull, "array");  // throws IllegalArgumentException
+     * checkElementNotNull(arrayWithNull, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to check
@@ -1994,10 +2033,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b");
-     * checkElementNotNull(list);  // Valid
+     * checkElementNotNull(list);   // Valid
      *
      * List<String> listWithNull = Arrays.asList("a", null);
-     * checkElementNotNull(listWithNull);  // throws IllegalArgumentException
+     * checkElementNotNull(listWithNull);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param c the collection to check
@@ -2021,10 +2060,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b");
-     * checkElementNotNull(list, "list");  // Valid
+     * checkElementNotNull(list, "list");   // Valid
      *
      * List<String> listWithNull = Arrays.asList("a", null);
-     * checkElementNotNull(listWithNull, "list");  // throws IllegalArgumentException
+     * checkElementNotNull(listWithNull, "list");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param c the collection to check
@@ -2054,11 +2093,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkKeyNotNull(map);  // Valid
+     * checkKeyNotNull(map);   // Valid
      *
      * Map<String, String> mapWithNullKey = new HashMap<>();
      * mapWithNullKey.put(null, "value");
-     * checkKeyNotNull(mapWithNullKey);  // throws IllegalArgumentException
+     * checkKeyNotNull(mapWithNullKey);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2083,11 +2122,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkKeyNotNull(map, "map");  // Valid
+     * checkKeyNotNull(map, "map");   // Valid
      *
      * Map<String, String> mapWithNullKey = new HashMap<>();
      * mapWithNullKey.put(null, "value");
-     * checkKeyNotNull(mapWithNullKey, "map");  // throws IllegalArgumentException
+     * checkKeyNotNull(mapWithNullKey, "map");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2117,11 +2156,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkValueNotNull(map);  // Valid
+     * checkValueNotNull(map);   // Valid
      *
      * Map<String, String> mapWithNullValue = new HashMap<>();
      * mapWithNullValue.put("key", null);
-     * checkValueNotNull(mapWithNullValue);  // throws IllegalArgumentException
+     * checkValueNotNull(mapWithNullValue);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2146,11 +2185,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkValueNotNull(map, "map");  // Valid
+     * checkValueNotNull(map, "map");   // Valid
      *
      * Map<String, String> mapWithNullValue = new HashMap<>();
      * mapWithNullValue.put("key", null);
-     * checkValueNotNull(mapWithNullValue, "map");  // throws IllegalArgumentException
+     * checkValueNotNull(mapWithNullValue, "map");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2407,6 +2446,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2421,6 +2462,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2437,6 +2480,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2451,6 +2496,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2467,6 +2514,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2481,6 +2530,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2497,6 +2548,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2511,6 +2564,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2527,6 +2582,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2541,6 +2598,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2557,6 +2616,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2571,6 +2632,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2587,6 +2650,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2601,6 +2666,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2617,6 +2684,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2631,6 +2700,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2647,6 +2718,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2661,6 +2734,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2677,6 +2752,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2691,6 +2768,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2707,6 +2786,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2721,6 +2802,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2739,6 +2822,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -2756,6 +2841,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
@@ -3187,6 +3274,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3201,6 +3290,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3217,6 +3308,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3231,6 +3324,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3247,6 +3342,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3261,6 +3358,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3277,6 +3376,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3291,6 +3392,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3307,6 +3410,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3321,6 +3426,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3337,6 +3444,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3351,6 +3460,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3367,6 +3478,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3381,6 +3494,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3397,6 +3512,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3411,6 +3528,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3427,6 +3546,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3441,6 +3562,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3457,6 +3580,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3471,6 +3596,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3487,6 +3614,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3501,6 +3630,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3517,6 +3648,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3531,6 +3664,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3623,7 +3758,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, "Object cannot be null");  // Throws NullPointerException
+     * requireNonNull(null, "Object cannot be null");   // Throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the object
@@ -3653,7 +3788,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, () -> "Object cannot be null");  // Throws NullPointerException
+     * requireNonNull(null, () -> "Object cannot be null");   // Throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the object
@@ -3865,15 +4000,6 @@ sealed class CommonUtil permits N {
      * Compares two boolean arrays for equality within the specified range.
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean[] a = {true, false, true};
-     * boolean[] b = {false, true, false};
-     * equals(a, 1, b, 1, 1);  // returns true (compares false with true? No, index 1 of a is false, index 1 of b is true. Wait. a[1]=false, b[1]=true. Not equal.
-     * // Let's fix example:
-     * // a = {true, false, true}
-     * // b = {true, false, false}
-     * // equals(a, 0, b, 0, 2);  // returns true (true, false == true, false)
-     * }</pre>
      * <pre>{@code
      * boolean[] a = {true, false, true};
      * boolean[] b = {true, false, false};
@@ -4185,6 +4311,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two float arrays for equality within the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f};
+     * float[] b = {1.0f, 2.0f, 4.0f};
+     * equals(a, 0, b, 0, 2);   // returns true
+     * equals(a, 0, b, 0, 3);   // returns false
+     * }</pre>
+     *
      * @param a the first float array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second float array, must not be null
@@ -4216,6 +4350,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two float arrays for equality within a specified delta.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f};
+     * float[] b = {1.01f, 2.01f, 3.01f};
+     * equals(a, b, 0.02f);    // returns true
+     * equals(a, b, 0.001f);   // returns false
+     * }</pre>
      *
      * @param a the first float array, must not be null
      * @param b the second float array, must not be null
@@ -4257,6 +4399,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two double arrays for equality within the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0};
+     * double[] b = {1.0, 2.0, 4.0};
+     * equals(a, 0, b, 0, 2);   // returns true
+     * equals(a, 0, b, 0, 3);   // returns false
+     * }</pre>
+     *
      * @param a the first double array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second double array, must not be null
@@ -4288,6 +4438,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two double arrays for equality within a specified delta.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0};
+     * double[] b = {1.01, 2.01, 3.01};
+     * equals(a, b, 0.02);    // returns true
+     * equals(a, b, 0.001);   // returns false
+     * }</pre>
      *
      * @param a the first double array, must not be null
      * @param b the second double array, must not be null
@@ -4715,7 +4873,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of booleans.
      *
-     * @param a the array of booleans
+     * @param a the array of booleans, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(boolean[])
      * @see #equals(boolean[], boolean[])
@@ -4730,7 +4888,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] a = {true, false, true};
-     * int hash = hashCode(a, 0, 2);  // hash code for {true, false}
+     * int hash = hashCode(a, 0, 2);   // hash code for {true, false}
      * }</pre>
      *
      * @param a the array of booleans
@@ -4758,7 +4916,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of chars.
      *
-     * @param a the array of chars
+     * @param a the array of chars, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(char[])
      */
@@ -4772,7 +4930,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] a = {'a', 'b', 'c'};
-     * int hash = hashCode(a, 0, 2);  // hash code for {'a', 'b'}
+     * int hash = hashCode(a, 0, 2);   // hash code for {'a', 'b'}
      * }</pre>
      *
      * @param a the array of chars
@@ -4800,7 +4958,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of bytes.
      *
-     * @param a the array of bytes
+     * @param a the array of bytes, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(byte[])
      */
@@ -4814,7 +4972,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1, 2}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of bytes
@@ -4842,7 +5000,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of shorts.
      *
-     * @param a the array of shorts
+     * @param a the array of shorts, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(short[])
      */
@@ -4856,7 +5014,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1, 2}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of shorts
@@ -4884,7 +5042,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of ints.
      *
-     * @param a the array of ints
+     * @param a the array of ints, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(int[])
      */
@@ -4898,7 +5056,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1, 2}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of ints
@@ -4926,7 +5084,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of longs.
      *
-     * @param a the array of longs
+     * @param a the array of longs, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(long[])
      */
@@ -4940,7 +5098,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1L, 2L}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1L, 2L}
      * }</pre>
      *
      * @param a the array of longs
@@ -4968,7 +5126,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of floats.
      *
-     * @param a the array of floats
+     * @param a the array of floats, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(float[])
      */
@@ -4982,7 +5140,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1.0f, 2.0f}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1.0f, 2.0f}
      * }</pre>
      *
      * @param a the array of floats
@@ -5010,7 +5168,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of doubles.
      *
-     * @param a the array of doubles
+     * @param a the array of doubles, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(double[])
      */
@@ -5024,7 +5182,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] a = {1.0, 2.0, 3.0};
-     * int hash = hashCode(a, 0, 2);  // hash code for {1.0, 2.0}
+     * int hash = hashCode(a, 0, 2);   // hash code for {1.0, 2.0}
      * }</pre>
      *
      * @param a the array of doubles
@@ -5052,7 +5210,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of Objects.
      *
-     * @param a the array of Objects
+     * @param a the array of Objects, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(Object[])
      */
@@ -5066,7 +5224,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] a = {"a", "b", "c"};
-     * int hash = hashCode(a, 0, 2);  // hash code for {"a", "b"}
+     * int hash = hashCode(a, 0, 2);   // hash code for {"a", "b"}
      * }</pre>
      *
      * @param a the array of Objects
@@ -5161,10 +5319,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * int deepHash = deepHashCode(array);  // deep hash code of array
+     * int deepHash = deepHashCode(array);   // deep hash code of array
      * }</pre>
      *
-     * @param a the array of Objects
+     * @param a the array of Objects, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#deepHashCode(Object[])
      */
@@ -5178,7 +5336,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * int deepHash = deepHashCode(array, 0, 2);  // deep hash code of {"a", "b"}
+     * int deepHash = deepHashCode(array, 0, 2);   // deep hash code of {"a", "b"}
      * }</pre>
      *
      * @param a the array of Objects
@@ -5296,7 +5454,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString('a');  // returns "a"
+     * toString('a');   // returns "a"
      * }</pre>
      *
      * @param value the char value to be represented as a string
@@ -5311,7 +5469,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString((byte) 1);  // returns "1"
+     * toString((byte) 1);   // returns "1"
      * }</pre>
      *
      * @param value the byte value to be represented as a string
@@ -5326,7 +5484,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString((short) 1);  // returns "1"
+     * toString((short) 1);   // returns "1"
      * }</pre>
      *
      * @param value the short value to be represented as a string
@@ -5341,7 +5499,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1);  // returns "1"
+     * toString(1);   // returns "1"
      * }</pre>
      *
      * @param value the int value to be represented as a string
@@ -5356,7 +5514,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1L);  // returns "1"
+     * toString(1L);   // returns "1"
      * }</pre>
      *
      * @param value the long value to be represented as a string
@@ -5371,7 +5529,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1.0f);  // returns "1.0"
+     * toString(1.0f);   // returns "1.0"
      * }</pre>
      *
      * @param value the float value to be represented as a string
@@ -5386,7 +5544,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1.0);  // returns "1.0"
+     * toString(1.0);   // returns "1.0"
      * }</pre>
      *
      * @param value the double value to be represented as a string
@@ -5484,10 +5642,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false};
-     * toString(array);  // returns "[true, false]"
+     * toString(array);   // returns "[true, false]"
      * }</pre>
      *
-     * @param a the boolean array to be represented as a string
+     * @param a the boolean array to be represented as a string, may be {@code null}
      * @return the String representation of the boolean array
      * @see Arrays#toString(boolean[])
      */
@@ -5507,7 +5665,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * toString(array, 0, 2);  // returns "[true, false]"
+     * toString(array, 0, 2);   // returns "[true, false]"
      * }</pre>
      *
      * @param a the boolean array to be represented as a string
@@ -5558,10 +5716,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b'};
-     * toString(array);  // returns "[a, b]"
+     * toString(array);   // returns "[a, b]"
      * }</pre>
      *
-     * @param a the char array to be represented as a string
+     * @param a the char array to be represented as a string, may be {@code null}
      * @return the String representation of the char array
      * @see Arrays#toString(char[])
      */
@@ -5581,7 +5739,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * toString(array, 0, 2);  // returns "[a, b]"
+     * toString(array, 0, 2);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the char array to be represented as a string
@@ -5601,7 +5759,7 @@ sealed class CommonUtil permits N {
 
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
 
-        // return String.valueOf(a, fromIndex, toIndex - fromIndex); // NOSONAR)
+        // return String.valueOf(a, fromIndex, toIndex - fromIndex);   // NOSONAR)
     }
 
     static void toString(final StringBuilder sb, final char[] a) {
@@ -5634,10 +5792,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2};
-     * toString(array);  // returns "[1, 2]"
+     * toString(array);   // returns "[1, 2]"
      * }</pre>
      *
-     * @param a the byte array to be represented as a string
+     * @param a the byte array to be represented as a string, may be {@code null}
      * @return the String representation of the byte array
      * @see Arrays#toString(byte[])
      */
@@ -5657,7 +5815,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * toString(array, 0, 2);  // returns "[1, 2]"
+     * toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the byte array to be represented as a string
@@ -5708,10 +5866,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2};
-     * toString(array);  // returns "[1, 2]"
+     * toString(array);   // returns "[1, 2]"
      * }</pre>
      *
-     * @param a the short array to be represented as a string
+     * @param a the short array to be represented as a string, may be {@code null}
      * @return the String representation of the short array
      * @see Arrays#toString(short[])
      */
@@ -5731,7 +5889,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * toString(array, 0, 2);  // returns "[1, 2]"
+     * toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the short array to be represented as a string
@@ -5782,10 +5940,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * toString(array);  // returns "[1, 2]"
+     * toString(array);   // returns "[1, 2]"
      * }</pre>
      *
-     * @param a the int array to be represented as a string
+     * @param a the int array to be represented as a string, may be {@code null}
      * @return the String representation of the int array
      * @see Arrays#toString(int[])
      */
@@ -5805,7 +5963,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * toString(array, 0, 2);  // returns "[1, 2]"
+     * toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the int array to be represented as a string
@@ -5856,10 +6014,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L};
-     * toString(array);  // returns "[1, 2]"
+     * toString(array);   // returns "[1, 2]"
      * }</pre>
      *
-     * @param a the long array to be represented as a string
+     * @param a the long array to be represented as a string, may be {@code null}
      * @return the String representation of the long array
      * @see Arrays#toString(long[])
      */
@@ -5879,7 +6037,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * toString(array, 0, 2);  // returns "[1, 2]"
+     * toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the long array to be represented as a string
@@ -5930,10 +6088,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f};
-     * toString(array);  // returns "[1.0, 2.0]"
+     * toString(array);   // returns "[1.0, 2.0]"
      * }</pre>
      *
-     * @param a the float array to be represented as a string
+     * @param a the float array to be represented as a string, may be {@code null}
      * @return the String representation of the float array
      * @see Arrays#toString(float[])
      */
@@ -5953,7 +6111,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * toString(array, 0, 2);  // returns "[1.0, 2.0]"
+     * toString(array, 0, 2);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the float array to be represented as a string
@@ -6004,10 +6162,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0};
-     * toString(array);  // returns "[1.0, 2.0]"
+     * toString(array);   // returns "[1.0, 2.0]"
      * }</pre>
      *
-     * @param a the double array to be represented as a string
+     * @param a the double array to be represented as a string, may be {@code null}
      * @return the String representation of the double array
      * @see Arrays#toString(double[])
      */
@@ -6027,7 +6185,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * toString(array, 0, 2);  // returns "[1.0, 2.0]"
+     * toString(array, 0, 2);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the double array to be represented as a string
@@ -6094,10 +6252,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * toString(array);  // returns "[a, b]"
+     * toString(array);   // returns "[a, b]"
      * }</pre>
      *
-     * @param a the Object array to be represented as a string
+     * @param a the Object array to be represented as a string, may be {@code null}
      * @return the String representation of the Object array
      * @see Arrays#toString(Object[])
      */
@@ -6117,7 +6275,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * toString(array, 0, 2);  // returns "[a, b]"
+     * toString(array, 0, 2);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the Object array to be represented as a string
@@ -6248,10 +6406,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * deepToString(array);  // returns "[a, b]"
+     * deepToString(array);   // returns "[a, b]"
      * }</pre>
      *
-     * @param a the object array to be represented as a string
+     * @param a the object array to be represented as a string, may be {@code null}
      * @return the String representation of the object, or the default value if the object is null
      * @see Arrays#deepToString(Object[])
      */
@@ -6967,11 +7125,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Multiset) null);  // returns true
+     * isEmpty((Multiset) null);   // returns true
      * Multiset<String> multiset = new Multiset<>();
-     * isEmpty(multiset);  // returns true
+     * isEmpty(multiset);   // returns true
      * multiset.add("a");
-     * isEmpty(multiset);  // returns false
+     * isEmpty(multiset);   // returns false
      * }</pre>
      *
      * @param s the Multiset to be checked, may be {@code null}
@@ -6988,11 +7146,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Multimap) null);  // returns true
+     * isEmpty((Multimap) null);   // returns true
      * Multimap<String, String> multimap = new ListMultimap<>();
-     * isEmpty(multimap);  // returns true
+     * isEmpty(multimap);   // returns true
      * multimap.put("k", "v");
-     * isEmpty(multimap);  // returns false
+     * isEmpty(multimap);   // returns false
      * }</pre>
      *
      * @param m the Multimap to be checked, may be {@code null}
@@ -7009,7 +7167,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Dataset) null);  // returns true
+     * isEmpty((Dataset) null);   // returns true
      * // Dataset ds = ...
      * // isEmpty(ds);
      * }</pre>
@@ -7062,6 +7220,9 @@ sealed class CommonUtil permits N {
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code Boolean.TRUE}, {@code false} otherwise
+     * @see #isFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #negate(Boolean)
      */
     @Beta
     public static boolean isTrue(final Boolean bool) {
@@ -7080,6 +7241,10 @@ sealed class CommonUtil permits N {
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code null} or {@code Boolean.FALSE}, {@code false} otherwise
+     * @see #isNotFalse(Boolean)
+     * @see #isTrue(Boolean)
+     * @see #isFalse(Boolean)
+     * @see #negate(Boolean)
      */
     @Beta
     public static boolean isNotTrue(final Boolean bool) {
@@ -7098,6 +7263,9 @@ sealed class CommonUtil permits N {
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code Boolean.FALSE}, {@code false} otherwise
+     * @see #isNotFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #negate(Boolean)
      */
     @Beta
     public static boolean isFalse(final Boolean bool) {
@@ -7116,6 +7284,9 @@ sealed class CommonUtil permits N {
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code null} or {@code Boolean.TRUE}, {@code false} otherwise
+     * @see #isFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #negate(Boolean)
      */
     @Beta
     public static boolean isNotFalse(final Boolean bool) {
@@ -7434,7 +7605,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Dataset ds = ...
      * // notEmpty(ds);
-     * notEmpty((Dataset) null);  // returns false
+     * notEmpty((Dataset) null);   // returns false
      * }</pre>
      *
      * @param dataset the Dataset to check
@@ -8362,6 +8533,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((SortedMap) null);   // returns immutable empty sorted map
+     * nullToEmpty(new TreeMap<>());    // returns the original map
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map the SortedMap to check
@@ -8374,6 +8551,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((NavigableMap) null);   // returns immutable empty navigable map
+     * nullToEmpty(new TreeMap<>());       // returns the original map
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8388,6 +8571,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty iterator if the specified Iterator is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Iterator) null);                      // returns immutable empty iterator
+     * nullToEmpty(Arrays.asList("a", "b").iterator());   // returns the original iterator
+     * }</pre>
+     *
      * @param <T> the type of elements returned by this iterator
      * @param iter the iterator to check
      * @return an empty iterator if the specified Iterator is {@code null}, otherwise the original Iterator
@@ -8399,6 +8588,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ListIterator) null);                      // returns immutable empty list iterator
+     * nullToEmpty(Arrays.asList("a", "b").listIterator());   // returns the original list iterator
+     * }</pre>
      *
      * @param <T> the type of elements returned by this list iterator
      * @param iter the list iterator to check
@@ -8593,9 +8788,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmptyForEach(null);  // returns empty String array
+     * nullToEmptyForEach(null);   // returns empty String array
      * String[] array = {"a", null, "b"};
-     * nullToEmptyForEach(array);  // modifies array to {"a", "", "b"} and returns it
+     * nullToEmptyForEach(array);   // modifies array to {"a", "", "b"} and returns it
      * }</pre>
      *
      * @param a the String array to check
@@ -8717,9 +8912,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty(null, String[].class);  // returns empty String array
+     * nullToEmpty(null, String[].class);   // returns empty String array
      * String[] array = {"a"};
-     * nullToEmpty(array, String[].class);  // returns the original array
+     * nullToEmpty(array, String[].class);   // returns the original array
      * }</pre>
      *
      * @param <T> the component type of the array
@@ -9472,6 +9667,13 @@ sealed class CommonUtil permits N {
     /**
      * Gets a Type by the given {@code Class}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> stringType = typeOf(String.class);
+     * Type<Integer> intType = typeOf(Integer.class);
+     * Type<List> listType = typeOf(List.class);
+     * }</pre>
+     *
      * @param <T> the type represented by the class
      * @param cls the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
@@ -9484,7 +9686,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given boolean value to its corresponding String representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf(true);    // returns "true"
+     * stringOf(false);   // returns "false"
+     * }</pre>
      *
      * @param val the value to be converted.
      * @return the String representation of the given value. Returns "true" if the value is {@code true}, "false" otherwise.
@@ -9494,10 +9702,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given char value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf('a');    // returns "a"
+     * stringOf('1');    // returns "1"
+     * stringOf('\n');   // returns "\n"
+     * }</pre>
+     *
+     * @param val the char value to be converted
+     * @return the String representation of the given char value
      */
     public static String stringOf(final char val) {
         if (val < 128) {
@@ -9508,10 +9723,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given byte value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf((byte) 0);     // returns "0"
+     * stringOf((byte) 127);   // returns "127"
+     * stringOf((byte) -1);    // returns "-1"
+     * }</pre>
+     *
+     * @param val the byte value to be converted
+     * @return the String representation of the given byte value
      */
     @SuppressFBWarnings({ "INT_BAD_COMPARISON_WITH_SIGNED_BYTE", "INT_BAD_COMPARISON_WITH_SIGNED_BYTE" })
     public static String stringOf(final byte val) {
@@ -9525,10 +9747,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given short value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf((short) 0);      // returns "0"
+     * stringOf((short) 1000);   // returns "1000"
+     * stringOf((short) -500);   // returns "-500"
+     * }</pre>
+     *
+     * @param val the short value to be converted
+     * @return the String representation of the given short value
      */
     public static String stringOf(final short val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -9539,10 +9768,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given int value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf(0);      // returns "0"
+     * stringOf(123);    // returns "123"
+     * stringOf(-456);   // returns "-456"
+     * }</pre>
+     *
+     * @param val the int value to be converted
+     * @return the String representation of the given int value
      */
     public static String stringOf(final int val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -9553,10 +9789,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given long value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf(0L);            // returns "0"
+     * stringOf(123456789L);    // returns "123456789"
+     * stringOf(-987654321L);   // returns "-987654321"
+     * }</pre>
+     *
+     * @param val the long value to be converted
+     * @return the String representation of the given long value
      */
     public static String stringOf(final long val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -9567,20 +9810,34 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given float value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf(0.0f);    // returns "0.0"
+     * stringOf(3.14f);   // returns "3.14"
+     * stringOf(-2.5f);   // returns "-2.5"
+     * }</pre>
+     *
+     * @param val the float value to be converted
+     * @return the String representation of the given float value
      */
     public static String stringOf(final float val) {
         return String.valueOf(val);
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given double value to its corresponding String representation.
      *
-     * @param val the value to be converted.
-     * @return the String representation of the given value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * stringOf(0.0);       // returns "0.0"
+     * stringOf(3.14159);   // returns "3.14159"
+     * stringOf(-2.718);    // returns "-2.718"
+     * }</pre>
+     *
+     * @param val the double value to be converted
+     * @return the String representation of the given double value
      */
     public static String stringOf(final double val) {
         return String.valueOf(val);
@@ -10016,6 +10273,10 @@ sealed class CommonUtil permits N {
      *
      * @param bool the Boolean to negate, which may be null
      * @return the negated Boolean, or {@code null} if {@code null} input
+     * @see #isTrue(Boolean)
+     * @see #isFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #isNotFalse(Boolean)
      */
     @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     @MayReturnNull
@@ -10039,6 +10300,10 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param a the boolean array to negate
+     * @see #isTrue(Boolean)
+     * @see #isFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #isNotFalse(Boolean)
      */
     @Beta
     public static void negate(final boolean[] a) {
@@ -10063,6 +10328,10 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to negate
      * @param toIndex the ending index (exclusive) of the range to negate
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see #isTrue(Boolean)
+     * @see #isFalse(Boolean)
+     * @see #isNotTrue(Boolean)
+     * @see #isNotFalse(Boolean)
      */
     @Beta
     public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -10176,158 +10445,678 @@ sealed class CommonUtil permits N {
         return enumMap;
     }
 
+    private static final Map<Class<?>, Boolean> UNMODIFIABLE_CLASSES = new ConcurrentHashMap<>();
+
+    static {
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableCollection(new ArrayList<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableList(new ArrayList<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableSet(new HashSet<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableSortedSet(new TreeSet<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.emptyList().getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.emptySet().getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.singleton("value").getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.singletonList("value").getClass(), true);
+
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableMap(new HashMap<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableSortedMap(new TreeMap<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.unmodifiableNavigableMap(new TreeMap<>()).getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.emptyMap().getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Collections.singletonMap("k", "v").getClass(), true);
+
+        UNMODIFIABLE_CLASSES.put(List.of("a").getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Set.of("a").getClass(), true);
+        UNMODIFIABLE_CLASSES.put(Map.of("k", "v").getClass(), true);
+
+        UNMODIFIABLE_CLASSES.put(ArrayList.class, false);
+        UNMODIFIABLE_CLASSES.put(LinkedList.class, false);
+        UNMODIFIABLE_CLASSES.put(HashSet.class, false);
+        UNMODIFIABLE_CLASSES.put(LinkedHashSet.class, false);
+        UNMODIFIABLE_CLASSES.put(TreeSet.class, false);
+        UNMODIFIABLE_CLASSES.put(HashMap.class, false);
+        UNMODIFIABLE_CLASSES.put(LinkedHashMap.class, false);
+        UNMODIFIABLE_CLASSES.put(TreeMap.class, false);
+        UNMODIFIABLE_CLASSES.put(ConcurrentHashMap.class, false);
+
+        UNMODIFIABLE_CLASSES.put(ArrayDeque.class, false);
+
+        // cause initialization issue.
+        //    UNMODIFIABLE_CLASSES.put(ImmutableList.of("a").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableSet.of("a").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableSortedSet.of("a").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableNavigableSet.of("a").getClass(), true);
+        //
+        //    UNMODIFIABLE_CLASSES.put(ImmutableMap.of("k", "v").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableSortedMap.of("k", "v").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableNavigableMap.of("k", "v").getClass(), true);
+        //    UNMODIFIABLE_CLASSES.put(ImmutableBiMap.of("k", "v").getClass(), true);
+    }
+
     /**
-     * Returns an unmodifiable view of the specified collection, or an immutable empty collection if the specified collection is {@code null}.
+     * Checks if the specified {@code Collection} is unmodifiable by attempting a mutation operation.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>This method determines whether a Collection instance is unmodifiable by performing a test
+     * mutation: it attempts to add a temporary sentinel element and then remove it. If this operation
+     * throws an {@link UnsupportedOperationException}, the Collection is classified as unmodifiable.
+     *
+     * <p><b>Detection Strategy:</b>
+     * <ul>
+     *   <li><b>Null Safety:</b> {@code null} collections are considered unmodifiable (returns {@code true})</li>
+     *   <li><b>Caching:</b> Results are cached by class type to avoid repeated mutation tests</li>
+     *   <li><b>Mutation Test:</b> Attempts {@code add()} and {@code remove()} with a sentinel value</li>
+     *   <li><b>Exception Handling:</b> {@code UnsupportedOperationException} indicates unmodifiable</li>
+     * </ul>
+     *
+     * <p><b>Recognized Unmodifiable Collection Types:</b>
+     * <ul>
+     *   <li>{@link Collections#unmodifiableCollection(Collection)}</li>
+     *   <li>{@link Collections#unmodifiableList(List)}</li>
+     *   <li>{@link Collections#unmodifiableSet(Set)}</li>
+     *   <li>{@link Collections#unmodifiableSortedSet(SortedSet)}</li>
+     *   <li>{@link Collections#unmodifiableNavigableSet(NavigableSet)}</li>
+     *   <li>{@link Collections#emptyList()}, {@link Collections#emptySet()}</li>
+     *   <li>{@link Collections#singleton(Object)}, {@link Collections#singletonList(Object)}</li>
+     *   <li>{@link List#of()}, {@link Set#of()} and related factory methods (Java 9+)</li>
+     *   <li>Custom unmodifiable Collection implementations throwing {@code UnsupportedOperationException}</li>
+     * </ul>
+     *
+     * <p><b>Important Notes:</b>
+     * <ul>
+     *   <li><b>Side Effects:</b> Modifiable collections are temporarily mutated during the test (though changes are reverted)</li>
+     *   <li><b>Thread Safety:</b> The mutation test is not synchronized; concurrent access may cause issues</li>
+     *   <li><b>False Negatives:</b> Collections that throw other exceptions (not {@code UnsupportedOperationException})
+     *       during mutation are considered modifiable</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b>
      * <pre>{@code
-     * Collection<String> original = Arrays.asList("a", "b", "c");
-     * Collection<String> unmodifiable = N.unmodifiableCollection(original);
+     * // Null collection
+     * isUnmodifiable((Collection) null);   // returns true
+     *
+     * // Unmodifiable collections
+     * isUnmodifiable(Collections.emptyList());                           // returns true
+     * isUnmodifiable(Collections.unmodifiableList(new ArrayList<>()));   // returns true
+     * isUnmodifiable(List.of("a", "b"));                                 // returns true
+     * isUnmodifiable(Collections.singleton("value"));                    // returns true
+     *
+     * // Modifiable collections
+     * isUnmodifiable(new ArrayList<>());                                 // returns false
+     * isUnmodifiable(new HashSet<>());                                   // returns false
+     * isUnmodifiable(new LinkedList<>());                                // returns false
+     *
+     * // Cached behavior (second call uses cache)
+     * Collection<String> c1 = new ArrayList<>();
+     * isUnmodifiable(c1);  // performs mutation test
+     * Collection<String> c2 = new ArrayList<>();
+     * isUnmodifiable(c2);  // uses cached result from c1's class
+     * }</pre>
+     *
+     * <p><b>Exception Handling:</b>
+     * <ul>
+     *   <li>{@code UnsupportedOperationException}: Collection is unmodifiable → returns {@code true}</li>
+     *   <li>Any other exception: Collection is assumed modifiable → returns {@code false}</li>
+     * </ul>
+     *
+     * @param c the Collection to check, may be {@code null}
+     * @return {@code true} if the Collection is {@code null} or unmodifiable (throws {@code UnsupportedOperationException}
+     *         on mutation attempts), {@code false} if the Collection is modifiable or throws other exceptions
+     * @see #isUnmodifiable(Map)
+     * @see #unmodifiableCollection(Collection)
+     * @see #unmodifiableList(List)
+     * @see #unmodifiableSet(Set)
+     * @see Collections#unmodifiableCollection(Collection)
+     * @see UnsupportedOperationException
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static boolean isUnmodifiable(final Collection c) {
+        if (c == null) {
+            return true;
+        }
+
+        final Class<?> cls = c.getClass();
+        Boolean b = UNMODIFIABLE_CLASSES.get(cls);
+
+        if (b != null) {
+            return b;
+        }
+
+        if (Immutable.class.isAssignableFrom(cls)) {
+            b = true;
+            UNMODIFIABLE_CLASSES.put(cls, b);
+            return b;
+        }
+
+        final int sizeBefore = c.size();
+
+        try {
+            final Object obj = null; // N.NULL_MASK; class cast issue with some Collections
+
+            c.add(obj);
+
+            final int sizeAfter = c.size();
+
+            if (sizeAfter > sizeBefore) {
+                c.remove(obj);
+            }
+
+            b = false;
+        } catch (UnsupportedOperationException e) {
+            b = true;
+        } catch (Exception e) {
+            b = false;
+        }
+
+        UNMODIFIABLE_CLASSES.put(cls, b);
+
+        return b;
+    }
+
+    /**
+     * Checks if the specified {@code Map} is unmodifiable by attempting a mutation operation.
+     *
+     * <p>This method determines whether a Map instance is unmodifiable by performing a test
+     * mutation: it attempts to add a temporary entry and then remove it. If this operation
+     * throws an {@link UnsupportedOperationException}, the Map is classified as unmodifiable.
+     *
+     * <p><b>Detection Strategy:</b>
+     * <ul>
+     *   <li><b>Null Safety:</b> {@code null} maps are considered unmodifiable (returns {@code true})</li>
+     *   <li><b>Caching:</b> Results are cached by class type to avoid repeated mutation tests</li>
+     *   <li><b>Mutation Test:</b> Attempts {@code put()} and {@code remove()} with a sentinel value</li>
+     *   <li><b>Exception Handling:</b> {@code UnsupportedOperationException} indicates unmodifiable</li>
+     * </ul>
+     *
+     * <p><b>Recognized Unmodifiable Map Types:</b>
+     * <ul>
+     *   <li>{@link Collections#unmodifiableMap(Map)}</li>
+     *   <li>{@link Collections#unmodifiableSortedMap(SortedMap)}</li>
+     *   <li>{@link Collections#unmodifiableNavigableMap(NavigableMap)}</li>
+     *   <li>{@link Collections#emptyMap()}</li>
+     *   <li>{@link Collections#singletonMap(Object, Object)}</li>
+     *   <li>{@link Map#of()} and related factory methods (Java 9+)</li>
+     *   <li>Custom unmodifiable Map implementations throwing {@code UnsupportedOperationException}</li>
+     * </ul>
+     *
+     * <p><b>Important Notes:</b>
+     * <ul>
+     *   <li><b>Side Effects:</b> Modifiable maps are temporarily mutated during the test (though changes are reverted)</li>
+     *   <li><b>Thread Safety:</b> The mutation test is not synchronized; concurrent access may cause issues</li>
+     *   <li><b>False Negatives:</b> Maps that throw other exceptions (not {@code UnsupportedOperationException})
+     *       during mutation are considered modifiable</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * // Null map
+     * isUnmodifiable((Map) null);   // returns true
+     *
+     * // Unmodifiable maps
+     * isUnmodifiable(Collections.emptyMap());                         // returns true
+     * isUnmodifiable(Collections.unmodifiableMap(new HashMap<>()));   // returns true
+     * isUnmodifiable(Map.of("k", "v"));                               // returns true
+     *
+     * // Modifiable maps
+     * isUnmodifiable(new HashMap<>());                                // returns false
+     * isUnmodifiable(new TreeMap<>());                                // returns false
+     * isUnmodifiable(new LinkedHashMap<>());                          // returns false
+     *
+     * // Cached behavior (second call uses cache)
+     * Map<String, String> map1 = new HashMap<>();
+     * isUnmodifiable(map1);  // performs mutation test
+     * Map<String, String> map2 = new HashMap<>();
+     * isUnmodifiable(map2);  // uses cached result from map1's class
+     * }</pre>
+     *
+     * <p><b>Exception Handling:</b>
+     * <ul>
+     *   <li>{@code UnsupportedOperationException}: Map is unmodifiable → returns {@code true}</li>
+     *   <li>Any other exception: Map is assumed modifiable → returns {@code false}</li>
+     * </ul>
+     *
+     * @param m the Map to check, may be {@code null}
+     * @return {@code true} if the Map is {@code null} or unmodifiable (throws {@code UnsupportedOperationException}
+     *         on mutation attempts), {@code false} if the Map is modifiable or throws other exceptions
+     * @see #isUnmodifiable(Collection)
+     * @see #unmodifiableMap(Map)
+     * @see Collections#unmodifiableMap(Map)
+     * @see UnsupportedOperationException
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static boolean isUnmodifiable(final Map m) {
+        if (m == null) {
+            return true;
+        }
+
+        final Class<?> cls = m.getClass();
+
+        Boolean b = UNMODIFIABLE_CLASSES.get(cls);
+
+        if (b != null) {
+            return b;
+        }
+
+        if (Immutable.class.isAssignableFrom(cls)) {
+            b = true;
+            UNMODIFIABLE_CLASSES.put(cls, b);
+            return b;
+        }
+
+        final int sizeBefore = m.size();
+
+        try {
+
+            final Object key = null; // N.NULL_MASK cause class cast issue with some Maps
+            final Object value = null; // N.NULL_MASK class cast issue with some Maps
+
+            final Object oldValue = m.put(key, value);
+
+            final int sizeAfter = m.size();
+
+            if (oldValue != null) {
+                m.put(key, oldValue);
+            } else if (sizeAfter > sizeBefore) {
+                m.remove(key);
+            }
+
+            b = false;
+        } catch (UnsupportedOperationException e) {
+            b = true;
+        } catch (Exception e) {
+            b = false;
+        }
+
+        UNMODIFIABLE_CLASSES.put(cls, b);
+
+        return b;
+    }
+
+    /**
+     * Returns an unmodifiable view of the specified {@code Collection}.
+     * <p>
+     * This method optimizes the unmodifiable collection creation by:
+     * <ul>
+     *   <li>Returning an empty list if the input collection is {@code null}</li>
+     *   <li>Returning the original collection if it's already known to be unmodifiable</li>
+     *   <li>Returning the original collection if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the collection in an unmodifiable wrapper otherwise</li>
+     * </ul>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Returns the collection unchanged (already unmodifiable)
+     * Collection<String> immutable = List.of("a", "b", "c");
+     * Collection<String> result = N.unmodifiableCollection(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * Collection<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * Collection<String> unmodifiable = N.unmodifiableCollection(list);
      * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     * N.unmodifiableCollection(null);   // returns an empty immutable collection
+     *
+     * // Returns empty list for null input
+     * N.unmodifiableCollection(null);  // returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the collection
-     * @param c the collection for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified collection, or an immutable empty collection if the specified collection is null
+     * @param c the {@code Collection} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified collection, or an empty list if {@code null}
+     *
+     * @see Collections#unmodifiableCollection(Collection)
+     * @see #isUnmodifiable(Collection)
+     * @see Immutable
      */
     public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
         if (c == null) {
             return emptyList();
         }
 
+        final Class<?> cls = c.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (Collection<T>) c;
+        }
+
         return Collections.unmodifiableCollection(c);
     }
 
     /**
-     * Returns an unmodifiable view of the specified list, or an immutable empty list if the specified list is {@code null}.
+     * Returns an unmodifiable view of the specified {@code List}.
+     * <p>
+     * This method optimizes the unmodifiable list creation by:
+     * <ul>
+     *   <li>Returning an empty list if the input list is {@code null}</li>
+     *   <li>Returning the original list if it's already known to be unmodifiable</li>
+     *   <li>Returning the original list if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the list in an unmodifiable wrapper otherwise</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Examples:</b>
      * <pre>{@code
-     * List<String> original = new ArrayList<>(Arrays.asList("a", "b", "c"));
-     * List<String> unmodifiable = N.unmodifiableList(original);
+     * // Returns the list unchanged (already unmodifiable)
+     * List<String> immutable = List.of("a", "b", "c");
+     * List<String> result = N.unmodifiableList(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * List<String> mutableList = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * List<String> unmodifiable = N.unmodifiableList(mutableList);
      * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     * N.unmodifiableList(null);   // returns an empty immutable list
+     *
+     * // Returns empty list for null input
+     * N.unmodifiableList(null);  // returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the list
-     * @param list the list for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified list, or an immutable empty list if the specified list is null
+     * @param list the {@code List} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified list, or an empty list if {@code null}
+     *
+     * @see Collections#unmodifiableList(List)
+     * @see #isUnmodifiable(Collection)
+     * @see Immutable
      */
     public static <T> List<T> unmodifiableList(final List<? extends T> list) {
         if (list == null) {
             return emptyList();
         }
 
+        final Class<?> cls = list.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (List<T>) list;
+        }
+
         return Collections.unmodifiableList(list);
     }
 
     /**
-     * Returns an unmodifiable view of the specified set, or an immutable empty set if the specified set is {@code null}.
+     * Returns an unmodifiable view of the specified {@code Set}.
+     * <p>
+     * This method optimizes the unmodifiable set creation by:
+     * <ul>
+     *   <li>Returning an empty set if the input set is {@code null}</li>
+     *   <li>Returning the original set if it's already known to be unmodifiable</li>
+     *   <li>Returning the original set if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Examples:</b>
      * <pre>{@code
-     * Set<String> original = new HashSet<>(Arrays.asList("a", "b", "c"));
-     * Set<String> unmodifiable = N.unmodifiableSet(original);
+     * // Returns the set unchanged (already unmodifiable)
+     * Set<String> immutable = Set.of("a", "b", "c");
+     * Set<String> result = N.unmodifiableSet(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * Set<String> mutableSet = new HashSet<>(Arrays.asList("a", "b", "c"));
+     * Set<String> unmodifiable = N.unmodifiableSet(mutableSet);
      * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     * N.unmodifiableSet(null);   // returns an empty immutable set
+     *
+     * // Returns empty set for null input
+     * N.unmodifiableSet(null);  // returns empty set
      * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @param s the set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified set, or an immutable empty set if the specified set is null
+     * @param set the {@code Set} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified set, or an empty set if {@code null}
+     *
+     * @see Collections#unmodifiableSet(Set)
+     * @see #isUnmodifiable(Collection)
+     * @see Immutable
      */
-    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
-        if (s == null) {
+    public static <T> Set<T> unmodifiableSet(final Set<? extends T> set) {
+        if (set == null) {
             return emptySet();
         }
 
-        return Collections.unmodifiableSet(s);
+        final Class<?> cls = set.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (Set<T>) set;
+        }
+
+        return Collections.unmodifiableSet(set);
     }
 
     /**
-     * Returns an unmodifiable view of the specified sorted set, or an immutable empty sorted set if the specified sorted set is {@code null}.
+     * Returns an unmodifiable view of the specified {@code SortedSet}.
+     * <p>
+     * This method optimizes the unmodifiable sorted set creation by:
+     * <ul>
+     *   <li>Returning an empty sorted set if the input set is {@code null}</li>
+     *   <li>Returning the original set if it's already known to be unmodifiable</li>
+     *   <li>Returning the original set if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
+     * </ul>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Returns the set unchanged (already unmodifiable)
+     * SortedSet<String> immutable = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList("a", "b", "c")));
+     * SortedSet<String> result = N.unmodifiableSortedSet(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * SortedSet<String> mutableSet = new TreeSet<>(Arrays.asList("a", "b", "c"));
+     * SortedSet<String> unmodifiable = N.unmodifiableSortedSet(mutableSet);
+     * // unmodifiable.add("d");  // throws UnsupportedOperationException
+     *
+     * // Returns empty sorted set for null input
+     * N.unmodifiableSortedSet(null);  // returns empty sorted set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @param s the sorted set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified sorted set, or an immutable empty sorted set if the specified sorted set is null
+     * @param set the {@code SortedSet} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified sorted set, or an empty sorted set if {@code null}
+     *
+     * @see Collections#unmodifiableSortedSet(SortedSet)
+     * @see #isUnmodifiable(Collection)
+     * @see Immutable
      */
-    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
-        if (s == null) {
+    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> set) {
+        if (set == null) {
             return emptySortedSet();
         }
 
-        return Collections.unmodifiableSortedSet(s);
+        final Class<?> cls = set.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return set;
+        }
+
+        return Collections.unmodifiableSortedSet(set);
     }
 
     /**
-     * Returns an unmodifiable view of the specified navigable set, or an immutable empty navigable set if the specified navigable set is {@code null}.
+     * Returns an unmodifiable view of the specified {@code NavigableSet}.
+     * <p>
+     * This method optimizes the unmodifiable navigable set creation by:
+     * <ul>
+     *   <li>Returning an empty navigable set if the input set is {@code null}</li>
+     *   <li>Returning the original set if it's already known to be unmodifiable</li>
+     *   <li>Returning the original set if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
+     * </ul>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Returns the set unchanged (already unmodifiable)
+     * NavigableSet<String> immutable = Collections.unmodifiableNavigableSet(new TreeSet<>(Arrays.asList("a", "b", "c")));
+     * NavigableSet<String> result = N.unmodifiableNavigableSet(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * NavigableSet<String> mutableSet = new TreeSet<>(Arrays.asList("a", "b", "c"));
+     * NavigableSet<String> unmodifiable = N.unmodifiableNavigableSet(mutableSet);
+     * // unmodifiable.add("d");  // throws UnsupportedOperationException
+     *
+     * // Returns empty navigable set for null input
+     * N.unmodifiableNavigableSet(null);  // returns empty navigable set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @param s the navigable set for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified navigable set, or an immutable empty navigable set if the specified navigable set is null
+     * @param set the {@code NavigableSet} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified navigable set, or an empty navigable set if {@code null}
+     *
+     * @see Collections#unmodifiableNavigableSet(NavigableSet)
+     * @see #isUnmodifiable(Collection)
+     * @see Immutable
      */
-    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
-        if (s == null) {
+    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> set) {
+        if (set == null) {
             return emptyNavigableSet();
         }
 
-        return Collections.unmodifiableNavigableSet(s);
+        final Class<?> cls = set.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return set;
+        }
+
+        return Collections.unmodifiableNavigableSet(set);
     }
 
     /**
-     * Returns an unmodifiable view of the specified map, or an immutable empty map if the specified map is {@code null}.
+     * Returns an unmodifiable view of the specified {@code Map}.
+     * <p>
+     * This method optimizes the unmodifiable map creation by:
+     * <ul>
+     *   <li>Returning an empty map if the input map is {@code null}</li>
+     *   <li>Returning the original map if it's already known to be unmodifiable</li>
+     *   <li>Returning the original map if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Examples:</b>
      * <pre>{@code
-     * Map<String, Integer> original = new HashMap<>();
-     * original.put("a", 1);
-     * original.put("b", 2);
-     * Map<String, Integer> unmodifiable = N.unmodifiableMap(original);
+     * // Returns the map unchanged (already unmodifiable)
+     * Map<String, Integer> immutable = Collections.unmodifiableMap(Map.of("a", 1, "b", 2));
+     * Map<String, Integer> result = N.unmodifiableMap(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * Map<String, Integer> mutableMap = new HashMap<>();
+     * mutableMap.put("a", 1);
+     * Map<String, Integer> unmodifiable = N.unmodifiableMap(mutableMap);
      * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
-     * N.unmodifiableMap(null);   // returns an empty immutable map
+     *
+     * // Returns empty map for null input
+     * N.unmodifiableMap(null);  // returns empty map
      * }</pre>
      *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified map, or an immutable empty map if the specified map is null
+     * @param <K> the type of map keys
+     * @param <V> the type of map values
+     * @param m the {@code Map} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified map, or an empty map if {@code null}
+     *
+     * @see Collections#unmodifiableMap(Map)
+     * @see #isUnmodifiable(Map)
+     * @see Immutable
      */
     public static <K, V> Map<K, V> unmodifiableMap(final Map<? extends K, ? extends V> m) {
         if (m == null) {
             return emptyMap();
         }
 
+        final Class<?> cls = m.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (Map<K, V>) m;
+        }
+
         return Collections.unmodifiableMap(m);
     }
 
     /**
-     * Returns an unmodifiable view of the specified sorted map, or an immutable empty sorted map if the specified map is {@code null}.
+     * Returns an unmodifiable view of the specified {@code SortedMap}.
+     * <p>
+     * This method optimizes the unmodifiable sorted map creation by:
+     * <ul>
+     *   <li>Returning an empty sorted map if the input map is {@code null}</li>
+     *   <li>Returning the original map if it's already known to be unmodifiable</li>
+     *   <li>Returning the original map if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
+     * </ul>
      *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the sorted map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified sorted map, or an immutable empty sorted map if the specified map is null
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Returns the map unchanged (already unmodifiable)
+     * SortedMap<String, Integer> immutable = Collections.unmodifiableSortedMap(new TreeMap<>(Map.of("a", 1, "b", 2)));
+     * SortedMap<String, Integer> result = N.unmodifiableSortedMap(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * SortedMap<String, Integer> mutableMap = new TreeMap<>();
+     * mutableMap.put("a", 1);
+     * SortedMap<String, Integer> unmodifiable = N.unmodifiableSortedMap(mutableMap);
+     * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
+     *
+     * // Returns empty sorted map for null input
+     * N.unmodifiableSortedMap(null);  // returns empty sorted map
+     * }</pre>
+     *
+     * @param <K> the type of map keys
+     * @param <V> the type of map values
+     * @param m the {@code SortedMap} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified sorted map, or an empty sorted map if {@code null}
+     *
+     * @see Collections#unmodifiableSortedMap(SortedMap)
+     * @see #isUnmodifiable(Map)
+     * @see Immutable
      */
     public static <K, V> SortedMap<K, V> unmodifiableSortedMap(final SortedMap<K, ? extends V> m) {
         if (m == null) {
             return emptySortedMap();
         }
 
+        final Class<?> cls = m.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (SortedMap<K, V>) m;
+        }
+
         return Collections.unmodifiableSortedMap(m);
     }
 
     /**
-     * Returns an unmodifiable view of the specified navigable map, or an immutable empty navigable map if the specified map is {@code null}.
+     * Returns an unmodifiable view of the specified {@code NavigableMap}.
+     * <p>
+     * This method optimizes the unmodifiable navigable map creation by:
+     * <ul>
+     *   <li>Returning an empty navigable map if the input map is {@code null}</li>
+     *   <li>Returning the original map if it's already known to be unmodifiable</li>
+     *   <li>Returning the original map if it implements the {@code Immutable} interface</li>
+     *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
+     * </ul>
      *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param m the navigable map for which an unmodifiable view is to be returned
-     * @return an unmodifiable view of the specified navigable map, or an immutable empty navigable map if the specified map is null
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Returns the map unchanged (already unmodifiable)
+     * NavigableMap<String, Integer> immutable = Collections.unmodifiableNavigableMap(new TreeMap<>(Map.of("a", 1, "b", 2)));
+     * NavigableMap<String, Integer> result = N.unmodifiableNavigableMap(immutable);  // same instance
+     *
+     * // Returns an unmodifiable wrapper
+     * NavigableMap<String, Integer> mutableMap = new TreeMap<>();
+     * mutableMap.put("a", 1);
+     * NavigableMap<String, Integer> unmodifiable = N.unmodifiableNavigableMap(mutableMap);
+     * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
+     *
+     * // Returns empty navigable map for null input
+     * N.unmodifiableNavigableMap(null);  // returns empty navigable map
+     * }</pre>
+     *
+     * @param <K> the type of map keys
+     * @param <V> the type of map values
+     * @param m the {@code NavigableMap} to wrap, may be {@code null}
+     * @return an unmodifiable view of the specified navigable map, or an empty navigable map if {@code null}
+     *
+     * @see Collections#unmodifiableNavigableMap(NavigableMap)
+     * @see #isUnmodifiable(Map)
+     * @see Immutable
      */
     public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(final NavigableMap<K, ? extends V> m) {
         if (m == null) {
             return emptyNavigableMap();
+        }
+
+        final Class<?> cls = m.getClass();
+
+        if (UNMODIFIABLE_CLASSES.getOrDefault(cls, false) || Immutable.class.isAssignableFrom(cls)) {
+            return (NavigableMap<K, V>) m;
         }
 
         return Collections.unmodifiableNavigableMap(m);
@@ -10367,7 +11156,7 @@ sealed class CommonUtil permits N {
      *     System.out.println("Method called: " + method.getName());
      *     return null;
      * });
-     * proxy.someMethod();  // prints "Method called: someMethod"
+     * proxy.someMethod();   // prints "Method called: someMethod"
      * }</pre>
      *
      * @param <T> the type of the interface for the proxy class to implement.
@@ -10580,6 +11369,15 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new array of the specified component type and dimensions.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][] matrix = N.newArray(int.class, 3, 4);
+     * // Creates a 3x4 two-dimensional int array
+     *
+     * String[][][] cube = N.newArray(String.class, 2, 3, 4);
+     * // Creates a 2x3x4 three-dimensional String array
+     * }</pre>
+     *
      * @param <T> the type of the array elements
      * @param componentType the class of the component type of the array
      * @param dimensions the dimensions of the new array
@@ -10626,6 +11424,13 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of an ArrayList with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ArrayList<String> list = N.newArrayList(100);
+     * // Creates an ArrayList with initial capacity of 100
+     * list.add("element");
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param initialCapacity the initial capacity of the list
      * @return a new instance of an ArrayList with the specified initial capacity
@@ -10637,6 +11442,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an ArrayList with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+     * ArrayList<String> list = N.newArrayList(set);
+     * // list contains ["a", "b", "c"] in some order
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param c the collection whose elements are to be placed into this list
@@ -10688,6 +11500,13 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a HashSet with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = N.newHashSet(100);
+     * // Creates a HashSet with initial capacity of 100
+     * set.add("element");
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param initialCapacity the initial capacity of the set
      * @return a new instance of a HashSet with the specified initial capacity
@@ -10699,6 +11518,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a HashSet with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "a");
+     * Set<String> set = N.newHashSet(list);
+     * // set contains ["a", "b", "c"] - duplicates removed
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param c the collection whose elements are to be placed into this set
@@ -10968,7 +11794,7 @@ sealed class CommonUtil permits N {
      * ImmutableEntry<String, Integer> entry = N.newImmutableEntry("key", 1);
      * entry.getKey();     // returns "key"
      * entry.getValue();   // returns 1
-     * // entry.setValue(2);  // throws UnsupportedOperationException
+     * // entry.setValue(2);   // throws UnsupportedOperationException
      * }</pre>
      *
      * @param <K> the type of keys maintained by this entry
@@ -11001,6 +11827,13 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a HashMap with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = N.newHashMap(100);
+     * // Creates a HashMap with initial capacity of 100
+     * map.put("key", 1);
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param initialCapacity the initial capacity of the map
@@ -11012,6 +11845,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a HashMap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TreeMap<String, Integer> treeMap = new TreeMap<>();
+     * treeMap.put("a", 1);
+     * treeMap.put("b", 2);
+     * Map<String, Integer> hashMap = N.newHashMap(treeMap);
+     * // hashMap contains {"a"=1, "b"=2}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -11438,6 +12280,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap backed by a LinkedHashMap.
+     * A LinkedHashMap maintains insertion order, so keys will be iterated in the order they were first added.
+     * Values for each key are stored in an ArrayList, preserving the order they were added.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newLinkedListMultimap();
+     * multimap.put("key1", 1);
+     * multimap.put("key2", 2);
+     * multimap.put("key1", 3);
+     * multimap.get("key1");  // returns [1, 3] in insertion order
+     * // Keys iterated in order: key1, key2
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -11527,10 +12381,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap with the specified initial capacity.
+     * Specifying an appropriate initial capacity can reduce rehashing and improve performance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Pre-size for expected number of keys
+     * SetMultimap<String, Integer> multimap = N.newSetMultimap(100);
+     * // Efficiently handles up to ~100 keys without rehashing
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
-     * @param initialCapacity the initial capacity of the SetMultimap
+     * @param initialCapacity the initial capacity of the SetMultimap. Must be non-negative.
      * @return a new instance of a SetMultimap with the specified initial capacity
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final int initialCapacity) {
@@ -12027,11 +12889,25 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new Dataset from the provided Map.
      * The Dataset will have two columns: one for keys and one for values from the Map.
+     * Each entry in the map becomes a row in the dataset.
      *
-     * @param keyColumnName the name of the column for the keys from the Map.
-     * @param valueColumnName the name of the column for the values from the Map.
-     * @param m the Map to convert into a Dataset.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> scores = N.asMap("Alice", 95, "Bob", 87);
+     * Dataset ds = N.newDataset("Name", "Score", scores);
+     * // ds has columns ["Name", "Score"] with rows:
+     * // Row 0: Name=Alice, Score=95
+     * // Row 1: Name=Bob, Score=87
+     *
+     * // Null map creates empty dataset
+     * Dataset empty = N.newDataset("key", "value", null);
+     * }</pre>
+     *
+     * @param keyColumnName the name of the column for the keys from the Map. Cannot be {@code null} or empty.
+     * @param valueColumnName the name of the column for the values from the Map. Cannot be {@code null} or empty.
+     * @param m the Map to convert into a Dataset. Can be {@code null} or empty.
      * @return a new Dataset with two columns: one for keys and one for values from the Map.
+     *         Returns an empty Dataset if {@code m} is {@code null} or empty.
      */
     public static Dataset newDataset(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
         final List<Object> keyColumn = new ArrayList<>(m.size());
@@ -12049,7 +12925,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Creates a new Dataset from the provided Map.
+     * Creates a new Dataset from the provided Map of column names to Collections.
      *
      * The Dataset will have as many columns as there are entries in the Map.
      * The column names are the keys from the Map.
@@ -12057,9 +12933,26 @@ sealed class CommonUtil permits N {
      * If a column has fewer rows than the maximum number of rows, the missing rows will be filled with {@code null} values.
      * Eventually all the columns will have the same number of rows.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, List<Object>> data = N.asLinkedHashMap(
+     *     "Name", N.asList("Alice", "Bob", "Charlie"),
+     *     "Age", N.asList(25, 30, 35),
+     *     "City", N.asList("NYC", "LA")  // shorter column
+     * );
+     * Dataset ds = N.newDataset(data);
+     * // ds has 3 rows (max collection size) and 3 columns
+     * // City column has null for row 2
+     *
+     * // Empty map creates empty dataset
+     * Dataset empty = N.newDataset(N.newLinkedHashMap());
+     * }</pre>
+     *
      * @param <C> the type of the Collection values in the Map.
      * @param map the Map to convert into a Dataset. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
-     * @return a new Dataset with columns created from the Map.
+     *             Can be {@code null} or empty.
+     * @return a new Dataset with columns created from the Map. Returns an empty Dataset if {@code map} is {@code null} or empty.
+     *         All columns will have the same number of rows, with shorter columns padded with {@code null}.
      */
     public static <C extends Collection<?>> Dataset newDataset(final Map<String, C> map) {
         if (isEmpty(map)) {
@@ -12094,14 +12987,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Creates a new Dataset with single column from the provided Collection.
+     * Creates a new Dataset with a single column from the provided Collection.
      * The Dataset will have one column with the provided column name.
      * The data in the column is the data from the provided Collection.
+     * Each element in the Collection becomes a row in the Dataset.
      *
-     * @param columnName the name of the column in the Dataset.
-     * @param column the Collection to convert into a Dataset column.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = N.asList("Alice", "Bob", "Charlie");
+     * Dataset ds = N.newDataset("Name", names);
+     * // ds has 1 column "Name" with 3 rows: Alice, Bob, Charlie
+     *
+     * // Empty collection creates dataset with column but no rows
+     * Dataset empty = N.newDataset("Value", N.asList());
+     * // empty has column "Value" but 0 rows
+     * }</pre>
+     *
+     * @param columnName the name of the column in the Dataset. Cannot be {@code null} or empty.
+     * @param column the Collection to convert into a Dataset column. Can be {@code null} or empty.
      * @return a new Dataset with one column containing the data from the provided Collection.
-     * @throws IllegalArgumentException if the provided columnName is empty.
+     *         If {@code column} is {@code null} or empty, returns a Dataset with the column name but no rows.
+     * @throws IllegalArgumentException if the provided columnName is {@code null} or empty.
      */
     public static Dataset newDataset(final String columnName, final Collection<?> column) throws IllegalArgumentException {
         checkArgNotEmpty(columnName, cs.columnName);
@@ -12249,11 +13155,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified collection to an array.
+     * Converts the specified collection to an array of Objects.
      * Returns an empty array if the specified collection is {@code null} or empty.
      *
-     * @param c the collection to be converted to an array
-     * @return an array containing all the elements in the specified collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = N.asList("a", "b", "c");
+     * Object[] array = N.toArray(list);
+     * // array is ["a", "b", "c"]
+     *
+     * // Handles null input safely
+     * Object[] empty = N.toArray(null);
+     * // empty is an empty array []
+     * }</pre>
+     *
+     * @param c the collection to be converted to an array. Can be {@code null}.
+     * @return an array containing all the elements in the specified collection, or an empty array if {@code c} is {@code null} or empty
      */
     public static Object[] toArray(final Collection<?> c) {
         if (isEmpty(c)) {
@@ -12492,10 +13409,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a collection of Boolean objects to a boolean array.
+     * Converts a collection of Boolean objects to a boolean primitive array.
+     * Null elements in the collection are converted to {@code false} by default.
      *
-     * @param c the collection of Boolean objects to be converted
-     * @return a boolean array containing the primitive boolean values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Boolean> list = N.asList(true, false, true);
+     * boolean[] array = N.toBooleanArray(list);
+     * // array is [true, false, true]
+     *
+     * // Null elements become false
+     * List<Boolean> listWithNull = N.asList(true, null, false);
+     * boolean[] arrayWithNull = N.toBooleanArray(listWithNull);
+     * // arrayWithNull is [true, false, false]
+     * }</pre>
+     *
+     * @param c the collection of Boolean objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a boolean array containing the primitive boolean values from the collection. Null elements are converted to {@code false}.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c) {
         return toBooleanArray(c, false);
@@ -12582,10 +13513,22 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a byte array to a boolean array.
-     * Each byte with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
+     * Each byte with positive value ({@code > 0}) is converted to {@code true}, {@code 0} and negative values are converted to {@code false}.
      *
-     * @param a the byte array to be converted
-     * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = {1, 0, -1, 5, 0};
+     * boolean[] bools = N.toBooleanArray(bytes);
+     * // bools is [true, false, false, true, false]
+     *
+     * // Null or empty returns empty array
+     * boolean[] empty = N.toBooleanArray((byte[]) null);
+     * // empty is an empty boolean array
+     * }</pre>
+     *
+     * @param a the byte array to be converted. Can be {@code null}.
+     * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty.
+     *         Positive bytes become {@code true}, zero and negative bytes become {@code false}.
      */
     public static boolean[] toBooleanArray(final byte[] a) {
         if ((a == null) || (a.length == 0)) {
@@ -12626,9 +13569,23 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Character objects to a char array.
+     * Null elements in the collection are converted to '\0' (null character) by default.
      *
-     * @param c the collection of Character objects to be converted
-     * @return a char array containing the primitive char values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Character> list = N.asList('a', 'b', 'c');
+     * char[] array = N.toCharArray(list);
+     * // array is ['a', 'b', 'c']
+     *
+     * // Null elements become '\0'
+     * List<Character> listWithNull = N.asList('x', null, 'z');
+     * char[] arrayWithNull = N.toCharArray(listWithNull);
+     * // arrayWithNull is ['x', '\0', 'z']
+     * }</pre>
+     *
+     * @param c the collection of Character objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a char array containing the primitive char values from the collection. Null elements are converted to '\0'.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static char[] toCharArray(final Collection<Character> c) {
         return toCharArray(c, (char) 0);
@@ -12716,9 +13673,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to a byte array.
+     * Each Number is converted to its byte value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return a byte array containing the primitive byte values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Byte> list = N.asList((byte) 1, (byte) 2, (byte) 3);
+     * byte[] array = N.toByteArray(list);
+     * // array is [1, 2, 3]
+     *
+     * // Works with other Number types (truncates to byte range)
+     * List<Integer> ints = N.asList(100, 200, 50);
+     * byte[] fromInts = N.toByteArray(ints);
+     * // fromInts is [100, -56, 50] (200 overflows to -56)
+     *
+     * // Null elements become 0
+     * List<Byte> withNull = N.asList((byte) 1, null, (byte) 3);
+     * byte[] arrayWithNull = N.toByteArray(withNull);
+     * // arrayWithNull is [1, 0, 3]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a byte array containing the primitive byte values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static byte[] toByteArray(final Collection<? extends Number> c) {
         return toByteArray(c, (byte) 0);
@@ -12808,8 +13784,20 @@ sealed class CommonUtil permits N {
      * Converts a boolean array to a byte array.
      * Each boolean value is converted to a byte value: {@code true} to 1 and {@code false} to 0.
      *
-     * @param a the boolean array to be converted
-     * @return a byte array with the same length as the input array, or an empty byte array if the input array is {@code null} or empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] bools = {true, false, true, true};
+     * byte[] bytes = N.toByteArray(bools);
+     * // bytes is [1, 0, 1, 1]
+     *
+     * // Null or empty returns empty array
+     * byte[] empty = N.toByteArray((boolean[]) null);
+     * // empty is an empty byte array
+     * }</pre>
+     *
+     * @param a the boolean array to be converted. Can be {@code null}.
+     * @return a byte array with the same length as the input array, or an empty byte array if the input array is {@code null} or empty.
+     *         {@code true} becomes 1, {@code false} becomes 0.
      */
     public static byte[] toByteArray(final boolean[] a) {
         if ((a == null) || (a.length == 0)) {
@@ -12828,9 +13816,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to a short array.
+     * Each Number is converted to its short value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return a short array containing the primitive short values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Short> list = N.asList((short) 100, (short) 200, (short) 300);
+     * short[] array = N.toShortArray(list);
+     * // array is [100, 200, 300]
+     *
+     * // Works with other Number types (truncates to short range)
+     * List<Integer> ints = N.asList(1000, 50000, 500);
+     * short[] fromInts = N.toShortArray(ints);
+     * // fromInts is [1000, -15536, 500] (50000 overflows)
+     *
+     * // Null elements become 0
+     * List<Short> withNull = N.asList((short) 10, null, (short) 30);
+     * short[] arrayWithNull = N.toShortArray(withNull);
+     * // arrayWithNull is [10, 0, 30]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a short array containing the primitive short values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static short[] toShortArray(final Collection<? extends Number> c) {
         return toShortArray(c, (short) 0);
@@ -12918,9 +13925,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to an int array.
+     * Each Number is converted to its int value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return an int array containing the primitive int values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = N.asList(1, 2, 3, 4);
+     * int[] array = N.toIntArray(list);
+     * // array is [1, 2, 3, 4]
+     *
+     * // Works with other Number types (truncates decimals)
+     * List<Double> doubles = N.asList(1.5, 2.9, 3.1);
+     * int[] fromDoubles = N.toIntArray(doubles);
+     * // fromDoubles is [1, 2, 3]
+     *
+     * // Null elements become 0
+     * List<Integer> withNull = N.asList(1, null, 3);
+     * int[] arrayWithNull = N.toIntArray(withNull);
+     * // arrayWithNull is [1, 0, 3]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return an int array containing the primitive int values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static int[] toIntArray(final Collection<? extends Number> c) {
         return toIntArray(c, 0);
@@ -13032,8 +14058,23 @@ sealed class CommonUtil permits N {
      * Converts a boolean array to an int array.
      * Each boolean value is converted to an int value: {@code true} to 1 and {@code false} to 0.
      *
-     * @param a the boolean array to be converted
-     * @return an int array with the same length as the input array, or an empty int array if the input array is {@code null} or empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] bools = {true, false, true, true};
+     * int[] ints = N.toIntArray(bools);
+     * // ints is [1, 0, 1, 1]
+     *
+     * // Useful for boolean arithmetic operations
+     * int trueCount = IntStream.of(N.toIntArray(bools)).sum();
+     * // trueCount is 3
+     *
+     * // Null or empty returns empty array
+     * int[] empty = N.toIntArray((boolean[]) null);
+     * }</pre>
+     *
+     * @param a the boolean array to be converted. Can be {@code null}.
+     * @return an int array with the same length as the input array, or an empty int array if the input array is {@code null} or empty.
+     *         {@code true} becomes 1, {@code false} becomes 0.
      */
     public static int[] toIntArray(final boolean[] a) {
         if ((a == null) || (a.length == 0)) {
@@ -13052,9 +14093,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to a long array.
+     * Each Number is converted to its long value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return a long array containing the primitive long values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Long> list = N.asList(100L, 200L, 300L);
+     * long[] array = N.toLongArray(list);
+     * // array is [100, 200, 300]
+     *
+     * // Works with other Number types
+     * List<Integer> ints = N.asList(1, 2, 3);
+     * long[] fromInts = N.toLongArray(ints);
+     * // fromInts is [1L, 2L, 3L]
+     *
+     * // Null elements become 0
+     * List<Long> withNull = N.asList(10L, null, 30L);
+     * long[] arrayWithNull = N.toLongArray(withNull);
+     * // arrayWithNull is [10, 0, 30]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a long array containing the primitive long values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static long[] toLongArray(final Collection<? extends Number> c) {
         return toLongArray(c, 0);
@@ -13142,9 +14202,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to a float array.
+     * Each Number is converted to its float value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return a float array containing the primitive float values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Float> list = N.asList(1.5f, 2.5f, 3.5f);
+     * float[] array = N.toFloatArray(list);
+     * // array is [1.5, 2.5, 3.5]
+     *
+     * // Works with other Number types
+     * List<Integer> ints = N.asList(1, 2, 3);
+     * float[] fromInts = N.toFloatArray(ints);
+     * // fromInts is [1.0f, 2.0f, 3.0f]
+     *
+     * // Null elements become 0
+     * List<Float> withNull = N.asList(1.1f, null, 3.3f);
+     * float[] arrayWithNull = N.toFloatArray(withNull);
+     * // arrayWithNull is [1.1, 0.0, 3.3]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a float array containing the primitive float values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static float[] toFloatArray(final Collection<? extends Number> c) {
         return toFloatArray(c, 0);
@@ -13232,9 +14311,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a collection of Number objects to a double array.
+     * Each Number is converted to its double value. Null elements are converted to 0.
      *
-     * @param c the collection of Number objects to be converted
-     * @return a double array containing the primitive double values from the collection
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Double> list = N.asList(1.5, 2.5, 3.5);
+     * double[] array = N.toDoubleArray(list);
+     * // array is [1.5, 2.5, 3.5]
+     *
+     * // Works with other Number types
+     * List<Integer> ints = N.asList(1, 2, 3);
+     * double[] fromInts = N.toDoubleArray(ints);
+     * // fromInts is [1.0, 2.0, 3.0]
+     *
+     * // Null elements become 0
+     * List<Double> withNull = N.asList(1.1, null, 3.3);
+     * double[] arrayWithNull = N.toDoubleArray(withNull);
+     * // arrayWithNull is [1.1, 0.0, 3.3]
+     * }</pre>
+     *
+     * @param c the collection of Number objects to be converted. Can be {@code null} or contain {@code null} elements.
+     * @return a double array containing the primitive double values from the collection. Null elements are converted to 0.
+     *         Returns an empty array if {@code c} is {@code null} or empty.
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c) {
         return toDoubleArray(c, 0);
@@ -13322,11 +14420,26 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a boolean array to a modifiable List, which is NOT backed with the input array.
+     * Changes to the returned list will not affect the original array, and vice versa.
+     *
      * <p><b>Performance Note:</b> This operation boxes each primitive boolean value into a Boolean object,
      * which may have performance implications for large arrays.
      *
-     * @param a the boolean array to be converted
-     * @return a modifiable List of Boolean objects containing the values from the boolean array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true};
+     * List<Boolean> list = N.toList(array);
+     * list.add(false);  // list is now [true, false, true, false]
+     * // array is still [true, false, true] - not affected
+     *
+     * // Null or empty input returns empty list
+     * List<Boolean> empty = N.toList((boolean[]) null);
+     * // empty is an empty ArrayList
+     * }</pre>
+     *
+     * @param a the boolean array to be converted. Can be {@code null}.
+     * @return a modifiable List of Boolean objects containing the values from the boolean array.
+     *         Returns an empty ArrayList if {@code a} is {@code null} or empty.
      */
     public static List<Boolean> toList(final boolean[] a) {
         return toList(a, 0, len(a)); // NOSONAR
@@ -13648,10 +14761,23 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterator of objects to a modifiable List.
+     * The iterator will be fully consumed by this operation and cannot be reused.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = N.asList("a", "b", "c").iterator();
+     * List<String> list = N.toList(iter);
+     * // list is ["a", "b", "c"]
+     * // iter is now exhausted and cannot be reused
+     *
+     * // Null iterator returns empty list
+     * List<String> empty = N.toList((Iterator<String>) null);
+     * // empty is an empty ArrayList
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the iterator to be converted
-     * @return a modifiable List of objects containing the values from the iterator
+     * @param iter the iterator to be converted. Can be {@code null}. Will be consumed by this operation.
+     * @return a modifiable ArrayList containing all values from the iterator. Returns an empty ArrayList if {@code iter} is {@code null}.
      */
     public static <T> List<T> toList(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -13669,9 +14795,24 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a boolean array to a modifiable Set, which is NOT backed with the input array.
+     * Duplicate values in the array will appear only once in the resulting Set.
+     * Changes to the returned Set will not affect the original array.
      *
-     * @param a the boolean array to be converted
-     * @return a modifiable Set of Boolean objects containing the values from the boolean array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true, false};
+     * Set<Boolean> set = N.toSet(array);
+     * // set contains only [true, false] - duplicates removed
+     * set.add(true);  // no effect, already present
+     *
+     * // Null or empty input returns empty Set
+     * Set<Boolean> empty = N.toSet((boolean[]) null);
+     * // empty is an empty HashSet
+     * }</pre>
+     *
+     * @param a the boolean array to be converted. Can be {@code null}.
+     * @return a modifiable Set of Boolean objects containing the unique values from the boolean array.
+     *         Returns an empty HashSet if {@code a} is {@code null} or empty.
      */
     public static Set<Boolean> toSet(final boolean[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
@@ -13991,10 +15132,24 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterator of objects to a modifiable Set.
+     * Duplicate elements in the iterator will appear only once in the resulting Set.
+     * The iterator will be fully consumed by this operation and cannot be reused.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = N.asList("a", "b", "a", "c").iterator();
+     * Set<String> set = N.toSet(iter);
+     * // set is ["a", "b", "c"] - duplicates removed
+     * // iter is now exhausted and cannot be reused
+     *
+     * // Null iterator returns empty set
+     * Set<String> empty = N.toSet((Iterator<String>) null);
+     * // empty is an empty HashSet
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the iterator to be converted
-     * @return a modifiable Set of objects containing the values from the iterator
+     * @param iter the iterator to be converted. Can be {@code null}. Will be consumed by this operation.
+     * @return a modifiable HashSet containing unique values from the iterator. Returns an empty HashSet if {@code iter} is {@code null}.
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -14012,11 +15167,29 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts a boolean array to a specified type of Collection.
+     * This method provides flexibility to create any type of Collection implementation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true};
+     *
+     * // Convert to ArrayList
+     * List<Boolean> list = N.toCollection(array, ArrayList::new);
+     * // list is [true, false, true]
+     *
+     * // Convert to LinkedHashSet (maintains insertion order, removes duplicates)
+     * Set<Boolean> set = N.toCollection(array, LinkedHashSet::new);
+     * // set is [true, false]
+     *
+     * // Convert to TreeSet (sorted)
+     * Set<Boolean> sorted = N.toCollection(array, TreeSet::new);
+     * // sorted is [false, true]
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
-     * @param a the boolean array to be converted
-     * @param supplier a function that provides a new instance of the desired Collection type
-     * @return a Collection of Boolean objects containing the values from the boolean array
+     * @param a the boolean array to be converted. Can be {@code null}.
+     * @param supplier a function that provides a new instance of the desired Collection type. The function receives the expected capacity as a parameter.
+     * @return a Collection of Boolean objects containing the values from the boolean array. Returns an empty Collection if {@code a} is {@code null} or empty.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
@@ -14455,6 +15628,22 @@ sealed class CommonUtil permits N {
     /**
      * Converts an Iterator to a specified type of Collection.
      *
+     * <p>This method consumes all elements from the Iterator and adds them to a new Collection
+     * provided by the supplier. The Iterator cannot be reused after this operation.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = N.asList("a", "b", "c").iterator();
+     *
+     * // Convert to ArrayList
+     * List<String> list = N.toCollection(iter, ArrayList::new);
+     *
+     * // Convert to LinkedHashSet (maintains insertion order)
+     * Iterator<String> iter2 = N.asList("a", "b", "a").iterator();
+     * Set<String> set = N.toCollection(iter2, LinkedHashSet::new);
+     * // Result: ["a", "b"]
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator and the Collection
      * @param <C> the type of Collection to be returned
      * @param iter the Iterator to be converted
@@ -14480,6 +15669,21 @@ sealed class CommonUtil permits N {
     /**
      * Converts an Iterable to a Map using a key extractor function.
      *
+     * <p>Each element in the Iterable becomes a value in the resulting Map, with the key
+     * extracted by applying the keyExtractor function to the element. If duplicate keys
+     * are produced, the later value overwrites the earlier one.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = N.asList("Alice", "Bob", "Charlie");
+     * Map<Integer, String> lengthToName = N.toMap(names, String::length);
+     * // Result: {5=Alice (or Charlie), 3=Bob}
+     *
+     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     * Map<Integer, User> idToUser = N.toMap(users, User::getId);
+     * // Result: {1=User(1, Alice), 2=User(2, Bob)}
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable
      * @param <K> the type of keys in the resulting Map
      * @param c the Iterable to be converted
@@ -14502,6 +15706,20 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterable to a Map using key and value extractor functions.
+     *
+     * <p>Each element in the Iterable is transformed into a key-value pair using the provided
+     * extractor functions. If duplicate keys are produced, the later value overwrites the earlier one.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     * Map<Integer, String> idToName = N.toMap(users, User::getId, User::getName);
+     * // Result: {1="Alice", 2="Bob"}
+     *
+     * List<String> words = N.asList("apple", "banana", "cherry");
+     * Map<String, Integer> wordToLength = N.toMap(words, s -> s, String::length);
+     * // Result: {"apple"=5, "banana"=6, "cherry"=6}
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable
      * @param <K> the type of keys in the resulting Map
@@ -14529,6 +15747,22 @@ sealed class CommonUtil permits N {
     /**
      * Converts an Iterable to a Map using key and value extractor functions, with a custom Map supplier.
      *
+     * <p>This method allows specifying a custom Map implementation through the mapSupplier parameter,
+     * such as LinkedHashMap for maintaining insertion order or TreeMap for sorted keys.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     *
+     * // Using LinkedHashMap to maintain insertion order
+     * LinkedHashMap<Integer, String> orderedMap = N.toMap(users, User::getId, User::getName,
+     *         size -> new LinkedHashMap<>(size));
+     *
+     * // Using TreeMap for sorted keys
+     * TreeMap<Integer, String> sortedMap = N.toMap(users, User::getId, User::getName,
+     *         size -> new TreeMap<>());
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable
      * @param <K> the type of keys in the resulting Map
      * @param <V> the type of values in the resulting Map
@@ -14555,7 +15789,30 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts an Iterable to a Map using key and value extractor functions, with a custom Map supplier.
+     * Converts an Iterable to a Map using key and value extractor functions, with a merge function for handling
+     * duplicate keys and a custom Map supplier.
+     *
+     * <p>When duplicate keys are encountered, the mergeFunction is used to combine the old and new values.
+     * This is useful for aggregating values or handling conflicts.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Summing values for duplicate keys
+     * List<Transaction> transactions = N.asList(
+     *     new Transaction("A", 100), new Transaction("B", 200), new Transaction("A", 50));
+     * Map<String, Integer> totalByAccount = N.toMap(transactions,
+     *     Transaction::getAccount,
+     *     Transaction::getAmount,
+     *     Integer::sum,
+     *     size -> new HashMap<>(size));
+     * // Result: {"A"=150, "B"=200}
+     *
+     * // Concatenating strings for duplicate keys
+     * List<Pair<String, String>> pairs = N.asList(Pair.of("k1", "a"), Pair.of("k1", "b"));
+     * Map<String, String> merged = N.toMap(pairs, Pair::getLeft, Pair::getRight,
+     *     (v1, v2) -> v1 + "," + v2, size -> new LinkedHashMap<>(size));
+     * // Result: {"k1"="a,b"}
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable
      * @param <K> the type of keys in the resulting Map
@@ -14599,6 +15856,16 @@ sealed class CommonUtil permits N {
     /**
      * Converts an Iterator to a Map using a key extractor function.
      *
+     * <p>Each element from the Iterator becomes a value in the resulting Map, with the key
+     * extracted by applying the keyExtractor function to the element.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = N.asList("Alice", "Bob", "Charlie").iterator();
+     * Map<Integer, String> lengthToName = N.toMap(iter, String::length);
+     * // Result: {5="Charlie", 3="Bob"} (later values overwrite earlier for same key)
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator
      * @param <K> the type of keys in the resulting Map
      * @param iter the Iterator to be converted
@@ -14623,14 +15890,29 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterator to a Map using key and value extractor functions.
+     * Each element from the Iterator is transformed into a key-value pair using the provided functions.
+     * If duplicate keys are encountered, later values overwrite earlier ones.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = N.asList("apple", "banana", "cherry");
+     * Iterator<String> iter = words.iterator();
+     * Map<Integer, String> lengthToWord = N.toMap(iter, String::length, s -> s.toUpperCase());
+     * // Result: {5="APPLE" or "CHERRY", 6="BANANA"} (later values overwrite earlier for same key)
+     *
+     * // Null iterator returns empty map
+     * Map<Integer, String> empty = N.toMap(null, String::length, String::toUpperCase);
+     * // empty is an empty HashMap
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param <K> the type of keys in the resulting Map
      * @param <V> the type of values in the resulting Map
-     * @param iter the Iterator to be converted
-     * @param keyExtractor a function that extracts keys from the elements of the Iterator
-     * @param valueExtractor a function that extracts values from the elements of the Iterator
-     * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @param iter the Iterator to be converted. Can be {@code null}. The iterator will be consumed by this operation.
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator. Cannot be {@code null}.
+     * @param valueExtractor a function that extracts values from the elements of the Iterator. Cannot be {@code null}.
+     * @return a HashMap containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions.
+     *         Returns an empty HashMap if {@code iter} is {@code null}.
      */
     public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor) {
@@ -14651,16 +15933,35 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterator to a Map using key and value extractor functions, with a custom Map supplier.
+     * This method allows specifying a custom Map implementation through the mapSupplier parameter.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = N.asList("apple", "banana", "cherry");
+     * Iterator<String> iter = words.iterator();
+     *
+     * // Using LinkedHashMap to maintain insertion order
+     * LinkedHashMap<Integer, String> orderedMap = N.toMap(iter,
+     *     String::length, String::toUpperCase, LinkedHashMap::new);
+     * // orderedMap maintains insertion order of keys
+     *
+     * // Using TreeMap for sorted keys
+     * Iterator<String> iter2 = words.iterator();
+     * TreeMap<Integer, String> sortedMap = N.toMap(iter2,
+     *     String::length, String::toUpperCase, TreeMap::new);
+     * // sortedMap has keys in natural order
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param <K> the type of keys in the resulting Map
      * @param <V> the type of values in the resulting Map
      * @param <M> the type of Map to be returned
-     * @param iter the Iterator to be converted
-     * @param keyExtractor a function that extracts keys from the elements of the Iterator
-     * @param valueExtractor a function that extracts values from the elements of the Iterator
-     * @param mapSupplier a function that provides a new instance of the desired Map type
-     * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @param iter the Iterator to be converted. Can be {@code null}. The iterator will be consumed by this operation.
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator. Cannot be {@code null}.
+     * @param valueExtractor a function that extracts values from the elements of the Iterator. Cannot be {@code null}.
+     * @param mapSupplier a function that provides a new instance of the desired Map type. Cannot be {@code null}.
+     * @return a Map of the specified type containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions.
+     *         Returns an empty Map of the specified type if {@code iter} is {@code null}.
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
@@ -14725,10 +16026,27 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     * This is a type-safe varargs method that allows creating arrays inline.
+     * Note: No defensive copy is made, so the returned array is the same instance as the input.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create an array inline
+     * String[] array = N.asArray("a", "b", "c");
+     * // array is ["a", "b", "c"]
+     *
+     * // Pass varargs to methods expecting arrays
+     * void processArray(String[] arr) { }
+     * processArray(N.asArray("x", "y", "z"));
+     *
+     * // Returns null for null input
+     * String[] nullArray = N.asArray((String[]) null);
+     * // nullArray is null
+     * }</pre>
      *
      * @param <T> the type of the array elements
-     * @param a the input array
-     * @return the input array
+     * @param a the input array. Can be {@code null}.
+     * @return the input array unchanged (same reference). Returns {@code null} if {@code a} is {@code null}.
      * @see Arrays#asList(Object[])
      * @see N#copyOf(Object[], int)
      * @see N#asList(Object[])
@@ -14778,13 +16096,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with the specified key and value.
+     * Returns a modifiable {@code HashMap} with the specified key and value.
+     * This is a convenient factory method for creating a single-entry map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = N.asMap("age", 25);
+     * map.put("name", "John");  // Can add more entries
+     *
+     * // Both key and value can be null
+     * Map<String, String> mapWithNull = N.asMap("key", null);
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
-     * @param k1 the key to be placed in the Map
-     * @param v1 the value to be associated with the key in the Map
-     * @return a Map containing the specified key and value
+     * @param k1 the key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the key in the Map. Can be {@code null}.
+     * @return a modifiable HashMap containing the specified key and value
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
         final Map<K, V> map = newHashMap(1);
@@ -14969,12 +16297,24 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code LinkedHashMap} with specified key and value.
+     * A LinkedHashMap maintains insertion order, making it useful when iteration order matters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = N.asLinkedHashMap("first", 1);
+     * map.put("second", 2);
+     * map.put("third", 3);
+     * // Iteration order: first, second, third (insertion order preserved)
+     *
+     * // Both key and value can be null
+     * Map<String, String> mapWithNull = N.asLinkedHashMap("key", null);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @return a modifiable LinkedHashMap containing the specified key and value, preserving insertion order
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
         final Map<K, V> map = newLinkedHashMap(1);
@@ -15145,7 +16485,8 @@ sealed class CommonUtil permits N {
      * @param <V> the value type
      * @param a an array of key/value pairs
      * @return a Map containing the specified key/value pairs
-     * @deprecated
+     * @deprecated Use {@link #newLinkedHashMap()} or specific overloads with explicit key-value parameters instead.
+     *             This method uses varargs which makes the API less type-safe and more error-prone.
      */
     @Deprecated
     @NullSafe
@@ -15158,11 +16499,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with a specified key/value.
+     * Returns a modifiable {@code LinkedHashMap} with a specified property name and value.
+     * This is a type-safe convenience method for creating property maps commonly used in configuration.
+     * The returned map uses String keys and Object values.
      *
-     * @param propName the name of the property to be placed in the Map
-     * @param propValue the value to be associated with the property name in the Map
-     * @return a Map containing the specified property name and value
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> props = N.asProps("timeout", 5000);
+     * props.put("retryCount", 3);
+     * props.put("enabled", true);
+     *
+     * // Property value can be null
+     * Map<String, Object> propsWithNull = N.asProps("optionalValue", null);
+     * }</pre>
+     *
+     * @param propName the name of the property to be placed in the Map. Can be {@code null}.
+     * @param propValue the value to be associated with the property name in the Map. Can be {@code null}.
+     * @return a modifiable LinkedHashMap containing the specified property name and value, preserving insertion order
      */
     @Beta
     public static Map<String, Object> asProps(final String propName, final Object propValue) {
@@ -15266,7 +16619,8 @@ sealed class CommonUtil permits N {
      *
      * @param a an array of key/value pairs
      * @return a Map containing the specified key/value pairs
-     * @deprecated
+     * @deprecated Use {@link #newLinkedHashMap()} or specific {@code asProps} overloads with explicit parameter pairs instead.
+     *             This method uses varargs which makes the API less type-safe and more error-prone.
      */
     @Deprecated
     public static Map<String, Object> asProps(final Object... a) {
@@ -15278,11 +16632,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} with the specified element.
+     * Returns a modifiable {@code ArrayList} with the specified element.
+     * This is a convenient factory method for creating a single-element list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = N.asList("hello");
+     * list.add("world");  // Can add more elements
+     * // list is now ["hello", "world"]
+     *
+     * // Element can be null
+     * List<String> listWithNull = N.asList(null);
+     * // listWithNull is [null]
+     * }</pre>
      *
      * @param <T> the type of the element
-     * @param e the element to be placed in the List
-     * @return a List containing the specified element
+     * @param e the element to be placed in the List. Can be {@code null}.
+     * @return a modifiable ArrayList containing the specified element
      */
     public static <T> List<T> asList(final T e) {
         final List<T> list = new ArrayList<>(1);
@@ -15291,12 +16657,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code ArrayList} with specified elements.
+     * This is a convenient factory method for creating a two-element list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = N.asList("hello", "world");
+     * list.add("!");  // Can add more elements
+     * // list is now ["hello", "world", "!"]
+     *
+     * // Elements can be null
+     * List<String> listWithNull = N.asList("first", null);
+     * // listWithNull is ["first", null]
+     * }</pre>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @return a modifiable ArrayList containing the specified elements in order
      */
     public static <T> List<T> asList(final T e1, final T e2) {
         final List<T> list = new ArrayList<>(2);
@@ -15306,13 +16684,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code ArrayList} with specified elements.
+     * This is a convenient factory method for creating a three-element list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = N.asList(1, 2, 3);
+     * list.add(4);  // Can add more elements
+     * // list is now [1, 2, 3, 4]
+     *
+     * // Elements can be null
+     * List<String> listWithNull = N.asList("first", null, "third");
+     * // listWithNull is ["first", null, "third"]
+     * }</pre>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @return a modifiable ArrayList containing the specified elements in order
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3) {
         final List<T> list = new ArrayList<>(3);
@@ -15368,7 +16758,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = N.asList("a", "b", "c", "d", "e", "f");
-     * list.add("g");  // modifiable
+     * list.add("g");   // modifiable
      * // list is ["a", "b", "c", "d", "e", "f", "g"]
      * }</pre>
      *
@@ -16196,8 +17586,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code asLinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code asLinkedBlockingDeque} is returned.
+     * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingDeque} is returned.
      *
      * @param <T> the type of elements in the deque
      * @param a the array of elements to be placed in the deque
@@ -16254,7 +17644,7 @@ sealed class CommonUtil permits N {
      * @return an immutable list containing the specified element
      * @see java.util.Collections#singletonList(Object)
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> List<T> asSingletonList(final T e) {
         return Collections.singletonList(e);
     }
@@ -16264,10 +17654,10 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the element
      * @param e the element to be wrapped in a singleton set
-     * @return an immutable list containing the specified element
+     * @return an immutable set containing the specified element
      * @see java.util.Collections#singleton(Object)
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> Set<T> asSingletonSet(final T e) {
         return Collections.singleton(e);
     }
@@ -16282,7 +17672,7 @@ sealed class CommonUtil permits N {
      * @return an immutable map containing the specified key-value pair
      * @see java.util.Collections#singletonMap(Object, Object)
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <K, V> Map<K, V> asSingletonMap(final K key, final V value) {
         return Collections.singletonMap(key, value);
     }
@@ -16294,7 +17684,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty list
      * @see Collections#emptyList()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> List<T> emptyList() {
         return EMPTY_LIST;
     }
@@ -16306,7 +17696,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty set
      * @see Collections#emptySet()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> Set<T> emptySet() {
         return EMPTY_SET;
     }
@@ -16318,7 +17708,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty set
      * @see Collections#emptySortedSet()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> SortedSet<T> emptySortedSet() {
         return EMPTY_SORTED_SET;
     }
@@ -16330,7 +17720,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty set
      * @see Collections#emptyNavigableSet()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> NavigableSet<T> emptyNavigableSet() {
         return EMPTY_NAVIGABLE_SET;
     }
@@ -16343,7 +17733,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty map
      * @see Collections#emptyMap()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <K, V> Map<K, V> emptyMap() {
         return EMPTY_MAP;
     }
@@ -16356,7 +17746,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty sorted map
      * @see Collections#emptySortedMap()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <K, V> SortedMap<K, V> emptySortedMap() {
         return EMPTY_SORTED_MAP;
     }
@@ -16369,7 +17759,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty navigable map
      * @see Collections#emptyNavigableMap()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <K, V> NavigableMap<K, V> emptyNavigableMap() {
         return EMPTY_NAVIGABLE_MAP;
     }
@@ -16392,7 +17782,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty list iterator
      * @see Collections#emptyListIterator()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static <T> ListIterator<T> emptyListIterator() {
         return EMPTY_LIST_ITERATOR;
     }
@@ -16405,7 +17795,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty input stream
      * @see ByteArrayInputStream
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static InputStream emptyInputStream() {
         return EMPTY_INPUT_STREAM;
     }
@@ -16416,7 +17806,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty Dataset
      * @see Dataset#empty()
      */
-    @Immutable
+    @com.landawn.abacus.annotation.Immutable
     public static Dataset emptyDataset() {
         return Dataset.empty();
     }
@@ -16560,7 +17950,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two {@code Comparable} object values. ({@code null} is considered as the smallest value in nature order).
+     * Compares two {@code Comparable} object values. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the comparable objects
      * @param a the first object value
@@ -16589,7 +17979,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two pairs of values (a1, b1) and (a2, b2) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares two pairs of values (a1, b1) and (a2, b2) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -16607,7 +17997,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares three pairs of values (a1, b1), (a2, b2), and (a3, b3) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares three pairs of values (a1, b1), (a2, b2), and (a3, b3) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -16634,7 +18024,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares four pairs of values (a1, b1), (a2, b2), (a3, b3), and (a4, b4) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares four pairs of values (a1, b1), (a2, b2), (a3, b3), and (a4, b4) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -16667,7 +18057,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares five pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), and (a5, b5) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares five pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), and (a5, b5) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -16703,7 +18093,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares six pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), and (a6, b6) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares six pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), and (a6, b6) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -16744,7 +18134,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares seven pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), and (a7, b7) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Compares seven pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), and (a7, b7) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
      * @param <T1> the type of the first pair of values, which must be comparable
@@ -17711,7 +19101,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two collections lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
+     * Compares two collections lexicographically over the specified range. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the collection elements
      * @param a the first collection to compare
@@ -17730,7 +19120,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two iterables lexicographically. ({@code null} is considered as the smallest value in nature order).
+     * Compares two iterables lexicographically. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of elements in the iterables, which must be comparable
      * @param a the first iterable to compare
@@ -17744,7 +19134,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two iterators lexicographically. ({@code null} is considered as the smallest value in nature order).
+     * Compares two iterators lexicographically. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of elements in the iterators, which must be comparable
      * @param a the first iterator to compare
@@ -17901,11 +19291,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in nature order).
+     * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is less than the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean lessThan(final T a, final T b) {
@@ -17916,8 +19306,8 @@ sealed class CommonUtil permits N {
      * Compares two objects using the specified comparator to determine if the first is less than the second.
      *
      * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is less than the second, {@code false} otherwise
      */
@@ -17928,11 +19318,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in nature order).
+     * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
@@ -17943,8 +19333,8 @@ sealed class CommonUtil permits N {
      * Compares two objects using the specified comparator to determine if the first is less than or equal to the second.
      *
      * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
      */
@@ -17955,11 +19345,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in nature order).
+     * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is greater than the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean greaterThan(final T a, final T b) {
@@ -17970,8 +19360,8 @@ sealed class CommonUtil permits N {
      * Compares two objects using the specified comparator to determine if the first is greater than the second.
      *
      * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is greater than the second, {@code false} otherwise
      */
@@ -17982,11 +19372,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in nature order).
+     * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
@@ -17997,8 +19387,8 @@ sealed class CommonUtil permits N {
      * Compares two objects using the specified comparator to determine if the first is greater than or equal to the second.
      *
      * @param <T> the type of the objects being compared
-     * @param a the first object to compare, must not be null
-     * @param b the second object to compare, must not be null
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
      */
@@ -18009,7 +19399,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
+     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, must not be null
@@ -18046,7 +19436,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
+     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, must not be null
@@ -18083,7 +19473,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
+     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, must not be null
@@ -18120,7 +19510,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
+     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, must not be null
@@ -18159,7 +19549,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the given value is between the specified minimum and maximum values, inclusive.
      * It means {@code min <= value <= max}.
-     * {@code null} is considered as the smallest value in nature order.
+     * {@code null} is considered as the smallest value in natural order.
      * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.</p>
      *
      * @param <T> the type of the objects being compared
@@ -18203,7 +19593,7 @@ sealed class CommonUtil permits N {
      * List<String> list = Arrays.asList("a", "b", "c");
      * N.getElement(list, 0);   // returns "a"
      * N.getElement(list, 2);   // returns "c"
-     * // N.getElement(list, 5);  // throws IndexOutOfBoundsException
+     * // N.getElement(list, 5);   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -18234,7 +19624,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
-     * N.getElement(iter, 1);  // returns "b"
+     * N.getElement(iter, 1);   // returns "b"
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
@@ -18265,13 +19655,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> singleElement = Arrays.asList("only");
-     * N.getOnlyElement(singleElement);  // returns Nullable.of("only")
+     * N.getOnlyElement(singleElement);   // returns Nullable.of("only")
      *
      * List<String> empty = Arrays.asList();
-     * N.getOnlyElement(empty);  // returns Nullable.empty()
+     * N.getOnlyElement(empty);   // returns Nullable.empty()
      *
      * List<String> multiple = Arrays.asList("a", "b");
-     * // N.getOnlyElement(multiple);  // throws TooManyElementsException
+     * // N.getOnlyElement(multiple);   // throws TooManyElementsException
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -18322,10 +19712,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.firstElement(list);  // returns Nullable.of("a")
+     * N.firstElement(list);   // returns Nullable.of("a")
      *
      * List<String> empty = Arrays.asList();
-     * N.firstElement(empty);  // returns Nullable.empty()
+     * N.firstElement(empty);   // returns Nullable.empty()
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -18363,10 +19753,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.lastElement(list);  // returns Nullable.of("c")
+     * N.lastElement(list);   // returns Nullable.of("c")
      *
      * List<String> empty = Arrays.asList();
-     * N.lastElement(empty);  // returns Nullable.empty()
+     * N.lastElement(empty);   // returns Nullable.empty()
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -19260,15 +20650,15 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.firstOrNullIfEmpty(list);  // returns "a"
+     * N.firstOrNullIfEmpty(list);   // returns "a"
      *
      * List<String> empty = Arrays.asList();
-     * N.firstOrNullIfEmpty(empty);  // returns null
+     * N.firstOrNullIfEmpty(empty);   // returns null
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
-     * @param c the iterable to check
-     * @return the first element of the iterable if it is not empty, otherwise null
+     * @param c the iterable to check, may be {@code null} or empty
+     * @return the first element of the iterable if it is not empty, otherwise {@code null}
      */
     public static <T> T firstOrNullIfEmpty(final Iterable<? extends T> c) {
         return firstOrDefaultIfEmpty(c, null);
@@ -19278,8 +20668,8 @@ sealed class CommonUtil permits N {
      * Returns the first element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @return the first element of the iterator if it is not empty, otherwise null
+     * @param iter the iterator to check, may be {@code null} or empty
+     * @return the first element of the iterator if it is not empty, otherwise {@code null}
      */
     public static <T> T firstOrNullIfEmpty(final Iterator<? extends T> iter) {
         return firstOrDefaultIfEmpty(iter, null);
@@ -19311,10 +20701,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.firstOrDefaultIfEmpty(list, "default");  // returns "a"
+     * N.firstOrDefaultIfEmpty(list, "default");   // returns "a"
      *
      * List<String> empty = Arrays.asList();
-     * N.firstOrDefaultIfEmpty(empty, "default");  // returns "default"
+     * N.firstOrDefaultIfEmpty(empty, "default");   // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -19375,10 +20765,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.lastOrNullIfEmpty(list);  // returns "c"
+     * N.lastOrNullIfEmpty(list);   // returns "c"
      *
      * List<String> empty = Arrays.asList();
-     * N.lastOrNullIfEmpty(empty);  // returns null
+     * N.lastOrNullIfEmpty(empty);   // returns null
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -19393,8 +20783,8 @@ sealed class CommonUtil permits N {
      * Returns the last element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
      * @param <T> the type of the elements in the iterator
-     * @param iter the iterator to check
-     * @return the last element of the iterator if it is not empty, otherwise null
+     * @param iter the iterator to check, may be {@code null} or empty
+     * @return the last element of the iterator if it is not empty, otherwise {@code null}
      */
     public static <T> T lastOrNullIfEmpty(final Iterator<? extends T> iter) {
         return lastOrDefaultIfEmpty(iter, null);
@@ -19418,10 +20808,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * N.lastOrDefaultIfEmpty(list, "default");  // returns "c"
+     * N.lastOrDefaultIfEmpty(list, "default");   // returns "c"
      *
      * List<String> empty = Arrays.asList();
-     * N.lastOrDefaultIfEmpty(empty, "default");  // returns "default"
+     * N.lastOrDefaultIfEmpty(empty, "default");   // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable
@@ -19597,12 +20987,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the last element in the given iterator that matches the specified predicate.
+     * Internal helper method that returns the last element in the given iterable that matches the specified predicate.
      *
-     * @param <T> the type of the elements in the iterator
+     * @param <T> the type of the elements in the iterable
      * @param c the iterable to search
-     * @param predicate the predicate to apply to elements of the iterator
-     * @return a {@code Nullable} containing the last element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @param predicate the predicate to apply to elements of the iterable
+     * @param isForNonNull if {@code true}, only non-null elements are considered and an Optional is returned; if {@code false}, a Nullable is returned
+     * @return an Optional or Nullable (depending on isForNonNull) containing the last element that matches the predicate, or empty if no such element is found
      */
     private static <T> Object findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate, final boolean isForNonNull) {
         if (isEmptyCollection(c)) {
@@ -21944,15 +23335,15 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * // Rotate an int array to the right by 2 positions
      * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, 2);  // a => [4, 5, 1, 2, 3]
+     * rotate(a, 2);   // a => [4, 5, 1, 2, 3]
      *
      * //  Rotate an int array to the left by 1 position (negative distance)
      * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, -1);  // a => [2, 3, 4, 5, 1]
+     * rotate(a, -1);   // a => [2, 3, 4, 5, 1]
      *
      * // Rotate by a distance larger than the stream size
      * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, 7);  // a => [4, 5, 1, 2, 3], same as rotated(2) due to modulo operation
+     * rotate(a, 7);   // a => [4, 5, 1, 2, 3], same as rotated(2) due to modulo operation
      * }</pre>
      * 
      * <p>The rotation is performed in-place, modifying the original array.
@@ -22470,7 +23861,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified char array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -22480,7 +23871,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final char[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22535,7 +23926,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified byte array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -22545,7 +23936,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final byte[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22610,7 +24001,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final short[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22645,7 +24036,7 @@ sealed class CommonUtil permits N {
      * @param a the int array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(int[], int, int, Random)
      */
     public static void shuffle(final int[] a, final int fromIndex, final int toIndex) {
@@ -22675,7 +24066,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final int[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22710,7 +24101,7 @@ sealed class CommonUtil permits N {
      * @param a the long array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(long[], int, int, Random)
      */
     public static void shuffle(final long[] a, final int fromIndex, final int toIndex) {
@@ -22740,7 +24131,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final long[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22775,7 +24166,7 @@ sealed class CommonUtil permits N {
      * @param a the float array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(float[], int, int, Random)
      */
     public static void shuffle(final float[] a, final int fromIndex, final int toIndex) {
@@ -22805,7 +24196,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final float[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22840,7 +24231,7 @@ sealed class CommonUtil permits N {
      * @param a the double array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(double[], int, int, Random)
      */
     public static void shuffle(final double[] a, final int fromIndex, final int toIndex) {
@@ -22870,7 +24261,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final double[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22905,7 +24296,7 @@ sealed class CommonUtil permits N {
      * @param a the object array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(Object[], int, int, Random)
      */
     public static void shuffle(final Object[] a, final int fromIndex, final int toIndex) {
@@ -22935,7 +24326,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
      * @param rnd the random number generator to use for shuffling
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.}
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      */
     public static void shuffle(final Object[] a, final int fromIndex, final int toIndex, final Random rnd) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -22976,7 +24367,7 @@ sealed class CommonUtil permits N {
      * positional access.</p>
      *
      * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
-     * @param rnd the random number generator to use for shuffling or has size &lt;= 1)
+     * @param rnd the random number generator to use for shuffling
      * @see java.util.Collections#shuffle(List, Random)
      * @see Random
      */
@@ -23037,7 +24428,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
      *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
      *          no operation is performed.
-     * @param rnd the random number generator to use for shuffling or has size &lt; 2)
+     * @param rnd the random number generator to use for shuffling
      * @see #shuffle(List, Random)
      * @see #shuffle(Collection)
      * @see java.util.Collections#shuffle(List, Random)
@@ -23482,7 +24873,6 @@ sealed class CommonUtil permits N {
      * @param toIndex the index to stop filling (exclusive)
      * @param val the float value to fill the array with
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of bounds
-     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      * @see Arrays#fill(float[], int, int, float)
      */
     public static void fill(final float[] a, final int fromIndex, final int toIndex, final float val) {
@@ -26029,13 +27419,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] sorted = {1, 2, 3, 4, 5};
-     * boolean result1 = isSorted(sorted);  // Returns true
+     * boolean result1 = isSorted(sorted);   // Returns true
      *
      * int[] unsorted = {1, 3, 2, 4, 5};
-     * boolean result2 = isSorted(unsorted);  // Returns false
+     * boolean result2 = isSorted(unsorted);   // Returns false
      *
      * int[] empty = {};
-     * boolean result3 = isSorted(empty);  // Returns true
+     * boolean result3 = isSorted(empty);   // Returns true
      * }</pre>
      *
      * @param a the integer array to be checked
@@ -26306,13 +27696,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "date"};
-     * boolean result1 = isSorted(array, Comparator.naturalOrder());  // Returns true
+     * boolean result1 = isSorted(array, Comparator.naturalOrder());   // Returns true
      *
      * String[] array2 = {"apple", "cherry", "banana"};
-     * boolean result2 = isSorted(array2, Comparator.naturalOrder());  // Returns false
+     * boolean result2 = isSorted(array2, Comparator.naturalOrder());   // Returns false
      *
      * String[] byLength = {"a", "bb", "ccc", "dddd"};
-     * boolean result3 = isSorted(byLength, Comparator.comparing(String::length));  // Returns true
+     * boolean result3 = isSorted(byLength, Comparator.comparing(String::length));   // Returns true
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -26979,7 +28369,7 @@ sealed class CommonUtil permits N {
      * @param list the list to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the specified range is out of
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -27240,11 +28630,34 @@ sealed class CommonUtil permits N {
     private static final int PARALLEL_SORT_OBJECT_THRESHOLD = 2000;
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting using {@link Arrays#sort(char[])}.
+     * Otherwise, it uses {@link Arrays#parallelSort(char[])} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] largeArray = new char[10000];
+     * // ... populate array ...
+     * parallelSort(largeArray);   // Uses multiple threads for better performance
+     * // Result: array sorted in ascending order using parallel processing
+     *
+     * char[] smallArray = {'z', 'a', 'm', 'b'};
+     * parallelSort(smallArray);   // Uses single-threaded sort (array too small)
+     * // Result: smallArray = {'a', 'b', 'm', 'z'}
+     * }</pre>
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(char[])
      * @see Arrays#parallelSort(char[], int, int)
+     * @see #parallelSort(char[], int, int)
      */
     public static void parallelSort(final char[] a) {
         if (isEmpty(a)) {
@@ -27255,14 +28668,40 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(char[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(char[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'z', 'y', 'x', 'w', 'v', 'u', 't', 's'};
+     *
+     * // Sort a range from index 2 to 6 (exclusive)
+     * parallelSort(array, 2, 6);
+     * // Result: array = {'z', 'y', 'v', 'w', 'x', 'u', 't', 's'}
+     * //                              ^^^^^^^^^ sorted range
+     *
+     * // Sort the entire array except first and last element
+     * parallelSort(array, 1, array.length - 1);
+     * }</pre>
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(char[])
      * @see Arrays#parallelSort(char[], int, int)
+     * @see #parallelSort(char[])
      */
     public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27279,11 +28718,29 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(byte[])} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] largeArray = new byte[10000];
+     * // ... populate array ...
+     * parallelSort(largeArray);   // Uses multiple threads for better performance
+     * }</pre>
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(byte[])
      * @see Arrays#parallelSort(byte[], int, int)
+     * @see #parallelSort(byte[], int, int)
      */
     public static void parallelSort(final byte[] a) {
         if (isEmpty(a)) {
@@ -27294,14 +28751,36 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(byte[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(byte[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {30, 10, 50, 20, 40, 15, 25, 35};
+     *
+     * // Sort a range from index 2 to 6 (exclusive)
+     * parallelSort(array, 2, 6);
+     * // Result: array = {30, 10, 20, 40, 50, 15, 25, 35}
+     * }</pre>
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(byte[])
      * @see Arrays#parallelSort(byte[], int, int)
+     * @see #parallelSort(byte[])
      */
     public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27318,11 +28797,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(short[])} for parallel execution.
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(short[])
      * @see Arrays#parallelSort(short[], int, int)
+     * @see #parallelSort(short[], int, int)
      */
     public static void parallelSort(final short[] a) {
         if (isEmpty(a)) {
@@ -27333,14 +28823,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(short[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(short[], int, int)} for parallel execution.
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(short[])
      * @see Arrays#parallelSort(short[], int, int)
+     * @see #parallelSort(short[])
      */
     public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27367,7 +28870,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * int[] largeArray = new int[10000];
      * // ... populate array ...
-     * parallelSort(largeArray);  // Uses multiple threads for better performance
+     * parallelSort(largeArray);   // Uses multiple threads for better performance
      * // Result: array sorted in ascending order using parallel processing
      * }</pre>
      *
@@ -27384,7 +28887,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -27408,11 +28911,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(long[])} for parallel execution.
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(long[])
      * @see Arrays#parallelSort(long[], int, int)
+     * @see #parallelSort(long[], int, int)
      */
     public static void parallelSort(final long[] a) {
         if (isEmpty(a)) {
@@ -27423,14 +28937,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(long[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(long[], int, int)} for parallel execution.
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(long[])
      * @see Arrays#parallelSort(long[], int, int)
+     * @see #parallelSort(long[])
      */
     public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27447,11 +28974,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(float[])} for parallel execution.
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(float[])
      * @see Arrays#parallelSort(float[], int, int)
+     * @see #parallelSort(float[], int, int)
      */
     public static void parallelSort(final float[] a) {
         if (isEmpty(a)) {
@@ -27462,14 +29000,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(float[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(float[], int, int)} for parallel execution.
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(float[])
      * @see Arrays#parallelSort(float[], int, int)
+     * @see #parallelSort(float[])
      */
     public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27486,11 +29037,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts the entire array by dividing the work across available
+     * CPU cores when the array size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller arrays or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(double[])} for parallel execution.
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(double[])
      * @see Arrays#parallelSort(double[], int, int)
+     * @see #parallelSort(double[], int, int)
      */
     public static void parallelSort(final double[] a) {
         if (isEmpty(a)) {
@@ -27501,14 +29063,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array into ascending numerical order by multiple threads.
+     * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>This method efficiently sorts a portion of the array by dividing the work across available
+     * CPU cores when the range size exceeds the parallel sort threshold (3000 elements) and multiple
+     * cores are available. For smaller ranges or single-core systems, it falls back to standard
+     * single-threaded sorting for optimal performance.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
+     *
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(double[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(double[], int, int)} for parallel execution.
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(double[])
      * @see Arrays#parallelSort(double[], int, int)
+     * @see #parallelSort(double[])
      */
     public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -27525,7 +29100,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array according to the natural ordering (where {@code null} is minimum) by multiple threads.
+     * Sorts the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
@@ -27546,14 +29121,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) by multiple threads.
+     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
      * @param <T> the type of the comparable array elements
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IllegalArgumentException if fromIndex &gt; toIndex
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -27573,7 +29147,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array according to the order induced by the specified comparator by multiple threads.
+     * Sorts the specified array according to the order induced by the specified comparator using multiple threads.
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
@@ -27595,7 +29169,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the specified array according to the order induced by the specified comparator by multiple threads.
+     * Sorts the specified range of the specified array according to the order induced by the specified comparator using multiple threads.
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
@@ -27626,7 +29200,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list according to the natural ordering (where {@code null} is minimum) by multiple threads.
+     * Sorts the specified list according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27647,13 +29221,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is minimum) by multiple threads.
+     * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the specified range is out of
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -27667,7 +29241,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list according to the order induced by the specified comparator by multiple threads.
+     * Sorts the specified list according to the order induced by the specified comparator using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27689,7 +29263,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the list according to the order induced by the specified comparator by multiple threads.
+     * Sorts the specified range of the list according to the order induced by the specified comparator using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27737,37 +29311,101 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array based on the keys extracted by the provided {@code Function} by multiple threads.
+     * Sorts the specified array based on the comparable keys extracted by the provided {@code Function} using multiple threads.
+     * <p>This method provides a convenient way to sort an array of objects based on a property or derived value,
+     * without having to manually create a comparator. The {@code keyExtractor} function is applied to each element
+     * to obtain a comparable key, and elements are sorted in ascending order of these keys.
+     *
+     * <p>The array is sorted in place, modifying the original array. This method uses parallel sorting when
+     * beneficial (large arrays on multi-core systems).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Person {
+     *     String name;
+     *     int age;
+     *     Person(String name, int age) { this.name = name; this.age = age; }
+     *     String getName() { return name; }
+     *     int getAge() { return age; }
+     * }
+     *
+     * Person[] people = {
+     *     new Person("Alice", 30),
+     *     new Person("Bob", 25),
+     *     new Person("Charlie", 35)
+     * };
+     *
+     * // Sort by name (alphabetically)
+     * parallelSortBy(people, Person::getName);
+     * // Result: [Alice, Bob, Charlie]
+     *
+     * // Sort by age (numerically)
+     * parallelSortBy(people, p -> p.getAge());
+     * // Result: [Bob(25), Alice(30), Charlie(35)]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
-     * @param <U> the type of the keys extracted by the key extractor function
-     * @param a the array to be sorted
-     * @param keyExtractor the function used to extract the keys for comparison
+     * @param <U> the type of the comparable keys extracted by the key extractor function
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
+     * @param keyExtractor the function used to extract comparable keys from elements for comparison - must not be {@code null}
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
+     * @see #parallelSort(Object[], Comparator)
      */
     public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
         parallelSort(a, Comparators.comparingBy(keyExtractor));
     }
 
     /**
-     * Sorts the specified list based on the keys extracted by the provided {@code Function} by multiple threads.
+     * Sorts the specified list based on the comparable keys extracted by the provided {@code Function} using multiple threads.
+     * <p>This method provides a convenient way to sort a list of objects based on a property or derived value,
+     * without having to manually create a comparator. The {@code keyExtractor} function is applied to each element
+     * to obtain a comparable key, and elements are sorted in ascending order of these keys.
+     *
+     * <p>The list is sorted in place, modifying the original list. This method uses parallel sorting when
+     * beneficial (large lists on multi-core systems).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Employee {
+     *     String name;
+     *     double salary;
+     *     Employee(String name, double salary) { this.name = name; this.salary = salary; }
+     *     String getName() { return name; }
+     *     double getSalary() { return salary; }
+     * }
+     *
+     * List<Employee> employees = Arrays.asList(
+     *     new Employee("Alice", 75000),
+     *     new Employee("Bob", 60000),
+     *     new Employee("Charlie", 85000)
+     * );
+     *
+     * // Sort by name (alphabetically)
+     * parallelSortBy(employees, Employee::getName);
+     * // Result: [Alice, Bob, Charlie]
+     *
+     * // Sort by salary (numerically)
+     * parallelSortBy(employees, e -> e.getSalary());
+     * // Result: [Bob(60000), Alice(75000), Charlie(85000)]
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
-     * @param <U> the type of the keys extracted by the key extractor function
-     * @param list the list to be sorted
-     * @param keyExtractor the function used to extract the keys for comparison
+     * @param <U> the type of the comparable keys extracted by the key extractor function
+     * @param list the list to be sorted - if {@code null} or empty, the method returns immediately without effect
+     * @param keyExtractor the function used to extract comparable keys from elements for comparison - must not be {@code null}
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
+     * @see #parallelSort(List, Comparator)
      */
     public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
         parallelSort(list, Comparators.comparingBy(keyExtractor));
     }
 
     /**
-     * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} by multiple threads.
+     * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
@@ -27778,7 +29416,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} by multiple threads.
+     * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27789,7 +29427,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} by multiple threads.
+     * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
@@ -27800,7 +29438,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} by multiple threads.
+     * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27811,7 +29449,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} by multiple threads.
+     * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
@@ -27822,7 +29460,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} by multiple threads.
+     * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -27833,7 +29471,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} by multiple threads.
+     * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
@@ -27844,7 +29482,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} by multiple threads.
+     * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} using multiple threads.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -28107,9 +29745,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array of objects in reverse order. (where {@code null} is maximum)
+     * Sorts the specified array of objects in reverse (descending) order.
+     * <p>This method sorts the array in place in descending order, where the largest elements come first.
+     * {@code null} values are treated as maximum and will appear at the end of the sorted array.
      *
-     * @param a the array to be sorted
+     * <p>The elements must implement {@link Comparable}, or a {@link ClassCastException} will be thrown.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] numbers = {30, 10, 50, 20, 40};
+     * reverseSort(numbers);
+     * // Result: numbers = {50, 40, 30, 20, 10}
+     *
+     * String[] words = {"apple", "cherry", "banana", null};
+     * reverseSort(words);
+     * // Result: words = {"cherry", "banana", "apple", null}  // null is maximum
+     * }</pre>
+     *
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
+     * @throws ClassCastException if the array contains elements that are not mutually comparable
+     * @see #reverseSort(Object[], int, int)
+     * @see #sort(Object[])
      */
     public static void reverseSort(final Object[] a) {
         sort(a, REVERSED_COMPARATOR);
@@ -28164,12 +29820,45 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array based on the keys extracted by the provided {@code Function} in reverse order.
+     * Sorts the specified array in reverse (descending) order based on the comparable keys extracted by the provided {@code Function}.
+     * <p>This method provides a convenient way to sort an array of objects in descending order based on a property or derived value.
+     * The {@code keyExtractor} function is applied to each element to obtain a comparable key, and elements are sorted
+     * in descending order of these keys (largest to smallest).
+     *
+     * <p>The array is sorted in place, modifying the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Student {
+     *     String name;
+     *     double gpa;
+     *     Student(String name, double gpa) { this.name = name; this.gpa = gpa; }
+     *     String getName() { return name; }
+     *     double getGpa() { return gpa; }
+     * }
+     *
+     * Student[] students = {
+     *     new Student("Alice", 3.5),
+     *     new Student("Bob", 3.9),
+     *     new Student("Charlie", 3.7)
+     * };
+     *
+     * // Sort by GPA in descending order (highest first)
+     * reverseSortBy(students, Student::getGpa);
+     * // Result: [Bob(3.9), Charlie(3.7), Alice(3.5)]
+     *
+     * // Sort by name in reverse alphabetical order
+     * reverseSortBy(students, Student::getName);
+     * // Result: [Charlie, Bob, Alice]
+     * }</pre>
      *
      * @param <T> the type of elements in the array
-     * @param <U> the type of keys extracted from the elements, which must be comparable
-     * @param a the array to be sorted
-     * @param keyExtractor the function to extract the keys from the elements
+     * @param <U> the type of comparable keys extracted from the elements
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
+     * @param keyExtractor the function to extract comparable keys from the elements - must not be {@code null}
+     * @see #reverseSortBy(List, Function)
+     * @see #sortBy(Object[], Function)
+     * @see Comparators#reversedComparingBy(Function)
      */
     public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
         sort(a, Comparators.reversedComparingBy(keyExtractor));
@@ -28270,9 +29959,8 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the double key from the elements
-     * @throws IndexOutOfBoundsException if the list indices are out of bounds during sorting
      */
-    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IndexOutOfBoundsException {
+    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
         sort(list, Comparators.reversedComparingDouble(keyExtractor));
     }
 
@@ -30182,16 +31870,16 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 1, 4, 1, 5};
-     * int[] minIndices1 = indicesOfAllMin(array1);  // Returns [1, 3] (both 1's)
+     * int[] minIndices1 = indicesOfAllMin(array1);   // Returns [1, 3] (both 1's)
      *
      * String[] array2 = {"cat", "dog", "ant", "ant"};
-     * int[] minIndices2 = indicesOfAllMin(array2);  // Returns [2, 3] (both "ant"s)
+     * int[] minIndices2 = indicesOfAllMin(array2);   // Returns [2, 3] (both "ant"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] minIndices3 = indicesOfAllMin(array3);  // Returns [0, 1, 2] (all equal)
+     * int[] minIndices3 = indicesOfAllMin(array3);   // Returns [0, 1, 2] (all equal)
      *
      * Integer[] emptyArray = {};
-     * int[] minIndices4 = indicesOfAllMin(emptyArray);  // Returns empty array []
+     * int[] minIndices4 = indicesOfAllMin(emptyArray);   // Returns empty array []
      * }</pre>
      *
      * @param <T> the type of elements in the array - must implement {@link Comparable}
@@ -30259,11 +31947,48 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all minimum elements in the specified collection using the provided comparator.
+     * <p>This method finds all elements in the collection that are equal to the minimum value according
+     * to the provided comparator and returns their indices. If multiple elements have the same minimum value,
+     * all their indices will be included in the returned array.
+     *
+     * <p>The indices are returned in ascending order (the order they appear in the collection's iteration).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Person {
+     *     String name;
+     *     int age;
+     *     Person(String name, int age) { this.name = name; this.age = age; }
+     * }
+     *
+     * List<Person> people = Arrays.asList(
+     *     new Person("Alice", 30),
+     *     new Person("Bob", 25),
+     *     new Person("Charlie", 25),
+     *     new Person("David", 35)
+     * );
+     *
+     * // Find all youngest people (minimum age)
+     * Comparator<Person> byAge = Comparator.comparingInt(p -> p.age);
+     * int[] minIndices = indicesOfAllMin(people, byAge);
+     * // Returns [1, 2] (Bob and Charlie, both age 25)
+     *
+     * // Find alphabetically first names
+     * Comparator<Person> byName = Comparator.comparing(p -> p.name);
+     * int[] firstNames = indicesOfAllMin(people, byName);
+     * // Returns [0] (Alice is alphabetically first)
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
-     * @param c the collection to search within
-     * @param cmp the comparator to compare elements of the collection
-     * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
+     * @param c the collection to search within - may be {@code null} or empty
+     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with null values treated as maximum
+     * @return an array of indices where minimum elements are located according to the comparator.
+     *         Returns an empty array if the input collection is {@code null} or empty.
+     *         The indices are in ascending order.
+     * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
+     * @see #indicesOfAllMin(Collection)
+     * @see #indicesOfAllMax(Collection, Comparator)
+     * @see #indicesOfAllMin(Object[], Comparator)
      */
     public static <T> int[] indicesOfAllMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -30308,13 +32033,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 5, 4, 5, 2};
-     * int[] maxIndices1 = indicesOfAllMax(array1);  // Returns [1, 3] (both 5's)
+     * int[] maxIndices1 = indicesOfAllMax(array1);   // Returns [1, 3] (both 5's)
      *
      * String[] array2 = {"cat", "dog", "dog", "ant"};
-     * int[] maxIndices2 = indicesOfAllMax(array2);  // Returns [1, 2] (both "dog"s)
+     * int[] maxIndices2 = indicesOfAllMax(array2);   // Returns [1, 2] (both "dog"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] maxIndices3 = indicesOfAllMax(array3);  // Returns [0, 1, 2] (all equal)
+     * int[] maxIndices3 = indicesOfAllMax(array3);   // Returns [0, 1, 2] (all equal)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -30327,11 +32052,48 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all maximum elements in the specified array using the provided comparator.
+     * <p>This method finds all elements in the array that are equal to the maximum value according
+     * to the provided comparator and returns their indices. If multiple elements have the same maximum value,
+     * all their indices will be included in the returned array.
+     *
+     * <p>The indices are returned in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Product {
+     *     String name;
+     *     double price;
+     *     Product(String name, double price) { this.name = name; this.price = price; }
+     * }
+     *
+     * Product[] products = {
+     *     new Product("Apple", 1.50),
+     *     new Product("Banana", 0.75),
+     *     new Product("Cherry", 2.00),
+     *     new Product("Date", 2.00)
+     * };
+     *
+     * // Find all most expensive products (maximum price)
+     * Comparator<Product> byPrice = Comparator.comparingDouble(p -> p.price);
+     * int[] maxIndices = indicesOfAllMax(products, byPrice);
+     * // Returns [2, 3] (Cherry and Date, both $2.00)
+     *
+     * // Find products with longest names (maximum length)
+     * Comparator<Product> byNameLength = Comparator.comparingInt(p -> p.name.length());
+     * int[] longestNames = indicesOfAllMax(products, byNameLength);
+     * // Returns [1, 2] (Banana and Cherry, both 6 characters)
+     * }</pre>
      *
      * @param <T> the type of elements in the array
-     * @param a the array to search within
-     * @param cmp the comparator to compare elements of the array
-     * @return an array of indices of all maximum elements. An empty array if the input array is empty.
+     * @param a the array to search within - may be {@code null} or empty
+     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with null values treated as minimum
+     * @return an array of indices where maximum elements are located according to the comparator.
+     *         Returns an empty array if the input array is {@code null} or empty.
+     *         The indices are in ascending order.
+     * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
+     * @see #indicesOfAllMax(Comparable[])
+     * @see #indicesOfAllMin(Object[], Comparator)
+     * @see #indicesOfAllMax(Collection, Comparator)
      */
     public static <T> int[] indicesOfAllMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -30374,11 +32136,48 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all maximum elements in the specified collection using the provided comparator.
+     * <p>This method finds all elements in the collection that are equal to the maximum value according
+     * to the provided comparator and returns their indices (positions in iteration order). If multiple elements
+     * have the same maximum value, all their indices will be included in the returned array.
+     *
+     * <p>The indices are returned in ascending order (the order they appear in the collection's iteration).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class Score {
+     *     String player;
+     *     int points;
+     *     Score(String player, int points) { this.player = player; this.points = points; }
+     * }
+     *
+     * List<Score> scores = Arrays.asList(
+     *     new Score("Alice", 100),
+     *     new Score("Bob", 150),
+     *     new Score("Charlie", 150),
+     *     new Score("David", 120)
+     * );
+     *
+     * // Find all players with highest score (maximum points)
+     * Comparator<Score> byPoints = Comparator.comparingInt(s -> s.points);
+     * int[] topScorers = indicesOfAllMax(scores, byPoints);
+     * // Returns [1, 2] (Bob and Charlie, both 150 points)
+     *
+     * // Find alphabetically last player names
+     * Comparator<Score> byName = Comparator.comparing(s -> s.player);
+     * int[] lastNames = indicesOfAllMax(scores, byName);
+     * // Returns [3] (David is alphabetically last)
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
-     * @param c the collection to search within
-     * @param cmp the comparator to compare elements of the collection
-     * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
+     * @param c the collection to search within - may be {@code null} or empty
+     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with null values treated as minimum
+     * @return an array of indices where maximum elements are located according to the comparator.
+     *         Returns an empty array if the input collection is {@code null} or empty.
+     *         The indices are in ascending order.
+     * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
+     * @see #indicesOfAllMax(Collection)
+     * @see #indicesOfAllMin(Collection, Comparator)
+     * @see #indicesOfAllMax(Object[], Comparator)
      */
     public static <T> int[] indicesOfAllMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -30416,10 +32215,34 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all occurrences of the specified value in the given array.
+     * <p>This method searches the entire array and returns the positions (indices) of all elements
+     * that are equal to the specified value. Equality is determined using {@link Objects#equals(Object, Object)},
+     * which handles {@code null} values correctly.
      *
-     * @param a the array to search within
-     * @param valueToFind the value to find in the array
-     * @return an array of indices of all occurrences of the specified value
+     * <p>The indices are returned in ascending order (the order they appear in the array).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "apple", "cherry", "apple", "date"};
+     * int[] indices1 = indicesOfAll(words, "apple");
+     * // Returns [0, 2, 4] (all positions where "apple" appears)
+     *
+     * int[] indices2 = indicesOfAll(words, "grape");
+     * // Returns [] (empty array - value not found)
+     *
+     * String[] withNull = {"a", null, "b", null, "c"};
+     * int[] indices3 = indicesOfAll(withNull, null);
+     * // Returns [1, 3] (all positions where null appears)
+     * }</pre>
+     *
+     * @param a the array to search within - may be {@code null} or empty
+     * @param valueToFind the value to find in the array - may be {@code null}
+     * @return an array of indices of all occurrences of the specified value.
+     *         Returns an empty array if no occurrences are found or if the input array is {@code null} or empty.
+     *         The indices are in ascending order.
+     * @see #indicesOfAll(Object[], Object, int)
+     * @see #indicesOfAll(Collection, Object)
+     * @see #indexOf(Object[], Object)
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind) {
         return indicesOfAll(a, valueToFind, 0);
@@ -30427,11 +32250,45 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all occurrences of the specified value in the given array, starting the search from the specified index.
+     * <p>This method searches the array from {@code startIndex} (inclusive) onwards and returns the positions (indices)
+     * of all elements that are equal to the specified value. Equality is determined using {@link Objects#equals(Object, Object)},
+     * which handles {@code null} values correctly.
      *
-     * @param a the array to search within
-     * @param valueToFind the value to find in the array
-     * @param startIndex the index to start the search from
-     * @return an array of indices of all occurrences of the specified value
+     * <p>If {@code startIndex} is negative, the search starts from index 0. If {@code startIndex} is greater than or equal
+     * to the array length, an empty array is returned.
+     *
+     * <p>The indices are returned in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "apple", "cherry", "apple", "date", "apple"};
+     *
+     * // Find all "apple" occurrences from the beginning
+     * int[] indices1 = indicesOfAll(words, "apple", 0);
+     * // Returns [0, 2, 4, 6] (all positions where "apple" appears)
+     *
+     * // Find "apple" occurrences starting from index 3
+     * int[] indices2 = indicesOfAll(words, "apple", 3);
+     * // Returns [4, 6] (only "apple"s at or after index 3)
+     *
+     * // Search with negative startIndex (treated as 0)
+     * int[] indices3 = indicesOfAll(words, "banana", -1);
+     * // Returns [1]
+     *
+     * // Search from index beyond array length
+     * int[] indices4 = indicesOfAll(words, "apple", 100);
+     * // Returns [] (empty array)
+     * }</pre>
+     *
+     * @param a the array to search within - may be {@code null} or empty
+     * @param valueToFind the value to find in the array - may be {@code null}
+     * @param startIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
+     * @return an array of indices of all occurrences of the specified value starting from {@code startIndex}.
+     *         Returns an empty array if no occurrences are found, the array is {@code null}/empty, or {@code startIndex} is beyond the array length.
+     *         The indices are in ascending order.
+     * @see #indicesOfAll(Object[], Object)
+     * @see #indicesOfAll(Collection, Object, int)
+     * @see #indexOf(Object[], Object, int)
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int startIndex) {
         final int len = len(a);
@@ -30584,19 +32441,19 @@ sealed class CommonUtil permits N {
      * List<String> list = Arrays.asList("apple", "banana", "apple", "cherry", "apple");
      *
      * // Find all "apple" occurrences from index 1
-     * int[] indices1 = indicesOfAll(list, s -> "apple".equals(s), 1);  // Returns [2, 4]
+     * int[] indices1 = indicesOfAll(list, s -> "apple".equals(s), 1);   // Returns [2, 4]
      *
      * // Find all strings longer than 5 characters from start
-     * int[] indices2 = indicesOfAll(list, s -> s.length() > 5, 0);  // Returns [1, 3]
+     * int[] indices2 = indicesOfAll(list, s -> s.length() > 5, 0);   // Returns [1, 3]
      *
      * // Search from index beyond collection size
-     * int[] indices3 = indicesOfAll(list, s -> true, 10);  // Returns []
+     * int[] indices3 = indicesOfAll(list, s -> true, 10);   // Returns []
      *
      * // Search with negative fromIndex (treated as 0)
-     * int[] indices4 = indicesOfAll(list, s -> "apple".equals(s), -1);  // Returns [0, 2, 4]
+     * int[] indices4 = indicesOfAll(list, s -> "apple".equals(s), -1);   // Returns [0, 2, 4]
      *
      * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5));
-     * int[] indices5 = indicesOfAll(set, n -> n % 2 == 0, 0);  // Returns even number indices
+     * int[] indices5 = indicesOfAll(set, n -> n % 2 == 0, 0);   // Returns even number indices
      * }</pre>
      *
      * @param <T> the type of elements in the collection

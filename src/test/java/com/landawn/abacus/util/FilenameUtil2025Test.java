@@ -862,7 +862,7 @@ public class FilenameUtil2025Test extends TestBase {
     @Test
     public void testIsExtension_String_NoMatch() {
         Assertions.assertFalse(FilenameUtil.isExtension("file.txt", "pdf"));
-        Assertions.assertFalse(FilenameUtil.isExtension("file.txt", "TXT")); // Case sensitive
+        Assertions.assertFalse(FilenameUtil.isExtension("file.txt", "TXT"));   // Case sensitive
     }
 
     @Test
@@ -892,7 +892,7 @@ public class FilenameUtil2025Test extends TestBase {
     public void testIsExtension_StringArray_NoMatch() {
         String[] exts = { "txt", "pdf", "doc" };
         Assertions.assertFalse(FilenameUtil.isExtension("file.jpg", exts));
-        Assertions.assertFalse(FilenameUtil.isExtension("file.TXT", exts)); // Case sensitive
+        Assertions.assertFalse(FilenameUtil.isExtension("file.TXT", exts));   // Case sensitive
     }
 
     @Test
@@ -979,7 +979,7 @@ public class FilenameUtil2025Test extends TestBase {
     public void testWildcardMatch_MultipleStars() {
         Assertions.assertTrue(FilenameUtil.wildcardMatch("abcdefghi", "a*c*f*i"));
         Assertions.assertTrue(FilenameUtil.wildcardMatch("abc123def456.txt", "abc*def*.txt"));
-        Assertions.assertTrue(FilenameUtil.wildcardMatch("file.txt", "****.txt")); // Multiple stars collapse
+        Assertions.assertTrue(FilenameUtil.wildcardMatch("file.txt", "****.txt"));   // Multiple stars collapse
     }
 
     @Test
@@ -1178,7 +1178,7 @@ public class FilenameUtil2025Test extends TestBase {
         // Complex normalization scenarios
         Assertions.assertNotNull(FilenameUtil.normalize("/a/./b/../c/./d/../e"));
         Assertions.assertNotNull(FilenameUtil.normalize("a/b/c/../../d"));
-        Assertions.assertNull(FilenameUtil.normalize("a/b/../../../c")); // Goes above root
+        Assertions.assertNull(FilenameUtil.normalize("a/b/../../../c"));   // Goes above root
     }
 
     @Test

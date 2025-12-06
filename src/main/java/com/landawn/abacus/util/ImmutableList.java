@@ -88,7 +88,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Constructs an ImmutableList instance with the provided list.
      * The list is not made unmodifiable in this constructor, it's handled in another constructor.
      *
-     * @param list the list of elements to be included in this ImmutableList
+     * @param list the list of elements to be included in this ImmutableList.
      */
     ImmutableList(final List<? extends E> list) {
         this(list, ClassUtil.isPossibleImmutable(list.getClass()));
@@ -98,8 +98,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Constructs an ImmutableList instance with the provided list and a boolean indicating if the list is unmodifiable.
      * If the list is not unmodifiable, it is wrapped into an unmodifiable list.
      *
-     * @param list the list of elements to be included in this ImmutableList
-     * @param isUnmodifiable a boolean indicating if the provided list is unmodifiable
+     * @param list the list of elements to be included in this ImmutableList.
+     * @param isUnmodifiable a boolean indicating if the provided list is unmodifiable.
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION")
     ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) {
@@ -118,8 +118,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * System.out.println(empty.isEmpty());   // prints: true
      * }</pre>
      *
-     * @param <E> the type of elements in the list
-     * @return an empty ImmutableList instance
+     * @param <E> the type of elements in the list.
+     * @return an empty ImmutableList instance.
      */
     public static <E> ImmutableList<E> empty() {
         return EMPTY;
@@ -132,12 +132,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> single = ImmutableList.just("hello");
-     * System.out.println(single.get(0));  // prints: hello
+     * System.out.println(single.get(0));   // prints: hello
      * }</pre>
      *
-     * @param <E> the type of the element
-     * @param e the single element to be contained in the ImmutableList
-     * @return an ImmutableList containing only the specified element
+     * @param <E> the type of the element.
+     * @param e the single element to be contained in the ImmutableList.
+     * @return an ImmutableList containing only the specified element.
      */
     public static <E> ImmutableList<E> just(final E e) {
         return new ImmutableList<>(Array.asList(e), false);
@@ -150,12 +150,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<Integer> single = ImmutableList.of(42);
-     * // single.add(43);  // Would throw UnsupportedOperationException
+     * // single.add(43);   // Would throw UnsupportedOperationException
      * }</pre>
      *
-     * @param <E> the type of the element
-     * @param e1 the single element to be contained in the ImmutableList
-     * @return an ImmutableList containing only the specified element
+     * @param <E> the type of the element.
+     * @param e1 the single element to be contained in the ImmutableList.
+     * @return an ImmutableList containing only the specified element.
      */
     public static <E> ImmutableList<E> of(final E e1) {
         return new ImmutableList<>(Array.asList(e1), false);
@@ -165,10 +165,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly two elements in the order provided.
      * The returned list is immutable and will have a size of 2.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<String> pair = ImmutableList.of("first", "second");
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2) {
         return new ImmutableList<>(Array.asList(e1, e2), false);
@@ -178,11 +183,16 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly three elements in the order provided.
      * The returned list is immutable and will have a size of 3.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> triple = ImmutableList.of(1, 2, 3);
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableList<>(Array.asList(e1, e2, e3), false);
@@ -192,12 +202,17 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly four elements in the order provided.
      * The returned list is immutable and will have a size of 4.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<String> seasons = ImmutableList.of("Spring", "Summer", "Fall", "Winter");
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4), false);
@@ -207,13 +222,18 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly five elements in the order provided.
      * The returned list is immutable and will have a size of 5.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> primes = ImmutableList.of(2, 3, 5, 7, 11);
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5), false);
@@ -223,14 +243,19 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly six elements in the order provided.
      * The returned list is immutable and will have a size of 6.
      *
-     * @param <E> the type of elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<String> days = ImmutableList.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
+     * }</pre>
+     *
+     * @param <E> the type of elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6), false);
@@ -240,15 +265,20 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly seven elements in the order provided.
      * The returned list is immutable and will have a size of 7.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<String> weekDays = ImmutableList.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun");
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7), false);
@@ -258,16 +288,21 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly eight elements in the order provided.
      * The returned list is immutable and will have a size of 8.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> fibonacci = ImmutableList.of(1, 1, 2, 3, 5, 8, 13, 21);
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8), false);
@@ -277,17 +312,22 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly nine elements in the order provided.
      * The returned list is immutable and will have a size of 9.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @param e9 the ninth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> digits = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @param e9 the ninth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
@@ -297,18 +337,23 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly ten elements in the order provided.
      * The returned list is immutable and will have a size of 10.
      *
-     * @param <E> the type of the elements
-     * @param e1 the first element
-     * @param e2 the second element
-     * @param e3 the third element
-     * @param e4 the fourth element
-     * @param e5 the fifth element
-     * @param e6 the sixth element
-     * @param e7 the seventh element
-     * @param e8 the eighth element
-     * @param e9 the ninth element
-     * @param e10 the tenth element
-     * @return an ImmutableList containing the specified elements in order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> numbers = ImmutableList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @param e9 the ninth element.
+     * @param e10 the tenth element.
+     * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
@@ -328,9 +373,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * array[0] = "modified";  // Does not affect list
      * }</pre>
      *
-     * @param <E> the type of the elements
-     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty
-     * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty
+     * @param <E> the type of the elements.
+     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty.
+     * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty.
      * @see List#of(Object...)
      */
     @SafeVarargs
@@ -338,7 +383,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         if (N.isEmpty(a)) {
             return empty();
         } else {
-            // return new ImmutableList<>(List.of(a), true); // Doesn't support null element
+            // return new ImmutableList<>(List.of(a), true);   // Doesn't support null element
             return new ImmutableList<>(Array.asList(a), false);
         }
     }
@@ -354,12 +399,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <pre>{@code
      * List<Integer> mutable = new ArrayList<>(Arrays.asList(1, 2, 3));
      * ImmutableList<Integer> immutable = ImmutableList.copyOf(mutable);
-     * mutable.add(4);  // Does not affect immutable
+     * mutable.add(4);   // Does not affect immutable
      * }</pre>
      *
-     * @param <E> the type of elements in the collection
-     * @param c the collection whose elements are to be placed into the ImmutableList
-     * @return an ImmutableList containing all elements from the collection, or the same instance if already an ImmutableList
+     * @param <E> the type of elements in the collection.
+     * @param c the collection whose elements are to be placed into the ImmutableList.
+     * @return an ImmutableList containing all elements from the collection, or the same instance if already an ImmutableList.
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableList) {
@@ -391,9 +436,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * System.out.println(wrapped.get(1));   // prints: "added later"
      * }</pre>
      *
-     * @param <E> the type of elements in the list
-     * @param list the list to be wrapped into an ImmutableList
-     * @return an ImmutableList view of the provided list, or the same instance if already an ImmutableList
+     * @param <E> the type of elements in the list.
+     * @param list the list to be wrapped into an ImmutableList.
+     * @return an ImmutableList view of the provided list, or the same instance if already an ImmutableList.
      */
     @Beta
     public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
@@ -410,11 +455,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This method is deprecated and will always throw an UnsupportedOperationException.
      * Use {@link #wrap(List)} or {@link #copyOf(Collection)} instead.
      *
-     * @param <E> the type of elements
-     * @param c the collection to wrap
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated Use {@link #wrap(List)} for lists or {@link #copyOf(Collection)} for general collections
+     * @param <E> the type of elements.
+     * @param c the collection to wrap.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated Use {@link #wrap(List)} for lists or {@link #copyOf(Collection)} for general collections.
      */
     @Deprecated
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
@@ -428,12 +473,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-     * String second = list.get(1);  // returns "b"
+     * String second = list.get(1);   // returns "b"
      * }</pre>
      *
-     * @param index index of the element to return (0-based)
-     * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+     * @param index the index of the element to return (0-based).
+     * @return the element at the specified position in this list.
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size()).
      * @see List#get(int)
      */
     @Override
@@ -454,9 +499,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * int notFound = list.indexOf("d");   // returns -1
      * }</pre>
      *
-     * @param valueToFind the element to search for, may be null
+     * @param valueToFind the element to search for, may be null.
      * @return the index of the first occurrence of the specified element in this list,
-     *         or -1 if this list does not contain the element
+     *         or -1 if this list does not contain the element.
      * @see List#indexOf(Object)
      */
     @Override
@@ -473,12 +518,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
-     * int lastIndex = list.lastIndexOf("b");  // returns 3
+     * int lastIndex = list.lastIndexOf("b");   // returns 3
      * }</pre>
      *
-     * @param valueToFind the element to search for, may be null
+     * @param valueToFind the element to search for, may be null.
      * @return the index of the last occurrence of the specified element in this list,
-     *         or -1 if this list does not contain the element
+     *         or -1 if this list does not contain the element.
      * @see List#lastIndexOf(Object)
      */
     @Override
@@ -500,7 +545,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * }
      * }</pre>
      *
-     * @return an immutable list iterator over the elements in this list in proper sequence
+     * @return an immutable list iterator over the elements in this list in proper sequence.
      * @see List#listIterator()
      */
     @Override
@@ -524,9 +569,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * System.out.println(iter.previous());   // prints "b"
      * }</pre>
      *
-     * @param index index of the first element to be returned from the list iterator (by a call to next())
-     * @return an immutable list iterator over the elements in this list starting at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @param index the index of the first element to be returned from the list iterator (by a call to next()).
+     * @return an immutable list iterator over the elements in this list starting at the specified position.
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size()).
      * @see List#listIterator(int)
      */
     @Override
@@ -550,11 +595,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * // sub contains ["b", "c", "d"]
      * }</pre>
      *
-     * @param fromIndex low endpoint (inclusive) of the subList
-     * @param toIndex high endpoint (exclusive) of the subList
-     * @return an immutable view of the specified range within this list
+     * @param fromIndex the low endpoint (inclusive) of the subList.
+     * @param toIndex the high endpoint (exclusive) of the subList.
+     * @return an immutable view of the specified range within this list.
      * @throws IndexOutOfBoundsException for an illegal endpoint index value
-     *         (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex).
      * @see List#subList(int, int)
      */
     @Override
@@ -566,11 +611,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param index ignored
-     * @param newElements ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param index ignored.
+     * @param newElements ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -582,11 +627,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param index ignored
-     * @param element ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param index ignored.
+     * @param element ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -598,10 +643,10 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param index ignored
-     * @param element ignored
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param index ignored.
+     * @param element ignored.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -613,10 +658,10 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param index ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param index ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -628,9 +673,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param operator ignored
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param operator ignored.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -642,9 +687,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param c ignored
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableList does not support modification operations
+     * @param c ignored.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
@@ -671,7 +716,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * // backToOriginal is the same instance as original
      * }</pre>
      *
-     * @return an immutable view of this list with elements in reverse order
+     * @return an immutable view of this list with elements in reverse order.
      */
     public ImmutableList<E> reverse() {
         return (size() <= 1) ? this : new ReverseImmutableList<>(this);
@@ -755,8 +800,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements to be maintained by the list
-     * @return a new Builder instance for creating an ImmutableList
+     * @param <E> the type of elements to be maintained by the list.
+     * @return a new Builder instance for creating an ImmutableList.
      */
     public static <E> Builder<E> builder() {
         return new Builder<>(new ArrayList<>());
@@ -777,9 +822,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements to be maintained by the list
-     * @param holder the list to be used as the backing storage for the Builder
-     * @return a new Builder instance that will use the provided list
+     * @param <E> the type of elements to be maintained by the list.
+     * @param holder the list to be used as the backing storage for the Builder.
+     * @return a new Builder instance that will use the provided list.
      */
     public static <E> Builder<E> builder(final List<E> holder) {
         return new Builder<>(holder);
@@ -800,7 +845,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *     .build();
      * }</pre>
      *
-     * @param <E> the type of elements in the list being built
+     * @param <E> the type of elements in the list being built.
      */
     public static final class Builder<E> {
         private final List<E> list;
@@ -818,8 +863,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.add("hello").add("world");
          * }</pre>
          *
-         * @param element the element to add, may be null
-         * @return this builder instance for method chaining
+         * @param element the element to add, may be null.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> add(final E element) {
             list.add(element);
@@ -837,8 +882,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.add("one", "two", "three");
          * }</pre>
          *
-         * @param elements the elements to add, may be {@code null} or empty
-         * @return this builder instance for method chaining
+         * @param elements the elements to add, may be {@code null} or empty.
+         * @return this builder instance for method chaining.
          */
         @SafeVarargs
         public final Builder<E> add(final E... elements) {
@@ -860,8 +905,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.addAll(moreElements);
          * }</pre>
          *
-         * @param c the collection containing elements to add, may be {@code null} or empty
-         * @return this builder instance for method chaining
+         * @param c the collection containing elements to add, may be {@code null} or empty.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
             if (N.notEmpty(c)) {
@@ -883,8 +928,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be null
-         * @return this builder instance for method chaining
+         * @param iter the iterator over elements to add, may be null.
+         * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Iterator<? extends E> iter) {
             if (iter != null) {
@@ -907,10 +952,10 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableList<String> finalList = builder.build();
-         * System.out.println(finalList.size());  // Number of elements added
+         * System.out.println(finalList.size());   // Number of elements added
          * }</pre>
          *
-         * @return a new ImmutableList containing all added elements in the order they were added
+         * @return a new ImmutableList containing all added elements in the order they were added.
          */
         public ImmutableList<E> build() {
             return new ImmutableList<>(list);

@@ -123,11 +123,11 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Using forEach for processing all elements
  * Tuple3<String, Integer, Double> data = Tuple.of("test", 42, 3.14);
- * data.forEach(System.out::println);  // Prints each element
+ * data.forEach(System.out::println);   // Prints each element
  *
  * // Converting to collections
  * Tuple3<String, String, String> words = Tuple.of("apple", "banana", "cherry");
- * List<String> wordList = Tuple.toList(words);  // Creates ["apple", "banana", "cherry"]
+ * List<String> wordList = Tuple.toList(words);   // Creates ["apple", "banana", "cherry"]
  *
  * // Working with collections and maps
  * Map<String, Integer> map = Map.of("key1", 1, "key2", 2);
@@ -264,7 +264,7 @@ import com.landawn.abacus.util.u.Optional;
  * }
  * }</pre>
  *
- * @param <TP> the self-type of the tuple, enabling type-safe method chaining and inheritance
+ * @param <TP> the self-type of the tuple, enabling type-safe method chaining and inheritance.
  * @see Immutable
  * @see Pair
  * @see Triple
@@ -291,10 +291,10 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("a", 1, true);
-     * int size = t.arity();  // Returns 3
+     * int size = t.arity();   // Returns 3
      * }</pre>
      *
-     * @return the arity (size) of this tuple, which is the count of elements it contains
+     * @return the arity (size) of this tuple, which is the count of elements it contains.
      */
     public abstract int arity();
 
@@ -307,13 +307,13 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t1 = Tuple.of("a", null, true);
-     * boolean hasNull = t1.anyNull();  // Returns true
+     * boolean hasNull = t1.anyNull();   // Returns true
      *
      * Tuple3<String, Integer, Boolean> t2 = Tuple.of("a", 1, true);
-     * boolean hasNull2 = t2.anyNull();  // Returns false
+     * boolean hasNull2 = t2.anyNull();   // Returns false
      * }</pre>
      *
-     * @return {@code true} if at least one element in this tuple is {@code null}, {@code false} if all elements are non-null
+     * @return {@code true} if at least one element in this tuple is {@code null}, {@code false} if all elements are non-null.
      */
     public abstract boolean anyNull();
 
@@ -326,13 +326,13 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t1 = Tuple.of(null, null, null);
-     * boolean allNull = t1.allNull();  // Returns true
+     * boolean allNull = t1.allNull();   // Returns true
      *
      * Tuple3<String, Integer, Boolean> t2 = Tuple.of("a", null, null);
-     * boolean allNull2 = t2.allNull();  // Returns false
+     * boolean allNull2 = t2.allNull();   // Returns false
      * }</pre>
      *
-     * @return {@code true} if every element in this tuple is {@code null}, {@code false} if at least one element is non-null
+     * @return {@code true} if every element in this tuple is {@code null}, {@code false} if at least one element is non-null.
      */
     public abstract boolean allNull();
 
@@ -350,8 +350,8 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean found3 = t.contains(null);      // Returns false
      * }</pre>
      *
-     * @param valueToFind the value to search for in this tuple, may be {@code null}
-     * @return {@code true} if this tuple contains an element equal to the specified value, {@code false} otherwise
+     * @param valueToFind the value to search for in this tuple, may be {@code null}.
+     * @return {@code true} if this tuple contains an element equal to the specified value, {@code false} otherwise.
      */
     public abstract boolean contains(final Object valueToFind);
 
@@ -364,10 +364,10 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("a", 1, true);
-     * Object[] array = t.toArray();  // Returns ["a", 1, true]
+     * Object[] array = t.toArray();   // Returns ["a", 1, true]
      * }</pre>
      *
-     * @return a new Object array containing all tuple elements in order
+     * @return a new Object array containing all tuple elements in order.
      */
     public abstract Object[] toArray();
 
@@ -381,18 +381,18 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> t = Tuple.of("hello", "world");
-     * String[] array = t.toArray(new String[0]);  // Returns ["hello", "world"]
+     * String[] array = t.toArray(new String[0]);   // Returns ["hello", "world"]
      *
      * // Using pre-sized array
      * String[] existing = new String[5];
-     * String[] result = t.toArray(existing);  // Uses existing array, sets existing[2] to null
+     * String[] result = t.toArray(existing);   // Uses existing array, sets existing[2] to null
      * }</pre>
      *
-     * @param <A> the component type of the array to contain the tuple elements
-     * @param a the array into which the elements of this tuple are to be stored, if it is big enough;
+     * @param <A> the component type of the array to contain the tuple elements.
+     * @param a the array into which the elements of this tuple are to be stored, if it is big enough;.
      *          otherwise, a new array of the same runtime type is allocated for this purpose
-     * @return an array containing all elements of this tuple
-     * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+     * @return an array containing all elements of this tuple.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a supertype.
      *         of the runtime type of every element in this tuple
      */
     public abstract <A> A[] toArray(A[] a);
@@ -406,16 +406,16 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("hello", 42, true);
-     * t.forEach(System.out::println);  // Prints each element on a new line
+     * t.forEach(System.out::println);   // Prints each element on a new line
      *
      * // Collecting elements
      * List<Object> list = new ArrayList<>();
      * t.forEach(list::add);
      * }</pre>
      *
-     * @param <E> the type of exception that the consumer may throw
-     * @param consumer the action to be performed for each element, must not be {@code null}
-     * @throws E if the consumer throws an exception
+     * @param <E> the type of exception that the consumer may throw.
+     * @param consumer the action to be performed for each element, must not be {@code null}.
+     * @throws E if the consumer throws an exception.
      */
     public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
 
@@ -432,9 +432,9 @@ public abstract class Tuple<TP> implements Immutable {
      * // Prints: "age: 25"
      * }</pre>
      *
-     * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed on this tuple, must not be {@code null}
-     * @throws E if the action throws an exception
+     * @param <E> the type of exception that the action may throw.
+     * @param action the action to be performed on this tuple, must not be {@code null}.
+     * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
         action.accept((TP) this);
@@ -456,11 +456,11 @@ public abstract class Tuple<TP> implements Immutable {
      * Person person = t.map(tuple -> new Person(tuple._1, tuple._2));
      * }</pre>
      *
-     * @param <R> the type of the result of the mapping function
-     * @param <E> the type of exception that the mapper may throw
-     * @param mapper the mapping function to apply to this tuple, must not be {@code null}
-     * @return the result of applying the mapping function to this tuple
-     * @throws E if the mapper throws an exception
+     * @param <R> the type of the result of the mapping function.
+     * @param <E> the type of exception that the mapper may throw.
+     * @param mapper the mapping function to apply to this tuple, must not be {@code null}.
+     * @return the result of applying the mapping function to this tuple.
+     * @throws E if the mapper throws an exception.
      */
     public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E {
         return mapper.apply((TP) this);
@@ -484,10 +484,10 @@ public abstract class Tuple<TP> implements Immutable {
      * // Returns empty Optional
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test this tuple against, must not be {@code null}
-     * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional
-     * @throws E if the predicate throws an exception
+     * @param <E> the type of exception that the predicate may throw.
+     * @param predicate the predicate to test this tuple against, must not be {@code null}.
+     * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional.
+     * @throws E if the predicate throws an exception.
      */
     @Beta
     public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
@@ -507,9 +507,9 @@ public abstract class Tuple<TP> implements Immutable {
      * String value = single._1;  // "hello"
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param _1 the first element, may be {@code null}
-     * @return a new Tuple1 instance containing the specified element
+     * @param <T1> the type of the first element.
+     * @param _1 the first element, may be {@code null}.
+     * @return a new Tuple1 instance containing the specified element.
      */
     public static <T1> Tuple1<T1> of(final T1 _1) {
         return new Tuple1<>(_1);
@@ -526,14 +526,14 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Integer> nameAge = Tuple.of("Alice", 25);
-     * System.out.println(nameAge._1 + " is " + nameAge._2);  // "Alice is 25"
+     * System.out.println(nameAge._1 + " is " + nameAge._2);   // "Alice is 25"
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param _1 the first element, may be {@code null}
-     * @param _2 the second element, may be {@code null}
-     * @return a new Tuple2 instance containing the specified elements
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param _1 the first element, may be {@code null}.
+     * @param _2 the second element, may be {@code null}.
+     * @return a new Tuple2 instance containing the specified elements.
      */
     public static <T1, T2> Tuple2<T1, T2> of(final T1 _1, final T2 _2) {
         return new Tuple2<>(_1, _2);
@@ -552,13 +552,13 @@ public abstract class Tuple<TP> implements Immutable {
      * // Represents name, age, and active status
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param _1 the first element, may be {@code null}
-     * @param _2 the second element, may be {@code null}
-     * @param _3 the third element, may be {@code null}
-     * @return a new Tuple3 instance containing the specified elements
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param _1 the first element, may be {@code null}.
+     * @param _2 the second element, may be {@code null}.
+     * @param _3 the third element, may be {@code null}.
+     * @return a new Tuple3 instance containing the specified elements.
      */
     public static <T1, T2, T3> Tuple3<T1, T2, T3> of(final T1 _1, final T2 _2, final T3 _3) {
         return new Tuple3<>(_1, _2, _3);
@@ -573,15 +573,15 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of("John", "Doe", 35, new Date());
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @return a new Tuple4 containing the specified elements
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @return a new Tuple4 containing the specified elements.
      */
     public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4) {
         return new Tuple4<>(_1, _2, _3, _4);
@@ -596,17 +596,17 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of("Product", 100, true, 99.99, LocalDate.now());
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @param _5 the fifth element to be contained in the tuple
-     * @return a new Tuple5 containing the specified elements
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @param _5 the fifth element to be contained in the tuple.
+     * @return a new Tuple5 containing the specified elements.
      */
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5) {
         return new Tuple5<>(_1, _2, _3, _4, _5);
@@ -621,19 +621,19 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of("John", "Doe", 123, "Main St", "Boston", "MA");
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @param _5 the fifth element to be contained in the tuple
-     * @param _6 the sixth element to be contained in the tuple
-     * @return a new Tuple6 containing the specified elements
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @param _5 the fifth element to be contained in the tuple.
+     * @param _6 the sixth element to be contained in the tuple.
+     * @return a new Tuple6 containing the specified elements.
      */
     public static <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6) {
         return new Tuple6<>(_1, _2, _3, _4, _5, _6);
@@ -641,25 +641,33 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a Tuple7 containing the specified elements in order.
-     * 
+     *
      * <p>For tuples of this size, consider whether a dedicated class with meaningful
      * field names would provide better code clarity.</p>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @param _5 the fifth element to be contained in the tuple
-     * @param _6 the sixth element to be contained in the tuple
-     * @param _7 the seventh element to be contained in the tuple
-     * @return a new Tuple7 containing the specified elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple7<String, String, Integer, String, String, String, String> address =
+     *     Tuple.of("John", "Doe", 123, "Main St", "Apt 4B", "Boston", "MA");
+     * String firstName = address._1;
+     * String streetNumber = address._4;
+     * }</pre>
+     *
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @param _5 the fifth element to be contained in the tuple.
+     * @param _6 the sixth element to be contained in the tuple.
+     * @param _7 the seventh element to be contained in the tuple.
+     * @return a new Tuple7 containing the specified elements.
      */
     public static <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5,
             final T6 _6, final T7 _7) {
@@ -685,24 +693,24 @@ public abstract class Tuple<TP> implements Immutable {
      * ) {}
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
-     * @param <T8> the type of the eighth element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @param _5 the fifth element to be contained in the tuple
-     * @param _6 the sixth element to be contained in the tuple
-     * @param _7 the seventh element to be contained in the tuple
-     * @param _8 the eighth element to be contained in the tuple
-     * @return a new Tuple8 containing the specified elements
-     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
+     * @param <T8> the type of the eighth element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @param _5 the fifth element to be contained in the tuple.
+     * @param _6 the sixth element to be contained in the tuple.
+     * @param _7 the seventh element to be contained in the tuple.
+     * @param _8 the eighth element to be contained in the tuple.
+     * @return a new Tuple8 containing the specified elements.
+     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}.
      */
     @Deprecated
     public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5,
@@ -712,30 +720,46 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a Tuple9 containing the specified elements in order.
-     * 
-     * <p><b>Note:</b> This method is deprecated. For tuples with 9 elements,
-     * it is strongly recommended to use a dedicated class or record with meaningful property names.</p>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
-     * @param <T8> the type of the eighth element
-     * @param <T9> the type of the ninth element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @param _4 the fourth element to be contained in the tuple
-     * @param _5 the fifth element to be contained in the tuple
-     * @param _6 the sixth element to be contained in the tuple
-     * @param _7 the seventh element to be contained in the tuple
-     * @param _8 the eighth element to be contained in the tuple
-     * @param _9 the ninth element to be contained in the tuple
-     * @return a new Tuple9 containing the specified elements
-     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}
+     * <p><b>Note:</b> This method is deprecated. For tuples with 9 elements,
+     * it is strongly recommended to use a dedicated class or record with meaningful property names
+     * for better code readability and maintainability.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Instead of Tuple9, consider creating a dedicated class:
+     * Tuple9<String, String, Integer, String, String, String, String, String, String> contact =
+     *     Tuple.of("John", "Doe", 35, "john@example.com", "555-1234",
+     *              "123 Main St", "Apt 4B", "Boston", "MA");
+     *
+     * // Better approach - use a record or class:
+     * public record ContactInfo(
+     *     String firstName, String lastName, int age,
+     *     String email, String phone, String street,
+     *     String apartment, String city, String state
+     * ) {}
+     * }</pre>
+     *
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
+     * @param <T8> the type of the eighth element.
+     * @param <T9> the type of the ninth element.
+     * @param _1 the first element to be contained in the tuple.
+     * @param _2 the second element to be contained in the tuple.
+     * @param _3 the third element to be contained in the tuple.
+     * @param _4 the fourth element to be contained in the tuple.
+     * @param _5 the fifth element to be contained in the tuple.
+     * @param _6 the sixth element to be contained in the tuple.
+     * @param _7 the seventh element to be contained in the tuple.
+     * @param _8 the eighth element to be contained in the tuple.
+     * @param _9 the ninth element to be contained in the tuple.
+     * @return a new Tuple9 containing the specified elements.
+     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}.
      */
     @Deprecated
     public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4,
@@ -759,10 +783,10 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <K> the key type of the map entry
-     * @param <V> the value type of the map entry
-     * @param entry the map entry to convert to a tuple, must not be null
-     * @return a new Tuple2 containing the key and value from the entry
+     * @param <K> the key type of the map entry.
+     * @param <V> the value type of the map entry.
+     * @param entry the map entry to convert to a tuple, must not be null.
+     * @return a new Tuple2 containing the key and value from the entry.
      */
     @Beta
     public static <K, V> Tuple2<K, V> create(final Map.Entry<K, V> entry) {
@@ -783,10 +807,10 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <TP> the type of tuple to create
-     * @param a the array of objects to convert to a tuple, may be {@code null} or empty
-     * @return a tuple containing the array elements in order, or Tuple0.EMPTY if array is {@code null} or empty
-     * @throws IllegalArgumentException if the array contains more than 9 elements
+     * @param <TP> the type of tuple to create.
+     * @param a the array of objects to convert to a tuple, may be {@code null} or empty.
+     * @return a tuple containing the array elements in order, or Tuple0.EMPTY if array is {@code null} or empty.
+     * @throws IllegalArgumentException if the array contains more than 9 elements.
      */
     @Beta
     public static <TP extends Tuple<TP>> TP create(final Object[] a) {
@@ -857,10 +881,10 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <TP> the type of tuple to create
-     * @param c the collection of objects to convert to a tuple, may be {@code null} or empty
-     * @return a tuple containing the collection elements in iteration order, or Tuple0.EMPTY if collection is {@code null} or empty
-     * @throws IllegalArgumentException if the collection contains more than 9 elements
+     * @param <TP> the type of tuple to create.
+     * @param c the collection of objects to convert to a tuple, may be {@code null} or empty.
+     * @return a tuple containing the collection elements in iteration order, or Tuple0.EMPTY if collection is {@code null} or empty.
+     * @throws IllegalArgumentException if the collection contains more than 9 elements.
      */
     @Beta
     public static <TP extends Tuple<TP>> TP create(final Collection<?> c) {
@@ -924,14 +948,14 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple1<String> t = Tuple.of("hello");
-     * List<String> list = Tuple.toList(t);  // Returns ["hello"]
+     * List<String> list = Tuple.toList(t);   // Returns ["hello"]
      * }</pre>
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the type of the element in the tuple
-     * @param tp the Tuple1 to convert to a list, must not be null
-     * @return a List containing the single element from the tuple
+     * @param <T> the type of the element in the tuple.
+     * @param tp the Tuple1 to convert to a list, must not be null.
+     * @return a List containing the single element from the tuple.
      */
     @Beta
     public static <T> List<T> toList(final Tuple1<? extends T> tp) {
@@ -946,14 +970,14 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> t = Tuple.of("hello", "world");
-     * List<String> list = Tuple.toList(t);  // Returns ["hello", "world"]
+     * List<String> list = Tuple.toList(t);   // Returns ["hello", "world"]
      * }</pre>
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple2 to convert to a list, must not be null
-     * @return a List containing the two elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple2 to convert to a list, must not be null.
+     * @return a List containing the two elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) {
@@ -962,14 +986,20 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple3 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple3<String, String, String> t = Tuple.of("apple", "banana", "cherry");
+     * List<String> list = Tuple.toList(t);   // Returns ["apple", "banana", "cherry"]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple3 to convert to a list, must not be null
-     * @return a List containing the three elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple3 to convert to a list, must not be null.
+     * @return a List containing the three elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) {
@@ -978,14 +1008,20 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple4 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple4<Integer, Integer, Integer, Integer> t = Tuple.of(1, 2, 3, 4);
+     * List<Integer> list = Tuple.toList(t);   // Returns [1, 2, 3, 4]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple4 to convert to a list, must not be null
-     * @return a List containing the four elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple4 to convert to a list, must not be null.
+     * @return a List containing the four elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -994,14 +1030,21 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple5 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple5<String, String, String, String, String> t =
+     *     Tuple.of("Mon", "Tue", "Wed", "Thu", "Fri");
+     * List<String> list = Tuple.toList(t);   // Returns ["Mon", "Tue", "Wed", "Thu", "Fri"]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple5 to convert to a list, must not be null
-     * @return a List containing the five elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple5 to convert to a list, must not be null.
+     * @return a List containing the five elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1010,14 +1053,21 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple6 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple6<Double, Double, Double, Double, Double, Double> t =
+     *     Tuple.of(1.1, 2.2, 3.3, 4.4, 5.5, 6.6);
+     * List<Double> list = Tuple.toList(t);   // Returns [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple6 to convert to a list, must not be null
-     * @return a List containing the six elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple6 to convert to a list, must not be null.
+     * @return a List containing the six elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1026,14 +1076,21 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple7 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> t =
+     *     Tuple.of(10, 20, 30, 40, 50, 60, 70);
+     * List<Integer> list = Tuple.toList(t);   // Returns [10, 20, 30, 40, 50, 60, 70]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple7 to convert to a list, must not be null
-     * @return a List containing the seven elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple7 to convert to a list, must not be null.
+     * @return a List containing the seven elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1042,14 +1099,21 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple8 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple8<String, String, String, String, String, String, String, String> t =
+     *     Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+     * List<String> list = Tuple.toList(t);   // Returns ["a", "b", "c", "d", "e", "f", "g", "h"]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple8 to convert to a list, must not be null
-     * @return a List containing the eight elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple8 to convert to a list, must not be null.
+     * @return a List containing the eight elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1058,14 +1122,21 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple9 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> t =
+     *     Tuple.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * List<Integer> list = Tuple.toList(t);   // Returns [1, 2, 3, 4, 5, 6, 7, 8, 9]
+     * }</pre>
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T> the common type of the elements in the tuple
-     * @param tp the Tuple9 to convert to a list, must not be null
-     * @return a List containing the nine elements from the tuple in order
+     * @param <T> the common type of the elements in the tuple.
+     * @param tp the Tuple9 to convert to a list, must not be null.
+     * @return a List containing the nine elements from the tuple in order.
      */
     @Beta
     public static <T> List<T> toList(
@@ -1089,11 +1160,11 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T1> the type of the first element in the nested tuple
-     * @param <T2> the type of the second element in the nested tuple
-     * @param <T3> the type of the third element (second element of outer tuple)
-     * @param tp the nested tuple structure to flatten, must not be null
-     * @return a new Tuple3 containing all three elements in order
+     * @param <T1> the type of the first element in the nested tuple.
+     * @param <T2> the type of the second element in the nested tuple.
+     * @param <T3> the type of the third element (second element of outer tuple).
+     * @param tp the nested tuple structure to flatten, must not be null.
+     * @return a new Tuple3 containing all three elements in order.
      */
     @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) {
@@ -1116,13 +1187,13 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <T1> the type of the first element in the nested tuple
-     * @param <T2> the type of the second element in the nested tuple
-     * @param <T3> the type of the third element in the nested tuple
-     * @param <T4> the type of the fourth element (second element of outer tuple)
-     * @param <T5> the type of the fifth element (third element of outer tuple)
-     * @param tp the nested tuple structure to flatten, must not be null
-     * @return a new Tuple5 containing all five elements in order
+     * @param <T1> the type of the first element in the nested tuple.
+     * @param <T2> the type of the second element in the nested tuple.
+     * @param <T3> the type of the third element in the nested tuple.
+     * @param <T4> the type of the fourth element (second element of outer tuple).
+     * @param <T5> the type of the fifth element (third element of outer tuple).
+     * @param tp the nested tuple structure to flatten, must not be null.
+     * @return a new Tuple5 containing all five elements in order.
      */
     @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
@@ -1151,7 +1222,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple0, this always returns 0 as it contains no elements.</p>
          *
-         * @return 0, as this is an empty tuple
+         * @return 0, as this is an empty tuple.
          */
         @Override
         public int arity() {
@@ -1163,7 +1234,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple0, this always returns {@code false} since there are no elements to be {@code null}.</p>
          *
-         * @return {@code false}, as an empty tuple has no {@code null} elements
+         * @return {@code false}, as an empty tuple has no {@code null} elements.
          */
         @Override
         public boolean anyNull() {
@@ -1176,7 +1247,7 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>For Tuple0, this returns {@code true} following the mathematical convention
          * that "all elements" of an empty set satisfy any predicate (vacuous truth).</p>
          *
-         * @return {@code true}, following the vacuous truth principle
+         * @return {@code true}, following the vacuous truth principle.
          */
         @Override
         public boolean allNull() {
@@ -1188,8 +1259,8 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple0, this always returns {@code false} since there are no elements to contain.</p>
          *
-         * @param valueToFind the value to search for
-         * @return {@code false}, as an empty tuple contains no elements
+         * @param valueToFind the value to search for.
+         * @return {@code false}, as an empty tuple contains no elements.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1201,7 +1272,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple0, this always returns an empty Object array.</p>
          *
-         * @return an empty Object array
+         * @return an empty Object array.
          */
         @Override
         public Object[] toArray() {
@@ -1215,9 +1286,9 @@ public abstract class Tuple<TP> implements Immutable {
          * element at index 0 is set to {@code null} to mark the end of tuple elements,
          * following Java Collection contract.</p>
          *
-         * @param <A> the component type of the array
-         * @param a the array to use or a template for creating a new array
-         * @return the same array, potentially with a[0] set to {@code null} if a.length > 0
+         * @param <A> the component type of the array.
+         * @param a the array to use or a template for creating a new array.
+         * @return the same array, potentially with a[0] set to {@code null} if a.length > 0.
          */
         @Override
         public <A> A[] toArray(final A[] a) {
@@ -1233,10 +1304,10 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>For Tuple0, this method validates the consumer but performs no action
          * since there are no elements to iterate over.</p>
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the action to be performed for each element
-         * @throws IllegalArgumentException if consumer is null
-         * @throws E if the consumer throws an exception (won't happen for Tuple0)
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the action to be performed for each element.
+         * @throws IllegalArgumentException if consumer is null.
+         * @throws E if the consumer throws an exception (won't happen for Tuple0).
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
@@ -1249,7 +1320,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple0, this always returns "()" representing an empty tuple.</p>
          *
-         * @return "()"
+         * @return "()".
          */
         @Override
         public String toString() {
@@ -1273,10 +1344,10 @@ public abstract class Tuple<TP> implements Immutable {
      * String value = message._1;  // "Hello"
      * 
      * // Converting to array
-     * Object[] array = message.toArray();  // ["Hello"]
+     * Object[] array = message.toArray();   // ["Hello"]
      * }</pre>
      *
-     * @param <T1> the type of the single element in this tuple
+     * @param <T1> the type of the single element in this tuple.
      */
     public static final class Tuple1<T1> extends Tuple<Tuple1<T1>> {
 
@@ -1297,7 +1368,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple1, this always returns 1 as it contains exactly one element.</p>
          *
-         * @return 1, the number of elements in this tuple
+         * @return 1, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -1309,7 +1380,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple1, this returns {@code true} if and only if the single element is {@code null}.</p>
          *
-         * @return {@code true} if the element is {@code null}, {@code false} otherwise
+         * @return {@code true} if the element is {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean anyNull() {
@@ -1321,7 +1392,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple1, this returns {@code true} if and only if the single element is {@code null}.</p>
          *
-         * @return {@code true} if the element is {@code null}, {@code false} otherwise
+         * @return {@code true} if the element is {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean allNull() {
@@ -1334,8 +1405,8 @@ public abstract class Tuple<TP> implements Immutable {
          * <p>Since this tuple has only one element, this method returns true
          * if and only if the element equals the specified value (including {@code null} equality).</p>
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if the element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if the element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1345,7 +1416,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an array containing the single element of this tuple.
          *
-         * @return a new Object array of length 1 containing the element
+         * @return a new Object array of length 1 containing the element.
          */
         @Override
         public Object[] toArray() {
@@ -1355,9 +1426,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an array containing this tuple's element, using the specified array type.
          *
-         * @param <A> the component type of the array
-         * @param a the array into which the element is to be stored, if it is big enough
-         * @return an array containing the tuple element
+         * @param <A> the component type of the array.
+         * @param a the array into which the element is to be stored, if it is big enough.
+         * @return an array containing the tuple element.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1373,9 +1444,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Performs the given action on the single element of this tuple.
          *
-         * @param <E> the type of exception that the consumer may throw
-         * @param consumer the action to be performed on the element
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that the consumer may throw.
+         * @param consumer the action to be performed on the element.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -1389,7 +1460,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>The hash code is computed based on the element value.</p>
          *
-         * @return a hash code value for this tuple
+         * @return a hash code value for this tuple.
          */
         @Override
         public int hashCode() {
@@ -1403,8 +1474,8 @@ public abstract class Tuple<TP> implements Immutable {
          * 
          * <p>Two Tuple1 instances are equal if they contain equal elements.</p>
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple1 with an equal element
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple1 with an equal element.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1426,7 +1497,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>The format is: ({@code _1})</p>
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -1461,11 +1532,11 @@ public abstract class Tuple<TP> implements Immutable {
      * Map.Entry<String, Integer> entry = score.toEntry();
      * 
      * // Reversing elements
-     * Tuple2<Integer, String> reversed = score.reverse();  // (95, "Alice")
+     * Tuple2<Integer, String> reversed = score.reverse();   // (95, "Alice")
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
      */
     public static final class Tuple2<T1, T2> extends Tuple<Tuple2<T1, T2>> {
 
@@ -1490,7 +1561,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple2, this always returns 2 as it contains exactly two elements.</p>
          *
-         * @return 2, the number of elements in this tuple
+         * @return 2, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -1502,7 +1573,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple2, this returns {@code true} if either element is {@code null}.</p>
          *
-         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise
+         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean anyNull() {
@@ -1514,7 +1585,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>For Tuple2, this returns {@code true} if both elements are {@code null}.</p>
          *
-         * @return {@code true} if both elements are {@code null}, {@code false} otherwise
+         * @return {@code true} if both elements are {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean allNull() {
@@ -1526,8 +1597,8 @@ public abstract class Tuple<TP> implements Immutable {
          * 
          * <p>Returns {@code true} if either element equals the specified value.</p>
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if either element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if either element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1537,7 +1608,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an array containing the two elements of this tuple in order.
          *
-         * @return a new Object array of length 2 containing the elements
+         * @return a new Object array of length 2 containing the elements.
          */
         @Override
         public Object[] toArray() {
@@ -1547,9 +1618,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an array containing this tuple's elements, using the specified array type.
          *
-         * @param <A> the component type of the array
-         * @param a the array into which the elements are to be stored, if it is big enough
-         * @return an array containing the tuple elements
+         * @param <A> the component type of the array.
+         * @param a the array into which the elements are to be stored, if it is big enough.
+         * @return an array containing the tuple elements.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1576,7 +1647,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // pair.left = "key", pair.right = 100
          * }</pre>
          *
-         * @return a new Pair containing the same elements as this tuple
+         * @return a new Pair containing the same elements as this tuple.
          */
         public Pair<T1, T2> toPair() {
             return Pair.of(_1, _2);
@@ -1597,7 +1668,7 @@ public abstract class Tuple<TP> implements Immutable {
          * map.put(entry.getKey(), entry.getValue());
          * }</pre>
          *
-         * @return a new ImmutableEntry containing the same elements as this tuple
+         * @return a new ImmutableEntry containing the same elements as this tuple.
          */
         public ImmutableEntry<T1, T2> toEntry() {
             return ImmutableEntry.of(_1, _2);
@@ -1612,21 +1683,21 @@ public abstract class Tuple<TP> implements Immutable {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> original = Tuple.of("name", 42);
-         * Tuple2<Integer, String> reversed = original.reverse();  // (42, "name")
+         * Tuple2<Integer, String> reversed = original.reverse();   // (42, "name")
          * }</pre>
          *
-         * @return a new Tuple2 with elements in reversed order
+         * @return a new Tuple2 with elements in reversed order.
          */
         public Tuple2<T2, T1> reverse() {
-            return of(_2, _1); //NOSONAR
+            return of(_2, _1);   //NOSONAR
         }
 
         /**
          * Performs the given action for each element of this tuple.
          *
-         * @param <E> the type of exception that the consumer may throw
-         * @param consumer the action to be performed for each element
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that the consumer may throw.
+         * @param consumer the action to be performed for each element.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -1649,9 +1720,9 @@ public abstract class Tuple<TP> implements Immutable {
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
-         * @param <E> the type of exception that the action may throw
-         * @param action the bi-consumer action to be performed on the tuple elements
-         * @throws E if the action throws an exception
+         * @param <E> the type of exception that the action may throw.
+         * @param action the bi-consumer action to be performed on the tuple elements.
+         * @throws E if the action throws an exception.
          */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E {
             action.accept(_1, _2);
@@ -1666,17 +1737,17 @@ public abstract class Tuple<TP> implements Immutable {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<Integer, Integer> dimensions = Tuple.of(10, 20);
-         * Integer area = dimensions.map((width, height) -> width * height);  // 200
+         * Integer area = dimensions.map((width, height) -> width * height);   // 200
          * 
          * Tuple2<String, String> names = Tuple.of("John", "Doe");
          * String fullName = names.map((first, last) -> first + " " + last);
          * }</pre>
          *
-         * @param <R> the type of the result of the bi-function
-         * @param <E> the type of exception that the mapper may throw
-         * @param mapper the bi-function to apply to the tuple elements
-         * @return the result of applying the bi-function to this tuple's elements
-         * @throws E if the mapper throws an exception
+         * @param <R> the type of the result of the bi-function.
+         * @param <E> the type of exception that the mapper may throw.
+         * @param mapper the bi-function to apply to the tuple elements.
+         * @return the result of applying the bi-function to this tuple's elements.
+         * @throws E if the mapper throws an exception.
          */
         public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E {
             return mapper.apply(_1, _2);
@@ -1698,10 +1769,10 @@ public abstract class Tuple<TP> implements Immutable {
          * // Returns empty Optional
          * }</pre>
          *
-         * @param <E> the type of exception that the predicate may throw
-         * @param predicate the bi-predicate to test the tuple elements against
-         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
-         * @throws E if the predicate throws an exception
+         * @param <E> the type of exception that the predicate may throw.
+         * @param predicate the bi-predicate to test the tuple elements against.
+         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
+         * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.empty();
@@ -1712,7 +1783,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>The hash code is computed based on the values of both elements.</p>
          *
-         * @return a hash code value for this tuple
+         * @return a hash code value for this tuple.
          */
         @Override
         public int hashCode() {
@@ -1727,8 +1798,8 @@ public abstract class Tuple<TP> implements Immutable {
          * 
          * <p>Two Tuple2 instances are equal if they contain equal elements in the same positions.</p>
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple2 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple2 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -1750,7 +1821,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * <p>The format is: ({@code _1}, {@code _2})</p>
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -1789,9 +1860,9 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of("data", 42, true).toTriple();
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
      */
     public static final class Tuple3<T1, T2, T3> extends Tuple<Tuple3<T1, T2, T3>> {
 
@@ -1822,7 +1893,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 3, the number of elements in this tuple
+         * @return 3, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -1832,7 +1903,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the three elements is null
+         * @return {@code true} if any of the three elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -1842,7 +1913,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all three elements are null
+         * @return {@code true} if all three elements are null.
          */
         @Override
         public boolean allNull() {
@@ -1852,8 +1923,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -1863,7 +1934,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3]
+         * @return an array containing [_1, _2, _3].
          */
         @Override
         public Object[] toArray() {
@@ -1873,9 +1944,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1902,7 +1973,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Triple<String, Integer, Boolean> triple = tuple.toTriple();
          * }</pre>
          *
-         * @return a new Triple containing the same elements as this tuple
+         * @return a new Triple containing the same elements as this tuple.
          */
         public Triple<T1, T2, T3> toTriple() {
             return Triple.of(_1, _2, _3);
@@ -1922,7 +1993,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains (true, 2, "A")
          * }</pre>
          *
-         * @return a new Tuple3 with elements in reversed order
+         * @return a new Tuple3 with elements in reversed order.
          */
         public Tuple3<T3, T2, T1> reverse() {
             return new Tuple3<>(_3, _2, _1);
@@ -1932,9 +2003,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1, _2, _3.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -1958,9 +2029,9 @@ public abstract class Tuple<TP> implements Immutable {
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
-         * @param <E> the type of exception that the action may throw
-         * @param action the tri-consumer action to be performed on the tuple elements
-         * @throws E if the action throws an exception
+         * @param <E> the type of exception that the action may throw.
+         * @param action the tri-consumer action to be performed on the tuple elements.
+         * @throws E if the action throws an exception.
          */
         public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
             action.accept(_1, _2, _3);
@@ -1980,11 +2051,11 @@ public abstract class Tuple<TP> implements Immutable {
          * // hex = "#FF8040"
          * }</pre>
          *
-         * @param <R> the type of the result of the tri-function
-         * @param <E> the type of exception that the mapper may throw
-         * @param mapper the tri-function to apply to the tuple elements
-         * @return the result of applying the tri-function to this tuple's elements
-         * @throws E if the mapper throws an exception
+         * @param <R> the type of the result of the tri-function.
+         * @param <E> the type of exception that the mapper may throw.
+         * @param mapper the tri-function to apply to the tuple elements.
+         * @return the result of applying the tri-function to this tuple's elements.
+         * @throws E if the mapper throws an exception.
          */
         public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper) throws E {
             return mapper.apply(_1, _2, _3);
@@ -2004,10 +2075,10 @@ public abstract class Tuple<TP> implements Immutable {
          * // rightTriangle.isPresent() == true
          * }</pre>
          *
-         * @param <E> the type of exception that the predicate may throw
-         * @param predicate the tri-predicate to test the tuple elements against
-         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
-         * @throws E if the predicate throws an exception
+         * @param <E> the type of exception that the predicate may throw.
+         * @param predicate the tri-predicate to test the tuple elements against.
+         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
+         * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
                 throws E {
@@ -2018,7 +2089,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all three elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -2033,8 +2104,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple3 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple3 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple3 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2055,7 +2126,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -2085,10 +2156,10 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of(123L, "John", "john@example.com", new Date());
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
      */
     public static final class Tuple4<T1, T2, T3, T4> extends Tuple<Tuple4<T1, T2, T3, T4>> {
 
@@ -2123,7 +2194,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 4, the number of elements in this tuple
+         * @return 4, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -2133,7 +2204,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the four elements is null
+         * @return {@code true} if any of the four elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -2143,7 +2214,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all four elements are null
+         * @return {@code true} if all four elements are null.
          */
         @Override
         public boolean allNull() {
@@ -2153,8 +2224,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2164,7 +2235,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3, _4]
+         * @return an array containing [_1, _2, _3, _4].
          */
         @Override
         public Object[] toArray() {
@@ -2174,9 +2245,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2208,7 +2279,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains (true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple4 with elements in reversed order
+         * @return a new Tuple4 with elements in reversed order.
          */
         public Tuple4<T4, T3, T2, T1> reverse() {
             return new Tuple4<>(_4, _3, _2, _1);
@@ -2218,9 +2289,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1, _2, _3, _4.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -2236,7 +2307,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all four elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -2252,8 +2323,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple4 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple4 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple4 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2274,7 +2345,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3, _4)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -2300,11 +2371,11 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of(1.0, 2.0, 3.0, 4.0, 5.0);
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
      */
     public static final class Tuple5<T1, T2, T3, T4, T5> extends Tuple<Tuple5<T1, T2, T3, T4, T5>> {
 
@@ -2343,7 +2414,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 5, the number of elements in this tuple
+         * @return 5, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -2353,7 +2424,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the five elements is null
+         * @return {@code true} if any of the five elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -2363,7 +2434,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all five elements are null
+         * @return {@code true} if all five elements are null.
          */
         @Override
         public boolean allNull() {
@@ -2373,8 +2444,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2385,7 +2456,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3, _4, _5]
+         * @return an array containing [_1, _2, _3, _4, _5].
          */
         @Override
         public Object[] toArray() {
@@ -2395,9 +2466,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2431,7 +2502,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains (100L, true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple5 with elements in reversed order
+         * @return a new Tuple5 with elements in reversed order.
          */
         public Tuple5<T5, T4, T3, T2, T1> reverse() {
             return new Tuple5<>(_5, _4, _3, _2, _1);
@@ -2441,9 +2512,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1, _2, _3, _4, _5.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -2460,7 +2531,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all five elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -2477,8 +2548,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple5 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple5 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple5 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2499,7 +2570,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3, _4, _5)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -2525,12 +2596,12 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of(2024, 12, 25, 14, 30, 45);
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
      */
     public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
@@ -2573,7 +2644,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 6, the number of elements in this tuple
+         * @return 6, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -2583,7 +2654,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the six elements is null
+         * @return {@code true} if any of the six elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -2593,7 +2664,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all six elements are null
+         * @return {@code true} if all six elements are null.
          */
         @Override
         public boolean allNull() {
@@ -2603,8 +2674,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2615,7 +2686,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3, _4, _5, _6]
+         * @return an array containing [_1, _2, _3, _4, _5, _6].
          */
         @Override
         public Object[] toArray() {
@@ -2625,9 +2696,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2661,7 +2732,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains ('X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple6 with elements in reversed order
+         * @return a new Tuple6 with elements in reversed order.
          */
         public Tuple6<T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple6<>(_6, _5, _4, _3, _2, _1);
@@ -2671,9 +2742,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1, _2, _3, _4, _5, _6.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -2691,7 +2762,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all six elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -2709,8 +2780,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple6 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple6 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple6 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2732,7 +2803,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3, _4, _5, _6)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -2759,13 +2830,13 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of(123L, "John", "Doe", new Date(), true, 75000.0, "Active");
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
      */
     public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
 
@@ -2812,7 +2883,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 7, the number of elements in this tuple
+         * @return 7, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -2822,7 +2893,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the seven elements is null
+         * @return {@code true} if any of the seven elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -2832,7 +2903,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all seven elements are null
+         * @return {@code true} if all seven elements are null.
          */
         @Override
         public boolean allNull() {
@@ -2842,8 +2913,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -2854,7 +2925,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3, _4, _5, _6, _7]
+         * @return an array containing [_1, _2, _3, _4, _5, _6, _7].
          */
         @Override
         public Object[] toArray() {
@@ -2864,9 +2935,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2901,7 +2972,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains (3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple7 with elements in reversed order
+         * @return a new Tuple7 with elements in reversed order.
          */
         public Tuple7<T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
@@ -2911,9 +2982,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1, _2, _3, _4, _5, _6, _7.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -2932,7 +3003,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all seven elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -2951,8 +3022,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple7 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple7 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple7 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2974,7 +3045,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3, _4, _5, _6, _7)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -3001,14 +3072,14 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
-     * @param <T8> the type of the eighth element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
+     * @param <T8> the type of the eighth element.
      */
     public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
@@ -3059,7 +3130,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return 8, the number of elements in this tuple
+         * @return 8, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -3069,7 +3140,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if any of the eight elements is null
+         * @return {@code true} if any of the eight elements is null.
          */
         @Override
         public boolean anyNull() {
@@ -3079,7 +3150,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return {@code true} if all eight elements are null
+         * @return {@code true} if all eight elements are null.
          */
         @Override
         public boolean allNull() {
@@ -3089,8 +3160,8 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param valueToFind the value to search for
-         * @return {@code true} if any element equals the specified value
+         * @param valueToFind the value to search for.
+         * @return {@code true} if any element equals the specified value.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -3101,7 +3172,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @return an array containing [_1, _2, _3, _4, _5, _6, _7, _8]
+         * @return an array containing [_1, _2, _3, _4, _5, _6, _7, _8].
          */
         @Override
         public Object[] toArray() {
@@ -3111,9 +3182,9 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * {@inheritDoc}
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill
-         * @return the filled array
+         * @param <A> the component type of the array.
+         * @param a the array to fill.
+         * @return the filled array.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -3148,7 +3219,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed contains ((byte)5, 3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple8 with elements in reversed order
+         * @return a new Tuple8 with elements in reversed order.
          */
         public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
@@ -3158,9 +3229,9 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Applies the consumer to each element in order: _1 through _8.
          *
-         * @param <E> the type of exception that may be thrown
-         * @param consumer the consumer to apply
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that may be thrown.
+         * @param consumer the consumer to apply.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -3180,7 +3251,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Computes hash code based on all eight elements.
          *
-         * @return the hash code of this tuple
+         * @return the hash code of this tuple.
          */
         @Override
         public int hashCode() {
@@ -3200,8 +3271,8 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Two Tuple8 instances are equal if all corresponding elements are equal.
          *
-         * @param obj the object to compare with
-         * @return {@code true} if the specified object is a Tuple8 with equal elements
+         * @param obj the object to compare with.
+         * @return {@code true} if the specified object is a Tuple8 with equal elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -3223,7 +3294,7 @@ public abstract class Tuple<TP> implements Immutable {
          * {@inheritDoc}
          * Returns a string representation in the format "(_1, _2, _3, _4, _5, _6, _7, _8)".
          *
-         * @return a string representation of this tuple
+         * @return a string representation of this tuple.
          */
         @Override
         public String toString() {
@@ -3251,19 +3322,19 @@ public abstract class Tuple<TP> implements Immutable {
      * Double height = t._3;  // 175.5
      * 
      * // Using functional operations
-     * t.forEach(System.out::println);  // Prints all 9 elements
+     * t.forEach(System.out::println);   // Prints all 9 elements
      * String summary = t.map(tuple -> tuple._1 + " is " + tuple._2 + " years old");
      * }</pre>
      *
-     * @param <T1> the type of the first element
-     * @param <T2> the type of the second element
-     * @param <T3> the type of the third element
-     * @param <T4> the type of the fourth element
-     * @param <T5> the type of the fifth element
-     * @param <T6> the type of the sixth element
-     * @param <T7> the type of the seventh element
-     * @param <T8> the type of the eighth element
-     * @param <T9> the type of the ninth element
+     * @param <T1> the type of the first element.
+     * @param <T2> the type of the second element.
+     * @param <T3> the type of the third element.
+     * @param <T4> the type of the fourth element.
+     * @param <T5> the type of the fifth element.
+     * @param <T6> the type of the sixth element.
+     * @param <T7> the type of the seventh element.
+     * @param <T8> the type of the eighth element.
+     * @param <T9> the type of the ninth element.
      */
     public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
 
@@ -3317,15 +3388,15 @@ public abstract class Tuple<TP> implements Immutable {
          *     new Tuple9<>("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * }</pre>
          *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         * @param _5 the fifth element
-         * @param _6 the sixth element
-         * @param _7 the seventh element
-         * @param _8 the eighth element
-         * @param _9 the ninth element
+         * @param _1 the first element.
+         * @param _2 the second element.
+         * @param _3 the third element.
+         * @param _4 the fourth element.
+         * @param _5 the fifth element.
+         * @param _6 the sixth element.
+         * @param _7 the seventh element.
+         * @param _8 the eighth element.
+         * @param _9 the ninth element.
          */
         Tuple9(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7, final T8 _8, final T9 _9) {
             this._1 = _1;
@@ -3353,10 +3424,10 @@ public abstract class Tuple<TP> implements Immutable {
          * <pre>{@code
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * int arity = t.arity();  // Returns 9
+         * int arity = t.arity();   // Returns 9
          * }</pre>
          *
-         * @return 9, the number of elements in this tuple
+         * @return 9, the number of elements in this tuple.
          */
         @Override
         public int arity() {
@@ -3373,14 +3444,14 @@ public abstract class Tuple<TP> implements Immutable {
          * <pre>{@code
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
          *     Tuple.of("A", null, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * boolean hasNull = t1.anyNull();  // Returns true
+         * boolean hasNull = t1.anyNull();   // Returns true
          * 
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * boolean hasNull2 = t2.anyNull();  // Returns false
+         * boolean hasNull2 = t2.anyNull();   // Returns false
          * }</pre>
          *
-         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise
+         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean anyNull() {
@@ -3396,14 +3467,14 @@ public abstract class Tuple<TP> implements Immutable {
          * <pre>{@code
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
          *     Tuple.of(null, null, null, null, null, null, null, null, null);
-         * boolean allNull = t1.allNull();  // Returns true
+         * boolean allNull = t1.allNull();   // Returns true
          * 
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
          *     Tuple.of("A", null, null, null, null, null, null, null, null);
-         * boolean allNull2 = t2.allNull();  // Returns false
+         * boolean allNull2 = t2.allNull();   // Returns false
          * }</pre>
          *
-         * @return {@code true} if all 9 elements are {@code null}, {@code false} otherwise
+         * @return {@code true} if all 9 elements are {@code null}, {@code false} otherwise.
          */
         @Override
         public boolean allNull() {
@@ -3428,8 +3499,8 @@ public abstract class Tuple<TP> implements Immutable {
          * boolean found4 = t.contains(null);   // Returns false
          * }</pre>
          *
-         * @param valueToFind the value to search for, may be null
-         * @return {@code true} if any element equals the specified value, {@code false} otherwise
+         * @param valueToFind the value to search for, may be null.
+         * @return {@code true} if any element equals the specified value, {@code false} otherwise.
          */
         @Override
         public boolean contains(final Object valueToFind) {
@@ -3453,7 +3524,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // array = ["A", 1, 2.0, true, 'X', 100L, 3.14f, 5, 10]
          * }</pre>
          *
-         * @return a new Object array containing all 9 elements in order
+         * @return a new Object array containing all 9 elements in order.
          */
         @Override
         public Object[] toArray() {
@@ -3474,21 +3545,21 @@ public abstract class Tuple<TP> implements Immutable {
          * 
          * // Using a smaller array - new array created
          * String[] small = new String[5];
-         * String[] result1 = t.toArray(small);  // New String[9] array created
+         * String[] result1 = t.toArray(small);   // New String[9] array created
          * 
          * // Using exact size array
          * String[] exact = new String[9];
-         * String[] result2 = t.toArray(exact);  // Same array returned
+         * String[] result2 = t.toArray(exact);   // Same array returned
          * 
          * // Using larger array
          * String[] large = new String[12];
-         * String[] result3 = t.toArray(large);  // Same array used, large[9] set to null
+         * String[] result3 = t.toArray(large);   // Same array used, large[9] set to null
          * }</pre>
          *
-         * @param <A> the component type of the array
-         * @param a the array to fill, or whose runtime type to use for creating a new array
-         * @return an array containing all 9 elements of this tuple
-         * @throws ArrayStoreException if any tuple element cannot be stored in the array due to type mismatch
+         * @param <A> the component type of the array.
+         * @param a the array to fill, or whose runtime type to use for creating a new array.
+         * @return an array containing all 9 elements of this tuple.
+         * @throws ArrayStoreException if any tuple element cannot be stored in the array due to type mismatch.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -3525,7 +3596,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // reversed = ((byte)10, (short)5, 3.14f, 100L, 'X', true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple9 with elements in reverse order
+         * @return a new Tuple9 with elements in reverse order.
          */
         public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
@@ -3555,9 +3626,9 @@ public abstract class Tuple<TP> implements Immutable {
          * t.forEach(e -> { if (e != null) count.incrementAndGet(); });
          * }</pre>
          *
-         * @param <E> the type of exception that the consumer may throw
-         * @param consumer the action to perform on each element, must not be null
-         * @throws E if the consumer throws an exception
+         * @param <E> the type of exception that the consumer may throw.
+         * @param consumer the action to perform on each element, must not be null.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
@@ -3591,10 +3662,10 @@ public abstract class Tuple<TP> implements Immutable {
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * 
-         * assert t1.hashCode() == t2.hashCode();  // Same elements = same hash code
+         * assert t1.hashCode() == t2.hashCode();   // Same elements = same hash code
          * }</pre>
          *
-         * @return the hash code value for this tuple
+         * @return the hash code value for this tuple.
          */
         @Override
         public int hashCode() {
@@ -3632,8 +3703,8 @@ public abstract class Tuple<TP> implements Immutable {
          * assert !t1.equals("not a tuple");   // false - different type
          * }</pre>
          *
-         * @param obj the object to compare with this tuple
-         * @return {@code true} if the specified object is a Tuple9 with all elements equal to this tuple's elements
+         * @param obj the object to compare with this tuple.
+         * @return {@code true} if the specified object is a Tuple9 with all elements equal to this tuple's elements.
          */
         @Override
         public boolean equals(final Object obj) {
@@ -3673,7 +3744,7 @@ public abstract class Tuple<TP> implements Immutable {
          * // Returns: "(A, null, 2.0, true, null, 100, 3.14, null, 10)"
          * }</pre>
          *
-         * @return a string representation of this tuple in the format "(e1, e2, e3, e4, e5, e6, e7, e8, e9)"
+         * @return a string representation of this tuple in the format "(e1, e2, e3, e4, e5, e6, e7, e8, e9)".
          */
         @Override
         public String toString() {

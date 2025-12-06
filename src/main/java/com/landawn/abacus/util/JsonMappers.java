@@ -633,7 +633,7 @@ public final class JsonMappers {
      * 
      * // Handling null
      * String nullJson = "null";
-     * Person nullPerson = JsonMappers.fromJson(nullJson, Person.class);  // returns null
+     * Person nullPerson = JsonMappers.fromJson(nullJson, Person.class);   // returns null
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to

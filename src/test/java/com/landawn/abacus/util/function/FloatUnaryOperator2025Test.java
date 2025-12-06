@@ -32,7 +32,7 @@ public class FloatUnaryOperator2025Test extends TestBase {
         final FloatUnaryOperator composed = multiplyBy3.compose(add10);
         final float result = composed.applyAsFloat(5.0f);
 
-        assertEquals(45.0f, result, 0.001f); // (5 + 10) * 3
+        assertEquals(45.0f, result, 0.001f);   // (5 + 10) * 3
     }
 
     @Test
@@ -43,7 +43,7 @@ public class FloatUnaryOperator2025Test extends TestBase {
         final FloatUnaryOperator composed = multiplyBy2.andThen(subtract5);
         final float result = composed.applyAsFloat(10.0f);
 
-        assertEquals(15.0f, result, 0.001f); // (10 * 2) - 5
+        assertEquals(15.0f, result, 0.001f);   // (10 * 2) - 5
     }
 
     @Test

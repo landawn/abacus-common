@@ -28,6 +28,10 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      */
     public static final String BASE64_ENCODED = "Base64Encoded";
 
+    /**
+     * Package-private constructor for Base64EncodedType.
+     * This constructor is called by the TypeFactory to create Base64Encoded type instances.
+     */
     Base64EncodedType() {
         super(BASE64_ENCODED);
     }

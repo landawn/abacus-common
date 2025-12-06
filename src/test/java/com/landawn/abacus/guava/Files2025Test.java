@@ -318,7 +318,7 @@ public class Files2025Test extends TestBase {
         // Touch existing file updates timestamp
         long initialTime = newFile.lastModified();
         try {
-            Thread.sleep(10); // Small delay to ensure time difference
+            Thread.sleep(10);   // Small delay to ensure time difference
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -554,7 +554,7 @@ public class Files2025Test extends TestBase {
             files.add(f);
         }
 
-        assertTrue(files.size() >= 4); // dir1, dir2, file1, file2
+        assertTrue(files.size() >= 4);   // dir1, dir2, file1, file2
         assertTrue(files.contains(dir1));
         assertTrue(files.contains(file1));
     }
@@ -654,7 +654,7 @@ public class Files2025Test extends TestBase {
 
         Files.deleteDirectoryContents(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
 
-        assertTrue(java.nio.file.Files.exists(rootDir)); // Directory itself remains
+        assertTrue(java.nio.file.Files.exists(rootDir));   // Directory itself remains
         assertFalse(java.nio.file.Files.exists(file1));
         assertFalse(java.nio.file.Files.exists(file2));
         assertFalse(java.nio.file.Files.exists(subDir));

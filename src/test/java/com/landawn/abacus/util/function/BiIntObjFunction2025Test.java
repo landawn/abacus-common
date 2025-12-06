@@ -27,7 +27,7 @@ public class BiIntObjFunction2025Test extends TestBase {
 
         Integer result = function.apply(5, 10, "hello");
 
-        assertEquals(20, result); // 5 + 5 + 10
+        assertEquals(20, result);   // 5 + 5 + 10
     }
 
     @Test
@@ -49,7 +49,7 @@ public class BiIntObjFunction2025Test extends TestBase {
         BiIntObjFunction<String, Integer> chainedFunction = function.andThen(afterFunction);
         Integer result = chainedFunction.apply(5, 10, "value");
 
-        assertEquals(7, result); // "value15" has length 7
+        assertEquals(7, result);   // "value15" has length 7
     }
 
     @Test
@@ -61,7 +61,7 @@ public class BiIntObjFunction2025Test extends TestBase {
         BiIntObjFunction<String, String> chainedFunction = function.andThen(doubleIt).andThen(toString);
         String result = chainedFunction.apply(5, 10, "hi");
 
-        assertEquals("34", result); // (2 + 5 + 10) * 2 = 34
+        assertEquals("34", result);   // (2 + 5 + 10) * 2 = 34
     }
 
     @Test

@@ -44,13 +44,13 @@ public interface DoubleBinaryOperator extends Throwables.DoubleBinaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleBinaryOperator adder = (a, b) -> a + b;
-     * double sum = adder.applyAsDouble(2.5, 3.7);  // Returns 6.2
+     * double sum = adder.applyAsDouble(2.5, 3.7);   // Returns 6.2
      *
      * DoubleBinaryOperator multiplier = (a, b) -> a * b;
-     * double product = multiplier.applyAsDouble(4.0, 2.5);  // Returns 10.0
+     * double product = multiplier.applyAsDouble(4.0, 2.5);   // Returns 10.0
      *
      * DoubleBinaryOperator min = Math::min;
-     * double minimum = min.applyAsDouble(5.5, 3.3);  // Returns 3.3
+     * double minimum = min.applyAsDouble(5.5, 3.3);   // Returns 3.3
      * }</pre>
      *
      * @param left the first operand

@@ -51,10 +51,10 @@ import com.landawn.abacus.util.N;
  * Nested properties allow you to specify type information for properties at any depth
  * within an object graph. For example:</p>
  * <pre>{@code
- * config.setValueType("address.city", String.class);  // Simple nested property
- * config.setValueType("account.devices.model", String.class);  // Multi-level nested property
- * config.setValueType("order.items", List.class);  // Collection in nested property
- * config.setValueType("user.preferences.settings", Map.class);  // Map in deeply nested property
+ * config.setValueType("address.city", String.class);   // Simple nested property
+ * config.setValueType("account.devices.model", String.class);   // Multi-level nested property
+ * config.setValueType("order.items", List.class);   // Collection in nested property
+ * config.setValueType("user.preferences.settings", Map.class);   // Map in deeply nested property
  * }</pre>
  *
  * <p>When using methods that accept property names (such as {@link #setValueType(String, Class)}

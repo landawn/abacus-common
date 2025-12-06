@@ -35,8 +35,8 @@ public class FloatTriConsumer2025Test extends TestBase {
         chained.accept(2.0f, 3.0f, 4.0f);
 
         assertEquals(2, results.size());
-        assertEquals(9.0f, results.get(0), 0.001f); // 2+3+4
-        assertEquals(24.0f, results.get(1), 0.001f); // 2*3*4
+        assertEquals(9.0f, results.get(0), 0.001f);   // 2+3+4
+        assertEquals(24.0f, results.get(1), 0.001f);   // 2*3*4
     }
 
     @Test

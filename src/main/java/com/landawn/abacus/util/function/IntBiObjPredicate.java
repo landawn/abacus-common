@@ -33,6 +33,22 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Check if an index is within bounds and string matches pattern
+     * IntBiObjPredicate<List<String>, String> isValidUpdate =
+     *     (index, list, value) -> index >= 0 && index < list.size() && value != null;
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * boolean canUpdate = isValidUpdate.test(1, list, "newValue");   // returns true
+     * boolean invalid = isValidUpdate.test(5, list, "newValue");     // returns false (out of bounds)
+     *
+     * // Check if a map contains a key and value matches condition
+     * IntBiObjPredicate<Map<String, String>, String> hasKeyAndValueLength =
+     *     (minLength, map, key) -> map.containsKey(key) && map.get(key).length() >= minLength;
+     * Map<String, String> map = Map.of("user1", "Alice", "user2", "Bob");
+     * boolean result = hasKeyAndValueLength.test(3, map, "user1");   // returns true ("Alice".length() >= 3)
+     * }</pre>
+     *
      * @param i the {@code int} argument
      * @param t the first object argument
      * @param u the second object argument

@@ -16,8 +16,8 @@ public class BiObjIntPredicate2025Test extends TestBase {
     public void testTest() {
         BiObjIntPredicate<String, String> predicate = (t, u, i) -> (t.length() + u.length()) == i;
 
-        assertTrue(predicate.test("Hello", "World", 10)); // 5 + 5 = 10
-        assertFalse(predicate.test("Hi", "There", 10)); // 2 + 5 != 10
+        assertTrue(predicate.test("Hello", "World", 10));   // 5 + 5 = 10
+        assertFalse(predicate.test("Hi", "There", 10));   // 2 + 5 != 10
     }
 
     @Test
@@ -33,8 +33,8 @@ public class BiObjIntPredicate2025Test extends TestBase {
         BiObjIntPredicate<String, String> predicate = (t, u, i) -> t.equals(u) && i > 0;
 
         assertTrue(predicate.test("test", "test", 5));
-        assertFalse(predicate.test("test", "other", 5)); // not equal
-        assertFalse(predicate.test("test", "test", 0)); // i not > 0
+        assertFalse(predicate.test("test", "other", 5));   // not equal
+        assertFalse(predicate.test("test", "test", 0));   // i not > 0
     }
 
     @Test
@@ -42,8 +42,8 @@ public class BiObjIntPredicate2025Test extends TestBase {
         BiObjIntPredicate<String, String> predicate = (t, u, i) -> (t.length() + u.length()) == i;
         BiObjIntPredicate<String, String> negated = predicate.negate();
 
-        assertFalse(negated.test("Hello", "World", 10)); // original returns true
-        assertTrue(negated.test("Hi", "There", 10)); // original returns false
+        assertFalse(negated.test("Hello", "World", 10));   // original returns true
+        assertTrue(negated.test("Hi", "There", 10));   // original returns false
     }
 
     @Test
@@ -53,9 +53,9 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<String, String> combined = lengthMatch.and(positiveInt);
 
-        assertTrue(combined.test("Hello", "World", 10)); // both conditions true
-        assertFalse(combined.test("Hi", "There", 10)); // first condition false
-        assertFalse(combined.test("Hi", "!", 0)); // second condition false (3 == 0 is false anyway)
+        assertTrue(combined.test("Hello", "World", 10));   // both conditions true
+        assertFalse(combined.test("Hi", "There", 10));   // first condition false
+        assertFalse(combined.test("Hi", "!", 0));   // second condition false (3 == 0 is false anyway)
     }
 
     @Test
@@ -67,7 +67,7 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<String, String> combined = firstFalse.and(shouldNotExecute);
 
-        assertFalse(combined.test("test", "value", 5)); // Should not throw exception
+        assertFalse(combined.test("test", "value", 5));   // Should not throw exception
     }
 
     @Test
@@ -77,9 +77,9 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<String, String> combined = equals.or(intZero);
 
-        assertTrue(combined.test("test", "test", 5)); // equals
-        assertTrue(combined.test("test", "other", 0)); // int is zero
-        assertFalse(combined.test("test", "other", 5)); // neither condition
+        assertTrue(combined.test("test", "test", 5));   // equals
+        assertTrue(combined.test("test", "other", 0));   // int is zero
+        assertFalse(combined.test("test", "other", 5));   // neither condition
     }
 
     @Test
@@ -91,7 +91,7 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<String, String> combined = firstTrue.or(shouldNotExecute);
 
-        assertTrue(combined.test("test", "value", 5)); // Should not throw exception
+        assertTrue(combined.test("test", "value", 5));   // Should not throw exception
     }
 
     @Test
@@ -102,10 +102,10 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<String, String> complex = notEmpty.and(positiveInt).and(lengthSum);
 
-        assertTrue(complex.test("Hello", "World", 5)); // all conditions true
-        assertFalse(complex.test("", "World", 5)); // first condition false
-        assertFalse(complex.test("Hello", "World", 0)); // second condition false
-        assertFalse(complex.test("Hi", "!", 10)); // third condition false (3 >= 10 is false)
+        assertTrue(complex.test("Hello", "World", 5));   // all conditions true
+        assertFalse(complex.test("", "World", 5));   // first condition false
+        assertFalse(complex.test("Hello", "World", 0));   // second condition false
+        assertFalse(complex.test("Hi", "!", 10));   // third condition false (3 >= 10 is false)
     }
 
     @Test
@@ -115,8 +115,8 @@ public class BiObjIntPredicate2025Test extends TestBase {
 
         BiObjIntPredicate<Integer, Integer> combined = sumEquals.and(positive).negate();
 
-        assertFalse(combined.test(10, 20, 30)); // negation of (true && true)
-        assertTrue(combined.test(10, 20, 25)); // negation of (false && ...)
+        assertFalse(combined.test(10, 20, 30));   // negation of (true && true)
+        assertTrue(combined.test(10, 20, 25));   // negation of (false && ...)
     }
 
     @Test
@@ -137,8 +137,8 @@ public class BiObjIntPredicate2025Test extends TestBase {
             }
         };
 
-        assertTrue(predicate.test("Hello", "World", 5)); // 10 > 5
-        assertFalse(predicate.test("Hi", "!", 10)); // 3 not > 10
+        assertTrue(predicate.test("Hello", "World", 5));   // 10 > 5
+        assertFalse(predicate.test("Hi", "!", 10));   // 3 not > 10
     }
 
     @Test
@@ -169,11 +169,11 @@ public class BiObjIntPredicate2025Test extends TestBase {
             return totalLength >= i;
         };
 
-        assertTrue(predicate.test("Hello", "World", 10)); // 10 >= 10
-        assertTrue(predicate.test("Hello", "World", 5)); // 10 >= 5
-        assertFalse(predicate.test("Hi", "!", 10)); // 3 < 10
-        assertFalse(predicate.test(null, "World", 5)); // null check
-        assertFalse(predicate.test("Hello", "World", -1)); // negative check
+        assertTrue(predicate.test("Hello", "World", 10));   // 10 >= 10
+        assertTrue(predicate.test("Hello", "World", 5));   // 10 >= 5
+        assertFalse(predicate.test("Hi", "!", 10));   // 3 < 10
+        assertFalse(predicate.test(null, "World", 5));   // null check
+        assertFalse(predicate.test("Hello", "World", -1));   // negative check
     }
 
     @Test

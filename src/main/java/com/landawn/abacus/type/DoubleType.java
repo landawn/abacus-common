@@ -26,8 +26,14 @@ import com.landawn.abacus.util.Numbers;
  */
 public final class DoubleType extends AbstractDoubleType {
 
+    /**
+     * The type name constant for Double type identification.
+     */
     public static final String DOUBLE = Double.class.getSimpleName();
-
+    /**
+     * Package-private constructor for DoubleType.
+     * This constructor is called by the TypeFactory to create Double type instances.
+     */
     DoubleType() {
         super(DOUBLE);
     }
@@ -62,7 +68,7 @@ public final class DoubleType extends AbstractDoubleType {
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
      * ResultSet rs = ...;  // from SQL query
-     * Double price = type.get(rs, 1);  // retrieves Double from column 1
+     * Double price = type.get(rs, 1);   // retrieves Double from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -91,7 +97,7 @@ public final class DoubleType extends AbstractDoubleType {
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
      * ResultSet rs = ...;  // from SQL query
-     * Double price = type.get(rs, "price");  // retrieves Double from "price" column
+     * Double price = type.get(rs, "price");   // retrieves Double from "price" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

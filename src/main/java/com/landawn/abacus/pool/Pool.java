@@ -61,10 +61,10 @@ public interface Pool extends Serializable {
 
     /**
      * Releases the exclusive lock on this pool.
-     * 
+     *
      * <p>This method must be called by the same thread that acquired the lock
      * via {@link #lock()}, typically in a finally block.
-     * 
+     *
      * @throws IllegalMonitorStateException if the current thread does not hold the lock
      */
     void unlock();
@@ -112,7 +112,7 @@ public interface Pool extends Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
-     *     pool.vacate();  // free up some space
+     *     pool.vacate();   // free up some space
      * }
      * }</pre>
      * 
@@ -179,7 +179,7 @@ public interface Pool extends Serializable {
      * try {
      *     // use the pool
      * } finally {
-     *     pool.close();  // ensure cleanup
+     *     pool.close();   // ensure cleanup
      * }
      * }</pre>
      */

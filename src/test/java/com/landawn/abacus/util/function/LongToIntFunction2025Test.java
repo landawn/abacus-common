@@ -61,8 +61,8 @@ public class LongToIntFunction2025Test extends TestBase {
     @Test
     public void testApplyAsInt_truncation() {
         final LongToIntFunction function = value -> (int) value;
-        final int result = function.applyAsInt(5000000000L); // Larger than Integer.MAX_VALUE
-        assertNotNull(result); // Will be truncated
+        final int result = function.applyAsInt(5000000000L);   // Larger than Integer.MAX_VALUE
+        assertNotNull(result);   // Will be truncated
     }
 
     @Test

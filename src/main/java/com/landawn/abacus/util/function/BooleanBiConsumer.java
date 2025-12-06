@@ -31,7 +31,7 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanBiConsumer logger = (a, b) -> System.out.println("AND: " + (a && b));
-     * logger.accept(true, false);  // Prints: AND: false
+     * logger.accept(true, false);   // Prints: AND: false
      * }</pre>
      *
      * @param t the first input argument (boolean value)

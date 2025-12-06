@@ -33,7 +33,7 @@ import java.nio.CharBuffer;
  *     writer.write("Hello, ");
  *     writer.write("World!");
  * }
- * System.out.println(sb.toString());  // "Hello, World!"
+ * System.out.println(sb.toString());   // "Hello, World!"
  * }</pre>
  * 
  * @see StringWriter
@@ -113,7 +113,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.append("Hello World", 0, 5);  // Appends "Hello"
+     * writer.append("Hello World", 0, 5);   // Appends "Hello"
      * }</pre>
      *
      * @param csq the character sequence from which a subsequence will be appended. 
@@ -140,7 +140,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write('X');
-     * writer.write(65);  // Writes 'A'
+     * writer.write(65);   // Writes 'A'
      * }</pre>
      *
      * @param c the int specifying a character to be written
@@ -178,7 +178,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
-     * writer.write(chars, 6, 5);  // Writes "World"
+     * writer.write(chars, 6, 5);   // Writes "World"
      * }</pre>
      *
      * @param cbuf the array of characters
@@ -218,7 +218,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello, World!", 7, 5);  // Writes "World"
+     * writer.write("Hello, World!", 7, 5);   // Writes "World"
      * }</pre>
      *
      * @param str a string
@@ -244,7 +244,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Important data");
-     * writer.flush();  // Ensures data is flushed if supported
+     * writer.flush();   // Ensures data is flushed if supported
      * }</pre>
      *
      * @throws IOException if an I/O error occurs or if the writer has been closed
@@ -310,7 +310,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * StringBuilder sb = new StringBuilder();
      * AppendableWriter writer = new AppendableWriter(sb);
      * writer.write("Hello");
-     * System.out.println(writer.toString());  // "Hello"
+     * System.out.println(writer.toString());   // "Hello"
      * }</pre>
      *
      * @return the string representation of the underlying Appendable

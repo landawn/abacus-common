@@ -47,12 +47,12 @@ abstract class AbstractIndexed implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("val", 42L);
-     * int idx = indexed.index();  // Returns 42
+     * int idx = indexed.index();   // Returns 42
      * System.out.println("Index: " + idx);
      * 
      * // This would throw ArithmeticException:
      * Indexed<String> largeIndex = Indexed.of("val", Long.MAX_VALUE);
-     * int overflow = largeIndex.index();  // Throws ArithmeticException
+     * int overflow = largeIndex.index();   // Throws ArithmeticException
      * }</pre>
      *
      * @return the index value as an int
@@ -78,12 +78,12 @@ abstract class AbstractIndexed implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("value", Long.MAX_VALUE);
-     * long idx = indexed.longIndex();  // Returns Long.MAX_VALUE safely
+     * long idx = indexed.longIndex();   // Returns Long.MAX_VALUE safely
      * System.out.println("Long index: " + idx);
      *
      * // Safe for any long value:
      * Indexed<String> largeIndex = Indexed.of("value", 9_223_372_036_854_775_807L);
-     * long safeIndex = largeIndex.longIndex();  // No exceptions thrown
+     * long safeIndex = largeIndex.longIndex();   // No exceptions thrown
      * }</pre>
      *
      * @return the index value as a long

@@ -228,7 +228,7 @@ public class EventBus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EventBus eventBus = new EventBus("myBus");
-     * String id = eventBus.identifier();  // Returns "myBus"
+     * String id = eventBus.identifier();   // Returns "myBus"
      * }</pre>
      *
      * @return the identifier of this EventBus
@@ -317,7 +317,7 @@ public class EventBus {
      *
      * @param subscriber the subscriber to register
      * @return this EventBus instance for method chaining
-     * @throws RuntimeException if no subscriber methods are found in the subscriber class
+     * @throws RuntimeException if no subscriber methods are found in the subscriber class, or if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber) {
         return register(subscriber, (ThreadMode) null);
@@ -336,7 +336,7 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param eventId the event ID to filter events
      * @return this EventBus instance for method chaining
-     * @throws RuntimeException if registering a lambda subscriber without event ID
+     * @throws RuntimeException if no subscriber methods are found in the subscriber class, or if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber, final String eventId) {
         return register(subscriber, eventId, null);
@@ -355,7 +355,7 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param threadMode the thread mode for event delivery
      * @return this EventBus instance for method chaining
-     * @throws RuntimeException if the thread mode is not supported
+     * @throws RuntimeException if the thread mode is not supported, if no subscriber methods are found in the subscriber class, or if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber, final ThreadMode threadMode) {
         return register(subscriber, null, threadMode);
@@ -375,7 +375,7 @@ public class EventBus {
      * @param eventId the event ID to filter events, or {@code null} for no filtering
      * @param threadMode the thread mode for event delivery, or {@code null} for default
      * @return this EventBus instance for method chaining
-     * @throws RuntimeException if the thread mode is not supported or no subscriber methods are found
+     * @throws RuntimeException if the thread mode is not supported, if no subscriber methods are found in the subscriber class, or if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
         if (!isSupportedThreadMode(threadMode)) {
@@ -457,7 +457,7 @@ public class EventBus {
                         try {
                             dispatch(sub, entry.getKey());
                         } catch (final Exception e) {
-                            logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e); //NOSONAR
+                            logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e);   //NOSONAR
                         }
                     }
                 }
@@ -652,7 +652,7 @@ public class EventBus {
         if (Strings.isEmpty(eventId)) {
             if (listOfSubs == null) {
                 synchronized (registeredSubMap) {
-                    listOfSubs = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
+                    listOfSubs = new ArrayList<>(registeredSubMap.values());   // in case concurrent register/unregister.
                     listOfSubEventSubs = listOfSubs;
                 }
             }
@@ -662,7 +662,7 @@ public class EventBus {
             if (listOfEventIdSub == null) {
                 synchronized (registeredEventIdSubMap) {
                     if (registeredEventIdSubMap.containsKey(eventId)) {
-                        listOfEventIdSub = new ArrayList<>(registeredEventIdSubMap.get(eventId)); // in case concurrent register/unregister.
+                        listOfEventIdSub = new ArrayList<>(registeredEventIdSubMap.get(eventId));   // in case concurrent register/unregister.
                     } else {
                         listOfEventIdSub = N.emptyList();
                     }
@@ -746,7 +746,7 @@ public class EventBus {
      * }</pre>
      *
      * @param event the sticky event to remove
-     * @return {@code true} if the event was found and removed, {@code false} otherwise
+     * @return {@code true} if the event was removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final Object event) {
         return removeStickyEvent(event, null);
@@ -764,7 +764,7 @@ public class EventBus {
      *
      * @param event the sticky event to remove
      * @param eventId the event ID the sticky event was posted with
-     * @return {@code true} if the event was found with matching event ID and removed, {@code false} otherwise
+     * @return {@code true} if the event was removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final Object event, final String eventId) {
         synchronized (stickyEventMap) {
@@ -792,7 +792,7 @@ public class EventBus {
      * }</pre>
      *
      * @param eventType the class type of sticky events to remove
-     * @return {@code true} if one or more sticky events were removed, {@code false} otherwise
+     * @return {@code true} if one or more events were removed, {@code false} otherwise
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
@@ -810,7 +810,7 @@ public class EventBus {
      *
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type of sticky events to remove
-     * @return {@code true} if one or more sticky events were removed, {@code false} otherwise
+     * @return {@code true} if one or more events were removed, {@code false} otherwise
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> keyToRemove = new ArrayList<>();

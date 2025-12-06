@@ -36,6 +36,11 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     private final Type<Boolean> elementType = Type.of(boolean.class);
     private final Type<Boolean>[] parameterTypes = new Type[] { elementType };
 
+    /**
+     * Constructs a new PrimitiveBooleanListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveBooleanListType() {
         super(BOOLEAN_LIST);
     }

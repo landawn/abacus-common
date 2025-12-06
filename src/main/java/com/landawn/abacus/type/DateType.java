@@ -32,12 +32,25 @@ import com.landawn.abacus.util.Strings;
  */
 public class DateType extends AbstractDateType<Date> {
 
+    /**
+     * The type name constant for Date type identification.
+     */
     public static final String DATE = Date.class.getSimpleName();
 
+    /**
+     * Package-private constructor for DateType.
+     * This constructor is called by the TypeFactory to create Date type instances.
+     */
     DateType() {
         super(DATE);
     }
 
+    /**
+     * Package-private constructor for DateType with a custom type name.
+     * This constructor allows subclasses to provide their own type name.
+     *
+     * @param typeName the name of the type
+     */
     DateType(final String typeName) {
         super(typeName);
     }
@@ -65,14 +78,14 @@ public class DateType extends AbstractDateType<Date> {
      * Type<Date> dateType = TypeFactory.getType(Date.class);
      *
      * // Convert from milliseconds (Number)
-     * Date date1 = dateType.valueOf(1609459200000L);  // 2021-01-01
+     * Date date1 = dateType.valueOf(1609459200000L);   // 2021-01-01
      *
      * // Convert from java.util.Date
      * Date date2 = dateType.valueOf(new java.util.Date());
      *
      * // Convert from String (including special "sysTime" value)
      * Date date3 = dateType.valueOf("2021-01-01");
-     * Date date4 = dateType.valueOf("sysTime");  // current system date
+     * Date date4 = dateType.valueOf("sysTime");   // current system date
      * }</pre>
      *
      * @param obj the object to convert to SQL Date. Can be {@code null}.
@@ -100,9 +113,9 @@ public class DateType extends AbstractDateType<Date> {
      * <pre>{@code
      * Type<Date> dateType = TypeFactory.getType(Date.class);
      *
-     * // Parse standard date strings
+     * // Parse standard ISO date strings
      * Date date1 = dateType.valueOf("2021-01-01");
-     * Date date2 = dateType.valueOf("2021/01/01");
+     * Date date2 = dateType.valueOf("2021-02-15");
      *
      * // Use special "sysTime" value to get current system date
      * Date now = dateType.valueOf("sysTime");
@@ -125,6 +138,23 @@ public class DateType extends AbstractDateType<Date> {
      * If the character array appears to represent a numeric value (timestamp),
      * it attempts to parse it as milliseconds since epoch.
      * Otherwise, it converts to string and uses string parsing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * // Parse from character array containing timestamp
+     * char[] timestampChars = "1609459200000".toCharArray();
+     * Date date1 = dateType.valueOf(timestampChars, 0, timestampChars.length);
+     *
+     * // Parse from character array containing date string
+     * char[] dateChars = "2021-01-01".toCharArray();
+     * Date date2 = dateType.valueOf(dateChars, 0, dateChars.length);
+     *
+     * // Parse subset of character array
+     * char[] largeArray = "prefix2021-01-01suffix".toCharArray();
+     * Date date3 = dateType.valueOf(largeArray, 6, 10);   // extracts "2021-01-01"
+     * }</pre>
      *
      * @param cbuf the character array containing the value to parse
      * @param offset the starting position in the character array
@@ -157,7 +187,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
      *     if (rs.next()) {
-     *         Date createdDate = dateType.get(rs, 1);  // retrieves date from column 1
+     *         Date createdDate = dateType.get(rs, 1);   // retrieves date from column 1
      *     }
      * }
      * }</pre>
@@ -181,7 +211,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
      *     if (rs.next()) {
-     *         Date createdDate = dateType.get(rs, "created_date");  // retrieves by column name
+     *         Date createdDate = dateType.get(rs, "created_date");   // retrieves by column name
      *     }
      * }
      * }</pre>
@@ -199,6 +229,18 @@ public class DateType extends AbstractDateType<Date> {
     /**
      * Sets a SQL Date value as a parameter in a PreparedStatement.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * try (PreparedStatement stmt = conn.prepareStatement(
+     *         "INSERT INTO events (name, event_date) VALUES (?, ?)")) {
+     *     stmt.setString(1, "Meeting");
+     *     dateType.set(stmt, 2, Date.valueOf("2021-01-01"));
+     *     stmt.executeUpdate();
+     * }
+     * }</pre>
+     *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
      * @param x the SQL Date value to set. Can be {@code null}.
@@ -211,6 +253,17 @@ public class DateType extends AbstractDateType<Date> {
 
     /**
      * Sets a SQL Date value as a named parameter in a CallableStatement.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * try (CallableStatement stmt = conn.prepareCall("{call addEvent(?, ?)}")) {
+     *     stmt.setString(1, "Conference");
+     *     dateType.set(stmt, "eventDate", Date.valueOf("2021-06-15"));
+     *     stmt.execute();
+     * }
+     * }</pre>
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set

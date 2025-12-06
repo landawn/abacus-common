@@ -36,6 +36,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractDoubleType extends NumberType<Number> {
 
+    /**
+     * Constructs an AbstractDoubleType with the specified type name.
+     *
+     * @param typeName the name of the double type (e.g., "Double", "double")
+     */
     protected AbstractDoubleType(final String typeName) {
         super(typeName);
     }
@@ -125,11 +130,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive double types
      * PrimitiveDoubleType type = TypeFactory.getType(double.class);
-     * double value = type.get(rs, 1);  // Returns 0.0 for SQL NULL
+     * double value = type.get(rs, 1);   // Returns 0.0 for SQL NULL
      *
      * // For wrapper Double types
      * DoubleType type = TypeFactory.getType(Double.class);
-     * Double value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
+     * Double value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -151,11 +156,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive double types
      * PrimitiveDoubleType type = TypeFactory.getType(double.class);
-     * double value = type.get(rs, "price");  // Returns 0.0 for SQL NULL
+     * double value = type.get(rs, "price");   // Returns 0.0 for SQL NULL
      *
      * // For wrapper Double types
      * DoubleType type = TypeFactory.getType(Double.class);
-     * Double value = type.get(rs, "price");  // Returns null for SQL NULL (overridden in subclass)
+     * Double value = type.get(rs, "price");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

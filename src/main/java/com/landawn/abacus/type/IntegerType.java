@@ -26,8 +26,14 @@ import com.landawn.abacus.util.Numbers;
  */
 public final class IntegerType extends AbstractIntegerType {
 
+    /**
+     * The type name constant for Integer type identification.
+     */
     public static final String INTEGER = Integer.class.getSimpleName();
-
+    /**
+     * Package-private constructor for IntegerType.
+     * This constructor is called by the TypeFactory to create Integer type instances.
+     */
     IntegerType() {
         super(INTEGER);
     }
@@ -62,7 +68,7 @@ public final class IntegerType extends AbstractIntegerType {
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
      * ResultSet rs = ...;  // from SQL query
-     * Integer age = type.get(rs, 1);  // retrieves Integer from column 1
+     * Integer age = type.get(rs, 1);   // retrieves Integer from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -93,7 +99,7 @@ public final class IntegerType extends AbstractIntegerType {
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
      * ResultSet rs = ...;  // from SQL query
-     * Integer age = type.get(rs, "age");  // retrieves Integer from "age" column
+     * Integer age = type.get(rs, "age");   // retrieves Integer from "age" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

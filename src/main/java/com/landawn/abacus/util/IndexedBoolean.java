@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedBoolean indexedBool = IndexedBoolean.of(true, 5);
- * boolean value = indexedBool.value();  // true
- * long index = indexedBool.index();  // 5
+ * boolean value = indexedBool.value();   // true
+ * long index = indexedBool.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -99,7 +99,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
-     * boolean value = indexed.value();  // true
+     * boolean value = indexed.value();   // true
      * }</pre>
      *
      * @return the boolean value
@@ -152,7 +152,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
-     * System.out.println(indexed);  // prints: [5]=true
+     * System.out.println(indexed);   // prints: [5]=true
      * }</pre>
      *
      * @return a string representation in the format [index]=value

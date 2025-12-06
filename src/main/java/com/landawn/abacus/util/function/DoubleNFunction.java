@@ -53,7 +53,7 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      *     for (double value : args) sum += value;
      *     return sum / args.length;
      * };
-     * Double avg = average.apply(1.5, 2.5, 3.5);  // Returns 2.5
+     * Double avg = average.apply(1.5, 2.5, 3.5);   // Returns 2.5
      * }</pre>
      *
      * @param args the double input arguments as a varargs array. Can be empty,
@@ -71,7 +71,7 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      * <pre>{@code
      * DoubleNFunction<Double> sum = args -> DoubleStream.of(args).sum();
      * DoubleNFunction<String> formatted = sum.andThen(d -> String.format("%.2f", d));
-     * String result = formatted.apply(1.1, 2.2, 3.3);  // "6.60"
+     * String result = formatted.apply(1.1, 2.2, 3.3);   // "6.60"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

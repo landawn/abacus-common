@@ -49,7 +49,7 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive float value if the operation cannot be completed
+     * @param value the second input argument, a primitive float value
      */
     @Override
     void accept(T t, float value);

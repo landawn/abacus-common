@@ -35,10 +35,10 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Using status in an entity
  * Status orderStatus = Status.PROCESSING;
- * int statusCode = orderStatus.getCode();  // Returns 42
+ * int statusCode = orderStatus.getCode();   // Returns 42
  * 
  * // Retrieving status from code
- * Status retrieved = Status.fromCode(42);  // Returns PROCESSING
+ * Status retrieved = Status.fromCode(42);   // Returns PROCESSING
  * 
  * // Checking status
  * if (userStatus == Status.ACTIVE) {
@@ -341,7 +341,7 @@ public enum Status {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Status status = Status.ACTIVE;
-     * int code = status.getCode();  // Returns 2
+     * int code = status.getCode();   // Returns 2
      * }</pre>
      *
      * @return the numeric code for this status

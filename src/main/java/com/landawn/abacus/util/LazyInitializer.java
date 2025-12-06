@@ -29,8 +29,8 @@ import java.util.function.Supplier;
  * <pre>{@code
  * LazyInitializer<ExpensiveObject> lazy = LazyInitializer.of(() -> new ExpensiveObject());
  * // Object is not created yet
- * ExpensiveObject obj = lazy.get();  // Object is created here
- * ExpensiveObject same = lazy.get();  // Returns the same cached instance
+ * ExpensiveObject obj = lazy.get();   // Object is created here
+ * ExpensiveObject same = lazy.get();   // Returns the same cached instance
  * }</pre>
  * 
  * @param <T> the type of the lazily initialized object
@@ -53,7 +53,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<String> lazy = LazyInitializer.of(() -> "Hello World");
-     * String value = lazy.get();  // "Hello World"
+     * String value = lazy.get();   // "Hello World"
      * }</pre>
      * 
      * @param <T> the type of the lazily initialized object

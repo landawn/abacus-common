@@ -31,18 +31,42 @@ import com.landawn.abacus.util.Throwables;
 public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> { //NOSONAR
     /**
      * A predicate that always evaluates to {@code true}, regardless of the input char value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean result = CharPredicate.ALWAYS_TRUE.test('a');    // Always returns true
+     * boolean result2 = CharPredicate.ALWAYS_TRUE.test('5');   // Always returns true
+     * }</pre>
      */
     CharPredicate ALWAYS_TRUE = value -> true;
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input char value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean result = CharPredicate.ALWAYS_FALSE.test('a');    // Always returns false
+     * boolean result2 = CharPredicate.ALWAYS_FALSE.test('5');   // Always returns false
+     * }</pre>
      */
     CharPredicate ALWAYS_FALSE = value -> false;
     /**
      * A predicate that tests if the char value is equal to the {@code null} character ('\0').
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean result = CharPredicate.IS_ZERO.test('\0');   // Returns true
+     * boolean result2 = CharPredicate.IS_ZERO.test('a');   // Returns false
+     * }</pre>
      */
     CharPredicate IS_ZERO = value -> value == 0;
     /**
      * A predicate that tests if the char value is not equal to the {@code null} character ('\0').
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean result = CharPredicate.NOT_ZERO.test('a');     // Returns true
+     * boolean result2 = CharPredicate.NOT_ZERO.test('\0');   // Returns false
+     * }</pre>
      */
     CharPredicate NOT_ZERO = value -> value != 0;
 
@@ -52,7 +76,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate isDigit = Character::isDigit;
-     * boolean result = isDigit.test('5');  // Returns true
+     * boolean result = isDigit.test('5');   // Returns true
      * }</pre>
      *
      * @param value the char input argument
@@ -68,7 +92,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate pred = CharPredicate.of(c -> c > 'A');
-     * boolean result = pred.test('B');  // Returns true
+     * boolean result = pred.test('B');   // Returns true
      * }</pre>
      *
      * @param predicate the predicate to return
@@ -140,7 +164,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate isA = CharPredicate.equal('A');
-     * boolean result = isA.test('A');  // Returns true
+     * boolean result = isA.test('A');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -156,7 +180,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate notSpace = CharPredicate.notEqual(' ');
-     * boolean result = notSpace.test('A');  // Returns true
+     * boolean result = notSpace.test('A');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -173,7 +197,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate afterM = CharPredicate.greaterThan('M');
-     * boolean result = afterM.test('Z');  // Returns true
+     * boolean result = afterM.test('Z');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -190,7 +214,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate atLeastA = CharPredicate.greaterEqual('A');
-     * boolean result = atLeastA.test('A');  // Returns true
+     * boolean result = atLeastA.test('A');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -207,7 +231,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate beforeZ = CharPredicate.lessThan('Z');
-     * boolean result = beforeZ.test('A');  // Returns true
+     * boolean result = beforeZ.test('A');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -224,7 +248,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate maxZ = CharPredicate.lessEqual('Z');
-     * boolean result = maxZ.test('Z');  // Returns true
+     * boolean result = maxZ.test('Z');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
@@ -242,7 +266,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharPredicate inRange = CharPredicate.between('A', 'Z');
-     * boolean result = inRange.test('M');  // Returns true
+     * boolean result = inRange.test('M');   // Returns true
      * }</pre>
      *
      * @param minValue the exclusive lower bound

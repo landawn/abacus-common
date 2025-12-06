@@ -82,7 +82,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>API Data Processing:</b> Processing JSON/XML responses in structured format</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Creating datasets
  * Dataset empty = Dataset.empty();
@@ -191,10 +191,10 @@ import com.landawn.abacus.util.stream.Stream;
 public sealed interface Dataset permits RowDataset {
 
     /**
-     * Returns an immutable empty {@code Dataset}.
+     * Returns an immutable empty Dataset.
      * <br />
-     * This method provides a convenient way to obtain an empty Dataset instance for initialization, 
-     * comparison purposes, or as a default value. The returned Dataset contains no rows or columns 
+     * This method provides a convenient way to obtain an empty Dataset instance for initialization,
+     * comparison purposes, or as a default value. The returned Dataset contains no rows or columns
      * and is immutable, meaning it cannot be modified.
      *
      * <p><b>Usage Examples:</b></p>
@@ -202,12 +202,12 @@ public sealed interface Dataset permits RowDataset {
      * Dataset emptyDataset = Dataset.empty();
      * boolean isEmpty = emptyDataset.isEmpty();   // returns true
      * int size = emptyDataset.size();             // returns 0
-     * 
+     *
      * // Can be used as a default value or for comparison
      * Dataset result = someCondition ? processedDataset : Dataset.empty();
      * }</pre>
      *
-     * @return an immutable empty {@code Dataset} with no columns or rows
+     * @return an immutable empty Dataset with no columns or rows
      * @see #isEmpty()
      * @see #size()
      */
@@ -218,24 +218,29 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Creates a new Dataset with the specified column names and rows.
      * <br />
-     * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>rows</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
-     * The order of elements in each row should correspond to the order of column names.
+     * The Dataset is constructed in a row-oriented manner where each element array represents
+     * a complete row of data. The order of elements in each row must correspond to the order
+     * of column names. This method is useful when data is naturally organized by rows, such as
+     * reading from database result sets or CSV files.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(
      *     Arrays.asList("id", "name", "age"),
-     *     new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}}
+     *     new Object[][] {
+     *         {1, "Alice", 25},
+     *         {2, "Bob", 30},
+     *         {3, "Carol", 28}
+     *     }
      * );
      * }</pre>
      *
-     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a two-dimensional array representing the data in the Dataset. Each subarray is a row. If there is no row, it can be {@code null} or empty array.
-     * @return a new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException if the provided columnNames and rows do not align properly.
+     * @param columnNames the collection of column names (case-sensitive)
+     * @param rows the two-dimensional array where each subarray represents a row. Can be {@code null} or empty if no rows
+     * @return a new Dataset with the specified column names and rows
+     * @throws IllegalArgumentException if {@code rows} contains arrays with length different from {@code columnNames} size
      * @see N#newDataset(Collection, Object[][])
+     * @see #columns(Collection, Object[][])
      */
     static Dataset rows(final Collection<String> columnNames, final Object[][] rows) throws IllegalArgumentException {
         return N.newDataset(columnNames, rows);
@@ -375,7 +380,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * int count = dataset.columnCount();  // returns 3
+     * int count = dataset.columnCount();   // returns 3
      * }</pre>
      *
      * @return the count of columns
@@ -390,7 +395,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset ds = Dataset.rows(Arrays.asList("id", "name"), data);
-     * String name = ds.getColumnName(1);  // returns "name"
+     * String name = ds.getColumnName(1);   // returns "name"
      * }</pre>
      *
      * @param columnIndex the zero-based index of the column
@@ -405,7 +410,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * int index = dataset.getColumnIndex("name");  // returns 1
+     * int index = dataset.getColumnIndex("name");   // returns 1
      * }</pre>
      *
      * @param columnName the name(case-sensitive) of the column for which the index is required.
@@ -420,7 +425,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * int[] indexes = dataset.getColumnIndexes(Arrays.asList("name", "age"));  // returns [1, 2]
+     * int[] indexes = dataset.getColumnIndexes(Arrays.asList("name", "age"));   // returns [1, 2]
      * }</pre>
      *
      * @param columnNames the collection of column names(case-sensitive) for which indexes are required.
@@ -435,7 +440,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * boolean exists = dataset.containsColumn("name");  // returns true
+     * boolean exists = dataset.containsColumn("name");   // returns true
      * }</pre>
      *
      * @param columnName the name(case-sensitive) of the column to check.
@@ -449,7 +454,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * boolean hasAll = dataset.containsAllColumns(Arrays.asList("id", "name"));  // returns true
+     * boolean hasAll = dataset.containsAllColumns(Arrays.asList("id", "name"));   // returns true
      * }</pre>
      *
      * @param columnNames the collection of column names(case-sensitive) to check.
@@ -568,7 +573,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * dataset.swapColumnPosition("name", "age");  // swaps "name" and "age" positions
+     * dataset.swapColumnPosition("name", "age");   // swaps "name" and "age" positions
      * }</pre>
      *
      * @param columnNameA the name of the first column to be swapped.
@@ -619,7 +624,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.swapRowPosition(0, 1);  // swaps row 0 and row 1
+     * dataset.swapRowPosition(0, 1);   // swaps row 0 and row 1
      * }</pre>
      *
      * @param rowIndexA the index of the first row to be swapped.
@@ -631,13 +636,13 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the value at the specified row and column index in the Dataset.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
+     * There is NO underlying auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * String name = dataset.get(0, 1);  // gets value at row 0, column 1
+     * String name = dataset.get(0, 1);   // gets value at row 0, column 1
      * }</pre>
      *
      * @param <T> the type of the value to be returned.
@@ -656,7 +661,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.set(0, 1, "John");  // sets value at row 0, column 1
+     * dataset.set(0, 1, "John");   // sets value at row 0, column 1
      * }</pre>
      *
      * @param rowIndex the index of the row.
@@ -673,7 +678,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * boolean isNull = dataset.isNull(0, 1);  // checks if value at row 0, column 1 is null
+     * boolean isNull = dataset.isNull(0, 1);   // checks if value at row 0, column 1 is null
      * }</pre>
      *
      * @param rowIndex the index of the row.
@@ -686,13 +691,13 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
+     * There is NO underlying auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * String value = dataset.get(1);  // gets value at column index 1 for current row
+     * String value = dataset.get(1);   // gets value at column index 1 for current row
      * }</pre>
      *
      * @param <T> the type of the value to be returned.
@@ -705,7 +710,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
+     * There is NO underlying auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      * <br />
      * Using {@code get(int)} for better performance.
@@ -713,7 +718,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * String name = dataset.get("name");  // gets value for "name" column in current row
+     * String name = dataset.get("name");   // gets value for "name" column in current row
      * }</pre>
      *
      * @param <T> the type of the value to be returned.
@@ -727,7 +732,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the boolean value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to {@code Boolean}.
      * <br />
      * Returns default value (false) if the property is {@code null}.
@@ -735,7 +740,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "active"), data);
-     * boolean isActive = dataset.getBoolean(1);  // gets boolean value at column index 1
+     * boolean isActive = dataset.getBoolean(1);   // gets boolean value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -747,7 +752,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the boolean value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to {@code Boolean}.
      * <br />
      * Returns default value (false) if the property is {@code null}.
@@ -770,7 +775,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the char value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Character}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to {@code Character}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -778,7 +783,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "grade"), data);
-     * char grade = dataset.getChar(1);  // gets char value at column index 1
+     * char grade = dataset.getChar(1);   // gets char value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -790,7 +795,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the char value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Character}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to {@code Character}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -813,7 +818,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the byte value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Byte}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -833,7 +838,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the byte value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Byte}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -856,7 +861,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the short value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Short}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -876,7 +881,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the short value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Short}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -899,7 +904,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the integer value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Integer}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -907,7 +912,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "age"), data);
-     * int age = dataset.getInt(1);  // gets integer value at column index 1
+     * int age = dataset.getInt(1);   // gets integer value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -919,7 +924,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the integer value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Integer}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -942,7 +947,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the long value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Long}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -950,7 +955,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "timestamp"), data);
-     * long timestamp = dataset.getLong(1);  // gets long value at column index 1
+     * long timestamp = dataset.getLong(1);   // gets long value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -962,7 +967,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the long value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Long}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0) if the property is {@code null}.
@@ -985,7 +990,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the float value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Float}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0f) if the property is {@code null}.
@@ -993,7 +998,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "price"), data);
-     * float price = dataset.getFloat(1);  // gets float value at column index 1
+     * float price = dataset.getFloat(1);   // gets float value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -1005,7 +1010,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the float value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Float}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0f) if the property is {@code null}.
@@ -1028,7 +1033,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the double value at the specified column index in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Double}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0d) if the property is {@code null}.
@@ -1036,7 +1041,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "score"), data);
-     * double score = dataset.getDouble(1);  // gets double value at column index 1
+     * double score = dataset.getDouble(1);   // gets double value at column index 1
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -1048,7 +1053,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the double value at the specified column in the Dataset for the current row.
      * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code Double}.
+     * There is NO underlying auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
      * Returns default value (0d) if the property is {@code null}.
@@ -1095,7 +1100,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, null}});
-     * boolean missing = dataset.isNull(0, 1);
+     * boolean missing = dataset.isNull("name");
      * }</pre>
      *
      * @param columnName the name of the column.
@@ -1195,7 +1200,7 @@ public sealed interface Dataset permits RowDataset {
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
      * List<String> names = dataset.copyColumn("name");
-     * names.add("newName");  // This won't affect the original Dataset
+     * names.add("newName");   // This won't affect the original Dataset
      * }</pre>
      *
      * @param <T> the type of the values to be returned.
@@ -1233,7 +1238,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * dataset.addColumn(1, "label", Arrays.asList("A", "B"));
      * }</pre>
      *
      * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
@@ -1322,8 +1327,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataset.addColumn(0, "fullName", Arrays.asList("firstName", "lastName"),
+     *     row -> row.get(0) + " " + row.get(1));
      * }</pre>
      *
      * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
@@ -1345,8 +1351,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataset.addColumn("fullName", Tuple.of("firstName", "lastName"),
+     *     (first, last) -> first + " " + last);
      * }</pre>
      *
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
@@ -1367,8 +1374,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
+     * dataset.addColumn(0, "fullName", Tuple.of("firstName", "lastName"),
+     *     (first, last) -> first + " " + last);
      * }</pre>
      *
      * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
@@ -1390,8 +1398,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("x", "y", "z"), data);
+     * dataset.addColumn("coordinates", Tuple.of("x", "y", "z"),
+     *     (x, y, z) -> "(" + x + "," + y + "," + z + ")");
      * }</pre>
      *
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
@@ -1412,8 +1421,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.addColumn("label", Arrays.asList("A", "B"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("x", "y", "z"), data);
+     * dataset.addColumn(0, "coordinates", Tuple.of("x", "y", "z"),
+     *     (x, y, z) -> "(" + x + "," + y + "," + z + ")");
      * }</pre>
      *
      * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
@@ -1538,7 +1548,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("name", "age"), data);
-     * dataset.updateColumn("name", v -> ((String) v).toUpperCase());  // v is the current value in the "name" column
+     * dataset.updateColumn("name", v -> ((String) v).toUpperCase());   // v is the current value in the "name" column
      * }</pre>
      *
      * @param columnName the name of the column to be updated. It should be a name that exists in the Dataset.
@@ -1569,17 +1579,20 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Converts the values in a specified column of the Dataset to a specified target type.
      * <br />
-     * 
+     * Each value in the column is converted to the target type using type conversion logic. The conversion modifies the column in place.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("age"), data);
-     * dataset.convertColumn("age", Integer.class);  // Convert string ages to integers
+     * Dataset dataset = Dataset.rows(Arrays.asList("age"),
+     *     new Object[][] {{"25"}, {"30"}, {"35"}});
+     * dataset.convertColumn("age", Integer.class);   // Convert string ages to integers
+     * // The "age" column now contains Integer values: 25, 30, 35
      * }</pre>
      *
      * @param columnName the name of the column to be converted. It should be a name that exists in the Dataset.
      * @param targetType the Class object representing the target type to which the column values should be converted.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset or a value cannot be cast to the target type.
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset or a value cannot be converted to the target type.
      * @see N#convert(Object, Class)
      */
     void convertColumn(String columnName, Class<?> targetType) throws IllegalStateException, IllegalArgumentException;
@@ -1587,17 +1600,21 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Converts the values in multiple specified columns of the Dataset to their respective target types.
      * <br />
-     * 
+     * Each value in the specified columns is converted to its corresponding target type using type conversion logic. The conversion modifies the columns in place.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("age", "salary"), data);
-     * Map<String, Class<?>> types = Map.of("age", Integer.class, "salary", Double.class);
+     * Dataset dataset = Dataset.rows(Arrays.asList("age", "salary"),
+     *     new Object[][] {{"25", "50000.5"}, {"30", "60000.75"}});
+     * Map<String, Class<?>> types = N.asMap("age", Integer.class, "salary", Double.class);
      * dataset.convertColumns(types);
+     * // "age" column now contains Integer values: 25, 30
+     * // "salary" column now contains Double values: 50000.5, 60000.75
      * }</pre>
      *
      * @param columnTargetTypes a map where the key is the column name and the value is the Class object representing the target type to which the column values should be converted. The column names should exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or a value cannot be converted to the target type.
      * @see N#convert(Object, Class)
      */
     void convertColumns(Map<String, Class<?>> columnTargetTypes) throws IllegalStateException, IllegalArgumentException;
@@ -1768,8 +1785,8 @@ public sealed interface Dataset permits RowDataset {
      *          new Object[][] { { "John_Doe" }, { "Jane_Smith" } });
      *
      *  ds.divideColumn("fullName", Arrays.asList("firstName", "lastName"),  (String full) -> Arrays.asList(full.split("_")));
-     *  System.out.println(ds.columnCount());  // 2
-     * System.out.println(ds.columnNameList());  // [firstName, lastName]
+     *  System.out.println(ds.columnCount());   // 2
+     * System.out.println(ds.columnNameList());   // [firstName, lastName]
      *  
      *  ds.print();
      *  // +-----------+----------+
@@ -1902,8 +1919,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.columns(Arrays.asList("id", "name"), new Object[][] {{1, 2}, {"Alice", "Bob"}});
-     * int count = dataset.columnCount();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {{1, "Alice"}, {2, "Bob"}});
+     * dataset.columns().forEach(column -> System.out.println("Column: " + column));
+     * // Output: Column: [1, 2]
+     * //         Column: [Alice, Bob]
      * }</pre>
      *
      * @return a Stream containing ImmutableList where each list represents a column of data in the Dataset.
@@ -1917,8 +1937,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}});
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {{1, "Alice"}, {2, "Bob"}});
      * Map<String, ImmutableList<Object>> map = dataset.columnMap();
+     * // map contains: {"id": [1, 2], "name": ["Alice", "Bob"]}
+     * ImmutableList<Object> names = map.get("name");   // ["Alice", "Bob"]
      * }</pre>
      *
      * @return a Map where each entry represents a column in the Dataset.
@@ -2010,7 +2033,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * dataset.removeRow(2);  // Remove the third row (0-based index)
+     * dataset.removeRow(2);   // Remove the third row (0-based index)
      * }</pre>
      *
      * @param rowIndex the index of the row to be removed. It should be a valid index within the current row range.
@@ -2102,7 +2125,7 @@ public sealed interface Dataset permits RowDataset {
      *         {3, "Johnathan Doe", "Finance"},  // Duplicate based on last name
      *         {4, "Bob Brown", "IT"}
      *     });
-     * dataset.removeDuplicateRowsBy("name", name -> ((String) name).split(" ")[1]);  // Use last name as key
+     * dataset.removeDuplicateRowsBy("name", name -> ((String) name).split(" ")[1]);   // Use last name as key
      * // Result: Only rows with id=1, id=2, and id=4 remain
      * // The row with id=3 is removed because "Doe" already exists
      * }</pre>
@@ -2139,14 +2162,14 @@ public sealed interface Dataset permits RowDataset {
      * // The row with id=3 is removed because ("John", "IT") already exists
      * }</pre>
      *
-     * @param keyColumnName a collection containing the names of the columns to use for identifying duplicates. These should be names that exist in the Dataset.
+     * @param keyColumnNames a collection containing the names of the columns to use for identifying duplicates. These should be names that exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName} is empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnNames} is empty.
      * @see #removeDuplicateRowsBy(Collection, Function)
      * @see #removeDuplicateRowsBy(String)
      * @see #distinctBy(Collection)
      */
-    void removeDuplicateRowsBy(Collection<String> keyColumnName) throws IllegalStateException, IllegalArgumentException;
+    void removeDuplicateRowsBy(Collection<String> keyColumnNames) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Removes duplicate rows from the Dataset based on the key extracted from specified columns by custom key extractor function.
@@ -2166,7 +2189,7 @@ public sealed interface Dataset permits RowDataset {
      *         {4, "Bob Brown", "IT"}
      *     });
      * dataset.removeDuplicateRowsBy(Arrays.asList("name", "department"), 
-     *     row -> ((String) row.get(0)).split(" ")[1] + "|" + row.get(1));  // Use last name and department as key
+     *     row -> ((String) row.get(0)).split(" ")[1] + "|" + row.get(1));   // Use last name and department as key
      * // Result: Only rows with id=1, id=2, and id=4 remain
      * // The row with id=3 is removed because ("Doe", "IT") already exists
      * }</pre>
@@ -2208,7 +2231,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("name", "status"), data);
-     * dataset.updateRow(new int[] {0, 5}, (i, v) -> v instanceof String ? ((String) v).toUpperCase() : v);
+     * dataset.updateRows(new int[] {0, 5}, (i, c, v) -> v instanceof String ? ((String) v).toUpperCase() : v);
+     * // Updates rows 0 and 5, converting all string values to uppercase
      * }</pre>
      *
      * @param rowIndexesToUpdate an array of integers representing the indices of the rows to be updated. Each index should be a valid index within the current row range.
@@ -2228,7 +2252,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.updateAll(value -> v instanceof Integer ? ((Integer) v) + 10 : v);
+     * dataset.updateAll(v -> v instanceof Integer ? ((Integer) v) + 10 : v);
+     * // All id values are incremented by 10: {11}, {12}
      * }</pre>
      *
      * @param func the function to be applied to each value in the Dataset. It takes the current value and returns the new value.
@@ -2265,10 +2290,11 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * dataset.replaceIf("id", v -> v instanceof Integer && (Integer) v < 2, 99);
+     * dataset.replaceIf(v -> v instanceof Integer && (Integer) v < 2, 99);
+     * // Values less than 2 are replaced with 99: {{99}, {2}}
      * }</pre>
      *
-     * @param predicate the predicate to test each value in the sheet. It takes a value from the Dataset as input and returns a boolean indicating whether the value should be replaced.
+     * @param predicate the predicate to test each value in the Dataset. It takes a value from the Dataset as input and returns a boolean indicating whether the value should be replaced.
      * @param newValue the new value to replace the values that satisfy the condition.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      */
@@ -2561,7 +2587,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * Object[] firstRow = dataset.getRow(0);  // Gets first row as Object[]
+     * Object[] firstRow = dataset.getRow(0);   // Gets first row as Object[]
      * }</pre>
      *
      * @param rowIndex the index of the row to retrieve. The first row is 0, the second is 1, and so on.
@@ -2574,11 +2600,14 @@ public sealed interface Dataset permits RowDataset {
      * Retrieves a row from the Dataset and converts it to a specific type.
      * <br />
      * This method is typically used when accessing the data in a specific row and converting it to a specific type.
+     * The type can be an Object[], Collection, Map, or a Bean class.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * ImmutableList<Object> row = dataset.getRow(0, User.class);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"),
+     *     new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<String, Object> row = dataset.getRow(0, Map.class);
+     * // row contains: {"id": 1, "name": "Alice", "age": 25}
      * }</pre>
      *
      * @param rowIndex the index of the row to retrieve. The first row is 0, the second is 1, and so on.
@@ -2586,7 +2615,7 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type to which the row data should be converted.
      * @return an instance of the specified type representing the data in the specified row.
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> T getRow(int rowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -2647,7 +2676,9 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
-     * ImmutableList<Object> first = dataset.firstRow();
+     * Optional<Object[]> first = dataset.firstRow();
+     * first.ifPresent(row -> System.out.println("First row: " + Arrays.toString(row)));
+     * // Output: First row: [1, Alice]
      * }</pre>
      *
      * @return an Optional array of Objects representing the data in the first row. If the Dataset is empty, the Optional will be empty.
@@ -2935,7 +2966,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * List<Object[]> rows = dataset.toList();  // Convert all rows to List<Object[]>
+     * List<Object[]> rows = dataset.toList();   // Convert all rows to List<Object[]>
      * }</pre>
      *
      * @return a List of Object arrays representing the data in the Dataset. Each Object array is a row in the Dataset.
@@ -2953,7 +2984,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * List<Object[]> firstThreeRows = dataset.toList(0, 3);  // Get rows 0, 1, 2
+     * List<Object[]> firstThreeRows = dataset.toList(0, 3);   // Get rows 0, 1, 2
      * }</pre>
      *
      * @param fromRowIndex the starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
@@ -2974,7 +3005,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * List<Map<String, Object>> maps = dataset.toList(Map.class);  // Convert to List of Maps
+     * List<Map<String, Object>> maps = dataset.toList(Map.class);   // Convert to List of Maps
      * }</pre>
      *
      * @param <T> the target type of the row.
@@ -3188,7 +3219,7 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
      * @param columnNameFilter the predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
      * @param columnNameConverter the function to convert the column names into property names in the instance.
-     * @param rowType the bean type used to instantiate each materialized row
+     * @param rowType the Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
@@ -3332,8 +3363,13 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * List<Person> people = dataset.toEntities(Person.class);
+     * final List<String> columNames = N.asList("id", "name", "d.id", "d.model");
+     * final Dataset dataset = Dataset.rows(columNames,
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone" },
+     *              { 200, "Alice", 3, "Android" }
+     *          });
+     * List<Account> accounts = dataset.toEntities(0, 2, columNames, Map.of("d", "devices"), Account.class);
      * }</pre>
      *
      * @param <T> the target type of the row.
@@ -3689,7 +3725,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * Map<Integer, String> topTenMap = dataset.toMap(0, 10, "id", "name");  // First 10 rows
+     * Map<Integer, String> topTenMap = dataset.toMap(0, 10, "id", "name");   // First 10 rows
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3716,15 +3752,15 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
+     * LinkedHashMap<Integer, String> topTenMap = dataset.toMap(0, 10, "id", "name", LinkedHashMap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
      * @param <V> the type of the values in the resulting map.
      * @param <M> the type of the map to be returned.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive)
+     * @param toRowIndex the ending index of the row range (exclusive)
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnName the name of the column in the Dataset that will be used as the values in the resulting map.
      * @param supplier a function that generates a new map. The function takes an integer argument, which is the initial map capacity.
@@ -3745,8 +3781,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, Map> idToPersonMap = dataset.toMap("id", Arrays.asList("name", "age"), Map.class);
+     * // Result: {1={name=Alice, age=25}, 2={name=Bob, age=30}}
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3770,8 +3807,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, Map> idToPersonMap = dataset.toMap("id", Arrays.asList("name", "age"), Map.class, LinkedHashMap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3797,8 +3834,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, Map> idToPersonMap = dataset.toMap(0, 1, "id", Arrays.asList("name", "age"), Map.class);
+     * // Result: {1={name=Alice, age=25}}
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3826,8 +3864,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, Map> idToPersonMap = dataset.toMap(0, 1, "id", Arrays.asList("name", "age"), Map.class, LinkedHashMap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3856,8 +3894,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, ArrayList> idToPersonMap = dataset.toMap("id", Arrays.asList("name", "age"), ArrayList::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3881,8 +3919,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, ArrayList> idToPersonMap = dataset.toMap("id", Arrays.asList("name", "age"), ArrayList::new, LinkedHashMap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3908,8 +3946,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, ArrayList> idToPersonMap = dataset.toMap(0, 1, "id", Arrays.asList("name", "age"), ArrayList::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3937,8 +3975,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Map<String, Object> first = dataset.toMap(0);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Map<Integer, ArrayList> idToPersonMap = dataset.toMap(0, 1, "id", Arrays.asList("name", "age"), ArrayList::new, LinkedHashMap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -3992,7 +4030,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name", ListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4019,13 +4057,13 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap(0, 1, "dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
      * @param <T> the type of the values in the resulting map.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnName the name of the column in the Dataset that will be used as the values in the resulting map.
      * @return a ListMultimap where each key-value pair corresponds to a row in the Dataset. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
@@ -4054,14 +4092,14 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of the values in the resulting map.
      * @param <V> the type of the collection of values in the resulting map.
      * @param <M> the type of the Multimap to be returned.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnName the name of the column in the Dataset that will be used as the values in the resulting map.
      * @param supplier a function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
      * @return a Multimap where each key-value pair corresponds to a row in the Dataset. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value column in the row.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
-     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the Dataset, or if any of the specified value column names does not exist in the Dataset or {@code valueColumnNames} is empty.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the Dataset.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName,
             IntFunction<? extends M> supplier) throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -4135,8 +4173,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <K> the type of the keys in the resulting map.
      * @param <T> the type of the values in the resulting map.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnNames the names of the columns in the Dataset that will be used as the values in the resulting map.
      * @param rowType the class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
@@ -4166,8 +4204,8 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of the values in the resulting map.
      * @param <V> the type of the collection of values in the resulting map.
      * @param <M> the type of the Multimap to be returned.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnNames the names of the columns in the Dataset that will be used as the values in the resulting map.
      * @param rowType the class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
@@ -4250,8 +4288,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <K> the type of the keys in the resulting map.
      * @param <T> the type of the values in the resulting map.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnNames the names of the columns in the Dataset that will be used as the values in the resulting map.
      * @param rowSupplier a function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
@@ -4281,8 +4319,8 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of the values in the resulting map.
      * @param <V> the type of the collection of values in the resulting map.
      * @param <M> the type of the Multimap to be returned.
-     * @param fromRowIndex the starting index of the row range to be included in the map.
-     * @param toRowIndex the ending index of the row range to be included in the map.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param keyColumnName the name of the column in the Dataset that will be used as the keys in the resulting map.
      * @param valueColumnNames the names of the columns in the Dataset that will be used as the values in the resulting map.
      * @param rowSupplier a function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
@@ -4306,7 +4344,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * String json = dataset.toJson();  // Convert Dataset to JSON array string
+     * String json = dataset.toJson();   // Convert Dataset to JSON array string
      * }</pre>
      *
      * @return a JSON string representing the current Dataset.
@@ -4328,8 +4366,8 @@ public sealed interface Dataset permits RowDataset {
      * String json = dataset.toJson();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the JSON string.
-     * @param toRowIndex the ending index of the row range to be included in the JSON string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @return a JSON string representing the specified range of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      */
@@ -4349,8 +4387,8 @@ public sealed interface Dataset permits RowDataset {
      * String json = dataset.toJson();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the JSON string.
-     * @param toRowIndex the ending index of the row range to be included in the JSON string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the JSON string.
      * @return a JSON string representing the specified range of rows and columns in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4364,7 +4402,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String json = dataset.toJson();
+     * dataset.toJson(file);
      * }</pre>
      *
      * @param output the File where the JSON string will be written
@@ -4379,7 +4417,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String json = dataset.toJson();
+     * dataset.toJson(0, 10, file);
      * }</pre>
      *
      * @param fromRowIndex the starting index of the row range (inclusive)
@@ -4405,8 +4443,8 @@ public sealed interface Dataset permits RowDataset {
      * String json = dataset.toJson();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the JSON string.
-     * @param toRowIndex the ending index of the row range to be included in the JSON string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the JSON string.
      * @param output the File where the JSON string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4463,8 +4501,8 @@ public sealed interface Dataset permits RowDataset {
      * String json = dataset.toJson();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the JSON string.
-     * @param toRowIndex the ending index of the row range to be included in the JSON string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the JSON string.
      * @param output the OutputStream where the JSON string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4480,7 +4518,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String json = dataset.toJson();
+     * dataset.toJson(writer);
      * }</pre>
      *
      * @param output the Writer where the JSON string will be written
@@ -4521,8 +4559,8 @@ public sealed interface Dataset permits RowDataset {
      * String json = dataset.toJson();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the JSON string.
-     * @param toRowIndex the ending index of the row range to be included in the JSON string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the JSON string.
      * @param output the Writer where the JSON string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4585,8 +4623,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @return a String containing the XML representation of the specified range of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @see #toXml(int, int, Collection, String)
@@ -4608,8 +4646,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @return a String containing the XML representation of the specified range of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4633,8 +4671,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included in the XML string.
      * @return a String containing the XML representation of the specified range of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4658,8 +4696,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the XML string.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @return a String containing the XML representation of the specified range of rows and columns in the Dataset.
@@ -4728,8 +4766,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param output the File where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws UncheckedIOException if an I/O error occurs writing to the File.
@@ -4752,8 +4790,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the File where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4773,8 +4811,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the XML string.
      * @param output the File where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4800,8 +4838,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the XML string.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the File where the XML string will be written.
@@ -4873,8 +4911,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param output the OutputStream where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
@@ -4898,8 +4936,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the OutputStream where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4926,8 +4964,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included in the XML string.
      * @param output the OutputStream where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -4954,8 +4992,8 @@ public sealed interface Dataset permits RowDataset {
      * String xml = dataset.toXml();
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the XML string.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the OutputStream where the XML string will be written.
@@ -4979,7 +5017,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml(writer);
      * }</pre>
      *
      * @param output the Writer where the XML string will be written.
@@ -5001,7 +5039,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml("row", writer);
      * }</pre>
      *
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
@@ -5025,11 +5063,11 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml(0, 1, writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param output the Writer where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
@@ -5050,11 +5088,11 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml(0, 1, "row", writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the Writer where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5078,11 +5116,11 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml(0, 1, Arrays.asList("id", "name"), writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included in the XML string.
      * @param output the Writer where the XML string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5106,11 +5144,11 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * String xml = dataset.toXml();
+     * dataset.toXml(0, 1, Arrays.asList("id", "name"), "row", writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the XML string.
-     * @param toRowIndex the ending index of the row range to be included in the XML string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the XML string.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the Writer where the XML string will be written.
@@ -5173,8 +5211,8 @@ public sealed interface Dataset permits RowDataset {
      * // 2,"Bob""s"
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the CSV string.
-     * @param toRowIndex the ending index of the row range to be included in the CSV string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the CSV string.
      * @return a CSV string representing the specified range of rows and columns in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5195,12 +5233,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(file);
+     * dataset.toCsv(file);
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5226,12 +5264,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(0, 2, Arrays.asList("id", "name"), file);
+     * dataset.toCsv(0, 2, Arrays.asList("id", "name"), file);
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5239,8 +5277,8 @@ public sealed interface Dataset permits RowDataset {
      * // 2,"Bob""s"
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the CSV string.
-     * @param toRowIndex the ending index of the row range to be included in the CSV string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the CSV string.
      * @param output the File where the CSV string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5263,12 +5301,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(new FileOutputStream(file));
+     * dataset.toCsv(new FileOutputStream(file));
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5294,12 +5332,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(0, 2, Arrays.asList("id", "name"), new FileOutputStream(file));
+     * dataset.toCsv(0, 2, Arrays.asList("id", "name"), new FileOutputStream(file));
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5307,8 +5345,8 @@ public sealed interface Dataset permits RowDataset {
      * // 2,"Bob""s"
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the CSV string.
-     * @param toRowIndex the ending index of the row range to be included in the CSV string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the CSV string.
      * @param output the OutputStream where the CSV string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5331,12 +5369,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(new FileWriter(file));
+     * dataset.toCsv(new FileWriter(file));
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5362,12 +5400,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
      *                  });
-     * String csv = dataset.toCsv(0, 2, Arrays.asList("id", "name"), new FileWriter(file));
+     * dataset.toCsv(0, 2, Arrays.asList("id", "name"), new FileWriter(file));
      * System.out.println(IOUtil.readAllToString(file));
      * // Output:
      * // "id","name"
@@ -5375,8 +5413,8 @@ public sealed interface Dataset permits RowDataset {
      * // 2,"Bob""s"
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row range to be included in the CSV string.
-     * @param toRowIndex the ending index of the row range to be included in the CSV string.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the CSV string.
      * @param output the Writer where the CSV string will be written.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
@@ -5423,7 +5461,7 @@ public sealed interface Dataset permits RowDataset {
      *     "department",                           // group by department
      *     "salary",                              // aggregate on salary column
      *     "total_salary",                        // result column name
-     *     Collectors.summingInt(Integer.class::cast));  // sum salaries
+     *     Collectors.summingInt(Integer.class::cast));   // sum salaries
      *
      * // Result Dataset:
      * // +------------+--------------+
@@ -5460,8 +5498,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
+     * Dataset grouped = dataset.groupBy("dept", Arrays.asList("employee", "salary"), "employees", Object[].class);
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5486,14 +5524,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
+     * Dataset grouped = dataset.groupBy("dept", Arrays.asList("employee", "salary"), "data", Collectors.toList());
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
-     * @param collector the downstream collector used to aggregate grouped rows
+     * @param collector the collector that defines the aggregate operation.
      * @return a new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code aggregateOnColumnNames} is empty.
      * @see #groupBy(String, String, String, Collector)
@@ -5512,8 +5550,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
+     * Dataset grouped = dataset.groupBy("dept", Arrays.asList("employee", "salary"), "employees",
+     *     row -> row.get(0) + ":" + row.get(1), Collectors.toList());
      * }</pre>
      *
      * @param <T> the type of the elements being grouped.
@@ -5541,7 +5580,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, "salary", "total_salary", Collectors.summingInt(Integer.class::cast));
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5567,8 +5606,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
+     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, Arrays.asList("employee", "salary"), "employees", Object[].class);
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5594,8 +5633,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy(Arrays.asList("dept"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
+     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, Arrays.asList("employee", "salary"), "data", Collectors.toList());
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5646,7 +5685,7 @@ public sealed interface Dataset permits RowDataset {
      *     Arrays.asList("salary", "bonus"),      // aggregate on salary and bonus
      *     "total_compensation",                   // result column name
      *     row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
-     *     Collectors.summingInt(Integer.class::cast));  // sum the results
+     *     Collectors.summingInt(Integer.class::cast));   // sum the results
      *
      * // Result Dataset:
      * // +------------+--------------------+
@@ -5981,7 +6020,7 @@ public sealed interface Dataset permits RowDataset {
      *     Arrays.asList("salary", "bonus"),       // aggregate on salary and bonus
      *     "total_compensation",                    // result column name
      *     row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
-     *     Collectors.summingInt(Integer.class::cast));  // sum the results
+     *     Collectors.summingInt(Integer.class::cast));   // sum the results
      *
      * // Result Dataset:
      * // +------------+--------+--------------------+
@@ -6166,7 +6205,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -6339,7 +6378,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName} or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -6859,7 +6898,7 @@ public sealed interface Dataset permits RowDataset {
      *     Arrays.asList("region", "country", "city"),
      *     keyExtractor,
      *     Arrays.asList("sales", "quantity"),
-     *     "aggregated_totals",
+     *     "aggregated_data",
      *     row -> Tuple.of((Integer) row.get(0), (Integer) row.get(1)),
      *     MoreCollectors.summingInt(tp -> tp._1, tp -> tp._2));
      *
@@ -6902,7 +6941,7 @@ public sealed interface Dataset permits RowDataset {
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
      * @param rowMapper the function to transform the DisposableObjArray to a custom row before aggregation. Must not be {@code null}.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code rowMapper}, {@code collector}, or {@code aggregateResultColumnName} is {@code null}.
      * @see #rollup(Collection)
@@ -6999,7 +7038,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), "amount", "total_amount", Collectors.summingInt(Integer.class::cast));
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7028,8 +7067,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"), new Object[][] {{"APAC", "A", 100, 10}});
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), Arrays.asList("sales", "quantity"), "data", Object[].class);
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7058,8 +7097,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"), new Object[][] {{"APAC", "A", 100, 10}});
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), Arrays.asList("sales", "quantity"), "data", Collectors.toList());
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7089,8 +7128,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"), new Object[][] {{"APAC", "A", 100, 10}});
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), Arrays.asList("sales", "quantity"), "total",
+     *     row -> (Integer) row.get(0) + (Integer) row.get(1), Collectors.summingInt(Integer::intValue));
      * }</pre>
      *
      * @param <T> the type of the object that the row data will be mapped to.
@@ -7121,7 +7161,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), keyRow -> keyRow.join("-"));
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7149,7 +7189,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), keyRow -> keyRow.join("-"),
+     *     "amount", "total_amount", Collectors.summingInt(Integer.class::cast));
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7180,8 +7221,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"), new Object[][] {{"APAC", "A", 100, 10}});
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), keyRow -> keyRow.join("-"),
+     *     Arrays.asList("sales", "quantity"), "data", Object[].class);
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7212,8 +7254,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "amount"), new Object[][] {{"APAC", "A", 42}});
-     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"));
+     * Dataset dataset = Dataset.rows(Arrays.asList("region", "product", "sales", "quantity"), new Object[][] {{"APAC", "A", 100, 10}});
+     * Stream<Dataset> levels = dataset.cube(Arrays.asList("region", "product"), keyRow -> keyRow.join("-"),
+     *     Arrays.asList("sales", "quantity"), "data", Collectors.toList());
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed.
@@ -7373,7 +7416,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
      * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
      * @param aggregateOnColumnNames the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, or {@code collector} is {@code null}.
      * @see #groupBy(Collection)
@@ -7420,7 +7463,7 @@ public sealed interface Dataset permits RowDataset {
      *     "region",                           // row identifier
      *     "product",                          // column identifier
      *     Arrays.asList("sales", "quantity"), // aggregate columns
-     *     Collectors.summingInt(arr -> (Integer) arr[0] + (Integer) arr[1]));  // sum sales + quantity
+     *     Collectors.summingInt(arr -> (Integer) arr[0] + (Integer) arr[1]));   // sum sales + quantity
      *
      * // Result Sheet:
      * //         +-----+-----+
@@ -7437,7 +7480,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
      * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
      * @see #pivot(String, String, String, Collector)
@@ -7489,7 +7532,7 @@ public sealed interface Dataset permits RowDataset {
      *     "product",                          // column identifier
      *     Arrays.asList("sales", "quantity"), // aggregate columns
      *     rowMapper,                          // transform function
-     *     Collectors.collectingAndThen(Collectors.summingDouble(Double::doubleValue), r -> Numbers.round(r, 2)));  // aggregation
+     *     Collectors.collectingAndThen(Collectors.summingDouble(Double::doubleValue), r -> Numbers.round(r, 2)));   // aggregation
      * //         +-------+-------+
      * //         | A     | B     |
      * // +-------+-------+-------+
@@ -7506,7 +7549,7 @@ public sealed interface Dataset permits RowDataset {
      * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
      * @param rowMapper the function to transform the row data before aggregation. Must not be {@code null}.
-     * @param collector the collector defining the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
      * @see #pivot(String, String, String, Collector)
@@ -7528,7 +7571,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
-     * employees.sortBy("age");  // sorts by age in ascending order
+     * employees.sortBy("age");   // sorts by age in ascending order
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
@@ -7545,7 +7588,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.sortBy("id");
+     * dataset.sortBy("id", Comparator.reverseOrder());  // sorts in place by id in descending order
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
@@ -7563,7 +7606,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.sortBy("id");
+     * dataset.sortBy(Arrays.asList("department", "name"));  // sorts in place by department, then by name
      * }</pre>
      *
      * @param columnNames the collection of column names to be used for sorting.
@@ -7576,11 +7619,14 @@ public sealed interface Dataset permits RowDataset {
      * Sorts the Dataset based on the specified collection of column names using the provided Comparator.
      * <br />
      * The Comparator determines the order of the elements for each row, which is an Object array.
+     * This method modifies the Dataset in place.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.sortBy("id");
+     * // Sort by id in descending order, comparing the first element of each row array
+     * dataset.sortBy(Arrays.asList("id", "name"),
+     *     (a, b) -> Integer.compare((Integer)b[0], (Integer)a[0]));  // sorts in place with custom comparator
      * }</pre>
      *
      * @param columnNames the collection of column names to be used for sorting.
@@ -7592,8 +7638,23 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Sorts the Dataset based on the specified column names and a key mapper function.
+     * <br />
      * The key mapper function is applied to each row of the Dataset, and the resulting Comparable objects are used for sorting.
      * The column names determine the order of the elements in the DisposableObjArray passed to the key mapper function.
+     * This method modifies the Dataset in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"),
+     *     new Object[][] {
+     *         {"John", "Smith"},
+     *         {"Jane", "Doe"},
+     *         {"Bob", "Anderson"}
+     *     });
+     * // Sort by concatenated full name (case-insensitive)
+     * dataset.sortBy(Arrays.asList("firstName", "lastName"),
+     *     row -> ((String)row.get(0) + " " + (String)row.get(1)).toLowerCase());  // sorts in place by full name
+     * }</pre>
      *
      * @param columnNames the names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
      * @param keyExtractor a function that takes a DisposableObjArray representing a row of the Dataset and returns a Comparable object that is used for sorting.
@@ -7612,7 +7673,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.parallelSortBy("id");
+     * dataset.parallelSortBy("id");  // sorts in place using multiple threads
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
@@ -7624,16 +7685,16 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Sorts the Dataset with multi-threads based on the specified column name using the provided Comparator.
      * <br />
-     * The Comparator determines the order of the elements for each row, which is an Object array.
+     * The Comparator determines the order of the elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.parallelSortBy("id");
+     * dataset.parallelSortBy("id", Comparator.reverseOrder());  // sorts in place using multiple threads in descending order
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
-     * @param cmp the Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @param cmp the Comparator to determine the order of the elements.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset.
      */
@@ -7647,7 +7708,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.parallelSortBy("id");
+     * dataset.parallelSortBy(Arrays.asList("id", "name"));  // sorts in place using multiple threads by id, then by name
      * }</pre>
      *
      * @param columnNames the collection of column names to be used for sorting.
@@ -7664,7 +7725,9 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{2, "Bob"}, {1, "Alice"}});
-     * Dataset sorted = dataset.parallelSortBy("id");
+     * // Sort by id in descending order, comparing the first element of each row array
+     * dataset.parallelSortBy(Arrays.asList("id", "name"),
+     *     (a, b) -> Integer.compare((Integer)b[0], (Integer)a[0]));  // sorts in place using multiple threads
      * }</pre>
      *
      * @param columnNames the collection of column names to be used for sorting.
@@ -7676,9 +7739,19 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Sorts the Dataset with multi-threads based on the specified column names and a key mapper function.
+     * <br />
      * The key mapper function is applied to each row of the Dataset, and the resulting Comparable objects are used for sorting.
      * The column names determine the order of the elements in the DisposableObjArray passed to the key mapper function.
      * This method is designed for large datasets where parallel sorting can provide a performance improvement.
+     * This method modifies the Dataset in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset largeDataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);  // assume large dataset
+     * // Sort by concatenated full name using parallel processing
+     * largeDataset.parallelSortBy(Arrays.asList("firstName", "lastName"),
+     *     row -> ((String)row.get(0) + " " + (String)row.get(1)).toLowerCase());  // sorts in place using multiple threads
+     * }</pre>
      *
      * @param columnNames the names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
      * @param keyExtractor a function that takes a DisposableObjArray representing a row of the Dataset and returns a Comparable object that is used for sorting.
@@ -7698,7 +7771,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset employees = Dataset.rows(Arrays.asList("name", "salary", "age"), data);
-     * Dataset topPaid = employees.topBy("salary", 5);  // top 5 highest salaries
+     * Dataset topPaid = employees.topBy("salary", 5);   // top 5 highest salaries
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
@@ -7716,13 +7789,13 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 85}, {2, 95}});
-     * Dataset top = dataset.topBy("score", 1);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 85}, {2, 95}, {3, 90}});
+     * Dataset top = dataset.topBy("score", 2, Comparator.reverseOrder());  // top 2 highest scores
      * }</pre>
      *
      * @param columnName the name of the column to be used for sorting.
      * @param n the number of top rows to return.
-     * @param cmp the Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @param cmp the Comparator to determine the order of the elements.
      * @return a new Dataset containing the top <i>n</i> rows.
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset or <i>n</i> is less than 1.
      */
@@ -7731,7 +7804,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Returns the top <i>n</i> rows from the Dataset based on the values in the specified columns.
      * <br />
-     * The rows are sorted in the order they appear in the Dataset.
+     * The rows are sorted in ascending order based on the values in the specified columns.
      * If two rows have the same values in the specified columns, their order is determined by their original order in the Dataset.
      *
      * @param columnNames the names of the columns to be used for sorting.
@@ -7777,7 +7850,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset orders = Dataset.rows(Arrays.asList("product", "customer"), data);
-     * Dataset uniqueOrders = orders.distinct();  // removes duplicate rows
+     * Dataset uniqueOrders = orders.distinct();   // removes duplicate rows
      * }</pre>
      *
      * @return a new Dataset containing only distinct rows.
@@ -7797,7 +7870,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset employees = Dataset.rows(Arrays.asList("name", "department", "salary"), data);
-     * Dataset uniqueDepts = employees.distinctBy("department");  // one row per department
+     * Dataset uniqueDepts = employees.distinctBy("department");   // one row per department
      * }</pre>
      *
      * @param columnName the name of the column to be used for determining distinctness.
@@ -7812,6 +7885,20 @@ public sealed interface Dataset permits RowDataset {
      * Returns a new Dataset containing only the distinct rows based on the specified column from the original Dataset.
      * <br />
      * The distinctness of rows is determined by the equals method of the values returned by the provided keyExtractor function.
+     * The keyExtractor is applied to each column value before comparing for distinctness.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "email"),
+     *     new Object[][] {
+     *         {"alice", "ALICE@example.com"},
+     *         {"bob", "bob@example.com"},
+     *         {"Alice", "alice@example.com"}
+     *     });
+     * // Get distinct rows by email, case-insensitive
+     * Dataset uniqueEmails = employees.distinctBy("email", (String email) -> email.toLowerCase());
+     * // Result: two rows (alice@example.com appears twice but is treated as one when lowercased)
+     * }</pre>
      *
      * @param columnName the name of the column to be used for determining distinctness.
      * @param keyExtractor a function to process the column values before determining distinctness.
@@ -7846,6 +7933,21 @@ public sealed interface Dataset permits RowDataset {
      * Returns a new Dataset containing only the distinct rows based on the specified columns from the original Dataset.
      * <br />
      * The distinctness of rows is determined by the equals method of the values returned by the provided keyExtractor function.
+     * The keyExtractor is applied to the combined values of the specified columns before comparing for distinctness.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("firstName", "lastName", "email"),
+     *     new Object[][] {
+     *         {"John", "Smith", "john.smith@example.com"},
+     *         {"JOHN", "SMITH", "different@example.com"},
+     *         {"Jane", "Doe", "jane.doe@example.com"}
+     *     });
+     * // Get distinct rows by first and last name, case-insensitive
+     * Dataset uniqueNames = employees.distinctBy(Arrays.asList("firstName", "lastName"),
+     *     row -> ((String)row.get(0) + " " + (String)row.get(1)).toLowerCase());
+     * // Result: two rows (John Smith appears twice with different cases, but is treated as one)
+     * }</pre>
      *
      * @param columnNames the names of the columns to be used for determining distinctness.
      * @param keyExtractor a function to process the column values before determining distinctness.
@@ -7861,6 +7963,19 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned Dataset.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"),
+     *     new Object[][] {
+     *         {"Alice", 25, 50000},
+     *         {"Bob", 35, 80000},
+     *         {"Charlie", 28, 60000}
+     *     });
+     * // Filter employees with salary > 55000
+     * Dataset highEarners = employees.filter(row -> (Integer)row.get(2) > 55000);
+     * // Result contains: Bob and Charlie
+     * }</pre>
+     *
      * @param filter the predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @return a new Dataset containing only the rows that satisfy the provided predicate.
      */
@@ -7871,6 +7986,13 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned Dataset.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * // Get first 5 employees with salary > 50000
+     * Dataset topEarners = employees.filter(row -> (Integer)row.get(2) > 50000, 5);
+     * }</pre>
      *
      * @param filter the predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @param max the maximum number of rows to include in the returned Dataset.
@@ -7884,11 +8006,11 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The predicate is applied to each row within the range, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned Dataset.
      *
-     * @param fromRowIndex the starting index of the row range to apply the filter. It's inclusive.
-     * @param toRowIndex the ending index of the row range to apply the filter. It's exclusive.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param filter the predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @return a new Dataset containing only the rows within the specified range that satisfy the provided predicate.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter) throws IndexOutOfBoundsException;
 
@@ -7898,12 +8020,12 @@ public sealed interface Dataset permits RowDataset {
      * The predicate is applied to each row within the range, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned Dataset.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     * @param fromRowIndex the starting index of the row range to apply the filter. It's inclusive.
-     * @param toRowIndex the ending index of the row range to apply the filter. It's exclusive.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param filter the predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows within the specified range that satisfy the provided predicate, up to the specified maximum limit.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
      * @throws IllegalArgumentException if the specified max is less than 0.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max)
@@ -7917,7 +8039,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter) throws IllegalArgumentException;
 
@@ -7931,7 +8053,7 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, up to the specified maximum limit.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or if the specified max is less than 0.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or if the specified max is less than 0.
      */
     Dataset filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max) throws IllegalArgumentException;
 
@@ -7941,13 +8063,13 @@ public sealed interface Dataset permits RowDataset {
      * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned Dataset.
      * The operation is performed only on the rows within the specified index range.
      *
-     * @param fromRowIndex the start index of the row range to filter.
-     * @param toRowIndex the end index of the row range to filter.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range.
-     * @throws IndexOutOfBoundsException if the specified row index range is out of the Dataset's bounds.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -7958,14 +8080,14 @@ public sealed interface Dataset permits RowDataset {
      * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned Dataset.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     * @param fromRowIndex the start index of the row range to filter.
-     * @param toRowIndex the end index of the row range to filter.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range and up to the specified maximum limit.
-     * @throws IndexOutOfBoundsException if the specified row index range is out of the Dataset's bounds.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or if the specified max is less than 0.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or if the specified max is less than 0.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -7978,7 +8100,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter) throws IllegalArgumentException;
 
@@ -7992,7 +8114,7 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, up to the specified maximum limit.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or if the specified max is less than 0.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or if the specified max is less than 0.
      */
     Dataset filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max) throws IllegalArgumentException;
 
@@ -8002,13 +8124,13 @@ public sealed interface Dataset permits RowDataset {
      * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned Dataset.
      * The operation is performed only on the rows within the specified index range.
      *
-     * @param fromRowIndex the start index of the row range to apply the filter on.
-     * @param toRowIndex the end index of the row range to apply the filter on.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8019,14 +8141,14 @@ public sealed interface Dataset permits RowDataset {
      * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned Dataset.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     * @param fromRowIndex the start index of the row range to apply the filter on.
-     * @param toRowIndex the end index of the row range to apply the filter on.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range and up to the specified maximum limit.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or if the specified max is less than 0.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or if the specified max is less than 0.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8062,12 +8184,12 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The Predicate is applied to each value from the specified column within the given range, and only rows where the Predicate returns {@code true} are included in the returned Dataset.
      *
-     * @param fromRowIndex the start index of the row range to apply the filter.
-     * @param toRowIndex the end index of the row range to apply the filter.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnName the name of the column to be used in the Predicate.
      * @param filter the Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the Dataset's row for the specified column.
      * @return a new Dataset containing only the rows within the specified range where the provided Predicate returns {@code true} for the value from the specified column.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
      * @throws IllegalArgumentException if the specified column name is not found in the Dataset.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter) throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8079,14 +8201,14 @@ public sealed interface Dataset permits RowDataset {
      * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting Dataset.
      * The operation is performed on the rows within the specified range and until the number of rows in the resulting Dataset reaches the specified maximum limit.
      *
-     * @param fromRowIndex the starting index of the row range to consider for filtering.
-     * @param toRowIndex the ending index of the row range to consider for filtering.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnName the name of the column whose values will be used as input for the predicate function.
      * @param filter the predicate function to apply to each row of the specified column. It takes an instance of the column's value type and returns a boolean.
      * @param max the maximum number of rows to include in the resulting Dataset.
      * @return a new Dataset containing only the rows that satisfy the predicate, up to the specified maximum limit.
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or if the specified max is less than 0.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if the specified column name is not found in the Dataset or if the specified max is less than 0.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter, int max)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8100,7 +8222,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a collection of column names whose values will be used as input for the predicate function.
      * @param filter the predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
      * @return a new Dataset containing only the rows that satisfy the predicate.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code columnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code columnNames} is empty.
      */
     Dataset filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter) throws IllegalArgumentException;
 
@@ -8115,7 +8237,7 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
      * @param max the maximum number of rows to include in the resulting Dataset.
      * @return a new Dataset containing only the rows that satisfy the predicate, up to the specified maximum limit.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code columnNames} is empty or if the specified max is less than 0.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code columnNames} is empty or if the specified max is less than 0.
      */
     Dataset filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max) throws IllegalArgumentException;
 
@@ -8126,13 +8248,13 @@ public sealed interface Dataset permits RowDataset {
      * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting Dataset.
      * The operation is performed on a range of rows specified by the fromRowIndex and toRowIndex parameters.
      *
-     * @param fromRowIndex the starting index of the row range to filter (inclusive).
-     * @param toRowIndex the ending index of the row range to filter (exclusive).
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a collection of column names whose values will be used as input for the predicate function.
      * @param filter the predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
      * @return a new Dataset containing only the rows that satisfy the predicate.
-     * @throws IndexOutOfBoundsException if the specified row index range is out of the Dataset's bounds.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code columnNames} is empty.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code columnNames} is empty.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8143,14 +8265,14 @@ public sealed interface Dataset permits RowDataset {
      * The Predicate is applied to each DisposableObjArray (which represents a row in the Dataset) from the specified columns, and only rows where the Predicate returns {@code true} are included in the returned Dataset.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     * @param fromRowIndex the start index of the row range to filter.
-     * @param toRowIndex the end index of the row range to filter.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Collection containing the names of the columns to be used in the Predicate.
      * @param filter the Predicate to apply to each DisposableObjArray from the specified columns. It takes an instance of DisposableObjArray, which represents the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided Predicate returns {@code true} for the DisposableObjArray from the specified columns, within the specified row index range and up to the specified maximum limit.
-     * @throws IndexOutOfBoundsException if the specified row index range is out of the Dataset's bounds.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code columnNames} is empty or if the specified max is less than 0.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code columnNames} is empty or if the specified max is less than 0.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -8166,7 +8288,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnName the name of the column to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a new value.
      * @return a new Dataset with the new column added and the specified column copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset map(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper) throws IllegalArgumentException;
 
@@ -8181,7 +8303,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a new value.
      * @return a new Dataset with the new column added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper) throws IllegalArgumentException;
 
@@ -8196,7 +8318,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified columns. It takes instances of the columns' values and returns a new value.
      * @return a new Dataset with the new column added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper)
             throws IllegalArgumentException;
@@ -8212,7 +8334,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified columns. It takes instances of the columns' values and returns a new value.
      * @return a new Dataset with the new column added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, TriFunction<?, ?, ?, ?> mapper)
             throws IllegalArgumentException;
@@ -8228,7 +8350,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the Dataset's row for the specified columns.
      * @return a new Dataset with the new column added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
      */
     Dataset map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, Function<? super DisposableObjArray, ?> mapper)
             throws IllegalArgumentException;
@@ -8276,7 +8398,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapper that turns each input row into a dataset whose rows are concatenated
      * @return a new Dataset with the new rows added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset flatMap(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             BiFunction<?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
@@ -8292,7 +8414,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the Dataset's row for the specified columns, and returns a Collection of new rows.
      * @return a new Dataset with the new rows added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     Dataset flatMap(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             TriFunction<?, ?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
@@ -8308,7 +8430,7 @@ public sealed interface Dataset permits RowDataset {
      * @param copyingColumnNames a collection of column names to be copied to the new Dataset.
      * @param mapper the mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the Dataset's row for the specified columns.
      * @return a new Dataset with the new column added and the specified columns copied.
-     * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
      */
     Dataset flatMap(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             Function<? super DisposableObjArray, ? extends Collection<?>> mapper) throws IllegalArgumentException;
@@ -8389,7 +8511,7 @@ public sealed interface Dataset permits RowDataset {
      * <pre>{@code
      * Dataset employees = Dataset.rows(Arrays.asList("id", "name"), empData);
      * Dataset salaries = Dataset.rows(Arrays.asList("emp_id", "salary"), salData);
-     * Dataset result = employees.leftJoin(salaries, "id", "emp_id");  // includes all employees
+     * Dataset result = employees.leftJoin(salaries, "id", "emp_id");   // includes all employees
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8411,7 +8533,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Dataset joined = left.leftJoin(Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}}), Arrays.asList("id"));
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
+     * Dataset joined = left.leftJoin(right, N.asMap("id", "id"));   // join on id column from both datasets
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8432,8 +8555,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Dataset joined = left.leftJoin(Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}}), Arrays.asList("id"));
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
+     * Dataset joined = left.leftJoin(right, N.asMap("id", "id"), "scoreData", Map.class);
+     * // Result will have columns: id, name, scoreData (containing the joined row data from right)
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8498,8 +8623,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
-     * Dataset joined = right.rightJoin(Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}}), Arrays.asList("id"));
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}, {2, 85}});
+     * Dataset joined = left.rightJoin(right, N.asMap("id", "id"));   // includes all rows from right dataset
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8520,8 +8646,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
-     * Dataset joined = right.rightJoin(Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}}), Arrays.asList("id"));
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}, {2, 85}});
+     * Dataset joined = left.rightJoin(right, N.asMap("id", "id"), "rightData", Map.class);
+     * // Result will have all rows from right dataset with corresponding left data
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8585,8 +8713,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Dataset joined = left.fullJoin(Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}}), Arrays.asList("id"));
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}, {3, 85}});
+     * Dataset joined = left.fullJoin(right, N.asMap("id", "id"));   // includes all rows from both datasets
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8606,8 +8735,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Dataset joined = left.fullJoin(Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}}), Arrays.asList("id"));
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}, {3, 85}});
+     * Dataset joined = left.fullJoin(right, N.asMap("id", "id"), "joinData", Map.class);
+     * // Result includes all rows from both datasets with joined data in joinData column
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -9010,7 +9141,7 @@ public sealed interface Dataset permits RowDataset {
      * @param other the other Dataset to intersect with
      * @param keyColumnNames the collection of column names to be used as keys for intersection
      * @return a new Dataset that is the result of the intersection operation
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if keyColumnNames is {@code null} or empty
+     * @throws IllegalArgumentException if the other Dataset is {@code null} or if the keyColumnNames is {@code null} or empty
      * @see #intersect(Dataset)
      * @see #union(Dataset, Collection)
      * @see #except(Dataset, Collection)
@@ -9053,7 +9184,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnNames the collection of column names to be used as keys for intersection
      * @param requiresSameColumns whether both Datasets must have the same columns
      * @return a new Dataset that is the result of the intersection operation
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, if keyColumnNames is {@code null} or empty, 
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, if the keyColumnNames is {@code null} or empty,
      *                                  or if requiresSameColumns is {@code true} and the Datasets do not have the same columns
      * @see #intersect(Dataset)
      * @see #intersect(Dataset, Collection)
@@ -10192,8 +10323,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * Dataset[] parts = dataset.split(2);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}, {3, "Carol"}});
+     * Stream<Dataset> parts = dataset.split(2, Arrays.asList("id"));
      * }</pre>
      *
      * @param chunkSize the maximum number of rows each split Dataset should contain.
@@ -10231,8 +10362,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * List<Dataset> parts = dataset.splitToList(2);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}, {3, "Carol"}});
+     * List<Dataset> parts = dataset.splitToList(2, Arrays.asList("id"));
      * }</pre>
      *
      * @param chunkSize the maximum number of rows each split Dataset should contain.
@@ -10271,8 +10402,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
-     * Dataset slice = dataset.slice(0, 1);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Dataset slice = dataset.slice(Arrays.asList("id", "name"));
      * }</pre>
      *
      * @param columnNames the collection of column names to be included in the sliced Dataset.
@@ -10290,8 +10421,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
-     * Dataset slice = dataset.slice(0, 1);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Dataset slice = dataset.slice(0, 1, Arrays.asList("id", "name"));
      * }</pre>
      *
      * @param fromRowIndex the starting index of the slice, inclusive.
@@ -10312,7 +10443,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset original = Dataset.rows(Arrays.asList("name", "age"), data);
-     * Dataset backup = original.copy();  // creates an independent copy
+     * Dataset backup = original.copy();   // creates an independent copy
      * }</pre>
      *
      * @return a new Dataset that is a copy of the current Dataset.
@@ -10346,8 +10477,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * Dataset slice = dataset.copy(0, 2);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Dataset copy = dataset.copy(Arrays.asList("id", "name"));
      * }</pre>
      *
      * @param columnNames the collection of column names to be included in the copy.
@@ -10364,8 +10495,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * Dataset slice = dataset.copy(0, 2);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * Dataset copy = dataset.copy(0, 1, Arrays.asList("id", "name"));
      * }</pre>
      *
      * @param fromRowIndex the starting index of the copy, inclusive.
@@ -10381,7 +10512,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.
      * <br />
      * This method ensures that the returned Dataset is a completely separate copy of the original Dataset, with no shared references.
-     * The frozen status of the copy will always be same as the frozen status in the original Dataset.
+     * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10392,7 +10523,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset that is a deep copy of the current Dataset.
      */
     @Beta
-    Dataset clone(); //NOSONAR
+    Dataset clone();   //NOSONAR
 
     /**
      * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.
@@ -10418,8 +10549,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Iterator<ImmutableList<Object>> rows = dataset.iterator();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
+     * BiIterator<Integer, String> iter = dataset.iterator("id", "name");
+     * while (iter.hasNext()) {
+     *     iter.forEachRemaining((id, name) -> System.out.println(id + ": " + name));
+     * }
      * }</pre>
      *
      * @param <A> the type of the elements in the column specified by columnNameA.
@@ -10439,8 +10573,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Iterator<ImmutableList<Object>> rows = dataset.iterator();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}, {3, "Carol"}});
+     * BiIterator<Integer, String> iter = dataset.iterator(0, 2, "id", "name");
      * }</pre>
      *
      * @param <A> the type of the elements in the column specified by columnNameA.
@@ -10463,8 +10597,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Iterator<ImmutableList<Object>> rows = dataset.iterator();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}});
+     * TriIterator<Integer, String, Integer> iter = dataset.iterator("id", "name", "age");
      * }</pre>
      *
      * @param <A> the type of the elements in the column specified by columnNameA.
@@ -10486,21 +10620,21 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Iterator<ImmutableList<Object>> rows = dataset.iterator();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), new Object[][] {{1, "Alice", 25}, {2, "Bob", 30}, {3, "Carol", 28}});
+     * TriIterator<Integer, String, Integer> iter = dataset.iterator(0, 2, "id", "name", "age");
      * }</pre>
      *
      * @param <A> the type of the elements in the column specified by columnNameA.
      * @param <B> the type of the elements in the column specified by columnNameB.
      * @param <C> the type of the elements in the column specified by columnNameC.
-     * @param fromRowIndex the starting row index for the iteration.
-     * @param toRowIndex the ending row index for the iteration.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNameA the name of the first column to iterate over.
      * @param columnNameB the name of the second column to iterate over.
      * @param columnNameC the name of the third column to iterate over.
      * @return a TriIterator over triplets of elements from the specified columns.
      * @throws IndexOutOfBoundsException if either fromRowIndex or toRowIndex is out of the Dataset's row bounds.
-     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.s
+     * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
     <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -10530,8 +10664,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * Paginated<Dataset> pages = dataset.paginate(2);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}, {3, "Charlie"}});
+     * Paginated<Dataset> pages = dataset.paginate(Arrays.asList("id"), 2);
      * }</pre>
      *
      * @param columnNames the collection of column names to be included in the paginated Dataset.
@@ -10567,13 +10701,13 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Stream<String> names = dataset.stream("name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}, {3, "Charlie"}});
+     * Stream<String> names = dataset.stream(0, 2, "name");  // Stream of ["Alice", "Bob"]
      * }</pre>
      *
      * @param <T> the type of the elements in the Stream.
-     * @param fromRowIndex the starting row index for the Stream.
-     * @param toRowIndex the ending row index for the Stream.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnName the name of the column in the Dataset to create the Stream from.
      * @return a Stream containing all values from the specified column in the Dataset.
      * @throws IndexOutOfBoundsException if the specified row indexes are out of the Dataset's range.
@@ -10595,7 +10729,7 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of objects in the resulting Stream.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from rows in the Dataset.
-     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> Stream<T> stream(Class<? extends T> rowType) throws IllegalArgumentException;
 
@@ -10605,27 +10739,39 @@ public sealed interface Dataset permits RowDataset {
      * The type of objects in the resulting Stream is determined by the provided rowType.
      * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Employee> empStream = employees.stream(0, 10, Employee.class);  // First 10 employees
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row subset.
-     * @param toRowIndex the ending index of the row subset.
-     * @param rowType the class of the objects in the resulting Stream.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
+     * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
-     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Creates a Stream of objects of type {@code T} from a subset of rows in the Dataset.
+     * Creates a Stream of objects of type {@code T} from rows in the Dataset.
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowType.
      * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Employee> empStream = employees.stream(Arrays.asList("name", "age"), Employee.class);
+     * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
      * @param columnNames the collection of column names to be included to the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from rows in the Dataset.
-     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class, or if the columnNames are not found in the Dataset or {@code columnNames} is empty.
      */
     <T> Stream<T> stream(Collection<String> columnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
@@ -10636,14 +10782,20 @@ public sealed interface Dataset permits RowDataset {
      * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
      * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Employee> empStream = employees.stream(0, 10, Arrays.asList("name", "age"), Employee.class);
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row subset.
-     * @param toRowIndex the ending index of the row subset.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included to the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
-     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class, or if the columnNames are not found in the Dataset or {@code columnNames} is empty.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType)
             throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -10653,6 +10805,12 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Map<String, Object>> mapStream = employees.stream(i -> new HashMap<>());
+     * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
@@ -10668,9 +10826,15 @@ public sealed interface Dataset permits RowDataset {
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
      * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Map<String, Object>> mapStream = employees.stream(0, 10, i -> new HashMap<>());
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row subset.
-     * @param toRowIndex the ending index of the row subset.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
@@ -10684,6 +10848,12 @@ public sealed interface Dataset permits RowDataset {
      * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
      * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Map<String, Object>> mapStream = employees.stream(Arrays.asList("name", "age"), i -> new HashMap<>());
+     * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
      * @param columnNames the collection of column names to be included to the instances created by rowSupplier.
@@ -10700,9 +10870,15 @@ public sealed interface Dataset permits RowDataset {
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
      * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<Map<String, Object>> mapStream = employees.stream(0, 10, Arrays.asList("name", "age"), i -> new HashMap<>());
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row subset.
-     * @param toRowIndex the ending index of the row subset.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included to the instances created by rowSupplier.
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
@@ -10734,8 +10910,8 @@ public sealed interface Dataset permits RowDataset {
      * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row subset.
-     * @param toRowIndex the ending index of the row subset.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param prefixAndFieldNameMap the map of prefixes and field names to be used for mapping Dataset's columns to the fields of the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
@@ -10757,7 +10933,7 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map of prefixes and field names to be used for mapping Dataset's columns to the fields of the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
      * @return a Stream of objects of type T
-     * @throws IllegalArgumentException if the columnNames are not found in the Dataset or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
+     * @throws IllegalArgumentException if the columnNames are not found in the Dataset or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code rowType} is not a supported type - Bean class.
      */
     <T> Stream<T> stream(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) throws IllegalArgumentException;
 
@@ -10770,14 +10946,14 @@ public sealed interface Dataset permits RowDataset {
      * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row, inclusive.
-     * @param toRowIndex the ending index of the row, exclusive.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included in the {@code rowType}.
      * @param prefixAndFieldNameMap the map of prefixes and field names to be used for mapping Dataset's columns to the fields of the {@code rowType}.
-     * @param rowType the class of the objects in the resulting Stream.
+     * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
      * @return a Stream of objects of type T
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
-     * @throws IllegalArgumentException if the columnNames are not found in the Dataset or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
+     * @throws IllegalArgumentException if the columnNames are not found in the Dataset or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code rowType} is not a supported type - Bean class.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
             Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -10787,6 +10963,14 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
      * The DisposableObjArray contains the values of the row.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<String> summaries = employees.stream((rowIndex, row) ->
+     *     row.get(0) + " is " + row.get(1) + " years old"
+     * );
+     * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
@@ -10802,9 +10986,17 @@ public sealed interface Dataset permits RowDataset {
      * The DisposableObjArray contains the values of the row.
      * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<String> summaries = employees.stream(0, 10, (rowIndex, row) ->
+     *     row.get(0) + " is " + row.get(1) + " years old"
+     * );
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row, inclusive.
-     * @param toRowIndex the ending index of the row, exclusive.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
      * @return a Stream of objects of type T, created by applying the rowMapper function to each row in the Dataset.
@@ -10819,6 +11011,14 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
      * The DisposableObjArray contains the values of the specified columns for that row.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<String> summaries = employees.stream(Arrays.asList("name", "age"), (rowIndex, row) ->
+     *     row.get(0) + " is " + row.get(1) + " years old"
+     * );
+     * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
      * @param columnNames a collection of column names to be included in the DisposableObjArray passed to the rowMapper function.
@@ -10836,9 +11036,17 @@ public sealed interface Dataset permits RowDataset {
      * The DisposableObjArray contains the values of the specified columns for that row.
      * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("name", "age", "salary"), data);
+     * Stream<String> summaries = employees.stream(0, 10, Arrays.asList("name", "age"), (rowIndex, row) ->
+     *     row.get(0) + " is " + row.get(1) + " years old"
+     * );
+     * }</pre>
+     *
      * @param <T> the type of objects in the resulting Stream.
-     * @param fromRowIndex the starting index of the row, inclusive.
-     * @param toRowIndex the ending index of the row, exclusive.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a collection of column names to be included in the DisposableObjArray passed to the rowMapper function.
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
@@ -10854,6 +11062,14 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The row mapper function is used to transform the values of the two columns into an instance of type T.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("firstName", "lastName", "age"), data);
+     * Stream<String> fullNames = employees.stream(Tuple.of("firstName", "lastName"),
+     *     (first, last) -> first + " " + last
+     * );
+     * }</pre>
+     *
      * @param <T> the type of the elements in the resulting Stream
      * @param columnNames a Tuple2 containing the names of the two columns to be used
      * @param rowMapper a BiFunction to transform the values of the two columns into an instance of type T
@@ -10868,9 +11084,17 @@ public sealed interface Dataset permits RowDataset {
      * The Stream will contain all values from the specified columns, starting from the row index specified by <i>fromRowIndex</i> and ending at the row index specified by <i>toRowIndex</i>.
      * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("firstName", "lastName", "age"), data);
+     * Stream<String> fullNames = employees.stream(0, 10, Tuple.of("firstName", "lastName"),
+     *     (first, last) -> first + " " + last
+     * );
+     * }</pre>
+     *
      * @param <T> the type of the elements in the resulting Stream
-     * @param fromRowIndex the starting index of the row, inclusive
-     * @param toRowIndex the ending index of the row, exclusive
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames a Tuple2 containing the names of the two columns to be used
      * @param rowMapper a BiFunction to transform the values of the two columns into an instance of type T
      * @return a Stream of type T
@@ -10886,6 +11110,14 @@ public sealed interface Dataset permits RowDataset {
      * The Stream will contain all values from the specified columns.
      * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("firstName", "lastName", "age"), data);
+     * Stream<String> descriptions = employees.stream(Tuple.of("firstName", "lastName", "age"),
+     *     (first, last, age) -> first + " " + last + " (" + age + ")"
+     * );
+     * }</pre>
+     *
      * @param <T> the type of the elements in the Stream.
      * @param columnNames the names of the columns in the Dataset to create the Stream from.
      * @param rowMapper the function to transform the values from the specified columns into an object of type T.
@@ -10900,9 +11132,17 @@ public sealed interface Dataset permits RowDataset {
      * The Stream will contain all values from the specified columns, starting from the row index specified by <i>fromRowIndex</i> and ending at the row index specified by <i>toRowIndex</i>.
      * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset employees = Dataset.rows(Arrays.asList("firstName", "lastName", "age"), data);
+     * Stream<String> descriptions = employees.stream(0, 10, Tuple.of("firstName", "lastName", "age"),
+     *     (first, last, age) -> first + " " + last + " (" + age + ")"
+     * );
+     * }</pre>
+     *
      * @param <T> the type of the elements in the Stream.
-     * @param fromRowIndex the starting row index for the Stream.
-     * @param toRowIndex the ending row index for the Stream.
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to create the Stream from.
      * @param rowMapper the function to transform the values from the specified columns into an object of type T.
      * @return a Stream containing all values from the specified columns in the Dataset, transformed by the row mapper function.
@@ -10995,7 +11235,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset config = Dataset.rows(Arrays.asList("key", "value"), data);
-     * config.freeze();  // prevents further modifications
+     * config.freeze();   // prevents further modifications
      * }</pre>
      */
     void freeze();
@@ -11021,7 +11261,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset tempData = Dataset.rows(Arrays.asList("id", "name"), data);
-     * tempData.clear();  // removes all rows
+     * tempData.clear();   // removes all rows
      * }</pre>
      * @throws IllegalStateException if the Dataset is frozen and cannot be modified.
      */
@@ -11061,7 +11301,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * // Can also be called on frozen datasets
      * dataset.freeze();
-     * dataset.trimToSize();  // Still valid - doesn't modify content
+     * dataset.trimToSize();   // Still valid - doesn't modify content
      * }</pre>
      *
      * @see #freeze()
@@ -11076,7 +11316,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset employees = Dataset.rows(Arrays.asList("name", "age"), data);
-     * int totalEmployees = employees.size();  // returns row count
+     * int totalEmployees = employees.size();   // returns row count
      * }</pre>
      *
      * @return the number of rows in the Dataset.
@@ -11148,7 +11388,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.println("## ");  // Print entire Dataset to console with prefix "## "
+     * dataset.println("## ");   // Print entire Dataset to console with prefix "## "
      * 
      * ## +----+---------+-----+---------+
      * ## | id | name    | age | salary  |
@@ -11169,15 +11409,15 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Prints a portion of the Dataset to the standard output.
      * <br />
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.println(0, 10);  // Print first 10 rows to console
+     * dataset.println(0, 10);   // Print first 10 rows to console
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row, inclusive
-     * @param toRowIndex the ending index of the row, exclusive
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
      * @see #println()
      * @see #println(String)
@@ -11187,14 +11427,16 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Prints a portion of the Dataset to the standard output.
      * <br />
-     * 
+     * Only the specified columns and rows will be printed.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
+     * dataset.println(0, 5, Arrays.asList("id", "name"));   // Print first 5 rows, only id and name columns
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row, inclusive
-     * @param toRowIndex the ending index of the row, exclusive
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be printed
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
      * @see #println()
@@ -11210,7 +11452,7 @@ public sealed interface Dataset permits RowDataset {
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
      * StringWriter writer = new StringWriter();
-     * dataset.println(writer);  // Print Dataset to StringWriter
+     * dataset.println(writer);   // Print Dataset to StringWriter
      * }</pre>
      *
      * @param output the appendable where the Dataset will be printed
@@ -11221,16 +11463,19 @@ public sealed interface Dataset permits RowDataset {
     void println(Appendable output) throws UncheckedIOException;
 
     /**
-     * Prints a portion of the Dataset to the provided Writer.
-     * 
+     * Prints a portion of the Dataset to the provided Appendable.
+     * <br />
+     * Only the specified columns and rows will be printed to the output.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * dataset.println();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
+     * StringWriter writer = new StringWriter();
+     * dataset.println(0, 10, Arrays.asList("id", "name"), writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row, inclusive
-     * @param toRowIndex the ending index of the row, exclusive
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be printed
      * @param output the appendable where the Dataset will be printed
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
@@ -11241,16 +11486,19 @@ public sealed interface Dataset permits RowDataset {
     void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Appendable output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
-     * Prints a portion of the Dataset to the provided Writer.
-     * 
+     * Prints a portion of the Dataset to the provided Appendable with a custom prefix.
+     * <br />
+     * Only the specified columns and rows will be printed to the output, with each line prefixed by the given prefix string.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * dataset.println();
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
+     * StringWriter writer = new StringWriter();
+     * dataset.println(0, 10, Arrays.asList("id", "name"), "## ", writer);
      * }</pre>
      *
-     * @param fromRowIndex the starting index of the row, inclusive
-     * @param toRowIndex the ending index of the row, exclusive
+     * @param fromRowIndex the starting index of the row range (inclusive).
+     * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be printed
      * @param prefix the prefix string to be printed before each line of the Dataset output
      * @param output the appendable where the Dataset will be printed

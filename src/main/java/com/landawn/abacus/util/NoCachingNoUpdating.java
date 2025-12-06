@@ -223,7 +223,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * disposable.foreach(System.out::println);  // Prints each element
+         * disposable.foreach(System.out::println);   // Prints each element
          * }</pre>
          *
          * @param <E> the type of exception that the action may throw
@@ -274,7 +274,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * String joined = disposable.join(", ");  // "a, b, c"
+         * String joined = disposable.join(", ");   // "a, b, c"
          * }</pre>
          *
          * @param delimiter the delimiter to use between elements
@@ -291,7 +291,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * String joined = disposable.join(", ", "[", "]");  // "[a, b, c]"
+         * String joined = disposable.join(", ", "[", "]");   // "[a, b, c]"
          * }</pre>
          *
          * @param delimiter the delimiter to use between elements
@@ -2438,7 +2438,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableEntry<String, Integer> entry = DisposableEntry.wrap(Map.entry("age", 25));
-         * String result = entry.apply((k, v) -> k + "=" + v);  // "age=25"
+         * String result = entry.apply((k, v) -> k + "=" + v);   // "age=25"
          * }</pre>
          *
          * @param <R> the type of the result
@@ -2568,7 +2568,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposablePair<Integer, Integer> pair = DisposablePair.wrap(Pair.of(3, 4));
-         * Integer sum = pair.apply((l, r) -> l + r);  // 7
+         * Integer sum = pair.apply((l, r) -> l + r);   // 7
          * }</pre>
          *
          * @param <U> the type of the result
@@ -2703,7 +2703,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableTriple<Integer, Integer, Integer> triple = DisposableTriple.wrap(Triple.of(1, 2, 3));
-         * Integer sum = triple.apply((l, m, r) -> l + m + r);  // 6
+         * Integer sum = triple.apply((l, m, r) -> l + m + r);   // 6
          * }</pre>
          *
          * @param <U> the type of the result

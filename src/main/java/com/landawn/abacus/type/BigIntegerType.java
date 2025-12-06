@@ -35,6 +35,10 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      */
     public static final String BIG_INTEGER = BigInteger.class.getSimpleName();
 
+    /**
+     * Package-private constructor for BigIntegerType.
+     * This constructor is called by the TypeFactory to create BigInteger type instances.
+     */
     BigIntegerType() {
         super(BIG_INTEGER);
     }
@@ -97,7 +101,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
      * ResultSet rs = ...;  // from SQL query
-     * BigInteger largeId = type.get(rs, 1);  // retrieves BigInteger from column 1
+     * BigInteger largeId = type.get(rs, 1);   // retrieves BigInteger from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -119,7 +123,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
      * ResultSet rs = ...;  // from SQL query
-     * BigInteger largeId = type.get(rs, "large_id");  // retrieves BigInteger from "large_id" column
+     * BigInteger largeId = type.get(rs, "large_id");   // retrieves BigInteger from "large_id" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -158,9 +162,17 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     /**
      * Sets a named BigInteger parameter in a CallableStatement.
      *
-     * @param stmt the CallableStatement to set the parameter on
-     * @param parameterName the name of the parameter to set
-     * @param x the BigInteger value to set, may be null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
+     * CallableStatement stmt = conn.prepareCall("{call processLargeNumber(?)}");
+     * type.set(stmt, "largeNum", new BigInteger("12345678901234567890"));
+     * stmt.execute();
+     * }</pre>
+     *
+     * @param stmt the CallableStatement to set the parameter on, must not be {@code null}
+     * @param parameterName the name of the parameter to set, must not be {@code null}
+     * @param x the BigInteger value to set, may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

@@ -401,9 +401,9 @@ public final class Clazz {
      * MyObject obj = deserialize(json, Clazz.of(MyObject.class));
      * }</pre>
      *
-     * @param <T> the target type parameter
-     * @param cls the class to cast (must not be null)
-     * @return a typed Class reference with generic type information
+     * @param <T> the target type parameter.
+     * @param cls the class to cast (must not be null).
+     * @return a typed Class reference with generic type information.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -424,8 +424,8 @@ public final class Clazz {
      * Class<List<String>> listClass = Clazz.ofList();
      * }</pre>
      *
-     * @param <T> the element type of the list
-     * @return the Class object representing {@code List<T>}
+     * @param <T> the element type of the list.
+     * @return the Class object representing {@code List<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -458,9 +458,9 @@ public final class Clazz {
      * List<String> result = deserializer.readValue(json, Clazz.ofList(String.class));
      * }</pre>
      *
-     * @param <T> the element type of the list
-     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code List} interface
+     * @param <T> the element type of the list.
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code List} interface.
      * @see #ofLinkedList(Class) for a specific List implementation
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
@@ -482,8 +482,8 @@ public final class Clazz {
      * Class<List<String>> linkedListClass = Clazz.ofLinkedList();
      * }</pre>
      *
-     * @param <T> the element type of the list
-     * @return the Class object representing {@code LinkedList<T>}
+     * @param <T> the element type of the list.
+     * @return the Class object representing {@code LinkedList<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -504,9 +504,9 @@ public final class Clazz {
      * Class<List<String>> linkedListClass = Clazz.ofLinkedList(String.class);
      * }</pre>
      *
-     * @param <T> the element type of the list
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code LinkedList<T>}
+     * @param <T> the element type of the list.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code LinkedList<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -527,11 +527,11 @@ public final class Clazz {
      * Class<List<Map<String, Object>>> listOfMapsClass = Clazz.ofListOfMap(String.class, Object.class);
      * }</pre>
      *
-     * @param <K> the key type of the maps in the list
-     * @param <V> the value type of the maps in the list
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code List<Map<K, V>>}
+     * @param <K> the key type of the maps in the list.
+     * @param <V> the value type of the maps in the list.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code List<Map<K, V>>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -553,11 +553,11 @@ public final class Clazz {
      * Class<Set<Map<String, Integer>>> setOfMapsClass = Clazz.ofSetOfMap(String.class, Integer.class);
      * }</pre>
      *
-     * @param <K> the key type of the maps in the set
-     * @param <V> the value type of the maps in the set
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code Set<Map<K, V>>}
+     * @param <K> the key type of the maps in the set.
+     * @param <V> the value type of the maps in the set.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code Set<Map<K, V>>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -579,8 +579,8 @@ public final class Clazz {
      * Class<Set<String>> setClass = Clazz.ofSet();
      * }</pre>
      *
-     * @param <T> the element type of the set
-     * @return the Class object representing {@code Set<T>}
+     * @param <T> the element type of the set.
+     * @return the Class object representing {@code Set<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -602,9 +602,9 @@ public final class Clazz {
      * Class<Set<Integer>> intSetClass = Clazz.ofSet(Integer.class);
      * }</pre>
      *
-     * @param <T> the element type of the set
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code Set<T>}
+     * @param <T> the element type of the set.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code Set<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -625,8 +625,8 @@ public final class Clazz {
      * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet();
      * }</pre>
      *
-     * @param <T> the element type of the set
-     * @return the Class object representing {@code LinkedHashSet<T>}
+     * @param <T> the element type of the set.
+     * @return the Class object representing {@code LinkedHashSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -647,9 +647,9 @@ public final class Clazz {
      * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet(String.class);
      * }</pre>
      *
-     * @param <T> the element type of the set
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code LinkedHashSet<T>}
+     * @param <T> the element type of the set.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code LinkedHashSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -670,8 +670,8 @@ public final class Clazz {
      * Class<SortedSet<String>> sortedSetClass = Clazz.ofSortedSet();
      * }</pre>
      *
-     * @param <T> the element type of the sorted set
-     * @return the Class object representing {@code SortedSet<T>}
+     * @param <T> the element type of the sorted set.
+     * @return the Class object representing {@code SortedSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -692,9 +692,9 @@ public final class Clazz {
      * Class<SortedSet<Integer>> sortedIntSetClass = Clazz.ofSortedSet(Integer.class);
      * }</pre>
      *
-     * @param <T> the element type of the sorted set
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code SortedSet<T>}
+     * @param <T> the element type of the sorted set.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code SortedSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -715,8 +715,8 @@ public final class Clazz {
      * Class<NavigableSet<String>> navigableSetClass = Clazz.ofNavigableSet();
      * }</pre>
      *
-     * @param <T> the element type of the navigable set
-     * @return the Class object representing {@code NavigableSet<T>}
+     * @param <T> the element type of the navigable set.
+     * @return the Class object representing {@code NavigableSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -737,9 +737,9 @@ public final class Clazz {
      * Class<NavigableSet<Double>> navigableDoubleSetClass = Clazz.ofNavigableSet(Double.class);
      * }</pre>
      *
-     * @param <T> the element type of the navigable set
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code NavigableSet<T>}
+     * @param <T> the element type of the navigable set.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code NavigableSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -760,8 +760,8 @@ public final class Clazz {
      * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet();
      * }</pre>
      *
-     * @param <T> the element type of the tree set
-     * @return the Class object representing {@code TreeSet<T>}
+     * @param <T> the element type of the tree set.
+     * @return the Class object representing {@code TreeSet<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -800,9 +800,9 @@ public final class Clazz {
      * // numbers now contains: [1, 2, 5, 8]
      * }</pre>
      *
-     * @param <T> the element type of the tree set
-     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code TreeSet} concrete class
+     * @param <T> the element type of the tree set.
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code TreeSet} concrete class.
      * @see #ofNavigableSet(Class) for the NavigableSet interface
      * @see #ofSortedSet(Class) for the SortedSet interface
      * @see TypeReference#type()
@@ -825,8 +825,8 @@ public final class Clazz {
      * Class<Queue<String>> queueClass = Clazz.ofQueue();
      * }</pre>
      *
-     * @param <T> the element type of the queue
-     * @return the Class object representing {@code Queue<T>}
+     * @param <T> the element type of the queue.
+     * @return the Class object representing {@code Queue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -847,9 +847,9 @@ public final class Clazz {
      * Class<Queue<Task>> taskQueueClass = Clazz.ofQueue(Task.class);
      * }</pre>
      *
-     * @param <T> the element type of the queue
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code Queue<T>}
+     * @param <T> the element type of the queue.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code Queue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -870,8 +870,8 @@ public final class Clazz {
      * Class<Deque<String>> dequeClass = Clazz.ofDeque();
      * }</pre>
      *
-     * @param <T> the element type of the deque
-     * @return the Class object representing {@code Deque<T>}
+     * @param <T> the element type of the deque.
+     * @return the Class object representing {@code Deque<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -892,9 +892,9 @@ public final class Clazz {
      * Class<Deque<Integer>> intDequeClass = Clazz.ofDeque(Integer.class);
      * }</pre>
      *
-     * @param <T> the element type of the deque
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code Deque<T>}
+     * @param <T> the element type of the deque.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code Deque<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -915,8 +915,8 @@ public final class Clazz {
      * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque();
      * }</pre>
      *
-     * @param <T> the element type of the array deque
-     * @return the Class object representing {@code ArrayDeque<T>}
+     * @param <T> the element type of the array deque.
+     * @return the Class object representing {@code ArrayDeque<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -937,9 +937,9 @@ public final class Clazz {
      * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque(String.class);
      * }</pre>
      *
-     * @param <T> the element type of the array deque
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code ArrayDeque<T>}
+     * @param <T> the element type of the array deque.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code ArrayDeque<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -960,8 +960,8 @@ public final class Clazz {
      * Class<Queue<String>> concurrentQueueClass = Clazz.ofConcurrentLinkedQueue();
      * }</pre>
      *
-     * @param <T> the element type of the concurrent queue
-     * @return the Class object representing {@code ConcurrentLinkedQueue<T>}
+     * @param <T> the element type of the concurrent queue.
+     * @return the Class object representing {@code ConcurrentLinkedQueue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -982,9 +982,9 @@ public final class Clazz {
      * Class<Queue<Message>> messageQueueClass = Clazz.ofConcurrentLinkedQueue(Message.class);
      * }</pre>
      *
-     * @param <T> the element type of the concurrent queue
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code ConcurrentLinkedQueue<T>}
+     * @param <T> the element type of the concurrent queue.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code ConcurrentLinkedQueue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1005,8 +1005,8 @@ public final class Clazz {
      * Class<Queue<Task>> priorityQueueClass = Clazz.ofPriorityQueue();
      * }</pre>
      *
-     * @param <T> the element type of the priority queue
-     * @return the Class object representing {@code PriorityQueue<T>}
+     * @param <T> the element type of the priority queue.
+     * @return the Class object representing {@code PriorityQueue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1027,9 +1027,9 @@ public final class Clazz {
      * Class<Queue<Integer>> intPriorityQueueClass = Clazz.ofPriorityQueue(Integer.class);
      * }</pre>
      *
-     * @param <T> the element type of the priority queue
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code PriorityQueue<T>}
+     * @param <T> the element type of the priority queue.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code PriorityQueue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1050,8 +1050,8 @@ public final class Clazz {
      * Class<BlockingQueue<String>> blockingQueueClass = Clazz.ofLinkedBlockingQueue();
      * }</pre>
      *
-     * @param <T> the element type of the blocking queue
-     * @return the Class object representing {@code LinkedBlockingQueue<T>}
+     * @param <T> the element type of the blocking queue.
+     * @return the Class object representing {@code LinkedBlockingQueue<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1092,9 +1092,9 @@ public final class Clazz {
      * Task task = queue.take();                                     // blocks if queue is empty
      * }</pre>
      *
-     * @param <T> the element type of the blocking queue
-     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code LinkedBlockingQueue} concrete class
+     * @param <T> the element type of the blocking queue.
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code LinkedBlockingQueue} concrete class.
      * @see #ofQueue(Class) for a non-blocking queue
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
@@ -1116,8 +1116,8 @@ public final class Clazz {
      * Class<Collection<String>> collectionClass = Clazz.ofCollection();
      * }</pre>
      *
-     * @param <T> the element type of the collection
-     * @return the Class object representing {@code Collection<T>}
+     * @param <T> the element type of the collection.
+     * @return the Class object representing {@code Collection<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1138,9 +1138,9 @@ public final class Clazz {
      * Class<Collection<User>> userCollectionClass = Clazz.ofCollection(User.class);
      * }</pre>
      *
-     * @param <T> the element type of the collection
-     * @param eleCls the class of elements (used only for type inference)
-     * @return the Class object representing {@code Collection<T>}
+     * @param <T> the element type of the collection.
+     * @param eleCls the class of elements (used only for type inference).
+     * @return the Class object representing {@code Collection<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1161,9 +1161,9 @@ public final class Clazz {
      * Class<Map<String, Object>> mapClass = Clazz.ofMap();
      * }</pre>
      *
-     * @param <K> the key type of the map
-     * @param <V> the value type of the map
-     * @return the Class object representing {@code Map<K, V>}
+     * @param <K> the key type of the map.
+     * @param <V> the value type of the map.
+     * @return the Class object representing {@code Map<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1185,11 +1185,11 @@ public final class Clazz {
      * Class<Map<Long, User>> userMapClass = Clazz.ofMap(Long.class, User.class);
      * }</pre>
      *
-     * @param <K> the key type of the map
-     * @param <V> the value type of the map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code Map<K, V>}
+     * @param <K> the key type of the map.
+     * @param <V> the value type of the map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code Map<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1210,9 +1210,9 @@ public final class Clazz {
      * Class<Map<String, Object>> linkedMapClass = Clazz.ofLinkedHashMap();
      * }</pre>
      *
-     * @param <K> the key type of the map
-     * @param <V> the value type of the map
-     * @return the Class object representing {@code LinkedHashMap<K, V>}
+     * @param <K> the key type of the map.
+     * @param <V> the value type of the map.
+     * @return the Class object representing {@code LinkedHashMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1233,11 +1233,11 @@ public final class Clazz {
      * Class<Map<String, Object>> propsMapClass = Clazz.ofLinkedHashMap(String.class, Object.class);
      * }</pre>
      *
-     * @param <K> the key type of the map
-     * @param <V> the value type of the map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code LinkedHashMap<K, V>}
+     * @param <K> the key type of the map.
+     * @param <V> the value type of the map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code LinkedHashMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1259,9 +1259,9 @@ public final class Clazz {
      * Class<SortedMap<String, Integer>> sortedMapClass = Clazz.ofSortedMap();
      * }</pre>
      *
-     * @param <K> the key type of the sorted map
-     * @param <V> the value type of the sorted map
-     * @return the Class object representing {@code SortedMap<K, V>}
+     * @param <K> the key type of the sorted map.
+     * @param <V> the value type of the sorted map.
+     * @return the Class object representing {@code SortedMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1282,11 +1282,11 @@ public final class Clazz {
      * Class<SortedMap<Integer, String>> sortedMapClass = Clazz.ofSortedMap(Integer.class, String.class);
      * }</pre>
      *
-     * @param <K> the key type of the sorted map
-     * @param <V> the value type of the sorted map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code SortedMap<K, V>}
+     * @param <K> the key type of the sorted map.
+     * @param <V> the value type of the sorted map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code SortedMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1308,9 +1308,9 @@ public final class Clazz {
      * Class<NavigableMap<String, Object>> navigableMapClass = Clazz.ofNavigableMap();
      * }</pre>
      *
-     * @param <K> the key type of the navigable map
-     * @param <V> the value type of the navigable map
-     * @return the Class object representing {@code NavigableMap<K, V>}
+     * @param <K> the key type of the navigable map.
+     * @param <V> the value type of the navigable map.
+     * @return the Class object representing {@code NavigableMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1331,11 +1331,11 @@ public final class Clazz {
      * Class<NavigableMap<Date, Event>> eventMapClass = Clazz.ofNavigableMap(Date.class, Event.class);
      * }</pre>
      *
-     * @param <K> the key type of the navigable map
-     * @param <V> the value type of the navigable map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code NavigableMap<K, V>}
+     * @param <K> the key type of the navigable map.
+     * @param <V> the value type of the navigable map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code NavigableMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1357,9 +1357,9 @@ public final class Clazz {
      * Class<NavigableMap<String, Integer>> treeMapClass = Clazz.ofTreeMap();
      * }</pre>
      *
-     * @param <K> the key type of the tree map
-     * @param <V> the value type of the tree map
-     * @return the Class object representing {@code TreeMap<K, V>}
+     * @param <K> the key type of the tree map.
+     * @param <V> the value type of the tree map.
+     * @return the Class object representing {@code TreeMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1380,11 +1380,11 @@ public final class Clazz {
      * Class<NavigableMap<String, List<String>>> treeMapClass = Clazz.ofTreeMap(String.class, List.class);
      * }</pre>
      *
-     * @param <K> the key type of the tree map
-     * @param <V> the value type of the tree map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code TreeMap<K, V>}
+     * @param <K> the key type of the tree map.
+     * @param <V> the value type of the tree map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code TreeMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1406,9 +1406,9 @@ public final class Clazz {
      * Class<ConcurrentMap<String, Object>> concurrentMapClass = Clazz.ofConcurrentMap();
      * }</pre>
      *
-     * @param <K> the key type of the concurrent map
-     * @param <V> the value type of the concurrent map
-     * @return the Class object representing {@code ConcurrentMap<K, V>}
+     * @param <K> the key type of the concurrent map.
+     * @param <V> the value type of the concurrent map.
+     * @return the Class object representing {@code ConcurrentMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1429,11 +1429,11 @@ public final class Clazz {
      * Class<ConcurrentMap<Long, Session>> sessionMapClass = Clazz.ofConcurrentMap(Long.class, Session.class);
      * }</pre>
      *
-     * @param <K> the key type of the concurrent map
-     * @param <V> the value type of the concurrent map
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueCls the class of map values (used only for type inference)
-     * @return the Class object representing {@code ConcurrentMap<K, V>}
+     * @param <K> the key type of the concurrent map.
+     * @param <V> the value type of the concurrent map.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueCls the class of map values (used only for type inference).
+     * @return the Class object representing {@code ConcurrentMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1455,9 +1455,9 @@ public final class Clazz {
      * Class<ConcurrentMap<String, Object>> concurrentHashMapClass = Clazz.ofConcurrentHashMap();
      * }</pre>
      *
-     * @param <K> the key type of the concurrent hash map
-     * @param <V> the value type of the concurrent hash map
-     * @return the Class object representing {@code ConcurrentHashMap<K, V>}
+     * @param <K> the key type of the concurrent hash map.
+     * @param <V> the value type of the concurrent hash map.
+     * @return the Class object representing {@code ConcurrentHashMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1494,11 +1494,11 @@ public final class Clazz {
      * Class<ConcurrentMap<String, User>> cacheType = Clazz.ofConcurrentHashMap(String.class, User.class);
      * }</pre>
      *
-     * @param <K> the key type of the concurrent hash map
-     * @param <V> the value type of the concurrent hash map
-     * @param keyCls the class of map keys (used only for type inference, not retained at runtime)
-     * @param valueCls the class of map values (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code ConcurrentHashMap} concrete class
+     * @param <K> the key type of the concurrent hash map.
+     * @param <V> the value type of the concurrent hash map.
+     * @param keyCls the class of map keys (used only for type inference, not retained at runtime).
+     * @param valueCls the class of map values (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code ConcurrentHashMap} concrete class.
      * @see #ofConcurrentMap(Class, Class) for the ConcurrentMap interface
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
@@ -1521,9 +1521,9 @@ public final class Clazz {
      * Class<BiMap<String, Integer>> biMapClass = Clazz.ofBiMap();
      * }</pre>
      *
-     * @param <K> the key type of the bimap
-     * @param <V> the value type of the bimap
-     * @return the Class object representing {@code BiMap<K, V>}
+     * @param <K> the key type of the bimap.
+     * @param <V> the value type of the bimap.
+     * @return the Class object representing {@code BiMap<K, V>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1565,14 +1565,14 @@ public final class Clazz {
      * BiMap<String, Integer> userIds = BiMap.create();
      * userIds.put("alice", 101);
      * userIds.put("bob", 102);
-     * String name = userIds.inverse().get(101);  // returns "alice"
+     * String name = userIds.inverse().get(101);   // returns "alice"
      * }</pre>
      *
-     * @param <K> the key type of the bimap
-     * @param <V> the value type of the bimap
-     * @param keyCls the class of map keys (used only for type inference, not retained at runtime)
-     * @param valueCls the class of map values (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code BiMap} interface
+     * @param <K> the key type of the bimap.
+     * @param <V> the value type of the bimap.
+     * @param keyCls the class of map keys (used only for type inference, not retained at runtime).
+     * @param valueCls the class of map values (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code BiMap} interface.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1593,8 +1593,8 @@ public final class Clazz {
      * Class<Multiset<String>> multisetClass = Clazz.ofMultiset();
      * }</pre>
      *
-     * @param <T> the element type of the multiset
-     * @return the Class object representing {@code Multiset<T>}
+     * @param <T> the element type of the multiset.
+     * @return the Class object representing {@code Multiset<T>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1642,12 +1642,12 @@ public final class Clazz {
      * words.add("apple");
      * words.add("banana");
      * words.add("apple");
-     * int count = words.count("apple");  // returns 2
+     * int count = words.count("apple");   // returns 2
      * }</pre>
      *
-     * @param <T> the element type of the multiset
-     * @param eleCls the class of elements (used only for type inference, not retained at runtime)
-     * @return the Class object representing the {@code Multiset} interface
+     * @param <T> the element type of the multiset.
+     * @param eleCls the class of elements (used only for type inference, not retained at runtime).
+     * @return the Class object representing the {@code Multiset} interface.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1668,9 +1668,9 @@ public final class Clazz {
      * Class<ListMultimap<String, Integer>> multiMapClass = Clazz.ofListMultimap();
      * }</pre>
      *
-     * @param <K> the key type of the list multimap
-     * @param <E> the element type of the value collections
-     * @return the Class object representing {@code ListMultimap<K, E>}
+     * @param <K> the key type of the list multimap.
+     * @param <E> the element type of the value collections.
+     * @return the Class object representing {@code ListMultimap<K, E>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1692,11 +1692,11 @@ public final class Clazz {
      *     Clazz.ofListMultimap(String.class, Integer.class);
      * }</pre>
      *
-     * @param <K> the key type of the list multimap
-     * @param <E> the element type of the value collections
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueEleCls the class of value collection elements (used only for type inference)
-     * @return the Class object representing {@code ListMultimap<K, E>}
+     * @param <K> the key type of the list multimap.
+     * @param <E> the element type of the value collections.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueEleCls the class of value collection elements (used only for type inference).
+     * @return the Class object representing {@code ListMultimap<K, E>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1718,9 +1718,9 @@ public final class Clazz {
      * Class<SetMultimap<String, Integer>> multiMapClass = Clazz.ofSetMultimap();
      * }</pre>
      *
-     * @param <K> the key type of the set multimap
-     * @param <E> the element type of the value collections
-     * @return the Class object representing {@code SetMultimap<K, E>}
+     * @param <K> the key type of the set multimap.
+     * @param <E> the element type of the value collections.
+     * @return the Class object representing {@code SetMultimap<K, E>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1742,11 +1742,11 @@ public final class Clazz {
      *     Clazz.ofSetMultimap(String.class, String.class);
      * }</pre>
      *
-     * @param <K> the key type of the set multimap
-     * @param <E> the element type of the value collections
-     * @param keyCls the class of map keys (used only for type inference)
-     * @param valueEleCls the class of value collection elements (used only for type inference)
-     * @return the Class object representing {@code SetMultimap<K, E>}
+     * @param <K> the key type of the set multimap.
+     * @param <E> the element type of the value collections.
+     * @param keyCls the class of map keys (used only for type inference).
+     * @param valueEleCls the class of value collection elements (used only for type inference).
+     * @return the Class object representing {@code SetMultimap<K, E>}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)

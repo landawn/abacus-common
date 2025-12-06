@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -289,7 +290,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Chain Visualization:</b> Upstream future tracking enables dependency analysis</li>
  * </ul>
  *
- * @param <T> the type of the value returned by this Future's {@code get} method
+ * @param <T> the type of the value returned by this Future's {@code get} method.
  *
  * @see Future
  * @see CompletableFuture
@@ -336,8 +337,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param action the action to be executed asynchronously
-     * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action
+     * @param action the action to be executed asynchronously.
+     * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      * @see N#asyncExecute(Throwables.Runnable)
      */
     public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action) {
@@ -360,9 +361,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * }, customExecutor);
      * }</pre>
      *
-     * @param action the action to be executed asynchronously
-     * @param executor the executor to use for running the action
-     * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action
+     * @param action the action to be executed asynchronously.
+     * @param executor the executor to use for running the action.
+     * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      */
     public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor) {
         final FutureTask<Void> futureTask = new FutureTask<>(() -> {
@@ -393,9 +394,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * Integer result = future.get();
      * }</pre>
      *
-     * @param <T> the type of the result returned by the callable
-     * @param action the callable action to be executed asynchronously
-     * @return a {@code ContinuableFuture<T>} representing the pending result of the action
+     * @param <T> the type of the result returned by the callable.
+     * @param action the callable action to be executed asynchronously.
+     * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      * @see N#asyncExecute(Callable)
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
@@ -417,10 +418,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * }, scheduler);
      * }</pre>
      *
-     * @param <T> the type of the result returned by the callable
-     * @param action the callable action to be executed asynchronously
-     * @param executor the executor to use for running the action
-     * @return a {@code ContinuableFuture<T>} representing the pending result of the action
+     * @param <T> the type of the result returned by the callable.
+     * @param action the callable action to be executed asynchronously.
+     * @param executor the executor to use for running the action.
+     * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
         final FutureTask<T> futureTask = new FutureTask<>(action);
@@ -448,7 +449,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<String> future = ContinuableFuture.completed("Hello");
      * 
      * // This doesn't block and returns immediately
-     * String result = future.get();  // "Hello"
+     * String result = future.get();   // "Hello"
      * 
      * // Useful for conditional async operations
      * ContinuableFuture<Data> loadData(boolean useCache) {
@@ -459,9 +460,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param <T> the type of the result
-     * @param result the result that the future should be completed with
-     * @return a {@code ContinuableFuture} that is already completed with the provided result
+     * @param <T> the type of the result.
+     * @param result the result that the future should be completed with.
+     * @return a {@code ContinuableFuture} that is already completed with the provided result.
      */
     public static <T> ContinuableFuture<T> completed(final T result) {
         return new ContinuableFuture<>(new Future<>() {
@@ -514,9 +515,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *            .thenCall(() -> processNextStep());
      * }</pre>
      *
-     * @param <T> the type of the value returned by the future
-     * @param future the future to wrap
-     * @return a {@code ContinuableFuture} that wraps the provided future
+     * @param <T> the type of the value returned by the future.
+     * @param future the future to wrap.
+     * @return a {@code ContinuableFuture} that wraps the provided future.
      */
     public static <T> ContinuableFuture<T> wrap(final Future<T> future) {
         return new ContinuableFuture<>(future);
@@ -542,13 +543,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Cancel after 1 second
      * Thread.sleep(1000);
-     * boolean cancelled = future.cancel(true);  // Interrupt if running
+     * boolean cancelled = future.cancel(true);   // Interrupt if running
      * }</pre>
      *
-     * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted;
-     *                              otherwise, in-progress tasks are allowed to complete
-     * @return {@code false} if the task could not be cancelled, typically because it has already
-     *         completed normally; {@code true} otherwise
+     * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted;.
+     *                              otherwise, in-progress tasks are allowed to complete.
+     * @return {@code false} if the task could not be cancelled, typically because it has already.
+     *         completed normally; {@code true} otherwise.
      * @see Future#cancel(boolean)
      */
     @Override
@@ -573,7 +574,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @return {@code true} if this task was cancelled before it completed
+     * @return {@code true} if this task was cancelled before it completed.
      * @see Future#isCancelled()
      */
     @Override
@@ -599,10 +600,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * boolean allCancelled = future3.cancelAll(true);
      * }</pre>
      *
-     * @param mayInterruptIfRunning {@code true} if the thread executing the tasks should be interrupted;
-     *                              otherwise, in-progress tasks are allowed to complete
-     * @return {@code true} if all futures in the chain were successfully cancelled; {@code false} if
-     *         any future failed to cancel
+     * @param mayInterruptIfRunning {@code true} if the thread executing the tasks should be interrupted;.
+     *                              otherwise, in-progress tasks are allowed to complete.
+     * @return {@code true} if all futures in the chain were successfully cancelled; {@code false} if.
+     *         any future failed to cancel.
      * @see #cancel(boolean)
      * @see Future#cancel(boolean)
      */
@@ -638,7 +639,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @return {@code true} if all futures in the chain have been cancelled; {@code false} otherwise
+     * @return {@code true} if all futures in the chain have been cancelled; {@code false} otherwise.
      * @see #isCancelled()
      * @see Future#isCancelled()
      */
@@ -671,7 +672,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * System.out.println("Task completed!");
      * }</pre>
      *
-     * @return {@code true} if this task completed
+     * @return {@code true} if this task completed.
      * @see Future#isDone()
      */
     @Override
@@ -695,7 +696,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * 
      * try {
-     *     Integer result = future.get();  // Blocks for ~1 second
+     *     Integer result = future.get();   // Blocks for ~1 second
      *     System.out.println("Result: " + result);
      * } catch (InterruptedException e) {
      *     Thread.currentThread().interrupt();
@@ -704,10 +705,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @return the computed result
-     * @throws CancellationException if the computation was cancelled
-     * @throws ExecutionException if the computation threw an exception
-     * @throws InterruptedException if the current thread was interrupted while waiting
+     * @return the computed result.
+     * @throws CancellationException if the computation was cancelled.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
      * @see Future#get()
      */
     @Override
@@ -736,17 +737,17 @@ public class ContinuableFuture<T> implements Future<T> {
      *     System.out.println("Got result: " + result);
      * } catch (TimeoutException e) {
      *     System.err.println("Operation timed out");
-     *     future.cancel(true);  // Cancel the operation
+     *     future.cancel(true);   // Cancel the operation
      * }
      * }</pre>
      *
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @return the computed result
-     * @throws CancellationException if the computation was cancelled
-     * @throws ExecutionException if the computation threw an exception
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws TimeoutException if the wait timed out
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @return the computed result.
+     * @throws CancellationException if the computation was cancelled.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws TimeoutException if the wait timed out.
      * @see Future#get(long, TimeUnit)
      */
     @Override
@@ -781,7 +782,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * String value = result.orElse("default value");
      * }</pre>
      *
-     * @return a {@code Result} object containing either the computed result or the exception
+     * @return a {@code Result} object containing either the computed result or the exception.
      */
     public Result<T, Exception> gett() {
         try {
@@ -807,15 +808,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * Data data = result.orElseGet(() -> {
      *     if (result.getException() instanceof TimeoutException) {
-     *         return getCachedData();  // Fallback on timeout
+     *         return getCachedData();   // Fallback on timeout
      *     }
      *     return getDefaultData();
      * });
      * }</pre>
      *
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @return a {@code Result} object containing either the computed result or the exception
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @return a {@code Result} object containing either the computed result or the exception.
      */
     public Result<T, Exception> gett(final long timeout, final TimeUnit unit) {
         try {
@@ -840,7 +841,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Check immediately without blocking
      * String result = future.getNow("Computing...");
-     * System.out.println(result);  // Prints "Computing..." if not done
+     * System.out.println(result);   // Prints "Computing..." if not done
      * 
      * // Polling pattern
      * while (true) {
@@ -853,11 +854,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param defaultValue the value to return if the computation is not yet complete
-     * @return the computed result if complete, otherwise the defaultValue
-     * @throws CancellationException if the computation was canceled
-     * @throws ExecutionException if the computation threw an exception
-     * @throws InterruptedException if the current thread was interrupted while checking
+     * @param defaultValue the value to return if the computation is not yet complete.
+     * @return the computed result if complete, otherwise the defaultValue.
+     * @throws CancellationException if the computation was canceled.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws InterruptedException if the current thread was interrupted while checking.
      */
     public T getNow(final T defaultValue) throws InterruptedException, ExecutionException {
         if (isDone()) {
@@ -880,22 +881,22 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * // Transform the result synchronously after completion
      * String result = future.getThenApply(num -> "The answer is: " + num);
-     * System.out.println(result);  // "The answer is: 42"
+     * System.out.println(result);   // "The answer is: 42"
      * 
      * // Can throw checked exceptions
      * Data processed = future.getThenApply(num -> {
      *     if (num < 0) throw new IllegalArgumentException("Negative!");
-     *     return processNumber(num);  // May throw IOException
+     *     return processNumber(num);   // May throw IOException
      * });
      * }</pre>
      *
-     * @param <U> the type of the result of the function
-     * @param <E> the type of exception the function may throw
-     * @param action the function to apply to the result
-     * @return the result of applying the function to the computed result
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
-     * @throws E if the function throws an exception
+     * @param <U> the type of the result of the function.
+     * @param <E> the type of exception the function may throw.
+     * @param action the function to apply to the result.
+     * @return the result of applying the function to the computed result.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws E if the function throws an exception.
      */
     public <U, E extends Exception> U getThenApply(final Throwables.Function<? super T, ? extends U, E> action)
             throws InterruptedException, ExecutionException, E {
@@ -920,16 +921,16 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param <U> the type of the result of the function
-     * @param <E> the type of exception the function may throw
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @param action the function to apply to the result
-     * @return the result of applying the function to the computed result
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
-     * @throws TimeoutException if the wait timed out
-     * @throws E if the function throws an exception
+     * @param <U> the type of the result of the function.
+     * @param <E> the type of exception the function may throw.
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @param action the function to apply to the result.
+     * @return the result of applying the function to the computed result.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws TimeoutException if the wait timed out.
+     * @throws E if the function throws an exception.
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit, final Throwables.Function<? super T, ? extends U, E> action)
             throws InterruptedException, ExecutionException, TimeoutException, E {
@@ -959,11 +960,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the type of the result of the function
-     * @param <E> the type of exception the function may throw
-     * @param action the bi-function to apply to the result and exception
-     * @return the result of applying the function
-     * @throws E if the bi-function throws an exception
+     * @param <U> the type of the result of the function.
+     * @param <E> the type of exception the function may throw.
+     * @param action the bi-function to apply to the result and exception.
+     * @return the result of applying the function.
+     * @throws E if the bi-function throws an exception.
      * @see #gett()
      */
     public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E {
@@ -990,13 +991,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the type of the result of the function
-     * @param <E> the type of exception the function may throw
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @param action the bi-function to apply to the result and exception
-     * @return the result of applying the function
-     * @throws E if the bi-function throws an exception
+     * @param <U> the type of the result of the function.
+     * @param <E> the type of exception the function may throw.
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @param action the bi-function to apply to the result and exception.
+     * @return the result of applying the function.
+     * @throws E if the bi-function throws an exception.
      * @see #gett(long, TimeUnit)
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
@@ -1023,11 +1024,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <E> the type of exception the consumer may throw
-     * @param action the consumer to execute with the result
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
-     * @throws E if the consumer throws an exception
+     * @param <E> the type of exception the consumer may throw.
+     * @param action the consumer to execute with the result.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws E if the consumer throws an exception.
      */
     public <E extends Exception> void getThenAccept(final Throwables.Consumer<? super T, E> action) throws InterruptedException, ExecutionException, E {
         action.accept(get());
@@ -1052,14 +1053,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param <E> the type of exception the consumer may throw
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @param action the consumer to execute with the result
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
-     * @throws TimeoutException if the wait timed out
-     * @throws E if the consumer throws an exception
+     * @param <E> the type of exception the consumer may throw.
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @param action the consumer to execute with the result.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws TimeoutException if the wait timed out.
+     * @throws E if the consumer throws an exception.
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit, final Throwables.Consumer<? super T, E> action)
             throws InterruptedException, ExecutionException, TimeoutException, E {
@@ -1089,9 +1090,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <E> the type of exception the bi-consumer may throw
-     * @param action the bi-consumer to execute with the result and exception
-     * @throws E if the bi-consumer throws an exception
+     * @param <E> the type of exception the bi-consumer may throw.
+     * @param action the bi-consumer to execute with the result and exception.
+     * @throws E if the bi-consumer throws an exception.
      * @see #gett()
      */
     public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
@@ -1119,11 +1120,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <E> the type of exception the bi-consumer may throw
-     * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @param action the bi-consumer to execute with the result and exception
-     * @throws E if the bi-consumer throws an exception
+     * @param <E> the type of exception the bi-consumer may throw.
+     * @param timeout the maximum time to wait.
+     * @param unit the time unit of the timeout argument.
+     * @param action the bi-consumer to execute with the result and exception.
+     * @throws E if the bi-consumer throws an exception.
      * @see #gett(long, TimeUnit)
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
@@ -1160,12 +1161,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      *
      * // The transformation happens when the original completes
-     * System.out.println(stringFuture.get());  // "The result is: 42"
+     * System.out.println(stringFuture.get());   // "The result is: 42"
      * }</pre>
      *
-     * @param <U> the type of the transformed result
-     * @param func the function to apply to the result
-     * @return a new {@code ContinuableFuture} with the transformed result
+     * @param <U> the type of the transformed result.
+     * @param func the function to apply to the result.
+     * @return a new {@code ContinuableFuture} with the transformed result.
      */
     @Beta
     public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
@@ -1238,8 +1239,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRun(() -> cleanupTempFiles());
      * }</pre>
      *
-     * @param action the action to execute after this future completes
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param action the action to execute after this future completes.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
     public ContinuableFuture<Void> thenRun(final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1268,8 +1269,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRun(() -> logCompletion());
      * }</pre>
      *
-     * @param action the consumer to execute with the result
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param action the consumer to execute with the result.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
     public ContinuableFuture<Void> thenRun(final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
@@ -1304,8 +1305,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRun(() -> cleanup());
      * }</pre>
      *
-     * @param action the bi-consumer to execute with the result and exception
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param action the bi-consumer to execute with the result and exception.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
     public ContinuableFuture<Void> thenRun(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
@@ -1335,9 +1336,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenCall(() -> processData());
      * }</pre>
      *
-     * @param <R> the type of the result returned by the callable
-     * @param action the callable to execute after this future completes
-     * @return a new {@code ContinuableFuture<R>} with the result of the callable
+     * @param <R> the type of the result returned by the callable.
+     * @param action the callable to execute after this future completes.
+     * @return a new {@code ContinuableFuture<R>} with the result of the callable.
      */
     public <R> ContinuableFuture<R> thenCall(final Callable<R> action) {
         return execute(() -> {
@@ -1367,9 +1368,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenCall(profile -> enrichWithSocialData(profile));
      * }</pre>
      *
-     * @param <R> the type of the result returned by the function
-     * @param action the function to apply to the result
-     * @return a new {@code ContinuableFuture<R>} with the transformed result
+     * @param <R> the type of the result returned by the function.
+     * @param action the function to apply to the result.
+     * @return a new {@code ContinuableFuture<R>} with the transformed result.
      */
     public <R> ContinuableFuture<R> thenCall(final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> action.apply(get()));
@@ -1392,15 +1393,15 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenCall((data, exception) -> {
      *         if (exception != null) {
      *             logger.warn("Primary failed, using fallback", exception);
-     *             return fetchFromSecondary();  // Recovery
+     *             return fetchFromSecondary();   // Recovery
      *         }
      *         return enhanceData(data);
      *     });
      * }</pre>
      *
-     * @param <R> the type of the result returned by the bi-function
-     * @param action the bi-function to apply to the result and exception
-     * @return a new {@code ContinuableFuture<R>} with the transformed result
+     * @param <R> the type of the result returned by the bi-function.
+     * @param action the bi-function to apply to the result and exception.
+     * @return a new {@code ContinuableFuture<R>} with the transformed result.
      * @see #gett()
      */
     public <R> ContinuableFuture<R> thenCall(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
@@ -1428,9 +1429,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other future to wait for
-     * @param action the action to execute after both futures complete
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param other the other future to wait for.
+     * @param action the action to execute after both futures complete.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
     public ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1460,10 +1461,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the type of the other future's result
-     * @param other the other future to wait for
-     * @param action the bi-consumer to execute with both results
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param <U> the type of the other future's result.
+     * @param other the other future to wait for.
+     * @param action the bi-consumer to execute with both results.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
     public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) {
@@ -1502,10 +1503,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the type of the other future's result
-     * @param other the other future to wait for
-     * @param action the consumer to execute with the tuple of results and exceptions
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param <U> the type of the other future's result.
+     * @param other the other future to wait for.
+     * @param action the consumer to execute with the tuple of results and exceptions.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
     public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
@@ -1542,10 +1543,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the type of the other future's result
-     * @param other the other future to wait for
-     * @param action the quad-consumer to execute with both results and exceptions
-     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action
+     * @param <U> the type of the other future's result.
+     * @param other the other future to wait for.
+     * @param action the quad-consumer to execute with both results and exceptions.
+     * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
     public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
@@ -1578,10 +1579,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <R> the type of the result returned by the callable
-     * @param other the other future to wait for completion; must not be null
-     * @param action the callable to execute after both futures complete; must not be null
-     * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable
+     * @param <R> the type of the result returned by the callable.
+     * @param other the other future to wait for completion; must not be null.
+     * @param action the callable to execute after both futures complete; must not be null.
+     * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {
@@ -1610,11 +1611,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *     (user, settings) -> createProfile(user, settings));
      * }</pre>
      *
-     * @param <U> the result type of the other ContinuableFuture
-     * @param <R> the result type of the bi-function and the returned ContinuableFuture
-     * @param other the other ContinuableFuture that must complete before executing the action; must not be null
-     * @param action the bi-function to execute with both results; must not be null
-     * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function
+     * @param <U> the result type of the other ContinuableFuture.
+     * @param <R> the result type of the bi-function and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture that must complete before executing the action; must not be null.
+     * @param action the bi-function to execute with both results; must not be null.
+     * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function.
      */
     public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) {
@@ -1651,11 +1652,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <U> the result type of the other ContinuableFuture
-     * @param <R> the result type of the function and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the function that processes the tuple of results and exceptions; must not be null
-     * @return a new {@code ContinuableFuture<R>} that completes with the result of the function
+     * @param <U> the result type of the other ContinuableFuture.
+     * @param <R> the result type of the function and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the function that processes the tuple of results and exceptions; must not be null.
+     * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
      * @see #gett()
      */
     public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
@@ -1693,11 +1694,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *     });
      * }</pre>
      *
-     * @param <U> the result type of the other ContinuableFuture
-     * @param <R> the result type of the QuadFunction and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the QuadFunction that processes both results and exceptions; must not be null
-     * @return a new ContinuableFuture that completes with the result of the QuadFunction
+     * @param <U> the result type of the other ContinuableFuture.
+     * @param <R> the result type of the QuadFunction and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the QuadFunction that processes both results and exceptions; must not be null.
+     * @return a new ContinuableFuture that completes with the result of the QuadFunction.
      */
     public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action) {
@@ -1727,9 +1728,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the Runnable to execute after either future completes; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the Runnable to execute after either future completes; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1754,14 +1755,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      * 
      * localWeather.runAfterEither(remoteWeather, weather -> {
-     *     displayWeather(weather);  // weather may be null if the first future failed
+     *     displayWeather(weather);   // weather may be null if the first future failed
      *     logSource(weather.getSource());
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the Consumer to execute with the first available result; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the Consumer to execute with the first available result; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
@@ -1796,9 +1797,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the BiConsumer to execute with the result and exception; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the BiConsumer to execute with the result and exception; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      * @see #gett()
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
@@ -1829,10 +1830,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <R> the result type of the callable and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the Callable to execute after either future completes; must not be null
-     * @return a new ContinuableFuture that completes with the result of the callable
+     * @param <R> the result type of the callable and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the Callable to execute after either future completes; must not be null.
+     * @return a new ContinuableFuture that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
@@ -1857,14 +1858,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * ContinuableFuture<Order> order = vendorA.callAfterEither(vendorB, price -> {
      *     // Process the first available price
-     *     return createOrder(price);  // price may be null if the first future failed
+     *     return createOrder(price);   // price may be null if the first future failed
      * });
      * }</pre>
      *
-     * @param <R> the result type of the function and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the function to transform the first available result; must not be null
-     * @return a new ContinuableFuture that completes with the transformed result
+     * @param <R> the result type of the function and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the function to transform the first available result; must not be null.
+     * @return a new ContinuableFuture that completes with the transformed result.
      */
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
@@ -1897,10 +1898,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *     });
      * }</pre>
      *
-     * @param <R> the result type of the BiFunction and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to race against; must not be null
-     * @param action the BiFunction to transform the result and exception; must not be null
-     * @return a new ContinuableFuture that completes with the transformed result
+     * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to race against; must not be null.
+     * @param action the BiFunction to transform the result and exception; must not be null.
+     * @return a new ContinuableFuture that completes with the transformed result.
      * @see #gett()
      */
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
@@ -1931,9 +1932,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the Runnable to execute after the first successful completion; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the Runnable to execute after the first successful completion; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1972,9 +1973,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the Consumer to execute with the first successful result; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the Consumer to execute with the first successful result; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
@@ -2033,9 +2034,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the BiConsumer to execute with the result and exception; must not be null
-     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the BiConsumer to execute with the result and exception; must not be null.
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     @Beta
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
@@ -2081,10 +2082,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param <R> the result type of the callable and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the Callable to execute after the first successful completion; must not be null
-     * @return a new ContinuableFuture that completes with the result of the callable
+     * @param <R> the result type of the callable and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the Callable to execute after the first successful completion; must not be null.
+     * @return a new ContinuableFuture that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
@@ -2122,10 +2123,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *     });
      * }</pre>
      *
-     * @param <R> the result type of the function and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the function to transform the first successful result; must not be null
-     * @return a new ContinuableFuture that completes with the transformed result
+     * @param <R> the result type of the function and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the function to transform the first successful result; must not be null.
+     * @return a new ContinuableFuture that completes with the transformed result.
      */
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
@@ -2174,10 +2175,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *     });
      * }</pre>
      *
-     * @param <R> the result type of the BiFunction and the returned ContinuableFuture
-     * @param other the other ContinuableFuture to wait for; must not be null
-     * @param action the BiFunction to transform based on result and exception; must not be null
-     * @return a new ContinuableFuture that completes with the transformed result
+     * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
+     * @param other the other ContinuableFuture to wait for; must not be null.
+     * @param action the BiFunction to transform based on result and exception; must not be null.
+     * @return a new ContinuableFuture that completes with the transformed result.
      * @see #gett()
      */
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
@@ -2237,9 +2238,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRun(() -> processResults());
      * }</pre>
      *
-     * @param delay the delay duration before the next action is executed; must be non-negative
-     * @param unit the time unit of the delay parameter; must not be null
-     * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0
+     * @param delay the delay duration before the next action is executed; must be non-negative.
+     * @param unit the time unit of the delay parameter; must not be null.
+     * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
      */
     public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
         if (delay <= 0) {
@@ -2266,12 +2267,12 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenUse(cpuExecutor)                             // Switch to CPU executor
      *     .thenCall(() -> processData())                    // CPU-intensive processing
      *     .thenUse(ioExecutor)                              // Switch to I/O executor
-     *     .thenRun(result -> writeToFile(result));  // I/O operation
+     *     .thenRun(result -> writeToFile(result));   // I/O operation
      * }</pre>
      *
-     * @param executor the executor to use for subsequent actions in the chain; must not be null
-     * @return a new ContinuableFuture configured with the specified executor
-     * @throws IllegalArgumentException if {@code executor} is null
+     * @param executor the executor to use for subsequent actions in the chain; must not be null.
+     * @return a new ContinuableFuture configured with the specified executor.
+     * @throws IllegalArgumentException if {@code executor} is null.
      */
     public ContinuableFuture<T> thenUse(final Executor executor) {
         return with(executor, 0, TimeUnit.MILLISECONDS);
@@ -2281,10 +2282,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * Internal method that creates a new ContinuableFuture with the specified executor and delay configuration.
      * This method combines the functionality of thenDelay and thenUse.
      *
-     * @param executor the executor to use for subsequent operations; must not be null
-     * @param delay the delay before executing subsequent operations
-     * @param unit the time unit for the delay
-     * @return a new ContinuableFuture with the specified configuration
+     * @param executor the executor to use for subsequent operations; must not be null.
+     * @param delay the delay before executing subsequent operations.
+     * @param unit the time unit for the delay.
+     * @return a new ContinuableFuture with the specified configuration.
      * @deprecated This is an internal method and should not be used directly. Use {@link #thenDelay} or {@link #thenUse} instead.
      */
     @Deprecated
@@ -2361,4 +2362,185 @@ public class ContinuableFuture<T> implements Future<T> {
 
     // https://stackoverflow.com/questions/23301598/transform-java-future-into-a-completablefuture
 
+    /**
+     * Converts this ContinuableFuture into a standard {@link CompletableFuture} for interoperability
+     * with APIs that require CompletableFuture instances. The conversion is performed asynchronously
+     * using this future's configured executor.
+     *
+     * <p>This method creates a new CompletableFuture that completes with the same result as this
+     * ContinuableFuture. The result retrieval is performed asynchronously, meaning this method
+     * returns immediately without blocking. Any exceptions thrown by this future (including
+     * InterruptedException and ExecutionException) are wrapped in a CompletionException as per
+     * CompletableFuture conventions.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Non-blocking:</b> Returns immediately; result retrieval happens asynchronously</li>
+     *   <li><b>Executor Reuse:</b> Uses this future's asyncExecutor for the conversion</li>
+     *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
+     *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
+     * </ul>
+     *
+     * <p><b>Common Use Cases:</b>
+     * <ul>
+     *   <li>Integrating ContinuableFuture with CompletableFuture-based frameworks</li>
+     *   <li>Migrating from ContinuableFuture to CompletableFuture APIs</li>
+     *   <li>Combining ContinuableFuture with third-party libraries expecting CompletableFuture</li>
+     *   <li>Leveraging CompletableFuture-specific methods like thenCompose, allOf, anyOf</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * // Basic conversion for framework integration
+     * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> loadUser());
+     * CompletableFuture<User> completable = userFuture.toCompletableFuture();
+     *
+     * // Chain with CompletableFuture operations
+     * ContinuableFuture<String> dataFuture = ContinuableFuture.call(() -> fetchData());
+     * dataFuture.toCompletableFuture()
+     *     .thenApply(data -> processData(data))
+     *     .thenAccept(result -> saveResult(result));
+     *
+     * // Combine with other CompletableFutures
+     * CompletableFuture<String> cf1 = continuableFuture1.toCompletableFuture();
+     * CompletableFuture<Integer> cf2 = continuableFuture2.toCompletableFuture();
+     * CompletableFuture<Object> combined = CompletableFuture.anyOf(cf1, cf2);
+     * }</pre>
+     *
+     * <p><b>Exception Handling:</b>
+     * <ul>
+     *   <li><b>InterruptedException:</b> Wrapped in CompletionException</li>
+     *   <li><b>ExecutionException:</b> Wrapped in CompletionException with cause preserved</li>
+     *   <li><b>CancellationException:</b> Wrapped in CompletionException</li>
+     *   <li><b>RuntimeException:</b> Wrapped in CompletionException</li>
+     * </ul>
+     *
+     * <p><b>Important Considerations:</b>
+     * <ul>
+     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
+     *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
+     *   <li>The conversion is asynchronous; blocking methods should not be called in the supplier</li>
+     *   <li>Uses this future's asyncExecutor, which may impact thread pool usage</li>
+     * </ul>
+     *
+     * <p><b>Performance Implications:</b>
+     * <ul>
+     *   <li>Creates additional task submission overhead</li>
+     *   <li>Blocks a thread from asyncExecutor until this future completes</li>
+     *   <li>For already-completed futures, consider using {@link CompletableFuture#completedFuture(Object)}</li>
+     * </ul>
+     *
+     * @return a new CompletableFuture that completes with the same result as this ContinuableFuture,.
+     *         executed asynchronously using this future's asyncExecutor.
+     * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
+     * @see #toCompletableFuture(Executor)
+     * @see CompletionException
+     */
+    @Beta
+    public CompletableFuture<T> toCompletableFuture() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.get();
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        }, asyncExecutor);
+    }
+
+    /**
+     * Converts this ContinuableFuture into a standard {@link CompletableFuture} using the specified executor
+     * for the conversion operation. This method provides fine-grained control over which thread pool performs
+     * the asynchronous result retrieval, making it ideal for scenarios requiring specific execution contexts.
+     *
+     * <p>This method creates a new CompletableFuture that completes with the same result as this
+     * ContinuableFuture. The result retrieval is performed asynchronously using the provided executor,
+     * meaning this method returns immediately without blocking. Any exceptions thrown by this future
+     * (including InterruptedException and ExecutionException) are wrapped in a CompletionException
+     * as per CompletableFuture conventions.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Non-blocking:</b> Returns immediately; result retrieval happens asynchronously</li>
+     *   <li><b>Custom Executor:</b> Uses the provided executor instead of this future's asyncExecutor</li>
+     *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
+     *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
+     * </ul>
+     *
+     * <p><b>Common Use Cases:</b>
+     * <ul>
+     *   <li>Converting to CompletableFuture with a specific thread pool (e.g., I/O vs CPU executor)</li>
+     *   <li>Isolating CompletableFuture operations from ContinuableFuture's execution context</li>
+     *   <li>Integrating with frameworks that provide their own executors</li>
+     *   <li>Managing thread pool resources independently for different workflow stages</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * // Use a custom executor for the conversion
+     * ExecutorService ioExecutor = Executors.newCachedThreadPool();
+     * ContinuableFuture<Data> dataFuture = ContinuableFuture.call(() -> loadData());
+     * CompletableFuture<Data> completable = dataFuture.toCompletableFuture(ioExecutor);
+     *
+     * // Integrate with framework-specific executors
+     * Executor springTaskExecutor = applicationContext.getBean("taskExecutor", Executor.class);
+     * ContinuableFuture<Result> result = ContinuableFuture.call(() -> computeResult());
+     * CompletableFuture<Result> springManaged = result.toCompletableFuture(springTaskExecutor);
+     *
+     * // Use different executors for different conversion stages
+     * ExecutorService cpuExecutor = Executors.newFixedThreadPool(4);
+     * ContinuableFuture<ProcessedData> processed = ContinuableFuture.call(() -> process());
+     * processed.toCompletableFuture(cpuExecutor)
+     *     .thenApplyAsync(data -> furtherProcessing(data), cpuExecutor);
+     * }</pre>
+     *
+     * <p><b>Exception Handling:</b>
+     * <ul>
+     *   <li><b>InterruptedException:</b> Wrapped in CompletionException</li>
+     *   <li><b>ExecutionException:</b> Wrapped in CompletionException with cause preserved</li>
+     *   <li><b>CancellationException:</b> Wrapped in CompletionException</li>
+     *   <li><b>RuntimeException:</b> Wrapped in CompletionException</li>
+     * </ul>
+     *
+     * <p><b>Important Considerations:</b>
+     * <ul>
+     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
+     *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
+     *   <li>The conversion is asynchronous; blocking methods should not be called in the supplier</li>
+     *   <li>The provided executor must be able to accept new tasks</li>
+     *   <li>Executor shutdown should be managed externally; this method does not manage lifecycle</li>
+     * </ul>
+     *
+     * <p><b>Performance Implications:</b>
+     * <ul>
+     *   <li>Creates additional task submission overhead to the specified executor</li>
+     *   <li>Blocks a thread from the provided executor until this future completes</li>
+     *   <li>Executor choice affects overall performance (e.g., ForkJoinPool vs ThreadPoolExecutor)</li>
+     *   <li>For already-completed futures, still incurs executor submission cost</li>
+     * </ul>
+     *
+     * <p><b>Comparison with {@link #toCompletableFuture()}:</b>
+     * <ul>
+     *   <li>This method allows custom executor selection vs using this future's asyncExecutor</li>
+     *   <li>Useful when asyncExecutor is not suitable for CompletableFuture operations</li>
+     *   <li>Provides better control over thread pool isolation and resource management</li>
+     * </ul>
+     *
+     * @param executor the executor to use for asynchronous result retrieval; must not be null.
+     * @return a new CompletableFuture that completes with the same result as this ContinuableFuture,.
+     *         executed asynchronously using the provided executor.
+     * @throws IllegalArgumentException if {@code executor} is null.
+     * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
+     * @see #toCompletableFuture()
+     * @see CompletionException
+     */
+    @Beta
+    public CompletableFuture<T> toCompletableFuture(final Executor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.get();
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        }, executor);
+    }
 }

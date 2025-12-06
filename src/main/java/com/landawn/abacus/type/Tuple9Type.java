@@ -73,6 +73,20 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple9Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     * @param t4TypeName the name of the fourth element type
+     * @param t5TypeName the name of the fifth element type
+     * @param t6TypeName the name of the sixth element type
+     * @param t7TypeName the name of the seventh element type
+     * @param t8TypeName the name of the eighth element type
+     * @param t9TypeName the name of the ninth element type
+     */
     Tuple9Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
             final String t6TypeName, final String t7TypeName, final String t8TypeName, final String t9TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, t9TypeName, false));
@@ -182,7 +196,7 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
@@ -245,7 +259,7 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
 
     /**
      * Writes the character representation of the Tuple9 to the given CharacterWriter.
-     * The output format is: [element1, element2, element3, element4, element5, element6, element7, element8]
+     * The output format is: [element1, element2, element3, element4, element5, element6, element7, element8, element9]
      * This method is optimized for character-based output streams.
      *
      * @param writer the CharacterWriter to write to
@@ -299,6 +313,7 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
      * @param t6TypeName the type name of the sixth element
      * @param t7TypeName the type name of the seventh element
      * @param t8TypeName the type name of the eighth element
+     * @param t9TypeName the type name of the ninth element
      * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
      *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string

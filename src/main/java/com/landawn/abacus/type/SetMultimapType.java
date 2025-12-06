@@ -32,6 +32,14 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
 
+    /**
+     * Constructs a new SetMultimapType with the specified type parameters.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     *
+     * @param typeClass the Class object representing the SetMultimap type
+     * @param keyTypeName the type name for the keys in the multimap
+     * @param valueElementTypeName the type name for the value elements in the multimap
+     */
     SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);
     }
@@ -47,7 +55,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * SetMultimap<String, Integer> multimap = N.newLinkedSetMultimap();
      * multimap.put("tags", 1);
      * multimap.put("tags", 2);
-     * multimap.put("tags", 1);  // Duplicate, will be ignored in Set
+     * multimap.put("tags", 1);   // Duplicate, will be ignored in Set
      * multimap.put("ids", 100);
      *
      * String json = type.stringOf(multimap);

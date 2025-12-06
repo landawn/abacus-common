@@ -34,13 +34,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteUnaryOperator doubler = value -> (byte) (value * 2);
-     * byte result = doubler.applyAsByte((byte) 5);  // Returns 10
-     * }</pre>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ByteUnaryOperator doubler = value -> (byte) (value * 2);
-     * byte result = doubler.applyAsByte((byte) 5);  // Returns 10
+     * byte result = doubler.applyAsByte((byte) 5);   // Returns 10
      * }</pre>
      *
      * @param operand the byte operand

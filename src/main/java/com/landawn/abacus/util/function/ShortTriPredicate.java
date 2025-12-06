@@ -49,11 +49,11 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      *
      * ShortTriPredicate isValidTriangle = (a, b, c) ->
      *     a + b > c && a + c > b && b + c > a;
-     * boolean result3 = isValidTriangle.test((short) 3, (short) 4, (short) 5);  // returns true
+     * boolean result3 = isValidTriangle.test((short) 3, (short) 4, (short) 5);   // returns true
      *
      * ShortTriPredicate inRange = (value, min, max) ->
      *     value >= min && value <= max;
-     * boolean result4 = inRange.test((short) 50, (short) 0, (short) 100);  // returns true
+     * boolean result4 = inRange.test((short) 50, (short) 0, (short) 100);   // returns true
      * }</pre>
      *
      * @param a the first input argument
@@ -66,6 +66,13 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * ShortTriPredicate notAllPositive = allPositive.negate();
+     * boolean result = notAllPositive.test((short) -1, (short) 2, (short) 3);   // returns true
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -81,7 +88,15 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * ShortTriPredicate sumLessThan100 = (a, b, c) -> (a + b + c) < 100;
+     * ShortTriPredicate combined = allPositive.and(sumLessThan100);
+     * boolean result = combined.test((short) 10, (short) 20, (short) 30);   // returns true
+     * }</pre>
+     *
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ShortTriPredicate and(final ShortTriPredicate other) {
@@ -96,7 +111,15 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriPredicate hasZero = (a, b, c)                    == 0 || b == 0 || c == 0;
+     * ShortTriPredicate sumIsZero = (a, b, c) -> (a + b + c)   == 0;
+     * ShortTriPredicate combined = hasZero.or(sumIsZero);
+     * boolean result = combined.test((short) 1, (short) 0, (short) 3);   // returns true
+     * }</pre>
+     *
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ShortTriPredicate or(final ShortTriPredicate other) {

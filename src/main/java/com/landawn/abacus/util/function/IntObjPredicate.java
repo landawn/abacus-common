@@ -35,7 +35,7 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
-     * boolean valid = indexInRange.test(5, "Hello World");  // Returns true
+     * boolean valid = indexInRange.test(5, "Hello World");   // Returns true
      * }</pre>
      *
      * @param t the {@code int} argument
@@ -47,6 +47,13 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
+     * IntObjPredicate<String> indexOutOfRange = indexInRange.negate();
+     * boolean result = indexOutOfRange.test(10, "Hello");   // Returns true (index is out of range)
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -61,6 +68,14 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
+     * IntObjPredicate<String> charIsVowel = (index, str) -> "aeiouAEIOU".indexOf(str.charAt(index)) >= 0;
+     * IntObjPredicate<String> inRangeAndVowel = indexInRange.and(charIsVowel);
+     * boolean result = inRangeAndVowel.test(1, "Hello");   // Returns true ('e' is a vowel)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
@@ -77,6 +92,14 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjPredicate<String> indexIsZero = (index, str) -> index == 0;
+     * IntObjPredicate<String> indexIsLast = (index, str) -> index == str.length() - 1;
+     * IntObjPredicate<String> isFirstOrLast = indexIsZero.or(indexIsLast);
+     * boolean result = isFirstOrLast.test(0, "Hello");   // Returns true (first position)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and

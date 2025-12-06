@@ -37,6 +37,10 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     public static final String ATOMIC_BOOLEAN = AtomicBoolean.class.getSimpleName();
 
+    /**
+     * Package-private constructor for AtomicBooleanType.
+     * This constructor is called by the TypeFactory to create AtomicBoolean type instances.
+     */
     AtomicBooleanType() {
         super(ATOMIC_BOOLEAN);
     }

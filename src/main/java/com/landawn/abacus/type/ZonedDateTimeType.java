@@ -34,6 +34,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
+    /**
+     * Constructs a ZonedDateTimeType instance.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     ZonedDateTimeType() {
         super(ZONED_DATE_TIME);
     }
@@ -48,7 +52,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ZonedDateTime> type = TypeFactory.getType(ZonedDateTime.class);
-     * Class&lt;ZonedDateTime&gt; clazz = type.clazz();  // Returns ZonedDateTime.class
+     * Class&lt;ZonedDateTime&gt; clazz = type.clazz();   // Returns ZonedDateTime.class
      * }</pre>
      *
      * @return the Class object for ZonedDateTime.class
@@ -68,7 +72,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * String str = type.stringOf(zdt);  // Returns "2023-10-15T10:30:00.123Z"
+     * String str = type.stringOf(zdt);   // Returns "2023-10-15T10:30:00.123Z"
      * }</pre>
      *
      * @param x the ZonedDateTime instance to convert to string
@@ -167,7 +171,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "1697364600000".toCharArray();
-     * ZonedDateTime zdt = type.valueOf(chars, 0, chars.length);  // From epoch millis
+     * ZonedDateTime zdt = type.valueOf(chars, 0, chars.length);   // From epoch millis
      * }</pre>
      *
      * @param cbuf the character array containing the date/time representation
@@ -252,7 +256,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * type.set(preparedStatement, 1, zdt);  // Sets timestamp at first parameter
+     * type.set(preparedStatement, 1, zdt);   // Sets timestamp at first parameter
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
@@ -275,7 +279,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * type.set(callableStatement, "created_date", zdt);  // Sets timestamp parameter
+     * type.set(callableStatement, "created_date", zdt);   // Sets timestamp parameter
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in
@@ -298,7 +302,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, ZonedDateTime.now());  // Appends formatted date/time
+     * type.appendTo(sb, ZonedDateTime.now());   // Appends formatted date/time
      * }</pre>
      *
      * @param appendable the Appendable to write to
@@ -331,7 +335,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
-     * type.writeCharacter(writer, ZonedDateTime.now(), config);  // Writes formatted date/time
+     * type.writeCharacter(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

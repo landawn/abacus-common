@@ -52,7 +52,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AbstractStringType type = ...;  // concrete String type instance
-     * Class<?> clazz = type.clazz();  // returns String.class
+     * Class<?> clazz = type.clazz();   // returns String.class
      * }</pre>
      *
      * @return the Class object for String.class
@@ -69,7 +69,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * boolean isString = type.isString();  // returns true
+     * boolean isString = type.isString();   // returns true
      * }</pre>
      *
      * @return {@code true} indicating this is a string type
@@ -192,7 +192,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * ResultSet rs = ...;  // from SQL query
-     * String name = type.get(rs, 1);  // retrieves String from column 1
+     * String name = type.get(rs, 1);   // retrieves String from column 1
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -212,7 +212,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * ResultSet rs = ...;  // from SQL query
-     * String name = type.get(rs, "name");  // retrieves String from "name" column
+     * String name = type.get(rs, "name");   // retrieves String from "name" column
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -233,7 +233,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET name = ? WHERE id = ?");
-     * type.set(stmt, 1, "John Doe");  // sets parameter 1 to "John Doe"
+     * type.set(stmt, 1, "John Doe");   // sets parameter 1 to "John Doe"
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
@@ -253,7 +253,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
      * CallableStatement stmt = conn.prepareCall("{call updateUser(?, ?)}");
-     * type.set(stmt, "name", "John Doe");  // sets named parameter "name"
+     * type.set(stmt, "name", "John Doe");   // sets named parameter "name"
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on, must not be {@code null}

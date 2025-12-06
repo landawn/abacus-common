@@ -46,7 +46,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * <pre>{@code
      * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * Class<MutableDateTime> clazz = type.clazz();
-     * System.out.println(clazz.getName());  // Outputs: org.joda.time.MutableDateTime
+     * System.out.println(clazz.getName());   // Outputs: org.joda.time.MutableDateTime
      * }</pre>
      *
      * @return the Class object representing org.joda.time.MutableDateTime
@@ -198,7 +198,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         MutableDateTime dt = type.get(rs, 1);
-     *         dt.addDays(1);  // Can modify after retrieval
+     *         dt.addDays(1);   // Can modify after retrieval
      *     }
      * }
      * }</pre>

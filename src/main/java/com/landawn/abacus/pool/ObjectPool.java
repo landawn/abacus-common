@@ -54,7 +54,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * try {
  *     // use borrowed object
  * } finally {
- *     pool.add(borrowed);  // return to pool
+ *     pool.add(borrowed);   // return to pool
  * }
  * }</pre>
  *
@@ -73,7 +73,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <ul>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
      *   <li>The object has already expired</li>
-     *   <li>The operation will fail if the object would exceed memory constraints</li>
+     *   <li>The object would exceed memory constraints</li>
      * </ul>
      *
      * @param e the object to be added to the pool, must not be {@code null}
@@ -164,7 +164,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
      * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
-     * The object's activity print is updated to reflect the access.
+     * The object's activity print is updated to reflect this access.
      *
      * <p>If the retrieved object has expired, it will be destroyed and {@code null} will be returned.
      *
@@ -175,7 +175,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);  // return to pool
+     *         pool.add(obj);   // return to pool
      *     }
      * }
      * }</pre>
@@ -200,7 +200,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);  // return to pool
+     *         pool.add(obj);   // return to pool
      *     }
      * } else {
      *     // timeout - pool was empty

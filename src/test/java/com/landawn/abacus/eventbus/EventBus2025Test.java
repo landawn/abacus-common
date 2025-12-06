@@ -89,7 +89,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.register(subscriber, "testId");
         eventBus.post("hello");
 
-        assertNull(result.get()); // Should not receive without matching event ID
+        assertNull(result.get());   // Should not receive without matching event ID
     }
 
     @Test
@@ -115,7 +115,7 @@ public class EventBus2025Test extends TestBase {
         String event = "sticky";
         eventBus.postSticky(event);
         assertTrue(eventBus.removeStickyEvent(event));
-        assertFalse(eventBus.removeStickyEvent(event)); // Already removed
+        assertFalse(eventBus.removeStickyEvent(event));   // Already removed
     }
 
     @Test
@@ -165,7 +165,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.register(handler);
         eventBus.post("async event");
 
-        Thread.sleep(100); // Wait for async execution
+        Thread.sleep(100);   // Wait for async execution
         assertEquals("async event", result.get());
         assertNotEquals(Thread.currentThread().getName(), threadName.get());
 

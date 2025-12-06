@@ -102,43 +102,43 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Bean validation and introspection
- * boolean isBean = Beans.isBeanClass(User.class);  // Check if class follows bean pattern
- * List<String> properties = Beans.getPropNameList(User.class);  // Get all property names
- * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class);  // Get builder info
+ * boolean isBean = Beans.isBeanClass(User.class);                // Check if class follows bean pattern
+ * List<String> properties = Beans.getPropNameList(User.class);   // Get all property names
+ * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class);   // Get builder info
  *
  * // Property access operations
  * User user = new User();
- * Beans.setPropValue(user, "name", "John Doe");  // Set property value
- * String name = Beans.getPropValue(user, "name");  // Get property value
+ * Beans.setPropValue(user, "name", "John Doe");     // Set property value
+ * String name = Beans.getPropValue(user, "name");   // Get property value
  *
  * // Object creation and instantiation
- * User newUser = Beans.newBean(User.class);  // Create new instance
- * User copied = Beans.copy(user, User.class);  // Create copy with type conversion
- * User cloned = Beans.clone(user);  // Deep clone existing object
+ * User newUser = Beans.newBean(User.class);     // Create new instance
+ * User copied = Beans.copy(user, User.class);   // Create copy with type conversion
+ * User cloned = Beans.clone(user);              // Deep clone existing object
  *
  * // Bean to Map conversion (various formats)
- * Map<String, Object> flatMap = Beans.bean2Map(user);  // Map conversion
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);  // Deep map conversion
- * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email"));  // Selected properties
+ * Map<String, Object> flatMap = Beans.bean2Map(user);       // Map conversion
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);   // Deep map conversion
+ * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email"));   // Selected properties
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
- * User userFromMap = Beans.map2Bean(userData, User.class);  // Convert map to bean
- * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class);  // Ignore unknown properties
+ * User userFromMap = Beans.map2Bean(userData, User.class);                             // Convert map to bean
+ * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class);   // Ignore unknown properties
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.merge(source, target);  // Merge source into target
- * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);  // Custom merge function
+ * Beans.merge(source, target);   // Merge source into target
+ * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
  *
  * // Object comparison operations
- * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));  // Equality check by props
+ * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // Equality check by props
  *
  * // Null-safe operations
- * Map<String, Object> nullSafeMap = Beans.bean2Map(null);  // Returns empty map
- * User nullSafeUser = Beans.map2Bean(null, User.class);  // Returns null
- * boolean nullClassCheck = Beans.isBeanClass(null);  // Returns false
+ * Map<String, Object> nullSafeMap = Beans.bean2Map(null);   // Returns empty map
+ * User nullSafeUser = Beans.map2Bean(null, User.class);     // Returns null
+ * boolean nullClassCheck = Beans.isBeanClass(null);         // Returns false
  * }</pre>
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
@@ -271,25 +271,25 @@ import com.landawn.abacus.util.stream.Stream;
  * user.setRoles(Arrays.asList("admin", "user"));
  *
  * // Deep introspection
- * List<String> allProps = Beans.getPropNameList(User.class);  // [name, age, address, roles]
+ * List<String> allProps = Beans.getPropNameList(User.class);   // [name, age, address, roles]
  *
  * // Complex conversion operations
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);  // Deep nested conversion
- * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));  // Flatten address properties
- * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age"));  // Only name and age
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);      // Deep nested conversion
+ * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));       // Flatten address properties
+ * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age"));   // Only name and age
  *
  * // Advanced copying with transformations
- * UserDTO dto = Beans.copy(user, UserDTO.class);  // Convert to DTO
- * User cloned = Beans.clone(user);  // Deep clone
- * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class);  // Partial copy
+ * UserDTO dto = Beans.copy(user, UserDTO.class);   // Convert to DTO
+ * User cloned = Beans.clone(user);   // Deep clone
+ * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class);   // Partial copy
  *
  * // Merging with different strategies
  * User updates = new User();
  * updates.setName("Jane Doe");
  *
- * Beans.merge(updates, user);  // Merge updates into user
+ * Beans.merge(updates, user);   // Merge updates into user
  * Beans.merge(updates, user, (source, target) ->
- *     source != null && !source.equals("") ? source : target);  // Custom merge logic
+ *     source != null && !source.equals("") ? source : target);   // Custom merge logic
  *
  * // Validation and comparison
  * boolean isValid = Beans.isBeanClass(User.class);
@@ -318,7 +318,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     ));
  *
  * Map<String, Object> properties = loadPropertiesFile("database.properties");
- * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig());  // Get defaults
+ * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig());   // Get defaults
  *
  * // Merge configurations with precedence: env vars > properties > defaults
  * Map<String, Object> finalConfig = new HashMap<>(defaults);
@@ -480,8 +480,8 @@ public final class Beans {
      * boolean isNotBean = Beans.isBeanClass(String.class);   // false
      * }</pre>
      *
-     * @param cls the class to be checked
-     * @return {@code true} if the specified class is a bean class, {@code false} otherwise
+     * @param cls the class to be checked.
+     * @return {@code true} if the specified class is a bean class, {@code false} otherwise.
      */
     public static boolean isBeanClass(final Class<?> cls) {
         if (cls == null) {
@@ -511,11 +511,11 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * record Point(int x, int y) {}
-     * boolean isRec = Beans.isRecordClass(Point.class);  // true
+     * boolean isRec = Beans.isRecordClass(Point.class);   // true
      * }</pre>
      *
-     * @param cls the class to be checked
-     * @return {@code true} if the specified class is a record class, {@code false} otherwise
+     * @param cls the class to be checked.
+     * @return {@code true} if the specified class is a record class, {@code false} otherwise.
      */
     public static boolean isRecordClass(final Class<?> cls) {
         if (cls == null) {
@@ -541,9 +541,9 @@ public final class Beans {
      * }
      * }</pre>
      *
-     * @param beanType the bean type to get bean information for
-     * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class is not a bean class (no properties)
+     * @param beanType the bean type to get bean information for.
+     * @return a BeanInfo instance containing metadata about the class.
+     * @throws IllegalArgumentException if the class is not a bean class (no properties).
      * @see ParserUtil#getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
@@ -564,7 +564,7 @@ public final class Beans {
      * Beans.refreshBeanPropInfo(ModifiedClass.class);
      * }</pre>
      *
-     * @param cls the class whose bean property information should be refreshed
+     * @param cls the class whose bean property information should be refreshed.
      * @see ParserUtil#refreshBeanPropInfo(java.lang.reflect.Type)
      * @deprecated internal use only
      */
@@ -590,15 +590,15 @@ public final class Beans {
      * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo =
      *     Beans.getBuilderInfo(Person.class);
      * if (builderInfo != null) {
-     *     Object builder = builderInfo._2.get();  // Create builder
-     *     Object instance = builderInfo._3.apply(builder);  // Build instance
+     *     Object builder = builderInfo._2.get();   // Create builder
+     *     Object instance = builderInfo._3.apply(builder);   // Build instance
      * }
      * }</pre>
      *
-     * @param cls the class for which the builder information is to be retrieved
+     * @param cls the class for which the builder information is to be retrieved.
      * @return a tuple containing the builder class type, a supplier for creating builder instances,
-     *         and a function to build the target object from the builder, or {@code null} if no builder is found
-     * @throws IllegalArgumentException if the specified class is {@code null}
+     *         and a function to build the target object from the builder, or {@code null} if no builder is found.
+     * @throws IllegalArgumentException if the specified class is {@code null}.
      */
     @MayReturnNull
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
@@ -725,7 +725,7 @@ public final class Beans {
      * Beans.registerNonBeanClass(PhoneNumber.class);
      * }</pre>
      *
-     * @param cls the class to be registered as a non-bean class
+     * @param cls the class to be registered as a non-bean class.
      */
     @SuppressWarnings("deprecation")
     public static void registerNonBeanClass(final Class<?> cls) {
@@ -758,8 +758,8 @@ public final class Beans {
      * // Now MyClass.getInternal() won't be considered a property getter
      * }</pre>
      *
-     * @param cls the class for which the non-property get/set method is to be registered
-     * @param propName the name of the property to be registered as a non-property get/set method
+     * @param cls the class for which the non-property get/set method is to be registered.
+     * @param propName the name of the property to be registered as a non-property get/set method.
      */
     @SuppressWarnings("deprecation")
     public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
@@ -784,10 +784,10 @@ public final class Beans {
      * // Now fetchName() is recognized as the getter for property "name"
      * }</pre>
      *
-     * @param propName the name of the property
-     * @param method the method to be registered as a property get/set method
+     * @param propName the name of the property.
+     * @param method the method to be registered as a property get/set method.
      * @throws IllegalArgumentException if the method is not a valid getter or setter,
-     *         or if the property is already registered with a different method
+     *         or if the property is already registered with a different method.
      */
     @SuppressWarnings("deprecation")
     public static void registerPropGetSetMethod(final String propName, final Method method) {
@@ -849,7 +849,7 @@ public final class Beans {
      * // Now collection properties with only getters are recognized
      * }</pre>
      *
-     * @param cls the class to be registered for XML binding
+     * @param cls the class to be registered for XML binding.
      */
     @SuppressWarnings("deprecation")
     public static void registerXMLBindingClass(final Class<?> cls) {
@@ -882,8 +882,8 @@ public final class Beans {
      * }
      * }</pre>
      *
-     * @param cls the class to check
-     * @return {@code true} if the class is registered for XML binding, {@code false} otherwise
+     * @param cls the class to check.
+     * @return {@code true} if the class is registered for XML binding, {@code false} otherwise.
      */
     public static boolean isRegisteredXMLBindingClass(final Class<?> cls) {
         return registeredXMLBindingClassList.containsKey(cls);
@@ -903,11 +903,11 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method getter = User.class.getMethod("getName");
-     * String propName = Beans.getPropNameByMethod(getter);  // Returns "name"
+     * String propName = Beans.getPropNameByMethod(getter);   // Returns "name"
      * }</pre>
      *
-     * @param getSetMethod the method whose property name is to be retrieved
-     * @return the property name associated with the specified method
+     * @param getSetMethod the method whose property name is to be retrieved.
+     * @return the property name associated with the specified method.
      */
     public static String getPropNameByMethod(final Method getSetMethod) {
         String propName = methodPropNamePool.get(getSetMethod);
@@ -990,8 +990,8 @@ public final class Beans {
      * // Returns ["id", "name", "email", "age"] for a typical User class
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved
-     * @return an immutable list of property names for the specified class
+     * @param cls the class whose property names are to be retrieved.
+     * @return an immutable list of property names for the specified class.
      */
     public static ImmutableList<String> getPropNameList(final Class<?> cls) {
         N.checkArgNotNull(cls, cs.cls);
@@ -1015,9 +1015,9 @@ public final class Beans {
      * // Returns all properties except "password" and "ssn"
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved
-     * @param propNameToExclude the collection of property names to exclude from the result
-     * @return a list of property names for the specified class, excluding the specified property names
+     * @param cls the class whose property names are to be retrieved.
+     * @param propNameToExclude the collection of property names to exclude from the result.
+     * @return a list of property names for the specified class, excluding the specified property names.
      * @deprecated replaced by {@link #getPropNames(Class, Set)}
      * @see #getPropNames(Class, Set)
      */
@@ -1050,9 +1050,9 @@ public final class Beans {
      * // Returns ["id", "name", "email"] if User has those properties
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved
-     * @param propNameToExclude the set of property names to exclude from the result
-     * @return a list of property names for the specified class, excluding the specified property names
+     * @param cls the class whose property names are to be retrieved.
+     * @param propNameToExclude the set of property names to exclude from the result.
+     * @return a list of property names for the specified class, excluding the specified property names.
      */
     public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
         N.checkArgNotNull(cls, cs.cls);
@@ -1118,9 +1118,9 @@ public final class Beans {
      * // Returns ["email"]
      * }</pre>
      *
-     * @param bean the bean object whose property names are to be retrieved
-     * @param propNameFilter the predicate to filter property names
-     * @return a list of property names for the specified bean, filtered by the given predicate
+     * @param bean the bean object whose property names are to be retrieved.
+     * @param propNameFilter the predicate to filter property names.
+     * @return a list of property names for the specified bean, filtered by the given predicate.
      */
     public static List<String> getPropNames(final Object bean, final Predicate<String> propNameFilter) {
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -1157,9 +1157,9 @@ public final class Beans {
      * // Returns ["age"]
      * }</pre>
      *
-     * @param bean the bean object whose property names are to be retrieved
-     * @param propNameValueFilter the bi-predicate to filter property names and values, where the first parameter is the property name and the second parameter is the property value
-     * @return a list of property names for the specified bean, filtered by the given bi-predicate
+     * @param bean the bean object whose property names are to be retrieved.
+     * @param propNameValueFilter the bi-predicate to filter property names and values, where the first parameter is the property name and the second parameter is the property value.
+     * @return a list of property names for the specified bean, filtered by the given bi-predicate.
      */
     public static List<String> getPropNames(final Object bean, final BiPredicate<String, Object> propNameValueFilter) {
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -1192,8 +1192,8 @@ public final class Beans {
      * // Returns ["lastModified"]
      * }</pre>
      *
-     * @param cls the class for which the {@code MapDifference.of(Object, Object)} operation ignored property names are to be retrieved
-     * @return an immutable set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation
+     * @param cls the class for which the {@code MapDifference.of(Object, Object)} operation ignored property names are to be retrieved.
+     * @return an immutable set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation.
      * @see com.landawn.abacus.util.Difference.MapDifference
      * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
      */
@@ -1531,7 +1531,7 @@ public final class Beans {
             // for Double-Checked Locking is Broke initialize it before
             final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableFieldMap.keySet(); // initialize? //NOSONAR
+            unmodifiableFieldMap.keySet();   // initialize? //NOSONAR
             beanDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
             // put it into map.
@@ -1541,7 +1541,7 @@ public final class Beans {
 
             final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.wrap(propGetMethodMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableGetMethodMap.keySet(); // initialize? //NOSONAR
+            unmodifiableGetMethodMap.keySet();   // initialize? //NOSONAR
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             Map<String, Method> existingGetMethodMap = beanPropGetMethodPool.get(cls);
@@ -1556,7 +1556,7 @@ public final class Beans {
             // for Double-Checked Locking is Broke to initialize it before put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
+            unmodifiableSetMethodMap.keySet();   // initialize? //NOSONAR
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             Map<String, Method> existingSetMethodMap = beanPropSetMethodPool.get(cls);
@@ -1593,7 +1593,7 @@ public final class Beans {
 
                 final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
                 //noinspection ResultOfMethodCallIgnored
-                unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
+                unmodifiableBuilderPropSetMethodMap.keySet();   // initialize? //NOSONAR
                 beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
                 final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
@@ -1625,9 +1625,9 @@ public final class Beans {
      * Retrieves the declared field with the specified name from the given class.
      * {@code null} is returned if no field is found by the specified name.
      *
-     * @param cls the class from which the field is to be retrieved
-     * @param fieldName the name of the field to retrieve
-     * @return the declared field with the specified name
+     * @param cls the class from which the field is to be retrieved.
+     * @param fieldName the name of the field to retrieve.
+     * @return the declared field with the specified name.
      */
     private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
         try {
@@ -1674,10 +1674,10 @@ public final class Beans {
      * // Case-insensitive matching finds "id" field
      * }</pre>
      *
-     * @param cls the class from which the field is to be retrieved
-     * @param propName the name of the property whose field is to be retrieved
-     * @return the field associated with the specified property name, or {@code null} if no field is found
-     * @throws IllegalArgumentException if the class is not a bean class
+     * @param cls the class from which the field is to be retrieved.
+     * @param propName the name of the property whose field is to be retrieved.
+     * @return the field associated with the specified property name, or {@code null} if no field is found.
+     * @throws IllegalArgumentException if the class is not a bean class.
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
@@ -1741,8 +1741,8 @@ public final class Beans {
      * }
      * }</pre>
      *
-     * @param cls the class whose property fields are to be retrieved
-     * @return an immutable map of property fields for the specified class
+     * @param cls the class whose property fields are to be retrieved.
+     * @return an immutable map of property fields for the specified class.
      */
     public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
         ImmutableMap<String, Field> getterMethodList = beanDeclaredPropFieldPool.get(cls);
@@ -1771,9 +1771,9 @@ public final class Beans {
      * Object value = getter.invoke(userInstance);
      * }</pre>
      *
-     * @param cls the class from which the property get method is to be retrieved
-     * @param propName the name of the property whose get method is to be retrieved
-     * @return the property get method declared in the specified class, or {@code null} if no method is found
+     * @param cls the class from which the property get method is to be retrieved.
+     * @param propName the name of the property whose get method is to be retrieved.
+     * @return the property get method declared in the specified class, or {@code null} if no method is found.
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
@@ -1827,8 +1827,8 @@ public final class Beans {
      * // Map: {"name" -> getName(), "age" -> getAge(), ...}
      * }</pre>
      *
-     * @param cls the class from which the property get methods are to be retrieved
-     * @return an immutable map of property getter methods for the specified class
+     * @param cls the class from which the property get methods are to be retrieved.
+     * @return an immutable map of property getter methods for the specified class.
      */
     public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
         ImmutableMap<String, Method> getterMethodList = beanDeclaredPropGetMethodPool.get(cls);
@@ -1857,9 +1857,9 @@ public final class Beans {
      * setter.invoke(userInstance, "John");
      * }</pre>
      *
-     * @param cls the class from which the property set method is to be retrieved
-     * @param propName the name of the property whose set method is to be retrieved
-     * @return the property set method declared in the specified class, or {@code null} if no method is found
+     * @param cls the class from which the property set method is to be retrieved.
+     * @param propName the name of the property whose set method is to be retrieved.
+     * @return the property set method declared in the specified class, or {@code null} if no method is found.
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
@@ -1913,8 +1913,8 @@ public final class Beans {
      * // Map: {"name" -> setName(String), "age" -> setAge(int), ...}
      * }</pre>
      *
-     * @param cls the class from which the property set methods are to be retrieved
-     * @return an immutable map of property set methods for the specified class
+     * @param cls the class from which the property set methods are to be retrieved.
+     * @return an immutable map of property set methods for the specified class.
      */
     public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
         ImmutableMap<String, Method> setterMethodList = beanDeclaredPropSetMethodPool.get(cls);
@@ -1938,10 +1938,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the property value
-     * @param bean the object from which the property value is to be retrieved
-     * @param propGetMethod the method to be invoked to get the property value
-     * @return the value of the specified property
-     * @throws RuntimeException if the method cannot be invoked
+     * @param bean the object from which the property value is to be retrieved.
+     * @param propGetMethod the method to be invoked to get the property value.
+     * @return the value of the specified property.
+     * @throws RuntimeException if the method cannot be invoked.
      */
     @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object bean, final Method propGetMethod) {
@@ -1963,10 +1963,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the property value
-     * @param bean the object from which the property value is to be retrieved
-     * @param propName the name of the property whose value is to be retrieved
-     * @return the value of the specified property
-     * @throws IllegalArgumentException if the property cannot be found
+     * @param bean the object from which the property value is to be retrieved.
+     * @param propName the name of the property whose value is to be retrieved.
+     * @return the value of the specified property.
+     * @throws IllegalArgumentException if the property cannot be found.
      * @see #getPropValue(Object, Method)
      */
     public static <T> T getPropValue(final Object bean, final String propName) {
@@ -1984,21 +1984,21 @@ public final class Beans {
      * User user = new User("John", new Address("NYC"));
      *
      * // Simple property
-     * String name = Beans.getPropValue(user, "name", false);  // "John"
+     * String name = Beans.getPropValue(user, "name", false);   // "John"
      *
      * // Nested property
-     * String city = Beans.getPropValue(user, "address.city", false);  // "NYC"
+     * String city = Beans.getPropValue(user, "address.city", false);   // "NYC"
      *
      * // Non-existent property with ignore flag
-     * Object value = Beans.getPropValue(user, "unknown", true);  // null
+     * Object value = Beans.getPropValue(user, "unknown", true);   // null
      * }</pre>
      *
      * @param <T> the type of the property value
-     * @param bean the object from which the property value is to be retrieved
-     * @param propName the name of the property whose value is to be retrieved
-     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns null
-     * @return the value of the specified property, or {@code null} if the property is not found and ignoreUnmatchedProperty is true
-     * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false
+     * @param bean the object from which the property value is to be retrieved.
+     * @param propName the name of the property whose value is to be retrieved.
+     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns null.
+     * @return the value of the specified property, or {@code null} if the property is not found and ignoreUnmatchedProperty is true.
+     * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false.
      */
     @MayReturnNull
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
@@ -2080,14 +2080,14 @@ public final class Beans {
      *
      * // With type conversion
      * Method setAge = User.class.getMethod("setAge", int.class);
-     * Beans.setPropValue(userInstance, setAge, "25");  // String converted to int
+     * Beans.setPropValue(userInstance, setAge, "25");   // String converted to int
      * }</pre>
      *
-     * @param bean the object on which the property value is to be set
-     * @param propSetMethod the method to be invoked to set the property value
-     * @param propValue the value to be set to the property
-     * @return the final value that was set to the property
-     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
+     * @param bean the object on which the property value is to be set.
+     * @param propSetMethod the method to be invoked to set the property value.
+     * @param propValue the value to be set to the property.
+     * @return the final value that was set to the property.
+     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception.
      */
     public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
         if (propValue == null) {
@@ -2134,10 +2134,10 @@ public final class Beans {
      * Beans.setPropValue(user, "age", 25);
      * }</pre>
      *
-     * @param bean the object on which the property value is to be set
-     * @param propName the name of the property whose value is to be set
-     * @param propValue the value to be set to the property
-     * @throws IllegalArgumentException if the specified property cannot be set
+     * @param bean the object on which the property value is to be set.
+     * @param propName the name of the property whose value is to be set.
+     * @param propValue the value to be set to the property.
+     * @throws IllegalArgumentException if the specified property cannot be set.
      * @deprecated replaced by {@link ParserUtil.BeanInfo#setPropValue(Object, String, Object)}
      */
     @Deprecated
@@ -2160,18 +2160,18 @@ public final class Beans {
      * Beans.setPropValue(user, "name", "John", false);
      *
      * // Ignore unmatched property
-     * boolean set = Beans.setPropValue(user, "unknown", "value", true);  // Returns false
+     * boolean set = Beans.setPropValue(user, "unknown", "value", true);   // Returns false
      *
      * // Set nested property
      * Beans.setPropValue(user, "address.city", "NYC", false);
      * }</pre>
      *
-     * @param bean the object on which the property value is to be set
-     * @param propName the name of the property whose value is to be set
-     * @param propValue the value to be set to the property
-     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns false
-     * @return {@code true} if the property value has been set, {@code false} otherwise
-     * @throws IllegalArgumentException if the specified property cannot be set and ignoreUnmatchedProperty is false
+     * @param bean the object on which the property value is to be set.
+     * @param propName the name of the property whose value is to be set.
+     * @param propValue the value to be set to the property.
+     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns false.
+     * @return {@code true} if the property value has been set, {@code false} otherwise.
+     * @throws IllegalArgumentException if the specified property cannot be set and ignoreUnmatchedProperty is false.
      * @deprecated replaced by {@link ParserUtil.BeanInfo#setPropValue(Object, String, Object, boolean)}
      */
     @Deprecated
@@ -2197,10 +2197,10 @@ public final class Beans {
      * // The bean's tags list is cleared and populated with newTags
      * }</pre>
      *
-     * @param bean the object on which the property value is to be set
-     * @param propGetMethod the method to be invoked to get the property value
-     * @param propValue the value to be set to the property
-     * @throws IllegalArgumentException if the getter doesn't return a Collection or Map
+     * @param bean the object on which the property value is to be set.
+     * @param propGetMethod the method to be invoked to get the property value.
+     * @param propValue the value to be set to the property.
+     * @throws IllegalArgumentException if the getter doesn't return a Collection or Map.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void setPropValueByGet(final Object bean, final Method propGetMethod, final Object propValue) {
@@ -2240,8 +2240,8 @@ public final class Beans {
      * String formal3 = Beans.formalizePropName("class");        // Returns "clazz"
      * }</pre>
      *
-     * @param str the property name to be formalized
-     * @return the formalized property name
+     * @param str the property name to be formalized.
+     * @return the formalized property name.
      */
     public static String formalizePropName(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2277,8 +2277,8 @@ public final class Beans {
      * String camel3 = Beans.toCamelCase("address-line-1");   // Returns "addressLine1"
      * }</pre>
      *
-     * @param str the property name to be converted
-     * @return the camel case version of the property name
+     * @param str the property name to be converted.
+     * @return the camel case version of the property name.
      */
     public static String toCamelCase(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2306,8 +2306,8 @@ public final class Beans {
      * String snake3 = Beans.toLowerCaseWithUnderscore("userID");      // Returns "user_id"
      * }</pre>
      *
-     * @param str the string to be converted
-     * @return the lower case version of the string with underscores
+     * @param str the string to be converted.
+     * @return the lower case version of the string with underscores.
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2334,8 +2334,8 @@ public final class Beans {
      * String upper3 = Beans.toUpperCaseWithUnderscore("userID");      // Returns "USER_ID"
      * }</pre>
      *
-     * @param str the string to be converted
-     * @return the upper case version of the string with underscores
+     * @param str the string to be converted.
+     * @return the upper case version of the string with underscores.
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2366,7 +2366,7 @@ public final class Beans {
      * // map now contains: {"userName": "John", "firstName": "Jane"}
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to camel case
+     * @param props the map whose keys are to be converted to camel case.
      */
     @SuppressWarnings("deprecation")
     public static void toCamelCase(final Map<String, Object> props) {
@@ -2396,7 +2396,7 @@ public final class Beans {
      * // map now contains: {"user_name": "John", "first_name": "Jane"}
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to lower case with underscores
+     * @param props the map whose keys are to be converted to lower case with underscores.
      */
     @SuppressWarnings("deprecation")
     public static void toLowerCaseWithUnderscore(final Map<String, Object> props) {
@@ -2426,7 +2426,7 @@ public final class Beans {
      * // map now contains: {"USER_NAME": "John", "FIRST_NAME": "Jane"}
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to upper case with underscores
+     * @param props the map whose keys are to be converted to upper case with underscores.
      */
     @SuppressWarnings("deprecation")
     public static void toUpperCaseWithUnderscore(final Map<String, Object> props) {
@@ -2488,7 +2488,7 @@ public final class Beans {
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", null);
-     * userMap.put("unknownField", "value");  // This field doesn't exist in User class
+     * userMap.put("unknownField", "value");   // This field doesn't exist in User class
      *
      * // Ignore null properties and unmatched properties
      * User user = Beans.map2Bean(userMap, true, true, User.class);
@@ -3004,7 +3004,7 @@ public final class Beans {
                 propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass); //NOSONAR
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass);   //NOSONAR
                 }
 
                 propValue = propInfo.getPropValue(bean);
@@ -3863,7 +3863,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control over in-place conversion
-     * Map<String, Object> output = new TreeMap<>();  // Sorted map
+     * Map<String, Object> output = new TreeMap<>();   // Sorted map
      * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
      *
      * Product product = new Product("Widget", 29.99, new Category("Electronics"));
@@ -4315,7 +4315,7 @@ public final class Beans {
      *
      * LinkedHashMap<String, Object> result = bean2FlatMap(order, true, ignored,
      *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES,
-     *     size -> new LinkedHashMap<>(size * 2));  // larger initial capacity
+     *     size -> new LinkedHashMap<>(size * 2));   // larger initial capacity
      * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John,
      * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
      * // (amount null excluded, internal_notes ignored, ordered map)
@@ -4410,7 +4410,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control in-place flattening
-     * Map<String, Object> output = new TreeMap<>();  // sorted output
+     * Map<String, Object> output = new TreeMap<>();   // sorted output
      * Set<String> ignored = new HashSet<>(Arrays.asList("metadata"));
      *
      * Document doc = new Document("Report", null,
@@ -4509,9 +4509,9 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the object to be created
-     * @param targetType the class of the object to be created
-     * @return a new instance of the specified class
-     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
+     * @param targetType the class of the object to be created.
+     * @return a new instance of the specified class.
+     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated.
      */
     public static <T> T newBean(final Class<T> targetType) {
         return CommonUtil.newInstance(targetType);
@@ -4541,8 +4541,8 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the object to be cloned
-     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON
-     * @return a deep clone of the object, or {@code null} if the input is {@code null}
+     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON.
+     * @return a deep clone of the object, or {@code null} if the input is {@code null}.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -4577,10 +4577,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON
-     * @param targetType the class of the target type to create
-     * @return a new instance of the target type with properties cloned from the source object
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON.
+     * @param targetType the class of the target type to create.
+     * @return a new instance of the target type with properties cloned from the source object.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
@@ -4635,8 +4635,8 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @return a new instance with properties copied from the source bean, or {@code null} if the source is {@code null}
+     * @param sourceBean the source bean to copy.
+     * @return a new instance with properties copied from the source bean, or {@code null} if the source is {@code null}.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -4670,9 +4670,9 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @param selectPropNames the collection of property names to be copied
-     * @return a new instance with selected properties copied from the source bean, or {@code null} if the source is {@code null}
+     * @param sourceBean the source bean to copy.
+     * @param selectPropNames the collection of property names to be copied.
+     * @return a new instance with selected properties copied from the source bean, or {@code null} if the source is {@code null}.
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) {
@@ -4707,9 +4707,9 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy
-     * @param propFilter the predicate to filter properties to be copied
-     * @return a new instance with filtered properties copied from the source bean, or {@code null} if the source is {@code null}
+     * @param sourceBean the source bean to copy.
+     * @param propFilter the predicate to filter properties to be copied.
+     * @return a new instance with filtered properties copied from the source bean, or {@code null} if the source is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -4740,10 +4740,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with properties copied from the source
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param sourceBean the source bean to copy properties from.
+     * @param targetType the class of the target type.
+     * @return a new instance of the target type with properties copied from the source.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
         return copy(sourceBean, (Collection<String>) null, targetType);
@@ -4768,11 +4768,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param selectPropNames the collection of property names to be copied
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with selected properties copied
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param sourceBean the source bean to copy properties from.
+     * @param selectPropNames the collection of property names to be copied.
+     * @param targetType the class of the target type.
+     * @return a new instance of the target type with selected properties copied.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
@@ -4803,12 +4803,12 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param selectPropNames the collection of property names to be copied
-     * @param propNameConverter function to convert property names from source to target format
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with converted and copied properties
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param sourceBean the source bean to copy properties from.
+     * @param selectPropNames the collection of property names to be copied.
+     * @param propNameConverter function to convert property names from source to target format.
+     * @param targetType the class of the target type.
+     * @return a new instance of the target type with converted and copied properties.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5356,7 +5356,7 @@ public final class Beans {
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
-     * source.setLastName("");  // Empty string
+     * source.setLastName("");   // Empty string
      *
      * TargetBean target = new TargetBean();
      *
@@ -5627,7 +5627,7 @@ public final class Beans {
                 if (targetPropInfo == null) {
                     //noinspection ConstantValue
                     if (!ignoreUnmatchedProperty) { //NOSONAR
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass());   //NOSONAR
                     }
                 } else {
                     propValue = srcBeanInfo.getPropValue(sourceBean, propName);
@@ -5809,7 +5809,7 @@ public final class Beans {
      * Person person = new Person();
      * Beans.fill(person);
      * // person now has all properties filled with random values
-     * System.out.println(person.getName());  // e.g., "a1b2c3d4-e5f6-78"
+     * System.out.println(person.getName());   // e.g., "a1b2c3d4-e5f6-78"
      * }</pre>
      *
      * @param bean a bean object with getter/setter methods
@@ -6006,9 +6006,9 @@ public final class Beans {
             } else if (double.class.equals(parameterClass) || Double.class.equals(parameterClass)) {
                 propValue = N.RAND.nextDouble();
             } else if (byte.class.equals(parameterClass) || Byte.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue(); //NOSONAR
+                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue();   //NOSONAR
             } else if (short.class.equals(parameterClass) || Short.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue(); //NOSONAR
+                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue();   //NOSONAR
             } else if (Number.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(N.RAND.nextInt()));
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * ObjBiIntPredicate<String> isSubstringValid = (str, start, end) ->
  *     start >= 0 && end <= str.length() && start < end;
- * boolean valid = isSubstringValid.test("Hello", 0, 5);  // returns true
+ * boolean valid = isSubstringValid.test("Hello", 0, 5);   // returns true
  *
  * ObjBiIntPredicate<int[][]> isValidPosition = (matrix, row, col) ->
  *     row >= 0 && row < matrix.length &&
@@ -81,7 +81,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * ObjBiIntPredicate<String> isInBounds = (str, start, end) ->
      *     start >= 0 && end <= str.length();
      * ObjBiIntPredicate<String> isOutOfBounds = isInBounds.negate();
-     * isOutOfBounds.test("Hello", -1, 5);  // returns true
+     * isOutOfBounds.test("Hello", -1, 5);   // returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -109,7 +109,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      *     end > start;
      *
      * ObjBiIntPredicate<String> combined = isValidRange.and(isNonEmpty);
-     * combined.test("Hello", 2, 2);  // returns {@code false} (not non-empty)
+     * combined.test("Hello", 2, 2);   // returns {@code false} (not non-empty)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate

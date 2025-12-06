@@ -34,7 +34,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIntObjPredicate<String> lengthChecker = (i, j, str) -> str.length() == (i + j);
-     * boolean result = lengthChecker.test(3, 2, "hello");  // Returns true (5 == 3+2)
+     * boolean result = lengthChecker.test(3, 2, "hello");   // Returns true (5 == 3+2)
      * }</pre>
      *
      * @param i the first input argument (int value)

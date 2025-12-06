@@ -22,8 +22,16 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Dates;
 
+/**
+ * Type handler for {@link Date} objects that stores and retrieves them as milliseconds
+ * in the database. This implementation converts between java.sql.Date instances and their
+ * millisecond representation (time since epoch).
+ */
 public class MillisDateType extends DateType {
 
+    /**
+     * The type name identifier for this Date type handler that uses milliseconds.
+     */
     public static final String MILLIS_DATE = "MillisDate";
 
     MillisDateType() {
@@ -103,7 +111,7 @@ public class MillisDateType extends DateType {
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO users (id, created_date) VALUES (?, ?)");
      *
-     * Date date = new Date(1609459200000L);  // Jan 1, 2021
+     * Date date = new Date(1609459200000L);   // Jan 1, 2021
      * type.set(stmt, 2, date);
      * // Sets parameter to 1609459200000
      *
@@ -131,7 +139,7 @@ public class MillisDateType extends DateType {
      * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * CallableStatement stmt = connection.prepareCall("{call update_date(?, ?)}");
      *
-     * Date date = new Date(1609459200000L);  // Jan 1, 2021
+     * Date date = new Date(1609459200000L);   // Jan 1, 2021
      * type.set(stmt, "p_created_date", date);
      * // Sets parameter to 1609459200000
      *

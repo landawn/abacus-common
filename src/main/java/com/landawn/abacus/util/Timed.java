@@ -46,11 +46,11 @@ public final class Timed<T> implements Immutable {
     private final T value;
 
     /**
-     * Private constructor. Use static factory methods {@link #of(Object)} or 
+     * Private constructor. Use static factory methods {@link #of(Object)} or
      * {@link #of(Object, long)} to create instances.
      *
-     * @param value the value to associate with a timestamp
-     * @param timeInMillis the timestamp in milliseconds since epoch
+     * @param value the value to associate with a timestamp.
+     * @param timeInMillis the timestamp in milliseconds since epoch.
      */
     Timed(final T value, final long timeInMillis) {
         this.value = value;
@@ -67,9 +67,9 @@ public final class Timed<T> implements Immutable {
      * Timed<List<String>> snapshot = Timed.of(activeUsers);
      * }</pre>
      *
-     * @param <T> the type of the value
-     * @param value the value to associate with the current timestamp; can be {@code null}
-     * @return a new Timed instance containing the value and current timestamp
+     * @param <T> the type of the value.
+     * @param value the value to associate with the current timestamp; can be {@code null}.
+     * @return a new Timed instance containing the value and current timestamp.
      * @see #of(Object, long)
      */
     public static <T> Timed<T> of(final T value) {
@@ -92,10 +92,10 @@ public final class Timed<T> implements Immutable {
      * Timed<User> timedUser = Timed.of(user, dbTimestamp);
      * }</pre>
      *
-     * @param <T> the type of the value
-     * @param value the value to associate with the timestamp; can be {@code null}
-     * @param timeInMillis the timestamp in milliseconds since epoch
-     * @return a new Timed instance containing the value and specified timestamp
+     * @param <T> the type of the value.
+     * @param value the value to associate with the timestamp; can be {@code null}.
+     * @param timeInMillis the timestamp in milliseconds since epoch.
+     * @return a new Timed instance containing the value and specified timestamp.
      * @see #of(Object)
      */
     public static <T> Timed<T> of(final T value, final long timeInMillis) {
@@ -113,7 +113,7 @@ public final class Timed<T> implements Immutable {
      * System.out.println("Data is " + age + " milliseconds old");
      * }</pre>
      *
-     * @return the timestamp in milliseconds since epoch
+     * @return the timestamp in milliseconds since epoch.
      * @see #value()
      */
     public long timestamp() {
@@ -131,7 +131,7 @@ public final class Timed<T> implements Immutable {
      * processUser(user);
      * }</pre>
      *
-     * @return the value associated with the timestamp; can be {@code null}
+     * @return the value associated with the timestamp; can be {@code null}.
      * @see #timestamp()
      */
     public T value() {
@@ -154,7 +154,7 @@ public final class Timed<T> implements Immutable {
      * // t1.hashCode() == t2.hashCode() (equal objects have equal hash codes)
      * }</pre>
      *
-     * @return a hash code value for this object
+     * @return a hash code value for this object.
      */
     @Override
     public int hashCode() {
@@ -178,8 +178,8 @@ public final class Timed<T> implements Immutable {
      * assertFalse(t1.equals(t3));   // Same value, different timestamp
      * }</pre>
      *
-     * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the obj argument; {@code false} otherwise
+     * @param obj the reference object with which to compare.
+     * @return {@code true} if this object is equal to the obj argument; {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -204,10 +204,10 @@ public final class Timed<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t = Timed.of("Hello", 1609459200000L);
-     * System.out.println(t);  // Prints: "1609459200000: Hello"
+     * System.out.println(t);   // Prints: "1609459200000: Hello"
      * }</pre>
      *
-     * @return a string representation of this timed instance
+     * @return a string representation of this timed instance.
      */
     @Override
     public String toString() {

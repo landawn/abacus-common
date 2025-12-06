@@ -25,7 +25,14 @@ import java.sql.SQLException;
  */
 public final class CharacterType extends AbstractCharacterType {
 
+    /**
+     * The type name constant for Character type identification.
+     */
     public static final String CHARACTER = Character.class.getSimpleName();
+    /**
+     * Package-private constructor for CharacterType.
+     * This constructor is called by the TypeFactory to create Character type instances.
+     */
 
     CharacterType() {
         super(CHARACTER);
@@ -60,7 +67,7 @@ public final class CharacterType extends AbstractCharacterType {
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
      * ResultSet rs = ...;  // from SQL query
-     * Character initial = type.get(rs, 1);  // retrieves Character from column 1
+     * Character initial = type.get(rs, 1);   // retrieves Character from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -87,7 +94,7 @@ public final class CharacterType extends AbstractCharacterType {
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
      * ResultSet rs = ...;  // from SQL query
-     * Character initial = type.get(rs, "initial");  // retrieves Character from "initial" column
+     * Character initial = type.get(rs, "initial");   // retrieves Character from "initial" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

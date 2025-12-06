@@ -41,6 +41,13 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     /**
      * Returns the Class object representing the GregorianCalendar type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * Class<GregorianCalendar> clazz = type.clazz();
+     * // Returns: GregorianCalendar.class
+     * }</pre>
+     *
      * @return GregorianCalendar.class
      */
     @Override
@@ -55,6 +62,21 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * - java.util.Date: converted directly to GregorianCalendar
      * - Calendar: converted to GregorianCalendar preserving the time
      * - Other types: converted to string and then parsed
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     *
+     * // From timestamp in milliseconds
+     * GregorianCalendar gc1 = type.valueOf(1640361600000L);
+     *
+     * // From Date
+     * GregorianCalendar gc2 = type.valueOf(new Date());
+     *
+     * // From Calendar
+     * Calendar cal = Calendar.getInstance();
+     * GregorianCalendar gc3 = type.valueOf(cal);
+     * }</pre>
      *
      * @param obj the object to convert to GregorianCalendar
      * @return a GregorianCalendar instance, or {@code null} if the input is null
@@ -104,6 +126,18 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * If the character sequence appears to be a long number, it's interpreted as milliseconds since epoch.
      * Otherwise, the characters are converted to a string and parsed using standard date parsing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * char[] buffer = "2023-12-25 10:30:45".toCharArray();
+     * GregorianCalendar gc = type.valueOf(buffer, 0, buffer.length);
+     * // Parses the full date-time string
+     *
+     * char[] timestampBuffer = "1640361600000".toCharArray();
+     * GregorianCalendar gc2 = type.valueOf(timestampBuffer, 0, timestampBuffer.length);
+     * // Parses as milliseconds since epoch
+     * }</pre>
+     *
      * @param cbuf the character array containing the date/time representation
      * @param offset the start offset in the character array
      * @param len the number of characters to parse
@@ -131,6 +165,17 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * The method reads a Timestamp from the database and converts it to a GregorianCalendar.
      * If the column value is {@code null}, returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * try (ResultSet rs = stmt.executeQuery("SELECT created_at FROM events")) {
+     *     if (rs.next()) {
+     *         GregorianCalendar createdAt = type.get(rs, 1);
+     *         // Retrieves GregorianCalendar from the first column
+     *     }
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
      * @return the GregorianCalendar value from the column, or {@code null} if the column value is SQL NULL
@@ -146,6 +191,17 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * Retrieves a GregorianCalendar value from the specified column in a ResultSet using the column label.
      * The method reads a Timestamp from the database and converts it to a GregorianCalendar.
      * If the column value is {@code null}, returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * try (ResultSet rs = stmt.executeQuery("SELECT created_at FROM events")) {
+     *     if (rs.next()) {
+     *         GregorianCalendar createdAt = type.get(rs, "created_at");
+     *         // Retrieves GregorianCalendar from the "created_at" column
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read

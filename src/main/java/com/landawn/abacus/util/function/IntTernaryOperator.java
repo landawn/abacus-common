@@ -34,7 +34,7 @@ public interface IntTernaryOperator extends Throwables.IntTernaryOperator<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntTernaryOperator summer = (a, b, c) -> a + b + c;
-     * int result = summer.applyAsInt(1, 2, 3);  // Returns 6
+     * int result = summer.applyAsInt(1, 2, 3);   // Returns 6
      * }</pre>
      *
      * @param a the first operand

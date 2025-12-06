@@ -53,7 +53,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     try {
  *         // use connection
  *     } finally {
- *         pool.put("database1", borrowed);  // return to pool
+ *         pool.put("database1", borrowed);   // return to pool
  *     }
  * }
  * }</pre>
@@ -73,8 +73,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p>The put operation will fail if:</p>
      * <ul>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The element has already expired</li>
-     *   <li>The operation will fail if the element would exceed memory constraints</li>
+     *   <li>The object has already expired</li>
+     *   <li>The object would exceed memory constraints</li>
      * </ul>
      *
      * @param key the key with which the specified element is to be associated, must not be {@code null}
@@ -90,6 +90,16 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * with optional automatic destruction on failure.
      *
      * <p>This is a convenience method that ensures proper cleanup if the object cannot be pooled.
+     *
+     * <p><b>Execution Order:</b></p>
+     * <ol>
+     *   <li>Attempts to add the object to the pool using {@link #put(Object, Poolable)}</li>
+     *   <li>If put fails and {@code autoDestroyOnFailedToPut} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>Returns the success status of the put operation</li>
+     * </ol>
+     *
+     * <p>The destroy operation is guaranteed to execute in a finally block if the put fails,
+     * even if an exception occurs during the put attempt. This ensures no resource leaks.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -110,7 +120,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Returns the element associated with the specified key, or {@code null} if no mapping exists.
-     * The element's activity print is updated to reflect this access.
+     * The element's access time is updated to reflect this access.
      *
      * <p>If the retrieved element has expired, it will be destroyed and {@code null} will be returned.
      *
@@ -135,7 +145,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Removes and returns the element associated with the specified key.
-     * The element's activity print is updated to reflect this access.
+     * The element's access time is updated to reflect this access.
      *
      * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
      * so it will not be available for future requests unless re-added.
@@ -144,6 +154,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @return the element previously associated with the key, or {@code null} if no mapping exists
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     E remove(K key);
 
     /**
@@ -179,6 +190,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     E peek(K key);
 
     /**
@@ -223,7 +235,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, CachedData> measure = (key, data) ->
-     *     key.length() * 2 + data.getDataSize();  // * 2 for UTF-16 encoding (2 bytes per char)
+     *     key.length() * 2 + data.getDataSize();   // * 2 for UTF-16 encoding (2 bytes per char)
      *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,

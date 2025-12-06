@@ -609,7 +609,7 @@ public final class Fn {
      * List<User> users1 = cachedUsers.get();
      * 
      * // Subsequent calls within 5 minutes return cached value
-     * List<User> users2 = cachedUsers.get();  // No database query
+     * List<User> users2 = cachedUsers.get();   // No database query
      * 
      * // After 5 minutes, the next call will query database again
      * // and cache the new result
@@ -1044,7 +1044,7 @@ public final class Fn {
                     //noinspection ResultOfMethodCallIgnored
                     service.awaitTermination(terminationTimeout, timeUnit);
                 } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restore interrupt status
+                    Thread.currentThread().interrupt();   // Restore interrupt status
                     // Shutdown already initiated, so we can safely ignore the interruption
                 }
             }
@@ -1844,7 +1844,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * list.stream().filter(Fn.alwaysTrue()).count();  // Returns 3 (all elements pass)
+     * list.stream().filter(Fn.alwaysTrue()).count();   // Returns 3 (all elements pass)
      *
      * // Useful as a default predicate or placeholder
      * Predicate<String> condition = someCondition ? Fn.alwaysTrue() : s -> s.length() > 5;
@@ -1863,7 +1863,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * list.stream().filter(Fn.alwaysFalse()).count();  // Returns 0 (no elements pass)
+     * list.stream().filter(Fn.alwaysFalse()).count();   // Returns 0 (no elements pass)
      *
      * // Useful as a default predicate or to exclude all elements
      * Predicate<String> filter = disabled ? Fn.alwaysFalse() : s -> s.startsWith("a");
@@ -1985,7 +1985,7 @@ public final class Fn {
      * List<String> list = Arrays.asList("a", null, "b", null, "c");
      * List<String> nonNullList = list.stream()
      *     .filter(Fn.notNull())
-     *     .collect(Collectors.toList());  // Returns ["a", "b", "c"]
+     *     .collect(Collectors.toList());   // Returns ["a", "b", "c"]
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2014,7 +2014,7 @@ public final class Fn {
      * List<String> list = Arrays.asList("hello", "", "world", null, "  ");
      * List<String> nonEmptyList = list.stream()
      *     .filter(Fn.notEmpty())
-     *     .collect(Collectors.toList());  // Returns ["hello", "world", "  "] (whitespace is not empty)
+     *     .collect(Collectors.toList());   // Returns ["hello", "world", "  "] (whitespace is not empty)
      * }</pre>
      *
      * @param <T> the CharSequence type
@@ -3099,10 +3099,23 @@ public final class Fn {
      * Returns a Consumer that only accepts {@code non-null} values.
      * If the value is {@code null}, the consumer is not invoked.
      *
+     * <p>This is useful for filtering out null values in stream operations without explicitly
+     * checking for null in your consumer logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> items = Arrays.asList("apple", null, "banana", null, "cherry");
+     *
+     * // Print only non-null items
+     * items.forEach(Fn.acceptIfNotNull(System.out::println));
+     * // Output: apple, banana, cherry
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
-     * @param consumer the consumer to invoke for {@code non-null} values
+     * @param consumer the consumer to invoke for {@code non-null} values (must not be null)
      * @return a Consumer that only processes {@code non-null} values
      * @throws IllegalArgumentException if consumer is null
+     * @see #acceptIf(java.util.function.Predicate, java.util.function.Consumer)
      */
     @Beta
     public static <T> Consumer<T> acceptIfNotNull(final java.util.function.Consumer<? super T> consumer) throws IllegalArgumentException {
@@ -3118,11 +3131,25 @@ public final class Fn {
     /**
      * Returns a Consumer that only accepts values that satisfy the predicate.
      *
+     * <p>This method provides conditional execution of a consumer based on a predicate test.
+     * Only values that pass the predicate test will be processed by the consumer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+     *
+     * // Print only even numbers
+     * numbers.forEach(Fn.acceptIf(n -> n % 2 == 0, System.out::println));
+     * // Output: 2, 4, 6
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
-     * @param predicate the condition to test
-     * @param consumer the consumer to invoke when predicate is true
+     * @param predicate the condition to test (must not be null)
+     * @param consumer the consumer to invoke when predicate is true (must not be null)
      * @return a Consumer that conditionally processes values
      * @throws IllegalArgumentException if predicate or consumer is null
+     * @see #acceptIfNotNull(java.util.function.Consumer)
+     * @see #acceptIfOrElse(java.util.function.Predicate, java.util.function.Consumer, java.util.function.Consumer)
      */
     @Beta
     public static <T> Consumer<T> acceptIf(final java.util.function.Predicate<? super T> predicate, final java.util.function.Consumer<? super T> consumer)
@@ -3138,14 +3165,32 @@ public final class Fn {
     }
 
     /**
-     * Returns a Consumer that accepts values based on a predicate, with different consumers for true/false.
+     * Returns a Consumer that accepts values based on a predicate, with different consumers for true/false cases.
+     *
+     * <p>This method provides conditional execution with two different consumers: one for values that satisfy
+     * the predicate and another for values that don't. This is useful for bifurcating processing logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+     * List<Integer> evens = new ArrayList<>();
+     * List<Integer> odds = new ArrayList<>();
+     *
+     * // Separate even and odd numbers
+     * numbers.forEach(Fn.acceptIfOrElse(
+     *     n -> n % 2 == 0,
+     *     evens::add,
+     *     odds::add));
+     * // Result: evens = [2, 4, 6], odds = [1, 3, 5]
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
-     * @param predicate the condition to test
-     * @param consumerForTrue the consumer to invoke when predicate is true
-     * @param consumerForFalse the consumer to invoke when predicate is false
+     * @param predicate the condition to test (must not be null)
+     * @param consumerForTrue the consumer to invoke when predicate is true (must not be null)
+     * @param consumerForFalse the consumer to invoke when predicate is false (must not be null)
      * @return a Consumer that conditionally processes values
      * @throws IllegalArgumentException if any parameter is null
+     * @see #acceptIf(java.util.function.Predicate, java.util.function.Consumer)
      */
     @Beta
     public static <T> Consumer<T> acceptIfOrElse(final java.util.function.Predicate<? super T> predicate,
@@ -3167,10 +3212,25 @@ public final class Fn {
     /**
      * Returns a Function that applies a mapper and returns an empty list if the input is {@code null}.
      *
+     * <p>This method provides null-safe mapping to collections. When the input is null, an empty list
+     * is returned instead of throwing a NullPointerException or returning null.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Function<String, Collection<Character>> toChars =
+     *     Fn.applyIfNotNullOrEmpty(s -> s.chars()
+     *         .mapToObj(c -> (char) c)
+     *         .collect(Collectors.toList()));
+     *
+     * Collection<Character> result1 = toChars.apply("hello");   // [h, e, l, l, o]
+     * Collection<Character> result2 = toChars.apply(null);      // []
+     * }</pre>
+     *
      * @param <T> the type of the input
      * @param <R> the element type of the result collection
-     * @param mapper the function to apply to {@code non-null} inputs
+     * @param mapper the function to apply to {@code non-null} inputs (must not be null)
      * @return a Function that safely handles {@code null} inputs
+     * @see #applyIfNotNullOrDefault(java.util.function.Function, java.util.function.Function, Object)
      */
     @Beta
     public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper) {
@@ -3180,14 +3240,31 @@ public final class Fn {
     /**
      * Returns a Function that applies two mappers in sequence, returning a default value if any step produces {@code null}.
      *
+     * <p>This method provides null-safe function composition. If the input is null, or if any mapper
+     * in the chain returns null, the default value is returned instead of propagating null or throwing
+     * a NullPointerException.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Extract length of street name from an address, with default value
+     * Function<Person, Integer> getStreetLength = Fn.applyIfNotNullOrDefault(
+     *     Person::getAddress,
+     *     address -> address.getStreet().length(),
+     *     0);
+     *
+     * Integer length1 = getStreetLength.apply(personWithAddress);      // 10
+     * Integer length2 = getStreetLength.apply(personWithoutAddress);   // 0
+     * }</pre>
+     *
      * @param <A> the type of the input
      * @param <B> the intermediate type
      * @param <R> the result type
-     * @param mapperA the first mapper
-     * @param mapperB the second mapper
+     * @param mapperA the first mapper (must not be null)
+     * @param mapperB the second mapper (must not be null)
      * @param defaultValue the default value to return if any step is null
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if mapperA or mapperB is null
+     * @see #applyIfNotNullOrElseGet(java.util.function.Function, java.util.function.Function, java.util.function.Supplier)
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final R defaultValue) throws IllegalArgumentException {
@@ -3430,13 +3507,29 @@ public final class Fn {
     /**
      * Returns a Function that conditionally applies a function based on a predicate, with a default value.
      *
+     * <p>This method provides conditional transformation. If the input satisfies the predicate, the function
+     * is applied; otherwise, the default value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Calculate discount for customers with purchases over $100, otherwise 0
+     * Function<Customer, Double> getDiscount = Fn.applyIfOrElseDefault(
+     *     c -> c.getTotalPurchases() > 100,
+     *     c -> c.getTotalPurchases() * 0.1,
+     *     0.0);
+     *
+     * Double discount1 = getDiscount.apply(highValueCustomer);   // 15.0
+     * Double discount2 = getDiscount.apply(lowValueCustomer);    // 0.0
+     * }</pre>
+     *
      * @param <T> the type of the input
      * @param <R> the result type
-     * @param predicate the condition to test
-     * @param func the function to apply when predicate is true
+     * @param predicate the condition to test (must not be null)
+     * @param func the function to apply when predicate is true (must not be null)
      * @param defaultValue the value to return when predicate is false
      * @return a Function that conditionally applies transformation
      * @throws IllegalArgumentException if predicate or func is null
+     * @see #applyIfOrElseGet(java.util.function.Predicate, java.util.function.Function, java.util.function.Supplier)
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
@@ -3456,13 +3549,29 @@ public final class Fn {
     /**
      * Returns a Function that conditionally applies a function based on a predicate, with a supplier for the else value.
      *
+     * <p>This method provides conditional transformation with lazy evaluation of the default value.
+     * If the input satisfies the predicate, the function is applied; otherwise, the supplier is invoked
+     * to provide the default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get user's discount or compute default discount
+     * Function<User, Double> getDiscount = Fn.applyIfOrElseGet(
+     *     User::isPremiumMember,
+     *     u -> u.calculateMemberDiscount(),
+     *     () -> calculateDefaultDiscount());
+     *
+     * Double discount = getDiscount.apply(user);
+     * }</pre>
+     *
      * @param <T> the type of the input
      * @param <R> the result type
-     * @param predicate the condition to test
-     * @param func the function to apply when predicate is true
-     * @param supplier the supplier for the value when predicate is false
+     * @param predicate the condition to test (must not be null)
+     * @param func the function to apply when predicate is true (must not be null)
+     * @param supplier the supplier for the value when predicate is false (must not be null)
      * @return a Function that conditionally applies transformation
      * @throws IllegalArgumentException if any parameter is null
+     * @see #applyIfOrElseDefault(java.util.function.Predicate, java.util.function.Function, Object)
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
@@ -3483,9 +3592,22 @@ public final class Fn {
 
     /**
      * Returns a Function that flattens a Map with Collection values into a List of Maps.
-     * Each output Map contains one key-value pair from the original Map.
+     * Each output Map contains one key-value pair from the original Map, where values are taken
+     * from the corresponding index in each collection.
      *
-     * <p>Example: {@code {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]}.</p>
+     * <p>This transformation is useful for converting columnar data (where each key maps to a collection
+     * of values) into row-based data (where each map represents a row with values from the same index).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, List<Integer>> columnar = Map.of(
+     *     "a", Arrays.asList(1, 2, 3),
+     *     "b", Arrays.asList(4, 5, 6),
+     *     "c", Arrays.asList(7, 8));
+     *
+     * List<Map<String, Integer>> rows = Fn.<String, Integer>flatmapValue().apply(columnar);
+     * // Result: [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3501,8 +3623,22 @@ public final class Fn {
     /**
      * Returns a ToByteFunction that parses Strings to byte values.
      *
-     * @return a ToByteFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of byte values.
+     * It can be used in stream operations to convert strings to bytes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> byteStrings = Arrays.asList("1", "2", "127");
+     * List<Byte> bytes = byteStrings.stream()
+     *     .mapToInt(Fn.parseByte())
+     *     .boxed()
+     *     .collect(Collectors.toList());
+     * }</pre>
+     *
+     * @return a ToByteFunction that parses strings to byte values
      * @see Numbers#toByte(String)
+     * @see #parseShort()
+     * @see #parseInt()
      */
     public static ToByteFunction<String> parseByte() {
         return PARSE_BYTE_FUNC;
@@ -3511,8 +3647,21 @@ public final class Fn {
     /**
      * Returns a ToShortFunction that parses Strings to short values.
      *
-     * @return a ToShortFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of short values.
+     * It can be used in stream operations to convert strings to shorts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> shortStrings = Arrays.asList("100", "200", "32767");
+     * int sum = shortStrings.stream()
+     *     .mapToInt(Fn.parseShort())
+     *     .sum();
+     * }</pre>
+     *
+     * @return a ToShortFunction that parses strings to short values
      * @see Numbers#toShort(String)
+     * @see #parseByte()
+     * @see #parseInt()
      */
     public static ToShortFunction<String> parseShort() {
         return PARSE_SHORT_FUNC;
@@ -3521,8 +3670,21 @@ public final class Fn {
     /**
      * Returns a ToIntFunction that parses Strings to int values.
      *
-     * @return a ToIntFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of integer values.
+     * It can be used in stream operations to convert strings to integers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> numberStrings = Arrays.asList("10", "20", "30");
+     * int sum = numberStrings.stream()
+     *     .mapToInt(Fn.parseInt())
+     *     .sum();  // Result: 60
+     * }</pre>
+     *
+     * @return a ToIntFunction that parses strings to int values
      * @see Numbers#toInt(String)
+     * @see #parseLong()
+     * @see #parseDouble()
      */
     public static ToIntFunction<String> parseInt() {
         return PARSE_INT_FUNC;
@@ -3531,8 +3693,21 @@ public final class Fn {
     /**
      * Returns a ToLongFunction that parses Strings to long values.
      *
-     * @return a ToLongFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of long values.
+     * It can be used in stream operations to convert strings to longs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> longStrings = Arrays.asList("1000000", "2000000", "3000000");
+     * long total = longStrings.stream()
+     *     .mapToLong(Fn.parseLong())
+     *     .sum();  // Result: 6000000
+     * }</pre>
+     *
+     * @return a ToLongFunction that parses strings to long values
      * @see Numbers#toLong(String)
+     * @see #parseInt()
+     * @see #parseDouble()
      */
     public static ToLongFunction<String> parseLong() {
         return PARSE_LONG_FUNC;
@@ -3541,8 +3716,21 @@ public final class Fn {
     /**
      * Returns a ToFloatFunction that parses Strings to float values.
      *
-     * @return a ToFloatFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of float values.
+     * It can be used to convert strings to floats.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> floatStrings = Arrays.asList("1.5", "2.5", "3.5");
+     * ToFloatFunction<String> floatParser = Fn.parseFloat();
+     * float result1 = floatParser.applyAsFloat("1.5");   // Result: 1.5f
+     * float result2 = floatParser.applyAsFloat("2.5");   // Result: 2.5f
+     * }</pre>
+     *
+     * @return a ToFloatFunction that parses strings to float values
      * @see Numbers#toFloat(String)
+     * @see #parseDouble()
+     * @see #parseInt()
      */
     public static ToFloatFunction<String> parseFloat() {
         return PARSE_FLOAT_FUNC;
@@ -3551,8 +3739,21 @@ public final class Fn {
     /**
      * Returns a ToDoubleFunction that parses Strings to double values.
      *
-     * @return a ToDoubleFunction that parses strings
+     * <p>This method provides a reusable function for parsing string representations of double values.
+     * It can be used in stream operations to convert strings to doubles.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> priceStrings = Arrays.asList("19.99", "29.99", "39.99");
+     * double total = priceStrings.stream()
+     *     .mapToDouble(Fn.parseDouble())
+     *     .sum();  // Result: 89.97
+     * }</pre>
+     *
+     * @return a ToDoubleFunction that parses strings to double values
      * @see Numbers#toDouble(String)
+     * @see #parseInt()
+     * @see #parseFloat()
      */
     public static ToDoubleFunction<String> parseDouble() {
         return PARSE_DOUBLE_FUNC;
@@ -3562,8 +3763,23 @@ public final class Fn {
      * Returns a Function that creates Number objects from Strings.
      * Returns {@code null} for empty strings. The type of Number returned depends on the string format.
      *
-     * @return a Function that creates Number objects
+     * <p>This method automatically detects the appropriate numeric type (Integer, Long, Float, Double, etc.)
+     * based on the string representation. It's useful when the numeric type is not known in advance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> numbers = Arrays.asList("42", "3.14", "1000000L", "2.5f");
+     * List<Number> parsed = numbers.stream()
+     *     .map(Fn.createNumber())
+     *     .collect(Collectors.toList());
+     * // Result: [42 (Integer), 3.14 (Double), 1000000 (Long), 2.5 (Float)]
+     * }</pre>
+     *
+     * @return a Function that creates Number objects from string representations
      * @see Numbers#createNumber(String)
+     * @see #parseInt()
+     * @see #parseLong()
+     * @see #parseDouble()
      */
     public static Function<String, Number> createNumber() {
         return CREATE_NUMBER_FUNC;
@@ -3572,9 +3788,22 @@ public final class Fn {
     /**
      * Returns a ToIntFunction that converts Number objects to int values.
      *
+     * <p>This method provides a reusable function for extracting int values from any Number subtype
+     * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to ints.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Number> numbers = Arrays.asList(10.5, 20L, 30);
+     * int sum = numbers.stream()
+     *     .mapToInt(Fn.numToInt())
+     *     .sum();  // Result: 60 (10 + 20 + 30)
+     * }</pre>
+     *
      * @param <T> the Number type
      * @return a ToIntFunction that converts Numbers to int
      * @see Number#intValue()
+     * @see #numToLong()
+     * @see #numToDouble()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToIntFunction<T> numToInt() {
@@ -3584,9 +3813,22 @@ public final class Fn {
     /**
      * Returns a ToLongFunction that converts Number objects to long values.
      *
+     * <p>This method provides a reusable function for extracting long values from any Number subtype
+     * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to longs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Number> numbers = Arrays.asList(100, 200.5, 300L);
+     * long total = numbers.stream()
+     *     .mapToLong(Fn.numToLong())
+     *     .sum();  // Result: 600
+     * }</pre>
+     *
      * @param <T> the Number type
      * @return a ToLongFunction that converts Numbers to long
      * @see Number#longValue()
+     * @see #numToInt()
+     * @see #numToDouble()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToLongFunction<T> numToLong() {
@@ -3596,9 +3838,22 @@ public final class Fn {
     /**
      * Returns a ToDoubleFunction that converts Number objects to double values.
      *
+     * <p>This method provides a reusable function for extracting double values from any Number subtype
+     * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to doubles.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Number> prices = Arrays.asList(19.99, 29, 39.50f);
+     * double total = prices.stream()
+     *     .mapToDouble(Fn.numToDouble())
+     *     .sum();  // Result: 88.49
+     * }</pre>
+     *
      * @param <T> the Number type
      * @return a ToDoubleFunction that converts Numbers to double
      * @see Number#doubleValue()
+     * @see #numToInt()
+     * @see #numToLong()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToDoubleFunction<T> numToDouble() {
@@ -3608,12 +3863,25 @@ public final class Fn {
     /**
      * Returns a stateful Predicate that limits the number of elements that pass through.
      * The first <i>count</i> elements return {@code true}, all subsequent elements return {@code false}.
-     * Don't save or cache for reuse, but it can be used in parallel stream.
+     *
+     * <p>This predicate is stateful and maintains an internal counter. It's safe to use in parallel streams
+     * (uses AtomicInteger), but should not be saved or cached for reuse across multiple streams.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Take only the first 3 elements from a stream
+     * List<Integer> first3 = Stream.of(1, 2, 3, 4, 5, 6, 7, 8)
+     *     .filter(Fn.atMost(3))
+     *     .collect(Collectors.toList());
+     * // Result: [1, 2, 3]
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
-     * @param count the maximum number of elements to accept
+     * @param count the maximum number of elements to accept (must be non-negative)
      * @return a stateful Predicate that limits elements
      * @throws IllegalArgumentException if count is negative
+     * @see #limitThenFilter(int, java.util.function.Predicate)
+     * @see #filterThenLimit(java.util.function.Predicate, int)
      */
     @Beta
     @Stateful
@@ -3692,7 +3960,7 @@ public final class Fn {
         try {
             return f.get();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restore interrupt status
+            Thread.currentThread().interrupt();   // Restore interrupt status
             throw ExceptionUtil.toRuntimeException(e, true);
         } catch (ExecutionException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
@@ -3943,12 +4211,25 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that always returns the first argument.
-     * 
+     *
      * <p>This is useful in reduction operations where you want to keep the first occurrence
-     * of duplicate elements.
+     * of duplicate elements, or in collectors where you need to merge duplicate keys by selecting
+     * the first value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Keep first occurrence when collecting to a map with duplicate keys
+     * Map<String, Integer> map = Stream.of(
+     *     Pair.of("a", 1),
+     *     Pair.of("b", 2),
+     *     Pair.of("a", 3))
+     *     .collect(Collectors.toMap(Pair::getKey, Pair::getValue, Fn.selectFirst()));
+     * // Result: {a=1, b=2}
+     * }</pre>
      *
      * @param <T> the type of the operands and result
      * @return a BinaryOperator that returns the first argument
+     * @see #selectSecond()
      */
     public static <T> BinaryOperator<T> selectFirst() {
         return (BinaryOperator<T>) RETURN_FIRST;
@@ -3956,12 +4237,25 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that always returns the second argument.
-     * 
+     *
      * <p>This is useful in reduction operations where you want to keep the last occurrence
-     * of duplicate elements.
+     * of duplicate elements, or in collectors where you need to merge duplicate keys by selecting
+     * the most recent value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Keep last occurrence when collecting to a map with duplicate keys
+     * Map<String, Integer> map = Stream.of(
+     *     Pair.of("a", 1),
+     *     Pair.of("b", 2),
+     *     Pair.of("a", 3))
+     *     .collect(Collectors.toMap(Pair::getKey, Pair::getValue, Fn.selectSecond()));
+     * // Result: {a=3, b=2}
+     * }</pre>
      *
      * @param <T> the type of the operands and result
      * @return a BinaryOperator that returns the second argument
+     * @see #selectFirst()
      */
     public static <T> BinaryOperator<T> selectSecond() {
         return (BinaryOperator<T>) RETURN_SECOND;
@@ -3969,11 +4263,29 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that finds the minimum of two Comparable values.
-     * 
-     * <p>Null values are considered greater than {@code non-null} values.
+     *
+     * <p>Null values are considered greater than {@code non-null} values, so a non-null value
+     * will always be chosen over null when comparing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find the minimum value in a stream
+     * Optional<Integer> min = Stream.of(5, 2, 8, 1, 9)
+     *     .reduce(Fn.min());
+     * // Result: Optional[1]
+     *
+     * // Find minimum in a collection with null values
+     * Integer minWithNull = Stream.of(5, null, 2, 8)
+     *     .reduce(Fn.min())
+     *     .orElse(null);
+     * // Result: 2 (null is considered greater)
+     * }</pre>
      *
      * @param <T> the type of the Comparable operands and result
      * @return a BinaryOperator that returns the minimum value
+     * @see #max()
+     * @see #min(Comparator)
+     * @see #minBy(java.util.function.Function)
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable<? super T>> BinaryOperator<T> min() {
@@ -3983,10 +4295,28 @@ public final class Fn {
     /**
      * Returns a BinaryOperator that finds the minimum of two values using the given Comparator.
      *
+     * <p>This method allows you to define custom comparison logic for finding the minimum value.
+     * It's particularly useful when working with objects that don't implement Comparable or when
+     * you need a different ordering than the natural order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find person with minimum age
+     * Optional<Person> youngest = people.stream()
+     *     .reduce(Fn.min(Comparator.comparing(Person::getAge)));
+     *
+     * // Find string with minimum length
+     * Optional<String> shortest = strings.stream()
+     *     .reduce(Fn.min(Comparator.comparingInt(String::length)));
+     * }</pre>
+     *
      * @param <T> the type of the operands and result
-     * @param comparator the Comparator to determine the minimum
+     * @param comparator the Comparator to determine the minimum (must not be null)
      * @return a BinaryOperator that returns the minimum value according to the comparator
      * @throws IllegalArgumentException if comparator is null
+     * @see #min()
+     * @see #max(Comparator)
+     * @see #minBy(java.util.function.Function)
      */
     public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3996,13 +4326,27 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that finds the minimum of two values by comparing a key extracted from each.
-     * 
+     *
      * <p>The key must be Comparable. Null keys are considered greater than {@code non-null} keys.
+     * This is useful when you want to find the minimum element based on a specific property.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find person with minimum age
+     * Optional<Person> youngest = people.stream()
+     *     .reduce(Fn.minBy(Person::getAge));
+     *
+     * // Find product with lowest price
+     * Optional<Product> cheapest = products.stream()
+     *     .reduce(Fn.minBy(Product::getPrice));
+     * }</pre>
      *
      * @param <T> the type of the operands and result
-     * @param keyExtractor the function to extract the Comparable key
+     * @param keyExtractor the function to extract the Comparable key (must not be null)
      * @return a BinaryOperator that returns the element with the minimum key
      * @throws IllegalArgumentException if keyExtractor is null
+     * @see #maxBy(java.util.function.Function)
+     * @see #min(Comparator)
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
@@ -4042,11 +4386,29 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that finds the maximum of two Comparable values.
-     * 
-     * <p>Null values are considered less than {@code non-null} values.
+     *
+     * <p>Null values are considered less than {@code non-null} values, so a non-null value
+     * will always be chosen over null when comparing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find the maximum value in a stream
+     * Optional<Integer> max = Stream.of(5, 2, 8, 1, 9)
+     *     .reduce(Fn.max());
+     * // Result: Optional[9]
+     *
+     * // Find maximum in a collection with null values
+     * Integer maxWithNull = Stream.of(5, null, 2, 8)
+     *     .reduce(Fn.max())
+     *     .orElse(null);
+     * // Result: 8 (null is considered less)
+     * }</pre>
      *
      * @param <T> the type of the Comparable operands and result
      * @return a BinaryOperator that returns the maximum value
+     * @see #min()
+     * @see #max(Comparator)
+     * @see #maxBy(java.util.function.Function)
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
@@ -4069,13 +4431,27 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that finds the maximum of two values by comparing a key extracted from each.
-     * 
+     *
      * <p>The key must be Comparable. Null keys are considered less than {@code non-null} keys.
+     * This is useful when you want to find the maximum element based on a specific property.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find person with maximum age
+     * Optional<Person> oldest = people.stream()
+     *     .reduce(Fn.maxBy(Person::getAge));
+     *
+     * // Find product with highest price
+     * Optional<Product> mostExpensive = products.stream()
+     *     .reduce(Fn.maxBy(Product::getPrice));
+     * }</pre>
      *
      * @param <T> the type of the operands and result
-     * @param keyExtractor the function to extract the Comparable key
+     * @param keyExtractor the function to extract the Comparable key (must not be null)
      * @return a BinaryOperator that returns the element with the maximum key
      * @throws IllegalArgumentException if keyExtractor is null
+     * @see #minBy(java.util.function.Function)
+     * @see #max(Comparator)
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
@@ -4115,13 +4491,29 @@ public final class Fn {
 
     /**
      * Returns a Function that compares its input to the target value.
-     * 
+     *
      * <p>The function returns a negative integer, zero, or a positive integer as the input
-     * is less than, equal to, or greater than the target.
+     * is less than, equal to, or greater than the target. This is useful for sorting or filtering
+     * based on comparison to a reference value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all values greater than a threshold
+     * List<Integer> greaterThan5 = numbers.stream()
+     *     .filter(n -> Fn.compareTo(5).apply(n) > 0)
+     *     .collect(Collectors.toList());
+     *
+     * // Map to comparison results
+     * List<Integer> comparisons = numbers.stream()
+     *     .map(Fn.compareTo(10))
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @param <T> the type of the Comparable values
      * @param target the value to compare against
      * @return a Function that compares its input to the target
+     * @see #compareTo(Object, Comparator)
+     * @see #compare()
      */
     public static <T extends Comparable<? super T>> Function<T, Integer> compareTo(final T target) {
         return t -> N.compare(t, target);
@@ -4182,13 +4574,25 @@ public final class Fn {
 
     /**
      * Returns a Function that gets the result from a Future, returning the default value on error.
-     * 
+     *
      * <p>If the Future throws an InterruptedException or ExecutionException, the function
-     * will return the provided default value instead of propagating the exception.
+     * will return the provided default value instead of propagating the exception. This is useful
+     * for handling futures in streams without explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Future<String>> futures = executeTasks();
+     *
+     * // Get results, using "FAILED" for any that error
+     * List<String> results = futures.stream()
+     *     .map(Fn.futureGetOrDefaultOnError("FAILED"))
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @param <T> the type of the Future's result
      * @param defaultValue the value to return if the Future throws an exception
      * @return a Function that gets the Future's result or returns the default value on error
+     * @see #futureGet()
      */
     @Beta
     public static <T> Function<Future<T>, T> futureGetOrDefaultOnError(final T defaultValue) {
@@ -4685,7 +5089,7 @@ public final class Fn {
      * Consumer<String> logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
      *     System.out.println(p + msg + s));
      *
-     * logWithPrefixAndSuffix.accept("Hello");  // Prints: Log: Hello [end]
+     * logWithPrefixAndSuffix.accept("Hello");   // Prints: Log: Hello [end]
      * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-consumer
@@ -5994,8 +6398,8 @@ public final class Fn {
      * @param action the consumer to convert to a function
      * @return a function that executes the consumer and returns null
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(java.util.function.Consumer, Object) 
-     * @see #f2c(java.util.function.Function) 
+     * @see #c2f(java.util.function.Consumer, Object)
+     * @see #f2c(java.util.function.Function)
      */
     @Beta
     public static <T> Function<T, Void> c2f(final java.util.function.Consumer<? super T> action) throws IllegalArgumentException {

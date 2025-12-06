@@ -88,6 +88,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * - Number: interpreted as milliseconds since epoch
      * - Other types: converted to string and then parsed
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * Instant instant1 = type.valueOf(1703502645123L);
+     * // Converts long to Instant
+     *
+     * Instant instant2 = type.valueOf("2023-12-25T10:30:45Z");
+     * // Parses string to Instant
+     * }</pre>
+     *
      * @param obj the object to convert to Instant
      * @return an Instant instance, or {@code null} if the input is null
      */
@@ -155,6 +165,14 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * If the character sequence appears to be a long number, it's interpreted as milliseconds since epoch.
      * Otherwise, the characters are converted to a string and parsed using standard instant parsing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * char[] chars = "2023-12-25T10:30:45Z".toCharArray();
+     * Instant instant = type.valueOf(chars, 0, chars.length);
+     * // Parses character array to Instant
+     * }</pre>
+     *
      * @param cbuf the character array containing the instant representation
      * @param offset the start offset in the character array
      * @param len the number of characters to parse
@@ -205,6 +223,14 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Retrieves an Instant value from the specified column in a ResultSet using the column name.
      * The method reads a Timestamp from the database and converts it to an Instant.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * ResultSet rs = ...;  // obtained from database query
+     * Instant instant = type.get(rs, "created_at");
+     * // Returns: Instant value from "created_at" column
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnName the name of the column to read
      * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
@@ -245,6 +271,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Sets an Instant parameter in a CallableStatement using a parameter name.
      * The Instant is converted to a Timestamp for database storage.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_event(?, ?)}");
+     * Instant now = Instant.now();
+     * type.set(stmt, "created_at", now);
+     * // Sets parameter to current instant
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param columnName the name of the parameter to set
      * @param x the Instant to set, or null
@@ -258,6 +293,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /**
      * Appends the string representation of an Instant to an Appendable.
      * Uses the default ISO-8601 timestamp format.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * StringBuilder sb = new StringBuilder();
+     * Instant instant = Instant.ofEpochMilli(1703502645123L);
+     * type.appendTo(sb, instant);
+     * // sb contains: "2023-12-25T10:30:45.123Z"
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the Instant to append
@@ -280,6 +324,24 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * - ISO_8601_TIMESTAMP: writes in "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format
      * - Default: uses the standard stringOf() format
      * String formats are quoted if specified in the configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * CharacterWriter writer = new CharacterWriter();
+     * Instant instant = Instant.ofEpochMilli(1703502645123L);
+     *
+     * JSONXMLSerializationConfig config =
+     *     JSONXMLSerializationConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
+     * type.writeCharacter(writer, instant, config);
+     * // Writes: 1703502645123
+     *
+     * writer = new CharacterWriter();
+     * config = JSONXMLSerializationConfig.of()
+     *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+     * type.writeCharacter(writer, instant, config);
+     * // Writes: "2023-12-25T10:30:45.123Z"
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the Instant to write

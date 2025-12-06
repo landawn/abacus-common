@@ -21,9 +21,9 @@ import com.landawn.abacus.util.N;
  * A wrapper class that makes any object poolable by implementing the Poolable interface.
  * This class is immutable and provides a simple way to pool objects that don't naturally
  * implement the Poolable interface.
- * 
- * <p>The wrapper maintains an {@link ActivityPrint} to track the wrapped object's lifecycle
- * and provides a no-op {@link #destroy(Poolable.Caller)} method since the wrapper doesn't
+ *
+ * <p>The wrapper maintains an activityPrint to track the wrapped object's lifecycle
+ * and provides a no-op {@link #destroy(Caller)} method since the wrapper doesn't
  * own the wrapped object's lifecycle.
  * 
  * <p>Common use cases:
@@ -54,7 +54,7 @@ import com.landawn.abacus.util.N;
  * if (retrieved != null) {
  *     String value = retrieved.value();
  *     // use value
- *     pool.add(retrieved);  // return to pool
+ *     pool.add(retrieved);   // return to pool
  * }
  * }</pre>
  * 
@@ -76,7 +76,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * Constructs a new PoolableWrapper with infinite lifetime and idle time.
      * The wrapped object will never expire based on time.
      * 
-     * @param srcObject the object to wrap, can be null
+     * @param srcObject the object to wrap, can be {@code null}
      */
     public PoolableWrapper(final T srcObject) {
         this(srcObject, Long.MAX_VALUE, Long.MAX_VALUE);
@@ -85,7 +85,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     /**
      * Constructs a new PoolableWrapper with specified lifetime and idle time limits.
      * 
-     * @param srcObject the object to wrap, can be null
+     * @param srcObject the object to wrap, can be {@code null}
      * @param liveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
@@ -106,7 +106,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * }</pre>
      * 
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be null
+     * @param srcObject the object to wrap, can be {@code null}
      * @return a new PoolableWrapper containing the source object
      */
     public static <T> PoolableWrapper<T> of(final T srcObject) {
@@ -127,7 +127,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * }</pre>
      * 
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be null
+     * @param srcObject the object to wrap, can be {@code null}
      * @param liveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @return a new PoolableWrapper with the specified settings
@@ -149,7 +149,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * }
      * }</pre>
      *
-     * @return the object wrapped by this PoolableWrapper, may be null
+     * @return the object wrapped by this PoolableWrapper, may be {@code null}
      */
     public T value() {
         return srcObject;

@@ -153,7 +153,7 @@ public final class DataSourceUtil {
      * try {
      *     // Process results
      * } finally {
-     *     DataSourceUtil.close(rs, true);  // Also closes the statement
+     *     DataSourceUtil.close(rs, true);   // Also closes the statement
      * }
      * }</pre>
      *
@@ -302,7 +302,7 @@ public final class DataSourceUtil {
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                throw new UncheckedSQLException(e);   //NOSONAR
             }
         }
     }
@@ -339,7 +339,7 @@ public final class DataSourceUtil {
                     conn.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                throw new UncheckedSQLException(e);   //NOSONAR
             }
         }
     }
@@ -379,14 +379,14 @@ public final class DataSourceUtil {
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                throw new UncheckedSQLException(e);   //NOSONAR
             } finally {
                 try {
                     if (conn != null) {
                         conn.close();
                     }
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);   //NOSONAR
                 }
             }
         }
@@ -424,7 +424,7 @@ public final class DataSourceUtil {
      * try {
      *     // Process results
      * } finally {
-     *     DataSourceUtil.closeQuietly(rs, true);  // Also closes statement
+     *     DataSourceUtil.closeQuietly(rs, true);   // Also closes statement
      * }
      * }</pre>
      *

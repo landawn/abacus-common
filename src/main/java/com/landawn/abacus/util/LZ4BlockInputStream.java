@@ -106,7 +106,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
-     * int bytesRead = lz4In.read(buffer, 0, 512);  // Read up to 512 bytes
+     * int bytesRead = lz4In.read(buffer, 0, 512);   // Read up to 512 bytes
      * }</pre>
      * 
      * @param b the buffer into which the data is read
@@ -130,7 +130,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long skipped = lz4In.skip(1024);  // Try to skip 1024 bytes
+     * long skipped = lz4In.skip(1024);   // Try to skip 1024 bytes
      * }</pre>
      * 
      * @param n the number of bytes to skip

@@ -75,34 +75,34 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <pre>{@code
  * // Creating and initializing byte lists
  * ByteList data = ByteList.of((byte)1, (byte)2, (byte)3, (byte)255);
- * ByteList buffer = new ByteList(1024);  // Pre-sized for network buffer
- * ByteList range = ByteList.range((byte)0, (byte)256);  // All byte values
+ * ByteList buffer = new ByteList(1024);   // Pre-sized for network buffer
+ * ByteList range = ByteList.range((byte)0, (byte)256);   // All byte values
  *
  * // Basic operations
- * data.add((byte)42);  // Append byte value
- * byte first = data.get(0);  // Access by index: 1
- * data.set(1, (byte)100);  // Modify existing value
+ * data.add((byte)42);   // Append byte value
+ * byte first = data.get(0);   // Access by index: 1
+ * data.set(1, (byte)100);   // Modify existing value
  *
  * // Binary data processing
  * byte[] bytes = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
  * ByteList message = ByteList.copyOf(bytes);
- * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64});  // " World"
+ * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64});   // " World"
  *
  * // Statistical operations
- * OptionalByte min = data.min();  // Find minimum value
- * OptionalByte max = data.max();  // Find maximum value
- * OptionalByte median = data.median();  // Calculate median
+ * OptionalByte min = data.min();   // Find minimum value
+ * OptionalByte max = data.max();   // Find maximum value
+ * OptionalByte median = data.median();   // Calculate median
  *
  * // Set operations for data analysis
  * ByteList set1 = ByteList.of((byte)1, (byte)2, (byte)3);
  * ByteList set2 = ByteList.of((byte)2, (byte)3, (byte)4);
- * ByteList intersection = set1.intersection(set2);  // [2, 3]
- * ByteList difference = set1.difference(set2);  // [1]
+ * ByteList intersection = set1.intersection(set2);   // [2, 3]
+ * ByteList difference = set1.difference(set2);   // [1]
  *
  * // Conversion operations
- * byte[] primitiveArray = data.toArray();  // To primitive array
- * IntList intData = data.toIntList();  // Convert to int values
- * List<Byte> boxedList = data.boxed();  // To boxed collection
+ * byte[] primitiveArray = data.toArray();   // To primitive array
+ * IntList intData = data.toIntList();   // Convert to int values
+ * List<Byte> boxedList = data.boxed();   // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -243,8 +243,8 @@ import com.landawn.abacus.util.stream.ByteStream;
  * ByteList packet = new ByteList(1024);
  * 
  * // Add packet header
- * packet.addAll(new byte[]{0x01, 0x02});  // Protocol version
- * packet.addAll(intToBytes(payloadLength));  // Payload length
+ * packet.addAll(new byte[]{0x01, 0x02});   // Protocol version
+ * packet.addAll(intToBytes(payloadLength));   // Payload length
  * 
  * // Add payload data
  * packet.addAll(payloadData);
@@ -651,7 +651,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -701,7 +701,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -843,7 +843,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
-     * list.removeIf(b -> b < 0);  // Removes negative values
+     * list.removeIf(b -> b < 0);   // Removes negative values
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
@@ -1021,7 +1021,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)10, (byte)20, (byte)30, (byte)40, (byte)50);
-     * list.deleteAllByIndices(1, 3);  // Remove elements at positions 1 and 3
+     * list.deleteAllByIndices(1, 3);   // Remove elements at positions 1 and 3
      * // list now contains: [10, 30, 50]
      * }</pre>
      *
@@ -1093,7 +1093,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // Move range to end
      * list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * int rangeLen = 3 - 1;  // = 2
-     * list.moveRange(1, 3, list.size() - rangeLen);  // newPos = 5 - 2 = 3
+     * list.moveRange(1, 3, list.size() - rangeLen);   // newPos = 5 - 2 = 3
      * // Result: [1, 4, 5, 2, 3]
      * }</pre>
      *
@@ -1229,7 +1229,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
-     * list.replaceAll(b -> (byte)(b * 2));  // Double each value
+     * list.replaceAll(b -> (byte)(b * 2));   // Double each value
      * // list now contains: [2, 4, 6]
      * }</pre>
      *
@@ -1252,7 +1252,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
-     * list.replaceIf(b -> b < 0, (byte)0);  // Replace negative values with 0
+     * list.replaceIf(b -> b < 0, (byte)0);   // Replace negative values with 0
      * // list now contains: [1, 0, 3, 0, 5]
      * }</pre>
      *
@@ -1470,7 +1470,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)2, (byte)2, (byte)4);
-     * ByteList result = list1.intersection(list2);  // result: [(byte)1, (byte)2]
+     * ByteList result = list1.intersection(list2);   // result: [(byte)1, (byte)2]
      * }</pre>
      *
      * @param b the list to intersect with this list. Can be {@code null}.
@@ -1508,7 +1508,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)2, (byte)2, (byte)4};
-     * ByteList result = list.intersection(array);  // result: [(byte)1, (byte)2]
+     * ByteList result = list.intersection(array);   // result: [(byte)1, (byte)2]
      * }</pre>
      *
      * @param b the array to intersect with this list. Can be {@code null}.
@@ -1536,7 +1536,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)4);
-     * ByteList result = list1.difference(list2);  // result: [(byte)1, (byte)2, (byte)3]
+     * ByteList result = list1.difference(list2);   // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
      * @param b the list containing elements to be excluded. Can be {@code null}.
@@ -1574,7 +1574,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)4};
-     * ByteList result = list.difference(array);  // result: [(byte)1, (byte)2, (byte)3]
+     * ByteList result = list.difference(array);   // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
      * @param b the array containing elements to be excluded. Can be {@code null}.
@@ -1683,7 +1683,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)1, (byte)3, (byte)1);
-     * int count = list.occurrencesOf((byte)1);  // Returns 3
+     * int count = list.occurrencesOf((byte)1);   // Returns 3
      * }</pre>
      *
      * @param valueToFind the value to count occurrences of
@@ -2050,7 +2050,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
-     * list.sort();  // list now contains [-1, 1, 3, 4, 5]
+     * list.sort();   // list now contains [-1, 1, 3, 4, 5]
      * }</pre>
      */
     @Override
@@ -2092,7 +2092,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
-     * list.reverseSort();  // list now contains [5, 4, 3, 1, -1]
+     * list.reverseSort();   // list now contains [5, 4, 3, 1, -1]
      * }</pre>
      */
     @Override
@@ -2165,7 +2165,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
-     * list.reverse();  // list now contains [5, 4, 3, 2, 1]
+     * list.reverse();   // list now contains [5, 4, 3, 2, 1]
      * }</pre>
      */
     @Override
@@ -2185,7 +2185,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
-     * list.reverse(1, 5);  // list now contains [1, 5, 4, 3, 2, 6]
+     * list.reverse(1, 5);   // list now contains [1, 5, 4, 3, 2, 6]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
@@ -2234,7 +2234,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
-     * list.shuffle();  // list might now contain [3, 1, 5, 2, 4]
+     * list.shuffle();   // list might now contain [3, 1, 5, 2, 4]
      * }</pre>
      */
     @Override
@@ -2283,7 +2283,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
-     * list.swap(1, 3);  // list now contains [1, 4, 3, 2, 5]
+     * list.swap(1, 3);   // list now contains [1, 4, 3, 2, 5]
      * }</pre>
      *
      * @param i the index of the first element to swap
@@ -2325,7 +2325,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
-     * ByteList subCopy = list.copy(1, 4);  // subCopy contains [2, 3, 4]
+     * ByteList subCopy = list.copy(1, 4);   // subCopy contains [2, 3, 4]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
@@ -2465,6 +2465,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0;
     }
 
+    /**
+     * Returns the number of elements in this list.
+     *
+     * @return the number of elements in this list
+     */
     @Override
     public int size() {
         return size;
@@ -2651,7 +2656,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * int sum = list.stream()
      *     .filter(b -> b > 2)
      *     .map(b -> b * 2)
-     *     .sum();  // Sum of (3*2 + 4*2 + 5*2) = 24
+     *     .sum();   // Sum of (3*2 + 4*2 + 5*2) = 24
      * }</pre>
      *
      * @return a ByteStream over all elements in this list
@@ -2673,7 +2678,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
      * long count = list.stream(2, 5)
      *     .filter(b -> b % 2 == 0)
-     *     .count();  // Counts even numbers in elements [3, 4, 5], result is 1
+     *     .count();   // Counts even numbers in elements [3, 4, 5], result is 1
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) for the stream

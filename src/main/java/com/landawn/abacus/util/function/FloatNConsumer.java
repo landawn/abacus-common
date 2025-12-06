@@ -31,6 +31,25 @@ public interface FloatNConsumer {
      * <p>The behavior of this method is implementation-dependent and may process
      * the float values in any manner required by the specific use case.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatNConsumer printFloats = floats -> {
+     *     for (float f : floats) {
+     *         System.out.println(f);
+     *     }
+     * };
+     * printFloats.accept(1.0f, 2.5f, 3.7f);  // Prints each float value
+     *
+     * FloatNConsumer sumFloats = floats -> {
+     *     float sum = 0;
+     *     for (float f : floats) {
+     *         sum += f;
+     *     }
+     *     System.out.println("Sum: " + sum);
+     * };
+     * sumFloats.accept(1.0f, 2.0f, 3.0f);  // Prints "Sum: 6.0"
+     * }</pre>
+     *
      * @param args the float values to be processed. May be empty, in which case
      *             the consumer should handle the empty array appropriately.
      */

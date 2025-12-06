@@ -35,10 +35,10 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleObjPredicate<String> hasLength = (val, str) -> str.length() == (int)val;
-     * boolean result = hasLength.test(5.0, "hello");  // Returns true
+     * boolean result = hasLength.test(5.0, "hello");   // Returns true
      *
      * DoubleObjPredicate<List<Double>> contains = (val, list) -> list.contains(val);
-     * boolean result2 = contains.test(3.14, Arrays.asList(1.0, 2.0, 3.14));  // Returns true
+     * boolean result2 = contains.test(3.14, Arrays.asList(1.0, 2.0, 3.14));   // Returns true
      * }</pre>
      *
      * @param t the double input argument

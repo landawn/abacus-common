@@ -37,8 +37,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Reading from a string
  * BufferedReader reader = new BufferedReader("Hello\nWorld");
- * String line1 = reader.readLine();  // "Hello"
- * String line2 = reader.readLine();  // "World"
+ * String line1 = reader.readLine();   // "Hello"
+ * String line2 = reader.readLine();   // "World"
  * 
  * // Reading from an InputStream
  * BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"));
@@ -484,7 +484,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             }
 
             // Bound skip by beginning and end of the source
-            final long ns = Math.min(strLength - nextChar, n); //NOSONAR
+            final long ns = Math.min(strLength - nextChar, n);   //NOSONAR
             nextChar += (int) ns;
 
             return ns;
@@ -553,7 +553,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *     String line = reader.readLine();
      *     // Process line
      * } finally {
-     *     reader.close();  // Always close in finally block
+     *     reader.close();   // Always close in finally block
      * }
      * }</pre>
      *
@@ -585,10 +585,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("First");
-     * System.out.println(reader.readLine());  // "First"
+     * System.out.println(reader.readLine());   // "First"
      * 
      * reader.reinit("Second");
-     * System.out.println(reader.readLine());  // "Second"
+     * System.out.println(reader.readLine());   // "Second"
      * }</pre>
      *
      * @param st the new string to read from

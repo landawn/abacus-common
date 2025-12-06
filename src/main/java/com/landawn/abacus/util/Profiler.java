@@ -226,48 +226,158 @@ public final class Profiler {
     }
 
     /**
-     * Runs a performance test with the specified number of threads, loops, and rounds.
-     * Each thread will execute the command for the specified number of loops,
-     * and this process will be repeated for the specified number of rounds.
-     * 
+     * Executes a multi-threaded performance test with the specified configuration parameters.
+     * This method provides a simplified interface for running concurrent performance tests where each
+     * thread executes a given command multiple times across multiple test rounds. This is the primary
+     * entry point for basic performance profiling scenarios without custom labels or timing delays.
+     *
+     * <p>The test execution follows this pattern:
+     * <ol>
+     *   <li>Creates a thread pool with {@code threadNum} threads</li>
+     *   <li>Each thread executes {@code command} for {@code loopNum} iterations</li>
+     *   <li>The entire test is repeated {@code roundNum} times for statistical accuracy</li>
+     *   <li>Collects comprehensive timing statistics for analysis</li>
+     * </ol>
+     *
+     * <p>This method is ideal for quick performance benchmarks where you need to assess how code
+     * performs under concurrent load. The multi-round approach helps eliminate JVM warmup effects
+     * and provides more stable, statistically significant results. Each round's results are printed
+     * automatically to the console, and the final round's statistics are returned for further analysis.
+     *
+     * <p><b>Performance Considerations:</b>
+     * <ul>
+     *   <li>Memory usage scales with threadNum * loopNum (stores individual execution times)</li>
+     *   <li>For loop counts exceeding 100,000, consider using internal loops within the command</li>
+     *   <li>Multiple rounds help account for JIT compilation and garbage collection variations</li>
+     *   <li>Thread synchronization overhead is minimized through careful implementation</li>
+     * </ul>
+     *
+     * <p><b>Typical Use Cases:</b>
+     * <ul>
+     *   <li>Database query performance testing under concurrent load</li>
+     *   <li>API endpoint response time measurement</li>
+     *   <li>Algorithm efficiency comparison</li>
+     *   <li>Cache hit rate and performance validation</li>
+     *   <li>Resource pool contention analysis</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic string concatenation performance test
      * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, () -> {
-     *     // Code to profile
-     *     Thread.sleep(1);
+     *     String result = "";
+     *     for (int i = 0; i < 100; i++) {
+     *         result += "test";
+     *     }
      * });
      * stats.printResult();
+     *
+     * // Database query performance test
+     * Profiler.run(10, 500, 5, () -> {
+     *     userRepository.findById(12345L);
+     * });
+     *
+     * // Thread-safe collection performance
+     * ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+     * Profiler.run(8, 10000, 3, () -> {
+     *     map.put(UUID.randomUUID().toString(), "value");
+     * });
      * }</pre>
      *
-     * @param threadNum the number of threads to use
-     * @param loopNum the number of loops to run in each thread
-     * @param roundNum the number of rounds to repeat the test
-     * @param command the command to be executed in each loop
-     * @return the statistics of the performance test
-     * @throws IllegalArgumentException if threadNum or loopNum is less than or equal to 0
+     * @param threadNum the number of concurrent threads to execute the test, must be greater than 0.
+     *                  Higher values test concurrent performance but consume more system resources.
+     *                  Typical values: 1 (single-threaded), 4-8 (moderate concurrency), 50+ (stress testing)
+     * @param loopNum the number of times each thread executes the command, must be greater than 0.
+     *                Each execution is timed individually for statistical analysis.
+     *                Recommended range: 100-10,000 for balanced memory usage and statistical significance
+     * @param roundNum the number of times to repeat the entire test (all threads and loops).
+     *                 Multiple rounds help eliminate JVM warmup effects and provide stable measurements.
+     *                 Recommended: 3-5 rounds for most tests, 1 for quick checks
+     * @param command the code to be profiled and executed in each loop iteration.
+     *                This should be a Runnable that can throw checked exceptions.
+     *                The command is executed (threadNum * loopNum * roundNum) times in total
+     * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics including
+     *         minimum, maximum, average, and percentile execution times for all test executions.
+     *         The returned statistics represent the final round of testing
+     * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0}, as these would
+     *                                  result in invalid test configurations with no actual profiling
+     * @see #run(int, int, int, String, Throwables.Runnable) for tests with custom labels
+     * @see #run(int, long, int, long, int, String, Throwables.Runnable) for tests with timing delays
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command) {
         return run(threadNum, loopNum, roundNum, "run", command);
     }
 
     /**
-     * Runs a performance test with the specified parameters and a custom label.
-     * The label will be used to identify the test method in the results.
-     * 
+     * Executes a multi-threaded performance test with a custom descriptive label for result identification.
+     * This method extends the basic {@link #run(int, int, int, Throwables.Runnable)} by allowing you to
+     * specify a meaningful label that appears in the performance statistics output, making it easier to
+     * identify and distinguish between different test scenarios when running multiple benchmarks.
+     *
+     * <p>The custom label is particularly useful when:
+     * <ul>
+     *   <li>Running multiple performance tests in sequence and comparing results</li>
+     *   <li>Generating reports that need clear identification of each test case</li>
+     *   <li>Profiling different implementations of the same functionality</li>
+     *   <li>Creating test suites with descriptive names for each benchmark</li>
+     *   <li>Exporting results to external monitoring or analysis tools</li>
+     * </ul>
+     *
+     * <p>The label appears in all output formats (console, HTML, XML) and helps distinguish between
+     * different methods or scenarios being tested. Without a label, the default "run" identifier is used,
+     * which can make it difficult to differentiate between multiple tests in the output.
+     *
+     * <p><b>Best Practices for Labels:</b>
+     * <ul>
+     *   <li>Use descriptive names that clearly indicate what is being tested (e.g., "StringConcatenation", "DatabaseQuery")</li>
+     *   <li>Keep labels concise but meaningful (avoid overly long labels that clutter output)</li>
+     *   <li>Use consistent naming conventions across related tests (e.g., "Cache_Get", "Cache_Put", "Cache_Remove")</li>
+     *   <li>Avoid special characters that might interfere with output formatting</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "StringConcat", () -> {
-     *     String s = "Hello" + "World";
+     * // Compare StringBuilder vs String concatenation
+     * Profiler.run(4, 1000, 3, "StringBuilder", () -> {
+     *     StringBuilder sb = new StringBuilder();
+     *     for (int i = 0; i < 100; i++) {
+     *         sb.append("test");
+     *     }
      * });
+     *
+     * Profiler.run(4, 1000, 3, "StringConcat", () -> {
+     *     String s = "";
+     *     for (int i = 0; i < 100; i++) {
+     *         s += "test";
+     *     }
+     * });
+     *
+     * // Test different cache implementations
+     * MultiLoopsStatistics stats = Profiler.run(10, 5000, 5, "ConcurrentHashMap_Get", () -> {
+     *     cache.get(randomKey());
+     * });
+     * stats.printResult();
      * }</pre>
      *
-     * @param threadNum the number of threads to use
-     * @param loopNum the number of loops to run in each thread
-     * @param roundNum the number of rounds to repeat the test
-     * @param label a custom label for the test (e.g., method name)
-     * @param command the command to be executed in each loop
-     * @return the statistics of the performance test
-     * @throws IllegalArgumentException if threadNum or loopNum is less than or equal to 0
+     * @param threadNum the number of concurrent threads to execute the test, must be greater than 0.
+     *                  Determines the level of concurrent load applied during the test
+     * @param loopNum the number of times each thread executes the command, must be greater than 0.
+     *                Each iteration is measured individually for comprehensive statistics
+     * @param roundNum the number of times to repeat the entire test sequence.
+     *                 Multiple rounds help produce stable, reliable performance measurements
+     * @param label a descriptive identifier for this test that appears in all result outputs.
+     *              Use meaningful names that clearly describe what is being tested.
+     *              This label will appear in console output, HTML reports, and XML exports.
+     *              Can be {@code null}, in which case "run" is used as the default label
+     * @param command the code block to be profiled and executed in each loop iteration.
+     *                Should be a Runnable that encapsulates the operation being benchmarked
+     * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
+     *         for the labeled test, including execution times, percentiles, and statistical analysis.
+     *         The statistics object includes the label for easy identification
+     * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0},
+     *                                  indicating invalid test configuration parameters
+     * @see #run(int, int, int, Throwables.Runnable) for basic testing without custom labels
+     * @see #run(int, long, int, long, int, String, Throwables.Runnable) for tests with timing delays and labels
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
             final Throwables.Runnable<? extends Exception> command) {
@@ -275,30 +385,104 @@ public final class Profiler {
     }
 
     /**
-     * Runs a performance test with detailed control over timing and delays.
-     * This method allows you to add delays between thread starts and between loop iterations,
-     * which can be useful for simulating real-world scenarios.
-     * 
+     * Executes a comprehensive multi-threaded performance test with fine-grained control over timing,
+     * delays, and execution patterns. This advanced profiling method enables sophisticated testing
+     * scenarios that closely simulate real-world conditions by introducing controlled delays between
+     * thread starts and loop iterations, making it ideal for testing rate-limited systems, throttled
+     * APIs, and scenarios requiring gradual load ramp-up.
+     *
+     * <p>This method provides the most comprehensive control over test execution timing and is designed
+     * for advanced profiling scenarios where precise control over concurrency patterns and execution
+     * timing is required. The delay parameters allow you to:
+     * <ul>
+     *   <li><b>Stagger thread startup:</b> Gradually ramp up load instead of sudden concurrent bursts</li>
+     *   <li><b>Simulate rate limiting:</b> Add delays between iterations to mimic throttled operations</li>
+     *   <li><b>Test resource contention:</b> Control timing to expose race conditions and deadlocks</li>
+     *   <li><b>Model real traffic:</b> Create realistic load patterns matching production scenarios</li>
+     *   <li><b>Avoid overwhelming systems:</b> Prevent test load from exceeding system capacity</li>
+     * </ul>
+     *
+     * <p><b>Thread Delay Use Cases:</b>
+     * <ul>
+     *   <li>Gradual ramp-up testing: Start threads progressively to observe system behavior under increasing load</li>
+     *   <li>Connection pool testing: Avoid simultaneous connection attempts that might overwhelm pools</li>
+     *   <li>Distributed system testing: Simulate staggered client connections in microservices</li>
+     *   <li>Resource acquisition testing: Test systems with limited resources (file handles, ports)</li>
+     * </ul>
+     *
+     * <p><b>Loop Delay Use Cases:</b>
+     * <ul>
+     *   <li>API rate limiting: Respect rate limits by adding delays between requests</li>
+     *   <li>Database throttling: Prevent overwhelming database connections with continuous queries</li>
+     *   <li>Think time simulation: Model realistic user behavior with pauses between actions</li>
+     *   <li>Sustained load testing: Maintain consistent load over extended periods</li>
+     * </ul>
+     *
+     * <p><b>Performance Impact:</b>
+     * Note that delays affect total test duration but not individual operation timing measurements.
+     * Each operation's execution time is measured independently, excluding delay periods. Total test
+     * duration approximately equals: (threadDelay * threadNum) + (loopDelay * loopNum) + actual execution time.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Run 4 threads with 100ms delay between thread starts,
-     * // 1000 loops per thread with 10ms delay between loops
+     * // Gradual load ramp-up: Start one thread every 100ms
+     * Profiler.run(10, 100, 1000, 0, 3, "GradualRampUp", () -> {
+     *     apiClient.makeRequest();
+     * });
+     *
+     * // Rate-limited API testing: 10ms delay between each request
+     * Profiler.run(4, 0, 1000, 10, 3, "RateLimitedAPI", () -> {
+     *     rateLimitedService.call();
+     * });
+     *
+     * // Combined: Staggered start + throttled execution
      * MultiLoopsStatistics stats = Profiler.run(
-     *     4, 100, 1000, 10, 3, "DelayedTest", () -> {
-     *         // Test code
+     *     8,      // 8 threads
+     *     50,     // 50ms between thread starts
+     *     500,    // 500 iterations per thread
+     *     20,     // 20ms between iterations
+     *     5,      // 5 rounds
+     *     "DatabaseQuery_Throttled",
+     *     () -> {
+     *         database.query("SELECT * FROM users WHERE id = ?", randomId());
      *     }
      * );
+     * stats.printResult();
+     *
+     * // Simulate realistic user behavior with think time
+     * Profiler.run(20, 100, 100, 500, 3, "UserWorkflow", () -> {
+     *     // Simulate user action (delay represents "think time")
+     *     shoppingCart.addItem(randomProduct());
+     * });
      * }</pre>
      *
-     * @param threadNum the number of threads to use
-     * @param threadDelay the delay in milliseconds between starting each thread
-     * @param loopNum the number of loops to run in each thread
-     * @param loopDelay the delay in milliseconds between each loop
-     * @param roundNum the number of rounds to repeat the test
-     * @param label a custom label for the test
-     * @param command the command to be executed in each loop
-     * @return the statistics of the performance test
-     * @throws IllegalArgumentException if any numeric parameter is invalid
+     * @param threadNum the number of concurrent threads to execute the test, must be greater than 0.
+     *                  Each thread runs independently and executes the full loop sequence
+     * @param threadDelay the delay in milliseconds to wait before starting each subsequent thread, must be >= 0.
+     *                    A value of 0 starts all threads simultaneously. Higher values create gradual ramp-up.
+     *                    Example: With 10 threads and 100ms delay, the 10th thread starts 900ms after the first
+     * @param loopNum the number of times each thread executes the command, must be greater than 0.
+     *                Each execution is measured and contributes to the statistical analysis
+     * @param loopDelay the delay in milliseconds to wait between each loop iteration within a thread, must be >= 0.
+     *                  A value of 0 means continuous execution. Use positive values to throttle execution rate.
+     *                  This delay is NOT included in the measured execution time of each iteration
+     * @param roundNum the number of times to repeat the entire test (all threads and loops), must be greater than 0.
+     *                 Each round runs sequentially, with results from intermediate rounds printed to console.
+     *                 Multiple rounds help achieve statistically stable measurements
+     * @param label a descriptive identifier for this test that appears in all result outputs.
+     *              Use meaningful names to distinguish between different test scenarios.
+     *              Can be {@code null}, defaulting to a generic identifier
+     * @param command the code block to be profiled and executed in each loop iteration.
+     *                Execution time is measured individually for each invocation, excluding delay periods.
+     *                The command can throw checked exceptions which will be caught and logged
+     * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
+     *         including minimum, maximum, average, percentile execution times, and failure information.
+     *         The statistics represent the final round of testing
+     * @throws IllegalArgumentException if {@code threadNum <= 0}, {@code loopNum <= 0},
+     *                                  {@code threadDelay < 0}, or {@code loopDelay < 0}.
+     *                                  These conditions indicate invalid test configurations
+     * @see #run(int, int, int, Throwables.Runnable) for basic testing without delays
+     * @see #run(int, int, int, String, Throwables.Runnable) for testing with labels but no delays
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
@@ -430,7 +614,7 @@ public final class Profiler {
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
         if ((threadNum <= 0) || (loopNum <= 0) || (threadDelay < 0) || (loopDelay < 0)) {
-            throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay); //NOSONAR
+            throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay);   //NOSONAR
         }
         if (N.notEmpty(args) && (args.size() > 1) && (args.size() != threadNum)) {
             throw new IllegalArgumentException(
@@ -627,23 +811,81 @@ public final class Profiler {
     private static volatile boolean suspended = false;
 
     /**
-     * Suspends or resumes performance tests running on {@code Profiler}.
-     * When suspended, the profiler will only execute one loop with one thread for each test,
-     * making it useful for debugging without the overhead of full performance testing.
-     * 
+     * Controls the suspension state of the profiler, enabling or disabling full-scale performance testing.
+     * When suspended, all profiler operations run in minimal mode (single thread, single loop, single round)
+     * regardless of the parameters specified in test method calls. This feature is invaluable during
+     * development and debugging when you want to verify test logic without incurring the time and resource
+     * overhead of comprehensive performance testing.
+     *
+     * <p><b>Suspension Behavior:</b>
+     * When the profiler is suspended ({@code suspend(true)}):
+     * <ul>
+     *   <li>All tests execute with exactly 1 thread, 1 loop, and 1 round</li>
+     *   <li>Thread delays and loop delays are completely bypassed</li>
+     *   <li>Garbage collection between rounds is skipped</li>
+     *   <li>Test execution completes almost immediately</li>
+     *   <li>Statistical analysis still occurs but with minimal data</li>
+     * </ul>
+     *
+     * <p><b>Primary Use Cases:</b>
+     * <ul>
+     *   <li><b>Development Debugging:</b> Quickly verify that profiled code executes without errors</li>
+     *   <li><b>Integration Testing:</b> Test profiler integration without long-running performance tests</li>
+     *   <li><b>CI/CD Pipelines:</b> Run smoke tests with profiler calls without performance overhead</li>
+     *   <li><b>Rapid Iteration:</b> Quickly validate code changes before running full benchmarks</li>
+     *   <li><b>Exception Testing:</b> Verify error handling in profiled code without waiting</li>
+     * </ul>
+     *
+     * <p><b>Important Considerations:</b>
+     * <ul>
+     *   <li>Suspension is a global state affecting all profiler operations across all threads</li>
+     *   <li>Statistics from suspended runs are NOT representative of actual performance</li>
+     *   <li>Always resume the profiler before running actual performance tests</li>
+     *   <li>Suspension state is not persisted; it resets when the JVM restarts</li>
+     *   <li>This is a volatile variable, so changes are immediately visible across threads</li>
+     * </ul>
+     *
+     * <p><b>Best Practices:</b>
+     * <ul>
+     *   <li>Use try-finally blocks to ensure profiler is resumed after debugging sessions</li>
+     *   <li>Never leave profiler suspended in production environments</li>
+     *   <li>Document suspension state changes in test code comments</li>
+     *   <li>Consider using environment variables or system properties to control suspension</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Suspend profiler for debugging
+     * // Basic suspension for debugging
      * Profiler.suspend(true);
-     * 
-     * // Run tests in suspended mode (1 thread, 1 loop)
-     * Profiler.run(100, 1000, 10, () -> debugMethod());
-     * 
-     * // Resume normal operation
+     * try {
+     *     // This runs with just 1 thread, 1 loop regardless of parameters
+     *     Profiler.run(100, 1000, 10, () -> {
+     *         complexMethod(); // Just verify it doesn't crash
+     *     });
+     * } finally {
+     *     Profiler.suspend(false); // Always resume
+     * }
+     *
+     * // Conditional suspension based on environment
+     * boolean isDebugMode = System.getProperty("debug.mode", "false").equals("true");
+     * Profiler.suspend(isDebugMode);
+     *
+     * // Quick smoke test of multiple profiler calls
+     * Profiler.suspend(true);
+     * testSuite.runAllProfilerTests(); // Fast execution
      * Profiler.suspend(false);
+     *
+     * // Integration test scenario
+     * if (!"production".equals(environment)) {
+     *     Profiler.suspend(true); // Skip heavy testing in non-prod
+     * }
+     * performanceTestSuite.run();
      * }</pre>
      *
-     * @param yesOrNo if {@code true}, the profiler is suspended; if {@code false}, the profiler is resumed
+     * @param yesOrNo {@code true} to suspend the profiler (minimal execution mode), {@code false} to resume
+     *                normal profiler operation with full performance testing capabilities.
+     *                The suspension state affects all subsequent profiler operations until changed again
+     * @see #isSuspended() to check the current suspension state
      */
     public static void suspend(final boolean yesOrNo) {
         suspended = yesOrNo;
@@ -673,7 +915,7 @@ public final class Profiler {
             return;
         }
 
-        Runtime.getRuntime().gc(); //NOSONAR
+        Runtime.getRuntime().gc();   //NOSONAR
         N.sleep(1000);
     }
 
@@ -961,7 +1203,7 @@ public final class Profiler {
          */
         protected String time2String(final long timeInMillis) {
             final Timestamp timestamp = Dates.createTimestamp(timeInMillis);
-            return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
+            return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT);   // + " " + N.LOCAL_TIME_ZONE.getID();
         }
     }
 
@@ -1596,10 +1838,43 @@ public final class Profiler {
         }
 
         /**
-         * Prints the performance test results to the console.
-         * The output includes summary statistics, percentile information,
-         * and details about any failed executions.
-         * 
+         * Prints comprehensive performance test results to the standard output console (System.out).
+         * This method generates a detailed, formatted report including execution summary, statistical
+         * analysis, percentile distributions, and error information. The output is designed for immediate
+         * human readability during development, testing, and performance analysis sessions.
+         *
+         * <p>The generated report provides a complete performance analysis including:
+         * <ul>
+         *   <li><b>Test Configuration:</b> Thread count, loop iterations per thread, and timing information</li>
+         *   <li><b>Time Metrics:</b> Start time, end time, and total elapsed time for the entire test</li>
+         *   <li><b>Per-Method Statistics:</b> Average, minimum, and maximum execution times for each profiled method</li>
+         *   <li><b>Percentile Analysis:</b> Execution time percentiles (0.01%, 0.1%, 1%, 10%, 20%, 50%, 80%, 90%, 99%, 99.9%, 99.99%)</li>
+         *   <li><b>Error Summary:</b> Detailed information about any failed method executions with stack traces</li>
+         * </ul>
+         *
+         * <p><b>Output Format Details:</b>
+         * The console output uses a tabular format with columns aligned for easy reading. All timing values
+         * are displayed in milliseconds with three decimal places of precision. The percentile columns show
+         * the execution time threshold that the given percentage of executions completed within, helping
+         * identify performance outliers and distribution patterns.
+         *
+         * <p><b>Percentile Interpretation:</b>
+         * <ul>
+         *   <li><b>0.01% >=:</b> The fastest 0.01% of executions took at least this long (best case scenario)</li>
+         *   <li><b>50% >= (median):</b> Half of all executions were at least this fast</li>
+         *   <li><b>99% >=:</b> Only 1% of executions were slower than this (typical "worst case")</li>
+         *   <li><b>99.99% >=:</b> Only 0.01% of executions were slower (extreme outliers)</li>
+         * </ul>
+         *
+         * <p><b>Typical Use Cases:</b>
+         * <ul>
+         *   <li>Quick performance validation during development</li>
+         *   <li>Console-based performance regression testing</li>
+         *   <li>Interactive performance analysis and debugging</li>
+         *   <li>Automated test runs where console output is captured</li>
+         *   <li>Real-time performance monitoring during load tests</li>
+         * </ul>
+         *
          * <p><b>Example output format:</b></p>
          * <pre>{@code
          * ========================================================================================================================
@@ -1608,37 +1883,161 @@ public final class Profiler {
          * startTime: 2023-01-01 10:00:00
          * endTime:   2023-01-01 10:00:05
          * totalElapsedTime: 5000.000
-         * 
-         * <method name>,  |avg time|, |min time|, |max time|, |0.01% >=|, ...
-         * testMethod,     1.234,      0.123,      12.345,      10.234,     ...
+         *
+         * <method name>,        |avg time|, |min time|, |max time|, |0.01% >=|, |0.1% >=|,  |1% >=|,    |10% >=|,   |20% >=|,   |50% >=|,   |80% >=|,   |90% >=|,   |99% >=|,   |99.9% >=|, |99.99% >=|
+         * databaseQuery,        1.234,      0.123,      12.345,      0.150,      0.200,      0.300,      0.800,      1.000,      1.200,      1.500,      2.000,      5.000,      8.000,       10.000
+         * cacheOperation,       0.456,      0.050,      2.100,       0.060,      0.070,      0.100,      0.250,      0.350,      0.450,      0.600,      0.750,      1.200,      1.500,       1.800
+         *
+         * Errors: 5 (0.125%)
+         * --------------------------------------------------------------------------------
+         * method=databaseQuery, startTime=2023-01-01 10:00:01, endTime=2023-01-01 10:00:01, result=SQLException: Connection timeout.
+         * ========================================================================================================================
          * }</pre>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Basic usage: Run test and immediately print results
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, () -> {
+         *     performDatabaseQuery();
+         * });
+         * stats.printResult(); // Prints to console
+         *
+         * // Compare multiple implementations
+         * System.out.println("Testing ArrayList:");
+         * Profiler.run(8, 5000, 5, "ArrayList", () -> {
+         *     arrayList.add(randomValue());
+         * }).printResult();
+         *
+         * System.out.println("\nTesting CopyOnWriteArrayList:");
+         * Profiler.run(8, 5000, 5, "CopyOnWriteArrayList", () -> {
+         *     cowList.add(randomValue());
+         * }).printResult();
+         * }</pre>
+         *
+         * @see #writeResult(OutputStream) to write results to a file or custom output stream
+         * @see #writeResult(Writer) to write results using a Writer
+         * @see #writeHtmlResult(Writer) for HTML-formatted output suitable for web reports
+         * @see #writeXmlResult(Writer) for machine-readable XML output
          */
         public void printResult() {
-            writeResult(new PrintWriter(System.out)); //NOSONAR
+            writeResult(new PrintWriter(System.out));   //NOSONAR
         }
 
         /**
-         * Writes the performance test results to the specified output stream.
-         * The output format is the same as {@link #printResult()}.
+         * Writes comprehensive performance test results to the specified OutputStream in human-readable
+         * text format. This method provides byte-stream based output with the same detailed formatting
+         * as {@link #printResult()}, enabling direct writing to files, network sockets, or any other
+         * byte-oriented output destination.
          *
-         * @param output the output stream to write to
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
+         * {@link #writeResult(Writer)}. All performance metrics, statistical data, and error information
+         * are written in the same tabular text format as console output.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Write to file output stream
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, () -> {
+         *     performOperation();
+         * });
+         *
+         * try (FileOutputStream fos = new FileOutputStream("results.txt")) {
+         *     stats.writeResult(fos);
+         * }
+         *
+         * // Write to socket
+         * try (OutputStream out = socket.getOutputStream()) {
+         *     stats.writeResult(out);
+         * }
+         * }</pre>
+         *
+         * @param output the OutputStream to which performance results will be written. Must not be {@code null}.
+         *               The stream will be flushed but NOT closed by this method
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #writeResult(Writer) for character-stream based output
+         * @see #printResult() for console output
          */
         public void writeResult(final OutputStream output) {
             writeResult(new PrintWriter(output));
         }
 
         /**
-         * Writes the performance test results to the specified writer.
-         * The output format is the same as {@link #printResult()}.
-         * 
+         * Writes comprehensive performance test results to the specified Writer in human-readable text format.
+         * This method provides the same detailed, tabular output as {@link #printResult()} but directs it to
+         * a custom Writer destination, enabling flexible output handling such as file persistence, string
+         * buffers, network streams, or custom output processing pipelines.
+         *
+         * <p>The written output includes all performance metrics in a formatted, column-aligned text table
+         * with the same structure as console output: test configuration, timing summary, per-method statistics,
+         * percentile distributions, and error details. This format is optimized for human readability and can
+         * be easily archived, analyzed, or shared.
+         *
+         * <p><b>Common Use Cases:</b>
+         * <ul>
+         *   <li><b>File Archiving:</b> Save performance test results to log files for historical analysis</li>
+         *   <li><b>Build Reports:</b> Integrate results into CI/CD build artifacts and reports</li>
+         *   <li><b>Email Reports:</b> Generate text-based performance reports for distribution</li>
+         *   <li><b>String Processing:</b> Capture results in StringWriter for programmatic analysis</li>
+         *   <li><b>Network Streaming:</b> Stream results to remote monitoring systems</li>
+         *   <li><b>Log Integration:</b> Append results to application log files</li>
+         * </ul>
+         *
+         * <p><b>Output Format:</b>
+         * The output format is identical to {@link #printResult()}, containing separator lines, timing
+         * information, statistical tables with percentile data, and error summaries. All timing values
+         * are in milliseconds with three decimal places. The Writer is flushed after writing but NOT closed,
+         * allowing the caller to maintain control over resource lifecycle.
+         *
+         * <p><b>Resource Management:</b>
+         * This method does NOT close the provided Writer. The caller is responsible for closing the Writer
+         * when appropriate, typically using try-with-resources. The Writer is flushed after writing to
+         * ensure all data is written to the underlying stream.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * try (FileWriter writer = new FileWriter("results.txt")) {
-         *     statistics.writeResult(writer);
+         * // Write to file with automatic resource management
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, () -> {
+         *     performDatabaseQuery();
+         * });
+         *
+         * try (FileWriter writer = new FileWriter("performance-results.txt")) {
+         *     stats.writeResult(writer);
+         * }
+         *
+         * // Append to existing log file
+         * try (FileWriter writer = new FileWriter("performance-log.txt", true)) {
+         *     writer.write("\n=== Performance Test Run: " + new Date() + " ===\n");
+         *     stats.writeResult(writer);
+         * }
+         *
+         * // Capture results as a string for processing
+         * StringWriter stringWriter = new StringWriter();
+         * stats.writeResult(stringWriter);
+         * String results = stringWriter.toString();
+         * emailService.sendPerformanceReport(results);
+         *
+         * // Write to multiple destinations
+         * List<Writer> destinations = Arrays.asList(
+         *     new FileWriter("results.txt"),
+         *     new FileWriter("archive.txt"),
+         *     new StringWriter()
+         * );
+         * for (Writer writer : destinations) {
+         *     try {
+         *         stats.writeResult(writer);
+         *     } finally {
+         *         writer.close();
+         *     }
          * }
          * }</pre>
          *
-         * @param output the writer to write to
+         * @param output the Writer to which performance results will be written. Must not be {@code null}.
+         *               The Writer will be flushed but NOT closed by this method. All timing data,
+         *               statistics, and error information will be written in formatted text
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #printResult() for writing to standard output console
+         * @see #writeResult(OutputStream) for byte-stream based output
+         * @see #writeHtmlResult(Writer) for HTML-formatted output
+         * @see #writeXmlResult(Writer) for structured XML output
          */
         public void writeResult(final Writer output) {
             writeResult(new PrintWriter(output));
@@ -1710,7 +2109,7 @@ public final class Profiler {
             final List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
                 output.println();
-                output.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)"); //NOSONAR
+                output.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)");   //NOSONAR
                 for (final Object element : failedMethodList) {
                     output.println("--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
@@ -1720,27 +2119,130 @@ public final class Profiler {
         }
 
         /**
-         * Writes the performance test results in HTML format to the specified output stream.
-         * The HTML output includes a formatted table with all statistics and percentile information.
+         * Writes performance test results to the specified OutputStream in HTML format with structured
+         * tables and formatted markup. This method provides byte-stream based HTML output, enabling direct
+         * writing to files, network streams, or any other byte-oriented output destination.
          *
-         * @param output the output stream to write to
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
+         * {@link #writeHtmlResult(Writer)}. All performance statistics are rendered as HTML tables with
+         * proper formatting suitable for web browsers and HTML-based reporting systems.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Write HTML to file output stream
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "APITest", () -> {
+         *     apiClient.call();
+         * });
+         *
+         * try (FileOutputStream fos = new FileOutputStream("report.html")) {
+         *     stats.writeHtmlResult(fos);
+         * }
+         *
+         * // Stream HTML to HTTP response
+         * try (OutputStream out = httpResponse.getOutputStream()) {
+         *     stats.writeHtmlResult(out);
+         * }
+         * }</pre>
+         *
+         * @param output the OutputStream to which HTML-formatted results will be written.
+         *               Must not be {@code null}. The stream will be flushed but NOT closed by this method
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #writeHtmlResult(Writer) for character-stream based HTML output
+         * @see #writeResult(OutputStream) for plain text output
          */
         public void writeHtmlResult(final OutputStream output) {
             writeHtmlResult(new PrintWriter(output));
         }
 
         /**
-         * Writes the performance test results in HTML format to the specified writer.
-         * The HTML output includes a formatted table with all statistics and percentile information.
-         * 
+         * Writes performance test results to the specified Writer in HTML format with structured tables
+         * and formatted markup. This method generates web-ready HTML output that can be directly embedded
+         * in web pages, email reports, or dashboard views, providing a visually organized presentation of
+         * performance metrics suitable for stakeholders, management reports, and web-based monitoring systems.
+         *
+         * <p>The HTML output includes all performance statistics organized in a well-structured HTML table
+         * with proper headers, column alignment, and formatting. Unlike plain text output, the HTML format
+         * provides better visual organization, making it easier to scan large datasets and identify
+         * performance trends. The output uses semantic HTML markup suitable for styling with CSS.
+         *
+         * <p><b>Generated HTML Structure:</b>
+         * <ul>
+         *   <li><b>Summary Header:</b> Test configuration, timing, and metadata in formatted lines</li>
+         *   <li><b>Statistics Table:</b> HTML table with headers and data rows for each profiled method</li>
+         *   <li><b>Table Columns:</b> Method name, avg/min/max times, and all percentile thresholds</li>
+         *   <li><b>Error Section:</b> HTML-formatted error details if any method executions failed</li>
+         *   <li><b>HTML Entities:</b> Proper encoding of special characters (e.g., &gt; for >)</li>
+         * </ul>
+         *
+         * <p><b>Common Use Cases:</b>
+         * <ul>
+         *   <li><b>Web Reports:</b> Embed results in HTML reports for web browsers</li>
+         *   <li><b>Email Notifications:</b> Send HTML-formatted performance reports via email</li>
+         *   <li><b>Dashboard Integration:</b> Display results in monitoring dashboards</li>
+         *   <li><b>Documentation:</b> Include results in technical documentation and wikis</li>
+         *   <li><b>Stakeholder Reports:</b> Create executive-friendly performance summaries</li>
+         *   <li><b>CI/CD Artifacts:</b> Generate HTML build artifacts for Jenkins, GitLab, etc.</li>
+         * </ul>
+         *
+         * <p><b>HTML Table Features:</b>
+         * The generated table has a fixed width of 1200 pixels and includes borders for clear visual
+         * separation. Each column header uses HTML table header tags (&lt;th&gt;), and data cells use
+         * standard table data tags (&lt;td&gt;). The HTML can be easily styled with custom CSS for
+         * corporate branding or specific design requirements.
+         *
+         * <p><b>Resource Management:</b>
+         * This method does NOT close the provided Writer. The caller maintains responsibility for proper
+         * resource cleanup, typically using try-with-resources. The Writer is flushed after writing to
+         * ensure complete data transfer to the underlying stream.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * try (FileWriter writer = new FileWriter("results.html")) {
-         *     statistics.writeHtmlResult(writer);
+         * // Generate standalone HTML report file
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "DatabaseQuery", () -> {
+         *     repository.findById(randomId());
+         * });
+         *
+         * try (FileWriter writer = new FileWriter("performance-report.html")) {
+         *     writer.write("<html><head><title>Performance Report</title></head><body>\n");
+         *     writer.write("<h1>Database Query Performance Test</h1>\n");
+         *     stats.writeHtmlResult(writer);
+         *     writer.write("</body></html>");
+         * }
+         *
+         * // Email HTML report
+         * StringWriter htmlWriter = new StringWriter();
+         * stats.writeHtmlResult(htmlWriter);
+         * String htmlContent = htmlWriter.toString();
+         * emailService.sendHtmlEmail("Performance Results", htmlContent);
+         *
+         * // Embed in web dashboard
+         * try (PrintWriter out = response.getWriter()) {
+         *     out.println("<div class='performance-results'>");
+         *     stats.writeHtmlResult(out);
+         *     out.println("</div>");
+         * }
+         *
+         * // Generate styled report with custom CSS
+         * try (FileWriter writer = new FileWriter("styled-report.html")) {
+         *     writer.write("<html><head>");
+         *     writer.write("<style>");
+         *     writer.write("table { border-collapse: collapse; font-family: Arial; }");
+         *     writer.write("th { background-color: #4CAF50; color: white; padding: 12px; }");
+         *     writer.write("td { padding: 8px; border: 1px solid #ddd; }");
+         *     writer.write("</style></head><body>");
+         *     stats.writeHtmlResult(writer);
+         *     writer.write("</body></html>");
          * }
          * }</pre>
          *
-         * @param output the writer to write to
+         * @param output the Writer to which HTML-formatted performance results will be written.
+         *               Must not be {@code null}. The Writer will be flushed but NOT closed by this method.
+         *               All statistics are rendered as HTML tables and formatted text
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #writeHtmlResult(OutputStream) for byte-stream based HTML output
+         * @see #writeResult(Writer) for plain text formatted output
+         * @see #writeXmlResult(Writer) for machine-readable XML output
+         * @see #printResult() for console output
          */
         public void writeHtmlResult(final Writer output) {
             writeHtmlResult(new PrintWriter(output));
@@ -1753,12 +2255,12 @@ public final class Profiler {
          */
         private void writeHtmlResult(final PrintWriter output) {
             output.println(SEPARATOR_LINE);
-            output.println("<br/>" + "(unit: milliseconds)"); //NOSONAR
+            output.println("<br/>" + "(unit: milliseconds)");   //NOSONAR
             output.println("<br/>" + "threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
             output.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()));
             output.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()));
             output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
-            output.println("<br/>"); //NOSONAR
+            output.println("<br/>");   //NOSONAR
 
             output.println("<br/>");
             output.println("<table width=\"1200\" border=\"1\">");
@@ -1788,7 +2290,7 @@ public final class Profiler {
                 final double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
                 output.println("<tr>");
-                output.println("<td>" + methodName + "</td>"); //NOSONAR
+                output.println("<td>" + methodName + "</td>");   //NOSONAR
                 output.println("<td>" + elapsedTimeFormat.format(avgTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.format(minTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.format(maxTime) + "</td>");
@@ -1820,7 +2322,7 @@ public final class Profiler {
             MethodStatistics methodStatistics;
             final List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                output.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>"); //NOSONAR
+                output.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>");   //NOSONAR
                 for (final Object element : failedMethodList) {
                     output.println("<br/>" + "--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
@@ -1830,35 +2332,167 @@ public final class Profiler {
         }
 
         /**
-         * Writes the performance test results in XML format to the specified output stream.
-         * The XML output includes all statistics in a structured format suitable for parsing.
+         * Writes performance test results to the specified OutputStream in structured XML format, providing
+         * machine-readable output suitable for automated processing and data integration. This method provides
+         * byte-stream based XML output, enabling direct writing to files, network streams, or any other
+         * byte-oriented output destination.
          *
-         * @param output the output stream to write to
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
+         * {@link #writeXmlResult(Writer)}. All performance metrics are rendered as well-formed XML elements
+         * in a hierarchical structure suitable for parsing and automated processing.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Write XML to file output stream
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "DataProcessor", () -> {
+         *     processData();
+         * });
+         *
+         * try (FileOutputStream fos = new FileOutputStream("results.xml")) {
+         *     stats.writeXmlResult(fos);
+         * }
+         *
+         * // Stream XML to network destination
+         * try (OutputStream out = socket.getOutputStream()) {
+         *     stats.writeXmlResult(out);
+         * }
+         * }</pre>
+         *
+         * @param output the OutputStream to which XML-formatted results will be written.
+         *               Must not be {@code null}. The stream will be flushed but NOT closed by this method
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #writeXmlResult(Writer) for character-stream based XML output
+         * @see #writeResult(OutputStream) for plain text output
          */
         public void writeXmlResult(final OutputStream output) {
             writeXmlResult(new PrintWriter(output));
         }
 
         /**
-         * Writes the performance test results in XML format to the specified writer.
-         * The XML output includes all statistics in a structured format suitable for parsing.
-         * 
-         * <p><b>Example output structure:</b></p>
+         * Writes performance test results to the specified Writer in structured XML format, providing
+         * machine-readable output suitable for automated processing, data integration, and programmatic
+         * analysis. This method generates well-formed XML with hierarchical structure containing all
+         * performance metrics, statistical data, and error information in a format that can be easily
+         * parsed, transformed, and integrated into automated reporting and monitoring systems.
+         *
+         * <p>The XML output provides a hierarchical, structured representation of all performance data,
+         * making it ideal for integration with automated systems, data warehouses, monitoring platforms,
+         * and business intelligence tools. Unlike human-readable formats, XML enables reliable automated
+         * parsing, validation against schemas, and transformation using XSLT or similar technologies.
+         *
+         * <p><b>XML Structure and Elements:</b>
+         * <ul>
+         *   <li><b>Root Element:</b> {@code <result>} contains all performance test data</li>
+         *   <li><b>Metadata:</b> {@code <unit>}, {@code <threadNum>}, {@code <loops>}, timing information</li>
+         *   <li><b>Method Elements:</b> {@code <method name="...">} for each profiled method</li>
+         *   <li><b>Timing Statistics:</b> {@code <avgTime>}, {@code <minTime>}, {@code <maxTime>}</li>
+         *   <li><b>Percentiles:</b> {@code <_0.01>}, {@code <_0.1>}, {@code <_0.5>}, etc.</li>
+         *   <li><b>Error Information:</b> {@code <errors>} count and individual {@code <error>} elements</li>
+         * </ul>
+         *
+         * <p><b>Common Use Cases:</b>
+         * <ul>
+         *   <li><b>Automated Processing:</b> Parse results with XML parsers for programmatic analysis</li>
+         *   <li><b>Data Integration:</b> Import performance data into databases and data warehouses</li>
+         *   <li><b>Monitoring Systems:</b> Feed results into monitoring and alerting platforms</li>
+         *   <li><b>Trend Analysis:</b> Store historical data for long-term performance trend analysis</li>
+         *   <li><b>Report Generation:</b> Transform XML to various formats using XSLT</li>
+         *   <li><b>API Integration:</b> Exchange performance data between systems via XML</li>
+         *   <li><b>Business Intelligence:</b> Import into BI tools for executive dashboards</li>
+         * </ul>
+         *
+         * <p><b>XML Format Features:</b>
+         * <ul>
+         *   <li>Well-formed XML suitable for standard XML parsers (SAX, DOM, StAX)</li>
+         *   <li>All timing values in milliseconds with three decimal places</li>
+         *   <li>Consistent element naming and structure across all test runs</li>
+         *   <li>Percentile elements use underscore prefix (e.g., {@code <_0.99>})</li>
+         *   <li>Method names included as XML attributes for easy filtering</li>
+         *   <li>Error details formatted as text content within error elements</li>
+         * </ul>
+         *
+         * <p><b>Resource Management:</b>
+         * This method does NOT close the provided Writer. The caller is responsible for proper resource
+         * management, typically using try-with-resources. The Writer is flushed after writing to ensure
+         * all XML data is written to the underlying stream.
+         *
+         * <p><b>Example XML Output Structure:</b></p>
          * <pre>{@code
          * <result>
          *   <unit>milliseconds</unit>
          *   <threadNum>4</threadNum>
          *   <loops>1000</loops>
-         *   <method name="testMethod">
+         *   <startTime>2023-01-01 10:00:00</startTime>
+         *   <endTime>2023-01-01 10:00:05</endTime>
+         *   <totalElapsedTime>5000.000</totalElapsedTime>
+         *
+         *   <method name="databaseQuery">
          *     <avgTime>1.234</avgTime>
          *     <minTime>0.123</minTime>
          *     <maxTime>12.345</maxTime>
-         *     ...
+         *     <_0.0001>0.150</_0.0001>
+         *     <_0.001>0.200</_0.001>
+         *     <_0.01>0.300</_0.01>
+         *     <_0.2>1.000</_0.2>
+         *     <_0.5>1.200</_0.5>
+         *     <_0.8>1.500</_0.8>
+         *     <_0.9>2.000</_0.9>
+         *     <_0.99>5.000</_0.99>
+         *     <_0.999>8.000</_0.999>
+         *     <_0.9999>10.000</_0.9999>
          *   </method>
+         *
+         *   <errors>5 (0.125%)</errors>
+         *   <error>method=databaseQuery, startTime=2023-01-01 10:00:01, result=SQLException: Connection timeout.</error>
          * </result>
          * }</pre>
          *
-         * @param output the writer to write to
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Write XML results to file
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "DatabaseQuery", () -> {
+         *     repository.findById(randomId());
+         * });
+         *
+         * try (FileWriter writer = new FileWriter("performance-results.xml")) {
+         *     stats.writeXmlResult(writer);
+         * }
+         *
+         * // Parse XML results programmatically
+         * StringWriter xmlWriter = new StringWriter();
+         * stats.writeXmlResult(xmlWriter);
+         * String xmlContent = xmlWriter.toString();
+         *
+         * DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+         * Document doc = builder.parse(new InputSource(new StringReader(xmlContent)));
+         * NodeList methods = doc.getElementsByTagName("method");
+         * // Process XML data...
+         *
+         * // Store in database
+         * try (FileWriter writer = new FileWriter("results.xml")) {
+         *     stats.writeXmlResult(writer);
+         * }
+         * performanceDataService.importXmlResults("results.xml");
+         *
+         * // Generate multiple format outputs
+         * String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+         * try (FileWriter xmlWriter = new FileWriter("perf-" + timestamp + ".xml");
+         *      FileWriter txtWriter = new FileWriter("perf-" + timestamp + ".txt");
+         *      FileWriter htmlWriter = new FileWriter("perf-" + timestamp + ".html")) {
+         *     stats.writeXmlResult(xmlWriter);
+         *     stats.writeResult(txtWriter);
+         *     stats.writeHtmlResult(htmlWriter);
+         * }
+         * }</pre>
+         *
+         * @param output the Writer to which XML-formatted performance results will be written.
+         *               Must not be {@code null}. The Writer will be flushed but NOT closed by this method.
+         *               All statistics are rendered as well-formed XML elements
+         * @throws NullPointerException if {@code output} is {@code null}
+         * @see #writeXmlResult(OutputStream) for byte-stream based XML output
+         * @see #writeResult(Writer) for plain text formatted output
+         * @see #writeHtmlResult(Writer) for HTML-formatted output
+         * @see #printResult() for console output
          */
         public void writeXmlResult(final Writer output) {
             writeXmlResult(new PrintWriter(output));
@@ -1904,7 +2538,7 @@ public final class Profiler {
             }
             final List<MethodStatistics> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>"); //NOSONAR
+                output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>");   //NOSONAR
                 for (final MethodStatistics methodStatistics : failedMethodList) {
                     output.println("<error>" + methodStatistics.toString() + "</error>");
                 }

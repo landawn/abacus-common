@@ -31,6 +31,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
+    /**
+     * Constructs an AbstractBooleanType with the specified type name.
+     *
+     * @param typeName the name of the boolean type (e.g., "Boolean", "boolean")
+     */
     protected AbstractBooleanType(final String typeName) {
         super(typeName);
     }

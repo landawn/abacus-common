@@ -310,7 +310,7 @@ public final class Splitter {
      * // Returns ["apple", "banana", "cherry"]
      * }</pre>
      *
-     * @return a new Splitter instance configured with the default delimiter ", "
+     * @return a new Splitter instance configured with the default delimiter ", ".
      * @see #with(CharSequence)
      * @see #forLines()
      * @see Joiner#DEFAULT_DELIMITER
@@ -333,7 +333,7 @@ public final class Splitter {
      * // Returns ["line1", "line2", "line3", "line4"]
      * }</pre>
      *
-     * @return a new Splitter instance configured to split by line separators
+     * @return a new Splitter instance configured to split by line separators.
      * @see #with(Pattern)
      * @see #defauLt()
      */
@@ -352,8 +352,8 @@ public final class Splitter {
      * // Returns ["apple", "banana", "cherry"]
      * }</pre>
      *
-     * @param delimiter the character to use as a delimiter for splitting
-     * @return a new Splitter instance configured with the specified character delimiter
+     * @param delimiter the character to use as a delimiter for splitting.
+     * @return a new Splitter instance configured with the specified character delimiter.
      * @see #with(CharSequence)
      * @see #with(Pattern)
      */
@@ -434,9 +434,9 @@ public final class Splitter {
      * // Returns ["red", "green", "blue"]
      * }</pre>
      *
-     * @param delimiter the character sequence to use as a delimiter for splitting, not {@code null} or empty
-     * @return a new Splitter instance configured with the specified delimiter
-     * @throws IllegalArgumentException if the specified delimiter is {@code null} or empty
+     * @param delimiter the character sequence to use as a delimiter for splitting, not {@code null} or empty.
+     * @return a new Splitter instance configured with the specified delimiter.
+     * @throws IllegalArgumentException if the specified delimiter is {@code null} or empty.
      * @see #with(char)
      * @see #with(Pattern)
      * @see #pattern(CharSequence)
@@ -545,10 +545,10 @@ public final class Splitter {
      * // Returns ["one", "two", "three"]
      * }</pre>
      *
-     * @param delimiter the Pattern to use as a delimiter for splitting, not {@code null}
-     * @return a new Splitter instance configured with the specified pattern delimiter
+     * @param delimiter the Pattern to use as a delimiter for splitting, not {@code null}.
+     * @return a new Splitter instance configured with the specified pattern delimiter.
      * @throws IllegalArgumentException if the specified delimiter is {@code null}, or if the
-     *         pattern can match an empty string
+     *         pattern can match an empty string.
      * @see #pattern(CharSequence)
      * @see #with(CharSequence)
      */
@@ -649,10 +649,10 @@ public final class Splitter {
      * // Returns ["a", "b", "c"]
      * }</pre>
      *
-     * @param delimiterRegex the regular expression to use as a delimiter for splitting, not {@code null} or empty
-     * @return a new Splitter instance configured with the compiled pattern delimiter
+     * @param delimiterRegex the regular expression to use as a delimiter for splitting, not {@code null} or empty.
+     * @return a new Splitter instance configured with the compiled pattern delimiter.
      * @throws IllegalArgumentException if the specified delimiter regex is {@code null} or empty,
-     *         or if the resulting pattern can match an empty string
+     *         or if the resulting pattern can match an empty string.
      * @see #with(Pattern)
      * @see #with(CharSequence)
      */
@@ -667,8 +667,8 @@ public final class Splitter {
      * parameter is {@code true}. Empty strings can occur when there are consecutive delimiters
      * or when delimiters appear at the beginning or end of the input.
      *
-     * @param omitEmptyStrings {@code true} to omit empty strings from results, {@code false} to include them
-     * @return this Splitter instance for method chaining
+     * @param omitEmptyStrings {@code true} to omit empty strings from results, {@code false} to include them.
+     * @return this Splitter instance for method chaining.
      * @deprecated replaced by {@link #omitEmptyStrings()}
      */
     @Deprecated
@@ -691,7 +691,7 @@ public final class Splitter {
      * // Returns ["a", "b"] instead of ["a", "", "b", ""]
      * }</pre>
      *
-     * @return this Splitter instance for method chaining
+     * @return this Splitter instance for method chaining.
      * @see #trimResults()
      * @see #stripResults()
      */
@@ -706,8 +706,8 @@ public final class Splitter {
      * resulting substring when the specified parameter is {@code true}. Only space
      * characters (not all whitespace) are trimmed.
      *
-     * @param trim {@code true} to trim spaces from results, {@code false} to leave them as-is
-     * @return this Splitter instance for method chaining
+     * @param trim {@code true} to trim spaces from results, {@code false} to leave them as-is.
+     * @return this Splitter instance for method chaining.
      * @deprecated replaced by {@link #trimResults()}
      */
     @Deprecated
@@ -730,7 +730,7 @@ public final class Splitter {
      * // Returns ["a", "b", "c"] instead of ["a ", " b ", " c"]
      * }</pre>
      *
-     * @return this Splitter instance for method chaining
+     * @return this Splitter instance for method chaining.
      * @see #stripResults()
      * @see #omitEmptyStrings()
      */
@@ -746,8 +746,8 @@ public final class Splitter {
      * removes all whitespace as defined by {@link Character#isWhitespace(char)},
      * including spaces, tabs, newlines, etc.
      *
-     * @param strip {@code true} to strip whitespace from results, {@code false} to leave them as-is
-     * @return this Splitter instance for method chaining
+     * @param strip {@code true} to strip whitespace from results, {@code false} to leave them as-is.
+     * @return this Splitter instance for method chaining.
      * @see Character#isWhitespace(char)
      * @deprecated replaced by {@link #stripResults()}
      */
@@ -771,7 +771,7 @@ public final class Splitter {
      * // Returns ["a", "b", "c"] with all whitespace removed
      * }</pre>
      *
-     * @return this Splitter instance for method chaining
+     * @return this Splitter instance for method chaining.
      * @see #trimResults()
      * @see #omitEmptyStrings()
      * @see Character#isWhitespace(char)
@@ -795,9 +795,9 @@ public final class Splitter {
      * // Returns ["a", "b,c,d"]
      * }</pre>
      *
-     * @param limit the maximum number of substrings to return; must be positive
-     * @return this Splitter instance for method chaining
-     * @throws IllegalArgumentException if the provided limit is not a positive integer
+     * @param limit the maximum number of substrings to return; must be positive.
+     * @return this Splitter instance for method chaining.
+     * @throws IllegalArgumentException if the provided limit is not a positive integer.
      * @see #split(CharSequence)
      */
     public Splitter limit(final int limit) throws IllegalArgumentException {
@@ -823,8 +823,8 @@ public final class Splitter {
      * // Returns ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @return a new ArrayList containing the split results; returns an empty list if source is {@code null}
+     * @param source the CharSequence to split; may be {@code null}.
+     * @return a new ArrayList containing the split results; returns an empty list if source is {@code null}.
      * @see #split(CharSequence, Supplier)
      * @see #split(CharSequence, Function)
      * @see #split(CharSequence, Class)
@@ -851,10 +851,10 @@ public final class Splitter {
      * // Returns a LinkedHashSet containing ["a", "b", "c"]
      * }</pre>
      *
-     * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be {@code null}
-     * @param supplier a Supplier that creates a new Collection instance to hold the results
-     * @return the Collection created by the supplier, populated with the split results
+     * @param <C> the type of Collection to return.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @return the Collection created by the supplier, populated with the split results.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class, Supplier)
      */
@@ -878,10 +878,10 @@ public final class Splitter {
      * // Returns [1, 2, 3]
      * }</pre>
      *
-     * @param <T> the type of elements in the result list
-     * @param source the CharSequence to split; may be {@code null}
-     * @param mapper a function to apply to each split string
-     * @return a new List containing the mapped results
+     * @param <T> the type of elements in the result list.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param mapper a function to apply to each split string.
+     * @return a new List containing the mapped results.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class)
      * @see #splitThenApply(CharSequence, Function)
@@ -915,11 +915,11 @@ public final class Splitter {
      * // Returns [1.5, 2.75, 3.25]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Class representing the type to convert each substring to, not {@code null}
-     * @return a new List containing the converted results
-     * @throws IllegalArgumentException if targetType is {@code null}
+     * @param <T> the target type for conversion.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Class representing the type to convert each substring to, not {@code null}.
+     * @return a new List containing the converted results.
+     * @throws IllegalArgumentException if targetType is {@code null}.
      * @see #split(CharSequence, Type)
      * @see #split(CharSequence, Class, Supplier)
      * @see #splitToArray(CharSequence, Class)
@@ -945,12 +945,12 @@ public final class Splitter {
      * // Returns a HashSet containing {1, 2, 3}
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Class representing the type to convert each substring to
-     * @param supplier a Supplier that creates a new Collection instance to hold the results
-     * @return the Collection created by the supplier, populated with the converted results
+     * @param <T> the target type for conversion.
+     * @param <C> the type of Collection to return.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Class representing the type to convert each substring to.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @return the Collection created by the supplier, populated with the converted results.
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -978,11 +978,11 @@ public final class Splitter {
      * // Returns [1, 2, 3]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Type instance used for converting strings to the target type
-     * @return a List containing the converted results
-     * @throws IllegalArgumentException if targetType is null
+     * @param <T> the target type for conversion.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Type instance used for converting strings to the target type.
+     * @return a List containing the converted results.
+     * @throws IllegalArgumentException if targetType is null.
      */
     public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -1010,12 +1010,12 @@ public final class Splitter {
      * // Returns sorted unique values: [1, 2, 3]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Type instance used for converting strings to the target type
-     * @param supplier a Supplier that creates a new Collection instance to hold the results
-     * @return the Collection created by the supplier, populated with the converted results
+     * @param <T> the target type for conversion.
+     * @param <C> the type of Collection to return.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Type instance used for converting strings to the target type.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @return the Collection created by the supplier, populated with the converted results.
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -1039,10 +1039,10 @@ public final class Splitter {
      * // allParts now contains ["a", "b", "c", "d"]
      * }</pre>
      *
-     * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be {@code null}
-     * @param output the Collection to add the split results to, not {@code null}
-     * @throws IllegalArgumentException if output is {@code null}
+     * @param <C> the type of Collection to populate.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param output the Collection to add the split results to, not {@code null}.
+     * @throws IllegalArgumentException if output is {@code null}.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Supplier)
      */
@@ -1070,12 +1070,12 @@ public final class Splitter {
      * // numbers now contains [1, 2, 3, 4, 5, 6]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Class representing the type to convert each substring to
-     * @param output the Collection to add the converted results to
-     * @throws IllegalArgumentException if targetType or output is null
+     * @param <T> the target type for conversion.
+     * @param <C> the type of Collection to populate.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Class representing the type to convert each substring to.
+     * @param output the Collection to add the converted results to.
+     * @throws IllegalArgumentException if targetType or output is null.
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -1102,12 +1102,12 @@ public final class Splitter {
      * // results now contains [1.5, 2.7, 3.9]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Type instance used for converting strings to the target type
-     * @param output the Collection to add the converted results to
-     * @throws IllegalArgumentException if targetType or output is null
+     * @param <T> the target type for conversion.
+     * @param <C> the type of Collection to populate.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Type instance used for converting strings to the target type.
+     * @param output the Collection to add the converted results to.
+     * @throws IllegalArgumentException if targetType or output is null.
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -1132,8 +1132,8 @@ public final class Splitter {
      * // Returns an immutable list ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @return an ImmutableList containing the split results
+     * @param source the CharSequence to split; may be {@code null}.
+     * @return an ImmutableList containing the split results.
      * @see #split(CharSequence)
      * @see #splitToImmutableList(CharSequence, Class)
      */
@@ -1154,10 +1154,10 @@ public final class Splitter {
      * // Returns an immutable list [1, 2, 3]
      * }</pre>
      *
-     * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be {@code null}
-     * @param targetType the Class representing the type to convert each substring to
-     * @return an ImmutableList containing the converted results
+     * @param <T> the target type for conversion.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param targetType the Class representing the type to convert each substring to.
+     * @return an ImmutableList containing the converted results.
      */
     public <T> ImmutableList<T> splitToImmutableList(final CharSequence source, final Class<? extends T> targetType) {
         return ImmutableList.wrap(split(source, targetType));
@@ -1174,8 +1174,8 @@ public final class Splitter {
      * // Returns ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @return a String array containing the split results; returns an empty array if source is {@code null}
+     * @param source the CharSequence to split; may be {@code null}.
+     * @return a String array containing the split results; returns an empty array if source is {@code null}.
      * @see #split(CharSequence)
      * @see #splitToArray(CharSequence, Function)
      * @see #splitToArray(CharSequence, Class)
@@ -1199,9 +1199,9 @@ public final class Splitter {
      * // Returns ["A", "B", "C"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @param mapper a function to apply to each split string
-     * @return a String array containing the mapped results
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param mapper a function to apply to each split string.
+     * @return a String array containing the mapped results.
      */
     public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) {
         final List<String> substrs = split(source, mapper);
@@ -1227,11 +1227,11 @@ public final class Splitter {
      * // Returns [10, 20, 30]
      * }</pre>
      *
-     * @param <T> the array type
-     * @param source the CharSequence to split; may be {@code null}
-     * @param arrayType the Class object representing the desired array type
-     * @return an array of the specified type containing the split and converted results
-     * @throws IllegalArgumentException if arrayType is {@code null} or not an array type
+     * @param <T> the array type.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param arrayType the Class object representing the desired array type.
+     * @return an array of the specified type containing the split and converted results.
+     * @throws IllegalArgumentException if arrayType is {@code null} or not an array type.
      */
     public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) throws IllegalArgumentException {
         N.checkArgNotNull(arrayType, cs.arrayType);
@@ -1277,9 +1277,9 @@ public final class Splitter {
      * // parts now contains ["a", "b", "c"] (4th element "d" is not stored)
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @param output the String array to populate with split results
-     * @throws IllegalArgumentException if output is {@code null} or empty
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param output the String array to populate with split results.
+     * @throws IllegalArgumentException if output is {@code null} or empty.
      */
     public void splitToArray(final CharSequence source, final String[] output) throws IllegalArgumentException {
         N.checkArgNotEmpty(output, cs.output);
@@ -1309,8 +1309,8 @@ public final class Splitter {
      * // Returns 5
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @return a Stream containing the split results; returns an empty stream if source is {@code null}
+     * @param source the CharSequence to split; may be {@code null}.
+     * @return a Stream containing the split results; returns an empty stream if source is {@code null}.
      * @see #split(CharSequence)
      * @see #splitAndForEach(CharSequence, Consumer)
      */
@@ -1337,10 +1337,10 @@ public final class Splitter {
      * // Returns 6
      * }</pre>
      *
-     * @param <R> the type of the result
-     * @param source the CharSequence to split; may be {@code null}
-     * @param converter a function that transforms the list of split strings into a result
-     * @return the result of applying the converter function to the split results
+     * @param <R> the type of the result.
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param converter a function that transforms the list of split strings into a result.
+     * @return the result of applying the converter function to the split results.
      * @see #split(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
@@ -1362,8 +1362,8 @@ public final class Splitter {
      * });
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @param consumer a consumer that processes the list of split strings
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param consumer a consumer that processes the list of split strings.
      * @see #split(CharSequence)
      * @see #splitThenApply(CharSequence, Function)
      * @see #splitAndForEach(CharSequence, Consumer)
@@ -1389,8 +1389,8 @@ public final class Splitter {
      * // Prints each part as it's split
      * }</pre>
      *
-     * @param source the CharSequence to split; may be {@code null}
-     * @param action the Consumer to apply to each resulting substring
+     * @param source the CharSequence to split; may be {@code null}.
+     * @param action the Consumer to apply to each resulting substring.
      * @see #splitToStream(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
@@ -1406,10 +1406,18 @@ public final class Splitter {
      * iterator is consumed.
      *
      * <p>This is an internal method used by other split methods to avoid creating
-     * intermediate collections when not necessary.</p>
+     * intermediate collections when not necessary. The iterator respects all
+     * configured options including delimiter type, omitEmptyStrings, trimResults,
+     * stripResults, and limit settings.</p>
      *
-     * @param source the CharSequence to split; may be null
-     * @return an ObjIterator that produces split substrings; returns an empty iterator if source is null
+     * <p>The returned iterator is fail-fast and does not support the remove()
+     * operation. It produces substrings lazily, making it memory-efficient for
+     * large inputs.</p>
+     *
+     * @param source the CharSequence to split; may be {@code null}.
+     * @return an ObjIterator that produces split substrings; returns an empty iterator if source is {@code null}.
+     * @see #splitToStream(CharSequence)
+     * @see #split(CharSequence)
      */
     ObjIterator<String> iterate(final CharSequence source) {
         return strategy.split(source, omitEmptyStrings, trimResults, stripResults, limit);
@@ -1461,7 +1469,7 @@ public final class Splitter {
          * // Returns {name=John, age=30, city=NYC}
          * }</pre>
          *
-         * @return a new MapSplitter instance with default delimiters ", " and "="
+         * @return a new MapSplitter instance with default delimiters ", " and "=".
          * @see #with(CharSequence, CharSequence)
          * @see Joiner#DEFAULT_DELIMITER
          * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
@@ -1486,10 +1494,10 @@ public final class Splitter {
          * // Returns {host=localhost, port=8080}
          * }</pre>
          *
-         * @param entryDelimiter the delimiter that separates entries (key-value pairs), not {@code null} or empty
-         * @param keyValueDelimiter the delimiter that separates keys from values, not {@code null} or empty
-         * @return a new MapSplitter instance with the specified delimiters
-         * @throws IllegalArgumentException if either delimiter is {@code null} or empty
+         * @param entryDelimiter the delimiter that separates entries (key-value pairs), not {@code null} or empty.
+         * @param keyValueDelimiter the delimiter that separates keys from values, not {@code null} or empty.
+         * @return a new MapSplitter instance with the specified delimiters.
+         * @throws IllegalArgumentException if either delimiter is {@code null} or empty.
          * @see #with(Pattern, Pattern)
          * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(CharSequence)
@@ -1511,11 +1519,11 @@ public final class Splitter {
          * // Returns {a=1, b=2, c=3}
          * }</pre>
          *
-         * @param entryDelimiter the Pattern that separates entries (key-value pairs), not {@code null}
-         * @param keyValueDelimiter the Pattern that separates keys from values, not {@code null}
-         * @return a new MapSplitter instance with the specified pattern delimiters
+         * @param entryDelimiter the Pattern that separates entries (key-value pairs), not {@code null}.
+         * @param keyValueDelimiter the Pattern that separates keys from values, not {@code null}.
+         * @return a new MapSplitter instance with the specified pattern delimiters.
          * @throws IllegalArgumentException if either delimiter is {@code null}, or if either
-         *         pattern can match an empty string
+         *         pattern can match an empty string.
          * @see #with(CharSequence, CharSequence)
          * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(Pattern)
@@ -1536,11 +1544,11 @@ public final class Splitter {
          * // Returns {a=1, b=2, c=3}
          * }</pre>
          *
-         * @param entryDelimiterRegex the regular expression that separates entries, not {@code null} or empty
-         * @param keyValueDelimiterRegex the regular expression that separates keys from values, not {@code null} or empty
-         * @return a new MapSplitter instance with the compiled pattern delimiters
+         * @param entryDelimiterRegex the regular expression that separates entries, not {@code null} or empty.
+         * @param keyValueDelimiterRegex the regular expression that separates keys from values, not {@code null} or empty.
+         * @return a new MapSplitter instance with the compiled pattern delimiters.
          * @throws IllegalArgumentException if either regex is {@code null} or empty, or if
-         *         the compiled patterns can match an empty string
+         *         the compiled patterns can match an empty string.
          * @see #with(Pattern, Pattern)
          * @see #with(CharSequence, CharSequence)
          * @see Splitter#pattern(CharSequence)
@@ -1553,8 +1561,8 @@ public final class Splitter {
          * Configures this MapSplitter to omit entries with empty values when the
          * specified parameter is {@code true}. This applies to the entries splitting phase.
          *
-         * @param omitEmptyStrings {@code true} to omit entries with empty keys and values, {@code false} to include them
-         * @return this MapSplitter instance for method chaining
+         * @param omitEmptyStrings {@code true} to omit entries with empty keys and values, {@code false} to include them.
+         * @return this MapSplitter instance for method chaining.
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
         @Deprecated
@@ -1577,7 +1585,7 @@ public final class Splitter {
          * // Returns {a=1, b=2} (empty entry between commas is omitted)
          * }</pre>
          *
-         * @return this MapSplitter instance for method chaining
+         * @return this MapSplitter instance for method chaining.
          * @see #trimResults()
          * @see #stripResults()
          */
@@ -1591,8 +1599,8 @@ public final class Splitter {
          * Configures this MapSplitter to trim spaces from both entries and
          * key-value pairs when the specified parameter is {@code true}.
          *
-         * @param trim {@code true} to trim spaces, {@code false} to leave them as-is
-         * @return this MapSplitter instance for method chaining
+         * @param trim {@code true} to trim spaces, {@code false} to leave them as-is.
+         * @return this MapSplitter instance for method chaining.
          * @deprecated replaced by {@link #trimResults()}
          */
         @Deprecated
@@ -1617,7 +1625,7 @@ public final class Splitter {
          * // Returns {a=1, b=2} (spaces around keys and values are removed)
          * }</pre>
          *
-         * @return this MapSplitter instance for method chaining
+         * @return this MapSplitter instance for method chaining.
          * @see #stripResults()
          * @see #omitEmptyStrings()
          */
@@ -1633,8 +1641,8 @@ public final class Splitter {
          * characters from both entries and key-value pairs when the specified
          * parameter is {@code true}.
          *
-         * @param strip {@code true} to strip whitespace, {@code false} to leave it as-is
-         * @return this MapSplitter instance for method chaining
+         * @param strip {@code true} to strip whitespace, {@code false} to leave it as-is.
+         * @return this MapSplitter instance for method chaining.
          * @see Character#isWhitespace(char)
          * @deprecated replaced by {@link #stripResults()}
          */
@@ -1660,7 +1668,7 @@ public final class Splitter {
          * // Returns {a=1, b=2} (all whitespace around keys and values is removed)
          * }</pre>
          *
-         * @return this MapSplitter instance for method chaining
+         * @return this MapSplitter instance for method chaining.
          * @see #trimResults()
          * @see #omitEmptyStrings()
          * @see Character#isWhitespace(char)
@@ -1719,20 +1727,20 @@ public final class Splitter {
          * <pre>{@code
          * // DON'T: Think limit(2) returns 1 entry
          * Map<String, String> result = splitter.limit(2).split("a=1,b=2,c=3");
-         * assertEquals(1, result.size());  // WRONG! Returns 2, not 1
+         * assertEquals(1, result.size());   // WRONG! Returns 2, not 1
          *
          * // DO: Understand limit(N) returns UP TO N entries
          * Map<String, String> result = splitter.limit(2).split("a=1,b=2,c=3");
-         * assertEquals(2, result.size());  // Correct - returns 2 entries
+         * assertEquals(2, result.size());   // Correct - returns 2 entries
          *
          * // DON'T: Confuse with split string indices
          * // In String.split("a,b,c", 2) returns ["a", "b,c"] (2 parts)
          * // But here limit(2) means 2 map entries, not 1
          * }</pre>
          *
-         * @param limit the maximum number of entries to return; must be &gt; 0
-         * @return this MapSplitter for method chaining
-         * @throws IllegalArgumentException if {@code limit} &lt;= 0
+         * @param limit the maximum number of entries to return; must be &gt; 0.
+         * @return this MapSplitter for method chaining.
+         * @throws IllegalArgumentException if {@code limit} &lt;= 0.
          * @see Splitter#limit(int)
          */
         public MapSplitter limit(final int limit) throws IllegalArgumentException {
@@ -1759,8 +1767,8 @@ public final class Splitter {
          * // Returns {name=John, age=30, city=NYC}
          * }</pre>
          *
-         * @param source the CharSequence to split into a map; may be {@code null}
-         * @return a LinkedHashMap containing the parsed key-value pairs
+         * @param source the CharSequence to split into a map; may be {@code null}.
+         * @return a LinkedHashMap containing the parsed key-value pairs.
          * @see #split(CharSequence, Supplier)
          * @see #split(CharSequence, Class, Class)
          * @see #splitToImmutableMap(CharSequence)

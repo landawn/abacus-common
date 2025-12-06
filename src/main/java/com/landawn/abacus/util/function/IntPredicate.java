@@ -89,9 +89,9 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <pre>{@code
      * IntPredicate isEven = value -> value % 2 == 0;
      * IntPredicate isOdd = isEven.negate();
-     * boolean result = isOdd.test(3);  // Returns true
+     * boolean result = isOdd.test(3);   // Returns true
      *
-     * IntStream.of(1, 2, 3, 4, 5).filter(isEven.negate()).forEach(System.out::println);  // Prints: 1 3 5
+     * IntStream.of(1, 2, 3, 4, 5).filter(isEven.negate()).forEach(System.out::println);   // Prints: 1 3 5
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -114,9 +114,9 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntPredicate isPositive = value -> value > 0;
      * IntPredicate isEven = value -> value % 2 == 0;
      * IntPredicate isPositiveAndEven = isPositive.and(isEven);
-     * boolean result = isPositiveAndEven.test(4);  // Returns true
+     * boolean result = isPositiveAndEven.test(4);   // Returns true
      *
-     * IntStream.of(-2, -1, 0, 1, 2, 3, 4).filter(isPositive.and(isEven)).forEach(System.out::println);  // Prints: 2 4
+     * IntStream.of(-2, -1, 0, 1, 2, 3, 4).filter(isPositive.and(isEven)).forEach(System.out::println);   // Prints: 2 4
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -141,9 +141,9 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntPredicate isNegative = value -> value < 0;
      * IntPredicate isZero = value -> value == 0;
      * IntPredicate isNonPositive = isNegative.or(isZero);
-     * boolean result = isNonPositive.test(0);  // Returns true
+     * boolean result = isNonPositive.test(0);   // Returns true
      *
-     * IntStream.of(-2, -1, 0, 1, 2).filter(isNegative.or(isZero)).forEach(System.out::println);  // Prints: -2 -1 0
+     * IntStream.of(-2, -1, 0, 1, 2).filter(isNegative.or(isZero)).forEach(System.out::println);   // Prints: -2 -1 0
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate
@@ -162,7 +162,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate pred = IntPredicate.of(v -> v > 0);
-     * boolean result = pred.test(5);  // Returns true
+     * boolean result = pred.test(5);   // Returns true
      * }</pre>
      *
      * @param predicate the predicate to return
@@ -178,7 +178,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate isFive = IntPredicate.equal(5);
-     * boolean result = isFive.test(5);  // Returns true
+     * boolean result = isFive.test(5);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -194,7 +194,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate notZero = IntPredicate.notEqual(0);
-     * boolean result = notZero.test(5);  // Returns true
+     * boolean result = notZero.test(5);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -210,7 +210,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate greaterThanTen = IntPredicate.greaterThan(10);
-     * boolean result = greaterThanTen.test(15);  // Returns true
+     * boolean result = greaterThanTen.test(15);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -226,7 +226,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate atLeastZero = IntPredicate.greaterEqual(0);
-     * boolean result = atLeastZero.test(0);  // Returns true
+     * boolean result = atLeastZero.test(0);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -242,7 +242,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate lessThanHundred = IntPredicate.lessThan(100);
-     * boolean result = lessThanHundred.test(50);  // Returns true
+     * boolean result = lessThanHundred.test(50);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -258,7 +258,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate maxTen = IntPredicate.lessEqual(10);
-     * boolean result = maxTen.test(10);  // Returns true
+     * boolean result = maxTen.test(10);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
@@ -275,7 +275,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate inRange = IntPredicate.between(0, 100);
-     * boolean result = inRange.test(50);  // Returns true
+     * boolean result = inRange.test(50);   // Returns true
      * }</pre>
      *
      * @param minValue the lower bound (exclusive)

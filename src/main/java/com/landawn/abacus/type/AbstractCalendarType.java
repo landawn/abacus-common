@@ -34,6 +34,11 @@ import com.landawn.abacus.util.Dates;
  */
 public abstract class AbstractCalendarType<T extends Calendar> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractCalendarType with the specified type name.
+     *
+     * @param typeName the name of the Calendar type (e.g., "Calendar", "GregorianCalendar")
+     */
     protected AbstractCalendarType(final String typeName) {
         super(typeName);
     }

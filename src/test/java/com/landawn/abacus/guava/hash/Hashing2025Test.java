@@ -462,7 +462,7 @@ public class Hashing2025Test extends TestBase {
         HashFunction concatenated = Hashing.concatenating(first, second);
 
         assertNotNull(concatenated);
-        assertEquals(256, concatenated.bits()); // 128 + 128
+        assertEquals(256, concatenated.bits());   // 128 + 128
     }
 
     @Test
@@ -475,7 +475,7 @@ public class Hashing2025Test extends TestBase {
         HashFunction concatenated = Hashing.concatenating(first, second, third);
 
         assertNotNull(concatenated);
-        assertEquals(384, concatenated.bits()); // 128 + 128 + 128
+        assertEquals(384, concatenated.bits());   // 128 + 128 + 128
     }
 
     @Test
@@ -486,7 +486,7 @@ public class Hashing2025Test extends TestBase {
         HashFunction concatenated = Hashing.concatenating(functions);
 
         assertNotNull(concatenated);
-        assertEquals(96, concatenated.bits()); // 32 + 32 + 32
+        assertEquals(96, concatenated.bits());   // 32 + 32 + 32
     }
 
     @Test
@@ -510,7 +510,7 @@ public class Hashing2025Test extends TestBase {
         );
 
         assertNotNull(concatenated);
-        assertEquals(416, concatenated.bits()); // 32 + 128 + 256
+        assertEquals(416, concatenated.bits());   // 32 + 128 + 256
     }
 
     // Test combineOrdered() methods

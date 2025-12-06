@@ -165,7 +165,7 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @return the raw {@link java.lang.reflect.Type} instance representing the generic type T;
-     *         never {@code null} (validated during construction)
+     *         never {@code null} (validated during construction).
      * @see #type()
      * @see ParameterizedType
      */
@@ -213,7 +213,7 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @return the {@link Type} instance representing the generic type T;
-     *         never {@code null} (validated during construction)
+     *         never {@code null} (validated during construction).
      * @see #javaType()
      * @see Type
      * @see TypeFactory

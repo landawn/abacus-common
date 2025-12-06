@@ -99,7 +99,7 @@ public class BooleanBiConsumer2025Test extends TestBase {
         BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
-        assertEquals(1, results.size()); // First consumer should have executed
+        assertEquals(1, results.size());   // First consumer should have executed
     }
 
     @Test
@@ -164,7 +164,7 @@ public class BooleanBiConsumer2025Test extends TestBase {
         consumer.accept(true, true);
         consumer.accept(false, false);
 
-        assertEquals(3, trueCount.get()); // true,true,true from the three calls
-        assertEquals(3, falseCount.get()); // false,false,false from the three calls
+        assertEquals(3, trueCount.get());   // true,true,true from the three calls
+        assertEquals(3, falseCount.get());   // false,false,false from the three calls
     }
 }

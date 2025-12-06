@@ -40,7 +40,7 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Callable<String> task = () -> "Hello, World!";
-     * String result = task.call();  // Returns "Hello, World!"
+     * String result = task.call();   // Returns "Hello, World!"
      * }</pre>
      *
      * @return the computed result
@@ -57,7 +57,7 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * <pre>{@code
      * Callable<Integer> calculator = () -> 2 + 2;
      * Runnable runnable = calculator.toRunnable();
-     * runnable.run();  // Computes 4 but result is discarded
+     * runnable.run();   // Computes 4 but result is discarded
      * }</pre>
      *
      * @return a Runnable that executes this Callable and discards the result

@@ -38,6 +38,10 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      */
     public static final String BIG_DECIMAL = BigDecimal.class.getSimpleName();
 
+    /**
+     * Package-private constructor for BigDecimalType.
+     * This constructor is called by the TypeFactory to create BigDecimal type instances.
+     */
     BigDecimalType() {
         super(BIG_DECIMAL);
     }
@@ -125,7 +129,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * ResultSet rs = ...;  // from SQL query
-     * BigDecimal price = type.get(rs, 1);  // retrieves BigDecimal from column 1
+     * BigDecimal price = type.get(rs, 1);   // retrieves BigDecimal from column 1
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -145,7 +149,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * ResultSet rs = ...;  // from SQL query
-     * BigDecimal price = type.get(rs, "price");  // retrieves BigDecimal from "price" column
+     * BigDecimal price = type.get(rs, "price");   // retrieves BigDecimal from "price" column
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
@@ -166,7 +170,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE products SET price = ? WHERE id = ?");
-     * type.set(stmt, 1, new BigDecimal("99.99"));  // sets parameter 1 to 99.99
+     * type.set(stmt, 1, new BigDecimal("99.99"));   // sets parameter 1 to 99.99
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
@@ -186,7 +190,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
      * CallableStatement stmt = conn.prepareCall("{call updatePrice(?, ?)}");
-     * type.set(stmt, "price", new BigDecimal("99.99"));  // sets named parameter "price"
+     * type.set(stmt, "price", new BigDecimal("99.99"));   // sets named parameter "price"
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on, must not be {@code null}

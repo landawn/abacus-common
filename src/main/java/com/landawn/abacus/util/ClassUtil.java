@@ -228,8 +228,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * ClassUtil.setPropValue(bean, "address.city", "New York");
  *
  * // Type conversion operations
- * Class<?> wrapperType = ClassUtil.wrap(int.class);  // Returns Integer.class
- * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);  // Returns int.class
+ * Class<?> wrapperType = ClassUtil.wrap(int.class);   // Returns Integer.class
+ * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);   // Returns int.class
  *
  * // Method handle creation for performance
  * Method getter = ClassUtil.getPropGetMethod(MyBean.class, "name");
@@ -729,6 +729,24 @@ public final class ClassUtil {
     // ----------------------------------------------------------------------
 
     /**
+     * Gets the source code location of the specified class.
+     * This method returns the file system path where the class was loaded from.
+     * URLs with %20 encoding for spaces are automatically decoded.
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String location = Configuration.getSourceCodeLocation(MyClass.class);
+     * // Returns: "/path/to/myapp/classes" or "/path/to/myapp.jar"
+     * }</pre>
+     *
+     * @param clazz the class whose source code location is to be retrieved
+     * @return the path to the source code location of the specified class, with URL encoding removed
+     */
+    public static String getSourceCodeLocation(final Class<?> clazz) {
+        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "); //NOSONAR
+    }
+
+    /**
      * Returns the Class object associated with the class or interface with the given string name.
      * This method supports primitive types (boolean, char, byte, short, int, long, float, double)
      * and array types with format {@code java.lang.String[]}.
@@ -896,7 +914,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getCanonicalClassName(String.class);  // Returns "java.lang.String"
+     * String name = ClassUtil.getCanonicalClassName(String.class);   // Returns "java.lang.String"
      * }</pre>
      *
      * @param cls the class whose canonical name is to be retrieved
@@ -925,7 +943,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getClassName(String.class);  // Returns "java.lang.String"
+     * String name = ClassUtil.getClassName(String.class);   // Returns "java.lang.String"
      * }</pre>
      *
      * @param cls the class whose name is to be retrieved
@@ -942,7 +960,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = ClassUtil.getSimpleClassName(String.class);  // Returns "String"
+     * String name = ClassUtil.getSimpleClassName(String.class);   // Returns "String"
      * }</pre>
      *
      * @param cls the class whose simple name is to be retrieved
@@ -959,7 +977,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Package pkg = ClassUtil.getPackage(String.class);  // Returns java.lang package
+     * Package pkg = ClassUtil.getPackage(String.class);   // Returns java.lang package
      * }</pre>
      *
      * @param cls the class whose package is to be retrieved
@@ -990,7 +1008,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String pkgName = ClassUtil.getPackageName(String.class);  // Returns "java.lang"
+     * String pkgName = ClassUtil.getPackageName(String.class);   // Returns "java.lang"
      * }</pre>
      *
      * @param cls the class whose package name is to be retrieved
@@ -1025,6 +1043,7 @@ public final class ClassUtil {
      * @return a list of classes in the specified package
      * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
      * @throws UncheckedIOException if an I/O error occurs during package scanning
+     * @see #getClassesByPackage(String, boolean, boolean, Predicate)
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
             throws IllegalArgumentException, UncheckedIOException {
@@ -1340,7 +1359,7 @@ public final class ClassUtil {
     private static List<URL> getResources(final String pkgName) {
         final List<URL> resourceList = new ArrayList<>();
         final String pkgPath = packageName2FilePath(pkgName);
-        final ClassLoader localClassLoader = ClassUtil.class.getClassLoader();  // NOSONAR
+        final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
         final ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
         try {
@@ -1412,6 +1431,8 @@ public final class ClassUtil {
      *
      * @param cls the class to look up
      * @return a set of all interfaces implemented by the class and its superclasses
+     * @see #getAllSuperclasses(Class)
+     * @see #getAllSuperTypes(Class)
      */
     public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
         final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
@@ -1433,6 +1454,8 @@ public final class ClassUtil {
      *
      * @param cls the class to look up
      * @return a list of all superclasses, excluding {@code Object.class}
+     * @see #getAllInterfaces(Class)
+     * @see #getAllSuperTypes(Class)
      */
     public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
         final List<Class<?>> classes = new ArrayList<>();
@@ -1510,12 +1533,13 @@ public final class ClassUtil {
      * class Outer {
      *     class Inner { }
      * }
-     * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class);  // Returns Outer.class
+     * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class);   // Returns Outer.class
      * }</pre>
      *
      * @param cls the class whose enclosing class is to be retrieved
      * @return the enclosing class of the specified class, or {@code null} if the class is not an inner class
      */
+    @MayReturnNull
     public static Class<?> getEnclosingClass(final Class<?> cls) {
         Class<?> enclosingClass = enclosingClassPool.get(cls);
 
@@ -1547,6 +1571,7 @@ public final class ClassUtil {
      * @param parameterTypes the parameter types of the constructor
      * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found
      */
+    @MayReturnNull
     public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
         Constructor<?> constructor = null;
 
@@ -1608,7 +1633,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = ClassUtil.getDeclaredMethod(String.class, "substring", int.class, int.class);
-     * String result = (String) method.invoke("Hello", 0, 2);  // Returns "He"
+     * String result = (String) method.invoke("Hello", 0, 2);   // Returns "He"
      * }</pre>
      *
      * @param cls the class object
@@ -1616,6 +1641,7 @@ public final class ClassUtil {
      * @param parameterTypes the parameter types of the method
      * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
      */
+    @MayReturnNull
     public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
         Method method = null;
 
@@ -2016,12 +2042,13 @@ public final class ClassUtil {
      * <pre>{@code
      * ObjIterator<Class<?>> iter = ClassUtil.hierarchy(ArrayList.class);
      * while (iter.hasNext()) {
-     *     System.out.println(iter.next());  // Prints: ArrayList, AbstractList, AbstractCollection, Object
+     *     System.out.println(iter.next());   // Prints: ArrayList, AbstractList, AbstractCollection, Object
      * }
      * }</pre>
      *
      * @param type the type to get the class hierarchy from
      * @return an iterator over the class hierarchy of the given class, excluding interfaces
+     * @see #hierarchy(Class, boolean)
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
         return hierarchy(type, false);
@@ -2044,6 +2071,7 @@ public final class ClassUtil {
      * @param type the type to get the class hierarchy from
      * @param includeInterface if {@code true}, includes interfaces; if {@code false}, excludes interfaces
      * @return an iterator over the class hierarchy of the given class
+     * @see #hierarchy(Class)
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
         final ObjIterator<Class<?>> superClassesIter = new ObjIterator<>() {
@@ -2164,7 +2192,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = Integer.class.getDeclaredMethod("parseInt", String.class);
-     * int result = ClassUtil.invokeMethod(method, "123");  // Returns 123
+     * int result = ClassUtil.invokeMethod(method, "123");   // Returns 123
      * }</pre>
      *
      * @param <T> the type of the object to be returned
@@ -2173,6 +2201,7 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
      *         or the underlying method throws an exception
+     * @see #invokeMethod(Object, Method, Object...)
      */
     public static <T> T invokeMethod(final Method method, final Object... args) {
         return invokeMethod(null, method, args);
@@ -2196,6 +2225,7 @@ public final class ClassUtil {
      * @return the result of invoking the method
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
      *         or the underlying method throws an exception
+     * @see #invokeMethod(Method, Object...)
      */
     public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
         try {
@@ -2228,7 +2258,7 @@ public final class ClassUtil {
      * <pre>{@code
      * Field field = MyClass.class.getDeclaredField("privateField");
      * ClassUtil.setAccessible(field, true);
-     * Object value = field.get(instance);  // Can now access private field
+     * Object value = field.get(instance);   // Can now access private field
      * }</pre>
      *
      * @param accessibleObject the object whose accessibility is to be set
@@ -2322,7 +2352,7 @@ public final class ClassUtil {
      * Runnable r = new Runnable() {
      *     public void run() { }
      * };
-     * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass());  // Returns true
+     * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass());   // Returns true
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2342,7 +2372,7 @@ public final class ClassUtil {
      * class Outer {
      *     class Inner { }
      * }
-     * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class);  // Returns true
+     * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class);   // Returns true
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2389,6 +2419,8 @@ public final class ClassUtil {
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive type, {@code false} otherwise
      * @throws IllegalArgumentException if the class is {@code null}
+     * @see #isPrimitiveWrapper(Class)
+     * @see #isPrimitiveArrayType(Class)
      */
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -2409,6 +2441,8 @@ public final class ClassUtil {
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive wrapper type, {@code false} otherwise
      * @throws IllegalArgumentException if the class is {@code null}
+     * @see #isPrimitiveType(Class)
+     * @see #isPrimitiveArrayType(Class)
      */
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -2429,6 +2463,8 @@ public final class ClassUtil {
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive array type, {@code false} otherwise
      * @throws IllegalArgumentException if the class is {@code null}
+     * @see #isPrimitiveType(Class)
+     * @see #isPrimitiveWrapper(Class)
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -2474,6 +2510,7 @@ public final class ClassUtil {
      * @param cls the class to be wrapped
      * @return the corresponding wrapper type if {@code cls} is a primitive type or primitive array, otherwise {@code cls} itself
      * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @see #unwrap(Class)
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -2498,6 +2535,7 @@ public final class ClassUtil {
      * @param cls the class to be unwrapped
      * @return the corresponding primitive type if {@code cls} is a wrapper type or wrapper array, otherwise {@code cls} itself
      * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @see #wrap(Class)
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);

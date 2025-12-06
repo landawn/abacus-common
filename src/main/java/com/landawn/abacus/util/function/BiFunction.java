@@ -37,10 +37,10 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, String> concatenator = (s1, s2) -> s1 + s2;
-     * String result = concatenator.apply("Hello, ", "World!");  // Returns "Hello, World!"
+     * String result = concatenator.apply("Hello, ", "World!");   // Returns "Hello, World!"
      *
      * BiFunction<Integer, Integer, Integer> adder = (a, b) -> a + b;
-     * Integer sum = adder.apply(10, 20);  // Returns 30
+     * Integer sum = adder.apply(10, 20);   // Returns 30
      * }</pre>
      *
      * @param t the first function argument
@@ -59,7 +59,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * BiFunction<Integer, Integer, Integer> multiplier = (a, b) -> a * b;
      * Function<Integer, String> toString = Object::toString;
      * BiFunction<Integer, Integer, String> combined = multiplier.andThen(toString);
-     * String result = combined.apply(3, 4);  // Returns "12"
+     * String result = combined.apply(3, 4);   // Returns "12"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

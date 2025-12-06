@@ -38,8 +38,8 @@ public class StringWriter2025Test extends TestBase {
     @Test
     public void testWrite_int() throws Exception {
         StringWriter writer = new StringWriter();
-        writer.write(65); // 'A'
-        writer.write(66); // 'B'
+        writer.write(65);   // 'A'
+        writer.write(66);   // 'B'
         assertEquals("AB", writer.toString());
     }
 
@@ -119,7 +119,7 @@ public class StringWriter2025Test extends TestBase {
     public void testFlush() throws Exception {
         StringWriter writer = new StringWriter();
         writer.write("Test");
-        writer.flush(); // Should not throw exception
+        writer.flush();   // Should not throw exception
         assertEquals("Test", writer.toString());
     }
 
@@ -127,7 +127,7 @@ public class StringWriter2025Test extends TestBase {
     public void testClose() throws Exception {
         StringWriter writer = new StringWriter();
         writer.write("Test");
-        writer.close(); // Should not throw exception
+        writer.close();   // Should not throw exception
 
         // Can still be used after close
         writer.write(" More");

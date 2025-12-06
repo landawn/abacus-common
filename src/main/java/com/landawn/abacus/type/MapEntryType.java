@@ -70,7 +70,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * String name = type.declaringName();
      * // Returns: "Map.Entry<String, Integer>"
      * }</pre>
@@ -87,7 +87,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Class<Map.Entry<String, Integer>> clazz = type.clazz();
      * // Returns: Map.Entry.class
      * }</pre>
@@ -105,7 +105,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Type<?>[] paramTypes = type.getParameterTypes();
      * // Returns: [StringType, IntegerType]
      * // paramTypes[0] is the key type (String)
@@ -125,7 +125,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * boolean isGeneric = type.isGenericType();
      * // Returns: true
      * }</pre>
@@ -143,7 +143,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Map.Entry<String, Integer> entry = Map.entry("age", 25);
      *
      * String json = type.stringOf(entry);
@@ -167,7 +167,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      *
      * Map.Entry<String, Integer> entry = type.valueOf("{\"age\":25}");
      * // Returns: Map.Entry with key="age" and value=25
@@ -198,7 +198,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Map.Entry<String, Integer> entry = Map.entry("age", 25);
      * StringBuilder sb = new StringBuilder();
      *
@@ -260,7 +260,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntryType<String, Integer> type = new MapEntryType<>("String", "Integer");
+     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Map.Entry<String, Integer> entry = Map.entry("age", 25);
      * CharacterWriter writer = CharacterWriter.of(new StringWriter());
      * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
@@ -299,15 +299,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     /**
      * Generates the type name for a Map.Entry with the specified key and value types.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String typeName = MapEntryType.getTypeName("String", "Integer", false);
-     * // Returns: "Map.Entry<String, Integer>"
-     *
-     * typeName = MapEntryType.getTypeName("java.lang.String", "java.lang.Integer", true);
-     * // Returns: "Map.Entry<String, Integer>" (using declaring names)
-     * }</pre>
+     * This is an internal method used by the type system.
      *
      * @param keyTypeName The name of the key type
      * @param valueTypeName The name of the value type

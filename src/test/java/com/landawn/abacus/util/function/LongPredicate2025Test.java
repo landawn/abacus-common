@@ -186,8 +186,8 @@ public class LongPredicate2025Test extends TestBase {
     public void testBetween() {
         final LongPredicate predicate = LongPredicate.between(10L, 20L);
         assertTrue(predicate.test(15L));
-        assertFalse(predicate.test(10L)); // exclusive
-        assertFalse(predicate.test(20L)); // exclusive
+        assertFalse(predicate.test(10L));   // exclusive
+        assertFalse(predicate.test(20L));   // exclusive
         assertFalse(predicate.test(5L));
         assertFalse(predicate.test(25L));
     }
@@ -210,7 +210,7 @@ public class LongPredicate2025Test extends TestBase {
         assertFalse(combined.test(1L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
@@ -231,17 +231,17 @@ public class LongPredicate2025Test extends TestBase {
         assertTrue(combined.test(1L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
     public void testComplexChaining() {
         final LongPredicate predicate = LongPredicate.IS_POSITIVE.and(val -> val < 100).or(LongPredicate.IS_ZERO);
 
-        assertTrue(predicate.test(50L)); // positive and < 100
-        assertTrue(predicate.test(0L)); // is zero
-        assertFalse(predicate.test(150L)); // positive but >= 100
-        assertFalse(predicate.test(-10L)); // negative
+        assertTrue(predicate.test(50L));   // positive and < 100
+        assertTrue(predicate.test(0L));   // is zero
+        assertFalse(predicate.test(150L));   // positive but >= 100
+        assertFalse(predicate.test(-10L));   // negative
     }
 
     @Test

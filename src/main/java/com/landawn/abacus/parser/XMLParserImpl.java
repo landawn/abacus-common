@@ -1476,7 +1476,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (targetType == null) {
-            throw new ParseException("No target type is specified"); //NOSONAR
+            throw new ParseException("No target type is specified");   //NOSONAR
         }
 
         return readByDOMParser(source, config, targetType);
@@ -1694,7 +1694,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     propValue = null;
                                     propInfo = null;
                                 } else {
-                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName()); //NOSONAR
+                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName());   //NOSONAR
                                 }
                             }
 
@@ -1766,7 +1766,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error"); //NOSONAR
+                throw new ParseException("Unknown parser error");   //NOSONAR
             }
 
             case MAP: {
@@ -2399,7 +2399,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME);   //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2483,7 +2483,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME);   //NOSONAR
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2546,7 +2546,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME);   //NOSONAR
 
                     if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2613,7 +2613,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             checkedAttr = true;
                         }
 
-                        propName = isTagByPropertyName ? eleNode.getNodeName() : XmlUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
+                        propName = isTagByPropertyName ? eleNode.getNodeName() : XmlUtil.getAttribute(eleNode, XMLConstants.NAME);   //NOSONAR
 
                         propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
@@ -2677,7 +2677,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? eleNode.getNodeName() : XmlUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? eleNode.getNodeName() : XmlUtil.getAttribute(eleNode, XMLConstants.NAME);   //NOSONAR
 
                     propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 

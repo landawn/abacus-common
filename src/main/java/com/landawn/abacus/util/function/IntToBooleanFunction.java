@@ -39,10 +39,10 @@ public interface IntToBooleanFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToBooleanFunction isEven = value -> value % 2 == 0;
-     * boolean result = isEven.applyAsBoolean(4);  // Returns true
+     * boolean result = isEven.applyAsBoolean(4);   // Returns true
      *
      * // Using DEFAULT
-     * boolean defaultResult = IntToBooleanFunction.DEFAULT.applyAsBoolean(1);  // Returns true
+     * boolean defaultResult = IntToBooleanFunction.DEFAULT.applyAsBoolean(1);   // Returns true
      * }</pre>
      *
      * @param value the function argument

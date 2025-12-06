@@ -44,10 +44,10 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntBiFunction<String> formatter = (a, b) -> a + " x " + b;
-     * String result = formatter.apply(10, 20);  // Returns "10 x 20"
+     * String result = formatter.apply(10, 20);   // Returns "10 x 20"
      *
      * IntBiFunction<Point> pointCreator = Point::new;
-     * Point point = pointCreator.apply(5, 10);  // Creates Point(5, 10)
+     * Point point = pointCreator.apply(5, 10);   // Creates Point(5, 10)
      * }</pre>
      *
      * @param t the first {@code int} argument
@@ -67,7 +67,7 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      * IntBiFunction<Integer> adder = (a, b) -> a + b;
      * Function<Integer, String> formatter = n -> "Result: " + n;
      * IntBiFunction<String> combined = adder.andThen(formatter);
-     * String result = combined.apply(10, 20);  // Returns "Result: 30"
+     * String result = combined.apply(10, 20);   // Returns "Result: 30"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

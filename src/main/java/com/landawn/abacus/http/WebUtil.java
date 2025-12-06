@@ -79,7 +79,7 @@ public final class WebUtil {
      * request body is present, it's declared as a separate {@code requestBody}
      * variable for readability.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Input Example:</b></p>
      * <pre>{@code
      * curl -X POST https://api.example.com/users \
      *   -H "Content-Type: application/json" \
@@ -87,7 +87,7 @@ public final class WebUtil {
      *   -d '{"name":"John","age":30}'
      * }</pre>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Generated Output:</b></p>
      * <pre>{@code
      * String requestBody = "{\"name\":\"John\",\"age\":30}";
      *
@@ -103,6 +103,7 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
+     * @see #curl2OkHttpRequest(String)
      */
     public static String curl2HttpRequest(final String curl) {
         final String indent = "\n    ";
@@ -130,7 +131,7 @@ public final class WebUtil {
                             .append(header.substring(0, idx).trim())
                             .append("\", \"")
                             .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")"); //NOSONAR
+                            .append("\")");   //NOSONAR
                 }
             } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
                 body = tokens.get(++i);
@@ -221,14 +222,14 @@ public final class WebUtil {
      *   <li>Otherwise defaults to GET</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Input Example:</b></p>
      * <pre>{@code
      * curl -X POST https://api.example.com/users \
      *   -H "Content-Type: application/json" \
      *   -d '{"name":"John"}'
      * }</pre>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Generated Output:</b></p>
      * <pre>{@code
      * RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{\"name\":\"John\"}");
      *
@@ -273,7 +274,7 @@ public final class WebUtil {
                             .append(header.substring(0, idx).trim())
                             .append("\", \"")
                             .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")"); //NOSONAR
+                            .append("\")");   //NOSONAR
 
                     if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
                         mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
@@ -536,7 +537,7 @@ public final class WebUtil {
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Input Example:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Content-Type", "application/json");
@@ -552,7 +553,7 @@ public final class WebUtil {
      * );
      * }</pre>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Generated Output:</b></p>
      * <pre>{@code
      * curl -X POST 'https://api.example.com/users' \
      *   -H 'Content-Type: application/json' \
@@ -570,6 +571,7 @@ public final class WebUtil {
      * @param quoteChar the character to use for quoting values in the cURL command,
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is {@code null}
      * @see HttpUtil#readHttpHeadValue(Object)
      * @see Strings#quoteEscaped(String, char)
      */
@@ -658,6 +660,7 @@ public final class WebUtil {
      * @param requestBodyType the MIME type of the request body (e.g., "application/json",
      *                        "text/xml", "application/x-www-form-urlencoded"), can be {@code null} or empty
      * @param httpHeaders the HttpHeaders object to conditionally update, must not be null
+     * @throws NullPointerException if {@code httpHeaders} is {@code null}
      * @see HttpHeaders#setContentType(String)
      * @see HttpHeaders#get(String)
      */

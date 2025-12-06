@@ -1167,32 +1167,32 @@ public final class TypeFactory {
         return type;
     }
 
-    /**
-     * Retrieves a list of Type objects corresponding to the specified array of Class objects.
-     *
-     * @param <T> the type parameter
-     * @param classes the array of Class objects
-     * @return a list of Type objects corresponding to the specified classes
-     * @deprecated Use individual {@link #getType(Class)} calls instead
-     */
-    @Deprecated
-    @SafeVarargs
-    static <T> List<Type<T>> getType(final Class<? extends T>... classes) {
-        if (N.isEmpty(classes)) {
-            return new ArrayList<>();
-        }
-
-        final List<Type<T>> result = new ArrayList<>(classes.length);
-
-        Class<?> cls = null;
-        for (final Class<? extends T> element : classes) {
-            cls = element;
-
-            result.add(cls == null ? null : getType(cls));
-        }
-
-        return result;
-    }
+    //    /**
+    //     * Retrieves a list of Type objects corresponding to the specified array of Class objects.
+    //     *
+    //     * @param <T> the type parameter
+    //     * @param classes the array of Class objects
+    //     * @return a list of Type objects corresponding to the specified classes
+    //     * @deprecated Use individual {@link #getType(Class)} calls instead
+    //     */
+    //    @Deprecated
+    //    @SafeVarargs
+    //    static <T> List<Type<T>> getType(final Class<? extends T>... classes) {
+    //        if (N.isEmpty(classes)) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final List<Type<T>> result = new ArrayList<>(classes.length);
+    //
+    //        Class<?> cls = null;
+    //        for (final Class<? extends T> element : classes) {
+    //            cls = element;
+    //
+    //            result.add(cls == null ? null : getType(cls));
+    //        }
+    //
+    //        return result;
+    //    }
 
     /**
      * Retrieves the Type object corresponding to the specified Class object.
@@ -1238,24 +1238,24 @@ public final class TypeFactory {
         return type;
     }
 
-    /**
-     * Retrieves a list of Type objects corresponding to the specified collection of Class objects.
-     *
-     * @param <T> the type parameter
-     * @param classes the collection of Class objects
-     * @return a list of Type objects corresponding to the specified classes
-     * @deprecated Use individual {@link #getType(Class)} calls instead
-     */
-    @Deprecated
-    static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
-        final List<Type<T>> result = new ArrayList<>(classes.size());
-
-        for (final Class<?> cls : classes) {
-            result.add(cls == null ? null : getType(cls));
-        }
-
-        return result;
-    }
+    //    /**
+    //     * Retrieves a list of Type objects corresponding to the specified collection of Class objects.
+    //     *
+    //     * @param <T> the type parameter
+    //     * @param classes the collection of Class objects
+    //     * @return a list of Type objects corresponding to the specified classes
+    //     * @deprecated Use individual {@link #getType(Class)} calls instead
+    //     */
+    //    @Deprecated
+    //    static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
+    //        final List<Type<T>> result = new ArrayList<>(classes.size());
+    //
+    //        for (final Class<?> cls : classes) {
+    //            result.add(cls == null ? null : getType(cls));
+    //        }
+    //
+    //        return result;
+    //    }
 
     /**
      * Retrieves the Type object corresponding to the specified java.lang.reflect.Type.

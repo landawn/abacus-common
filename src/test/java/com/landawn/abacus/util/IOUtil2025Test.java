@@ -5482,7 +5482,7 @@ public class IOUtil2025Test extends TestBase {
         conn.connect();
 
         try (InputStream in = conn.getInputStream()) {
-            in.readAllBytes(); // simulate use
+            in.readAllBytes();   // simulate use
         }
 
         IOUtil.close(conn);

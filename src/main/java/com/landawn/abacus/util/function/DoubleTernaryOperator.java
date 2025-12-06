@@ -35,14 +35,14 @@ public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTernaryOperator average = (a, b, c) -> (a + b + c) / 3.0;
-     * double result = average.applyAsDouble(1.0, 2.0, 3.0);  // Returns 2.0
+     * double result = average.applyAsDouble(1.0, 2.0, 3.0);   // Returns 2.0
      *
      * DoubleTernaryOperator median = (a, b, c) -> {
      *     double[] values = {a, b, c};
      *     Arrays.sort(values);
      *     return values[1];
      * };
-     * double result2 = median.applyAsDouble(3.0, 1.0, 2.0);  // Returns 2.0
+     * double result2 = median.applyAsDouble(3.0, 1.0, 2.0);   // Returns 2.0
      * }</pre>
      *
      * @param a the first operand

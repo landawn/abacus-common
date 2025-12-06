@@ -37,7 +37,7 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
      * <pre>{@code
      * FloatTriConsumer coordinate3D = (x, y, z) ->
      *     System.out.printf("3D Point: (%.2f, %.2f, %.2f)%n", x, y, z);
-     * coordinate3D.accept(1.5f, 2.3f, 3.7f);  // Prints: three-dimensional Point: (1.50, 2.30, 3.70)
+     * coordinate3D.accept(1.5f, 2.3f, 3.7f);   // Prints: three-dimensional Point: (1.50, 2.30, 3.70)
      * }</pre>
      *
      * @param a the first float input argument
@@ -59,7 +59,7 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
      * FloatTriConsumer logger = (a, b, c) -> System.out.printf("Values: %.2f, %.2f, %.2f%n", a, b, c);
      * FloatTriConsumer sum = (a, b, c) -> System.out.printf("Sum: %.2f%n", a + b + c);
      * FloatTriConsumer combined = logger.andThen(sum);
-     * combined.accept(1.5f, 2.5f, 3.5f);  // Logs then calculates sum
+     * combined.accept(1.5f, 2.5f, 3.5f);   // Logs then calculates sum
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

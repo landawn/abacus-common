@@ -32,7 +32,7 @@ package com.landawn.abacus.util;
  * // On Windows: true, on Unix: false
  * 
  * // Always case-sensitive comparison
- * boolean isSensitive = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");  // false
+ * boolean isSensitive = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");   // false
  * }</pre>
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
@@ -81,7 +81,7 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IOCase ioCase = IOCase.forName("Sensitive");  // returns IOCase.SENSITIVE
+     * IOCase ioCase = IOCase.forName("Sensitive");   // returns IOCase.SENSITIVE
      * }</pre>
      *
      * @param name the name of the IOCase constant ("Sensitive", "Insensitive", or "System")

@@ -56,7 +56,7 @@ public class GuavaHasher2025Test extends TestBase {
         Hasher result = hasher.put((byte) 42);
 
         assertNotNull(result);
-        assertSame(hasher, result); // Test chaining
+        assertSame(hasher, result);   // Test chaining
     }
 
     @Test

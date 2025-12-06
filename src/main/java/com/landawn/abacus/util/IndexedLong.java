@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedLong indexedLong = IndexedLong.of(123456789L, 5);
- * long value = indexedLong.value();  // 123456789L
- * long index = indexedLong.index();  // 5
+ * long value = indexedLong.value();   // 123456789L
+ * long index = indexedLong.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -99,7 +99,7 @@ public final class IndexedLong extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
-     * long value = indexed.value();  // 123456789L
+     * long value = indexed.value();   // 123456789L
      * }</pre>
      *
      * @return the long value
@@ -151,7 +151,7 @@ public final class IndexedLong extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
-     * System.out.println(indexed);  // prints: [5]=123456789
+     * System.out.println(indexed);   // prints: [5]=123456789
      * }</pre>
      *
      * @return a string representation in the format [index]=value

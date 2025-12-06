@@ -78,7 +78,7 @@ public class FilenameUtil100Test extends TestBase {
     @Test
     public void testConcat() {
         String separator = File.separator;
-        N.println(FilenameUtil.concat("/foo/", "bar")); // Ens
+        N.println(FilenameUtil.concat("/foo/", "bar"));   // Ens
         Assertions.assertEquals(Strings.concat(separator, "foo", separator, "bar"), FilenameUtil.concat("/foo/", "bar"));
         Assertions.assertEquals(Strings.concat(separator, "foo", separator, "bar"), FilenameUtil.concat("/foo", "bar"));
         Assertions.assertEquals(Strings.concat(separator, "bar"), FilenameUtil.concat("/foo", "/bar"));

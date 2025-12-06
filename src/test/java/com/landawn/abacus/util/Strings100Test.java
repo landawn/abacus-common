@@ -1067,8 +1067,8 @@ public class Strings100Test extends TestBase {
     @Test
     @DisplayName("Test lastIndexOfAny(char...)")
     public void testLastIndexOfAnyChars() {
-        assertEquals(-1, Strings.lastIndexOfAny(null, 'a'));
-        assertEquals(-1, Strings.lastIndexOfAny("", 'a'));
+        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] {'a'}));
+        assertEquals(-1, Strings.lastIndexOfAny("", new char[] {'a'}));
         assertEquals(1, Strings.lastIndexOfAny("zzabyycdxx", 'z', 'x'));
         assertEquals(7, Strings.lastIndexOfAny("zzabyycdxx", 'd', 'x'));
     }

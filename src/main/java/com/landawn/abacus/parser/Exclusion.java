@@ -41,7 +41,7 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(null);  // This property will be excluded
+     * person.setAge(null);   // This property will be excluded
      * 
      * // With Exclusion.NULL, output: {"name": "John"}
      * }</pre>

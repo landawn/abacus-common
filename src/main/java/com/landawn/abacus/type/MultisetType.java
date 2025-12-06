@@ -61,7 +61,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      * String name = type.declaringName();
      * // Returns: "Multiset<String>"
      * }</pre>
@@ -78,7 +78,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      * Class<Multiset<String>> clazz = type.clazz();
      * // Returns: Multiset.class
      * }</pre>
@@ -95,7 +95,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      * Type<String> elemType = type.getElementType();
      * // Returns: StringType instance
      * }</pre>
@@ -113,7 +113,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      * Type<?>[] paramTypes = type.getParameterTypes();
      * // Returns: [StringType]
      * // paramTypes[0] is the element type (String)
@@ -155,7 +155,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      * Multiset<String> multiset = N.newMultiset();
      * multiset.add("apple", 3);
      * multiset.add("orange", 2);
@@ -182,7 +182,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
      *
      * Multiset<String> multiset = type.valueOf("{\"apple\":3,\"orange\":2,\"banana\":1}");
      * // Returns: Multiset with "apple" having count 3, "orange" count 2, "banana" count 1
@@ -217,6 +217,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     /**
      * Generates the type name for a Multiset with the specified element type.
+     * This is an internal method used by the type system.
      *
      * @param typeClass The Multiset class
      * @param parameterTypeName The name of the element type

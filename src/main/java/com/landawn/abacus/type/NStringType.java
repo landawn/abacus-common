@@ -29,6 +29,10 @@ public class NStringType extends AbstractStringType {
 
     public static final String NSTRING = "NString";
 
+    /**
+     * Constructs an NStringType.
+     * This constructor initializes the type handler for national character string objects.
+     */
     NStringType() {
         super(NSTRING);
     }

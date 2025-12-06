@@ -28,13 +28,17 @@ import com.landawn.abacus.util.Strings;
  * <pre>{@code
  * Type<UUID> type = TypeFactory.getType(UUID.class);
  * UUID uuid = type.valueOf("550e8400-e29b-41d4-a716-446655440000");
- * String str = type.stringOf(uuid);  // Returns the UUID string representation
+ * String str = type.stringOf(uuid);   // Returns the UUID string representation
  * }</pre>
  */
 public class UUIDType extends AbstractType<UUID> {
 
     public static final String UUID = "UUID";
 
+    /**
+     * Constructs a UUIDType instance.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     UUIDType() {
         super(UUID);
     }
@@ -49,7 +53,7 @@ public class UUIDType extends AbstractType<UUID> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UUIDType uuidType = new UUIDType();
-     * Class&lt;UUID&gt; clazz = uuidType.clazz();  // Returns UUID.class
+     * Class&lt;UUID&gt; clazz = uuidType.clazz();   // Returns UUID.class
      * }</pre>
      *
      * @return the Class object for UUID.class
@@ -70,7 +74,7 @@ public class UUIDType extends AbstractType<UUID> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UUID uuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-     * String str = uuidType.stringOf(uuid);  // Returns "550e8400-e29b-41d4-a716-446655440000"
+     * String str = uuidType.stringOf(uuid);   // Returns "550e8400-e29b-41d4-a716-446655440000"
      * }</pre>
      *
      * @param x the UUID instance to convert to string
@@ -101,6 +105,6 @@ public class UUIDType extends AbstractType<UUID> {
      */
     @Override
     public UUID valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str); // NOSONAR
+        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str);   // NOSONAR
     }
 }

@@ -117,7 +117,7 @@ public class Seid implements EntityId {
     public Seid(final String propName, final Object propValue) {
         this(NameUtil.getParentName(propName));
 
-        set(propName, propValue); // NOSONAR
+        set(propName, propValue);   // NOSONAR
     }
 
     /**
@@ -137,7 +137,7 @@ public class Seid implements EntityId {
     public Seid(final Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
-        set(nameValues); // NOSONAR
+        set(nameValues);   // NOSONAR
     }
 
     /**
@@ -252,7 +252,7 @@ public class Seid implements EntityId {
      * }
      * 
      * User user = new User(123L, "John");
-     * Seid userId = Seid.create(user);  // Will contain id=123
+     * Seid userId = Seid.create(user);   // Will contain id=123
      * }</pre>
      *
      * @param entity the entity object to extract ID from
@@ -306,7 +306,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid userId = Seid.of("User.id", 123);
-     * String entityName = userId.entityName();  // Returns "User"
+     * String entityName = userId.entityName();   // Returns "User"
      * }</pre>
      *
      * @return the entity name
@@ -347,7 +347,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.age", "25");
-     * int age = seid.getInt("age");  // Returns 25 (converted from String)
+     * int age = seid.getInt("age");   // Returns 25 (converted from String)
      * }</pre>
      *
      * @param propName the property name
@@ -366,7 +366,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * long id = seid.getLong("id");  // Returns 123L
+     * long id = seid.getLong("id");   // Returns 123L
      * }</pre>
      *
      * @param propName the property name
@@ -385,7 +385,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.active", "true");
-     * Boolean active = seid.get("active", Boolean.class);  // Returns Boolean.TRUE
+     * Boolean active = seid.get("active", Boolean.class);   // Returns Boolean.TRUE
      * }</pre>
      *
      * @param <T> the target type
@@ -504,7 +504,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
-     * Set<String> keys = seid.keySet();  // Contains ["id", "name"]
+     * Set<String> keys = seid.keySet();   // Contains ["id", "name"]
      * }</pre>
      *
      * @return a set view of the property names
@@ -539,7 +539,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.version", 1);
-     * int count = seid.size();  // Returns 2
+     * int count = seid.size();   // Returns 2
      * }</pre>
      *
      * @return the number of properties
@@ -555,7 +555,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User");
-     * boolean empty = seid.isEmpty();  // Returns true
+     * boolean empty = seid.isEmpty();   // Returns true
      * }</pre>
      *
      * @return {@code true} if this Seid contains no properties, {@code false} otherwise
@@ -606,7 +606,7 @@ public class Seid implements EntityId {
      * <pre>{@code
      * Seid seid1 = Seid.of("User.id", 123);
      * Seid seid2 = Seid.of("User.id", 123);
-     * boolean equal = seid1.equals(seid2);  // Returns true
+     * boolean equal = seid1.equals(seid2);   // Returns true
      * }</pre>
      *
      * @param obj the object to compare with
@@ -640,7 +640,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
-     * String str = seid.toString();  // Returns "User: {id=123, name=John}"
+     * String str = seid.toString();   // Returns "User: {id=123, name=John}"
      * }</pre>
      *
      * @return a string representation of this Seid

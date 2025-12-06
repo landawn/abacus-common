@@ -102,6 +102,7 @@ public final class HttpSettings {
      * The connection timeout is the time to wait for a connection to be established.
      *
      * @return The connection timeout in milliseconds, or 0 if not set
+     * @see #setConnectionTimeout(long)
      */
     public long getConnectionTimeout() {
         return connectionTimeout;
@@ -134,7 +135,7 @@ public final class HttpSettings {
      *
      * // Set different timeouts for connection and read operations
      * settings.setConnectionTimeout(5000)   // 5s to establish connection
-     *         .setReadTimeout(10000);  // 10s to read response
+     *         .setReadTimeout(10000);   // 10s to read response
      * }</pre>
      *
      * @param connectionTimeout The connection timeout in milliseconds (0 = infinite)
@@ -165,7 +166,7 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.setReadTimeout(10000);  // 10 seconds
+     * settings.setReadTimeout(10000);   // 10 seconds
      * }</pre>
      *
      * @param readTimeout The read timeout in milliseconds
@@ -247,8 +248,14 @@ public final class HttpSettings {
     /**
      * Sets whether to use caches for HTTP connections.
      * When enabled, the HTTP implementation may cache responses.
-     * 
+     *
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * settings.setUseCaches(false);   // Disable caching (default)
+     * settings.setUseCaches(true);    // Enable caching
+     * }</pre>
      *
      * @param useCaches {@code true} to use caches, {@code false} otherwise
      * @return This HttpSettings instance for method chaining
@@ -273,8 +280,14 @@ public final class HttpSettings {
     /**
      * Sets whether the connection will be used for input.
      * This should almost always be {@code true} (the default).
-     * 
+     *
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * settings.doInput(true);    // Enable input (default)
+     * settings.doInput(false);   // Disable input (rare)
+     * }</pre>
      *
      * @param doInput {@code true} if the connection will be used for input
      * @return This HttpSettings instance for method chaining
@@ -300,8 +313,14 @@ public final class HttpSettings {
     /**
      * Sets whether the connection will be used for output.
      * This is automatically set to {@code true} for POST and PUT requests.
-     * 
+     *
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * settings.doOutput(true);    // Enable output (default)
+     * settings.doOutput(false);   // Disable output for GET requests
+     * }</pre>
      *
      * @param doOutput {@code true} if the connection will be used for output
      * @return This HttpSettings instance for method chaining

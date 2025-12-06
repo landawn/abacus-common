@@ -49,7 +49,7 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive short value if the operation cannot be completed
+     * @param value the second input argument, a primitive short value
      */
     @Override
     void accept(T t, short value);

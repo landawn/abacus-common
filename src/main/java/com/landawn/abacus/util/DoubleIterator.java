@@ -63,6 +63,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Constructs a new DoubleIterator.
+     *
+     * <p>This constructor is protected to allow subclassing. Subclasses should
+     * implement the abstract {@link #nextDouble()} method and override {@link #hasNext()}
+     * to provide custom iteration logic over double values.</p>
      */
     protected DoubleIterator() {
     }
@@ -96,7 +100,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.empty();
-     * System.out.println(iter.hasNext());  // false
+     * System.out.println(iter.hasNext());   // false
      * }</pre>
      *
      * @return an empty {@code DoubleIterator}
@@ -135,7 +139,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.0, 2.0, 3.0, 4.0, 5.0};
-     * DoubleIterator iter = DoubleIterator.of(values, 1, 4);  // iterates over 2.0, 3.0, 4.0
+     * DoubleIterator iter = DoubleIterator.of(values, 1, 4);   // iterates over 2.0, 3.0, 4.0
      * }</pre>
      *
      * @param a the double array (may be {@code null})
@@ -500,6 +504,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns the first element in this iterator wrapped in an OptionalDouble.
      *
+     * <p><b>Note:</b> This method consumes one element from the iterator. After calling this method,
+     * the iterator will be positioned at the second element (if it exists).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalDouble first = DoubleIterator.of(1.5, 2.5, 3.5).first();
@@ -555,7 +562,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * double[] empty = DoubleIterator.empty().toArray();  // empty.length == 0
+     * double[] empty = DoubleIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a double array containing all remaining elements
@@ -578,7 +585,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * DoubleList empty = DoubleIterator.empty().toList();  // empty.size() == 0
+     * DoubleList empty = DoubleIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a DoubleList containing all remaining elements
@@ -595,6 +602,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Converts this iterator to a DoubleStream.
+     *
+     * <p><b>Note:</b> The returned stream is backed by this iterator. Consuming the stream
+     * will consume the iterator, and vice versa. After the stream is consumed, this iterator
+     * will be exhausted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -614,11 +625,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns an iterator of IndexedDouble objects that pairs each element with its index.
      * The indexing starts from 0.
      *
+     * <p><b>Note:</b> This is a {@code @Beta} method and its API may change in future releases.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed()
-     *     .foreachRemaining(indexed -> 
+     *     .foreachRemaining(indexed ->
      *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      *     );
      * }</pre>
@@ -634,11 +647,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns an iterator of IndexedDouble objects that pairs each element with its index,
      * starting from the specified start index.
      *
+     * <p><b>Note:</b> This is a {@code @Beta} method and its API may change in future releases.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed(100)
-     *     .foreachRemaining(indexed -> 
+     *     .foreachRemaining(indexed ->
      *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      *     );
      * // Prints indices 100, 101, 102 with corresponding values

@@ -2292,9 +2292,9 @@ public class Strings2025Test extends TestBase {
     @DisplayName("Test lastIndexOfAny() with char array")
     public void testLastIndexOfAny_CharArray() {
         assertEquals(0, Strings.lastIndexOfAny("abc", 'a', 'c'));
-        assertEquals(5, Strings.lastIndexOfAny("abcabc", 'c'));
+        assertEquals(5, Strings.lastIndexOfAny("abcabc", new char[] {'c'}));
         assertEquals(-1, Strings.lastIndexOfAny("abc", 'x', 'y'));
-        assertEquals(-1, Strings.lastIndexOfAny(null, 'a'));
+        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] {'a'}));
     }
 
     @Test
@@ -2418,6 +2418,8 @@ public class Strings2025Test extends TestBase {
         assertTrue(Strings.containsAll("abc", 'a', 'b', 'c'));
         assertFalse(Strings.containsAll("abc", 'a', 'x'));
         assertFalse(Strings.containsAll(null, 'a', 'b'));
+        assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDC00', 'a'));
+        assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDFFF', 'a'));
     }
 
     @Test
@@ -3530,6 +3532,78 @@ public class Strings2025Test extends TestBase {
 
         // From after first div - gets span>text1</span></div><div><span>text2
         assertEquals("span>text1</span></div><div><span>text2</span></div", StrUtil.substringBetweenFirstAndLast(input, 5, "<", ">").get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substring variants wrap Strings substring logic")
+    public void testStrUtil_Substring_Wrappers() {
+        assertEquals("cde", StrUtil.substring("abcde", 2).get());
+        assertEquals("bc", StrUtil.substring("abcde", 1, 3).get());
+        assertFalse(StrUtil.substring("abc", 5).isPresent());
+        assertEquals("bcd", StrUtil.substring("abcde", 1, i -> i + 3).get());
+        assertEquals("de", StrUtil.substring("abcde", endIndex -> endIndex - 2, 5).get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringAfter overloads return Optional results")
+    public void testStrUtil_SubstringAfter_Wrappers() {
+        assertEquals("example.com", StrUtil.substringAfter("user@example.com", '@').get());
+        assertEquals("section", StrUtil.substringAfter("path/section/end", "/", 12).get());
+        assertFalse(StrUtil.substringAfter("no-delimiter", "/", 5).isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringAfterAny handles char and string delimiters")
+    public void testStrUtil_SubstringAfterAny_Wrappers() {
+        assertEquals("world", StrUtil.substringAfterAny("hello.world", '.', '!').get());
+        assertEquals("world", StrUtil.substringAfterAny("hello::world", "::", "--").get());
+        assertFalse(StrUtil.substringAfterAny("plain", '.', '!').isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringAfterLast overloads for different delimiters")
+    public void testStrUtil_SubstringAfterLast_Wrappers() {
+        assertEquals("tail", StrUtil.substringAfterLast("head:mid:tail", ':').get());
+        assertEquals("end", StrUtil.substringAfterLast("a::b::end", "::").get());
+        assertEquals("", StrUtil.substringAfterLast("a::b::c::", "::", 9).get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBefore overloads for delimiters and offsets")
+    public void testStrUtil_SubstringBefore_Wrappers() {
+        assertEquals("hello", StrUtil.substringBefore("hello.world", '.').get());
+        assertEquals("prefix", StrUtil.substringBefore("prefix-suffix", "-").get());
+        assertEquals("middle", StrUtil.substringBefore("start-middle-end", 6, "-").get());
+        assertFalse(StrUtil.substringBefore("none", '.').isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBeforeAny handles multiple delimiter inputs")
+    public void testStrUtil_SubstringBeforeAny_Wrappers() {
+        assertEquals("first", StrUtil.substringBeforeAny("first.second:third", '.', ':').get());
+        assertEquals("first", StrUtil.substringBeforeAny("first::second|third", "::", "|").get());
+        assertFalse(StrUtil.substringBeforeAny("nodelem", '.', ':').isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBeforeLast overloads for char/string/fromIndex")
+    public void testStrUtil_SubstringBeforeLast_Wrappers() {
+        assertEquals("a.b", StrUtil.substringBeforeLast("a.b.c", '.').get());
+        assertEquals("left::middle", StrUtil.substringBeforeLast("left::middle::right", "::").get());
+        assertEquals("section", StrUtil.substringBeforeLast("root/section/leaf", 5, "/").get());
+        assertFalse(StrUtil.substringBeforeLast("no-delimiter", ':').isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetween covers representative overloads")
+    public void testStrUtil_SubstringBetween_Wrappers() {
+        assertEquals("bc", StrUtil.substringBetween("abcde", 0, 3).get());
+        assertEquals("DATA", StrUtil.substringBetween("start[DATA]end", 5, ']').get());
+        assertEquals("inner", StrUtil.substringBetween("begin<inner>tail", 5, ">").get());
+        assertEquals("dd", StrUtil.substringBetween("aa<bb>cc<dd>ee", 5, "<", ">").get());
+        assertEquals("ello ", StrUtil.substringBetween("Hello World", 0, i -> i + 6).get());
+        assertEquals("World", StrUtil.substringBetween("Hello World", i -> i - 6, 11).get());
+        assertFalse(StrUtil.substringBetween("short", 10, 12).isPresent());
     }
 
     @Test

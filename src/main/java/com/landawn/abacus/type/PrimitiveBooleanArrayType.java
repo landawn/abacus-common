@@ -37,6 +37,10 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
     private final Type<Boolean>[] parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveBooleanArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveBooleanArrayType() {
         super(BOOLEAN_ARRAY);
 

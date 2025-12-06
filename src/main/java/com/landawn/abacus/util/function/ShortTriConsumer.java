@@ -36,7 +36,7 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * <pre>{@code
      * ShortTriConsumer sumPrinter = (a, b, c) ->
      *     System.out.println("Sum: " + (a + b + c));
-     * sumPrinter.accept((short) 10, (short) 20, (short) 30);  // Prints "Sum: 60"
+     * sumPrinter.accept((short) 10, (short) 20, (short) 30);   // Prints "Sum: 60"
      *
      * ShortTriConsumer rangeSetter = (min, max, value) -> {
      *     if (value < min || value > max) {
@@ -44,7 +44,7 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      *     }
      *     config.setValue(value);
      * };
-     * rangeSetter.accept((short) 0, (short) 100, (short) 50);  // Sets value to 50
+     * rangeSetter.accept((short) 0, (short) 100, (short) 50);   // Sets value to 50
      * }</pre>
      *
      * @param a the first input argument
@@ -64,7 +64,7 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * ShortTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
      * ShortTriConsumer sum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
      * ShortTriConsumer combined = logger.andThen(sum);
-     * combined.accept((short) 10, (short) 20, (short) 30);  // Logs then calculates sum
+     * combined.accept((short) 10, (short) 20, (short) 30);   // Logs then calculates sum
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

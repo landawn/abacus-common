@@ -35,7 +35,7 @@ public interface ByteNConsumer {
      *     for (byte v : values) System.out.print(v + " ");
      *     System.out.println();
      * };
-     * logger.accept((byte) 1, (byte) 2, (byte) 3);  // Prints: 1 2 3
+     * logger.accept((byte) 1, (byte) 2, (byte) 3);   // Prints: 1 2 3
      * }</pre>
      *
      * @param args the byte array input arguments. Can be empty but not {@code null}.

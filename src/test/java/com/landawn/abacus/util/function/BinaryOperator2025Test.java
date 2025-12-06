@@ -68,7 +68,7 @@ public class BinaryOperator2025Test extends TestBase {
         BiFunction<Integer, Integer, Integer> chainedFunction = operator.andThen(addTen).andThen(doubleIt);
         Integer result = chainedFunction.apply(5, 3);
 
-        assertEquals(50, result); // (5 * 3 + 10) * 2 = 50
+        assertEquals(50, result);   // (5 * 3 + 10) * 2 = 50
     }
 
     @Test

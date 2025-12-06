@@ -77,38 +77,38 @@ import com.landawn.abacus.util.stream.IntStream;
  * <pre>{@code
  * // Creating and initializing integer lists
  * IntList numbers = IntList.of(1, 2, 3, 4, 5);
- * IntList range = IntList.range(1, 100);  // [1, 2, 3, ..., 99]
- * IntList even = IntList.range(0, 100, 2);  // [0, 2, 4, ..., 98]
- * IntList random = IntList.random(1, 100, 50);  // 50 random ints [1, 100)
+ * IntList range = IntList.range(1, 100);   // [1, 2, 3, ..., 99]
+ * IntList even = IntList.range(0, 100, 2);   // [0, 2, 4, ..., 98]
+ * IntList random = IntList.random(1, 100, 50);   // 50 random ints [1, 100)
  *
  * // Basic operations
- * numbers.add(42);  // Append integer value
- * int first = numbers.get(0);  // Access by index: 1
- * numbers.set(1, 100);  // Modify existing value
+ * numbers.add(42);   // Append integer value
+ * int first = numbers.get(0);   // Access by index: 1
+ * numbers.set(1, 100);   // Modify existing value
  *
  * // Mathematical operations
- * OptionalInt min = numbers.min();  // Find minimum value
- * OptionalInt max = numbers.max();  // Find maximum value
- * OptionalInt median = numbers.median();  // Calculate median
- * long sum = numbers.stream().sum();  // Calculate sum
+ * OptionalInt min = numbers.min();   // Find minimum value
+ * OptionalInt max = numbers.max();   // Find maximum value
+ * OptionalInt median = numbers.median();   // Calculate median
+ * long sum = numbers.stream().sum();   // Calculate sum
  *
  * // Set operations for data analysis
  * IntList set1 = IntList.of(1, 2, 3, 4);
  * IntList set2 = IntList.of(3, 4, 5, 6);
- * IntList intersection = set1.intersection(set2);  // [3, 4]
- * IntList difference = set1.difference(set2);  // [1, 2]
- * IntList union = set1.copy().addAll(set2).distinct();  // [1, 2, 3, 4, 5, 6]
+ * IntList intersection = set1.intersection(set2);   // [3, 4]
+ * IntList difference = set1.difference(set2);   // [1, 2]
+ * IntList union = set1.copy().addAll(set2).distinct();   // [1, 2, 3, 4, 5, 6]
  *
  * // Sorting and searching
- * numbers.sort();  // Sort in ascending order
- * numbers.reverseSort();  // Sort in descending order
- * int index = numbers.binarySearch(42);  // Binary search on sorted data
+ * numbers.sort();   // Sort in ascending order
+ * numbers.reverseSort();   // Sort in descending order
+ * int index = numbers.binarySearch(42);   // Binary search on sorted data
  *
  * // Type conversions
- * LongList longNumbers = numbers.toLongList();  // Convert to long values
- * DoubleList doubleNumbers = numbers.toDoubleList();  // Convert to double values
- * int[] primitiveArray = numbers.toArray();  // To primitive array
- * List<Integer> boxedList = numbers.boxed();  // To boxed collection
+ * LongList longNumbers = numbers.toLongList();   // Convert to long values
+ * DoubleList doubleNumbers = numbers.toDoubleList();   // Convert to double values
+ * int[] primitiveArray = numbers.toArray();   // To primitive array
+ * List<Integer> boxedList = numbers.boxed();   // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -264,17 +264,17 @@ import com.landawn.abacus.util.stream.IntStream;
  * <p><b>Example: Mathematical Computation</b>
  * <pre>{@code
  * // Generate and analyze a dataset
- * IntList dataset = IntList.random(1, 1000, 10000);  // 10K random numbers
+ * IntList dataset = IntList.random(1, 1000, 10000);   // 10K random numbers
  * 
  * // Statistical analysis
- * dataset.sort();  // Sort for median calculation
- * OptionalInt min = dataset.min();  // Minimum value
- * OptionalInt max = dataset.max();  // Maximum value
- * OptionalInt median = dataset.median();  // Median value
+ * dataset.sort();   // Sort for median calculation
+ * OptionalInt min = dataset.min();   // Minimum value
+ * OptionalInt max = dataset.max();   // Maximum value
+ * OptionalInt median = dataset.median();   // Median value
  * 
  * // Functional processing
- * long sum = dataset.stream().sum();  // Total sum
- * double average = dataset.stream().average().orElse(0.0);  // Average
+ * long sum = dataset.stream().sum();   // Total sum
+ * double average = dataset.stream().average().orElse(0.0);   // Average
  * IntList filtered = dataset.stream()                // Values > 500
  *     .filter(x -> x > 500)
  *     .collect(IntList::new, IntList::add, IntList::addAll);
@@ -716,7 +716,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -764,7 +764,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -830,7 +830,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3, 2, 4, 2, 5);
-     * numbers.removeAllOccurrences(2);  // Returns true, list is now [1, 3, 4, 5]
+     * numbers.removeAllOccurrences(2);   // Returns true, list is now [1, 3, 4, 5]
      * }</pre>
      *
      * @param e the element to be removed from this list
@@ -916,7 +916,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, -2, 3, -4, 5);
-     * list.removeIf(i -> i < 0);  // Removes negative values
+     * list.removeIf(i -> i < 0);   // Removes negative values
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
@@ -1138,7 +1138,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p> 
      * <pre>{@code
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-     * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
+     * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
      * }</pre>
      *
@@ -1522,7 +1522,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(1, 2, 2, 4);
-     * IntList result = list1.intersection(list2);  // result will be [1, 2, 2]
+     * IntList result = list1.intersection(list2);   // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      * }</pre>
      *
@@ -1561,7 +1561,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {1, 2, 2, 4};
-     * IntList result = list1.intersection(array);  // result will be [1, 2, 2]
+     * IntList result = list1.intersection(array);   // result will be [1, 2, 2]
      * }</pre>
      *
      * @param b the array to find common elements with this list
@@ -1589,7 +1589,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
-     * IntList result = list1.difference(list2);  // result will be [0, 2, 3]
+     * IntList result = list1.difference(list2);   // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and list2 has one
      * }</pre>
      *
@@ -1628,7 +1628,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {2, 5, 1};
-     * IntList result = list1.difference(array);  // result will be [0, 2, 3]
+     * IntList result = list1.difference(array);   // result will be [0, 2, 3]
      * }</pre>
      *
      * @param b the array whose elements are to be removed from this list

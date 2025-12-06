@@ -242,6 +242,17 @@ public final class OkHttpRequest {
      * present. If {@code cacheControl} doesn't define any directives, this clears this request's
      * cache-control headers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CacheControl cacheControl = new CacheControl.Builder()
+     *     .noCache()
+     *     .build();
+     *
+     * OkHttpRequest.url("https://api.example.com/data")
+     *     .cacheControl(cacheControl)
+     *     .get();
+     * }</pre>
+     *
      * @param cacheControl the cache control directives
      * @return this OkHttpRequest instance for method chaining
      */
@@ -253,6 +264,17 @@ public final class OkHttpRequest {
     /**
      * Attaches {@code tag} to the request. It can be used later to cancel the request. If the tag
      * is unspecified or {@code null}, the request is canceled by using the request itself as the tag.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object requestTag = "my-request-id";
+     * OkHttpRequest.url("https://api.example.com/data")
+     *     .tag(requestTag)
+     *     .asyncGet();
+     *
+     * // Later, cancel the request using the tag
+     * // httpClient.dispatcher().queuedCalls()...
+     * }</pre>
      *
      * @param tag the tag to attach to the request
      * @return this OkHttpRequest instance for method chaining
@@ -269,6 +291,22 @@ public final class OkHttpRequest {
      *
      * <p>Use this API to attach timing, debugging, or other application data to a request so that
      * you may read it in interceptors, event listeners, or callbacks.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * class RequestMetadata {
+     *     long startTime;
+     *     String requestId;
+     * }
+     *
+     * RequestMetadata metadata = new RequestMetadata();
+     * metadata.startTime = System.currentTimeMillis();
+     * metadata.requestId = "req-123";
+     *
+     * OkHttpRequest.url("https://api.example.com/data")
+     *     .tag(RequestMetadata.class, metadata)
+     *     .get();
+     * }</pre>
      *
      * @param <T> the type of the tag
      * @param type the class type used as a key for the tag
@@ -550,6 +588,14 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as XML with Content-Type: application/xml.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = "<user><name>John</name><age>30</age></user>";
+     * OkHttpRequest.url("https://api.example.com/users")
+     *     .xmlBody(xml)
+     *     .post();
+     * }</pre>
+     *
      * @param xml the XML string to send as the request body
      * @return this OkHttpRequest instance for method chaining
      */
@@ -560,6 +606,14 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as XML with Content-Type: application/xml.
      * The object will be serialized to XML using the default XML serializer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * OkHttpRequest.url("https://api.example.com/users")
+     *     .xmlBody(user)
+     *     .post();
+     * }</pre>
      *
      * @param obj the object to serialize to XML and send as the request body
      * @return this OkHttpRequest instance for method chaining
@@ -1116,9 +1170,10 @@ public final class OkHttpRequest {
 
     /**
      * Executes a GET request asynchronously using the specified executor.
+     * The request is executed on the provided executor and returns immediately with a ContinuableFuture.
      *
      * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response when the request finishes
      */
     public ContinuableFuture<Response> asyncGet(final Executor executor) {
         return ContinuableFuture.call(this::get, executor);

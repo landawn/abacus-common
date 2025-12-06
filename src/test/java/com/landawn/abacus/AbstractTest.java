@@ -261,7 +261,7 @@ public abstract class AbstractTest {
         }
 
         try {
-            buffer.force(); // flush changes to disk
+            buffer.force();   // flush changes to disk
 
             Method cleanerMethod = buffer.getClass().getMethod("cleaner");
             cleanerMethod.setAccessible(true);

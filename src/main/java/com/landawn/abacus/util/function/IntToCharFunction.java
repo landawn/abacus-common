@@ -56,7 +56,7 @@ public interface IntToCharFunction {
      *
      * // Convert digit to char
      * IntToCharFunction digitToChar = digit -> (char) ('0' + digit);
-     * char result3 = digitToChar.applyAsChar(5);  // Returns '5'
+     * char result3 = digitToChar.applyAsChar(5);   // Returns '5'
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to char.

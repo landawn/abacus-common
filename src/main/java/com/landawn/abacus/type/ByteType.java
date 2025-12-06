@@ -26,8 +26,15 @@ import com.landawn.abacus.util.Numbers;
  */
 public final class ByteType extends AbstractByteType {
 
+    /**
+     * The type name constant for Byte type identification.
+     */
     public static final String BYTE = Byte.class.getSimpleName();
 
+    /**
+     * Package-private constructor for ByteType.
+     * This constructor is called by the TypeFactory to create Byte type instances.
+     */
     ByteType() {
         super(BYTE);
     }
@@ -62,7 +69,7 @@ public final class ByteType extends AbstractByteType {
      * <pre>{@code
      * ByteType type = TypeFactory.getType(Byte.class);
      * ResultSet rs = ...;  // from SQL query
-     * Byte status = type.get(rs, 1);  // retrieves Byte from column 1
+     * Byte status = type.get(rs, 1);   // retrieves Byte from column 1
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
@@ -91,7 +98,7 @@ public final class ByteType extends AbstractByteType {
      * <pre>{@code
      * ByteType type = TypeFactory.getType(Byte.class);
      * ResultSet rs = ...;  // from SQL query
-     * Byte status = type.get(rs, "status");  // retrieves Byte from "status" column
+     * Byte status = type.get(rs, "status");   // retrieves Byte from "status" column
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}

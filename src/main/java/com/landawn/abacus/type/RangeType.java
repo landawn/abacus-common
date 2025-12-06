@@ -41,15 +41,15 @@ import com.landawn.abacus.util.WD;
  * Type<Range<Integer>> type = TypeFactory.getType("Range<Integer>");
  *
  * // Serialize a Range to string
- * Range<Integer> closedRange = Range.closed(1, 10);  // [1, 10]
- * String str1 = type.stringOf(closedRange);  // Returns "[1, 10]"
+ * Range<Integer> closedRange = Range.closed(1, 10);   // [1, 10]
+ * String str1 = type.stringOf(closedRange);   // Returns "[1, 10]"
  *
- * Range<Integer> openRange = Range.open(1, 10);  // (1, 10)
- * String str2 = type.stringOf(openRange);  // Returns "(1, 10)"
+ * Range<Integer> openRange = Range.open(1, 10);   // (1, 10)
+ * String str2 = type.stringOf(openRange);   // Returns "(1, 10)"
  *
  * // Deserialize string to Range
  * Range<Integer> restored = type.valueOf("[1, 10]");
- * boolean contains5 = restored.contains(5);  // true
+ * boolean contains5 = restored.contains(5);   // true
  * }</pre>
  *
  * @param <T> the type of values in the range, must be Comparable
@@ -69,6 +69,12 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
     private final Type<T> elementType;
 
+    /**
+     * Constructs a new RangeType with the specified parameter type.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     *
+     * @param parameterTypeName the type name for the range's element type, which must be Comparable
+     */
     @SuppressWarnings("rawtypes")
     RangeType(final String parameterTypeName) {
         super(RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
@@ -223,7 +229,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(prefix);

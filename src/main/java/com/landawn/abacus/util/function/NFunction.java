@@ -36,10 +36,10 @@ import com.landawn.abacus.util.Throwables;
  *     }
  *     return total;
  * };
- * Integer result = sum.apply(1, 2, 3, 4, 5);  // returns 15
+ * Integer result = sum.apply(1, 2, 3, 4, 5);   // returns 15
  *
  * NFunction<String, String> concatenate = args -> String.join(", ", args);
- * String joined = concatenate.apply("apple", "banana", "orange");  // returns "apple, banana, orange"
+ * String joined = concatenate.apply("apple", "banana", "orange");   // returns "apple, banana, orange"
  * }</pre>
  *
  * @param <T> the type of the input to the function
@@ -98,7 +98,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * Function<Integer, String> format = n -> "Total: " + n;
      *
      * NFunction<Integer, String> sumAndFormat = sum.andThen(format);
-     * String result = sumAndFormat.apply(10, 20, 30);  // returns "Total: 60"
+     * String result = sumAndFormat.apply(10, 20, 30);   // returns "Total: 60"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

@@ -26,6 +26,11 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = OptionalInt.class.getSimpleName();
 
+    /**
+     * Constructs a new OptionalIntType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected OptionalIntType() {
         super(OPTIONAL_INT);
     }
@@ -203,6 +208,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * Connection connection = ...;  // obtained from database connection
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO users (id, age) VALUES (?, ?)");
      *
@@ -236,6 +242,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * Connection connection = ...;  // obtained from database connection
      * CallableStatement stmt = connection.prepareCall("{call update_age(?, ?)}");
      *
      * OptionalInt opt = OptionalInt.of(30);

@@ -44,7 +44,7 @@ public class LongUnaryOperator2025Test extends TestBase {
         final LongUnaryOperator composed = multiplyBy3.compose(add10);
         final long result = composed.applyAsLong(5L);
 
-        assertEquals(45L, result); // (5 + 10) * 3
+        assertEquals(45L, result);   // (5 + 10) * 3
     }
 
     @Test
@@ -55,7 +55,7 @@ public class LongUnaryOperator2025Test extends TestBase {
         final LongUnaryOperator composed = multiplyBy2.andThen(subtract5);
         final long result = composed.applyAsLong(10L);
 
-        assertEquals(15L, result); // (10 * 2) - 5
+        assertEquals(15L, result);   // (10 * 2) - 5
     }
 
     @Test
@@ -67,7 +67,7 @@ public class LongUnaryOperator2025Test extends TestBase {
         final LongUnaryOperator composed = subtract3.compose(multiplyBy2).compose(add5);
         final long result = composed.applyAsLong(10L);
 
-        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
+        assertEquals(27L, result);   // ((10 + 5) * 2) - 3 = 27
     }
 
     @Test
@@ -79,7 +79,7 @@ public class LongUnaryOperator2025Test extends TestBase {
         final LongUnaryOperator composed = add5.andThen(multiplyBy2).andThen(subtract3);
         final long result = composed.applyAsLong(10L);
 
-        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
+        assertEquals(27L, result);   // ((10 + 5) * 2) - 3 = 27
     }
 
     @Test

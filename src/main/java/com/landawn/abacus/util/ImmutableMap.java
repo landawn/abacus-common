@@ -77,12 +77,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     private final Map<K, V> valueMap;
 
     ImmutableMap(final Map<? extends K, ? extends V> map) {
-        this(map, ClassUtil.isPossibleImmutable(map.getClass())); // to create immutable keySet(), values(), entrySet()
+        this(map, ClassUtil.isPossibleImmutable(map.getClass()));   // to create immutable keySet(), values(), entrySet()
     }
 
     ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
         this.valueMap = (Map<K, V>) map;
-        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap); // to create immutable keySet(), values(), entrySet()
+        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap);   // to create immutable keySet(), values(), entrySet()
     }
 
     /**
@@ -92,12 +92,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
-     * System.out.println(emptyMap.size());  // 0
+     * System.out.println(emptyMap.size());   // 0
      * }</pre>
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @return an empty ImmutableMap instance
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @return an empty ImmutableMap instance.
      */
     public static <K, V> ImmutableMap<K, V> empty() {
         return EMPTY;
@@ -111,14 +111,14 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> singleEntry = ImmutableMap.of("count", 42);
-     * System.out.println(singleEntry.get("count"));  // 42
+     * System.out.println(singleEntry.get("count"));   // 42
      * }</pre>
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @return an ImmutableMap containing only the specified key-value pair
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @return an ImmutableMap containing only the specified key-value pair.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1), false);
@@ -138,13 +138,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2), false);
@@ -165,15 +165,15 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3), false);
@@ -185,17 +185,24 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<String, Integer> quarters = ImmutableMap.of(
+     *     "Q1", 1, "Q2", 2, "Q3", 3, "Q4", 4
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4), false);
@@ -207,19 +214,27 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<String, String> weekdays = ImmutableMap.of(
+     *     "Mon", "Monday", "Tue", "Tuesday", "Wed", "Wednesday",
+     *     "Thu", "Thursday", "Fri", "Friday"
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -232,21 +247,29 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @param k6 the sixth key
-     * @param v6 the sixth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<Integer, String> numbers = ImmutableMap.of(
+     *     1, "one", 2, "two", 3, "three",
+     *     4, "four", 5, "five", 6, "six"
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -259,23 +282,32 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @param k6 the sixth key
-     * @param v6 the sixth value
-     * @param k7 the seventh key
-     * @param v7 the seventh value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<String, String> weekDays = ImmutableMap.of(
+     *     "Mon", "Monday", "Tue", "Tuesday", "Wed", "Wednesday",
+     *     "Thu", "Thursday", "Fri", "Friday", "Sat", "Saturday",
+     *     "Sun", "Sunday"
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @param k7 the seventh key.
+     * @param v7 the seventh value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -288,25 +320,33 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @param k6 the sixth key
-     * @param v6 the sixth value
-     * @param k7 the seventh key
-     * @param v7 the seventh value
-     * @param k8 the eighth key
-     * @param v8 the eighth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<String, Double> constants = ImmutableMap.of(
+     *     "pi", 3.14159, "e", 2.71828, "phi", 1.61803, "sqrt2", 1.41421,
+     *     "sqrt3", 1.73205, "sqrt5", 2.23607, "ln2", 0.69315, "ln10", 2.30259
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @param k7 the seventh key.
+     * @param v7 the seventh value.
+     * @param k8 the eighth key.
+     * @param v8 the eighth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
@@ -320,27 +360,35 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @param k6 the sixth key
-     * @param v6 the sixth value
-     * @param k7 the seventh key
-     * @param v7 the seventh value
-     * @param k8 the eighth key
-     * @param v8 the eighth value
-     * @param k9 the ninth key
-     * @param v9 the ninth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<Integer, String> digits = ImmutableMap.of(
+     *     1, "one", 2, "two", 3, "three", 4, "four", 5, "five",
+     *     6, "six", 7, "seven", 8, "eight", 9, "nine"
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @param k7 the seventh key.
+     * @param v7 the seventh value.
+     * @param k8 the eighth key.
+     * @param v8 the eighth value.
+     * @param k9 the ninth key.
+     * @param v9 the ninth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
@@ -363,34 +411,34 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
-     * @param k1 the first key
-     * @param v1 the first value
-     * @param k2 the second key
-     * @param v2 the second value
-     * @param k3 the third key
-     * @param v3 the third value
-     * @param k4 the fourth key
-     * @param v4 the fourth value
-     * @param k5 the fifth key
-     * @param v5 the fifth value
-     * @param k6 the sixth key
-     * @param v6 the sixth value
-     * @param k7 the seventh key
-     * @param v7 the seventh value
-     * @param k8 the eighth key
-     * @param v8 the eighth value
-     * @param k9 the ninth key
-     * @param v9 the ninth value
-     * @param k10 the tenth key
-     * @param v10 the tenth value
-     * @return an ImmutableMap containing the specified key-value pairs
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @param k7 the seventh key.
+     * @param v7 the seventh value.
+     * @param k8 the eighth key.
+     * @param v8 the eighth value.
+     * @param k9 the ninth key.
+     * @param v9 the ninth value.
+     * @param k10 the tenth key.
+     * @param v10 the tenth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
      */
     @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
-        // return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), true); // Doesn't support null key/value
+        // return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), true);   // Doesn't support null key/value
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), false);
     }
 
@@ -411,10 +459,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(immutable.size());   // Still 2
      * }</pre>
      *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param map the map whose mappings are to be placed in the ImmutableMap
-     * @return an ImmutableMap containing all mappings from the source map, or the same instance if already an ImmutableMap
+     * @param <K> the type of keys in the map.
+     * @param <V> the type of values in the map.
+     * @param map the map whose mappings are to be placed in the ImmutableMap.
+     * @return an ImmutableMap containing all mappings from the source map, or the same instance if already an ImmutableMap.
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableMap) {
@@ -445,10 +493,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(wrapped.size());   // 2
      * }</pre>
      *
-     * @param <K> the type of keys in the map
-     * @param <V> the type of values in the map
-     * @param map the map to be wrapped into an ImmutableMap
-     * @return an ImmutableMap view of the provided map, or the same instance if already an ImmutableMap
+     * @param <K> the type of keys in the map.
+     * @param <V> the type of values in the map.
+     * @param map the map to be wrapped into an ImmutableMap.
+     * @return an ImmutableMap view of the provided map, or the same instance if already an ImmutableMap.
      */
     @Beta
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {
@@ -474,9 +522,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map.getOrDefault("c", 99));   // 99
      * }</pre>
      *
-     * @param key the key whose associated value is to be returned
-     * @param defaultValue the value to return if the map contains no mapping for the key
-     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists
+     * @param key the key whose associated value is to be returned.
+     * @param defaultValue the value to return if the map contains no mapping for the key.
+     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists.
      */
     @Override
     public V getOrDefault(final Object key, final V defaultValue) {
@@ -489,11 +537,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param k ignored
-     * @param v ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param k ignored.
+     * @param v ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -505,10 +553,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param o ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param o ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -520,9 +568,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param map ignored
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param map ignored.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -534,11 +582,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param value ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param value ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -550,11 +598,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param value ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param value ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -566,12 +614,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param oldValue ignored
-     * @param newValue ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param oldValue ignored.
+     * @param newValue ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -583,11 +631,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param value ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param value ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -599,11 +647,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param mappingFunction ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param mappingFunction ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -615,11 +663,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param remappingFunction ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param remappingFunction ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -631,11 +679,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param remappingFunction ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param remappingFunction ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -647,12 +695,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param key ignored
-     * @param value ignored
-     * @param remappingFunction ignored
-     * @return never returns normally
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @param key ignored.
+     * @param value ignored.
+     * @param remappingFunction ignored.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -665,8 +713,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This operation is not supported by ImmutableMap.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @throws UnsupportedOperationException always
-     * @deprecated ImmutableMap does not support modification operations
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableMap does not support modification operations.
      */
     @Deprecated
     @Override
@@ -686,7 +734,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(nonEmpty.isEmpty());   // false
      * }</pre>
      *
-     * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise
+     * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise.
      * @see java.util.Map#isEmpty()
      */
     @Override
@@ -707,8 +755,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map.containsKey(null));   // false (unless null key was added)
      * }</pre>
      *
-     * @param key the key whose presence in this map is to be tested
-     * @return {@code true} if this map contains a mapping for the specified key
+     * @param key the key whose presence in this map is to be tested.
+     * @return {@code true} if this map contains a mapping for the specified key.
      * @see java.util.Map#containsKey(Object)
      */
     @Override
@@ -729,8 +777,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map.containsValue(3));   // false
      * }</pre>
      *
-     * @param value the value whose presence in this map is to be tested
-     * @return {@code true} if this map maps one or more keys to the specified value
+     * @param value the value whose presence in this map is to be tested.
+     * @return {@code true} if this map maps one or more keys to the specified value.
      * @see java.util.Map#containsValue(Object)
      */
     @Override
@@ -751,8 +799,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map.get("c"));   // null
      * }</pre>
      *
-     * @param key the key whose associated value is to be returned
-     * @return the value to which the specified key is mapped, or {@code null} if no mapping exists
+     * @param key the key whose associated value is to be returned.
+     * @return the value to which the specified key is mapped, or {@code null} if no mapping exists.
      * @see java.util.Map#get(Object)
      */
     @Override
@@ -770,11 +818,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Set<String> keys = map.keySet();
-     * System.out.println(keys);  // [a, b]
-     * // keys.add("c");  // throws UnsupportedOperationException
+     * System.out.println(keys);   // [a, b]
+     * // keys.add("c");   // throws UnsupportedOperationException
      * }</pre>
      *
-     * @return an unmodifiable set view of the keys contained in this map
+     * @return an unmodifiable set view of the keys contained in this map.
      * @see java.util.Map#keySet()
      */
     @Override
@@ -792,11 +840,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Collection<Integer> values = map.values();
-     * System.out.println(values);  // [1, 2]
-     * // values.remove(1);  // throws UnsupportedOperationException
+     * System.out.println(values);   // [1, 2]
+     * // values.remove(1);   // throws UnsupportedOperationException
      * }</pre>
      *
-     * @return an unmodifiable collection view of the values contained in this map
+     * @return an unmodifiable collection view of the values contained in this map.
      * @see java.util.Map#values()
      */
     @Override
@@ -820,7 +868,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * }
      * }</pre>
      *
-     * @return an unmodifiable set view of the mappings contained in this map
+     * @return an unmodifiable set view of the mappings contained in this map.
      * @see java.util.Map#entrySet()
      */
     @Override
@@ -835,10 +883,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
-     * System.out.println(map.size());  // 3
+     * System.out.println(map.size());   // 3
      * }</pre>
      *
-     * @return the number of key-value mappings in this map
+     * @return the number of key-value mappings in this map.
      * @see java.util.Map#size()
      */
     @Override
@@ -861,8 +909,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map1.equals(map3));   // false
      * }</pre>
      *
-     * @param obj the object to be compared for equality with this map
-     * @return {@code true} if the specified object is equal to this map
+     * @param obj the object to be compared for equality with this map.
+     * @return {@code true} if the specified object is equal to this map.
      * @see java.util.Map#equals(Object)
      */
     @Override
@@ -883,10 +931,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <pre>{@code
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map1.hashCode() == map2.hashCode());  // true
+     * System.out.println(map1.hashCode() == map2.hashCode());   // true
      * }</pre>
      *
-     * @return the hash code value for this map
+     * @return the hash code value for this map.
      * @see java.util.Map#hashCode()
      */
     @Override
@@ -903,10 +951,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map);  // {a=1, b=2}
+     * System.out.println(map);   // {a=1, b=2}
      * }</pre>
      *
-     * @return a string representation of this map
+     * @return a string representation of this map.
      */
     @Override
     public String toString() {
@@ -928,9 +976,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .build();
      * }</pre>
      *
-     * @param <K> the type of keys to be maintained by the map
-     * @param <V> the type of mapped values
-     * @return a new Builder instance for creating an ImmutableMap
+     * @param <K> the type of keys to be maintained by the map.
+     * @param <V> the type of mapped values.
+     * @return a new Builder instance for creating an ImmutableMap.
      */
     public static <K, V> Builder<K, V> builder() {
         return new Builder<>();
@@ -951,11 +999,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .build();
      * }</pre>
      *
-     * @param <K> the type of keys to be maintained by the map
-     * @param <V> the type of mapped values
-     * @param backedMap the map to be used as the backing storage for the Builder
-     * @return a new Builder instance that will use the provided map
-     * @throws IllegalArgumentException if backedMap is null
+     * @param <K> the type of keys to be maintained by the map.
+     * @param <V> the type of mapped values.
+     * @param backedMap the map to be used as the backing storage for the Builder.
+     * @return a new Builder instance that will use the provided map.
+     * @throws IllegalArgumentException if backedMap is null.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap);
@@ -980,8 +1028,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .build();
      * }</pre>
      *
-     * @param <K> the type of keys in the map being built
-     * @param <V> the type of values in the map being built
+     * @param <K> the type of keys in the map being built.
+     * @param <V> the type of values in the map being built.
      */
     public static final class Builder<K, V> {
         private final Map<K, V> map;
@@ -1005,9 +1053,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          *        .put("another", "data");
          * }</pre>
          *
-         * @param key the key with which the specified value is to be associated
-         * @param value the value to be associated with the specified key
-         * @return this builder instance for method chaining
+         * @param key the key with which the specified value is to be associated.
+         * @param value the value to be associated with the specified key.
+         * @return this builder instance for method chaining.
          */
         public Builder<K, V> put(final K key, final V value) {
             map.put(key, value);
@@ -1029,8 +1077,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          *        .put("c", 3);
          * }</pre>
          *
-         * @param m the map whose mappings are to be added, may be {@code null} or empty
-         * @return this builder instance for method chaining
+         * @param m the map whose mappings are to be added, may be {@code null} or empty.
+         * @return this builder instance for method chaining.
          */
         public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
             if (N.notEmpty(m)) {
@@ -1055,7 +1103,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          * // builder should not be used after this point
          * }</pre>
          *
-         * @return a new ImmutableMap containing all added entries
+         * @return a new ImmutableMap containing all added entries.
          */
         public ImmutableMap<K, V> build() {
             return ImmutableMap.wrap(map);

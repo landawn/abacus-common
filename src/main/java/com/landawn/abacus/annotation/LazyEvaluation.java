@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -68,7 +69,7 @@ import java.lang.annotation.Target;
  *     private final Function<Integer, T> generator;
  *
  *     public T get(int index) {
- *         return generator.apply(index);  // Computed only when requested
+ *         return generator.apply(index);   // Computed only when requested
  *     }
  * }
  * }</pre>
@@ -77,6 +78,7 @@ import java.lang.annotation.Target;
  * @see TerminalOp
  * @see TerminalOpTriggered
  */
+@Documented
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LazyEvaluation {

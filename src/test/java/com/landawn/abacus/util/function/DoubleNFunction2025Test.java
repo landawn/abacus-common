@@ -65,7 +65,7 @@ public class DoubleNFunction2025Test extends TestBase {
         DoubleNFunction<Integer> composed = function.andThen(after);
         Integer result = composed.apply(1.0, 2.0, 3.0);
 
-        assertEquals(8, result); // "length=3".length() = 8
+        assertEquals(8, result);   // "length=3".length() = 8
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DoubleNFunction2025Test extends TestBase {
         DoubleNFunction<Integer> composed = function.andThen(after1).andThen(after2);
         Integer result = composed.apply(10.0, 20.0);
 
-        assertEquals(8, result); // "sum=30.0".length() = 8
+        assertEquals(8, result);   // "sum=30.0".length() = 8
     }
 
     @Test

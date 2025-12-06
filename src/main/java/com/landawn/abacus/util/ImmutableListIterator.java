@@ -135,7 +135,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * while (immutableIter.hasNext()) {
      *     System.out.println(immutableIter.next());
      * }
-     * // immutableIter.set(4);  // Would throw UnsupportedOperationException
+     * // immutableIter.set(4);   // Would throw UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of elements returned by the iterator

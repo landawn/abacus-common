@@ -80,6 +80,14 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * The list is first converted to a byte array, then serialized using the array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ByteList> type = TypeFactory.getType(ByteList.class);
+     * ByteList list = ByteList.of(1, 2, 3, 127, -128);
+     * String result = type.stringOf(list);
+     * // result: Base64 encoded string of the byte values
+     * }</pre>
+     *
      * @param x the ByteList to convert
      * @return the string representation of the list, or {@code null} if input is null
      */
@@ -92,6 +100,14 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * Parses a string representation and creates a ByteList.
      * The string is first parsed as a byte array, then wrapped in a ByteList.
      * Returns {@code null} if the input string is {@code null} or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ByteList> type = TypeFactory.getType(ByteList.class);
+     * String encoded = "AQIDAP8=";  // Base64 encoded bytes
+     * ByteList list = type.valueOf(encoded);
+     * // list: ByteList containing the decoded bytes
+     * }</pre>
      *
      * @param str the string to parse
      * @return a ByteList created from the parsed values, or {@code null} if input is {@code null} or empty

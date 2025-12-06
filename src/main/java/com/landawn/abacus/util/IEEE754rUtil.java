@@ -35,14 +35,14 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Standard Math.min returns NaN if any argument is NaN
- * double result1 = Math.min(5.0, Double.NaN);  // returns NaN
+ * double result1 = Math.min(5.0, Double.NaN);   // returns NaN
  * 
  * // IEEE754rUtil.min returns the non-NaN value
- * double result2 = IEEE754rUtil.min(5.0, Double.NaN);  // returns 5.0
+ * double result2 = IEEE754rUtil.min(5.0, Double.NaN);   // returns 5.0
  * 
  * // Array operations
  * float[] values = {3.0f, Float.NaN, 1.0f, 2.0f};
- * float min = IEEE754rUtil.min(values);  // returns 1.0f
+ * float min = IEEE754rUtil.min(values);   // returns 1.0f
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -94,20 +94,27 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the smallest of three float values according to IEEE-754r standard.
-     * 
-     * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
+     *
+     * <p>If one or more values are NaN and at least one value is not NaN, the non-NaN minimum is returned.
+     * If all three values are NaN, NaN is returned. Otherwise, behaves like the minimum of three values.
      * This method is equivalent to calling {@code min(min(a, b), c)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);        // returns 1.0f
-     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f);   // returns 1.0f
+     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);                  // returns 1.0f
+     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f);             // returns 1.0f
+     * IEEE754rUtil.min(3.0f, Float.NaN, 1.0f);             // returns 1.0f
+     * IEEE754rUtil.min(Float.NaN, Float.NaN, Float.NaN);   // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
      * @param b the second value
      * @param c the third value
      * @return the smallest of {@code a}, {@code b}, and {@code c} according to IEEE-754r
+     * @see #min(float, float)
+     * @see #min(float...)
+     * @see #min(double, double, double)
+     * @see #max(float, float, float)
      */
     public static float min(final float a, final float b, final float c) {
         return min(min(a, b), c);
@@ -122,7 +129,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
-     * float min = IEEE754rUtil.min(values);  // returns 1.0f
+     * float min = IEEE754rUtil.min(values);   // returns 1.0f
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -132,7 +139,7 @@ public final class IEEE754rUtil {
     public static float min(final float... array) {
         // Validates input
         if (N.isEmpty(array)) {
-            throw new IllegalArgumentException("Array cannot be null or empty."); //NOSONAR
+            throw new IllegalArgumentException("Array cannot be null or empty.");   //NOSONAR
         }
 
         // Finds and returns min
@@ -178,20 +185,27 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the smallest of three double values according to IEEE-754r standard.
-     * 
-     * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
+     *
+     * <p>If one or more values are NaN and at least one value is not NaN, the non-NaN minimum is returned.
+     * If all three values are NaN, NaN is returned. Otherwise, behaves like the minimum of three values.
      * This method is equivalent to calling {@code min(min(a, b), c)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0, 5.0, 1.0);          // returns 1.0
-     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0);   // returns 1.0
+     * IEEE754rUtil.min(3.0, 5.0, 1.0);                        // returns 1.0
+     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0);                 // returns 1.0
+     * IEEE754rUtil.min(3.0, Double.NaN, 1.0);                 // returns 1.0
+     * IEEE754rUtil.min(Double.NaN, Double.NaN, Double.NaN);   // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
      * @param b the second value
      * @param c the third value
      * @return the smallest of {@code a}, {@code b}, and {@code c} according to IEEE-754r
+     * @see #min(double, double)
+     * @see #min(double...)
+     * @see #min(float, float, float)
+     * @see #max(double, double, double)
      */
     public static double min(final double a, final double b, final double c) {
         return min(min(a, b), c);
@@ -206,7 +220,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
-     * double min = IEEE754rUtil.min(values);  // returns 1.0
+     * double min = IEEE754rUtil.min(values);   // returns 1.0
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -262,20 +276,27 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the largest of three float values according to IEEE-754r standard.
-     * 
-     * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
+     *
+     * <p>If one or more values are NaN and at least one value is not NaN, the non-NaN maximum is returned.
+     * If all three values are NaN, NaN is returned. Otherwise, behaves like the maximum of three values.
      * This method is equivalent to calling {@code max(max(a, b), c)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);        // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f);   // returns 5.0f
+     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);                  // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f);             // returns 5.0f
+     * IEEE754rUtil.max(3.0f, Float.NaN, 5.0f);             // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, Float.NaN, Float.NaN);   // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
      * @param b the second value
      * @param c the third value
      * @return the largest of {@code a}, {@code b}, and {@code c} according to IEEE-754r
+     * @see #max(float, float)
+     * @see #max(float...)
+     * @see #max(double, double, double)
+     * @see #min(float, float, float)
      */
     public static float max(final float a, final float b, final float c) {
         return max(max(a, b), c);
@@ -290,7 +311,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
-     * float max = IEEE754rUtil.max(values);  // returns 5.0f
+     * float max = IEEE754rUtil.max(values);   // returns 5.0f
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty
@@ -346,20 +367,27 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the largest of three double values according to IEEE-754r standard.
-     * 
-     * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
+     *
+     * <p>If one or more values are NaN and at least one value is not NaN, the non-NaN maximum is returned.
+     * If all three values are NaN, NaN is returned. Otherwise, behaves like the maximum of three values.
      * This method is equivalent to calling {@code max(max(a, b), c)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0, 5.0, 1.0);          // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0);   // returns 5.0
+     * IEEE754rUtil.max(3.0, 5.0, 1.0);                        // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0);                 // returns 5.0
+     * IEEE754rUtil.max(3.0, Double.NaN, 5.0);                 // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, Double.NaN, Double.NaN);   // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
      * @param b the second value
      * @param c the third value
      * @return the largest of {@code a}, {@code b}, and {@code c} according to IEEE-754r
+     * @see #max(double, double)
+     * @see #max(double...)
+     * @see #max(float, float, float)
+     * @see #min(double, double, double)
      */
     public static double max(final double a, final double b, final double c) {
         return max(max(a, b), c);
@@ -374,7 +402,7 @@ public final class IEEE754rUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
-     * double max = IEEE754rUtil.max(values);  // returns 5.0
+     * double max = IEEE754rUtil.max(values);   // returns 5.0
      * }</pre>
      *
      * @param array the array of values, must not be {@code null} or empty

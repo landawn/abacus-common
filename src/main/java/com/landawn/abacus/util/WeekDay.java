@@ -25,9 +25,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * WeekDay today = WeekDay.MONDAY;
- * int dayValue = today.intValue();  // Returns 1
+ * int dayValue = today.intValue();   // Returns 1
  * 
- * WeekDay sunday = WeekDay.valueOf(0);  // Returns WeekDay.SUNDAY
+ * WeekDay sunday = WeekDay.valueOf(0);   // Returns WeekDay.SUNDAY
  * }</pre>
  *
  * @see Color

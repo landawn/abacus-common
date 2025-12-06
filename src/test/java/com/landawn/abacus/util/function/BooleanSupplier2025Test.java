@@ -67,9 +67,9 @@ public class BooleanSupplier2025Test extends TestBase {
             return state.get();
         };
 
-        assertTrue(supplier.getAsBoolean()); // First call: false -> true
-        assertFalse(supplier.getAsBoolean()); // Second call: true -> false
-        assertTrue(supplier.getAsBoolean()); // Third call: false -> true
+        assertTrue(supplier.getAsBoolean());   // First call: false -> true
+        assertFalse(supplier.getAsBoolean());   // Second call: true -> false
+        assertTrue(supplier.getAsBoolean());   // Third call: false -> true
     }
 
     @Test

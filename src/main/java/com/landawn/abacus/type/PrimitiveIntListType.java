@@ -185,7 +185,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type.writeCharacter(writer, list, null);
      * // Writes: [5, 10, 15]
      *
-     * type.writeCharacter(writer, {@code null}, null);
+     * type.writeCharacter(writer, null, null);
      * // Writes: null
      * }</pre>
      *

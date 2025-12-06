@@ -37,7 +37,7 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
-     * Integer result1 = sum.apply((short) 10, (short) 20, (short) 30);  // returns 60
+     * Integer result1 = sum.apply((short) 10, (short) 20, (short) 30);   // returns 60
      *
      * ShortTriFunction<String> formatter = (x, y, z) ->
      *     String.format("Point3D(%d, %d, %d)", x, y, z);
@@ -46,7 +46,7 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
      *
      * ShortTriFunction<Boolean> inRange = (value, min, max) ->
      *     value >= min && value <= max;
-     * Boolean result3 = inRange.apply((short) 50, (short) 0, (short) 100);  // returns true
+     * Boolean result3 = inRange.apply((short) 50, (short) 0, (short) 100);   // returns true
      * }</pre>
      *
      * @param a the first function argument
@@ -62,8 +62,16 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
      * the {@code after} function to the result. If evaluation of either function throws an exception,
      * it is relayed to the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
+     * Function<Integer, String> toString = Object::toString;
+     * ShortTriFunction<String> sumAsString = sum.andThen(toString);
+     * String result = sumAsString.apply((short) 1, (short) 2, (short) 3);   // returns "6"
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> ShortTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

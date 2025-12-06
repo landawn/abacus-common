@@ -165,7 +165,7 @@ public enum LockMode {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int value = LockMode.RU.intValue();  // Returns 5 (1 + 4)
+     * int value = LockMode.RU.intValue();   // Returns 5 (1 + 4)
      * }</pre>
      *
      * @return the integer value of this lock mode
@@ -249,11 +249,11 @@ public enum LockMode {
      * <pre>{@code
      * LockMode currentLock = LockMode.R;
      * LockMode checkLock = LockMode.RU;
-     * boolean isLocked = currentLock.isXLockOf(checkLock);  // Returns true
+     * boolean isLocked = currentLock.isXLockOf(checkLock);   // Returns true
      * 
      * LockMode currentLock2 = LockMode.UD;
      * LockMode checkLock2 = LockMode.U;
-     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);  // Returns true
+     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // Returns true
      * }</pre>
      *
      * @param lockMode the LockMode to check against

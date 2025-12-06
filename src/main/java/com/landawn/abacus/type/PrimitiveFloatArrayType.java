@@ -46,6 +46,13 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     /**
      * Returns the Class object representing the float array type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * Class<float[]> clazz = type.clazz();
+     * // Returns: float[].class
+     * }</pre>
+     *
      * @return the Class object for float[]
      */
     @Override
@@ -55,6 +62,13 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
 
     /**
      * Returns the Type object for the float element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * Type<Float> elementType = type.getElementType();
+     * // Returns: Type instance for float
+     * }</pre>
      *
      * @return the Type object representing Float/float elements
      */
@@ -79,6 +93,20 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * The format is: [1.5, 2.7, 3.14] with elements separated by commas.
      * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * float[] array = {1.5f, 2.7f, 3.14f};
+     * String result = type.stringOf(array);
+     * // Returns: "[1.5, 2.7, 3.14]"
+     *
+     * String empty = type.stringOf(new float[0]);
+     * // Returns: "[]"
+     *
+     * String nullResult = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the float array to convert
      * @return the string representation of the array, or {@code null} if input is null
      */
@@ -97,6 +125,19 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Parses a string representation and creates a float array.
      * Expected format: [1.5, 2.7, 3.14] or similar numeric value representations.
      * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * float[] result = type.valueOf("[1.5, 2.7, 3.14]");
+     * // Returns: {1.5f, 2.7f, 3.14f}
+     *
+     * float[] empty = type.valueOf("[]");
+     * // Returns: {} (empty array)
+     *
+     * float[] nullResult = type.valueOf(null);
+     * // Returns: null
+     * }</pre>
      *
      * @param str the string to parse
      * @return the parsed float array, or {@code null} if input is null
@@ -127,6 +168,15 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * The format is: [1.5, 2.7, 3.14] with proper element separation.
      * Appends "null" if the array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * StringBuilder sb = new StringBuilder();
+     * float[] array = {1.5f, 2.7f, 3.14f};
+     * type.appendTo(sb, array);
+     * // sb now contains: "[1.5, 2.7, 3.14]"
+     * }</pre>
+     *
      * @param appendable the Appendable to write to
      * @param x the float array to append
      * @throws IOException if an I/O error occurs
@@ -154,6 +204,15 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Writes the character representation of a float array to a CharacterWriter.
      * Uses optimized write methods for better performance.
      * Writes "null" if the array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * CharacterWriter writer = new CharacterWriter();
+     * float[] array = {1.5f, 2.7f, 3.14f};
+     * type.writeCharacter(writer, array, null);
+     * // Writer contains: "[1.5, 2.7, 3.14]"
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the float array to write
@@ -184,6 +243,14 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Each element in the collection is unboxed to its primitive float value.
      * Returns {@code null} if the input collection is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * List<Float> list = Arrays.asList(1.5f, 2.7f, 3.14f);
+     * float[] array = type.collection2Array(list);
+     * // Returns: {1.5f, 2.7f, 3.14f}
+     * }</pre>
+     *
      * @param c the Collection of Float objects to convert
      * @return a float array containing the unboxed values, or {@code null} if input is null
      */
@@ -209,6 +276,15 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Each primitive float value is boxed to a Float object and added to the output collection.
      * Does nothing if the input array is {@code null} or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * float[] array = {1.5f, 2.7f, 3.14f};
+     * List<Float> list = new ArrayList<>();
+     * type.array2Collection(array, list);
+     * // list now contains: [1.5f, 2.7f, 3.14f]
+     * }</pre>
+     *
      * @param <E> the type of elements in the output collection
      * @param x the float array to convert
      * @param output the Collection to add the boxed Float values to
@@ -228,6 +304,14 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Calculates the hash code for a float array.
      * Uses the standard Arrays.hashCode algorithm for consistency.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * float[] array = {1.5f, 2.7f, 3.14f};
+     * int hash = type.hashCode(array);
+     * // Returns the hash code for the array
+     * }</pre>
+     *
      * @param x the float array to hash
      * @return the hash code of the array
      */
@@ -240,6 +324,19 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Compares two float arrays for equality.
      * Arrays are considered equal if they have the same length and all corresponding elements are equal.
      * Two {@code null} arrays are considered equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<float[]> type = TypeFactory.getType(float[].class);
+     * float[] array1 = {1.5f, 2.7f, 3.14f};
+     * float[] array2 = {1.5f, 2.7f, 3.14f};
+     * boolean equal = type.equals(array1, array2);
+     * // Returns: true
+     *
+     * float[] array3 = {1.5f, 2.8f};
+     * equal = type.equals(array1, array3);
+     * // Returns: false
+     * }</pre>
      *
      * @param x the first float array
      * @param y the second float array

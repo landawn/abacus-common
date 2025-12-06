@@ -95,7 +95,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * Future<Profile> profileFuture = profileService.fetchProfile(userId);
  *
  * ContinuableFuture<List<Object>> allResults = Futures.allOf(userFuture, ordersFuture, profileFuture);
- * List<Object> results = allResults.get();  // [User, List<Order>, Profile]
+ * List<Object> results = allResults.get();   // [User, List<Order>, Profile]
  *
  * // Structured result combination using Tuples
  * ContinuableFuture<Tuple3<User, List<Order>, Profile>> structuredResult =
@@ -350,27 +350,70 @@ public final class Futures {
      * to retrieve their values.
      *
      * <p>This overload uses the same function for both regular get() and timeout-based get() operations.
+     * The function is executed when get() or get(timeout, unit) is called on the returned future, allowing
+     * lazy evaluation of the composition logic. This provides maximum flexibility for orchestrating the
+     * completion of multiple futures with custom coordination strategies.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Lazy Execution:</b> The zip function is not executed until get() is called on the returned future</li>
+     *   <li><b>Custom Coordination:</b> Full control over how and when to retrieve values from input futures</li>
+     *   <li><b>Exception Handling:</b> InterruptedException and ExecutionException are propagated directly</li>
+     *   <li><b>Unified Behavior:</b> Same logic applies to both timed and untimed get operations</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic arithmetic combination
      * Future<Integer> future1 = CompletableFuture.completedFuture(5);
      * Future<Integer> future2 = CompletableFuture.completedFuture(10);
      *
      * ContinuableFuture<Integer> sum = Futures.compose(future1, future2,
      *     (f1, f2) -> f1.get() + f2.get());
      *
-     * System.out.println(sum.get());  // Prints: 15
+     * System.out.println(sum.get());   // Prints: 15
+     *
+     * // Custom error handling
+     * Future<String> mayFail1 = riskyOperation1();
+     * Future<String> mayFail2 = riskyOperation2();
+     *
+     * ContinuableFuture<String> combined = Futures.compose(mayFail1, mayFail2,
+     *     (f1, f2) -> {
+     *         try {
+     *             return f1.get() + " " + f2.get();
+     *         } catch (Exception e) {
+     *             return "Fallback value";
+     *         }
+     *     });
+     *
+     * // Conditional retrieval based on one future's result
+     * Future<Boolean> condition = checkCondition();
+     * Future<Data> expensiveData = loadExpensiveData();
+     *
+     * ContinuableFuture<Data> result = Futures.compose(condition, expensiveData,
+     *     (condFuture, dataFuture) -> {
+     *         if (condFuture.get()) {
+     *             return dataFuture.get();
+     *         } else {
+     *             return Data.DEFAULT;  // Skip expensive retrieval
+     *         }
+     *     });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <R> the result type of the composed future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param zipFunctionForGet the function that combines the futures' results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <R> the result type of the composed future.
+     * @param cf1 the first future to compose, must not be {@code null}.
+     * @param cf2 the second future to compose, must not be {@code null}.
+     * @param zipFunctionForGet the function that combines the futures' results. Receives both Future objects
+     *                         as parameters and returns the composed result. Must not be {@code null}.
      * @return a ContinuableFuture that completes when both input futures complete, with a result
-     *         computed by the provided zip function
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException
+     *         computed by the provided zip function.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException,
+     *                         the exception is wrapped in a RuntimeException and thrown.
+     * @see #compose(Future, Future, Throwables.BiFunction, Throwables.Function)
+     * @see #combine(Future, Future, Throwables.BiFunction)
+     * @see ContinuableFuture
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet) {
@@ -380,13 +423,25 @@ public final class Futures {
     /**
      * Composes two futures into a new ContinuableFuture with separate functions for regular and timeout-based operations.
      * This method provides maximum flexibility by allowing different logic for get() and get(timeout, unit) calls.
-     * The timeout function receives a Tuple4 containing both futures, the timeout value, and the time unit.
+     * The timeout function receives a Tuple4 containing both futures, the timeout value, and the time unit, enabling
+     * time-aware coordination strategies.
      *
      * <p>This is useful when you need different behavior for time-constrained operations, such as returning
-     * a default value or using a different computation strategy when under time pressure.
+     * a default value or using a different computation strategy when under time pressure. This enables
+     * sophisticated patterns like graceful degradation, partial results, or fallback strategies when
+     * operating under strict time constraints.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Dual Strategies:</b> Different execution paths for time-unlimited and time-limited scenarios</li>
+     *   <li><b>Timeout Awareness:</b> Timeout function receives exact timeout parameters for precise control</li>
+     *   <li><b>Graceful Degradation:</b> Supports returning partial or cached results when time is limited</li>
+     *   <li><b>Performance Optimization:</b> Allows skipping expensive operations when under time pressure</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic timeout handling with fallback
      * Future<String> slowFuture = CompletableFuture.supplyAsync(() -> {
      *     Thread.sleep(5000);
      *     return "Slow Result";
@@ -402,17 +457,65 @@ public final class Futures {
      *
      * // Will return quickly with timeout logic
      * String result = composed.get(100, TimeUnit.MILLISECONDS);
+     *
+     * // Sophisticated timeout handling with partial results
+     * Future<List<Data>> primaryData = fetchPrimaryData();
+     * Future<List<Data>> cachedData = fetchCachedData();
+     *
+     * ContinuableFuture<Report> report = Futures.compose(primaryData, cachedData,
+     *     // Full computation when time unlimited
+     *     (primary, cached) -> {
+     *         List<Data> all = new ArrayList<>(primary.get());
+     *         all.addAll(cached.get());
+     *         return generateFullReport(all);
+     *     },
+     *     // Quick computation when time limited
+     *     tuple -> {
+     *         try {
+     *             // Try primary first with available time
+     *             List<Data> data = tuple._1.get(tuple._3, tuple._4);
+     *             return generateQuickReport(data);
+     *         } catch (TimeoutException e) {
+     *             // Fall back to cache if primary times out
+     *             if (tuple._2.isDone()) {
+     *                 return generateQuickReport(tuple._2.get());
+     *             }
+     *             return Report.EMPTY;
+     *         }
+     *     });
+     *
+     * // Conditional expensive operation
+     * Future<Boolean> shouldProcess = checkProcessingFlag();
+     * Future<ExpensiveData> expensiveOperation = performExpensiveOperation();
+     *
+     * ContinuableFuture<Result> result = Futures.compose(shouldProcess, expensiveOperation,
+     *     (flag, data) -> flag.get() ? processData(data.get()) : Result.SKIPPED,
+     *     tuple -> {
+     *         // Under timeout, skip expensive operation if flag is false
+     *         boolean process = tuple._1.get(tuple._3 / 2, tuple._4);
+     *         if (!process) {
+     *             return Result.SKIPPED;
+     *         }
+     *         return processData(tuple._2.get(tuple._3 / 2, tuple._4));
+     *     });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <R> the result type of the composed future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param zipFunctionForGet the function that combines the futures' results
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 with
-     *                              (future1, future2, timeout, timeUnit)
-     * @return a ContinuableFuture with custom logic for both regular and timeout operations
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <R> the result type of the composed future.
+     * @param cf1 the first future to compose, must not be {@code null}.
+     * @param cf2 the second future to compose, must not be {@code null}.
+     * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
+     *                         Receives both Future objects. Must not be {@code null}.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 with.
+     *                              (_1: future1, _2: future2, _3: timeout value, _4: TimeUnit)
+     *                              Must not be {@code null}.
+     * @return a ContinuableFuture with custom logic for both regular and timeout operations.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     *                         ExecutionException, or TimeoutException.
+     * @see #compose(Future, Future, Throwables.BiFunction)
+     * @see Tuple4
+     * @see TimeUnit
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet,
@@ -426,10 +529,23 @@ public final class Futures {
     /**
      * Composes three futures into a new ContinuableFuture by applying a tri-function to the Future objects.
      * This method extends the composition pattern to three futures, allowing complex three-way combinations.
-     * The function receives all three Future objects and can orchestrate their completion as needed.
+     * The function receives all three Future objects and can orchestrate their completion as needed, enabling
+     * sophisticated coordination strategies for multiple asynchronous operations.
+     *
+     * <p>This overload uses the same function for both regular get() and timeout-based get() operations,
+     * providing a unified composition strategy regardless of whether a timeout is specified.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Three-Way Composition:</b> Combines three independent asynchronous operations efficiently</li>
+     *   <li><b>Flexible Coordination:</b> Full control over retrieval order and error handling strategy</li>
+     *   <li><b>Lazy Evaluation:</b> Function executes only when result is requested</li>
+     *   <li><b>Unified Behavior:</b> Same composition logic for timed and untimed operations</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic three-way string combination
      * Future<String> nameFuture = CompletableFuture.completedFuture("John");
      * Future<Integer> ageFuture = CompletableFuture.completedFuture(30);
      * Future<String> cityFuture = CompletableFuture.completedFuture("New York");
@@ -438,18 +554,52 @@ public final class Futures {
      *     (f1, f2, f3) -> String.format("%s, %d years old, from %s",
      *         f1.get(), f2.get(), f3.get()));
      *
-     * System.out.println(profile.get());  // "John, 30 years old, from New York"
+     * System.out.println(profile.get());   // "John, 30 years old, from New York"
+     *
+     * // Complex data aggregation from multiple sources
+     * Future<UserData> userData = fetchUserData(userId);
+     * Future<Preferences> preferences = fetchPreferences(userId);
+     * Future<ActivityLog> activityLog = fetchActivityLog(userId);
+     *
+     * ContinuableFuture<Dashboard> dashboard = Futures.compose(
+     *     userData, preferences, activityLog,
+     *     (user, prefs, activity) -> {
+     *         UserData u = user.get();
+     *         Preferences p = prefs.get();
+     *         ActivityLog a = activity.get();
+     *         return new Dashboard(u, p, a);
+     *     });
+     *
+     * // Conditional logic based on first future's result
+     * Future<Boolean> featureEnabled = checkFeatureFlag("newFeature");
+     * Future<NewData> newFeatureData = fetchNewFeatureData();
+     * Future<LegacyData> legacyData = fetchLegacyData();
+     *
+     * ContinuableFuture<Response> response = Futures.compose(
+     *     featureEnabled, newFeatureData, legacyData,
+     *     (flag, newData, legacy) -> {
+     *         if (flag.get()) {
+     *             return Response.fromNew(newData.get());
+     *         } else {
+     *             return Response.fromLegacy(legacy.get());
+     *         }
+     *     });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <R> the result type of the composed future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param zipFunctionForGet the function that combines the futures' results
-     * @return a ContinuableFuture that completes when all three input futures complete
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <R> the result type of the composed future.
+     * @param cf1 the first future to compose, must not be {@code null}.
+     * @param cf2 the second future to compose, must not be {@code null}.
+     * @param cf3 the third future to compose, must not be {@code null}.
+     * @param zipFunctionForGet the function that combines the futures' results. Receives all three Future objects
+     *                         and returns the composed result. Must not be {@code null}.
+     * @return a ContinuableFuture that completes when all three input futures complete, with a result
+     *         computed by the provided zip function.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException.
+     * @see #compose(Future, Future, Future, Throwables.TriFunction, Throwables.Function)
+     * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet) {
@@ -459,16 +609,28 @@ public final class Futures {
     /**
      * Composes three futures with separate functions for regular and timeout-based operations.
      * Similar to the two-future version, this provides different logic paths for time-constrained scenarios.
-     * The timeout function receives a Tuple5 containing all three futures plus timeout information.
+     * The timeout function receives a Tuple5 containing all three futures plus timeout information, enabling
+     * sophisticated time-aware coordination strategies for three-way compositions.
      *
      * <p>This is particularly useful for complex operations where you might want to skip expensive
-     * computations or use cached/default values when operating under time constraints.
+     * computations or use cached/default values when operating under time constraints. The method enables
+     * patterns like partial data aggregation, priority-based retrieval, or graceful degradation when
+     * coordinating three asynchronous operations under time pressure.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Dual Execution Paths:</b> Separate strategies for unlimited and time-limited scenarios</li>
+     *   <li><b>Priority Handling:</b> Can prioritize which futures to retrieve first under time pressure</li>
+     *   <li><b>Partial Results:</b> Supports returning results from subset of futures when time constrained</li>
+     *   <li><b>Timeout Distribution:</b> Function receives timeout parameters for dynamic time allocation</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Future<List<String>> dbQuery = // ... database query future
-     * Future<Map<String, Object>> cache = // ... cache lookup future
-     * Future<String> config = // ... configuration future
+     * // Basic timeout with cache fallback
+     * Future<List<String>> dbQuery = queryDatabase();
+     * Future<Map<String, Object>> cache = checkCache();
+     * Future<String> config = loadConfig();
      *
      * ContinuableFuture<Result> composed = Futures.compose(dbQuery, cache, config,
      *     (f1, f2, f3) -> processAllData(f1.get(), f2.get(), f3.get()),
@@ -480,19 +642,78 @@ public final class Futures {
      *             return Result.DEFAULT;
      *         }
      *     });
+     *
+     * // Priority-based retrieval with time allocation
+     * Future<CriticalData> critical = fetchCriticalData();
+     * Future<ImportantData> important = fetchImportantData();
+     * Future<OptionalData> optional = fetchOptionalData();
+     *
+     * ContinuableFuture<AggregatedData> result = Futures.compose(
+     *     critical, important, optional,
+     *     // Full aggregation when time unlimited
+     *     (c, i, o) -> new AggregatedData(c.get(), i.get(), o.get()),
+     *     // Priority-based retrieval under timeout
+     *     tuple -> {
+     *         long timePerFuture = tuple._4 / 3;
+     *         TimeUnit unit = tuple._5;
+     *
+     *         try {
+     *             // Critical data first (40% of time)
+     *             CriticalData c = tuple._1.get(timePerFuture * 2, unit);
+     *
+     *             // Important data second (40% of time)
+     *             ImportantData i = tuple._2.get(timePerFuture * 2, unit);
+     *
+     *             // Optional data last (20% of time)
+     *             OptionalData o = tuple._3.isDone() ?
+     *                 tuple._3.get() : OptionalData.EMPTY;
+     *
+     *             return new AggregatedData(c, i, o);
+     *         } catch (TimeoutException e) {
+     *             // Return partial results
+     *             return AggregatedData.partial(e.getMessage());
+     *         }
+     *     });
+     *
+     * // Conditional logic with multiple data sources
+     * Future<Boolean> shouldUseNewAPI = checkAPIVersion();
+     * Future<NewAPIData> newAPI = callNewAPI();
+     * Future<OldAPIData> oldAPI = callOldAPI();
+     *
+     * ContinuableFuture<APIResponse> response = Futures.compose(
+     *     shouldUseNewAPI, newAPI, oldAPI,
+     *     (flag, newData, oldData) ->
+     *         flag.get() ? APIResponse.from(newData.get()) :
+     *                     APIResponse.from(oldData.get()),
+     *     tuple -> {
+     *         // Quick check with timeout
+     *         boolean useNew = tuple._1.get(tuple._4 / 4, tuple._5);
+     *         if (useNew) {
+     *             return APIResponse.from(tuple._2.get(tuple._4 * 3 / 4, tuple._5));
+     *         } else {
+     *             return APIResponse.from(tuple._3.get(tuple._4 * 3 / 4, tuple._5));
+     *         }
+     *     });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <R> the result type of the composed future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param zipFunctionForGet the function that combines the futures' results
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 with
-     *                              (future1, future2, future3, timeout, timeUnit)
-     * @return a ContinuableFuture with custom logic for both regular and timeout operations
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <R> the result type of the composed future.
+     * @param cf1 the first future to compose, must not be {@code null}.
+     * @param cf2 the second future to compose, must not be {@code null}.
+     * @param cf3 the third future to compose, must not be {@code null}.
+     * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
+     *                         Receives all three Future objects. Must not be {@code null}.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 with.
+     *                              (_1: future1, _2: future2, _3: future3, _4: timeout value, _5: TimeUnit)
+     *                              Must not be {@code null}.
+     * @return a ContinuableFuture with custom logic for both regular and timeout operations.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     *                         ExecutionException, or TimeoutException.
+     * @see #compose(Future, Future, Future, Throwables.TriFunction)
+     * @see Tuple5
+     * @see TimeUnit
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet,
@@ -506,13 +727,26 @@ public final class Futures {
     /**
      * Composes a collection of futures into a single ContinuableFuture using a custom function.
      * This method provides maximum flexibility for combining any number of futures. The function
-     * receives the entire collection and can implement any logic for combining their results.
+     * receives the entire collection and can implement any logic for combining their results, making
+     * it ideal for dynamic numbers of futures or custom aggregation logic.
      *
      * <p>The collection type is preserved (FC extends Collection), allowing type-safe operations
-     * on specific collection implementations.
+     * on specific collection implementations. This enables working with List, Set, or any other
+     * Collection type while maintaining compile-time type safety.
+     *
+     * <p>This overload uses the same function for both regular get() and timeout-based get() operations.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Dynamic Size:</b> Works with any number of futures, determined at runtime</li>
+     *   <li><b>Collection Type Preservation:</b> Maintains the specific collection type through generics</li>
+     *   <li><b>Custom Aggregation:</b> Full control over how futures are combined and results processed</li>
+     *   <li><b>Lazy Execution:</b> Zip function executes only when result is requested</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic sum aggregation
      * List<Future<Integer>> futures = Arrays.asList(
      *     CompletableFuture.completedFuture(1),
      *     CompletableFuture.completedFuture(2),
@@ -527,16 +761,72 @@ public final class Futures {
      *     return total;
      * });
      *
-     * System.out.println(sum.get());  // Prints: 6
+     * System.out.println(sum.get());   // Prints: 6
+     *
+     * // Complex data aggregation with error handling
+     * List<Future<DataPoint>> dataFutures = sensors.stream()
+     *     .map(sensor -> fetchDataAsync(sensor))
+     *     .collect(Collectors.toList());
+     *
+     * ContinuableFuture<AggregatedReport> report = Futures.compose(dataFutures,
+     *     futures -> {
+     *         List<DataPoint> successfulData = new ArrayList<>();
+     *         List<Exception> errors = new ArrayList<>();
+     *
+     *         for (Future<DataPoint> f : futures) {
+     *             try {
+     *                 successfulData.add(f.get());
+     *             } catch (Exception e) {
+     *                 errors.add(e);
+     *             }
+     *         }
+     *
+     *         return new AggregatedReport(successfulData, errors);
+     *     });
+     *
+     * // Set-based uniqueness preservation
+     * Set<Future<String>> uniqueQueries = new HashSet<>(queryFutures);
+     *
+     * ContinuableFuture<Set<String>> uniqueResults = Futures.compose(uniqueQueries,
+     *     futureSet -> {
+     *         Set<String> results = new HashSet<>();
+     *         for (Future<String> f : futureSet) {
+     *             results.add(f.get());
+     *         }
+     *         return results;
+     *     });
+     *
+     * // Statistical analysis
+     * List<Future<Double>> measurements = performMeasurements();
+     *
+     * ContinuableFuture<Statistics> stats = Futures.compose(measurements,
+     *     futures -> {
+     *         List<Double> values = new ArrayList<>();
+     *         for (Future<Double> f : futures) {
+     *             values.add(f.get());
+     *         }
+     *
+     *         double sum = values.stream().mapToDouble(Double::doubleValue).sum();
+     *         double avg = sum / values.size();
+     *         double max = values.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+     *         double min = values.stream().mapToDouble(Double::doubleValue).min().orElse(0);
+     *
+     *         return new Statistics(avg, max, min, values.size());
+     *     });
      * }</pre>
      *
-     * @param <T> the result type of the input futures
-     * @param <FC> the specific collection type containing the futures
-     * @param <R> the result type of the composed future
-     * @param cfs the collection of input futures, must not be {@code null} or empty
-     * @param zipFunctionForGet the function that combines the futures' results
-     * @return a ContinuableFuture that completes when all input futures complete
-     * @throws IllegalArgumentException if the collection is {@code null} or empty
+     * @param <T> the result type of the input futures.
+     * @param <FC> the specific collection type containing the futures (e.g., List, Set).
+     * @param <R> the result type of the composed future.
+     * @param cfs the collection of input futures, must not be {@code null} or empty.
+     * @param zipFunctionForGet the function that combines the futures' results. Receives the collection
+     *                         of Future objects and returns the composed result. Must not be {@code null}.
+     * @return a ContinuableFuture that completes when all input futures complete, with a result
+     *         computed by the provided zip function.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException.
+     * @see #compose(Collection, Throwables.Function, Throwables.Function)
+     * @see #combine(Collection, Throwables.Function)
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
@@ -547,13 +837,25 @@ public final class Futures {
      * Composes a collection of futures with separate functions for regular and timeout operations.
      * This is the most flexible composition method, supporting any number of futures with custom
      * timeout handling. The timeout function receives a Tuple3 containing the collection, timeout value,
-     * and time unit.
+     * and time unit, enabling sophisticated time-aware aggregation strategies.
      *
      * <p>This method is ideal for scenarios where you need to aggregate results from many sources
-     * but want different behavior when operating under time constraints.
+     * but want different behavior when operating under time constraints. It supports patterns like
+     * partial aggregation, best-effort collection, or graceful degradation when coordinating
+     * large numbers of asynchronous operations.
+     *
+     * <p><b>Key Characteristics:</b>
+     * <ul>
+     *   <li><b>Maximum Flexibility:</b> Supports any number of futures with custom coordination logic</li>
+     *   <li><b>Dual Strategies:</b> Different aggregation approaches for unlimited and time-limited scenarios</li>
+     *   <li><b>Partial Results:</b> Can return partial aggregations when some futures haven't completed</li>
+     *   <li><b>Collection Type Preservation:</b> Maintains specific collection type through generics</li>
+     *   <li><b>Best-Effort Processing:</b> Supports gathering available results within time constraints</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Basic partial aggregation under timeout
      * Set<Future<DataPoint>> dataFutures = // ... multiple data source futures
      *
      * ContinuableFuture<Summary> summary = Futures.compose(dataFutures,
@@ -579,22 +881,98 @@ public final class Futures {
      *         }
      *         return computeQuickSummary(available);
      *     });
+     *
+     * // Time-budgeted distributed query aggregation
+     * List<Future<QueryResult>> distributedQueries = servers.stream()
+     *     .map(server -> queryServer(server, query))
+     *     .collect(Collectors.toList());
+     *
+     * ContinuableFuture<AggregatedResult> result = Futures.compose(
+     *     distributedQueries,
+     *     // Full wait for all servers
+     *     futures -> {
+     *         List<QueryResult> results = new ArrayList<>();
+     *         for (Future<QueryResult> f : futures) {
+     *             results.add(f.get());
+     *         }
+     *         return AggregatedResult.complete(results);
+     *     },
+     *     // Time-budgeted collection
+     *     tuple -> {
+     *         Collection<Future<QueryResult>> futures = tuple._1;
+     *         long timeout = tuple._2;
+     *         TimeUnit unit = tuple._3;
+     *
+     *         long timePerQuery = timeout / futures.size();
+     *         List<QueryResult> collected = new ArrayList<>();
+     *
+     *         for (Future<QueryResult> f : futures) {
+     *             try {
+     *                 collected.add(f.get(timePerQuery, unit));
+     *             } catch (TimeoutException e) {
+     *                 // Skip slow servers
+     *             }
+     *         }
+     *
+     *         return AggregatedResult.partial(collected);
+     *     });
+     *
+     * // Priority-based processing with fallback
+     * List<Future<CacheEntry>> cacheChecks = checkMultipleCaches(key);
+     *
+     * ContinuableFuture<CacheEntry> entry = Futures.compose(
+     *     cacheChecks,
+     *     futures -> {
+     *         // Try all caches, return first successful
+     *         for (Future<CacheEntry> f : futures) {
+     *             CacheEntry e = f.get();
+     *             if (e != null) return e;
+     *         }
+     *         return CacheEntry.MISS;
+     *     },
+     *     tuple -> {
+     *         // Under timeout, check caches sequentially with time limit
+     *         long remainingTime = unit.toMillis(tuple._2);
+     *         long startTime = System.currentTimeMillis();
+     *
+     *         for (Future<CacheEntry> f : tuple._1) {
+     *             long elapsed = System.currentTimeMillis() - startTime;
+     *             long timeLeft = remainingTime - elapsed;
+     *
+     *             if (timeLeft <= 0) break;
+     *
+     *             try {
+     *                 CacheEntry e = f.get(timeLeft, TimeUnit.MILLISECONDS);
+     *                 if (e != null) return e;
+     *             } catch (TimeoutException e) {
+     *                 continue;
+     *             }
+     *         }
+     *
+     *         return CacheEntry.MISS;
+     *     });
      * }</pre>
      *
-     * @param <T> the result type of the input futures
-     * @param <FC> the specific collection type containing the futures
-     * @param <R> the result type of the composed future
-     * @param cfs the collection of input futures, must not be {@code null} or empty
-     * @param zipFunctionForGet the function that combines the futures' results
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 with
-     *                              (futures collection, timeout, timeUnit)
-     * @return a ContinuableFuture with custom logic for both regular and timeout operations
-     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is null
+     * @param <T> the result type of the input futures.
+     * @param <FC> the specific collection type containing the futures (e.g., List, Set).
+     * @param <R> the result type of the composed future.
+     * @param cfs the collection of input futures, must not be {@code null} or empty.
+     * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
+     *                         Receives the collection of Future objects. Must not be {@code null}.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 with.
+     *                              (_1: futures collection, _2: timeout value, _3: TimeUnit). Must not be {@code null}.
+     * @return a ContinuableFuture with custom logic for both regular and timeout operations.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is null.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     *                         ExecutionException, or TimeoutException.
+     * @see #compose(Collection, Throwables.Function)
+     * @see Tuple3
+     * @see TimeUnit
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
-        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty"); //NOSONAR
+        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");   //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
 
@@ -606,7 +984,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -694,11 +1072,11 @@ public final class Futures {
      * });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @return a ContinuableFuture containing a Tuple2 with both results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @return a ContinuableFuture containing a Tuple2 with both results.
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -728,13 +1106,13 @@ public final class Futures {
      *     result._1, result._2, result._3);
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @return a ContinuableFuture containing a Tuple3 with all three results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @return a ContinuableFuture containing a Tuple3 with all three results.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -766,15 +1144,15 @@ public final class Futures {
      * });
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <T4> the result type of the fourth future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param cf4 the fourth future
-     * @return a ContinuableFuture containing a Tuple4 with all four results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <T4> the result type of the fourth future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @param cf4 the fourth future.
+     * @return a ContinuableFuture containing a Tuple4 with all four results.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -808,17 +1186,17 @@ public final class Futures {
      * allData.thenAccept(data -> renderDashboard(data));
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <T4> the result type of the fourth future
-     * @param <T5> the result type of the fifth future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param cf4 the fourth future
-     * @param cf5 the fifth future
-     * @return a ContinuableFuture containing a Tuple5 with all five results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <T4> the result type of the fourth future.
+     * @param <T5> the result type of the fifth future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @param cf4 the fourth future.
+     * @param cf5 the fifth future.
+     * @return a ContinuableFuture containing a Tuple5 with all five results.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -852,19 +1230,19 @@ public final class Futures {
      * system.thenAccept(components -> startApplication(components));
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <T4> the result type of the fourth future
-     * @param <T5> the result type of the fifth future
-     * @param <T6> the result type of the sixth future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param cf4 the fourth future
-     * @param cf5 the fifth future
-     * @param cf6 the sixth future
-     * @return a ContinuableFuture containing a Tuple6 with all six results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <T4> the result type of the fourth future.
+     * @param <T5> the result type of the fifth future.
+     * @param <T6> the result type of the sixth future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @param cf4 the fourth future.
+     * @param cf5 the fifth future.
+     * @param cf6 the sixth future.
+     * @return a ContinuableFuture containing a Tuple6 with all six results.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -905,21 +1283,21 @@ public final class Futures {
      * fullProfile.thenAccept(data -> generateComprehensiveReport(data));
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <T4> the result type of the fourth future
-     * @param <T5> the result type of the fifth future
-     * @param <T6> the result type of the sixth future
-     * @param <T7> the result type of the seventh future
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param cf4 the fourth future
-     * @param cf5 the fifth future
-     * @param cf6 the sixth future
-     * @param cf7 the seventh future
-     * @return a ContinuableFuture containing a Tuple7 with all seven results
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <T4> the result type of the fourth future.
+     * @param <T5> the result type of the fifth future.
+     * @param <T6> the result type of the sixth future.
+     * @param <T7> the result type of the seventh future.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @param cf4 the fourth future.
+     * @param cf5 the fifth future.
+     * @param cf6 the sixth future.
+     * @param cf7 the seventh future.
+     * @return a ContinuableFuture containing a Tuple7 with all seven results.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -953,13 +1331,13 @@ public final class Futures {
      * System.out.println("Total with tax: " + totalPrice.get());
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <R> the result type after applying the action
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param action the function to apply to both results. Receives the actual values (not futures)
-     * @return a ContinuableFuture containing the result of applying the action to both values
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <R> the result type after applying the action.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param action the function to apply to both results. Receives the actual values (not futures).
+     * @return a ContinuableFuture containing the result of applying the action to both values.
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) {
@@ -985,15 +1363,15 @@ public final class Futures {
      * System.out.println("Volume: " + volume.get());
      * }</pre>
      *
-     * @param <T1> the result type of the first future
-     * @param <T2> the result type of the second future
-     * @param <T3> the result type of the third future
-     * @param <R> the result type after applying the action
-     * @param cf1 the first future
-     * @param cf2 the second future
-     * @param cf3 the third future
-     * @param action the function to apply to all three results
-     * @return a ContinuableFuture containing the result of applying the action
+     * @param <T1> the result type of the first future.
+     * @param <T2> the result type of the second future.
+     * @param <T3> the result type of the third future.
+     * @param <R> the result type after applying the action.
+     * @param cf1 the first future.
+     * @param cf2 the second future.
+     * @param cf3 the third future.
+     * @param action the function to apply to all three results.
+     * @return a ContinuableFuture containing the result of applying the action.
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
             final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) {
@@ -1020,11 +1398,11 @@ public final class Futures {
      * System.out.println("Team total: " + totalScore.get());
      * }</pre>
      *
-     * @param <T> the result type of the input futures
-     * @param <R> the result type after applying the action
-     * @param cfs the collection of futures to combine
-     * @param action the function to apply to the list of results
-     * @return a ContinuableFuture containing the result of the action
+     * @param <T> the result type of the input futures.
+     * @param <R> the result type after applying the action.
+     * @param cfs the collection of futures to combine.
+     * @param action the function to apply to the list of results.
+     * @return a ContinuableFuture containing the result of the action.
      */
     public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
             final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {
@@ -1061,11 +1439,11 @@ public final class Futures {
      * });
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the array of futures to wait for
+     * @param <T> the result type of the futures.
+     * @param cfs the array of futures to wait for.
      * @return a ContinuableFuture that completes with a list of all results when all input
-     *         futures complete successfully
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     *         futures complete successfully.
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -1100,10 +1478,10 @@ public final class Futures {
      * });
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the collection of futures to wait for
-     * @return a ContinuableFuture that completes with a list of all results
-     * @throws IllegalArgumentException if the collection is {@code null} or empty
+     * @param <T> the result type of the futures.
+     * @param cfs the collection of futures to wait for.
+     * @return a ContinuableFuture that completes with a list of all results.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
         return allOf2(cfs);
@@ -1120,7 +1498,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -1206,13 +1584,13 @@ public final class Futures {
      *     cacheSource, primarySource, secondarySource
      * );
      *
-     * Data result = firstAvailable.get();  // Gets the fastest result
+     * Data result = firstAvailable.get();   // Gets the fastest result
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the array of futures to race
-     * @return a ContinuableFuture that completes with the first successful result
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @param <T> the result type of the futures.
+     * @param cfs the array of futures to race.
+     * @return a ContinuableFuture that completes with the first successful result.
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -1241,10 +1619,10 @@ public final class Futures {
      * });
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the collection of futures to race
-     * @return a ContinuableFuture that completes with the first successful result
-     * @throws IllegalArgumentException if the collection is {@code null} or empty
+     * @param <T> the result type of the futures.
+     * @param cfs the collection of futures to race.
+     * @return a ContinuableFuture that completes with the first successful result.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
         return anyOf2(cfs);
@@ -1261,7 +1639,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -1374,9 +1752,9 @@ public final class Futures {
      * }
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the array of futures to iterate over
-     * @return an iterator that yields results in completion order (first-finished, first-out)
+     * @param <T> the result type of the futures.
+     * @param cfs the array of futures to iterate over.
+     * @return an iterator that yields results in completion order (first-finished, first-out).
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -1408,9 +1786,9 @@ public final class Futures {
      * }
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the collection of futures to iterate over
-     * @return an iterator that yields results in completion order (first-finished, first-out)
+     * @param <T> the result type of the futures.
+     * @param cfs the collection of futures to iterate over.
+     * @return an iterator that yields results in completion order (first-finished, first-out).
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -1447,11 +1825,11 @@ public final class Futures {
      * }
      * }</pre>
      *
-     * @param <T> the result type of the futures
-     * @param cfs the collection of futures to iterate over
-     * @param totalTimeoutForAll the maximum time to wait for all results
-     * @param unit the time unit of the timeout
-     * @return an iterator that yields results in completion order (first-finished, first-out) with timeout enforcement
+     * @param <T> the result type of the futures.
+     * @param cfs the collection of futures to iterate over.
+     * @param totalTimeoutForAll the maximum time to wait for all results.
+     * @param unit the time unit of the timeout.
+     * @return an iterator that yields results in completion order (first-finished, first-out) with timeout enforcement.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
@@ -1506,11 +1884,11 @@ public final class Futures {
      * }
      * }</pre>
      *
-     * @param <T> the result type of the input futures
-     * @param <R> the result type after transformation
-     * @param cfs the collection of futures to iterate over
-     * @param resultHandler the function to transform Result objects into desired output type
-     * @return an iterator that yields transformed results in completion order (first-finished, first-out)
+     * @param <T> the result type of the input futures.
+     * @param <R> the result type after transformation.
+     * @param cfs the collection of futures to iterate over.
+     * @param resultHandler the function to transform Result objects into desired output type.
+     * @return an iterator that yields transformed results in completion order (first-finished, first-out).
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -1551,13 +1929,13 @@ public final class Futures {
      * }
      * }</pre>
      *
-     * @param <T> the result type of the input futures
-     * @param <R> the result type after transformation
-     * @param cfs the collection of futures to iterate over
-     * @param totalTimeoutForAll the maximum time to wait for all results
-     * @param unit the time unit of the timeout
-     * @param resultHandler the function to transform Result objects, including timeout handling
-     * @return an iterator that yields transformed results in completion order (first-finished, first-out) with timeout enforcement
+     * @param <T> the result type of the input futures.
+     * @param <R> the result type after transformation.
+     * @param cfs the collection of futures to iterate over.
+     * @param totalTimeoutForAll the maximum time to wait for all results.
+     * @param unit the time unit of the timeout.
+     * @param resultHandler the function to transform Result objects, including timeout handling.
+     * @return an iterator that yields transformed results in completion order (first-finished, first-out) with timeout enforcement.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -1621,6 +1999,59 @@ public final class Futures {
         };
     }
 
+    /**
+     * Converts an ExecutionException to its underlying cause exception if the cause is an Exception.
+     * This utility method unwraps ExecutionExceptions to provide cleaner exception handling in
+     * future composition operations. If the exception is not an ExecutionException or its cause
+     * is not an Exception, the original exception is returned unchanged.
+     *
+     * <p>This method is used internally throughout the Futures utility to provide more meaningful
+     * exception information when futures fail, avoiding nested ExecutionException wrappers that
+     * can obscure the actual failure cause. It simplifies error handling by exposing the root
+     * cause directly.
+     *
+     * <p><b>Conversion Rules:</b>
+     * <ul>
+     *   <li>If {@code e} is an {@link ExecutionException} and its cause is an Exception, returns the cause</li>
+     *   <li>If {@code e} is an {@link ExecutionException} but its cause is not an Exception (e.g., Error), returns {@code e} unchanged</li>
+     *   <li>If {@code e} is not an {@link ExecutionException}, returns {@code e} unchanged</li>
+     *   <li>If {@code e} is {@code null}, behavior is undefined (should not occur in normal usage)</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Example 1: ExecutionException with Exception cause
+     * ExecutionException ex1 = new ExecutionException(new IOException("Network error"));
+     * Exception converted1 = Futures.convertException(ex1);
+     * // converted1 is the IOException, not the ExecutionException
+     *
+     * // Example 2: ExecutionException with Error cause (not converted)
+     * ExecutionException ex2 = new ExecutionException(new OutOfMemoryError());
+     * Exception converted2 = Futures.convertException(ex2);
+     * // converted2 is still the ExecutionException (cause is not an Exception)
+     *
+     * // Example 3: Non-ExecutionException (passed through)
+     * RuntimeException ex3 = new IllegalArgumentException("Invalid argument");
+     * Exception converted3 = Futures.convertException(ex3);
+     * // converted3 is the same IllegalArgumentException
+     *
+     * // Internal usage in Futures methods
+     * try {
+     *     future.get();
+     * } catch (Exception e) {
+     *     Exception unwrapped = Futures.convertException(e);
+     *     // unwrapped is now the actual cause, not the ExecutionException wrapper
+     *     handleException(unwrapped);
+     * }
+     * }</pre>
+     *
+     * @param e the exception to convert, typically from a Future.get() call. Should not be {@code null}.
+     * @return the unwrapped exception if {@code e} is an ExecutionException with an Exception cause,
+     *         otherwise returns {@code e} unchanged. Never returns {@code null} if {@code e} is not {@code null}.
+     * @see ExecutionException
+     * @see Future#get()
+     * @see Throwable#getCause()
+     */
     static Exception convertException(final Exception e) {
         if (e instanceof ExecutionException && e.getCause() instanceof Exception ex) {
             return ex;

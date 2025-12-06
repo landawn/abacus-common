@@ -36,22 +36,26 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     public static final String TIMESTAMP = Timestamp.class.getSimpleName();
 
+    /**
+     * Constructs a TimestampType instance with the default type name.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     TimestampType() {
         super(TIMESTAMP);
     }
 
+    /**
+     * Constructs a TimestampType instance with the specified type name.
+     * This constructor is package-private and should only be called by TypeFactory or subclasses.
+     *
+     * @param typeName the name to use for this type
+     */
     TimestampType(final String typeName) {
         super(typeName);
     }
 
     /**
      * Returns the Java class that this type handler manages.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
-     * Class<Timestamp> clazz = type.clazz();  // Returns Timestamp.class
-     * }</pre>
      *
      * @return {@code Timestamp.class}
      */

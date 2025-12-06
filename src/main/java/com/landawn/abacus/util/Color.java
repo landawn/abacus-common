@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Color myColor = Color.RED;
- * int colorCode = myColor.intValue();  // returns 2
- * Color fromCode = Color.valueOf(2);  // returns Color.RED
+ * int colorCode = myColor.intValue();   // returns 2
+ * Color fromCode = Color.valueOf(2);   // returns Color.RED
  * }</pre>
  * 
  * @see WeekDay
@@ -94,7 +94,7 @@ public enum Color {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Color color = Color.BLUE;
-     * int value = color.intValue();  // returns 7
+     * int value = color.intValue();   // returns 7
      * }</pre>
      * 
      * @return the integer value representing this color (0-8)

@@ -74,6 +74,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final JSONDeserializationConfig jdc;
 
+    /**
+     * Constructs an ObjectArrayType for the specified array class.
+     * This constructor initializes the type handler by extracting the element type from the array class.
+     *
+     * @param arrayClass the array class to create a type handler for (e.g., String[].class)
+     */
     ObjectArrayType(final Class<T[]> arrayClass) {
         super(ClassUtil.getCanonicalClassName(arrayClass));
 
@@ -84,6 +90,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         jdc = JDC.create().setElementType(elementType);
     }
 
+    /**
+     * Constructs an ObjectArrayType for the specified element type.
+     * This constructor initializes the type handler by creating an array type from the element type.
+     *
+     * @param elementType the Type handler for the array's element type
+     */
     ObjectArrayType(final Type<T> elementType) {
         super(elementType.name() + "[]");
 
@@ -222,7 +234,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

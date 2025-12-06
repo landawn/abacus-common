@@ -36,10 +36,10 @@ public interface ToFloatBiFunction<T, U> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToFloatBiFunction<Integer, Integer> divider = (a, b) -> (float) a / b;
-     * float result = divider.applyAsFloat(10, 3);  // returns 3.3333333
+     * float result = divider.applyAsFloat(10, 3);   // returns 3.3333333
      *
      * ToFloatBiFunction<String, Float> multiplier = (str, factor) -> str.length() * factor;
-     * float weighted = multiplier.applyAsFloat("Hello", 1.5f);  // returns 7.5
+     * float weighted = multiplier.applyAsFloat("Hello", 1.5f);   // returns 7.5
      * }</pre>
      *
      * @param t the first function argument

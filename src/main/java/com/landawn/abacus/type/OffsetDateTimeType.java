@@ -39,6 +39,10 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 
+    /**
+     * Constructs an OffsetDateTimeType.
+     * This constructor initializes the type handler for OffsetDateTime objects.
+     */
     OffsetDateTimeType() {
         super(OFFSET_DATE_TIME);
     }

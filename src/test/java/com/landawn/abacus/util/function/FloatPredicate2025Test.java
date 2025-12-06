@@ -169,8 +169,8 @@ public class FloatPredicate2025Test extends TestBase {
     public void testBetween() {
         final FloatPredicate predicate = FloatPredicate.between(10.0f, 20.0f);
         assertTrue(predicate.test(15.0f));
-        assertFalse(predicate.test(10.0f)); // exclusive
-        assertFalse(predicate.test(20.0f)); // exclusive
+        assertFalse(predicate.test(10.0f));   // exclusive
+        assertFalse(predicate.test(20.0f));   // exclusive
     }
 
     @Test

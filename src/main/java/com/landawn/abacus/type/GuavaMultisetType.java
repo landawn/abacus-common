@@ -72,6 +72,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * The declaring name represents the type in a format suitable for type declarations,
      * using canonical class names with type parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * String declaringName = type.declaringName();
+     * // Returns: "com.google.common.collect.Multiset<java.lang.String>"
+     * }</pre>
+     *
      * @return the declaring name of this type (e.g., "com.google.common.collect.Multiset&lt;String&gt;")
      */
     @Override
@@ -82,6 +89,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     /**
      * Returns the Class object representing the multiset type handled by this type handler.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HashMultiset<String>> type = TypeFactory.getType("HashMultiset<String>");
+     * Class<?> clazz = type.clazz();
+     * // Returns: HashMultiset.class
+     * }</pre>
+     *
      * @return the Class object for the multiset type
      */
     @Override
@@ -91,6 +105,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
     /**
      * Returns the type handler for the elements contained in this multiset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * Type<String> elementType = type.getElementType();
+     * // Returns: Type instance for String
+     * }</pre>
      *
      * @return the Type instance representing the element type of this multiset
      */
@@ -103,6 +124,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Returns an array containing the parameter types of this generic multiset type.
      * For multiset types, this array contains a single element representing the element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // Returns: [Type<String>]
+     * }</pre>
+     *
      * @return an array containing the element type as the only parameter type
      */
     @Override
@@ -110,6 +138,12 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * Multiset types are always generic types as they have an element type parameter.
+     *
+     * @return {@code true}, as Multiset is a generic type
+     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -118,6 +152,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     /**
      * Indicates whether instances of this type can be serialized.
      * Guava multisets are serializable through their Map representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * boolean serializable = type.isSerializable();
+     * // Returns: true
+     * }</pre>
      *
      * @return {@code true}, as multisets can be serialized
      */
@@ -130,6 +171,19 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Converts a multiset to its string representation.
      * The multiset is serialized as a JSON object where each element maps to its count.
      * For ordered multisets (LinkedHashMultiset, TreeMultiset), the order is preserved using LinkedHashMap.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * Multiset<String> multiset = HashMultiset.create();
+     * multiset.add("apple", 3);
+     * multiset.add("banana", 2);
+     * String result = type.stringOf(multiset);
+     * // Returns: {"apple":3,"banana":2}
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
      *
      * @param x the multiset to convert to string
      * @return the JSON string representation of the multiset as a map of elements to counts, or {@code null} if the input is null
@@ -154,6 +208,19 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * The string should be in JSON format representing a Map&lt;E, Integer&gt; where values are element counts.
      * Creates the appropriate multiset implementation based on the type class.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+     * Multiset<String> result = type.valueOf("{\"apple\":3,\"banana\":2}");
+     * // Returns: Multiset with apple (count=3), banana (count=2)
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
+     *
      * @param str the JSON string to parse
      * @return a new multiset instance containing the parsed elements with their counts, or {@code null} if the input is {@code null} or empty
      */
@@ -177,6 +244,17 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     /**
      * Generates a type name string for a multiset type with the specified element type.
      * The format depends on whether a declaring name or full name is requested.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String typeName = GuavaMultisetType.getTypeName(
+     *     Multiset.class, "String", false);
+     * // Returns: "com.google.common.collect.Multiset<String>"
+     *
+     * String declaringName = GuavaMultisetType.getTypeName(
+     *     Multiset.class, "String", true);
+     * // Returns: "com.google.common.collect.Multiset<java.lang.String>"
+     * }</pre>
      *
      * @param typeClass the multiset class
      * @param parameterTypeName the name of the element type

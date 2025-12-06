@@ -55,6 +55,14 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple3Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     */
     Tuple3Type(final String t1TypeName, final String t2TypeName, final String t3TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, false));
 
@@ -113,6 +121,13 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      * Converts the given Tuple3 object to its string representation.
      * The tuple is serialized as a JSON array containing its three elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple3<String, Integer, Double>> type = TypeFactory.getType("Tuple3<String, Integer, Double>");
+     * Tuple3<String, Integer, Double> tuple = Tuple.of("Bob", 25, 175.5);
+     * String str = type.stringOf(tuple);   // Returns ["Bob", 25, 175.5]
+     * }</pre>
+     *
      * @param x the Tuple3 object to convert
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
@@ -125,6 +140,13 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      * Parses the given string into a Tuple3 object.
      * The string should be a JSON array representation with exactly three elements.
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple3<String, Integer, Double>> type = TypeFactory.getType("Tuple3<String, Integer, Double>");
+     * Tuple3<String, Integer, Double> tuple = type.valueOf("[\"Bob\", 25, 175.5]");
+     * // tuple._1 = "Bob", tuple._2 = 25, tuple._3 = 175.5
+     * }</pre>
      *
      * @param str the JSON string to parse
      * @return a Tuple3 object parsed from the string, or {@code null} if str is empty
@@ -161,7 +183,7 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

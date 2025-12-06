@@ -44,6 +44,15 @@ public interface FloatToLongFunction {
      * <p>The implementation should define how the float value is transformed into a long value.
      * Common implementations include truncation, rounding, or custom mapping logic.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatToLongFunction truncate = value -> (long) value;
+     * long result = truncate.applyAsLong(3.14f); // Returns 3L
+     *
+     * FloatToLongFunction round = value -> Math.round(value);
+     * long rounded = round.applyAsLong(3.7f); // Returns 4L
+     * }</pre>
+     *
      * @param value the float function argument
      * @return the long function result
      */

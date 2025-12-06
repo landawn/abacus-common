@@ -125,6 +125,8 @@ public final class Ascii {
      * have the meaning "New Line" (NL), a format effector which controls the movement of the printing
      * point to the first printing position on the next printing line. Use of this convention requires
      * agreement between sender and recipient of data.
+     *
+     * @see #NL
      */
     public static final byte LF = 10;
 
@@ -178,13 +180,20 @@ public final class Ascii {
      * processing or telecommunication systems, more especially switching devices "on" or "off." (If a
      * single "stop" control is required to interrupt or turn off ancillary devices, DC4 is the
      * preferred assignment.)
+     *
+     * <p>Also known as {@link #XON} in the context of software flow control.
+     *
+     * @see #XON
      */
     public static final byte DC1 = 17; // aka XON
 
     /**
-     * Transmission On: Although originally defined as DC1, this ASCII control character is now better
+     * Transmission On: Although originally defined as {@link #DC1}, this ASCII control character is now better
      * known as the XON code used for software flow control in serial communications. The main use is
-     * restarting the transmission after the communication has been stopped by the XOFF control code.
+     * restarting the transmission after the communication has been stopped by the {@link #XOFF} control code.
+     *
+     * @see #DC1
+     * @see #XOFF
      */
     public static final byte XON = 17; // aka DC1
 

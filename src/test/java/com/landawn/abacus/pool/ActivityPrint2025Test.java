@@ -83,7 +83,7 @@ public class ActivityPrint2025Test extends TestBase {
 
         ActivityPrint result = print.setLiveTime(15000);
 
-        assertEquals(print, result); // returns this for chaining
+        assertEquals(print, result);   // returns this for chaining
         assertEquals(15000, print.getLiveTime());
     }
 
@@ -118,7 +118,7 @@ public class ActivityPrint2025Test extends TestBase {
 
         ActivityPrint result = print.setMaxIdleTime(7500);
 
-        assertEquals(print, result); // returns this for chaining
+        assertEquals(print, result);   // returns this for chaining
         assertEquals(7500, print.getMaxIdleTime());
     }
 

@@ -34,10 +34,10 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharUnaryOperator toUpperCase = c -> Character.toUpperCase(c);
-     * char result = toUpperCase.applyAsChar('a');  // Returns 'A'
+     * char result = toUpperCase.applyAsChar('a');   // Returns 'A'
      *
      * CharUnaryOperator nextChar = c -> (char) (c + 1);
-     * char next = nextChar.applyAsChar('A');  // Returns 'B'
+     * char next = nextChar.applyAsChar('A');   // Returns 'B'
      * }</pre>
      *
      * @param operand the char operand
@@ -56,7 +56,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * CharUnaryOperator toLowerCase = c -> Character.toLowerCase(c);
      * CharUnaryOperator rotateByOne = c -> (char) (c + 1);
      * CharUnaryOperator composed = rotateByOne.compose(toLowerCase);
-     * char result = composed.applyAsChar('A');  // Returns 'b' (toLower then rotate)
+     * char result = composed.applyAsChar('A');   // Returns 'b' (toLower then rotate)
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
@@ -79,7 +79,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * CharUnaryOperator toUpperCase = c -> Character.toUpperCase(c);
      * CharUnaryOperator rotateByOne = c -> (char) (c + 1);
      * CharUnaryOperator combined = toUpperCase.andThen(rotateByOne);
-     * char result = combined.applyAsChar('a');  // Returns 'B' (toUpper then rotate)
+     * char result = combined.applyAsChar('a');   // Returns 'B' (toUpper then rotate)
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
@@ -99,7 +99,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharUnaryOperator identity = CharUnaryOperator.identity();
-     * char result = identity.applyAsChar('X');  // Returns 'X'
+     * char result = identity.applyAsChar('X');   // Returns 'X'
      * }</pre>
      *
      * @return a unary operator that always returns its input argument

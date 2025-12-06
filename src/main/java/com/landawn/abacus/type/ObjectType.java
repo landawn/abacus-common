@@ -33,6 +33,12 @@ public final class ObjectType<T> extends SingleValueType<T> {
         this((Class<T>) Object.class);
     }
 
+    /**
+     * Constructs an ObjectType with a specific class.
+     * This constructor creates a type handler for a specific class type.
+     *
+     * @param cls the class to create a type handler for
+     */
     protected ObjectType(final Class<T> cls) {
         super(cls);
     }

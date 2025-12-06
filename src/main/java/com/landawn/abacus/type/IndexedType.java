@@ -96,6 +96,19 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * Converts an Indexed object to its string representation.
      * The indexed value is serialized as a JSON array with two elements: [index, value].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
+     * Indexed<String> indexed = Indexed.of("hello", 5);
+     * String result = type.stringOf(indexed);
+     * // Returns: [5,"hello"]
+     *
+     * Type<Indexed<Integer>> intType = TypeFactory.getType("Indexed<Integer>");
+     * Indexed<Integer> intIndexed = Indexed.of(42, 0);
+     * result = intType.stringOf(intIndexed);
+     * // Returns: [0,42]
+     * }</pre>
+     *
      * @param x the Indexed object to convert to string
      * @return the JSON array representation "[index,value]", or {@code null} if the input is null
      */
@@ -109,6 +122,17 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * The string should be in JSON array format with exactly two elements: [index, value].
      * The first element is converted to a long index, and the second element is parsed
      * according to the value type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
+     * Indexed<String> indexed = type.valueOf("[5,\"hello\"]");
+     * // indexed.index() returns 5, indexed.value() returns "hello"
+     *
+     * Type<Indexed<Integer>> intType = TypeFactory.getType("Indexed<Integer>");
+     * Indexed<Integer> intIndexed = intType.valueOf("[0,42]");
+     * // intIndexed.index() returns 0, intIndexed.value() returns 42
+     * }</pre>
      *
      * @param str the JSON array string to parse (e.g., "[0,\"hello\"]")
      * @return a new Indexed instance with the parsed index and value, or {@code null} if the input is {@code null} or empty
@@ -131,6 +155,15 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     /**
      * Appends the string representation of an Indexed object to an Appendable.
      * The output format is a JSON array: [index,value].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
+     * StringBuilder sb = new StringBuilder();
+     * Indexed<String> indexed = Indexed.of("hello", 5);
+     * type.appendTo(sb, indexed);
+     * // sb contains: [5,"hello"]
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the Indexed object to append
@@ -155,6 +188,17 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * Writes the character representation of an Indexed object to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
      * The indexed value is serialized as a JSON array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * Indexed<String> indexed = Indexed.of("hello", 5);
+     * type.writeCharacter(writer, indexed, config);
+     * String result = writer.toString();
+     * // result: [5,"hello"]
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the Indexed object to write

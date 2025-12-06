@@ -46,7 +46,7 @@ public class ShortSupplier2025Test extends TestBase {
         // Very unlikely all three random values are the same
         // (though technically possible, probability is extremely low)
         boolean allDifferent = (value1 != value2 || value2 != value3 || value1 != value3);
-        assertTrue(allDifferent || value1 == value2); // Just verify it doesn't throw
+        assertTrue(allDifferent || value1 == value2);   // Just verify it doesn't throw
     }
 
     @Test
@@ -112,6 +112,6 @@ public class ShortSupplier2025Test extends TestBase {
         assertEquals(10, supplier.getAsShort());
         assertEquals(20, supplier.getAsShort());
         assertEquals(30, supplier.getAsShort());
-        assertEquals(10, supplier.getAsShort()); // Wraps around
+        assertEquals(10, supplier.getAsShort());   // Wraps around
     }
 }

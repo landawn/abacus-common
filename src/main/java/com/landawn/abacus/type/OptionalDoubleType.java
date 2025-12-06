@@ -26,6 +26,11 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = OptionalDouble.class.getSimpleName();
 
+    /**
+     * Constructs a new OptionalDoubleType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected OptionalDoubleType() {
         super(OPTIONAL_DOUBLE);
     }
@@ -203,6 +208,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * Connection connection = ...;  // obtained from database connection
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO products (id, price) VALUES (?, ?)");
      *
@@ -236,6 +242,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * Connection connection = ...;  // obtained from database connection
      * CallableStatement stmt = connection.prepareCall("{call update_price(?, ?)}");
      *
      * OptionalDouble opt = OptionalDouble.of(149.99);

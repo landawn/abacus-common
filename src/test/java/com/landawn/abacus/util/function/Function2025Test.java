@@ -48,7 +48,7 @@ public class Function2025Test extends TestBase {
         Function<Integer, String> composed = toString.compose(doubleIt);
         String result = composed.apply(5);
 
-        assertEquals("10", result); // doubleIt first: 5*2=10, then toString: "10"
+        assertEquals("10", result);   // doubleIt first: 5*2=10, then toString: "10"
     }
 
     @Test
@@ -59,7 +59,7 @@ public class Function2025Test extends TestBase {
         Function<String, Integer> composed = length.andThen(doubleIt);
         Integer result = composed.apply("hello");
 
-        assertEquals(10, result); // "hello".length() = 5, then 5 * 2 = 10
+        assertEquals(10, result);   // "hello".length() = 5, then 5 * 2 = 10
     }
 
     @Test
@@ -71,7 +71,7 @@ public class Function2025Test extends TestBase {
         Function<Integer, Integer> composed = subtract3.compose(multiplyBy2).compose(add1);
         Integer result = composed.apply(5);
 
-        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9, result);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test
@@ -83,7 +83,7 @@ public class Function2025Test extends TestBase {
         Function<Integer, Integer> composed = add1.andThen(multiplyBy2).andThen(subtract3);
         Integer result = composed.apply(5);
 
-        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
+        assertEquals(9, result);   // ((5 + 1) * 2) - 3 = 9
     }
 
     @Test

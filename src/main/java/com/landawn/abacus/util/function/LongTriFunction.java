@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * LongTriFunction<String> formatter = (a, b, c) ->
  *     String.format("(%d, %d, %d)", a, b, c);
- * String result = formatter.apply(10L, 20L, 30L);  // returns "(10, 20, 30)"
+ * String result = formatter.apply(10L, 20L, 30L);   // returns "(10, 20, 30)"
  *
  * LongTriFunction<Long> median = (a, b, c) -> {
  *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
@@ -84,7 +84,7 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      * LongTriFunction<Long> sum = (a, b, c) -> a + b + c;
      * Function<Long, String> format = n -> "Result: " + n;
      * LongTriFunction<String> composed = sum.andThen(format);
-     * String result = composed.apply(10L, 20L, 30L);  // returns "Result: 60"
+     * String result = composed.apply(10L, 20L, 30L);   // returns "Result: 60"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

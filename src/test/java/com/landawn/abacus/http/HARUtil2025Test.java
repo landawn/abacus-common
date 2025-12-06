@@ -171,7 +171,7 @@ public class HARUtil2025Test extends TestBase {
         HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
         assertNotNull(headers);
         assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals(null, headers.get("Authorization")); // Should be filtered out
+        assertEquals(null, headers.get("Authorization"));   // Should be filtered out
     }
 
     @Test

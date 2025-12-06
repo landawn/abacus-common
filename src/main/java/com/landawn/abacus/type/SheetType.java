@@ -37,6 +37,14 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     /**
      * Constructs a SheetType with the specified type names for row keys, column keys, and values.
+     * This constructor initializes a parameterized Sheet type handler for a specific combination
+     * of row key, column key, and element types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a SheetType for Sheet<String, String, Integer>
+     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * }</pre>
      *
      * @param rowKeyTypeName the type name for row keys
      * @param columnKeyTypeName the type name for column keys
@@ -56,6 +64,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Returns the declaring name of this type, which includes the Sheet class name
      * and its parameterized types in angle brackets using declaring names.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * String declName = type.declaringName();
+     * // Returns: "Sheet<String, String, Integer>"
+     * }</pre>
+     *
      * @return the declaring name in the format "Sheet&lt;RowType, ColumnType, ElementType&gt;"
      */
     @Override
@@ -65,6 +80,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     /**
      * Returns the Class object representing the Sheet type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * Class<Sheet<String, String, Object>> clazz = type.clazz();
+     * // clazz represents Sheet.class
+     * }</pre>
      *
      * @return the Class object for Sheet.class
      */
@@ -77,6 +99,15 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Returns an array containing the Type instances for the parameter types of this Sheet.
      * The array contains three elements: row key type, column key type, and element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, Integer, Double> type = new SheetType<>("String", "Integer", "Double");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // paramTypes[0] is Type for String (row keys)
+     * // paramTypes[1] is Type for Integer (column keys)
+     * // paramTypes[2] is Type for Double (elements)
+     * }</pre>
+     *
      * @return an array with Type instances for row key, column key, and element types
      */
     @Override
@@ -87,6 +118,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      * Indicates whether this type is a generic type.
      * SheetType is always generic as it is parameterized with three type parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * boolean isGeneric = type.isGenericType();
+     * // isGeneric is true
+     * }</pre>
      *
      * @return {@code true}, indicating this is a generic type
      */
@@ -99,6 +137,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Indicates whether this type is serializable.
      * SheetType does not support standard serialization.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * boolean serializable = type.isSerializable();
+     * // serializable is false
+     * }</pre>
+     *
      * @return {@code false}, indicating this type is not serializable
      */
     @Override
@@ -106,6 +151,18 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         return false;
     }
 
+    /**
+     * Returns the serialization type classification for Sheet objects.
+     * This identifies the type as SHEET, which indicates specialized sheet-based serialization handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Sheet<String, String, Object>> type = TypeFactory.getType("Sheet<String, String, Object>");
+     * SerializationType serType = type.getSerializationType();   // Returns SerializationType.SHEET
+     * }</pre>
+     *
+     * @return {@link SerializationType#SHEET}, indicating this type uses sheet-based serialization
+     */
     @Override
     public SerializationType getSerializationType() {
         return SerializationType.SHEET;
@@ -114,6 +171,19 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      * Converts a Sheet to its JSON string representation.
      * The sheet structure is serialized maintaining the row-column-value relationships.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * Sheet<String, String, Integer> sheet = new Sheet<>();
+     * sheet.put("row1", "col1", 100);
+     * sheet.put("row1", "col2", 200);
+     * String json = type.stringOf(sheet);
+     * // Returns JSON representation of the sheet
+     *
+     * String nullStr = type.stringOf(null);
+     * // Returns null
+     * }</pre>
      *
      * @param x the Sheet to convert to string
      * @return the JSON string representation of the sheet, or {@code null} if the input is null
@@ -127,6 +197,17 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      * Parses a JSON string representation and returns the corresponding Sheet object.
      * The string should represent a valid sheet structure with row keys, column keys, and values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * String json = "{\"row1\":{\"col1\":100,\"col2\":200}}";
+     * Sheet<String, String, Integer> sheet = type.valueOf(json);
+     * // sheet contains the parsed structure
+     *
+     * Sheet<String, String, Integer> nullSheet = type.valueOf(null);
+     * // nullSheet is null
+     * }</pre>
      *
      * @param str the JSON string to parse
      * @return the parsed Sheet object, or {@code null} if the input string is {@code null} or empty

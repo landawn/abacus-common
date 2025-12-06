@@ -43,11 +43,11 @@ import java.util.concurrent.TimeUnit;
  * <pre>{@code
  * Stopwatch stopwatch = Stopwatch.createStarted();
  * doSomething();
- * stopwatch.stop();  // optional
+ * stopwatch.stop();   // optional
  *
  * Duration duration = stopwatch.elapsed();
  *
- * log.info("time: " + stopwatch);  // formatted string like "12.3 ms"
+ * log.info("time: " + stopwatch);   // formatted string like "12.3 ms"
  * }</pre>
  *
  * <p>Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is
@@ -213,9 +213,9 @@ public final class Stopwatch {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * stopwatch.stop();
-     * Duration duration = stopwatch.elapsed();  // Time when stopped
+     * Duration duration = stopwatch.elapsed();   // Time when stopped
      * Thread.sleep(1000);
-     * Duration sameDuration = stopwatch.elapsed();  // Still the same time
+     * Duration sameDuration = stopwatch.elapsed();   // Still the same time
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining
@@ -309,7 +309,7 @@ public final class Stopwatch {
     /**
      * Returns a string representation of the current elapsed time.
      * The string uses the most appropriate unit and shows up to 4 significant figures.
-     * 
+     *
      * <p>Example outputs:</p>
      * <ul>
      *   <li>{@code "38.0 ns"} for 38 nanoseconds</li>
@@ -320,6 +320,13 @@ public final class Stopwatch {
      *   <li>{@code "1.500 h"} for 90 minutes</li>
      *   <li>{@code "2.000 d"} for 48 hours</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Stopwatch stopwatch = Stopwatch.createStarted();
+     * doSomething();
+     * System.out.println("Time elapsed: " + stopwatch);   // e.g., "Time elapsed: 12.34 ms"
+     * }</pre>
      *
      * @return a string representation of the elapsed time with appropriate unit
      */

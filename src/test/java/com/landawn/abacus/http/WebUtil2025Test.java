@@ -271,7 +271,7 @@ public class WebUtil2025Test extends TestBase {
         // Should not add another Content-Type header
         int firstIndex = result.indexOf("Content-Type");
         int lastIndex = result.lastIndexOf("Content-Type");
-        assertEquals(firstIndex, lastIndex); // Only one occurrence
+        assertEquals(firstIndex, lastIndex);   // Only one occurrence
     }
 
     @Test

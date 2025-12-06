@@ -75,7 +75,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatPredicate isPositive = value -> value > 0.0f;
-     * boolean result = isPositive.test(3.14f);  // Returns true
+     * boolean result = isPositive.test(3.14f);   // Returns true
      * }</pre>
      *
      * @param value the float value to test

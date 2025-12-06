@@ -41,6 +41,15 @@ public interface FloatToDoubleFunction {
      * Common implementations include widening conversion, mathematical transformations,
      * or value mapping.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatToDoubleFunction toDouble = value -> value;
+     * double result = toDouble.applyAsDouble(3.14f); // Returns 3.14 as double
+     *
+     * FloatToDoubleFunction squared = value -> value * value;
+     * double square = squared.applyAsDouble(5.0f); // Returns 25.0
+     * }</pre>
+     *
      * @param value the float function argument
      * @return the double function result
      */

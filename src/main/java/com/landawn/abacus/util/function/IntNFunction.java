@@ -51,7 +51,7 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
      *     for (int value : args) total += value;
      *     return total;
      * };
-     * Integer result = sum.apply(1, 2, 3, 4, 5);  // Returns 15
+     * Integer result = sum.apply(1, 2, 3, 4, 5);   // Returns 15
      * }</pre>
      *
      * @param args the function arguments as a variable-length array of {@code int} values.
@@ -70,7 +70,7 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
      * <pre>{@code
      * IntNFunction<Integer> sum = args -> Arrays.stream(args).sum();
      * IntNFunction<String> sumAsString = sum.andThen(String::valueOf);
-     * String result = sumAsString.apply(1, 2, 3);  // "6"
+     * String result = sumAsString.apply(1, 2, 3);   // "6"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

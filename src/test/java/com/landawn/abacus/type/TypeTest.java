@@ -11,7 +11,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -215,7 +214,10 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_valueOf() throws Exception {
-        List<Type<Object>> types = TypeFactory.getType(byte.class, short.class, int.class, long.class);
+        List<Type<Object>> types = N.asList(byte.class, short.class, int.class, long.class)
+                .stream()
+                .map(cls -> TypeFactory.getType(cls))
+                .toList();
 
         Map<Class<?>, Object[]> rangValues = N.asMap(byte.class, N.asArray(Byte.MIN_VALUE, Byte.MAX_VALUE), short.class,
                 N.asArray(Short.MIN_VALUE, Short.MAX_VALUE), int.class, N.asArray(-1000000, 1000000), long.class, N.asArray(-1000000, 1000000));
@@ -1091,37 +1093,37 @@ public class TypeTest extends AbstractTest {
         }).printResult();
     }
 
-    @Test
-    public void test_byte() {
-        List<Type<Number>> types = TypeFactory.getType(byte.class, short.class, int.class, long.class, float.class, double.class);
-        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
-
-        for (Type type : types) {
-            for (String str : strs) {
-                N.println(type.valueOf(str));
-            }
-        }
-    }
-
-    @Test
-    public void test_byte_2() {
-        List<Type<Number>> types = TypeFactory.getType(Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class);
-        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
-
-        for (Type type : types) {
-            for (String str : strs) {
-                N.println(type.valueOf(str));
-            }
-        }
-    }
+    //    @Test
+    //    public void test_byte() {
+    //        List<Type<Number>> types = TypeFactory.getType(byte.class, short.class, int.class, long.class, float.class, double.class);
+    //        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
+    //
+    //        for (Type type : types) {
+    //            for (String str : strs) {
+    //                N.println(type.valueOf(str));
+    //            }
+    //        }
+    //    }
+    //
+    //    @Test
+    //    public void test_byte_2() {
+    //        List<Type<Number>> types = TypeFactory.getType(Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class);
+    //        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
+    //
+    //        for (Type type : types) {
+    //            for (String str : strs) {
+    //                N.println(type.valueOf(str));
+    //            }
+    //        }
+    //    }
 
     @Test
     public void test_TypeFactory() {
-        N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
+        // N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
 
-        List<Class<?>> classes = N.asList(Long.class, long.class, int.class, Timestamp.class);
+        //    List<Class<?>> classes = N.asList(Long.class, long.class, int.class, Timestamp.class); 
+        //    N.println(TypeFactory.getType(classes));
 
-        N.println(TypeFactory.getType(classes));
         N.println(TypeFactory.getType("List<String>").name());
         N.println(TypeFactory.getType("ArrayList<String>").name());
         N.println(TypeFactory.getType("Set<String>").name());

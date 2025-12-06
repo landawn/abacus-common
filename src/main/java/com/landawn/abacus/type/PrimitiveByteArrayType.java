@@ -45,6 +45,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     private final Type<Byte> elementType;
     private final Type<Byte>[] parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveByteArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveByteArrayType() {
         super(BYTE_ARRAY);
 
@@ -167,7 +171,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 try {
                     blob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);   //NOSONAR
                 }
             }
         } else {

@@ -38,6 +38,15 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * Common implementations include mathematical operations like negation,
      * absolute value, or other unary transformations.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatUnaryOperator negate = x -> -x;
+     * float result = negate.applyAsFloat(5.0f); // Returns -5.0
+     *
+     * FloatUnaryOperator square = x -> x * x;
+     * float squared = square.applyAsFloat(3.0f); // Returns 9.0
+     * }</pre>
+     *
      * @param operand the float operand
      * @return the float result of applying this operator
      */
@@ -50,7 +59,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
      *
@@ -66,7 +75,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
      *

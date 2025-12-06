@@ -40,6 +40,11 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     /** Pre-configured Joda DateTimeFormatter for ISO 8601 timestamp format */
     protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_TIMESTAMP_FORMAT);
 
+    /**
+     * Constructs an AbstractJodaDateTimeType with the specified type name.
+     *
+     * @param typeName the name of the Joda DateTime type (e.g., "DateTime", "Instant")
+     */
     protected AbstractJodaDateTimeType(final String typeName) {
         super(typeName);
     }

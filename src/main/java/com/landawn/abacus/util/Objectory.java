@@ -59,7 +59,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *     sb.append("Hello").append(" ").append("World");
  *     return sb.toString();
  * } finally {
- *     Objectory.recycle(sb);  // Return to pool for reuse
+ *     Objectory.recycle(sb);   // Return to pool for reuse
  * }
  * }</pre>
  * 
@@ -532,7 +532,7 @@ public final class Objectory {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedWriter"); //NOSONAR
+            logCreated("createBufferedWriter");   //NOSONAR
 
             bw = new BufferedWriter();
         } else {
@@ -616,7 +616,7 @@ public final class Objectory {
         BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedXMLWriter"); //NOSONAR
+            logCreated("createBufferedXMLWriter");   //NOSONAR
 
             bw = new BufferedXMLWriter();
         } else {
@@ -692,7 +692,7 @@ public final class Objectory {
         BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedJSONWriter"); //NOSONAR
+            logCreated("createBufferedJSONWriter");   //NOSONAR
 
             bw = new BufferedJSONWriter();
         } else {
@@ -768,7 +768,7 @@ public final class Objectory {
         BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedCSVWriter"); //NOSONAR
+            logCreated("createBufferedCSVWriter");   //NOSONAR
 
             bw = new BufferedCSVWriter();
         } else {

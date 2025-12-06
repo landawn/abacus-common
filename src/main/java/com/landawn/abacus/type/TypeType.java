@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Strings;
  * // Convert Type to string
  * Type stringType = TypeFactory.getType(String.class);
  * TypeType typeHandler = new TypeType();
- * String typeName = typeHandler.stringOf(stringType);  // "String"
+ * String typeName = typeHandler.stringOf(stringType);   // "String"
  *
  * // Convert string back to Type
  * Type reconstructed = typeHandler.valueOf("String");
@@ -61,10 +61,20 @@ public class TypeType extends AbstractType<Type> {
 
     public static final String TYPE = "Type";
 
+    /**
+     * Constructs a TypeType instance with the default type name.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     TypeType() {
         super(TYPE);
     }
 
+    /**
+     * Constructs a TypeType instance with the specified type name.
+     * This constructor is package-private and should only be called by TypeFactory or subclasses.
+     *
+     * @param typeName the name to use for this type
+     */
     TypeType(final String typeName) {
         super(typeName);
     }

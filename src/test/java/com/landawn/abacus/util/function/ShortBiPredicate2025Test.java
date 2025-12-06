@@ -129,9 +129,9 @@ public class ShortBiPredicate2025Test extends TestBase {
         ShortBiPredicate combined = bothPositive.and(sumGreaterThanTen);
 
         assertTrue(combined.test((short) 6, (short) 6));
-        assertFalse(combined.test((short) 2, (short) 2)); // positive but sum not > 10
-        assertFalse(combined.test((short) -6, (short) 20)); // sum > 10 but not both positive
-        assertFalse(combined.test((short) -5, (short) -5)); // neither condition
+        assertFalse(combined.test((short) 2, (short) 2));   // positive but sum not > 10
+        assertFalse(combined.test((short) -6, (short) 20));   // sum > 10 but not both positive
+        assertFalse(combined.test((short) -5, (short) -5));   // neither condition
     }
 
     @Test
@@ -184,8 +184,8 @@ public class ShortBiPredicate2025Test extends TestBase {
 
         ShortBiPredicate complex = bothEven.and(sumLessThanHundred).or(firstPositive.negate());
 
-        assertTrue(complex.test((short) 10, (short) 20)); // both even and sum < 100
-        assertTrue(complex.test((short) -5, (short) 100)); // first not positive
-        assertFalse(complex.test((short) 10, (short) 100)); // even but sum >= 100, and first is positive
+        assertTrue(complex.test((short) 10, (short) 20));   // both even and sum < 100
+        assertTrue(complex.test((short) -5, (short) 100));   // first not positive
+        assertFalse(complex.test((short) 10, (short) 100));   // even but sum >= 100, and first is positive
     }
 }

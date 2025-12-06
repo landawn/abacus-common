@@ -79,8 +79,8 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = isTrue.and(alwaysTrue);
 
-        assertTrue(combined.test(true)); // true && true
-        assertFalse(combined.test(false)); // false && true
+        assertTrue(combined.test(true));   // true && true
+        assertFalse(combined.test(false));   // false && true
     }
 
     @Test
@@ -92,7 +92,7 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = firstFalse.and(shouldNotExecute);
 
-        assertFalse(combined.test(true)); // Should not throw exception
+        assertFalse(combined.test(true));   // Should not throw exception
     }
 
     @Test
@@ -102,8 +102,8 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = isTrue.or(isFalse);
 
-        assertTrue(combined.test(true)); // true || false
-        assertTrue(combined.test(false)); // false || true
+        assertTrue(combined.test(true));   // true || false
+        assertTrue(combined.test(false));   // false || true
     }
 
     @Test
@@ -115,7 +115,7 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = firstTrue.or(shouldNotExecute);
 
-        assertTrue(combined.test(true)); // Should not throw exception
+        assertTrue(combined.test(true));   // Should not throw exception
     }
 
     @Test

@@ -45,8 +45,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * user.set("name", "John");
  * user.set("age", 30);
  * 
- * String name = user.get("name");  // returns "John"
- * int age = user.get("age", Integer.class);  // returns 30
+ * String name = user.get("name");   // returns "John"
+ * int age = user.get("age", Integer.class);   // returns 30
  * }</pre>
  * 
  */
@@ -114,7 +114,7 @@ public final class MapEntity implements Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
-     * String name = user.entityName();  // returns "User"
+     * String name = user.entityName();   // returns "User"
      * }</pre>
      * 
      * @return the entity name
@@ -187,7 +187,7 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John")
      *     .set("age", 30)
-     *     .set("User.email", "john@example.com");  // canonical name
+     *     .set("User.email", "john@example.com");   // canonical name
      * }</pre>
      * 
      * @param propName the property name (can be simple or canonical)
@@ -234,7 +234,7 @@ public final class MapEntity implements Serializable {
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("tempData", "temp");
-     * Object removed = user.remove("tempData");  // returns "temp"
+     * Object removed = user.remove("tempData");   // returns "temp"
      * }</pre>
      * 
      * @param propName the property name to remove (can be simple or canonical)
@@ -310,7 +310,7 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
      * 
-     * Set<String> keys = user.keySet();  // returns ["name", "age"]
+     * Set<String> keys = user.keySet();   // returns ["name", "age"]
      * }</pre>
      * 
      * @return a set of property names
@@ -351,7 +351,7 @@ public final class MapEntity implements Serializable {
      * user.set("name", "John");
      * 
      * Map<String, Object> props = user.props();
-     * props.put("age", 30);  // This modifies the MapEntity
+     * props.put("age", 30);   // This modifies the MapEntity
      * }</pre>
      * 
      * @return the internal map of properties
@@ -367,7 +367,7 @@ public final class MapEntity implements Serializable {
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
-     * int count = user.size();  // returns 2
+     * int count = user.size();   // returns 2
      * }</pre>
      * 
      * @return the number of properties
@@ -382,10 +382,10 @@ public final class MapEntity implements Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
-     * boolean empty = user.isEmpty();  // returns true
+     * boolean empty = user.isEmpty();   // returns true
      * 
      * user.set("name", "John");
-     * empty = user.isEmpty();  // returns false
+     * empty = user.isEmpty();   // returns false
      * }</pre>
      * 
      * @return {@code true} if this entity has no properties, {@code false} otherwise
@@ -404,7 +404,7 @@ public final class MapEntity implements Serializable {
      * original.set("name", "John").set("age", 30);
      * 
      * MapEntity copy = original.copy();
-     * copy.set("age", 31);  // Doesn't affect original
+     * copy.set("age", 31);   // Doesn't affect original
      * }</pre>
      * 
      * @return a new MapEntity instance with the same entity name and properties
@@ -439,7 +439,7 @@ public final class MapEntity implements Serializable {
      * MapEntity user2 = new MapEntity("User");
      * user2.set("name", "John");
      * 
-     * boolean equal = user1.equals(user2);  // returns true
+     * boolean equal = user1.equals(user2);   // returns true
      * }</pre>
      * 
      * @param obj the object to compare with
@@ -468,7 +468,7 @@ public final class MapEntity implements Serializable {
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
-     * String str = user.toString();  // returns "{name=John, age=30}"
+     * String str = user.toString();   // returns "{name=John, age=30}"
      * }</pre>
      * 
      * @return a string representation of this object

@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Percentage p = Percentage._95;
- * double value = p.doubleValue();  // Returns 0.95
- * String str = p.toString();  // Returns "95%"
+ * double value = p.doubleValue();   // Returns 0.95
+ * String str = p.toString();   // Returns "95%"
  * 
  * // Get a range of percentages
  * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);

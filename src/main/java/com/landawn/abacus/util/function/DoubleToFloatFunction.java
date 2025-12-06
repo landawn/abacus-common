@@ -39,10 +39,10 @@ public interface DoubleToFloatFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleToFloatFunction toFloat = DoubleToFloatFunction.DEFAULT;
-     * float result = toFloat.applyAsFloat(3.14159);  // Returns 3.14159f
+     * float result = toFloat.applyAsFloat(3.14159);   // Returns 3.14159f
      *
      * DoubleToFloatFunction rounder = val -> Math.round(val * 100) / 100.0f;
-     * float result2 = rounder.applyAsFloat(3.14159);  // Returns 3.14f
+     * float result2 = rounder.applyAsFloat(3.14159);   // Returns 3.14f
      * }</pre>
      *
      * @param value the double function argument

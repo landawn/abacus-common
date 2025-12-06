@@ -459,7 +459,7 @@ public class CSVParser {
                     if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
                         sb.append(nextLine.charAt(++i));
                     } else {
-                        sb.append(c); // escape character is not followed by a quote or escape, so append it.
+                        sb.append(c);   // escape character is not followed by a quote or escape, so append it.
                     }
                 } else if (c == quoteChar) {
                     if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
@@ -512,7 +512,7 @@ public class CSVParser {
 
                 if (lastQuoteIndex >= 0 && Strings.isBlank(sb.substring(lastQuoteIndex + 1))) {
                     // Tested with: new CSVParser().parseLine("a,  b  ,  \"c\" "); 
-                    sb.setLength(lastQuoteIndex); // remove the last quote character
+                    sb.setLength(lastQuoteIndex);   // remove the last quote character
                 } else {
                     throw new ParseException("Un-terminated quoted field at end of CSV line");
                 }

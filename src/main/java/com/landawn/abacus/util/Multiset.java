@@ -91,10 +91,10 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic multiset operations
  * Multiset<String> words = new Multiset<>();
- * words.add("hello", 3);  // Add 3 occurrences
- * words.add("world", 2);  // Add 2 occurrences
- * System.out.println(words.getCount("hello"));  // Prints: 3
- * System.out.println(words.size());  // Prints: 5 (total elements)
+ * words.add("hello", 3);   // Add 3 occurrences
+ * words.add("world", 2);   // Add 2 occurrences
+ * System.out.println(words.getCount("hello"));   // Prints: 3
+ * System.out.println(words.size());   // Prints: 5 (total elements)
  *
  * // Creating from collections
  * List<String> data = Arrays.asList("a", "b", "a", "c", "b", "a");
@@ -106,8 +106,8 @@ import com.landawn.abacus.util.stream.Stream;
  * // Statistical operations
  * Multiset<Integer> scores = Multiset.of(85, 90, 85, 92, 88, 85);
  * Optional<Pair<Integer, Integer>> mode = scores.maxOccurrences();
- * System.out.println("Most frequent score: " + mode.get().right());  // 85
- * System.out.println("Frequency: " + mode.get().left());  // 3
+ * System.out.println("Most frequent score: " + mode.get().right());   // 85
+ * System.out.println("Frequency: " + mode.get().left());   // 3
  *
  * // Stream operations
  * Map<String, Integer> filtered = Multiset.of("apple", "banana", "apple", "cherry")
@@ -166,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
  * modified for consistency, performance optimization, and null-safety enhancement.
  *
- * @param <E> the type of elements maintained by this multiset 
+ * @param <E> the type of elements maintained by this multiset .
  */
 public final class Multiset<E> implements Collection<E> {
 
@@ -200,8 +200,8 @@ public final class Multiset<E> implements Collection<E> {
      * // Can efficiently store up to 100 distinct elements
      * }</pre>
      *
-     * @param initialCapacity the initial capacity of the backing map
-     * @throws IllegalArgumentException if the initial capacity is negative
+     * @param initialCapacity the initial capacity of the backing map.
+     * @throws IllegalArgumentException if the initial capacity is negative.
      */
     public Multiset(final int initialCapacity) {
         backingMapSupplier = Suppliers.ofMap();
@@ -219,10 +219,10 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "a", "c", "b", "a");
      * Multiset<String> multiset = new Multiset<>(list);
-     * System.out.println(multiset.getCount("a"));  // Prints: 3
+     * System.out.println(multiset.getCount("a"));   // Prints: 3
      * }</pre>
      *
-     * @param c the collection whose elements are to be placed into this multiset
+     * @param c the collection whose elements are to be placed into this multiset.
      */
     public Multiset(final Collection<? extends E> c) {
         this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
@@ -241,8 +241,8 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> orderedMultiset = new Multiset<>(LinkedHashMap.class);
      * }</pre>
      *
-     * @param valueMapType the class of the map to be used as the backing map
-     * @throws IllegalArgumentException if the specified map type cannot be instantiated
+     * @param valueMapType the class of the map to be used as the backing map.
+     * @throws IllegalArgumentException if the specified map type cannot be instantiated.
      */
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) {
@@ -259,7 +259,7 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> multiset = new Multiset<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
      * }</pre>
      *
-     * @param mapSupplier the supplier that provides the map to be used as the backing map
+     * @param mapSupplier the supplier that provides the map to be used as the backing map.
      */
     @SuppressWarnings("rawtypes")
     public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
@@ -280,12 +280,12 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
-     * System.out.println(multiset.getCount("a"));  // Prints: 2
+     * System.out.println(multiset.getCount("a"));   // Prints: 2
      * }</pre>
      *
-     * @param <T> the type of elements
-     * @param a the elements to be placed into the multiset
-     * @return a new multiset containing the specified elements
+     * @param <T> the type of elements.
+     * @param a the elements to be placed into the multiset.
+     * @return a new multiset containing the specified elements.
      */
     @SafeVarargs
     public static <T> Multiset<T> of(final T... a) {
@@ -310,9 +310,9 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> multiset = Multiset.create(list);
      * }</pre>
      *
-     * @param <T> the type of elements
-     * @param coll the collection whose elements are to be placed into the multiset
-     * @return a new multiset containing the elements of the specified collection
+     * @param <T> the type of elements.
+     * @param coll the collection whose elements are to be placed into the multiset.
+     * @return a new multiset containing the elements of the specified collection.
      */
     public static <T> Multiset<T> create(final Collection<? extends T> coll) {
         return new Multiset<>(coll);
@@ -326,13 +326,13 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "b", "a").iterator();
      * Multiset<String> multiset = Multiset.create(iter);
-     * System.out.println(multiset.getCount("a"));  // Prints: 2
+     * System.out.println(multiset.getCount("a"));   // Prints: 2
      * }</pre>
      *
-     * @param <T> the type of elements
-     * @param iter the iterator whose elements are to be placed into the multiset
-     * @return a new multiset containing the elements from the iterator
-     * @throws IllegalArgumentException if adding an element would exceed {@link Integer#MAX_VALUE} occurrences
+     * @param <T> the type of elements.
+     * @param iter the iterator whose elements are to be placed into the multiset.
+     * @return a new multiset containing the elements from the iterator.
+     * @throws IllegalArgumentException if adding an element would exceed {@link Integer#MAX_VALUE} occurrences.
      */
     public static <T> Multiset<T> create(final Iterator<? extends T> iter) {
         final Multiset<T> result = new Multiset<>();
@@ -349,7 +349,7 @@ public final class Multiset<E> implements Collection<E> {
                     result.backingMap.put(e, MutableInt.of(1));
                 } else {
                     if (count.value() == Integer.MAX_VALUE) {
-                        throw new IllegalArgumentException("The total count is out of the bound of int"); //NOSONAR
+                        throw new IllegalArgumentException("The total count is out of the bound of int");   //NOSONAR
                     }
 
                     count.add(1);
@@ -371,8 +371,8 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.occurrencesOf("d"));   // Prints: 0
      * }</pre>
      *
-     * @param element the element to count occurrences of
-     * @return the number of occurrences of the element; zero if not present
+     * @param element the element to count occurrences of.
+     * @return the number of occurrences of the element; zero if not present.
      * @see #getCount(Object)
      */
     public int occurrencesOf(final Object element) {
@@ -391,7 +391,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, element) with minimum occurrences,
-     *         or empty Optional if the multiset is empty
+     *         or empty Optional if the multiset is empty.
      */
     public Optional<Pair<Integer, E>> minOccurrences() {
         if (backingMap.isEmpty()) {
@@ -427,7 +427,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, element) with maximum occurrences,
-     *         or empty Optional if the multiset is empty
+     *         or empty Optional if the multiset is empty.
      */
     public Optional<Pair<Integer, E>> maxOccurrences() {
         if (backingMap.isEmpty()) {
@@ -463,7 +463,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, list of elements) with minimum occurrences,
-     *         or empty Optional if the multiset is empty
+     *         or empty Optional if the multiset is empty.
      */
     public Optional<Pair<Integer, List<E>>> allMinOccurrences() {
         if (backingMap.isEmpty()) {
@@ -501,7 +501,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, list of elements) with maximum occurrences,
-     *         or empty Optional if the multiset is empty
+     *         or empty Optional if the multiset is empty.
      */
     public Optional<Pair<Integer, List<E>>> allMaxOccurrences() {
         if (backingMap.isEmpty()) {
@@ -534,11 +534,11 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
-     * System.out.println(multiset.sumOfOccurrences());  // Prints: 5
+     * System.out.println(multiset.sumOfOccurrences());   // Prints: 5
      * }</pre>
      *
-     * @return the total count of all elements
-     * @throws ArithmeticException if the sum exceeds {@link Long#MAX_VALUE}
+     * @return the total count of all elements.
+     * @throws ArithmeticException if the sum exceeds {@link Long#MAX_VALUE}.
      * @see #size()
      */
     public long sumOfOccurrences() {
@@ -566,7 +566,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an OptionalDouble containing the average occurrences per distinct element,
-     *         or empty if the multiset is empty
+     *         or empty if the multiset is empty.
      */
     public OptionalDouble averageOfOccurrences() {
         if (backingMap.isEmpty()) {
@@ -596,9 +596,9 @@ public final class Multiset<E> implements Collection<E> {
      * int count = multiset.getCount(element);
      * }</pre>
      *
-     * @param element the element to count occurrences of
-     * @return the number of occurrences of the element; zero if not present
-     * @deprecated Use {@link #getCount(Object)} instead for better clarity
+     * @param element the element to count occurrences of.
+     * @return the number of occurrences of the element; zero if not present.
+     * @deprecated Use {@link #getCount(Object)} instead for better clarity.
      * @see #getCount(Object)
      */
     @Deprecated
@@ -622,9 +622,9 @@ public final class Multiset<E> implements Collection<E> {
      * int count = multiset.getCount(element);
      * }</pre>
      *
-     * @param element the element to count occurrences of
-     * @return the number of occurrences of the element; zero if not present
-     * @deprecated Use {@link #getCount(Object)} instead for better clarity
+     * @param element the element to count occurrences of.
+     * @return the number of occurrences of the element; zero if not present.
+     * @deprecated Use {@link #getCount(Object)} instead for better clarity.
      * @see #getCount(Object)
      */
     @Deprecated
@@ -645,8 +645,8 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("d"));   // Prints: 0
      * }</pre>
      *
-     * @param element the element to count occurrences of
-     * @return the number of occurrences of the element; zero if not present
+     * @param element the element to count occurrences of.
+     * @return the number of occurrences of the element; zero if not present.
      * @see #occurrencesOf(Object)
      */
     public int getCount(final Object element) {
@@ -669,10 +669,10 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("apple"));   // Prints: 5
      * }</pre>
      *
-     * @param element the element to set the count of
-     * @param occurrences the desired count; must be non-negative
-     * @return the count of the element before the operation
-     * @throws IllegalArgumentException if occurrences is negative
+     * @param element the element to set the count of.
+     * @param occurrences the desired count; must be non-negative.
+     * @return the count of the element before the operation..
+     * @throws IllegalArgumentException if occurrences is negative..
      * @see #setCount(Object, int, int)
      * @see #add(Object, int)
      */
@@ -710,11 +710,11 @@ public final class Multiset<E> implements Collection<E> {
      * updated = multiset.setCount("apple", 2, 10);          // false (current count is 5, not 2)
      * }</pre>
      *
-     * @param element the element to set the count of
-     * @param oldOccurrences the expected current count; must be non-negative
-     * @param newOccurrences the desired new count; must be non-negative
-     * @return {@code true} if the count was updated, {@code false} if the current count didn't match oldOccurrences
-     * @throws IllegalArgumentException if oldOccurrences or newOccurrences is negative
+     * @param element the element to set the count of.
+     * @param oldOccurrences the expected current count; must be non-negative.
+     * @param newOccurrences the desired new count; must be non-negative.
+     * @return {@code true} if the count was updated, {@code false} if the current count didn't match oldOccurrences.
+     * @throws IllegalArgumentException if oldOccurrences or newOccurrences is negative.
      * @see #setCount(Object, int)
      */
     public boolean setCount(final E element, final int oldOccurrences, final int newOccurrences) {
@@ -752,12 +752,12 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * multiset.add("apple");
-     * System.out.println(multiset.getCount("apple"));  // Prints: 1
+     * System.out.println(multiset.getCount("apple"));   // Prints: 1
      * }</pre>
      *
-     * @param element the element to add one occurrence of
-     * @return {@code true} (as specified by {@link Collection#add})
-     * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences
+     * @param element the element to add one occurrence of.
+     * @return {@code true} (as specified by {@link Collection#add}).
+     * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences.
      */
     @Override
     public boolean add(final E element) {
@@ -778,10 +778,10 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("apple"));   // Prints: 3
      * }</pre>
      *
-     * @param element the element to add occurrences of
-     * @param occurrencesToAdd the number of occurrences to add; must be non-negative
-     * @return the count of the element before the operation
-     * @throws IllegalArgumentException if occurrencesToAdd is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences
+     * @param element the element to add occurrences of.
+     * @param occurrencesToAdd the number of occurrences to add; must be non-negative.
+     * @return the count of the element before the operation.
+     * @throws IllegalArgumentException if occurrencesToAdd is negative., or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
      * @see #addAndGetCount(Object, int)
      * @see #setCount(Object, int)
      */
@@ -815,13 +815,13 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.addAndGetCount("apple", 3);
-     * System.out.println(newCount);  // Prints: 5
+     * System.out.println(newCount);   // Prints: 5
      * }</pre>
      *
-     * @param element the element to add occurrences of
-     * @param occurrences the number of occurrences to add; must be non-negative
-     * @return the count of the element after the operation
-     * @throws IllegalArgumentException if occurrences is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences
+     * @param element the element to add occurrences of.
+     * @param occurrences the number of occurrences to add; must be non-negative.
+     * @return the count of the element after the operation.
+     * @throws IllegalArgumentException if occurrences is negative., or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
      * @see #add(Object, int)
      */
     @Beta
@@ -856,11 +856,11 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> multiset = new Multiset<>();
      * List<String> list = Arrays.asList("a", "b", "a");
      * multiset.addAll(list);
-     * System.out.println(multiset.getCount("a"));  // Prints: 2
+     * System.out.println(multiset.getCount("a"));   // Prints: 2
      * }</pre>
      *
-     * @param c the collection containing elements to be added
-     * @return {@code true} if this multiset changed as a result of the call
+     * @param c the collection containing elements to be added.
+     * @return {@code true} if this multiset changed as a result of the call.
      */
     @Override
     public boolean addAll(final Collection<? extends E> c) {
@@ -880,10 +880,10 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("b"));   // Prints: 3
      * }</pre>
      *
-     * @param c the collection containing elements to be added
-     * @param occurrencesToAdd the number of occurrences to add for each element
-     * @return {@code true} if this multiset changed as a result of the call
-     * @throws IllegalArgumentException if occurrencesToAdd is negative
+     * @param c the collection containing elements to be added.
+     * @param occurrencesToAdd the number of occurrences to add for each element.
+     * @return {@code true} if this multiset changed as a result of the call.
+     * @throws IllegalArgumentException if occurrencesToAdd is negative.
      */
     @Beta
     public boolean addAll(final Collection<? extends E> c, final int occurrencesToAdd) {
@@ -910,11 +910,11 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
      * multiset.remove("a");
-     * System.out.println(multiset.getCount("a"));  // Prints: 1
+     * System.out.println(multiset.getCount("a"));   // Prints: 1
      * }</pre>
      *
-     * @param element the element to remove one occurrence of
-     * @return {@code true} if an occurrence was found and removed
+     * @param element the element to remove one occurrence of.
+     * @return {@code true} if an occurrence was found and removed.
      */
     @Override
     public boolean remove(final Object element) {
@@ -932,10 +932,10 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("a"));   // Prints: 1
      * }</pre>
      *
-     * @param element the element to remove occurrences of
-     * @param occurrencesToRemove the number of occurrences to remove; must be non-negative
-     * @return the count of the element before the operation
-     * @throws IllegalArgumentException if occurrencesToRemove is negative
+     * @param element the element to remove occurrences of.
+     * @param occurrencesToRemove the number of occurrences to remove; must be non-negative.
+     * @return the count of the element before the operation.
+     * @throws IllegalArgumentException if occurrencesToRemove is negative.
      * @see #removeAndGetCount(Object, int)
      * @see #removeAllOccurrences(Object)
      */
@@ -969,13 +969,13 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
      * int newCount = multiset.removeAndGetCount("a", 2);
-     * System.out.println(newCount);  // Prints: 1
+     * System.out.println(newCount);   // Prints: 1
      * }</pre>
      *
-     * @param element the element to remove occurrences of
-     * @param occurrences the number of occurrences to remove; must be non-negative
-     * @return the count of the element after the operation
-     * @throws IllegalArgumentException if occurrences is negative
+     * @param element the element to remove occurrences of.
+     * @param occurrences the number of occurrences to remove; must be non-negative.
+     * @return the count of the element after the operation.
+     * @throws IllegalArgumentException if occurrences is negative.
      * @see #remove(Object, int)
      */
     @Beta
@@ -1011,7 +1011,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
      * multiset.removeAll(Arrays.asList("a", "b"));
-     * System.out.println(multiset);  // Only contains "c"
+     * System.out.println(multiset);   // Only contains "c"
      * }</pre>
      *
      * <p><b>Migration Guidance:</b></p>
@@ -1024,9 +1024,9 @@ public final class Multiset<E> implements Collection<E> {
      * multiset.removeAllOccurrences(collection);
      * }</pre>
      *
-     * @param c the collection containing elements to be removed
-     * @return {@code true} if this multiset changed as a result of the call
-     * @deprecated replaced by {@link #removeAllOccurrences(Collection)} for better clarity
+     * @param c the collection containing elements to be removed.
+     * @return {@code true} if this multiset changed as a result of the call..
+     * @deprecated replaced by {@link #removeAllOccurrences(Collection)} for better clarity.
      */
     @Deprecated
     @Override
@@ -1060,10 +1060,10 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("b"));   // Prints: 0
      * }</pre>
      *
-     * @param c the collection containing elements to be removed
-     * @param occurrencesToRemove the number of occurrences to remove for each element
-     * @return {@code true} if this multiset changed as a result of the call
-     * @throws IllegalArgumentException if occurrencesToRemove is negative
+     * @param c the collection containing elements to be removed.
+     * @param occurrencesToRemove the number of occurrences to remove for each element.
+     * @return {@code true} if this multiset changed as a result of the call.
+     * @throws IllegalArgumentException if occurrencesToRemove is negative.
      */
     public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
@@ -1097,8 +1097,8 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.contains("a"));   // Prints: false
      * }</pre>
      *
-     * @param e the element whose all occurrences are to be removed
-     * @return the count of the element before removal, or 0 if not present
+     * @param e the element whose all occurrences are to be removed.
+     * @return the count of the element before removal, or 0 if not present.
      */
     public int removeAllOccurrences(final Object e) {
         @SuppressWarnings("SuspiciousMethodCalls")
@@ -1115,11 +1115,11 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
      * multiset.removeAllOccurrences(Arrays.asList("a", "b"));
-     * System.out.println(multiset);  // Only contains "c"
+     * System.out.println(multiset);   // Only contains "c"
      * }</pre>
      *
-     * @param c the collection containing elements to be removed
-     * @return {@code true} if this multiset changed as a result of the call
+     * @param c the collection containing elements to be removed.
+     * @return {@code true} if this multiset changed as a result of the call.
      */
     public boolean removeAllOccurrences(final Collection<?> c) {
         return removeAll(c);
@@ -1136,9 +1136,9 @@ public final class Multiset<E> implements Collection<E> {
      * // Removes all occurrences of "apple"
      * }</pre>
      *
-     * @param predicate the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed
-     * @throws IllegalArgumentException if the predicate is null
+     * @param predicate the predicate which returns {@code true} for elements to be removed.
+     * @return {@code true} if any elements were removed.
+     * @throws IllegalArgumentException if the predicate is null.
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -1178,9 +1178,9 @@ public final class Multiset<E> implements Collection<E> {
      * // Removes all occurrences of "a" (which has count 3)
      * }</pre>
      *
-     * @param predicate the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed
-     * @throws IllegalArgumentException if the predicate is null
+     * @param predicate the predicate which returns {@code true} for elements to be removed.
+     * @return {@code true} if any elements were removed.
+     * @throws IllegalArgumentException if the predicate is null.
      */
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -1222,7 +1222,7 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("b"));   // Prints: 6
      * }</pre>
      *
-     * @param function the function to compute new counts
+     * @param function the function to compute new counts.
      * @throws IllegalArgumentException if the function is null
      */
     public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
@@ -1260,14 +1260,14 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * int count = multiset.computeIfAbsent("apple", e -> 5);
-     * System.out.println(count);  // Prints: 5
+     * System.out.println(count);   // Prints: 5
      * 
      * count = multiset.computeIfAbsent("apple", e -> 10);
-     * System.out.println(count);  // Prints: 5 (not modified)
+     * System.out.println(count);   // Prints: 5 (not modified)
      * }</pre>
      *
-     * @param e the element whose count is to be computed
-     * @param mappingFunction the function to compute a count
+     * @param e the element whose count is to be computed.
+     * @param mappingFunction the function to compute a count.
      * @return the current (existing or computed) count of the element
      * @throws IllegalArgumentException if the mapping function is null
      */
@@ -1297,11 +1297,11 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.computeIfPresent("apple", (e, count) -> count * 2);
-     * System.out.println(newCount);  // Prints: 4
+     * System.out.println(newCount);   // Prints: 4
      * }</pre>
      *
-     * @param e the element whose count is to be computed
-     * @param remappingFunction the function to compute a new count
+     * @param e the element whose count is to be computed.
+     * @param remappingFunction the function to compute a new count.
      * @return the new count of the element, or 0 if not present
      * @throws IllegalArgumentException if the remapping function is null
      */
@@ -1333,14 +1333,14 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.compute("apple", (e, count) -> count + 3);
-     * System.out.println(newCount);  // Prints: 5
+     * System.out.println(newCount);   // Prints: 5
      * 
      * newCount = multiset.compute("banana", (e, count) -> count + 2);
-     * System.out.println(newCount);  // Prints: 2
+     * System.out.println(newCount);   // Prints: 2
      * }</pre>
      *
-     * @param key the element whose count is to be computed
-     * @param remappingFunction the function to compute a new count
+     * @param key the element whose count is to be computed.
+     * @param remappingFunction the function to compute a new count.
      * @return the new count of the element
      * @throws IllegalArgumentException if the remapping function is null
      */
@@ -1369,15 +1369,15 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.merge("apple", 3, (oldCount, value) -> oldCount + value);
-     * System.out.println(newCount);  // Prints: 5
+     * System.out.println(newCount);   // Prints: 5
      * 
      * newCount = multiset.merge("banana", 4, (oldCount, value) -> oldCount + value);
-     * System.out.println(newCount);  // Prints: 4
+     * System.out.println(newCount);   // Prints: 4
      * }</pre>
      *
-     * @param key the element whose count is to be merged
-     * @param value the value to merge with the existing count
-     * @param remappingFunction the function to merge the old count and value
+     * @param key the element whose count is to be merged.
+     * @param value the value to merge with the existing count.
+     * @param remappingFunction the function to merge the old count and value.
      * @return the new count of the element
      * @throws IllegalArgumentException if the remapping function is null
      */
@@ -1415,8 +1415,8 @@ public final class Multiset<E> implements Collection<E> {
      * // multiset now contains only "a" (2 occurrences) and "c" (1 occurrence)
      * }</pre>
      *
-     * @param c the collection containing elements to be retained
-     * @return {@code true} if this multiset changed as a result of the call
+     * @param c the collection containing elements to be retained.
+     * @return {@code true} if this multiset changed as a result of the call.
      */
     @Override
     public boolean retainAll(final Collection<?> c) {
@@ -1451,7 +1451,7 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.contains("c"));   // Prints: false
      * }</pre>
      *
-     * @param element the element whose presence is to be tested
+     * @param element the element whose presence is to be tested.
      * @return {@code true} if this multiset contains at least one occurrence of the element
      * @see #containsAll(Collection)
      * @see #getCount(Object)
@@ -1477,7 +1477,7 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.containsAll(Arrays.asList("a", "d")));   // Prints: false
      * }</pre>
      *
-     * @param c the collection to be checked for containment
+     * @param c the collection to be checked for containment.
      * @return {@code true} if this multiset contains all elements in the specified collection
      * @see #contains(Object)
      */
@@ -1505,7 +1505,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
      * Set<String> elements = multiset.elementSet();
-     * System.out.println(elements);  // Prints: [a, b, c] (order may vary)
+     * System.out.println(elements);   // Prints: [a, b, c] (order may vary)
      * }</pre>
      *
      * @return a view of the distinct elements in this multiset
@@ -1688,9 +1688,9 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
-     * System.out.println(multiset.isEmpty());  // Prints: true
+     * System.out.println(multiset.isEmpty());   // Prints: true
      * multiset.add("test");
-     * System.out.println(multiset.isEmpty());  // Prints: false
+     * System.out.println(multiset.isEmpty());   // Prints: false
      * }</pre>
      *
      * @return {@code true} if this multiset contains no elements, {@code false} otherwise
@@ -1710,7 +1710,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
      * multiset.clear();
-     * System.out.println(multiset.isEmpty());  // Prints: true
+     * System.out.println(multiset.isEmpty());   // Prints: true
      * }</pre>
      */
     @Override
@@ -1733,7 +1733,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
      * Object[] array = multiset.toArray();
-     * System.out.println(array.length);  // Prints: 3
+     * System.out.println(array.length);   // Prints: 3
      * }</pre>
      *
      * @return an array containing all the elements in this multiset
@@ -1754,11 +1754,11 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
      * String[] array = multiset.toArray(new String[0]);
-     * System.out.println(array.length);  // Prints: 3
+     * System.out.println(array.length);   // Prints: 3
      * }</pre>
      *
-     * @param <T> the runtime type of the array to contain the multiset
-     * @param a the array into which the elements of this multiset are to be stored, if it is big enough;
+     * @param <T> the runtime type of the array to contain the multiset.
+     * @param a the array into which the elements of this multiset are to be stored, if it is big enough;.
      *              otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing all the elements in this multiset
      * @throws IllegalArgumentException if the provided array is {@code null}
@@ -1821,8 +1821,8 @@ public final class Multiset<E> implements Collection<E> {
      * TreeMap<String, Integer> map = multiset.toMap(TreeMap::new);
      * }</pre>
      *
-     * @param <M> the type of the map to be returned
-     * @param supplier a function that generates a new instance of the desired map type
+     * @param <M> the type of the map to be returned.
+     * @param supplier a function that generates a new instance of the desired map type.
      * @return a map with the elements of this multiset as keys and their counts as values
      */
     public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) {
@@ -1870,7 +1870,7 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: c=3, b=2, a=1 (descending by count)
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the counts of the elements
+     * @param cmp the comparator to be used for sorting the counts of the elements.
      * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts using the provided comparator
      */
     public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
@@ -1891,7 +1891,7 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: a=2, b=1, c=1
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the keys of the elements
+     * @param cmp the comparator to be used for sorting the keys of the elements.
      * @return a map with the elements of this multiset as keys and their counts as values, sorted by the keys using the provided comparator
      */
     public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) {
@@ -1912,8 +1912,8 @@ public final class Multiset<E> implements Collection<E> {
      *     Comparator.comparing(e -> e.getValue().value()));
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the entries of the map. The comparator should compare Map.Entry objects
-     * @return a map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator
+     * @param cmp the comparator to be used for sorting the entries of the map. The comparator should compare Map.Entry objects.
+     * @return a map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator.
      */
     Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) {
         if (N.isEmpty(backingMap)) {
@@ -1965,7 +1965,7 @@ public final class Multiset<E> implements Collection<E> {
      *     multiset.toImmutableMap(size -> new TreeMap<>());
      * }</pre>
      *
-     * @param mapSupplier a function that generates a new instance of the desired map type
+     * @param mapSupplier a function that generates a new instance of the desired map type.
      * @return an immutable map with the elements of this multiset as keys and their counts as values
      */
     public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) {
@@ -1984,10 +1984,10 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * multiset.forEach(System.out::println);  // Prints: a, a, b (order may vary)
+     * multiset.forEach(System.out::println);   // Prints: a, a, b (order may vary)
      * }</pre>
      *
-     * @param action The action to be performed for each element
+     * @param action The action to be performed for each element.
      * @throws IllegalArgumentException if the provided action is {@code null}
      */
     @Override
@@ -2031,7 +2031,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * List<String> list = multiset.elements().toList();  // [a, a, b]
+     * List<String> list = multiset.elements().toList();   // [a, a, b]
      * }</pre>
      *
      * @return a Stream containing all element occurrences in this multiset
@@ -2069,12 +2069,12 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "c");
-     * int distinctCount = multiset.apply(ms -> ms.countOfDistinctElements());  // 3
+     * int distinctCount = multiset.apply(ms -> ms.countOfDistinctElements());   // 3
      * }</pre>
      *
-     * @param <R> the type of the result returned by the function
-     * @param <X> the type of the exception that can be thrown by the function
-     * @param func the function to be applied to this multiset
+     * @param <R> the type of the result returned by the function.
+     * @param <X> the type of the exception that can be thrown by the function.
+     * @param func the function to be applied to this multiset.
      * @return the result of applying the provided function to this multiset
      * @throws X if the provided function throws an exception of type X
      */
@@ -2091,15 +2091,15 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
-     * Optional<Integer> size = multiset.applyIfNotEmpty(ms -> ms.size());  // Optional.empty()
+     * Optional<Integer> size = multiset.applyIfNotEmpty(ms -> ms.size());   // Optional.empty()
      *
      * multiset.add("test");
-     * size = multiset.applyIfNotEmpty(ms -> ms.size());  // Optional.of(1)
+     * size = multiset.applyIfNotEmpty(ms -> ms.size());   // Optional.of(1)
      * }</pre>
      *
-     * @param <R> the type of the result returned by the function
-     * @param <X> the type of the exception that can be thrown by the function
-     * @param func the function to be applied to this multiset
+     * @param <R> the type of the result returned by the function.
+     * @param <X> the type of the exception that can be thrown by the function.
+     * @param func the function to be applied to this multiset.
      * @return an Optional containing the result of applying the provided function to this multiset, or an empty Optional if the multiset is empty
      * @throws X if the provided function throws an exception of type X
      */
@@ -2113,11 +2113,11 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "c");
-     * multiset.accept(ms -> System.out.println("Size: " + ms.size()));  // Prints: Size: 3
+     * multiset.accept(ms -> System.out.println("Size: " + ms.size()));   // Prints: Size: 3
      * }</pre>
      *
-     * @param <X> the type of the exception that can be thrown by the consumer function
-     * @param action the consumer function to be applied to this multiset
+     * @param <X> the type of the exception that can be thrown by the consumer function.
+     * @param action the consumer function to be applied to this multiset.
      * @throws X if the provided consumer function throws an exception of type X
      */
     public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
@@ -2131,15 +2131,15 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * multiset.acceptIfNotEmpty(ms -> System.out.println("Not empty"))
-     *         .orElse(() -> System.out.println("Empty"));  // Prints: Empty
+     *         .orElse(() -> System.out.println("Empty"));   // Prints: Empty
      *
      * multiset.add("test");
      * multiset.acceptIfNotEmpty(ms -> System.out.println("Not empty"))
-     *         .orElse(() -> System.out.println("Empty"));  // Prints: Not empty
+     *         .orElse(() -> System.out.println("Empty"));   // Prints: Not empty
      * }</pre>
      *
-     * @param <X> the type of the exception that can be thrown by the consumer function
-     * @param action the consumer function to be applied to this multiset
+     * @param <X> the type of the exception that can be thrown by the consumer function.
+     * @param action the consumer function to be applied to this multiset.
      * @return an instance of OrElse which can be used to perform some other operation if the Multiset is empty
      * @throws X if the provided consumer function throws an exception of type X
      */
@@ -2157,7 +2157,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> ms1 = Multiset.of("a", "b");
      * Multiset<String> ms2 = Multiset.of("b", "a");
-     * System.out.println(ms1.hashCode() == ms2.hashCode());  // true
+     * System.out.println(ms1.hashCode() == ms2.hashCode());   // true
      * }</pre>
      *
      * @return the hash code value for this multiset
@@ -2175,7 +2175,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> ms1 = Multiset.of("a", "a", "b");
      * Multiset<String> ms2 = Multiset.of("b", "a", "a");
-     * System.out.println(ms1.equals(ms2));  // true
+     * System.out.println(ms1.equals(ms2));   // true
      * }</pre>
      *
      * @param obj The object to be compared with this Multiset for equality.
@@ -2196,7 +2196,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * System.out.println(multiset);  // Prints: {a=2, b=1} (order may vary)
+     * System.out.println(multiset);   // Prints: {a=2, b=1} (order may vary)
      * }</pre>
      *
      * @return a string representation of this Multiset.
@@ -2228,7 +2228,7 @@ public final class Multiset<E> implements Collection<E> {
      * }
      * }</pre>
      *
-     * @param <E> the type of element contained in the multiset
+     * @param <E> the type of element contained in the multiset.
      */
     public interface Entry<E> {
 
@@ -2288,7 +2288,7 @@ public final class Multiset<E> implements Collection<E> {
          * boolean same = entry1.equals(entry2);
          * }</pre>
          *
-         * @param o object to be compared for equality with this multiset entry
+         * @param o object to be compared for equality with this multiset entry.
          * @return {@code true} if the specified object is equal to this entry
          */
         @Override
@@ -2338,7 +2338,7 @@ public final class Multiset<E> implements Collection<E> {
      * An immutable implementation of the {@link Entry} interface.
      * This class represents a snapshot of an element-count pair at a specific point in time.
      * 
-     * @param <E> the type of element in this entry
+     * @param <E> the type of element in this entry.
      */
     @SuppressWarnings("ClassCanBeRecord")
     static final class ImmutableEntry<E> implements Entry<E> { // NOSONAR
@@ -2348,8 +2348,8 @@ public final class Multiset<E> implements Collection<E> {
         /**
          * Constructs an immutable entry with the specified element and count.
          *
-         * @param element the element for this entry
-         * @param count the count of occurrences for this element
+         * @param element the element for this entry.
+         * @param count the count of occurrences for this element.
          */
         ImmutableEntry(final E element, final int count) {
             this.element = element;
@@ -2370,7 +2370,7 @@ public final class Multiset<E> implements Collection<E> {
          * Compares this entry to the specified object for equality.
          * Two entries are equal if they have the same element and count.
          *
-         * @param object the object to compare with this entry
+         * @param object the object to compare with this entry.
          * @return {@code true} if the specified object is equal to this entry
          */
         @Override

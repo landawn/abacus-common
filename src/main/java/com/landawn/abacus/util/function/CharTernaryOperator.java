@@ -36,10 +36,10 @@ public interface CharTernaryOperator extends Throwables.CharTernaryOperator<Runt
      * <pre>{@code
      * CharTernaryOperator firstIfUpperElseSecond = (a, b, c) ->
      *     Character.isUpperCase(a) ? a : b;
-     * char result = firstIfUpperElseSecond.applyAsChar('A', 'b', 'c');  // Returns 'A'
+     * char result = firstIfUpperElseSecond.applyAsChar('A', 'b', 'c');   // Returns 'A'
      *
      * CharTernaryOperator maxOfThree = (a, b, c) -> (char) Math.max(a, Math.max(b, c));
-     * char max = maxOfThree.applyAsChar('A', 'Z', 'M');  // Returns 'Z'
+     * char max = maxOfThree.applyAsChar('A', 'Z', 'M');   // Returns 'Z'
      * }</pre>
      *
      * @param a the first char operand

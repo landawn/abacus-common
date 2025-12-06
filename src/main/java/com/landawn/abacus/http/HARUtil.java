@@ -111,9 +111,12 @@ public final class HARUtil {
 
     /**
      * Resets the HTTP header filter to the default implementation.
-     * 
+     *
      * <p>The default filter accepts all valid HTTP headers as determined by
      * {@link HttpUtil#isValidHttpHeader(String, String)}.</p>
+     *
+     * <p><b>Note:</b> This method resets the filter for the current thread only,
+     * as the header filter is stored in thread-local storage.</p>
      */
     public static void resetHttpHeaderFilterForHARRequest() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
@@ -121,12 +124,17 @@ public final class HARUtil {
 
     /**
      * Enables or disables logging of curl commands for HAR requests.
-     * 
+     *
      * <p>When enabled, a curl command equivalent to each HAR request will be logged
      * using the default logger at INFO level. The curl commands use single quotes (')
      * for string quoting.</p>
-     * 
+     *
+     * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
+     * as the curl logging settings are stored in thread-local storage.</p>
+     *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
+     * @see #logRequestCurlForHARRequest(boolean, char)
+     * @see #logRequestCurlForHARRequest(boolean, char, Consumer)
      */
     public static void logRequestCurlForHARRequest(final boolean logRequest) {
         logRequestCurlForHARRequest(logRequest, '\'');
@@ -134,12 +142,14 @@ public final class HARUtil {
 
     /**
      * Enables or disables logging of curl commands for HAR requests with a custom quote character.
-     * 
+     *
      * <p>When enabled, a curl command equivalent to each HAR request will be logged
      * using the default logger at INFO level.</p>
-     * 
+     *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands (typically ' or ")
+     * @see #logRequestCurlForHARRequest(boolean)
+     * @see #logRequestCurlForHARRequest(boolean, char, Consumer)
      */
     public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar) {
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, defaultCurlLogHandler));
@@ -147,23 +157,25 @@ public final class HARUtil {
 
     /**
      * Enables or disables logging of curl commands for HAR requests with custom settings.
-     * 
+     *
      * <p>This method provides full control over curl command logging, including the
      * ability to specify a custom log handler for processing the generated curl commands.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
      * HARUtil.logRequestCurlForHARRequest(true, '"', curl -> {
-     *     Files.write(Paths.get("curl-commands.txt"), 
-     *                 (curl + "\n").getBytes(), 
+     *     Files.write(Paths.get("curl-commands.txt"),
+     *                 (curl + "\n").getBytes(),
      *                 StandardOpenOption.APPEND);
      * });
      * }</pre>
-     * 
+     *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands
      * @param logHandler the consumer that will handle the generated curl command strings
+     * @see #logRequestCurlForHARRequest(boolean)
+     * @see #logRequestCurlForHARRequest(boolean, char)
      */
     public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
@@ -262,7 +274,7 @@ public final class HARUtil {
     @SuppressWarnings("rawtypes")
     public static String sendRequestByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
-        final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
+        final List<Map> entries = Maps.getByPath(map, "log.entries");   //NOSONAR
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
@@ -384,11 +396,11 @@ public final class HARUtil {
 
     /**
      * Sends an HTTP request based on a HAR request entry.
-     * 
+     *
      * <p>This method extracts all necessary information from a HAR request entry map
      * (URL, HTTP method, headers, body) and sends the corresponding HTTP request.
      * The response is deserialized into the specified response class.</p>
-     * 
+     *
      * <p>The method will:</p>
      * <ul>
      *   <li>Extract URL, HTTP method, headers from the request entry</li>
@@ -397,11 +409,13 @@ public final class HARUtil {
      *   <li>Log curl command if logging is enabled</li>
      *   <li>Send the HTTP request and return the response</li>
      * </ul>
-     * 
+     *
      * @param <T> the type of the response
      * @param requestEntry the HAR request entry map containing request details
      * @param responseClass the class to deserialize the response into
      * @return the response deserialized into the specified type
+     * @throws IllegalArgumentException if the HTTP method in the request entry is invalid
+     * @throws RuntimeException if the HTTP request execution fails
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
         final String url = getUrlByRequestEntry(requestEntry);
@@ -427,10 +441,25 @@ public final class HARUtil {
 
     /**
      * Retrieves a request entry from a HAR file based on URL filtering.
-     * 
+     *
      * <p>This method searches through all entries in the HAR file and returns the first
      * request entry whose URL matches the provided filter predicate.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
+     *     new File("capture.har"),
+     *     url -> url.contains("/api/users")
+     * );
+     *
+     * requestOpt.ifPresent(request -> {
+     *     String url = HARUtil.getUrlByRequestEntry(request);
+     *     HttpMethod method = HARUtil.getHttpMethodByRequestEntry(request);
+     *     HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
+     *     System.out.println("Found request: " + method + " " + url);
+     * });
+     * }</pre>
+     *
      * @param har the HAR file containing captured HTTP requests
      * @param filterForTargetUrl predicate to test URLs
      * @return an Optional containing the first matching request entry map, or empty if no match is found
@@ -487,12 +516,13 @@ public final class HARUtil {
 
     /**
      * Extracts the HTTP method from a HAR request entry.
-     * 
+     *
      * <p>The method name in the HAR entry is converted to uppercase and mapped
      * to the corresponding {@link HttpMethod} enum value.</p>
-     * 
+     *
      * @param requestEntry the HAR request entry map
      * @return the HTTP method enum value (GET, POST, PUT, DELETE, etc.)
+     * @throws IllegalArgumentException if the method value from the request entry is not a valid HttpMethod
      */
     public static HttpMethod getHttpMethodByRequestEntry(final Map<String, Object> requestEntry) {
         return HttpMethod.valueOf(requestEntry.get("method").toString().toUpperCase());

@@ -40,11 +40,11 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
      * <pre>{@code
      * ToDoubleTriFunction<Integer, Integer, Integer> volumeCalculator =
      *     (length, width, height) -> (double) length * width * height;
-     * double volume = volumeCalculator.applyAsDouble(2, 3, 4);  // returns 24.0
+     * double volume = volumeCalculator.applyAsDouble(2, 3, 4);   // returns 24.0
      *
      * ToDoubleTriFunction<String, Integer, Double> weightedLength =
      *     (str, weight, factor) -> str.length() * weight * factor;
-     * double result = weightedLength.applyAsDouble("Hello", 2, 1.5);  // returns 15.0
+     * double result = weightedLength.applyAsDouble("Hello", 2, 1.5);   // returns 15.0
      * }</pre>
      *
      * @param a the first function argument

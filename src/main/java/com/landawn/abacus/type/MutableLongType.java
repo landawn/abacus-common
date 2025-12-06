@@ -25,12 +25,23 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 
+    /**
+     * Constructs a MutableLongType.
+     * This constructor initializes the type handler for MutableLong objects.
+     */
     protected MutableLongType() {
         super(MUTABLE_LONG);
     }
 
     /**
      * Returns the Java class type that this type handler manages.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * Class<MutableLong> clazz = type.clazz();
+     * // clazz equals MutableLong.class
+     * }</pre>
      *
      * @return the {@link MutableLong} class object
      */
@@ -41,6 +52,17 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Converts a {@link MutableLong} object to its string representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * MutableLong ml = MutableLong.of(9876543210L);
+     * String str = type.stringOf(ml);
+     * // str equals "9876543210"
+     *
+     * String nullStr = type.stringOf(null);
+     * // nullStr equals null
+     * }</pre>
      *
      * @param x the MutableLong object to convert
      * @return the string representation of the long value, or {@code null} if the input is null
@@ -53,6 +75,19 @@ public class MutableLongType extends NumberType<MutableLong> {
     /**
      * Converts a string representation to a {@link MutableLong} object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * MutableLong ml = type.valueOf("9876543210");
+     * // ml.value() equals 9876543210L
+     *
+     * MutableLong nullMl = type.valueOf(null);
+     * // nullMl equals null
+     *
+     * MutableLong emptyMl = type.valueOf("");
+     * // emptyMl equals null
+     * }</pre>
+     *
      * @param str the string to convert
      * @return a MutableLong containing the parsed long value, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a long
@@ -64,6 +99,16 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Retrieves a {@link MutableLong} value from a ResultSet at the specified column index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * ResultSet rs = statement.executeQuery("SELECT user_id FROM users");
+     * if (rs.next()) {
+     *     MutableLong userId = type.get(rs, 1);
+     *     // userId contains the long value from the first column
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -78,6 +123,16 @@ public class MutableLongType extends NumberType<MutableLong> {
     /**
      * Retrieves a {@link MutableLong} value from a ResultSet using the specified column label.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * ResultSet rs = statement.executeQuery("SELECT user_id FROM users");
+     * if (rs.next()) {
+     *     MutableLong userId = type.get(rs, "user_id");
+     *     // userId contains the long value from the "user_id" column
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return a MutableLong containing the long value from the ResultSet
@@ -90,6 +145,19 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value of a {@link MutableLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET user_id = ? WHERE email = ?");
+     * MutableLong userId = MutableLong.of(1234567890L);
+     * type.set(stmt, 1, userId);
+     * stmt.executeUpdate();
+     *
+     * // For null value
+     * type.set(stmt, 1, null);
+     * // This sets the parameter to 0
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -104,6 +172,19 @@ public class MutableLongType extends NumberType<MutableLong> {
     /**
      * Sets a named parameter in a CallableStatement to the value of a {@link MutableLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * CallableStatement cstmt = conn.prepareCall("{call update_user(?, ?)}");
+     * MutableLong userId = MutableLong.of(1234567890L);
+     * type.set(cstmt, "user_id", userId);
+     * cstmt.execute();
+     *
+     * // For null value
+     * type.set(cstmt, "user_id", null);
+     * // This sets the parameter to 0
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the MutableLong value to set, or null
@@ -116,6 +197,19 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Appends the string representation of a {@link MutableLong} to an Appendable.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * StringBuilder sb = new StringBuilder();
+     * MutableLong ml = MutableLong.of(999999999L);
+     * type.appendTo(sb, ml);
+     * // sb.toString() equals "999999999"
+     *
+     * StringBuilder sb2 = new StringBuilder();
+     * type.appendTo(sb2, null);
+     * // sb2.toString() equals "null"
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the MutableLong value to append
@@ -133,6 +227,18 @@ public class MutableLongType extends NumberType<MutableLong> {
     /**
      * Writes the character representation of a {@link MutableLong} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
+     * CharacterWriter writer = new CharacterWriter();
+     * MutableLong ml = MutableLong.of(123456789012345L);
+     * type.writeCharacter(writer, ml, null);
+     * // Writes: 123456789012345
+     *
+     * type.writeCharacter(writer, null, null);
+     * // Writes: null
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the MutableLong value to write

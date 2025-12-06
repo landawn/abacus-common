@@ -51,7 +51,7 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
      * boolean result4 = isEmpty.applyAsBoolean("hello");   // returns false
      *
      * ToBooleanFunction<Integer> isEven = n -> n % 2 == 0;
-     * boolean result5 = isEven.applyAsBoolean(4);  // returns true
+     * boolean result5 = isEven.applyAsBoolean(4);   // returns true
      * }</pre>
      *
      * @param value the function argument

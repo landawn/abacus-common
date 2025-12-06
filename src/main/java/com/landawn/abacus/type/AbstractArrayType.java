@@ -69,12 +69,12 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry"};
-     * Type<String[]> type = TypeFactory.getType(String[].class);
+     * Type<String[]> type = Type.of(String[].class);
      * List<String> list = type.array2Collection(array, ArrayList.class);
      * // list contains: ["apple", "banana", "cherry"]
      *
      * Integer[] numbers = {1, 2, 3, 4, 5};
-     * Type<Integer[]> intType = TypeFactory.getType(Integer[].class);
+     * Type<Integer[]> intType = Type.of(Integer[].class);
      * Set<Integer> set = intType.array2Collection(numbers, HashSet.class);
      * // set contains: [1, 2, 3, 4, 5]
      *
@@ -110,11 +110,26 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * If the resulting array has elements, it also strips square brackets from the
      * first and last elements if they exist.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Split with element separator
+     * String[] result1 = split("1, 2, 3");
+     * // result1: ["1", "2", "3"]
+     *
+     * // Split with square brackets
+     * String[] result2 = split("[apple, banana, cherry]");
+     * // result2: ["apple", " banana", " cherry"] (brackets removed)
+     *
+     * // Split with comma only
+     * String[] result3 = split("red,green,blue");
+     * // result3: ["red", "green", "blue"]
+     * }</pre>
+     *
      * @param str the string to split
      * @return an array of substrings after splitting and processing
      */
     protected static String[] split(final String str) {
-        String[] strs = str.split(ELEMENT_SEPARATOR); // NOSONAR
+        String[] strs = str.split(ELEMENT_SEPARATOR);   // NOSONAR
 
         if ((strs.length == 1) && (str.indexOf(WD._COMMA) >= 0)) {
             strs = str.split(WD.COMMA);

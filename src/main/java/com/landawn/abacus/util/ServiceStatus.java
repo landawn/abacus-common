@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * 
  * // Convert from stored integer
  * int storedValue = 2;
- * ServiceStatus restoredStatus = ServiceStatus.valueOf(storedValue);  // SUSPENDED
+ * ServiceStatus restoredStatus = ServiceStatus.valueOf(storedValue);   // SUSPENDED
  * }</pre>
  * 
  * @see AccountStatus
@@ -103,7 +103,7 @@ public enum ServiceStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ServiceStatus status = ServiceStatus.ACTIVE;
-     * int value = status.intValue();  // returns 1
+     * int value = status.intValue();   // returns 1
      * // Store in database
      * database.saveStatus(serviceId, value);
      * }</pre>

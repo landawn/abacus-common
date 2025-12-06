@@ -989,7 +989,7 @@ public class RegExUtil2025Test extends TestBase {
         assertNull(RegExUtil.findFirst("", pattern));
 
         Pattern anyPattern = Pattern.compile(".*");
-        assertEquals("", RegExUtil.findFirst("", anyPattern)); // Empty match
+        assertEquals("", RegExUtil.findFirst("", anyPattern));   // Empty match
     }
 
     @Test
@@ -1017,7 +1017,7 @@ public class RegExUtil2025Test extends TestBase {
 
         // Test with PHONE_NUMBER_FINDER
         String phoneResult = RegExUtil.findFirst("Call 123 456 7890 or 098 765 4321", RegExUtil.PHONE_NUMBER_FINDER);
-        assertNotNull(phoneResult); // Phone pattern finds something, exact match depends on pattern
+        assertNotNull(phoneResult);   // Phone pattern finds something, exact match depends on pattern
     }
 
     @Test
@@ -1102,11 +1102,11 @@ public class RegExUtil2025Test extends TestBase {
         assertEquals("789", RegExUtil.findLast("abc123def456ghi789", pattern));
 
         Pattern wordPattern = Pattern.compile("\\b\\w{4}\\b");
-        assertEquals("char", RegExUtil.findLast("This is a test with many four char items", wordPattern)); // "char" is the last 4-letter word
+        assertEquals("char", RegExUtil.findLast("This is a test with many four char items", wordPattern));   // "char" is the last 4-letter word
 
         // Test with overlapping possibilities
         Pattern overlapPattern = Pattern.compile("\\d{2}");
-        assertEquals("90", RegExUtil.findLast("12345678901234567890", overlapPattern)); // Last two digits are "90"
+        assertEquals("90", RegExUtil.findLast("12345678901234567890", overlapPattern));   // Last two digits are "90"
     }
 
     @Test
@@ -1136,7 +1136,7 @@ public class RegExUtil2025Test extends TestBase {
         assertNull(RegExUtil.findLast("", pattern));
 
         Pattern anyPattern = Pattern.compile(".*");
-        assertEquals("", RegExUtil.findLast("", anyPattern)); // Empty match
+        assertEquals("", RegExUtil.findLast("", anyPattern));   // Empty match
     }
 
     @Test
@@ -1164,7 +1164,7 @@ public class RegExUtil2025Test extends TestBase {
 
         // Test with WHITESPACE_FINDER - finds the last whitespace sequence
         String whitespaceResult = RegExUtil.findLast("Hello World  Test", RegExUtil.WHITESPACE_FINDER);
-        assertNotNull(whitespaceResult); // Will find whitespace, but could be single or double space
+        assertNotNull(whitespaceResult);   // Will find whitespace, but could be single or double space
     }
 
     @Test
@@ -1297,7 +1297,7 @@ public class RegExUtil2025Test extends TestBase {
         String multilineText = "Line 1: 100\nLine 2: 200\nLine 3: 300";
 
         Pattern numberPattern = Pattern.compile("\\d+");
-        assertEquals("1", RegExUtil.findFirst(multilineText, numberPattern)); // Finds "1" in "Line 1"
+        assertEquals("1", RegExUtil.findFirst(multilineText, numberPattern));   // Finds "1" in "Line 1"
         assertEquals("300", RegExUtil.findLast(multilineText, numberPattern));
 
         Pattern lineStartPattern = Pattern.compile("^Line \\d+", Pattern.MULTILINE);
@@ -1344,7 +1344,7 @@ public class RegExUtil2025Test extends TestBase {
         // Pattern matching entire string
         Pattern fullMatchPattern = Pattern.compile(".*");
         assertEquals("Hello World", RegExUtil.findFirst("Hello World", fullMatchPattern));
-        assertEquals("", RegExUtil.findLast("Hello World", fullMatchPattern)); // Last match might be empty at the end
+        assertEquals("", RegExUtil.findLast("Hello World", fullMatchPattern));   // Last match might be empty at the end
 
         // Backreference pattern
         Pattern backrefPattern = Pattern.compile("(\\w+)\\s+\\1");
@@ -1392,7 +1392,7 @@ public class RegExUtil2025Test extends TestBase {
     public void testFindFirstStringRegexWithEmptySource() {
         assertNull(RegExUtil.findFirst("", "\\d+"));
         assertNull(RegExUtil.findFirst("", "test"));
-        assertEquals("", RegExUtil.findFirst("", ".*")); // Pattern matches empty string
+        assertEquals("", RegExUtil.findFirst("", ".*"));   // Pattern matches empty string
     }
 
     @Test
@@ -1525,7 +1525,7 @@ public class RegExUtil2025Test extends TestBase {
     public void testFindLastStringRegexWithEmptySource() {
         assertNull(RegExUtil.findLast("", "\\d+"));
         assertNull(RegExUtil.findLast("", "test"));
-        assertEquals("", RegExUtil.findLast("", ".*")); // Pattern matches empty string
+        assertEquals("", RegExUtil.findLast("", ".*"));   // Pattern matches empty string
     }
 
     @Test

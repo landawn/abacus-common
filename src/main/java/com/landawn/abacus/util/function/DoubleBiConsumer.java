@@ -38,7 +38,7 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * <pre>{@code
      * DoubleBiConsumer pointPrinter = (x, y) ->
      *     System.out.println("Point: (" + x + ", " + y + ")");
-     * pointPrinter.accept(3.5, 7.2);  // Prints: Point: (3.5, 7.2)
+     * pointPrinter.accept(3.5, 7.2);   // Prints: Point: (3.5, 7.2)
      *
      * Map<Double, Double> coordinates = new HashMap<>();
      * DoubleBiConsumer coordRecorder = (lat, lon) -> coordinates.put(lat, lon);
@@ -61,7 +61,7 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * DoubleBiConsumer logger = (x, y) -> System.out.println("Values: " + x + ", " + y);
      * DoubleBiConsumer validator = (x, y) -> { if (x < 0 || y < 0) throw new IllegalArgumentException(); };
      * DoubleBiConsumer combined = logger.andThen(validator);
-     * combined.accept(1.5, 2.5);  // Logs then validates
+     * combined.accept(1.5, 2.5);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

@@ -199,6 +199,10 @@ public final class WSSecurityUtil {
      * @param password the password byte array to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
+     * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @see #doPasswordDigest(String, String, String)
+     * @see #generateNonce(int)
+     * @see #generateDigest(byte[])
      */
     public static String doPasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
         if (nonce == null) {
@@ -234,6 +238,13 @@ public final class WSSecurityUtil {
      * converting all string parameters to byte arrays using the default charset. The resulting
      * digest follows the WS-Security UsernameToken specification.</p>
      *
+     * <p><b>Important:</b> This method uses the default charset (Charsets.DEFAULT) for string-to-byte
+     * conversion. The choice of charset affects the resulting digest, as different charsets produce
+     * different byte representations of the same string. For maximum interoperability, especially with
+     * non-ASCII characters, consider using UTF-8 explicitly by calling the byte array version of this
+     * method with string.getBytes(StandardCharsets.UTF_8). Both parties (client and server) must use
+     * the same charset for the digest to match.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using string inputs
@@ -255,6 +266,10 @@ public final class WSSecurityUtil {
      * @param password the password string to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
+     * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @see #doPasswordDigest(byte[], byte[], byte[])
+     * @see #generateNonce(int)
+     * @see #generateDigest(byte[])
      */
     public static String doPasswordDigest(final String nonce, final String created, final String password) {
         if (nonce == null) {

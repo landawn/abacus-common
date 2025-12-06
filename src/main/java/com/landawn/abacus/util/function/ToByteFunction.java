@@ -57,7 +57,7 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
      * byte result4 = fromNum.applyAsByte(256);   // returns 0 (overflow)
      *
      * ToByteFunction<String> firstByte = str -> (byte) str.charAt(0);
-     * byte result5 = firstByte.applyAsByte("Hello");  // returns 72 (ASCII 'H')
+     * byte result5 = firstByte.applyAsByte("Hello");   // returns 72 (ASCII 'H')
      * }</pre>
      *
      * @param value the function argument

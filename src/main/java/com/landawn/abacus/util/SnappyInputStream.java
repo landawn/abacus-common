@@ -106,7 +106,7 @@ public final class SnappyInputStream extends InputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
-     * int bytesRead = snappyStream.read(buffer, 10, 100);  // Read up to 100 bytes starting at index 10
+     * int bytesRead = snappyStream.read(buffer, 10, 100);   // Read up to 100 bytes starting at index 10
      * }</pre>
      *
      * @param b the buffer into which the data is read
@@ -130,7 +130,7 @@ public final class SnappyInputStream extends InputStream {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long skipped = snappyStream.skip(1024);  // Try to skip 1024 bytes
+     * long skipped = snappyStream.skip(1024);   // Try to skip 1024 bytes
      * }</pre>
      *
      * @param n the number of bytes to be skipped

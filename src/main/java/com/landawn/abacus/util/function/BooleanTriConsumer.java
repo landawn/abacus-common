@@ -34,7 +34,7 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * <pre>{@code
      * BooleanTriConsumer logicalOps = (a, b, c) ->
      *     System.out.println("AND: " + (a && b && c) + ", OR: " + (a || b || c));
-     * logicalOps.accept(true, false, true);  // Prints: AND: false, OR: true
+     * logicalOps.accept(true, false, true);   // Prints: AND: false, OR: true
      * }</pre>
      *
      * @param a the first input argument
@@ -54,7 +54,7 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * BooleanTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
      * BooleanTriConsumer andPrinter = (a, b, c) -> System.out.println("AND result: " + (a && b && c));
      * BooleanTriConsumer combined = logger.andThen(andPrinter);
-     * combined.accept(true, true, false);  // Logs then calculates AND
+     * combined.accept(true, true, false);   // Logs then calculates AND
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

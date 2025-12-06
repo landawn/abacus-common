@@ -25,10 +25,10 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OperationType opType = OperationType.UPDATE;
- * int intValue = opType.intValue();  // Returns 4
+ * int intValue = opType.intValue();   // Returns 4
  * 
  * // Convert from int value
- * OperationType retrieved = OperationType.valueOf(4);  // Returns UPDATE
+ * OperationType retrieved = OperationType.valueOf(4);   // Returns UPDATE
  * }</pre>
  */
 public enum OperationType {

@@ -57,15 +57,15 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 42;
-     * float result1 = ToFloatFunction.FROM_NUM.applyAsFloat(intValue);  // returns 42.0f
+     * float result1 = ToFloatFunction.FROM_NUM.applyAsFloat(intValue);   // returns 42.0f
      *
      * Double doubleValue = 123.456;
-     * float result2 = ToFloatFunction.FROM_NUM.applyAsFloat(doubleValue);  // returns 123.456f
+     * float result2 = ToFloatFunction.FROM_NUM.applyAsFloat(doubleValue);   // returns 123.456f
      *
      * BigDecimal bigDecimal = new BigDecimal("999.999");
-     * float result3 = ToFloatFunction.FROM_NUM.applyAsFloat(bigDecimal);  // returns 999.999f
+     * float result3 = ToFloatFunction.FROM_NUM.applyAsFloat(bigDecimal);   // returns 999.999f
      *
-     * float defaultValue = ToFloatFunction.FROM_NUM.applyAsFloat(null);  // returns 0.0f
+     * float defaultValue = ToFloatFunction.FROM_NUM.applyAsFloat(null);   // returns 0.0f
      * }</pre>
      */
     ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toFloat(value);
@@ -76,13 +76,13 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToFloatFunction<String> parseFunction = Float::parseFloat;
-     * float parsed = parseFunction.applyAsFloat("3.14");  // Returns 3.14f
+     * float parsed = parseFunction.applyAsFloat("3.14");   // Returns 3.14f
      *
      * ToFloatFunction<Integer> convertFunction = Integer::floatValue;
-     * float converted = convertFunction.applyAsFloat(42);  // Returns 42.0f
+     * float converted = convertFunction.applyAsFloat(42);   // Returns 42.0f
      *
      * ToFloatFunction<Double> castFunction = Double::floatValue;
-     * float casted = castFunction.applyAsFloat(123.456);  // Returns 123.456f
+     * float casted = castFunction.applyAsFloat(123.456);   // Returns 123.456f
      * }</pre>
      *
      * @param value the function argument

@@ -32,7 +32,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  *
  * // Reading from database
  * NClob nclob = type.get(resultSet, 1);
- * String content = type.stringOf(nclob);  // Converts NClob to String
+ * String content = type.stringOf(nclob);   // Converts NClob to String
  *
  * // Writing to database
  * type.set(preparedStatement, 1, nclob);
@@ -44,10 +44,20 @@ public class NClobType extends AbstractType<NClob> {
 
     private final Class<NClob> clazz;
 
+    /**
+     * Constructs an NClobType for the standard NClob class.
+     * This constructor initializes the type handler for NCLOB database objects.
+     */
     NClobType() {
         this(NClob.class);
     }
 
+    /**
+     * Constructs an NClobType for a specific NClob implementation class.
+     * This constructor allows handling of custom NClob implementations.
+     *
+     * @param clazz the specific NClob class or subclass to handle
+     */
     NClobType(Class<? extends NClob> clazz) {
         super(NCLOB);
         this.clazz = (Class<NClob>) clazz;
@@ -74,7 +84,7 @@ public class NClobType extends AbstractType<NClob> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NClob nclob = resultSet.getNClob(1);
-     * String content = type.stringOf(nclob);  // Extracts full content and frees NClob
+     * String content = type.stringOf(nclob);   // Extracts full content and frees NClob
      * }</pre>
      *
      * @param x the NClob object to convert
@@ -95,7 +105,7 @@ public class NClobType extends AbstractType<NClob> {
             try {
                 x.free();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                throw new UncheckedSQLException(e);   //NOSONAR
             }
         }
     }

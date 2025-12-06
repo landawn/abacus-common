@@ -97,7 +97,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     public IdentityHashSet(final Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
 
-        addAll(c); // NOSONAR
+        addAll(c);   // NOSONAR
     }
 
     /**
@@ -131,7 +131,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
      * set.add(s);
-     * boolean removed = set.remove(s);  // returns true
+     * boolean removed = set.remove(s);   // returns true
      * }</pre>
      *
      * @param o object to be removed from this set, if present
@@ -152,7 +152,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * String s1 = "a", s2 = "b";
      * set.add(s1);
      * set.add(s2);
-     * boolean result = set.containsAll(Arrays.asList(s1, s2));  // returns true
+     * boolean result = set.containsAll(Arrays.asList(s1, s2));   // returns true
      * }</pre>
      *
      * @param c collection to be checked for containment in this set
@@ -176,7 +176,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * List<String> list = Arrays.asList("a", "b", "c");
-     * boolean changed = set.addAll(list);  // returns true
+     * boolean changed = set.addAll(list);   // returns true
      * }</pre>
      *
      * @param c collection containing elements to be added to this set
@@ -208,7 +208,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * String s1 = "a", s2 = "b";
      * set.add(s1);
      * set.add(s2);
-     * boolean changed = set.removeAll(Arrays.asList(s1));  // returns true, removes s1
+     * boolean changed = set.removeAll(Arrays.asList(s1));   // returns true, removes s1
      * }</pre>
      *
      * @param c collection containing elements to be removed from this set
@@ -241,7 +241,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * set.add(s1);
      * set.add(s2);
      * set.add(s3);
-     * boolean changed = set.retainAll(Arrays.asList(s1, s2));  // returns true, keeps only s1 and s2
+     * boolean changed = set.retainAll(Arrays.asList(s1, s2));   // returns true, keeps only s1 and s2
      * }</pre>
      *
      * @param c collection containing elements to be retained in this set
@@ -330,7 +330,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
      * set.add("b");
-     * Object[] array = set.toArray();  // returns array with "a" and "b"
+     * Object[] array = set.toArray();   // returns array with "a" and "b"
      * }</pre>
      *
      * @return an array containing all of the elements in this set
@@ -351,7 +351,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
      * set.add("b");
-     * String[] array = set.toArray(new String[0]);  // returns String array with "a" and "b"
+     * String[] array = set.toArray(new String[0]);   // returns String array with "a" and "b"
      * }</pre>
      *
      * @param <A> the runtime type of the array to contain the collection
@@ -374,7 +374,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
      * set.add("b");
-     * int count = set.size();  // returns 2
+     * int count = set.size();   // returns 2
      * }</pre>
      *
      * @return the number of elements in this set
@@ -390,9 +390,9 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
-     * boolean empty = set.isEmpty();  // returns true
+     * boolean empty = set.isEmpty();   // returns true
      * set.add("a");
-     * empty = set.isEmpty();  // returns false
+     * empty = set.isEmpty();   // returns false
      * }</pre>
      *
      * @return {@code true} if this set contains no elements
@@ -432,7 +432,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * String s = "hello";
      * set1.add(s);
      * set2.add(s);
-     * boolean equal = set1.equals(set2);  // returns true
+     * boolean equal = set1.equals(set2);   // returns true
      * }</pre>
      *
      * @param o object to be compared for equality with this set
@@ -476,7 +476,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
      * set.add("b");
-     * String str = set.toString();  // returns something like "[a, b]"
+     * String str = set.toString();   // returns something like "[a, b]"
      * }</pre>
      *
      * @return a string representation of this set

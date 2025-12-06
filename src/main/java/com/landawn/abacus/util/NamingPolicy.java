@@ -36,8 +36,8 @@ import com.landawn.abacus.annotation.Beta;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String original = "user-name";
- * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original);  // "userName"
- * String snakeCase = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert(original);  // "user_name"
+ * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original);   // "userName"
+ * String snakeCase = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert(original);   // "user_name"
  * }</pre>
  * 
  * @see Strings#toCamelCase(String)
@@ -170,12 +170,17 @@ public enum NamingPolicy {
      *
      * // Convert to snake case
      * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName");   // "user_name"
+     *
+     * // Null and empty string handling
+     * String result4 = NamingPolicy.LOWER_CAMEL_CASE.convert(null);                   // null
+     * String result5 = NamingPolicy.LOWER_CAMEL_CASE.convert("");                     // ""
      * }</pre>
      *
-     * @param str the string to convert; may contain various separators (underscores, hyphens, spaces)
-     *            or be in camelCase/PascalCase format
-     * @return the converted string according to this naming policy's rules; returns the result of
-     *         applying the policy's transformation function to the input string
+     * @param str the string to convert; may be {@code null}, empty, or contain various separators
+     *            (underscores, hyphens, spaces) or be in camelCase/PascalCase format
+     * @return the converted string according to this naming policy's rules; returns {@code null} if
+     *         the input is {@code null}, returns an empty string if the input is empty, otherwise
+     *         returns the result of applying the policy's transformation function to the input string
      * @see #func()
      */
     public String convert(final String str) {

@@ -80,6 +80,13 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * The declaring name represents the type in a format suitable for type declarations,
      * using canonical class names with type parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
+     * String declaringName = type.declaringName();
+     * // Returns: "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"
+     * }</pre>
+     *
      * @return the declaring name of this type (e.g., "com.google.common.collect.Multimap&lt;String, Integer&gt;")
      */
     @Override
@@ -89,6 +96,14 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
     /**
      * Returns the Class object representing the multimap type handled by this type handler.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ArrayListMultimap<String, Integer>> type =
+     *     TypeFactory.getType("ArrayListMultimap<String, Integer>");
+     * Class<?> clazz = type.clazz();
+     * // Returns: ArrayListMultimap.class
+     * }</pre>
      *
      * @return the Class object for the multimap type
      */
@@ -102,6 +117,17 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * For multimap types, this includes the key type and the collection value type.
      * SetMultimap types return [KeyType, Set&lt;ValueType&gt;], while other multimaps return [KeyType, List&lt;ValueType&gt;].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // Returns: [Type<String>, Type<List<Integer>>]
+     *
+     * Type<SetMultimap<String, Integer>> setType = TypeFactory.getType("SetMultimap<String, Integer>");
+     * Type<?>[] setParamTypes = setType.getParameterTypes();
+     * // Returns: [Type<String>, Type<Set<Integer>>]
+     * }</pre>
+     *
      * @return an array containing the key type and collection value type
      */
     @Override
@@ -109,6 +135,12 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * Multimap types are always generic types as they have key and value type parameters.
+     *
+     * @return {@code true}, as Multimap is a generic type
+     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -117,6 +149,13 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Indicates whether instances of this type can be serialized.
      * Guava multimaps are serializable through their Map representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
+     * boolean serializable = type.isSerializable();
+     * // Returns: true
+     * }</pre>
      *
      * @return {@code true}, as multimaps can be serialized
      */
@@ -209,6 +248,17 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Generates a type name string for a multimap type with the specified key and value types.
      * The format depends on whether a declaring name or full name is requested.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String typeName = GuavaMultimapType.getTypeName(
+     *     Multimap.class, "String", "Integer", false);
+     * // Returns: "com.google.common.collect.Multimap<String, Integer>"
+     *
+     * String declaringName = GuavaMultimapType.getTypeName(
+     *     Multimap.class, "String", "Integer", true);
+     * // Returns: "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"
+     * }</pre>
      *
      * @param typeClass the multimap class
      * @param keyTypeName the name of the key type

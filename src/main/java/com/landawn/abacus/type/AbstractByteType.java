@@ -36,6 +36,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractByteType extends NumberType<Number> {
 
+    /**
+     * Constructs an AbstractByteType with the specified type name.
+     *
+     * @param typeName the name of the byte type (e.g., "Byte", "byte")
+     */
     protected AbstractByteType(final String typeName) {
         super(typeName);
     }
@@ -109,7 +114,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * <pre>{@code
      * AbstractByteType type = TypeFactory.getType(Byte.class);
      * char[] buffer = "100".toCharArray();
-     * Byte value = type.valueOf(buffer, 0, 3);  // returns 100
+     * Byte value = type.valueOf(buffer, 0, 3);   // returns 100
      * }</pre>
      *
      * @param cbuf the character array to convert
@@ -142,11 +147,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive byte types
      * PrimitiveByteType type = TypeFactory.getType(byte.class);
-     * byte value = type.get(rs, 1);  // Returns 0 for SQL NULL
+     * byte value = type.get(rs, 1);   // Returns 0 for SQL NULL
      *
      * // For wrapper Byte types
      * ByteType type = TypeFactory.getType(Byte.class);
-     * Byte value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
+     * Byte value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -188,11 +193,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive byte types
      * PrimitiveByteType type = TypeFactory.getType(byte.class);
-     * byte value = type.get(rs, "status");  // Returns 0 for SQL NULL
+     * byte value = type.get(rs, "status");   // Returns 0 for SQL NULL
      *
      * // For wrapper Byte types
      * ByteType type = TypeFactory.getType(Byte.class);
-     * Byte value = type.get(rs, "status");  // Returns null for SQL NULL (overridden in subclass)
+     * Byte value = type.get(rs, "status");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

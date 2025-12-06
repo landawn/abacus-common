@@ -33,7 +33,7 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanTriFunction<String> formatter = (a, b, c) -> String.format("%b,%b,%b", a, b, c);
-     * String result = formatter.apply(true, false, true);  // Returns "true,false,true"
+     * String result = formatter.apply(true, false, true);   // Returns "true,false,true"
      * }</pre>
      *
      * @param a the first function argument

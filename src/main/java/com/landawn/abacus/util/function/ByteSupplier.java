@@ -50,7 +50,7 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
      *     private byte count = 0;
      *     public byte getAsByte() { return count++; }
      * };
-     * byte value = counter.getAsByte();  // Returns 0, then 1, 2, ...
+     * byte value = counter.getAsByte();   // Returns 0, then 1, 2, ...
      * }</pre>
      *
      * @return a byte value

@@ -88,24 +88,24 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Creating ranges with different boundary types
- * Range<Integer> closedRange = Range.closed(1, 10);  // [1, 10] - includes 1 and 10
- * Range<Integer> openRange = Range.open(1, 10);  // (1, 10) - excludes 1 and 10
- * Range<Integer> halfOpen = Range.closedOpen(1, 10);  // [1, 10) - includes 1, excludes 10
- * Range<Integer> halfClosed = Range.openClosed(1, 10);  // (1, 10] - excludes 1, includes 10
+ * Range<Integer> closedRange = Range.closed(1, 10);   // [1, 10] - includes 1 and 10
+ * Range<Integer> openRange = Range.open(1, 10);   // (1, 10) - excludes 1 and 10
+ * Range<Integer> halfOpen = Range.closedOpen(1, 10);   // [1, 10) - includes 1, excludes 10
+ * Range<Integer> halfClosed = Range.openClosed(1, 10);   // (1, 10] - excludes 1, includes 10
  *
  * // Single element ranges
- * Range<String> single = Range.just("value");  // [value, value] - contains only "value"
+ * Range<String> single = Range.just("value");   // [value, value] - contains only "value"
  *
  * // Containment testing
- * boolean contains5 = closedRange.contains(5);  // true - 5 is in [1, 10]
- * boolean contains1 = openRange.contains(1);  // false - 1 is not in (1, 10)
- * boolean contains10 = halfOpen.contains(10);  // false - 10 is not in [1, 10)
+ * boolean contains5 = closedRange.contains(5);   // true - 5 is in [1, 10]
+ * boolean contains1 = openRange.contains(1);   // false - 1 is not in (1, 10)
+ * boolean contains10 = halfOpen.contains(10);   // false - 10 is not in [1, 10)
  *
  * // Range operations
  * Range<Integer> other = Range.closed(5, 15);
- * boolean overlaps = closedRange.isOverlappedBy(other);  // true - ranges overlap
- * Optional<Range<Integer>> intersection = closedRange.intersection(other);  // [5, 10]
- * Range<Integer> span = closedRange.span(other);  // [1, 15] - encompasses both ranges
+ * boolean overlaps = closedRange.isOverlappedBy(other);   // true - ranges overlap
+ * Optional<Range<Integer>> intersection = closedRange.intersection(other);   // [5, 10]
+ * Range<Integer> span = closedRange.span(other);   // [1, 15] - encompasses both ranges
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -118,21 +118,21 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Functional transformation
  * Range<Integer> intRange = Range.closed(1, 5);
- * Range<String> stringRange = intRange.map(String::valueOf);  // ["1", "5"]
+ * Range<String> stringRange = intRange.map(String::valueOf);   // ["1", "5"]
  *
  * // Collection containment
  * List<Integer> values = Arrays.asList(2, 3, 4);
- * boolean allInRange = closedRange.containsAll(values);  // true for [1, 10]
+ * boolean allInRange = closedRange.containsAll(values);   // true for [1, 10]
  *
  * // Range positioning tests
  * Range<Integer> before = Range.closed(-5, 0);
  * Range<Integer> after = Range.closed(15, 20);
- * boolean isBefore = before.isBeforeRange(closedRange);  // true
- * boolean isAfter = after.isAfterRange(closedRange);  // true
+ * boolean isBefore = before.isBeforeRange(closedRange);   // true
+ * boolean isAfter = after.isAfterRange(closedRange);   // true
  *
  * // Element positioning
- * boolean startsAt1 = closedRange.isStartedBy(1);  // true for [1, 10]
- * boolean endsAt10 = closedRange.isEndedBy(10);  // true for [1, 10]
+ * boolean startsAt1 = closedRange.isStartedBy(1);   // true for [1, 10]
+ * boolean endsAt10 = closedRange.isEndedBy(10);   // true for [1, 10]
  * }</pre>
  *
  * <p><b>Endpoint System Design:</b>
@@ -316,10 +316,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(4);   // returns false
      * }</pre>
      *
-     * @param <T> the type of the elements in this range, must implement Comparable
-     * @param element the single value to use for both endpoints of this range, must not be null
-     * @return a new Range containing only the specified element
-     * @throws IllegalArgumentException if the element is null
+     * @param <T> the type of the elements in this range, must implement Comparable.
+     * @param element the single value to use for both endpoints of this range, must not be null.
+     * @return a new Range containing only the specified element.
+     * @throws IllegalArgumentException if the element is null.
      */
     public static <T extends Comparable<? super T>> Range<T> just(final T element) throws IllegalArgumentException {
         return closed(element, element);
@@ -338,11 +338,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(5);   // returns false
      * }</pre>
      *
-     * @param <T> the type of the elements in this range, must implement Comparable
-     * @param min the lower bound (exclusive) of the range, must not be null
-     * @param max the upper bound (exclusive) of the range, must not be null
-     * @return a new open Range from min (exclusive) to max (exclusive)
-     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max
+     * @param <T> the type of the elements in this range, must implement Comparable.
+     * @param min the lower bound (exclusive) of the range, must not be null.
+     * @param max the upper bound (exclusive) of the range, must not be null.
+     * @return a new open Range from min (exclusive) to max (exclusive).
+     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -366,11 +366,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(5);   // returns true
      * }</pre>
      *
-     * @param <T> the type of the elements in this range, must implement Comparable
-     * @param min the lower bound (exclusive) of the range, must not be null
-     * @param max the upper bound (inclusive) of the range, must not be null
-     * @return a new Range from min (exclusive) to max (inclusive)
-     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max
+     * @param <T> the type of the elements in this range, must implement Comparable.
+     * @param min the lower bound (exclusive) of the range, must not be null.
+     * @param max the upper bound (inclusive) of the range, must not be null.
+     * @return a new Range from min (exclusive) to max (inclusive).
+     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -394,11 +394,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(5);   // returns false
      * }</pre>
      *
-     * @param <T> the type of the elements in this range, must implement Comparable
-     * @param min the lower bound (inclusive) of the range, must not be null
-     * @param max the upper bound (exclusive) of the range, must not be null
-     * @return a new Range from min (inclusive) to max (exclusive)
-     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max
+     * @param <T> the type of the elements in this range, must implement Comparable.
+     * @param min the lower bound (inclusive) of the range, must not be null.
+     * @param max the upper bound (exclusive) of the range, must not be null.
+     * @return a new Range from min (inclusive) to max (exclusive).
+     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -421,11 +421,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(5);   // returns true
      * }</pre>
      *
-     * @param <T> the type of the elements in this range, must implement Comparable
-     * @param min the lower bound (inclusive) of the range, must not be null
-     * @param max the upper bound (inclusive) of the range, must not be null
-     * @return a new closed Range from min (inclusive) to max (inclusive)
-     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max
+     * @param <T> the type of the elements in this range, must implement Comparable.
+     * @param min the lower bound (inclusive) of the range, must not be null.
+     * @param max the upper bound (inclusive) of the range, must not be null.
+     * @return a new closed Range from min (inclusive) to max (inclusive).
+     * @throws IllegalArgumentException if min or max is {@code null}, or if min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -448,9 +448,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * // Creates range ["1", "5"]
      * }</pre>
      *
-     * @param <U> the type of elements in the resulting range, must implement Comparable
-     * @param mapper the function to apply to both endpoints, must not be {@code null} and must not return {@code null} values
-     * @return a new Range with transformed endpoints maintaining the same bound types
+     * @param <U> the type of elements in the resulting range, must implement Comparable.
+     * @param mapper the function to apply to both endpoints, must not be {@code null} and must not return {@code null} values.
+     * @return a new Range with transformed endpoints maintaining the same bound types.
      */
     public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
         return new Range<>(new LowerEndpoint<>(mapper.apply(lowerEndpoint.value), lowerEndpoint.isClosed),
@@ -460,7 +460,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      * Returns the bound type of this range, indicating whether the lower and upper
      * endpoints are open (exclusive) or closed (inclusive).
-     * 
+     *
      * <p>The possible bound types are:</p>
      * <ul>
      *   <li>OPEN_OPEN - both endpoints are exclusive</li>
@@ -469,7 +469,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *   <li>CLOSED_CLOSED - both endpoints are inclusive</li>
      * </ul>
      *
-     * @return the BoundType enum value representing this range's endpoint types
+     * @return the BoundType enum value representing this range's endpoint types.
      */
     public BoundType boundType() {
         return boundType;
@@ -479,14 +479,14 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Returns the lower endpoint (minimum value) of this range. This value represents
      * the lower bound of the range, which may be either inclusive or exclusive depending
      * on the range's bound type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 5);
-     * Integer lower = range.lowerEndpoint();  // returns 1
+     * Integer lower = range.lowerEndpoint();   // returns 1
      * }</pre>
      *
-     * @return the lower endpoint value of this range
+     * @return the lower endpoint value of this range.
      */
     public T lowerEndpoint() {
         return lowerEndpoint.value;
@@ -496,14 +496,14 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Returns the upper endpoint (maximum value) of this range. This value represents
      * the upper bound of the range, which may be either inclusive or exclusive depending
      * on the range's bound type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 5);
-     * Integer upper = range.upperEndpoint();  // returns 5
+     * Integer upper = range.upperEndpoint();   // returns 5
      * }</pre>
      *
-     * @return the upper endpoint value of this range
+     * @return the upper endpoint value of this range.
      */
     public T upperEndpoint() {
         return upperEndpoint.value;
@@ -515,7 +515,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      * Checks whether the specified element occurs within this range. The containment
      * check respects the bound types of the range endpoints.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closedOpen(1, 5);
@@ -525,8 +525,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * range.contains(null);   // returns false
      * }</pre>
      *
-     * @param valueToFind the element to check for containment, {@code null} returns false
-     * @return {@code true} if the specified element occurs within this range's bounds, {@code false} otherwise
+     * @param valueToFind the element to check for containment, {@code null} returns false.
+     * @return {@code true} if the specified element occurs within this range's bounds, {@code false} otherwise.
      */
     public boolean contains(final T valueToFind) {
         if (valueToFind == null) {
@@ -540,20 +540,20 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether all elements in the specified collection are contained within this range.
      * Returns {@code true} if the collection is empty or if every {@code non-null} element in the collection
      * is within the range bounds.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 10);
      * List<Integer> values = Arrays.asList(2, 5, 8);
-     * range.containsAll(values);  // returns true
-     * 
+     * range.containsAll(values);   // returns true
+     *
      * values = Arrays.asList(2, 5, 15);
-     * range.containsAll(values);  // returns {@code false} (15 is outside range)
+     * range.containsAll(values);   // returns {@code false} (15 is outside range)
      * }</pre>
      *
-     * @param c the collection of elements to check, may be {@code null} or empty
+     * @param c the collection of elements to check, may be {@code null} or empty.
      * @return {@code true} if all elements in the collection are contained within this range,
-     *         {@code true} if the collection is {@code null} or empty, {@code false} otherwise
+     *         {@code true} if the collection is {@code null} or empty, {@code false} otherwise.
      */
     public boolean containsAll(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -576,10 +576,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range1 = Range.closed(5, 10);
-     * range1.isStartedBy(5);  // returns true
+     * range1.isStartedBy(5);   // returns true
      * 
      * Range<Integer> range2 = Range.open(5, 10);
-     * range2.isStartedBy(5);  // returns {@code false} (lower bound is exclusive)
+     * range2.isStartedBy(5);   // returns {@code false} (lower bound is exclusive)
      * }</pre>
      *
      * @param element the element to check against the lower endpoint, {@code null} returns false
@@ -600,10 +600,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range1 = Range.closed(5, 10);
-     * range1.isEndedBy(10);  // returns true
+     * range1.isEndedBy(10);   // returns true
      * 
      * Range<Integer> range2 = Range.closedOpen(5, 10);
-     * range2.isEndedBy(10);  // returns {@code false} (upper bound is exclusive)
+     * range2.isEndedBy(10);   // returns {@code false} (upper bound is exclusive)
      * }</pre>
      *
      * @param element the element to check against the upper endpoint, {@code null} returns false
@@ -917,13 +917,13 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> emptyRange = Range.open(5, 5);
-     * emptyRange.isEmpty();  // returns true
+     * emptyRange.isEmpty();   // returns true
      * 
      * Range<Integer> pointRange = Range.closed(5, 5);
-     * pointRange.isEmpty();  // returns {@code false} (contains the value 5)
+     * pointRange.isEmpty();   // returns {@code false} (contains the value 5)
      * 
      * Range<Integer> normalRange = Range.open(5, 6);
-     * normalRange.isEmpty();  // returns false
+     * normalRange.isEmpty();   // returns false
      * }</pre>
      *
      * @return {@code true} if this range contains no values, {@code false} otherwise

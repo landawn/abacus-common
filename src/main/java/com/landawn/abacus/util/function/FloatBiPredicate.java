@@ -145,7 +145,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * // Combined: both positive AND sum less than 10
      * FloatBiPredicate combined = bothPositive.and(sumLessThan10);
-     * boolean result = combined.test(3.0f, 4.0f);  // true
+     * boolean result = combined.test(3.0f, 4.0f);   // true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -170,7 +170,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * // Combined: either zero OR both negative
      * FloatBiPredicate combined = eitherZero.or(bothNegative);
-     * boolean result = combined.test(-1.0f, -2.0f);  // true
+     * boolean result = combined.test(-1.0f, -2.0f);   // true
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

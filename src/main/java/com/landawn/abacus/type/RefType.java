@@ -20,10 +20,54 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Type handler for java.sql.Ref objects.
+ * A SQL REF is a reference to an SQL structured type value in the database. It is used in
+ * object-relational mapping to reference rows or objects in the database.
+ *
+ * <p>This type handler provides limited functionality because Ref objects are database-specific
+ * and cannot be meaningfully serialized to or deserialized from strings. The primary use case
+ * is for reading Ref values from ResultSets and setting them in PreparedStatements or CallableStatements.
+ *
+ * <p><b>Important Notes:</b></p>
+ * <ul>
+ *   <li>This type is NOT serializable (isSerializable() returns false)</li>
+ *   <li>stringOf() and valueOf(String) operations are not supported and will throw UnsupportedOperationException</li>
+ *   <li>Ref objects are typically obtained from database queries and represent references to structured types</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Ref> type = TypeFactory.getType(Ref.class);
+ *
+ * // Reading a Ref from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT person_ref FROM employees WHERE id = 1")) {
+ *     if (rs.next()) {
+ *         Ref personRef = type.get(rs, 1);
+ *         String baseTypeName = personRef.getBaseTypeName();
+ *         Object referencedObject = personRef.getObject();
+ *     }
+ * }
+ *
+ * // Using Ref in PreparedStatement
+ * PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET person_ref = ? WHERE id = ?");
+ * type.set(updateStmt, 1, personRef);
+ * updateStmt.setInt(2, employeeId);
+ * updateStmt.executeUpdate();
+ *
+ * // Note: These operations are NOT supported
+ * // String str = type.stringOf(ref);   // Throws UnsupportedOperationException
+ * // Ref ref = type.valueOf("string");   // Throws UnsupportedOperationException
+ * }</pre>
+ */
 public class RefType extends AbstractType<Ref> {
 
     public static final String REF = Ref.class.getSimpleName();
 
+    /**
+     * Constructs a new RefType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     RefType() {
         super(REF);
     }
@@ -35,7 +79,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * Class<Ref> clazz = type.clazz();
-     * System.out.println(clazz.getName());  // Output: java.sql.Ref
+     * System.out.println(clazz.getName());   // Output: java.sql.Ref
      * }</pre>
      *
      * @return the Class object for java.sql.Ref.class
@@ -53,7 +97,7 @@ public class RefType extends AbstractType<Ref> {
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * boolean serializable = type.isSerializable();
-     * System.out.println(serializable);  // Output: false
+     * System.out.println(serializable);   // Output: false
      * }</pre>
      *
      * @return {@code false}, indicating this type is not serializable
@@ -75,7 +119,7 @@ public class RefType extends AbstractType<Ref> {
      * try {
      *     String str = type.stringOf(ref);
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot convert Ref to string");  // This will execute
+     *     System.out.println("Cannot convert Ref to string");   // This will execute
      * }
      * }</pre>
      *
@@ -99,7 +143,7 @@ public class RefType extends AbstractType<Ref> {
      * try {
      *     Ref ref = type.valueOf("some_string");
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot create Ref from string");  // This will execute
+     *     System.out.println("Cannot create Ref from string");   // This will execute
      * }
      * }</pre>
      *

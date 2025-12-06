@@ -41,7 +41,7 @@ import com.landawn.abacus.util.WD;
  *
  * // Serialize a Pair to string
  * Pair<String, Integer> pair = Pair.of("age", 25);
- * String json = type.stringOf(pair);  // Returns ["age", 25]
+ * String json = type.stringOf(pair);   // Returns ["age", 25]
  *
  * // Deserialize a string to Pair
  * Pair<String, Integer> restored = type.valueOf("[\"age\", 25]");
@@ -64,6 +64,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a new PairType with the specified left and right type names.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     *
+     * @param leftTypeName the type name for the left element of the pair
+     * @param rightTypeName the type name for the right element of the pair
+     */
     PairType(final String leftTypeName, final String rightTypeName) {
         super(getTypeName(leftTypeName, rightTypeName, false));
 
@@ -167,7 +174,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

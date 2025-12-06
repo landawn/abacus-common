@@ -39,7 +39,7 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanFunction<String> formatter = b -> b ? "YES" : "NO";
-     * String result = formatter.apply(true);  // Returns "YES"
+     * String result = formatter.apply(true);   // Returns "YES"
      * }</pre>
      *
      * @param value the function argument
@@ -74,7 +74,7 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanFunction<Boolean> id = BooleanFunction.identity();
-     * Boolean result = id.apply(true);  // Returns true
+     * Boolean result = id.apply(true);   // Returns true
      * }</pre>
      *
      * @return a function that always returns its input argument

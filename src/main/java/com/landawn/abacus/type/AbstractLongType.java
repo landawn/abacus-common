@@ -42,6 +42,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractLongType extends NumberType<Number> {
 
+    /**
+     * Constructs an AbstractLongType with the specified type name.
+     *
+     * @param typeName the name of the long type (e.g., "Long", "long")
+     */
     protected AbstractLongType(final String typeName) {
         super(typeName);
     }
@@ -159,7 +164,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <pre>{@code
      * AbstractLongType type = TypeFactory.getType(Long.class);
      * char[] buffer = "9876543210".toCharArray();
-     * Long value = type.valueOf(buffer, 0, 10);  // returns 9876543210L
+     * Long value = type.valueOf(buffer, 0, 10);   // returns 9876543210L
      * }</pre>
      *
      * @param cbuf the character array to convert
@@ -201,11 +206,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive long types
      * PrimitiveLongType type = TypeFactory.getType(long.class);
-     * long value = type.get(rs, 1);  // Returns 0L for SQL NULL
+     * long value = type.get(rs, 1);   // Returns 0L for SQL NULL
      *
      * // For wrapper Long types
      * LongType type = TypeFactory.getType(Long.class);
-     * Long value = type.get(rs, 1);  // Returns null for SQL NULL (overridden in subclass)
+     * Long value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -227,11 +232,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <pre>{@code
      * // For primitive long types
      * PrimitiveLongType type = TypeFactory.getType(long.class);
-     * long value = type.get(rs, "timestamp");  // Returns 0L for SQL NULL
+     * long value = type.get(rs, "timestamp");   // Returns 0L for SQL NULL
      *
      * // For wrapper Long types
      * LongType type = TypeFactory.getType(Long.class);
-     * Long value = type.get(rs, "timestamp");  // Returns null for SQL NULL (overridden in subclass)
+     * Long value = type.get(rs, "timestamp");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
      * @param rs the ResultSet to read from

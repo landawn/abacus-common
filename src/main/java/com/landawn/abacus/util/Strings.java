@@ -109,15 +109,15 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Null-safe validation operations
- * boolean empty = Strings.isEmpty(null);              // Returns true
- * boolean blank = Strings.isBlank("   ");             // Returns true
- * boolean email = Strings.isEmail("user@domain.com"); // Returns true
+ * boolean empty = Strings.isEmpty(null);                // Returns true
+ * boolean blank = Strings.isBlank("   ");               // Returns true
+ * boolean email = Strings.isEmail("user@domain.com");   // Returns true
  *
  * // Safe transformation operations
- * String reversed    = Strings.reverse(null);            // Returns null
- * String abbrev      = Strings.abbreviate("Hello World", 8); // Returns "Hello..."
- * String capitalized = Strings.capitalize("hello");   // Returns "Hello"
- * String camelCase   = Strings.toCamelCase("hello_world"); // Returns "helloWorld"
+ * String reversed    = Strings.reverse(null);                  // Returns null
+ * String abbrev      = Strings.abbreviate("Hello World", 8);   // Returns "Hello..."
+ * String capitalized = Strings.capitalize("hello");            // Returns "Hello"
+ * String camelCase   = Strings.toCamelCase("hello_world");     // Returns "helloWorld"
  *
  * // Padding and alignment operations
  * String padded   = Strings.leftPad("123", 5, '0');    // Returns "00123"
@@ -125,9 +125,9 @@ import com.landawn.abacus.util.stream.Stream;
  * String trimmed  = Strings.trim("  text  ");          // Returns "text"
  *
  * // Search and replace operations
- * int index       = Strings.indexOf("Hello World", "World"); // Returns 6
- * String replaced = Strings.replace("Hello World", "World", "Java"); // Returns "Hello Java"
- * int count       = Strings.countMatches("abcabc", "abc");   // Returns 2
+ * int index       = Strings.indexOf("Hello World", "World");           // Returns 6
+ * String replaced = Strings.replace("Hello World", "World", "Java");   // Returns "Hello Java"
+ * int count       = Strings.countMatches("abcabc", "abc");             // Returns 2
  *
  * // Encoding and decoding operations
  * String encoded    = Strings.base64Encode("Hello");      // Base64 encoding
@@ -135,15 +135,15 @@ import com.landawn.abacus.util.stream.Stream;
  * String urlEncoded = Strings.urlEncode("Hello World");   // URL encoding
  *
  * // Pattern extraction and validation
- * String firstEmail = Strings.findFirstEmailAddress("Contact: user@domain.com or admin@site.org");
+ * String firstEmail      = Strings.findFirstEmailAddress("Contact: user@domain.com or admin@site.org");
  * List<String> allEmails = Strings.findAllEmailAddresses(text);
  * String firstNumber     = Strings.extractFirstInteger("Price: $123.45");
  * String firstDouble     = Strings.extractFirstDouble("Value: 123.45kg");
  *
  * // Advanced string building and manipulation
- * String joined     = Strings.join(Arrays.asList("a", "b", "c"), ", "); // Returns "a, b, c"
- * String[] split    = Strings.split("a,b,c", ",");     // Returns ["a", "b", "c"]
- * String normalized = Strings.normalize("café");       // Unicode normalization
+ * String joined     = Strings.join(Arrays.asList("a", "b", "c"), ", ");   // Returns "a, b, c"
+ * String[] split    = Strings.split("a,b,c", ",");   // Returns ["a", "b", "c"]
+ * String normalized = Strings.normalize("café");     // Unicode normalization
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -453,7 +453,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String uuid = uuid();                          // returns something like "550e8400-e29b-41d4-a716-446655440000"
+     * String uuid = uuid();   // returns something like "550e8400-e29b-41d4-a716-446655440000"
      * 
      * // Common use cases
      * String id = uuid();                   // returns "123e4567-e89b-12d3-a456-426614174000"
@@ -479,11 +479,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String guid = guid();                          // returns something like "550e8400e29b41d4a716446655440000"
+     * String guid = guid();   // returns something like "550e8400e29b41d4a716446655440000"
      * 
      * // Common use cases
      * String sessionId = "SESSION_" + guid();        // returns "SESSION_550e8400e29b41d4a716446655440000"
-     * String fileName = "temp_" + guid() + ".txt";  // returns "temp_550e8400e29b41d4a716446655440000.txt"
+     * String fileName = "temp_" + guid() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
      * }</pre>
      *
      * @return a new UUID string without hyphens, consisting of 32 hexadecimal characters.
@@ -542,7 +542,7 @@ public final class Strings {
       * Strings.isValidJavaIdentifier(null);              // returns false
       * Strings.isValidJavaIdentifier("");                // returns false
       * Strings.isValidJavaIdentifier("   ");             // returns false
-      * Strings.isValidJavaIdentifier("123abc");          // returns {@code false} (starts with digit)
+      * Strings.isValidJavaIdentifier("123abc");          // returns false (starts with digit)
       * }</pre>
       *
       * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -578,7 +578,7 @@ public final class Strings {
      * Strings.isKeyword("return");       // returns true
      * 
      * // Not Java keywords
-     * Strings.isKeyword("Class");        // returns {@code false} (case sensitive)
+     * Strings.isKeyword("Class");        // returns false (case sensitive)
      * Strings.isKeyword("myVariable");   // returns false
      * Strings.isKeyword(null);           // returns false
      * Strings.isKeyword("");             // returns false
@@ -613,9 +613,9 @@ public final class Strings {
      * Strings.isValidEmailAddress("admin+tag@domain.co.uk");   // returns true
      * 
      * // Invalid email addresses
-     * Strings.isValidEmailAddress("invalid.email");            // returns {@code false} (no @ symbol)
-     * Strings.isValidEmailAddress("@example.com");             // returns {@code false} (no local part)
-     * Strings.isValidEmailAddress("user@");                    // returns {@code false} (no domain)
+     * Strings.isValidEmailAddress("invalid.email");            // returns false (no @ symbol)
+     * Strings.isValidEmailAddress("@example.com");             // returns false (no local part)
+     * Strings.isValidEmailAddress("user@");                    // returns false (no domain)
      * Strings.isValidEmailAddress(null);                       // returns false
      * Strings.isValidEmailAddress("");                         // returns false
      * }</pre>
@@ -652,7 +652,7 @@ public final class Strings {
      * 
      * // Invalid URLs
      * Strings.isValidUrl("not a url");                         // returns false
-     * Strings.isValidUrl("www.example.com");                   // returns {@code false} (no protocol)
+     * Strings.isValidUrl("www.example.com");                   // returns false (no protocol)
      * Strings.isValidUrl(null);                                // returns false
      * Strings.isValidUrl("");                                  // returns false
      * }</pre>
@@ -685,9 +685,9 @@ public final class Strings {
      * Strings.isValidHttpUrl("https://api.example.com:8443");   // returns true
      * 
      * // Invalid HTTP URLs
-     * Strings.isValidHttpUrl("ftp://files.example.com");        // returns {@code false} (not HTTP)
-     * Strings.isValidHttpUrl("www.example.com");                // returns {@code false} (no protocol)
-     * Strings.isValidHttpUrl("file:///C:/doc.txt");             // returns {@code false} (not HTTP)
+     * Strings.isValidHttpUrl("ftp://files.example.com");        // returns false (not HTTP)
+     * Strings.isValidHttpUrl("www.example.com");                // returns false (no protocol)
+     * Strings.isValidHttpUrl("file:///C:/doc.txt");             // returns false (not HTTP)
      * Strings.isValidHttpUrl(null);                             // returns false
      * Strings.isValidHttpUrl("");                               // returns false
      * }</pre>
@@ -713,7 +713,7 @@ public final class Strings {
      * <pre>{@code
      * Strings.isEmpty(null);                  // returns true
      * Strings.isEmpty("");                    // returns true
-     * Strings.isEmpty("   ");                 // returns {@code false} (contains spaces)
+     * Strings.isEmpty("   ");                 // returns false (contains spaces)
      * Strings.isEmpty("abc");                 // returns false
      * Strings.isEmpty(new StringBuilder());   // returns true
      * }</pre>
@@ -772,7 +772,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.isNotEmpty("abc");                       // returns true
-     * Strings.isNotEmpty("   ");                       // returns {@code true} (contains spaces)
+     * Strings.isNotEmpty("   ");                       // returns true (contains spaces)
      * Strings.isNotEmpty(new StringBuilder("test"));   // returns true
      * Strings.isNotEmpty("");                          // returns false
      * Strings.isNotEmpty(null);                        // returns false
@@ -797,7 +797,7 @@ public final class Strings {
      * <pre>{@code
      * Strings.isNotBlank("abc");       // returns true
      * Strings.isNotBlank("  abc  ");   // returns true
-     * Strings.isNotBlank("   ");       // returns {@code false} (only whitespace)
+     * Strings.isNotBlank("   ");       // returns false (only whitespace)
      * Strings.isNotBlank("");          // returns false
      * Strings.isNotBlank(null);        // returns false
      * }</pre>
@@ -919,7 +919,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", null);
-     * Strings.isAllEmpty(list1);                             // returns true
+     * Strings.isAllEmpty(list1);   // returns true
      * 
      * List<String> list2 = Arrays.asList("", "abc", "");
      * Strings.isAllEmpty(list2);               // returns false
@@ -1057,7 +1057,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", "   ");
-     * Strings.isAllBlank(list1);                             // returns true
+     * Strings.isAllBlank(list1);   // returns true
      * 
      * List<String> list2 = Arrays.asList("   ", "abc", "");
      * Strings.isAllBlank(list2);               // returns false
@@ -1100,7 +1100,7 @@ public final class Strings {
      * Strings.isAnyEmpty("", "xyz");      // returns true
      * Strings.isAnyEmpty(null, "xyz");    // returns true
      * Strings.isAnyEmpty("abc", "xyz");   // returns false
-     * Strings.isAnyEmpty("   ", "xyz");   // returns {@code false} (spaces are not empty)
+     * Strings.isAnyEmpty("   ", "xyz");   // returns false (spaces are not empty)
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1128,7 +1128,7 @@ public final class Strings {
      * Strings.isAnyEmpty("", "def", "xyz");      // returns true
      * Strings.isAnyEmpty("abc", "def", null);    // returns true
      * Strings.isAnyEmpty("abc", "def", "xyz");   // returns false
-     * Strings.isAnyEmpty("   ", "def", "xyz");   // returns {@code false} (spaces are not empty)
+     * Strings.isAnyEmpty("   ", "def", "xyz");   // returns false (spaces are not empty)
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1196,7 +1196,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "", "xyz");
-     * Strings.isAnyEmpty(list1);                             // returns true
+     * Strings.isAnyEmpty(list1);   // returns true
      * 
      * List<String> list2 = Arrays.asList("abc", "def", "xyz");
      * Strings.isAnyEmpty(list2);               // returns false
@@ -1336,7 +1336,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "   ", "xyz");
-     * Strings.isAnyBlank(list1);                             // returns true
+     * Strings.isAnyBlank(list1);   // returns true
      * 
      * List<String> list2 = Arrays.asList("abc", "def", "xyz");
      * Strings.isAnyBlank(list2);               // returns false
@@ -1723,7 +1723,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("", null, "hello");
-     * Strings.firstNonEmpty(list1);                          // returns "hello"
+     * Strings.firstNonEmpty(list1);   // returns "hello"
      * 
      * List<String> list2 = Arrays.asList("", null, "");
      * Strings.firstNonEmpty(list2);               // returns ""
@@ -1858,10 +1858,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("   ", null, "hello");
-     * Strings.firstNonBlank(list1);                          // returns "hello"
+     * Strings.firstNonBlank(list1);   // returns "hello"
      *
      * List<String> list2 = Arrays.asList("   ", null, "\t");
-     * Strings.firstNonBlank(list2);                          // returns ""
+     * Strings.firstNonBlank(list2);   // returns ""
      *
      * Strings.firstNonBlank(null);                // returns ""
      * Strings.firstNonBlank(new ArrayList<>());   // returns ""
@@ -1918,7 +1918,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "hello", null, "world"};
-     * Strings.nullToEmpty(arr);                              // arr becomes {"", "hello", "", "world"}
+     * Strings.nullToEmpty(arr);   // arr becomes {"", "hello", "", "world"}
      * 
      * String[] arr2 = {"a", "b", "c"};
      * Strings.nullToEmpty(arr2);            // arr2 remains {"a", "b", "c"}
@@ -1973,7 +1973,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"", "hello", "", "world"};
-     * Strings.emptyToNull(arr);                              // arr becomes {null, "hello", null, "world"}
+     * Strings.emptyToNull(arr);   // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "   ", "c"};
      * Strings.emptyToNull(arr2);            // arr2 remains {"a", "   ", "c"} (spaces are not empty)
@@ -2028,7 +2028,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "   ", "hello", "\t"};
-     * Strings.blankToEmpty(arr);                             // arr becomes {"", "", "hello", ""}
+     * Strings.blankToEmpty(arr);   // arr becomes {"", "", "hello", ""}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
      * Strings.blankToEmpty(arr2);            // arr2 remains {"a", "  b  ", "c"}
@@ -2083,7 +2083,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"   ", "hello", "\t", "world"};
-     * Strings.blankToNull(arr);                              // arr becomes {null, "hello", null, "world"}
+     * Strings.blankToNull(arr);   // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
      * Strings.blankToNull(arr2);            // arr2 remains {"a", "  b  ", "c"}
@@ -3046,7 +3046,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the String to lower case, may be {@code null}
-     * @return the specified String if it's {@code null} or empty.
+     * @return the lower case String, or the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3078,7 +3078,7 @@ public final class Strings {
      *
      * @param str the String to lower case, may be {@code null}
      * @param locale the locale that defines the case transformation rules, must not be null
-     * @return the specified String if it's {@code null} or empty.
+     * @return the lower case String, or the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str, final Locale locale) {
         if (str == null || str.isEmpty()) {
@@ -3191,7 +3191,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the String to upper case, may be {@code null}
-     * @return the specified String if it's {@code null} or empty.
+     * @return the upper case String, or the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3222,7 +3222,7 @@ public final class Strings {
      *
      * @param str the String to upper case, may be {@code null}
      * @param locale the locale that defines the case transformation rules, must not be null
-     * @return the specified String if it's {@code null} or empty.
+     * @return the upper case String, or the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str, final Locale locale) {
         if (str == null || str.isEmpty()) {
@@ -3743,7 +3743,7 @@ public final class Strings {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3785,7 +3785,7 @@ public final class Strings {
      * @see #capitalizeFully(String, String, Collection)
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3826,7 +3826,7 @@ public final class Strings {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3897,7 +3897,7 @@ public final class Strings {
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3940,7 +3940,7 @@ public final class Strings {
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -4298,7 +4298,7 @@ public final class Strings {
      * Strings.replaceLast(null, *, *);             // returns null
      * Strings.replaceLast("", *, *);               // returns ""
      * Strings.replaceLast("any", null, *);         // returns "any"
-     * Strings.replaceLast("any", a, null);         // returns "ny"
+     * Strings.replaceLast("any", "a", null);       // returns "ny"
      * Strings.replaceLast("any", "", *);           // returns "any"
      * Strings.replaceLast("aba", "a", null);       // returns "ab"
      * Strings.replaceLast("aba", "a", "");         // returns "ab"
@@ -4876,7 +4876,7 @@ public final class Strings {
      * Strings.removeAll("hello", 'l');    // returns "heo"
      * Strings.removeAll("test", 'x');     // returns "test" (character not found)
      * Strings.removeAll(null, 'a');       // returns null
-     * Strings.removeAll("", 'a');         // returns null
+     * Strings.removeAll("", 'a');         // returns ""
      * }</pre>
      *
      * @param str the input string from which the character should be removed, may be {@code null} or empty
@@ -5756,10 +5756,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
-     * Strings.trim(arr);  // arr becomes ["abc", "def", "ghi"]
+     * Strings.trim(arr);   // arr becomes ["abc", "def", "ghi"]
      * 
      * String[] arr2 = {null, "  test  ", ""};
-     * Strings.trim(arr2); // arr2 becomes [null, "test", ""]
+     * Strings.trim(arr2);   // arr2 becomes [null, "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5809,10 +5809,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
-     * Strings.trimToNull(arr);  // arr becomes ["abc", null, "def", null]
+     * Strings.trimToNull(arr);   // arr becomes ["abc", null, "def", null]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * Strings.trimToNull(arr2); // arr2 becomes [null, "test", null]
+     * Strings.trimToNull(arr2);   // arr2 becomes [null, "test", null]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5860,10 +5860,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
-     * Strings.trimToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
+     * Strings.trimToEmpty(arr);   // arr becomes ["abc", "", "def", ""]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * Strings.trimToEmpty(arr2); // arr2 becomes ["", "test", ""]
+     * Strings.trimToEmpty(arr2);   // arr2 becomes ["", "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5918,10 +5918,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
-     * Strings.strip(arr);  // arr becomes ["abc", "def", "ghi"]
+     * Strings.strip(arr);   // arr becomes ["abc", "def", "ghi"]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * Strings.strip(arr2); // arr2 becomes [null, "test", ""]
+     * Strings.strip(arr2);   // arr2 becomes [null, "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -5974,10 +5974,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
-     * Strings.stripToNull(arr);  // arr becomes ["abc", null, "def", null]
+     * Strings.stripToNull(arr);   // arr becomes ["abc", null, "def", null]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * Strings.stripToNull(arr2); // arr2 becomes [null, "test", null]
+     * Strings.stripToNull(arr2);   // arr2 becomes [null, "test", null]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6028,10 +6028,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
-     * Strings.stripToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
+     * Strings.stripToEmpty(arr);   // arr becomes ["abc", "", "def", ""]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * Strings.stripToEmpty(arr2); // arr2 becomes ["", "test", ""]
+     * Strings.stripToEmpty(arr2);   // arr2 becomes ["", "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6090,10 +6090,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"xxabcyy", "xydefyx", "xyz"};
-     * Strings.strip(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.strip(arr, "xyz");   // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"  test  ", null, " \tabc\n "};
-     * Strings.strip(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.strip(arr2, null);   // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6186,10 +6186,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"xxabc", "xydef", "xyz"};
-     * Strings.stripStart(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.stripStart(arr, "xyz");   // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"  test", null, " \tabc"};
-     * Strings.stripStart(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.stripStart(arr2, null);   // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6284,10 +6284,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"abcxx", "defxy", "xyz"};
-     * Strings.stripEnd(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.stripEnd(arr, "xyz");   // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"test  ", null, "abc \t"};
-     * Strings.stripEnd(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.stripEnd(arr2, null);   // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6343,7 +6343,7 @@ public final class Strings {
     /**
      * Pattern used in {@link #stripAccents(String)}.
      */
-    private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+"); //$NON-NLS-1$
+    private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");   //$NON-NLS-1$
 
     private static void convertRemainingAccentCharacters(final StringBuilder decomposed) {
         char ch = 0;
@@ -6368,10 +6368,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"éclair", "café", "naïve"};
-     * Strings.stripAccents(arr);  // arr becomes ["eclair", "cafe", "naive"]
+     * Strings.stripAccents(arr);   // arr becomes ["eclair", "cafe", "naive"]
      * 
      * String[] arr2 = {null, "Łódź", "résumé"};
-     * Strings.stripAccents(arr2); // arr2 becomes [null, "Lodz", "resume"]
+     * Strings.stripAccents(arr2);   // arr2 becomes [null, "Lodz", "resume"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6706,7 +6706,7 @@ public final class Strings {
     // -----------------------------------------------------------------------
 
     /**
-     * Deletes all white spaces from a String as defined by {@link Character#isWhitespace(char)}.
+     * Deletes all whitespace from a String as defined by {@link Character#isWhitespace(char)}.
      *
      * <p>This method removes all characters for which {@link Character#isWhitespace(char)} returns {@code true}.
      * This includes spaces, tabs, newlines, and other Unicode whitespace characters. The method returns
@@ -6748,9 +6748,9 @@ public final class Strings {
     }
 
     /**
-     * Deletes all white spaces from each string in the provided array.
+     * Deletes all whitespace from each string in the provided array.
      *
-     * <p>White spaces are determined by {@link Character#isWhitespace(char)}. This includes spaces,
+     * <p>Whitespace is determined by {@link Character#isWhitespace(char)}. This includes spaces,
      * tabs, newlines, and other Unicode whitespace characters. Each string in the array is processed
      * independently and updated in-place.</p>
      *
@@ -7217,6 +7217,7 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is an ASCII lowercase letter, {@code false} otherwise
      * @see #isLowerCase(char)
+     * @see #isAsciiAlphaLower(char)
      * @see #isAsciiUpperCase(char)
      */
     public static boolean isAsciiLowerCase(final char ch) {
@@ -7265,6 +7266,9 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if the character is an ASCII uppercase letter, {@code false} otherwise
+     * @see #isUpperCase(char)
+     * @see #isAsciiAlphaUpper(char)
+     * @see #isAsciiLowerCase(char)
      */
     public static boolean isAsciiUpperCase(final char ch) {
         return (ch >= 'A') && (ch <= 'Z');
@@ -7365,8 +7369,8 @@ public final class Strings {
      * Strings.isMixedCase("ABC")     = false
      * Strings.isMixedCase("aBc")     = true
      * Strings.isMixedCase("Hello")   = true
-     * Strings.isMixedCase("123")   = false (no letters)
-     * Strings.isMixedCase("a1B2")  = true
+     * Strings.isMixedCase("123")     = false (no letters)
+     * Strings.isMixedCase("a1B2")    = true
      * }</pre>
      *
      * @param cs the CharSequence to check. It may be {@code null}.
@@ -7415,7 +7419,7 @@ public final class Strings {
      * Strings.isDigit('9')   = true
      * Strings.isDigit('a')   = false
      * Strings.isDigit('A')   = false
-     * Strings.isDigit('٠') = true (Arabic-Indic digit zero)
+     * Strings.isDigit('٠')   = true (Arabic-Indic digit zero)
      * }</pre>
      *
      * @param ch the character to check
@@ -7502,8 +7506,8 @@ public final class Strings {
      * Strings.isAscii('3')    = true
      * Strings.isAscii('-')    = true
      * Strings.isAscii('\n')   = true
-     * Strings.isAscii('©')  = false (value 169)
-     * Strings.isAscii('ñ')  = false (value 241)
+     * Strings.isAscii('©')    = false (value 169)
+     * Strings.isAscii('ñ')    = false (value 241)
      * }</pre>
      *
      * @param ch the character to check
@@ -7530,11 +7534,11 @@ public final class Strings {
      * Strings.isAsciiPrintable('A')   = true
      * Strings.isAsciiPrintable('3')   = true
      * Strings.isAsciiPrintable('-')   = true
-     * Strings.isAsciiPrintable(' ')  = true (space, value 32)
-     * Strings.isAsciiPrintable('~')  = true (tilde, value 126)
-     * Strings.isAsciiPrintable('\n') = false (newline, value 10)
-     * Strings.isAsciiPrintable('\t') = false (tab, value 9)
-     * Strings.isAsciiPrintable('©')  = false (value 169)
+     * Strings.isAsciiPrintable(' ')   = true (space, value 32)
+     * Strings.isAsciiPrintable('~')   = true (tilde, value 126)
+     * Strings.isAsciiPrintable('\n')  = false (newline, value 10)
+     * Strings.isAsciiPrintable('\t')  = false (tab, value 9)
+     * Strings.isAsciiPrintable('©')   = false (value 169)
      * }</pre>
      *
      * @param ch the character to check
@@ -7679,8 +7683,8 @@ public final class Strings {
      * Strings.isAsciiNumeric('A')    = false
      * Strings.isAsciiNumeric('-')    = false
      * Strings.isAsciiNumeric('\n')   = false
-     * Strings.isAsciiNumeric('٠')  = false (Arabic-Indic digit)
-     * Strings.isAsciiNumeric('©')  = false
+     * Strings.isAsciiNumeric('٠')    = false (Arabic-Indic digit)
+     * Strings.isAsciiNumeric('©')    = false
      * }</pre>
      *
      * @param ch the character to check
@@ -8590,7 +8594,7 @@ public final class Strings {
      * Strings.indexOf("", 'a');              // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param charValueToFind the Unicode code of the character to be found.
      * @return the index of the first occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur.
@@ -8628,7 +8632,7 @@ public final class Strings {
      * Strings.indexOf("", 'a', 0);        // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param charValueToFind the Unicode code of the character to be found.
      * @param fromIndex the index to start the search from.
      * @return the index of the first occurrence of the character in the character sequence represented by this object,
@@ -8670,7 +8674,7 @@ public final class Strings {
      * Strings.indexOf("", "test");               // returns -1 (substring longer than string)
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
@@ -8709,7 +8713,7 @@ public final class Strings {
      * Strings.indexOf("test", null, 0);             // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found.
      * @param fromIndex the index to start the search from.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
@@ -8731,7 +8735,8 @@ public final class Strings {
      *
      * <p>If any character within the array {@code valuesToFind} occurs in the character sequence
      * represented by the input {@code String} object, then the index of the first such occurrence
-     * is returned. The search starts from the beginning of the string.</p>
+     * is returned. The search starts from the beginning of the string. Note that the returned index may not be
+     * the smallest or largest index among all matching characters - it returns the index of the first match found.</p>
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
@@ -8750,16 +8755,20 @@ public final class Strings {
      * Strings.indexOfAny(null, 'a');                // returns -1
      * Strings.indexOfAny("", 'a');                  // returns -1
      * Strings.indexOfAny("hello");                  // returns -1 (empty array)
+     * 
+     * Strings.indexOfAny("abc", '\uDC00', 'a');     // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.indexOfAny("abc", '\uDFFF', 'a');     // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valuesToFind the array of characters to be found.
      * @return the index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit. 
      * @see #indexOfAny(String, int, char...)
      * @see #indexOf(String, int)
      */
-    public static int indexOfAny(final String str, final char... valuesToFind) {
+    public static int indexOfAny(final String str, final char... valuesToFind) throws IllegalArgumentException {
         return indexOfAny(str, 0, valuesToFind);
     }
 
@@ -8769,7 +8778,8 @@ public final class Strings {
      * <p>If any character within the array {@code valuesToFind} occurs in the character sequence
      * represented by the input {@code String} object at an index no smaller than {@code fromIndex},
      * then the index of the first such occurrence is returned. If {@code fromIndex} is negative,
-     * it is treated as zero.</p>
+     * it is treated as zero. Note that the returned index may not be
+     * the smallest or largest index among all matching characters - it returns the index of the first match found.</p>
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
@@ -8779,25 +8789,29 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Characters found
-     * Strings.indexOfAny("hello", 0, 'e', 'o');   // returns 1 (first 'e')
-     * Strings.indexOfAny("hello", 2, 'e', 'o');   // returns 4 (first 'o' after index 2)
-     * Strings.indexOfAny("hello", 0, 'l');        // returns 2 (first 'l')
+     * Strings.indexOfAny("hello", 0, 'e', 'o');      // returns 1 (first 'e')
+     * Strings.indexOfAny("hello", 2, 'e', 'o');      // returns 4 (first 'o' after index 2)
+     * Strings.indexOfAny("hello", 0, 'l');           // returns 2 (first 'l')
      * 
      * // Characters not found
-     * Strings.indexOfAny("hello", 5, 'h', 'e');   // returns -1 (no match after index 5)
-     * Strings.indexOfAny("hello", 0, 'x', 'y');   // returns -1
-     * Strings.indexOfAny(null, 0, 'a');           // returns -1
+     * Strings.indexOfAny("hello", 5, 'h', 'e');      // returns -1 (no match after index 5)
+     * Strings.indexOfAny("hello", 0, 'x', 'y');      // returns -1
+     * Strings.indexOfAny(null, 0, 'a');              // returns -1
+     * 
+     * Strings.indexOfAny("abc", 0, '\uDC00', 'a');   // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.indexOfAny("abc", 0, '\uDFFF', 'a');   // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param fromIndex the index to start the search from.
      * @param valuesToFind the array of characters to be found.
      * @return the index of the first occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur.
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
      * @see #indexOfAny(String, char...)
      * @see #indexOf(String, int, int)
      */
-    public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) {
+    public static int indexOfAny(final String str, int fromIndex, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -8860,7 +8874,7 @@ public final class Strings {
      * Strings.indexOfAny("test", new String[0]);             // returns -1 (empty array)
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valuesToFind the array of substrings to be found.
      * @return the index of the first occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur.
@@ -8897,7 +8911,7 @@ public final class Strings {
      * Strings.indexOfAny(null, 0, "test");                      // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param fromIndex the index to start the search from.
      * @param valuesToFind the array of substrings to be found.
      * @return the index of the first occurrence of any substring in the character sequence represented by this object,
@@ -8955,7 +8969,7 @@ public final class Strings {
      * Strings.indexOfAnyBut("hello");             // returns 0 (empty exclusion array)
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valuesToExclude the array of characters to exclude from the search.
      * @return the index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
@@ -8990,13 +9004,17 @@ public final class Strings {
      * Strings.indexOfAnyBut("aaa", 0, 'a');          // returns -1 (all excluded)
      * Strings.indexOfAnyBut("hello", 10, 'x');       // returns -1 (fromIndex beyond string)
      * Strings.indexOfAnyBut(null, 0, 'a');           // returns -1
+     * 
+     * Strings.indexOfAnyBut("abc", '\uDC00', 'a');   // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.indexOfAnyBut("abc", '\uDFFF', 'a');   // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param fromIndex the index to start the search from.
      * @param valuesToExclude the array of characters to exclude from the search.
      * @return the index of the first occurrence of any character not in the array of characters
      *         to exclude, or -1 if all characters are in the array or the string is {@code null} or empty.
+     * @throws IllegalArgumentException if any char in {@code valuesToExclude} contains low-surrogate or high-surrogate code unit.
      * @see #indexOfAnyBut(String, char...)
      */
     public static int indexOfAnyBut(final String str, int fromIndex, final char... valuesToExclude) {
@@ -9058,7 +9076,7 @@ public final class Strings {
      * Strings.indexOf("test", null, ",");                      // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found.
      * @param delimiter the delimiter to separate the search.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
@@ -9097,7 +9115,7 @@ public final class Strings {
      * Strings.indexOf("test", "test", ",", 5);                    // returns -1 (fromIndex beyond match)
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found.
      * @param delimiter the delimiter to separate the search.
      * @param fromIndex the index to start the search from.
@@ -9170,8 +9188,8 @@ public final class Strings {
      * Strings.indexOfIgnoreCase("test", null);             // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
@@ -9198,8 +9216,8 @@ public final class Strings {
      * Strings.indexOfIgnoreCase("test", "TEST", -5);                // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @param fromIndex the index to start the search from. Negative values are treated as 0.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either string parameter is {@code null}.
@@ -9242,9 +9260,9 @@ public final class Strings {
      * Strings.indexOfIgnoreCase("test", "test", ",");                  // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to be used for the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to be used for the search, may be {@code null} or empty.
      * @return the index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
@@ -9271,9 +9289,9 @@ public final class Strings {
      * Strings.indexOfIgnoreCase("test value test", "test", " ", 5);       // returns 11
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to be used for the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to be used for the search, may be {@code null} or empty.
      * @param fromIndex the index to start the search from. Negative values are treated as 0.
      * @return the index of the first occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if the input string or substring to find is {@code null}.
@@ -9342,7 +9360,7 @@ public final class Strings {
      * Strings.lastIndexOf(null, 'a');            // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param charValueToFind the character to be found.
      * @return the index of the last occurrence of the character in the character sequence represented by this object,
      *         or -1 if the character does not occur or if the string is {@code null} or empty.
@@ -9376,7 +9394,7 @@ public final class Strings {
      * Strings.lastIndexOf("Hello", 'l', -1);         // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param charValueToFind a character (Unicode code point).
      * @param startIndexFromBack the index to start the search from. There is no restriction on
      *            the value of {@code startIndexFromBack}. If it is greater than or
@@ -9417,8 +9435,8 @@ public final class Strings {
      * Strings.lastIndexOf("test", null);                   // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @return the index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
@@ -9449,8 +9467,8 @@ public final class Strings {
      * Strings.lastIndexOf("test", "test", -1);                 // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
      * @return the index of the last occurrence of the substring at or before the specified index,
@@ -9485,9 +9503,9 @@ public final class Strings {
      * Strings.lastIndexOf("test", "test", ",");                  // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to separate the search, may be {@code null} or empty.
      * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
@@ -9515,9 +9533,9 @@ public final class Strings {
      * Strings.lastIndexOf("test value test", "test", " ", 10);       // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to separate the search, may be {@code null} or empty.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
      * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
@@ -9586,8 +9604,8 @@ public final class Strings {
      * Strings.lastIndexOfIgnoreCase("test", null);                   // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @return the index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
      */
@@ -9618,8 +9636,8 @@ public final class Strings {
      * Strings.lastIndexOfIgnoreCase("test", "TEST", -1);                 // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
      * @return the index of the last occurrence of the substring at or before the specified index,
@@ -9661,9 +9679,9 @@ public final class Strings {
      * Strings.lastIndexOfIgnoreCase("test", "test", ",");                  // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to separate the search, may be {@code null} or empty.
      * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
@@ -9692,9 +9710,9 @@ public final class Strings {
      * Strings.lastIndexOfIgnoreCase("test value TEST", "test", " ", 10);       // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the substring to be found. May be {@code null}.
-     * @param delimiter the delimiter to separate the search. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the substring to be found, may be {@code null}.
+     * @param delimiter the delimiter to separate the search, may be {@code null} or empty.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
      * @return the index of the last occurrence of the substring bounded by the delimiter in the character sequence represented by this object,
@@ -9761,18 +9779,22 @@ public final class Strings {
      * Strings.lastIndexOfAny("Hello World", 'x', 'y', 'z');   // returns -1
      * Strings.lastIndexOfAny("", 'a', 'b');                   // returns -1
      * Strings.lastIndexOfAny(null, 'a');                      // returns -1
+     * 
+     * Strings.lastIndexOfAny("abc", '\uDC00', 'a');           // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.lastIndexOfAny("abc", '\uDFFF', 'a');           // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valuesToFind the array of characters to be found. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valuesToFind the array of characters to be found, may be {@code null} or empty.
      * @return the index of the last occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur or if the string or character array is {@code null} or empty.
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
      * @see #smallestLastIndexOfAll(String, String[])
      * @see #smallestLastIndexOfAll(String, int, String[])
      * @see #largestLastIndexOfAll(String, String[])
      * @see #largestLastIndexOfAll(String, int, String[])
      */
-    public static int lastIndexOfAny(final String str, final char... valuesToFind) {
+    public static int lastIndexOfAny(final String str, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -9797,22 +9819,26 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.lastIndexOfAny("Hello World", 'o', 'l', 8);        // returns 7 or 3 (implementation dependent)
-     * Strings.lastIndexOfAny("Hello World", 'o', 'l', 5);        // returns 4 or 3 (implementation dependent)
-     * Strings.lastIndexOfAny("Hello World", 'x', 'y', 'z', 10);  // returns -1
-     * Strings.lastIndexOfAny("", 'a', 'b', 0);                   // returns -1
-     * Strings.lastIndexOfAny(null, 'a', 0);                      // returns -1
+     * Strings.lastIndexOfAny("Hello World", 'o', 'l', 8);         // returns 7 or 3 (implementation dependent)
+     * Strings.lastIndexOfAny("Hello World", 'o', 'l', 5);         // returns 4 or 3 (implementation dependent)
+     * Strings.lastIndexOfAny("Hello World", 'x', 'y', 'z', 10);   // returns -1
+     * Strings.lastIndexOfAny("", 'a', 'b', 0);                    // returns -1
+     * Strings.lastIndexOfAny(null, 'a', 0);                       // returns -1
+     * 
+     * Strings.lastIndexOfAny("abc", 0, '\uDC00', 'a');            // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.lastIndexOfAny("abc", 0, '\uDFFF', 'a');            // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind the array of characters to be found. May be {@code null} or empty.
+     * @param valuesToFind the array of characters to be found, may be {@code null} or empty.
      * @return the index of the last occurrence of any character in the character sequence represented by this object
      *         that is less than or equal to {@code startIndexFromBack},
      *         or -1 if none of the characters occur before that point or if the string or character array is {@code null} or empty.
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
      */
-    public static int lastIndexOfAny(final String str, int startIndexFromBack, final char... valuesToFind) {
+    public static int lastIndexOfAny(final String str, int startIndexFromBack, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -9866,8 +9892,8 @@ public final class Strings {
      * Strings.lastIndexOfAny(null, "test");                      // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the index of the last occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur or if the string or substring array is {@code null} or empty.
      * @see #smallestLastIndexOfAll(String, String[])
@@ -9905,10 +9931,10 @@ public final class Strings {
      * Strings.lastIndexOfAny(null, "test");                          // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the index of the last occurrence of any substring in the character sequence represented by this object
      *         that is less than or equal to {@code startIndexFromBack},
      *         or -1 if none of the substrings occur before that point or if the string or substring array is {@code null} or empty.
@@ -9986,8 +10012,8 @@ public final class Strings {
      * Strings.smallestIndexOfAll(null, "test");                      // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the smallest index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
@@ -10015,9 +10041,9 @@ public final class Strings {
      * Strings.smallestIndexOfAll("test", -5, "test");               // returns 0
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param fromIndex the index to start the search from. Negative values are treated as 0.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the smallest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
@@ -10068,8 +10094,8 @@ public final class Strings {
      * Strings.largestIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the largest index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
@@ -10098,9 +10124,9 @@ public final class Strings {
      * Strings.largestIndexOfAll("test", -5, "test", "t");          // returns 3
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
+     * @param str the string to be checked, may be {@code null} or empty.
      * @param fromIndex the index to start the search from. Negative values are treated as 0.
-     * @param valuesToFind the array of substrings to be found. May be {@code null} or empty.
+     * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the largest index of all substrings within the input string from {@code fromIndex} or -1 if none of the substrings occur.
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
@@ -10153,8 +10179,8 @@ public final class Strings {
      * Strings.smallestLastIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
-     * @param str the string to search within. It may be {@code null}.
-     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @param str the string to search within, may be {@code null}.
+     * @param valuesToFind the substrings to find within the string, may be empty or {@code null}.
      * @return the smallest last index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
@@ -10182,10 +10208,10 @@ public final class Strings {
      * Strings.smallestLastIndexOfAll("test", -1, "test");                // returns -1
      * }</pre>
      *
-     * @param str the string to search within. It may be {@code null}.
+     * @param str the string to search within, may be {@code null}.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @param valuesToFind the substrings to find within the string, may be empty or {@code null}.
      * @return the smallest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
@@ -10235,8 +10261,8 @@ public final class Strings {
      * Strings.largestLastIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
-     * @param str the string to search within. It may be {@code null}.
-     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @param str the string to search within, may be {@code null}.
+     * @param valuesToFind the substrings to find within the string, may be empty or {@code null}.
      * @return the largest last index of all substrings within the input string or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
@@ -10264,10 +10290,10 @@ public final class Strings {
      * Strings.largestLastIndexOfAll("test", -1, "test");                // returns -1
      * }</pre>
      *
-     * @param str the string to search within. It may be {@code null}.
+     * @param str the string to search within, may be {@code null}.
      * @param startIndexFromBack the index to start the search from, searching backward.
      *                          If greater than or equal to the string length, the entire string is searched.
-     * @param valuesToFind the substrings to find within the string. These may be empty or {@code null}.
+     * @param valuesToFind the substrings to find within the string, may be empty or {@code null}.
      * @return the largest index of all substrings within the input string from {@code startIndexFromBack} or -1 if none of the substrings occur.
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
@@ -10319,8 +10345,8 @@ public final class Strings {
      * Strings.ordinalIndexOf(null, null, 1);         // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the value to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the value to be found, may be {@code null}.
      * @param ordinal the n-th occurrence to find. Must be greater than or equal to 1.
      * @return the index of the n-th occurrence of the specified value within the input string,
      *         or -1 if the value does not occur as many times as requested.
@@ -10352,8 +10378,8 @@ public final class Strings {
      * Strings.lastOrdinalIndexOf(null, null, 1);         // returns -1
      * }</pre>
      *
-     * @param str the string to be checked. May be {@code null} or empty.
-     * @param valueToFind the value to be found. May be {@code null}.
+     * @param str the string to be checked, may be {@code null} or empty.
+     * @param valueToFind the value to be found, may be {@code null}.
      * @param ordinal the n-th last occurrence to find. Must be greater than or equal to 1.
      * @return the index of the n-th last occurrence of the specified value within the input string,
      *         or -1 if the value does not occur as many times as requested.
@@ -10433,20 +10459,26 @@ public final class Strings {
     /**
      * Returns a stream of indices of all occurrences of the specified substring, ignoring case considerations.
      *
+     * <p>This method finds all occurrences of {@code valueToFind} within the input string and returns
+     * a stream of their indices. The search is case-insensitive. If the substring is empty, it returns
+     * indices of all positions in the string (0 through string length).</p>
+     *
+     * <p>The method returns an empty stream if the input string or the substring to find is {@code null},
+     * or if the substring is longer than the input string.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.indicesOf("abca", "a").join(", ");             // "0, 3"
-     * Strings.indicesOf("abcA", "a").join(", ");             // "0"
-     * Strings.indicesOf("abcA", null).join(", ");            // ""
-     * Strings.indicesOf(null, "").join(", ");                // ""
-     * Strings.indicesOf("", null).join(", ");                // ""
-     * Strings.indicesOf("abcA", "").join(", ");              // "0, 1, 2, 3"
-     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ");   // "0, 3"
+     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ");    // returns "0, 3"
+     * Strings.indicesOfIgnoreCase("HeLLo", "l").join(", ");   // returns "2, 3"
+     * Strings.indicesOfIgnoreCase("test", "X").join(", ");    // returns ""
+     * Strings.indicesOfIgnoreCase("abcA", null).join(", ");   // returns ""
+     * Strings.indicesOfIgnoreCase(null, "a").join(", ");      // returns ""
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valueToFind the substring to be found, may be {@code null}
      * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see #indicesOf(String, String)
      * @see RegExUtil#matchIndices(String, String)
      * @see RegExUtil#matchIndices(String, Pattern)
      * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
@@ -10458,21 +10490,27 @@ public final class Strings {
     /**
      * Returns a stream of indices of all occurrences of the specified substring, starting the search at the specified index, ignoring case considerations.
      *
+     * <p>This method finds all occurrences of {@code valueToFind} within the input string starting from {@code fromIndex}
+     * and returns a stream of their indices. The search is case-insensitive. If the substring is empty, it returns
+     * indices of all positions in the string from {@code fromIndex} to string length.</p>
+     *
+     * <p>The method returns an empty stream if the input string or the substring to find is {@code null},
+     * or if the substring is longer than the remaining part of the input string from {@code fromIndex}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.indicesOf("abca", "a").join(", ");             // "0, 3"
-     * Strings.indicesOf("abcA", "a").join(", ");             // "0"
-     * Strings.indicesOf("abcA", null).join(", ");            // ""
-     * Strings.indicesOf(null, "").join(", ");                // ""
-     * Strings.indicesOf("", null).join(", ");                // ""
-     * Strings.indicesOf("abcA", "").join(", ");              // "0, 1, 2, 3"
-     * Strings.indicesOfIgnoreCase("abcA", "a").join(", ");   // "0, 3"
+     * Strings.indicesOfIgnoreCase("abcAbc", "a", 0).join(", ");   // returns "0, 3"
+     * Strings.indicesOfIgnoreCase("abcAbc", "a", 2).join(", ");   // returns "3"
+     * Strings.indicesOfIgnoreCase("HeLLo", "L", 1).join(", ");    // returns "2, 3"
+     * Strings.indicesOfIgnoreCase("test", "X", 0).join(", ");     // returns ""
+     * Strings.indicesOfIgnoreCase("abcA", null, 0).join(", ");    // returns ""
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valueToFind the substring to be found, may be {@code null}
      * @param fromIndex the index to start the search from
      * @return a stream of indices of all occurrences of the specified substring, or an empty stream if the substring is not found
+     * @see #indicesOf(String, String, int)
      * @see RegExUtil#matchIndices(String, String)
      * @see RegExUtil#matchIndices(String, Pattern)
      * @see IntStream#ofIndices(Object, int, int, com.landawn.abacus.util.function.ObjIntFunction)
@@ -10635,7 +10673,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param valueToFind the substring to be found
+     * @param valueToFind the substring to be found, may be {@code null}
      * @return {@code true} if the substring is found in the string, {@code false} otherwise
      */
     public static boolean contains(final String str, final String valueToFind) {
@@ -10666,8 +10704,8 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param valueToFind the substring to be found
-     * @param delimiter the delimiter to be considered
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @param delimiter the delimiter to be considered, may be {@code null}
      * @return {@code true} if the substring is found as a complete token in the string considering the delimiter, {@code false} otherwise
      */
     public static boolean contains(final String str, final String valueToFind, final String delimiter) {
@@ -10699,7 +10737,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param valueToFind the substring to be found
+     * @param valueToFind the substring to be found, may be {@code null}
      * @return {@code true} if the substring is found in the string ignoring case considerations, {@code false} otherwise
      */
     public static boolean containsIgnoreCase(final String str, final String valueToFind) {
@@ -10729,8 +10767,8 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param valueToFind the substring to be found
-     * @param delimiter the delimiter to be considered
+     * @param valueToFind the substring to be found, may be {@code null}
+     * @param delimiter the delimiter to be considered, may be {@code null}
      * @return {@code true} if the substring is found as a complete token in the string considering the delimiter and ignoring case considerations, {@code false} otherwise
      */
     public static boolean containsIgnoreCase(final String str, final String valueToFind, final String delimiter) {
@@ -10760,13 +10798,16 @@ public final class Strings {
      * Strings.containsAll("test");                         // returns {@code true} (empty array)
      * Strings.containsAll(null, 'a');                      // returns false
      * Strings.containsAll("", 'a');                        // returns false
+     * Strings.containsAll("abc", '\uDC00', 'a');           // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.containsAll("abc", '\uDFFF', 'a');           // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be found
      * @return {@code true} if all the characters are found in the given string, or if the {@code valuesToFind} array is {@code null} or empty. Returns {@code false} otherwise.
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
      */
-    public static boolean containsAll(final String str, final char... valuesToFind) {
+    public static boolean containsAll(final String str, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (N.isEmpty(valuesToFind)) {
@@ -11004,19 +11045,22 @@ public final class Strings {
      * <pre>{@code
      * // Check if none of the characters are present
      * Strings.containsNone("hello", 'x', 'y', 'z');   // returns true
-     * Strings.containsNone("hello", 'h', 'x');        // returns {@code false} ('h' is present)
+     * Strings.containsNone("hello", 'h', 'x');        // returns false ('h' is present)
      * Strings.containsNone("test", 'a', 'b', 'c');    // returns true
      * Strings.containsNone("", 'a');                  // returns true
      * Strings.containsNone(null, 'a');                // returns true
-     * Strings.containsNone("test");                   // returns {@code true} (empty array)
+     * Strings.containsNone("test");                   // returns true (empty array)
+     * Strings.containsNone("abc", '\uDC00', 'a');     // throws IllegalArgumentException (Character.isLowSurrogate('\uDC00') is true)
+     * Strings.containsNone("abc", '\uD800', 'a');     // throws IllegalArgumentException (Character.isHighSurrogate('\uD800') is true)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be checked
      * @return {@code true} if none of the characters are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
+     * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
      * @see #containsAny(String, char[])
      */
-    public static boolean containsNone(final String str, final char... valuesToFind) {
+    public static boolean containsNone(final String str, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
@@ -11054,7 +11098,7 @@ public final class Strings {
      * <pre>{@code
      * // Check if none of the substrings are present
      * Strings.containsNone("hello world", "xyz", "abc");     // returns true
-     * Strings.containsNone("hello world", "hello", "xyz");   // returns {@code false} ("hello" is present)
+     * Strings.containsNone("hello world", "hello", "xyz");   // returns false ("hello" is present)
      * Strings.containsNone("test", "abc", "xyz");            // returns true
      * Strings.containsNone("", "test");                      // returns true
      * Strings.containsNone(null, "test");                    // returns true
@@ -11123,10 +11167,10 @@ public final class Strings {
      * // Check if string contains only specified characters
      * Strings.containsOnly("aaa", 'a');                  // returns true
      * Strings.containsOnly("abc", 'a', 'b', 'c', 'd');   // returns true
-     * Strings.containsOnly("abcd", 'a', 'b', 'c');       // returns {@code false} ('d' not allowed)
+     * Strings.containsOnly("abcd", 'a', 'b', 'c');       // returns false ('d' not allowed)
      * Strings.containsOnly("", 'a');                     // returns true
      * Strings.containsOnly(null, 'a');                   // returns true
-     * Strings.containsOnly("test");                      // returns {@code false} (empty allowed set)
+     * Strings.containsOnly("test");                      // returns false (empty allowed set)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11156,9 +11200,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check for whitespace presence
-     * Strings.containsWhitespace("hello world");    // returns {@code true} (space)
-     * Strings.containsWhitespace("hello\tworld");   // returns {@code true} (tab)
-     * Strings.containsWhitespace("hello\nworld");   // returns {@code true} (newline)
+     * Strings.containsWhitespace("hello world");    // returns true (space)
+     * Strings.containsWhitespace("hello\tworld");   // returns true (tab)
+     * Strings.containsWhitespace("hello\nworld");   // returns true (newline)
      * Strings.containsWhitespace("helloworld");     // returns false
      * Strings.containsWhitespace("");               // returns false
      * Strings.containsWhitespace(null);             // returns false
@@ -11195,9 +11239,9 @@ public final class Strings {
      * <pre>{@code
      * // Check if string starts with prefix
      * Strings.startsWith("hello world", "hello");   // returns true
-     * Strings.startsWith("hello world", "Hello");   // returns {@code false} (case-sensitive)
-     * Strings.startsWith("hello", "hello world");   // returns {@code false} (prefix too long)
-     * Strings.startsWith("test", "");               // returns {@code true} (empty prefix)
+     * Strings.startsWith("hello world", "Hello");   // returns false (case-sensitive)
+     * Strings.startsWith("hello", "hello world");   // returns false (prefix too long)
+     * Strings.startsWith("test", "");               // returns true (empty prefix)
      * Strings.startsWith(null, "test");             // returns false
      * Strings.startsWith("test", null);             // returns false
      * }</pre>
@@ -11225,7 +11269,7 @@ public final class Strings {
      * Strings.startsWithIgnoreCase("Hello World", "hello");   // returns true
      * Strings.startsWithIgnoreCase("Hello World", "HELLO");   // returns true
      * Strings.startsWithIgnoreCase("test", "TEST");           // returns true
-     * Strings.startsWithIgnoreCase("hello", "hello world");   // returns {@code false} (prefix too long)
+     * Strings.startsWithIgnoreCase("hello", "hello world");   // returns false (prefix too long)
      * Strings.startsWithIgnoreCase(null, "test");             // returns false
      * Strings.startsWithIgnoreCase("test", null);             // returns false
      * }</pre>
@@ -11267,11 +11311,11 @@ public final class Strings {
      * <pre>{@code
      * // Check if string starts with any prefix
      * Strings.startsWithAny("hello world", "hi", "hello");   // returns true
-     * Strings.startsWithAny("hello world", "Hi", "Hello");   // returns {@code false} (case-sensitive)
+     * Strings.startsWithAny("hello world", "Hi", "Hello");   // returns false (case-sensitive)
      * Strings.startsWithAny("test", "a", "b", "t");          // returns true
      * Strings.startsWithAny("test", "a", "b", "c");          // returns false
      * Strings.startsWithAny(null, "test");                   // returns false
-     * Strings.startsWithAny("test");                         // returns {@code false} (empty array)
+     * Strings.startsWithAny("test");                         // returns false (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11344,9 +11388,9 @@ public final class Strings {
      * <pre>{@code
      * // Check if string ends with suffix
      * Strings.endsWith("hello world", "world");   // returns true
-     * Strings.endsWith("hello world", "World");   // returns {@code false} (case-sensitive)
-     * Strings.endsWith("hello", "hello world");   // returns {@code false} (suffix too long)
-     * Strings.endsWith("test", "");               // returns {@code true} (empty suffix)
+     * Strings.endsWith("hello world", "World");   // returns false (case-sensitive)
+     * Strings.endsWith("hello", "hello world");   // returns false (suffix too long)
+     * Strings.endsWith("test", "");               // returns true (empty suffix)
      * Strings.endsWith(null, "test");             // returns false
      * Strings.endsWith("test", null);             // returns false
      * }</pre>
@@ -11374,7 +11418,7 @@ public final class Strings {
      * Strings.endsWithIgnoreCase("Hello World", "world");   // returns true
      * Strings.endsWithIgnoreCase("Hello World", "WORLD");   // returns true
      * Strings.endsWithIgnoreCase("test", "TEST");           // returns true
-     * Strings.endsWithIgnoreCase("hello", "hello world");   // returns {@code false} (suffix too long)
+     * Strings.endsWithIgnoreCase("hello", "hello world");   // returns false (suffix too long)
      * Strings.endsWithIgnoreCase(null, "test");             // returns false
      * Strings.endsWithIgnoreCase("test", null);             // returns false
      * }</pre>
@@ -11400,11 +11444,11 @@ public final class Strings {
      * <pre>{@code
      * // Check if string ends with any suffix
      * Strings.endsWithAny("hello.txt", ".txt", ".doc");   // returns true
-     * Strings.endsWithAny("hello.txt", ".TXT", ".DOC");   // returns {@code false} (case-sensitive)
+     * Strings.endsWithAny("hello.txt", ".TXT", ".DOC");   // returns false (case-sensitive)
      * Strings.endsWithAny("test", "st", "ing");           // returns true
      * Strings.endsWithAny("test", "ing", "ed");           // returns false
      * Strings.endsWithAny(null, "test");                  // returns false
-     * Strings.endsWithAny("test");                        // returns {@code false} (empty array)
+     * Strings.endsWithAny("test");                        // returns false (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11494,7 +11538,7 @@ public final class Strings {
      * <pre>{@code
      * // Compare strings for equality
      * Strings.equals("hello", "hello");   // returns true
-     * Strings.equals("hello", "Hello");   // returns {@code false} (case-sensitive)
+     * Strings.equals("hello", "Hello");   // returns false (case-sensitive)
      * Strings.equals(null, null);         // returns true
      * Strings.equals("test", null);       // returns false
      * Strings.equals(null, "test");       // returns false
@@ -11550,10 +11594,10 @@ public final class Strings {
      * <pre>{@code
      * // Check if string equals any value
      * Strings.equalsAny("test", "test", "demo", "sample");   // returns true
-     * Strings.equalsAny("test", "Test", "TEST");             // returns {@code false} (case-sensitive)
-     * Strings.equalsAny(null, "test", null, "demo");         // returns {@code true} (null match)
+     * Strings.equalsAny("test", "Test", "TEST");             // returns false (case-sensitive)
+     * Strings.equalsAny(null, "test", null, "demo");         // returns true (null match)
      * Strings.equalsAny("test", "demo", "sample");           // returns false
-     * Strings.equalsAny("test");                             // returns {@code false} (empty array)
+     * Strings.equalsAny("test");                             // returns false (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null}
@@ -11588,9 +11632,9 @@ public final class Strings {
      * // Check if string equals any value ignoring case
      * Strings.equalsAnyIgnoreCase("test", "TEST", "demo");     // returns true
      * Strings.equalsAnyIgnoreCase("Test", "test", "TEST");     // returns true
-     * Strings.equalsAnyIgnoreCase(null, "test", null);         // returns {@code true} (null match)
+     * Strings.equalsAnyIgnoreCase(null, "test", null);         // returns true (null match)
      * Strings.equalsAnyIgnoreCase("test", "demo", "sample");   // returns false
-     * Strings.equalsAnyIgnoreCase("test");                     // returns {@code false} (empty array)
+     * Strings.equalsAnyIgnoreCase("test");                     // returns false (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null}
@@ -11888,8 +11932,8 @@ public final class Strings {
      * Strings.commonPrefix("abc", "xyz");   // returns ""
      * }</pre>
      *
-     * @param a the first CharSequence to compare
-     * @param b the second CharSequence to compare
+     * @param a the first CharSequence to compare, may be {@code null}
+     * @param b the second CharSequence to compare, may be {@code null}
      * @return the longest common prefix, or an empty string if there is no common prefix
      */
     public static String commonPrefix(final CharSequence a, final CharSequence b) {
@@ -11963,7 +12007,7 @@ public final class Strings {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p> 
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * Returns the longest string {@code suffix} such that
      * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},
@@ -11976,8 +12020,8 @@ public final class Strings {
      * Strings.commonSuffix("abc", "xyz");   // returns ""
      * }</pre>
      *
-     * @param a the first CharSequence to compare
-     * @param b the second CharSequence to compare
+     * @param a the first CharSequence to compare, may be {@code null}
+     * @param b the second CharSequence to compare, may be {@code null}
      * @return the longest common suffix, or an empty string if there is no common suffix
      */
     public static String commonSuffix(final CharSequence a, final CharSequence b) {
@@ -13050,15 +13094,19 @@ public final class Strings {
      * Strings.substringAfterAny(null, '@');                       // returns null
      * Strings.substringAfterAny("test", null);                    // returns null
      * Strings.substringAfterAny("test", new char[0]);             // returns null
+     * 
+     * Strings.substringAfterAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.substringAfterAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
      * @param delimitersOfExclusiveBeginIndex the array of delimiter characters to search for.
      * @return the substring after the first occurrence of any delimiter, or {@code null} if not found.
+     * @throws IllegalArgumentException if any char in {@code delimitersOfExclusiveBeginIndex} contains low-surrogate or high-surrogate code unit.
      * @see #substringAfter(String, String)
      */
     @MayReturnNull
-    public static String substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) {
+    public static String substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) throws IllegalArgumentException {
         checkInputChars(delimitersOfExclusiveBeginIndex, cs.delimitersOfExclusiveBeginIndex, true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
@@ -13494,15 +13542,19 @@ public final class Strings {
      * Strings.substringBeforeAny(null, '@');                       // returns null
      * Strings.substringBeforeAny("test", null);                    // returns null
      * Strings.substringBeforeAny("test", new char[0]);             // returns null
+     * 
+     * Strings.substringBeforeAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
+     * Strings.substringBeforeAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
      * @param delimitersOfExclusiveEndIndex the array of delimiter characters to search for.
      * @return the substring before the first occurrence of any delimiter, or {@code null} if not found.
+     * @throws IllegalArgumentException if any char in {@code delimitersOfExclusiveEndIndex} contains low-surrogate or high-surrogate code unit.
      * @see #substringBefore(String, String)
      */
     @MayReturnNull
-    public static String substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) {
+    public static String substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) throws IllegalArgumentException {
         checkInputChars(delimitersOfExclusiveEndIndex, cs.delimitersOfExclusiveEndIndex, true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
@@ -13868,7 +13920,7 @@ public final class Strings {
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiter the delimiter string marking both the beginning and end of the substring, may be {@code null}
-     * @return the substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is emmpty or {@code null}.
+     * @return the substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is empty or {@code null}.
      * @see #substringBetween(String, String, String)
      */
     @MayReturnNull
@@ -15116,8 +15168,8 @@ public final class Strings {
      * }</pre>
      *
      * @param str the original string, may be {@code null}
-     * @param fromIndex the initial index of the range to be replaced, inclusive; must be valid index
-     * @param toIndex the final index of the range to be replaced, exclusive; must be valid
+     * @param fromIndex the initial index of the range to be replaced, inclusive. It must be &gt;= 0 and &lt;= {@code str.length()}.
+     * @param toIndex the final index of the range to be replaced, exclusive. It must be &gt;= {@code fromIndex} and &lt;= {@code str.length()}.
      * @param replacement the string to replace the specified range in the original string, may be {@code null}
      * @return a new string with the specified range replaced by the replacement string.
      * @throws IndexOutOfBoundsException if the range is out of the string bounds or indices are invalid.
@@ -15154,20 +15206,20 @@ public final class Strings {
      * <pre>{@code
      * // Moving a range of characters
      * Strings.moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
-     * Strings.moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 6)
-     * Strings.moveRange("Hello World", 0, 5, 5);   // returns " WorldHello" (moves "Hello" after "World")
+     * Strings.moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 5)
+     * Strings.moveRange("Hello World", 0, 5, 6);   // returns " WorldHello" (moves "Hello" to position 6)
      *
      * // Edge cases
      * Strings.moveRange(null, 0, 0, 0);            // returns ""
      * Strings.moveRange("", 0, 0, 0);              // returns ""
-     * Strings.moveRange("ABC", 1, 1, 2);           // returns "ABC" (no change when fromIndex == toIndex)
+     * Strings.moveRange("ABC", 1, 1, 1);           // returns "ABC" (no change when fromIndex == toIndex)
      * Strings.moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
      * }</pre>
      *
      * @param str the original string to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfString - lengthOfRange, inclusive.
      * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
@@ -15969,7 +16021,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
-     * Strings.join(numbers);                    // returns "1, 2, 3, 4, 5" (using default separator)
+     * Strings.join(numbers);   // returns "1, 2, 3, 4, 5" (using default separator)
      * 
      * int[] empty = {};
      * Strings.join(empty);   // returns ""
@@ -16136,7 +16188,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
-     * Strings.join(numbers);                    // returns "100, 200, 300" (using default separator)
+     * Strings.join(numbers);   // returns "100, 200, 300" (using default separator)
      * 
      * long[] empty = {};
      * Strings.join(empty);   // returns ""
@@ -16303,7 +16355,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {1.5f, 2.7f, 3.14f};
-     * Strings.join(numbers);                    // returns "1.5, 2.7, 3.14" (using default separator)
+     * Strings.join(numbers);   // returns "1.5, 2.7, 3.14" (using default separator)
      * 
      * float[] empty = {};
      * Strings.join(empty);   // returns ""
@@ -16409,7 +16461,7 @@ public final class Strings {
      * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
-     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -16470,7 +16522,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {1.5, 2.7, 3.14159};
-     * Strings.join(numbers);                    // returns "1.5, 2.7, 3.14159" (using default separator)
+     * Strings.join(numbers);   // returns "1.5, 2.7, 3.14159" (using default separator)
      * 
      * double[] empty = {};
      * Strings.join(empty);   // returns ""
@@ -16640,7 +16692,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
-     * Strings.join(arr);                                     // returns "apple, banana, cherry"
+     * Strings.join(arr);   // returns "apple, banana, cherry"
      * 
      * Object[] mixed = {1, "hello", true};
      * Strings.join(mixed);           // returns "1, hello, true"
@@ -16740,7 +16792,7 @@ public final class Strings {
      * Strings.join(arr, ", ", "[", "]", false);   // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Object[] mixed = {1, "  hello  ", true};
-     * Strings.join(mixed, " | ", "", "", true);              // returns "1 | hello | true"
+     * Strings.join(mixed, " | ", "", "", true);   // returns "1 | hello | true"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16839,7 +16891,7 @@ public final class Strings {
      * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
-     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
@@ -16923,7 +16975,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * Strings.join(list);                                    // returns "apple, banana, cherry"
+     * Strings.join(list);   // returns "apple, banana, cherry"
      * 
      * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
      * Strings.join(numbers);             // returns "1, 2, 3" (order may vary)
@@ -17020,7 +17072,7 @@ public final class Strings {
      * Strings.join(list, ", ", "[", "]", false);   // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Set<String> set = new HashSet<>(Arrays.asList("  one  ", "  two  "));
-     * Strings.join(set, " | ", "", "", true);                // returns "one | two" (order may vary)
+     * Strings.join(set, " | ", "", "", true);   // returns "one | two" (order may vary)
      * }</pre>
      *
      * @param c the Iterable containing the elements to join together, may be {@code null}
@@ -17123,7 +17175,7 @@ public final class Strings {
      * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
-     * @return the concatenated string. Returns an empty string if the specified Collection is {@code null} or empty or {@code fromIndex == toIndex}.
+     * @return the concatenated string. Returns an empty string if the specified Collection is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the Collection size.
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
@@ -17220,7 +17272,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * Strings.join(list.iterator());                         // returns "apple, banana, cherry"
+     * Strings.join(list.iterator());   // returns "apple, banana, cherry"
      * 
      * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
      * Strings.join(numbers.iterator());             // returns "1, 2, 3" (order may vary)
@@ -17319,7 +17371,7 @@ public final class Strings {
      * Strings.join(list.iterator(), ", ", "[", "]", false);   // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Set<String> set = new HashSet<>(Arrays.asList("  one  ", "  two  "));
-     * Strings.join(set.iterator(), " | ", "", "", true);     // returns "one | two" (order may vary)
+     * Strings.join(set.iterator(), " | ", "", "", true);      // returns "one | two" (order may vary)
      * }</pre>
      *
      * @param iter the Iterator containing the elements to join together, may be {@code null}
@@ -17361,7 +17413,7 @@ public final class Strings {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5);
      * map.put("banana", 3);
-     * Strings.joinEntries(map);                              // returns "apple=5, banana=3" (order may vary)
+     * Strings.joinEntries(map);   // returns "apple=5, banana=3" (order may vary)
      * 
      * Map<String, String> emptyMap = new HashMap<>();
      * Strings.joinEntries(emptyMap);   // returns ""
@@ -17390,11 +17442,11 @@ public final class Strings {
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("name", 1);
      * map.put("age", 25);
-     * Strings.joinEntries(map, ", ")      =1, age=25"
-     * Strings.joinEntries(map, " AND ")   =1 AND age=25"
+     * Strings.joinEntries(map, ", ");      // returns "name=1, age=25"
+     * Strings.joinEntries(map, " AND ");   // returns "name=1 AND age=25"
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * Strings.joinEntries(emptyMap, ", ");                   // returns ""
+     * Strings.joinEntries(emptyMap, ", ");   // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17425,12 +17477,12 @@ public final class Strings {
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("min", 10);
      * map.put("max", 100);
-     * Strings.joinEntries(map, ", ", " = ");       // returns "min = 10, max = 100"
-     * Strings.joinEntries(map, " AND ", " IS ");   // returns "min IS 10 AND max IS 100"
-     * Strings.joinEntries(map, "|", "");           // returns "min10|max100"
+     * Strings.joinEntries(map, ", ", " = ");        // returns "min = 10, max = 100"
+     * Strings.joinEntries(map, " AND ", " IS ");    // returns "min IS 10 AND max IS 100"
+     * Strings.joinEntries(map, "|", "");            // returns "min10|max100"
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * Strings.joinEntries(emptyMap, ", ", " = ");            // returns ""
+     * Strings.joinEntries(emptyMap, ", ", " = ");   // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17499,13 +17551,13 @@ public final class Strings {
      * map.put(" name ", " John ");
      * map.put(" age ", " 25 ");
      * 
-     * Strings.joinEntries(map, ", ", "=", "{", "}", false)   = John ,  age = 25 }"
-     * Strings.joinEntries(map, ", ", "=", "{", "}", true)    =John, age=25}"
+     * Strings.joinEntries(map, ", ", "=", "{", "}", false);   // returns "{ name = John ,  age = 25 }"
+     * Strings.joinEntries(map, ", ", "=", "{", "}", true);    // returns "{name=John, age=25}"
      * 
      * Map<Integer, Integer> numbers = new LinkedHashMap<>();
      * numbers.put(1, 100);
      * numbers.put(2, 200);
-     * Strings.joinEntries(numbers, " + ", "*", "(", ")", false); // returns "(1*100 + 2*200)"
+     * Strings.joinEntries(numbers, " + ", "*", "(", ")", false);   // returns "(1*100 + 2*200)"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17537,9 +17589,9 @@ public final class Strings {
      * map.put("second", 2);
      * map.put("third", 3);
      * 
-     * Strings.joinEntries(map, 0, 2, ", ")      =1, second=2"
-     * Strings.joinEntries(map, 1, 3, " AND ")   =2 AND third=3"
-     * Strings.joinEntries(map, 2, 2, ", ");                  // returns ""
+     * Strings.joinEntries(map, 0, 2, ", ");      // returns "first=1, second=2"
+     * Strings.joinEntries(map, 1, 3, " AND ");   // returns "second=2 AND third=3"
+     * Strings.joinEntries(map, 2, 2, ", ");      // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17571,9 +17623,9 @@ public final class Strings {
      * map.put(" key2 ", " value2 ");
      * map.put(" key3 ", " value3 ");
      * 
-     * Strings.joinEntries(map, 0, 2, ", ", false)   = value1 ,  key2 = value2 "
-     * Strings.joinEntries(map, 0, 2, ", ", true)    =value1, key2=value2"
-     * Strings.joinEntries(map, 1, 3, " | ", true)   =value2 | key3=value3"
+     * Strings.joinEntries(map, 0, 2, ", ", false);   // returns " key1 = value1 ,  key2 = value2 "
+     * Strings.joinEntries(map, 0, 2, ", ", true);    // returns "key1=value1, key2=value2"
+     * Strings.joinEntries(map, 1, 3, " | ", true);   // returns "key2=value2 | key3=value3"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17641,10 +17693,10 @@ public final class Strings {
      * map.put(" name ", " John ");
      * map.put(" age ", " 25 ");
      * map.put(" city ", " NYC ");
-     * 
-     * Strings.joinEntries(map, 0, 2, ", ", "=", false)   = John ,  age = 25 "
-     * Strings.joinEntries(map, 0, 2, ", ", "=", true)    =John, age=25"
-     * Strings.joinEntries(map, 1, 3, " AND ", " IS ", true); // returns "age IS 25 AND city IS NYC"
+     *
+     * Strings.joinEntries(map, 0, 2, ", ", "=", false);        // returns " name = John ,  age = 25 "
+     * Strings.joinEntries(map, 0, 2, ", ", "=", true);         // returns "name=John, age=25"
+     * Strings.joinEntries(map, 1, 3, " AND ", " IS ", true);   // returns "age IS 25 AND city IS NYC"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17877,7 +17929,7 @@ public final class Strings {
      * );
      * 
      * Strings.joinEntries(products, " + ", " costs $", "Total: ", "", false,
-     *     Product::getName, Product::getPrice);       // returns "Total: Apple costs $1.99 + Banana costs $0.99"
+     *     Product::getName, Product::getPrice);   // returns "Total: Apple costs $1.99 + Banana costs $0.99"
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -18169,16 +18221,16 @@ public final class Strings {
      * Strings.concat("H", "e", "l", "l", "o", " ", "9", "!", "!");   // returns "Hello 9!!"
      * }</pre>
      *
-     * @param a the first string to concatenate, may be {@code null}
-     * @param b the second string to concatenate, may be {@code null}
-     * @param c the third string to concatenate, may be {@code null}
-     * @param d the fourth string to concatenate, may be {@code null}
-     * @param e the fifth string to concatenate, may be {@code null}
-     * @param f the sixth string to concatenate, may be {@code null}
-     * @param g the seventh string to concatenate, may be {@code null}
-     * @param h the eighth string to concatenate, may be {@code null}
-     * @param i the ninth string to concatenate, may be {@code null}
-     * @return the concatenated string. Returns {@code ""} if all input strings are {@code null} or empty.
+     * @param a the first string to concatenate, may be {@code null} or empty
+     * @param b the second string to concatenate, may be {@code null} or empty
+     * @param c the third string to concatenate, may be {@code null} or empty
+     * @param d the fourth string to concatenate, may be {@code null} or empty
+     * @param e the fifth string to concatenate, may be {@code null} or empty
+     * @param f the sixth string to concatenate, may be {@code null} or empty
+     * @param g the seventh string to concatenate, may be {@code null} or empty
+     * @param h the eighth string to concatenate, may be {@code null} or empty
+     * @param i the ninth string to concatenate, may be {@code null} or empty
+     * @return the concatenated string. Returns an empty string if all inputs are {@code null} or empty.
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g, final String h,
             final String i) {
@@ -18471,7 +18523,7 @@ public final class Strings {
      * @param g the seventh object to concatenate, may be {@code null}
      * @param h the eighth object to concatenate, may be {@code null}
      * @param i the ninth object to concatenate, may be {@code null}
-     * @return the concatenated string. Returns {@code ""} if all input objects are {@code null} or empty.
+     * @return the concatenated string. Returns an empty string if all input objects are {@code null} or empty.
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g, final Object h,
             final Object i) {
@@ -18541,7 +18593,7 @@ public final class Strings {
      */
     // TODO(diamondm) consider using Arrays.toString() for array parameters
     public static String lenientFormat(String template, Object... args) {
-        template = String.valueOf(template); // null -> "null"
+        template = String.valueOf(template);   // null -> "null"
 
         if (args == null) {
             args = new Object[] { "(Object[])null" };
@@ -18591,7 +18643,7 @@ public final class Strings {
             // Logger is created inline with fixed name to avoid forcing Proguard to create another class.
             // Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
 
-            LOGGER.warn("Exception during lenientFormat for " + objectToString, e); //NOSONAR
+            LOGGER.warn("Exception during lenientFormat for " + objectToString, e);   //NOSONAR
 
             return "<" + objectToString + " threw " + e.getClass().getName() + ">";
         }
@@ -19128,10 +19180,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.base64EncodeString("Hello")         ="
-     * Strings.base64EncodeString("Hello World")   ="
-     * Strings.base64EncodeString("");      // returns ""
-     * Strings.base64EncodeString(null);    // returns ""
+     * Strings.base64EncodeString("Hello");         // returns "SGVsbG8="
+     * Strings.base64EncodeString("Hello World");   // returns "SGVsbG8gV29ybGQ="
+     * Strings.base64EncodeString("");              // returns ""
+     * Strings.base64EncodeString(null);            // returns ""
      * }</pre>
      *
      * @param str the string to be encoded.
@@ -19142,7 +19194,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes()); // NOSONAR
+        return BASE64_ENCODER.encodeToString(str.getBytes());   // NOSONAR
     }
 
     /**
@@ -19157,8 +19209,8 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic encoding
-     * Strings.base64EncodeUtf8String("Hello World")   ="
-     * Strings.base64EncodeUtf8String("test@123")      ="
+     * Strings.base64EncodeUtf8String("Hello World");        // returns "SGVsbG8gV29ybGQ="
+     * Strings.base64EncodeUtf8String("test@123");           // returns "dGVzdEAxMjM="
      * Strings.base64EncodeUtf8String("UTF-8 chars: ñ");     // returns "VVRGLTggY2hhcnM6IMOx"
      * 
      * // Edge cases
@@ -19186,9 +19238,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Different charset encodings
-     * Strings.base64EncodeString("Hello", StandardCharsets.UTF_8)      ="
-     * Strings.base64EncodeString("Hello", StandardCharsets.US_ASCII)   ="
-     * Strings.base64EncodeString("Test123", StandardCharsets.UTF_16);   // returns different encoding
+     * Strings.base64EncodeString("Hello", StandardCharsets.UTF_8);      //returns "SGVsbG8="
+     * Strings.base64EncodeString("Hello", StandardCharsets.US_ASCII);   //returns "SGVsbG8="
+     * Strings.base64EncodeString("Test123", StandardCharsets.UTF_16);   // returns "/v8AVABlAHMAdAAxADIAMw=="
      * 
      * // Edge cases
      * Strings.base64EncodeString(null, StandardCharsets.UTF_8);   // returns ""
@@ -19205,7 +19257,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes(charset)); // NOSONAR
+        return BASE64_ENCODER.encodeToString(str.getBytes(charset));   // NOSONAR
     }
 
     /**
@@ -19266,11 +19318,11 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(base64Decode(base64String)); // NOSONAR
+        return new String(base64Decode(base64String));   // NOSONAR
     }
 
     /**
-     * Decodes the given Base64 URL encoded string to a UTF-8 string.
+     * Decodes the given Base64 encoded string to a UTF-8 string.
      *
      * <p>This method specifically decodes Base64 encoded strings to UTF-8 format, ensuring proper
      * handling of Unicode characters. UTF-8 is the most common encoding for international text.</p>
@@ -19282,13 +19334,13 @@ public final class Strings {
      * // UTF-8 specific decoding
      * Strings.base64DecodeToUtf8String("SGVsbG8gV29ybGQ=");       // returns "Hello World"
      * Strings.base64DecodeToUtf8String("VVRGLTggY2hhcnM6IMOx");   // returns "UTF-8 chars: ñ"
-     * 
+     *
      * // Edge cases
      * Strings.base64DecodeToUtf8String(null);                     // returns ""
      * Strings.base64DecodeToUtf8String("");                       // returns ""
      * }</pre>
      *
-     * @param base64String the Base64 URL encoded string to be decoded.
+     * @param base64String the Base64 encoded string to be decoded.
      * @return the decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
      */
     public static String base64DecodeToUtf8String(final String base64String) {
@@ -19326,7 +19378,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(base64Decode(base64String), charset); // NOSONAR
+        return new String(base64Decode(base64String), charset);   // NOSONAR
     }
 
     /**
@@ -19420,7 +19472,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(BASE64_URL_DECODER.decode(base64String)); // NOSONAR
+        return new String(BASE64_URL_DECODER.decode(base64String));   // NOSONAR
     }
 
     /**
@@ -19498,7 +19550,7 @@ public final class Strings {
      * Map<String, String> params = new HashMap<>();
      * params.put("name", "John Doe");
      * params.put("age", "30");
-     * Strings.urlEncode(params);                              // returns "name=John+Doe&age=30"
+     * Strings.urlEncode(params);   // returns "name=John+Doe&age=30"
      * 
      * // Encoding with special characters
      * Map<String, String> data = new HashMap<>();
@@ -19533,10 +19585,10 @@ public final class Strings {
      * Map<String, String> params = new HashMap<>();
      * params.put("name", "José");
      * params.put("city", "São Paulo");
-     * Strings.urlEncode(params, StandardCharsets.UTF_8);      // returns properly encoded UTF-8 string
+     * Strings.urlEncode(params, StandardCharsets.UTF_8);        // returns properly encoded UTF-8 string
      * 
      * // Encoding with different charset
-     * Strings.urlEncode(params, StandardCharsets.ISO_8859_1); // returns ISO-8859-1 encoded string
+     * Strings.urlEncode(params, StandardCharsets.ISO_8859_1);   // returns ISO-8859-1 encoded string
      * }</pre>
      *
      * @param parameters the parameters to be URL-encoded.
@@ -19561,11 +19613,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic decoding
-     * Strings.urlDecode("name=John+Doe&age=30")            =John Doe, age=30}
-     * Strings.urlDecode("email=test%40example.com")        =test@example.com}
+     * Strings.urlDecode("name=John+Doe&age=30");       // returns "{name=John Doe, age=30}"
+     * Strings.urlDecode("email=test%40example.com");   // returns "{email=test@example.com}"
      * 
      * // Multiple values
-     * Strings.urlDecode("key1=value1&key2=value2&key3=")   =value1, key2=value2, key3=}
+     * Strings.urlDecode("key1=value1&key2=value2&key3=");   //returns: "{key1=value1, key2=value2, key3=}"
      * 
      * // Edge cases
      * Strings.urlDecode(null);    // returns empty map
@@ -19593,12 +19645,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // UTF-8 decoding
-     * Strings.urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);
-     * // returns {name = José, city=São Paulo}
+     * Strings.urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);   // returns "{name=José, city=São Paulo}"
      * 
      * // Different charset
-     * Strings.urlDecode("data=test%20data", StandardCharsets.ISO_8859_1);
-     * // returns {data = test data}
+     * Strings.urlDecode("data=test%20data", StandardCharsets.ISO_8859_1);   // returns "{data=test data}"
      * }</pre>
      *
      * @param urlQuery the URL query string to be decoded.
@@ -19631,8 +19681,8 @@ public final class Strings {
      * 
      * // Decode to object
      * UserParams params = urlDecode("name=John+Doe&age=30", UserParams.class);
-     * // params.getName() returns "John Doe"
-     * // params.getAge() returns 30
+     * // params.getName();   // returns "John Doe"
+     * // params.getAge();   // returns 30
      * }</pre>
      *
      * @param <T> the type of the object to be returned.
@@ -19667,8 +19717,8 @@ public final class Strings {
      * // Decode with specific charset
      * Product product = urlDecode("name=Caf%C3%A9&description=Delicious+coffee", 
      *                            StandardCharsets.UTF_8, Product.class);
-     * // product.getName() returns "Café"
-     * // product.getDescription() returns "Delicious coffee"
+     * // product.getName();   // returns "Café"
+     * // product.getDescription();   // returns "Delicious coffee"
      * }</pre>
      *
      * @param <T> the type of the object to be returned.
@@ -19768,7 +19818,7 @@ public final class Strings {
      *
      * @param arrayOctet byte array to test
      * @return {@code true} if all bytes are valid characters in the Base64 alphabet or if the byte array is empty;
-     *         {@code false}, otherwise
+     *         {@code false} otherwise
      */
     public static boolean isBase64(final byte[] arrayOctet) {
         if (arrayOctet == null) {
@@ -19808,7 +19858,7 @@ public final class Strings {
      *
      * @param base64 string to test
      * @return {@code true} if all characters in the String are valid characters in the Base64 alphabet or if
-     *         the String is empty; {@code false}, otherwise
+     *         the String is empty; {@code false} otherwise
      */
     public static boolean isBase64(final String base64) {
         if (base64 == null) {
@@ -19922,11 +19972,11 @@ public final class Strings {
      * <pre>{@code
      * // Trimming strings
      * String[] input  = {"  hello  ", " world ", "test"};
-     * String[] result = copyThenTrim(input);         // returns ["hello", "world", "test"]
+     * String[] result = copyThenTrim(input);    // returns ["hello", "world", "test"]
      * 
      * // Handling null and empty strings
      * String[] mixed   = {"  ", "text", null, " value "};
-     * String[] trimmed = copyThenTrim(mixed);        // returns ["", "text", null, "value"]
+     * String[] trimmed = copyThenTrim(mixed);   // returns ["", "text", null, "value"]
      * 
      * // Edge cases
      * Strings.copyThenTrim(null);            // returns null
@@ -19970,7 +20020,7 @@ public final class Strings {
      * Strings.copyThenStrip(new String[0]);   // returns empty array
      * }</pre>
      *
-     * @param strs the array of strings to be copied and stripped. May be {@code null}.
+     * @param strs the array of strings to be copied and stripped, may be {@code null}.
      * @return a new array with the stripped strings. Returns {@code null} if the input array is {@code null}.
      * @see N#copyThenReplaceAll(Object[], java.util.function.UnaryOperator)
      * @see Fn#strip()
@@ -20091,7 +20141,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to extract the double from, may be {@code null} or empty
-     * @param includingCientificNumber if {@code true}, it will also include scientific numbers in the search.
+     * @param includingScientificNumber if {@code true}, it will also include scientific numbers in the search.
      * @return the extracted double as a string, or {@code null} if no double is found, or the input string is {@code null} or empty.
      * @see #extractFirstInteger(String)
      * @see #extractFirstDouble(String)
@@ -20103,12 +20153,12 @@ public final class Strings {
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
     @MayReturnNull
-    public static String extractFirstDouble(final String str, final boolean includingCientificNumber) {
+    public static String extractFirstDouble(final String str, final boolean includingScientificNumber) {
         if (Strings.isEmpty(str)) {
             return null;
         }
 
-        final Matcher matcher = (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+        final Matcher matcher = (includingScientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
 
         if (matcher.find()) {
             return matcher.group(1);
@@ -20118,7 +20168,7 @@ public final class Strings {
     }
 
     /**
-     * Replaces the first occurrences of integer in the given string with the specified replacement string.
+     * Replaces the first occurrence of an integer in the given string with the specified replacement string.
      *
      * <p>This method finds the first integer (sequence of digits optionally preceded by a minus sign)
      * in the input string and replaces it with the provided replacement string. Only the first
@@ -20156,7 +20206,7 @@ public final class Strings {
     }
 
     /**
-     * Replaces the first occurrences of double in the given string with the specified replacement string.
+     * Replaces the first occurrence of a double in the given string with the specified replacement string.
      *
      * <p>This method finds the first number (integer or decimal) in the input string and replaces
      * it with the provided replacement string. It handles both integer and floating-point numbers
@@ -20193,7 +20243,7 @@ public final class Strings {
     }
 
     /**
-     * Replaces the first occurrences of double in the given string with the specified replacement string.
+     * Replaces the first occurrence of a double in the given string with the specified replacement string.
      *
      * <p>This method finds the first number in the input string and replaces it with the provided
      * replacement string. When scientific notation is enabled, it can match and replace numbers
@@ -20204,7 +20254,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Regular number replacement
-     * Strings.replaceFirstDouble("Value: 3.14, Pi", "X", false);      // returns "Value: X, Pi"
+     * Strings.replaceFirstDouble("Value: 3.14, Pi", "X", false);        // returns "Value: X, Pi"
      * 
      * // Scientific notation replacement
      * Strings.replaceFirstDouble("Result: 1.23e10 units", "X", true);   // returns "Result: X units"
@@ -20214,7 +20264,7 @@ public final class Strings {
      *
      * @param str the string to be modified, may be {@code null} or empty
      * @param replacement the string to replace the double with.
-     * @param includingCientificNumber if {@code true}, it will also include scientific numbers in the search.
+     * @param includingScientificNumber if {@code true}, it will also include scientific numbers in the search.
      * @return the modified string with the first double replaced by the specified replacement string, or an empty string if the input is {@code null} or empty.
      * @see #extractFirstDouble(String, boolean)
      * @see RegExUtil#replaceFirst(String, Pattern, String)
@@ -20222,12 +20272,12 @@ public final class Strings {
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static String replaceFirstDouble(final String str, final String replacement, final boolean includingCientificNumber) {
+    public static String replaceFirstDouble(final String str, final String replacement, final boolean includingScientificNumber) {
         if (Strings.isEmpty(str)) {
             return Strings.EMPTY;
         }
 
-        return (includingCientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str).replaceFirst(replacement);
+        return (includingScientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str).replaceFirst(replacement);
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
@@ -20313,7 +20363,7 @@ public final class Strings {
          * StrUtil.substring(null, 0);       // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
          * @see Strings#substring(String, int)
@@ -20338,7 +20388,7 @@ public final class Strings {
          * StrUtil.substring(null, 0, 5);      // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
@@ -20364,7 +20414,7 @@ public final class Strings {
          * StrUtil.substring(null, 0, len -> len);          // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
@@ -20390,7 +20440,7 @@ public final class Strings {
          * StrUtil.substring(null, end -> 0, 5);            // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
@@ -20415,9 +20465,9 @@ public final class Strings {
          * StrUtil.substringOrElse("hello", 2, null);         // returns "llo"
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
-         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substringAfter(String, char)
          */
@@ -20443,10 +20493,10 @@ public final class Strings {
          * StrUtil.substringOrElse("hello", 1, 4, null);         // returns "ell"
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
-         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, int, int)
          */
@@ -20471,10 +20521,10 @@ public final class Strings {
          * StrUtil.substringOrElse(null, 0, len -> len, "default");          // returns "default"
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
-         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
@@ -20500,10 +20550,10 @@ public final class Strings {
          * StrUtil.substringOrElse(null, end -> 0, 5, "default");            // returns "default"
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
-         * @param defaultStr the default string to return if substring extraction fails. Can be {@code null}.
+         * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
@@ -20531,7 +20581,7 @@ public final class Strings {
          * StrUtil.substringOrElseItself(null, 0);       // returns null
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @return the substring if it exists, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, char)
@@ -20559,7 +20609,7 @@ public final class Strings {
          * StrUtil.substringOrElseItself(null, 0, 5);       // returns null
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return the substring if it exists, otherwise {@code str} itself.
@@ -20586,7 +20636,7 @@ public final class Strings {
          * StrUtil.substringOrElseItself(null, 0, len -> len);          // returns null
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes the string length and returns the exclusive end index.
          * @return the substring if it exists, otherwise {@code str} itself.
@@ -20613,7 +20663,7 @@ public final class Strings {
          * StrUtil.substringOrElseItself(null, end -> 0, 5);            // returns null
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return the substring if it exists, otherwise {@code str} itself.
@@ -20641,7 +20691,7 @@ public final class Strings {
          * StrUtil.substringAfter(null, '.');            // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter character after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
          * @see Strings#substringAfter(String, char)
@@ -20666,7 +20716,7 @@ public final class Strings {
          * StrUtil.substringAfter(null, " ");              // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the delimiter, or empty if not found.
          * @see Strings#substringAfter(String, String)
@@ -20692,7 +20742,7 @@ public final class Strings {
          * StrUtil.substringAfter(null, " ", 5);               // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring after the delimiter up to the end index, or empty if not found.
@@ -20718,7 +20768,7 @@ public final class Strings {
          * StrUtil.substringAfterLast(null, '.');                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter character after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
          * @see Strings#substringAfterLast(String, String)
@@ -20743,7 +20793,7 @@ public final class Strings {
          * StrUtil.substringAfterLast(null, ".");                    // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the last occurrence of the delimiter, or empty if not found.
          * @see Strings#substringAfterLast(String, String)
@@ -20769,7 +20819,7 @@ public final class Strings {
          * StrUtil.substringAfterLast(null, ".", 10);                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter string after which the substring begins.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring after the last delimiter up to the end index, or empty if not found.
@@ -20795,7 +20845,7 @@ public final class Strings {
          * StrUtil.substringAfterAny(null, '.', '!');            // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimitersOfExclusiveBeginIndex the delimiter characters after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
          * @see Strings#substringAfterAny(String, char[])
@@ -20820,7 +20870,7 @@ public final class Strings {
          * StrUtil.substringAfterAny(null, " ", "::");             // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimitersOfExclusiveBeginIndex the delimiter strings after which the substring begins.
          * @return an {@code Optional<String>} containing the substring after the first found delimiter, or empty if none found.
          * @see Strings#substringAfterAny(String, String[])
@@ -20845,7 +20895,7 @@ public final class Strings {
          * StrUtil.substringBefore(null, '.');            // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the delimiter character before which the substring ends.
          * @return an {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
          * @see Strings#substringBefore(String, String)
@@ -20870,7 +20920,7 @@ public final class Strings {
          * StrUtil.substringBefore(null, " ");              // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string from which to extract the substring. Can be {@code null}.
+         * @param str the string from which to extract the substring, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the delimiter string before which the substring ends.
          * @return an {@code Optional<String>} containing the substring before the delimiter, or empty if not found.
          * @see Strings#substringBefore(String, String)
@@ -20899,7 +20949,7 @@ public final class Strings {
          * StrUtil.substringBefore("hello", 0, null);               // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param inclusiveBeginIndex the index from which to start searching (inclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -20928,7 +20978,7 @@ public final class Strings {
          * StrUtil.substringBeforeLast(null, '.');                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeLast(String, String)
@@ -20957,7 +21007,7 @@ public final class Strings {
          * StrUtil.substringBeforeLast("hello", null);                // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeLast(String, String)
@@ -20986,7 +21036,7 @@ public final class Strings {
          * StrUtil.substringBeforeLast("hello", 0, null);              // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param inclusiveBeginIndex the index from which to start searching (inclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21016,7 +21066,7 @@ public final class Strings {
          * StrUtil.substringBeforeAny("hello", (char[])null);          // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimitersOfExclusiveEndIndex the character delimiters marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeAny(String, char[])
@@ -21045,7 +21095,7 @@ public final class Strings {
          * StrUtil.substringBeforeAny("hello", (String[])null);          // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimitersOfExclusiveEndIndex the string delimiters marking the end of the substring (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBeforeAny(String, String[])
@@ -21070,7 +21120,7 @@ public final class Strings {
          * StrUtil.substringAfterOrElse("hello.", ".", "default");        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param defaultStr the default string to return if substring is not found.
          * @return the substring after the delimiter if found, otherwise {@code defaultStr}.
@@ -21099,7 +21149,7 @@ public final class Strings {
          * StrUtil.substringAfterLastOrElse("hello.world.", ".", "default");       // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param defaultStr the default string to return if substring is not found.
          * @return the substring after the last delimiter if found, otherwise {@code defaultStr}.
@@ -21127,7 +21177,7 @@ public final class Strings {
          * StrUtil.substringBeforeOrElse(".world", ".", "default");        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @param defaultStr the default string to return if substring is not found.
          * @return the substring before the delimiter if found, otherwise {@code defaultStr}.
@@ -21156,7 +21206,7 @@ public final class Strings {
          * StrUtil.substringBeforeLastOrElse("hello.", ".", "default");             // returns "hello"
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @param defaultStr the default string to return if substring is not found.
          * @return the substring before the last delimiter if found, otherwise {@code defaultStr}.
@@ -21185,7 +21235,7 @@ public final class Strings {
          * StrUtil.substringAfterOrElseItself("hello.", '.');        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
          * @return the substring after the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, char)
@@ -21213,7 +21263,7 @@ public final class Strings {
          * StrUtil.substringAfterOrElseItself("hello::", "::");        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
          * @return the substring after the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfter(String, String)
@@ -21241,7 +21291,7 @@ public final class Strings {
          * StrUtil.substringAfterOrElseItself(null, ".", 10);                 // returns null
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
          * @return the substring after the delimiter if found, otherwise {@code str} itself.
@@ -21270,7 +21320,7 @@ public final class Strings {
          * StrUtil.substringAfterLastOrElseItself("hello.world.", '.');       // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
          * @return the substring after the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfterLast(String, String)
@@ -21298,7 +21348,7 @@ public final class Strings {
          * StrUtil.substringAfterLastOrElseItself("hello::world::", "::");       // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
          * @return the substring after the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringAfterLast(String, String)
@@ -21326,7 +21376,7 @@ public final class Strings {
          * StrUtil.substringAfterLastOrElseItself(null, ".", 10);                 // returns null
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
          * @return the substring after the last delimiter if found, otherwise {@code str} itself.
@@ -21355,7 +21405,7 @@ public final class Strings {
          * StrUtil.substringBeforeOrElseItself(".world", '.');        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
          * @return the substring before the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBefore(String, String)
@@ -21383,7 +21433,7 @@ public final class Strings {
          * StrUtil.substringBeforeOrElseItself("::world", "::");        // returns ""
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
          * @return the substring before the delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBefore(String, String)
@@ -21412,7 +21462,7 @@ public final class Strings {
          * StrUtil.substringBeforeOrElseItself(null, 0, ".");                  // returns null
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param inclusiveBeginIndex the index from which to start searching (inclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return the substring before the delimiter if found, otherwise {@code str} itself.
@@ -21441,7 +21491,7 @@ public final class Strings {
          * StrUtil.substringBeforeLastOrElseItself("hello.", '.');             // returns "hello"
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
          * @return the substring before the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, String)
@@ -21469,7 +21519,7 @@ public final class Strings {
          * StrUtil.substringBeforeLastOrElseItself("hello::", "::");              // returns "hello"
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
          * @return the substring before the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, String)
@@ -21497,7 +21547,7 @@ public final class Strings {
          * StrUtil.substringBeforeLastOrElseItself(null, 10, ".");                 // returns null
          * }</pre>
          *
-         * @param str the string to search in. Can be {@code null}.
+         * @param str the string to search in, can be {@code null}.
          * @param exclusiveEndIndex the index marking the end boundary for searching (exclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return the substring before the last delimiter if found, otherwise {@code str} itself.
@@ -21522,14 +21572,14 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * StrUtil.substringBetween("hello world", 5, 11);   // returns Optional.of(" world")
+         * StrUtil.substringBetween("hello world", 5, 11);   // returns Optional.of("world")
          * StrUtil.substringBetween("hello", 0, 5);          // returns Optional.of("ello")
          * StrUtil.substringBetween("hello", 5, 10);         // returns Optional.empty() (indices out of bounds)
          * StrUtil.substringBetween("hello", 3, 3);          // returns Optional.empty() (begin >= end)
          * StrUtil.substringBetween(null, 0, 5);             // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param exclusiveBeginIndex the starting index (exclusive).
          * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
@@ -21557,7 +21607,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, 0, '.');                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param exclusiveBeginIndex the starting index (exclusive).
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21585,7 +21635,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, 0, "::");                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param exclusiveBeginIndex the starting index (exclusive).
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21613,7 +21663,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, '.', 10);                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning (exclusive).
          * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21641,7 +21691,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, "::", 10);                   // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21669,7 +21719,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, '[', ']');                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning (exclusive).
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21697,7 +21747,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, "*");              // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param tag the tag string marking both the beginning and end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see #substringBetween(String, String, String)
@@ -21725,7 +21775,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, "<start>", "</end>");                            // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21754,7 +21804,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, 0, "<a>", "</a>");                              // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param fromIndex the index from which to start searching.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
@@ -21779,7 +21829,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters after the begin index
-         * StrUtil.substringBetween("hello world", 5, beginIdx -> beginIdx + 6);     // returns Optional.of(" world")
+         * StrUtil.substringBetween("hello world", 5, beginIdx -> beginIdx + 6);   // returns Optional.of(" world")
          * 
          * // Extract until the end of the string
          * StrUtil.substringBetween("hello", 1, beginIdx -> 5);   // returns Optional.of("ello")
@@ -21787,7 +21837,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, 0, idx -> idx + 5);     // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param exclusiveBeginIndex the starting index (exclusive).
          * @param funcOfExclusiveEndIndex function to calculate the ending index based on begin index.
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
@@ -21810,7 +21860,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters before the end index
-         * StrUtil.substringBetween("hello world", endIdx -> endIdx - 5, 11);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello world", endIdx -> endIdx - 5, 11);   // returns Optional.of("world")
          * 
          * // Extract from the beginning
          * StrUtil.substringBetween("hello", endIdx -> 0, 4);    // returns Optional.of("hell")
@@ -21818,7 +21868,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, idx -> idx - 5, 10);   // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param funcOfExclusiveBeginIndex function to calculate the starting index based on end index.
          * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
@@ -21842,7 +21892,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters after the delimiter
-         * StrUtil.substringBetween("hello::world", "::", idx -> idx + 5);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world", "::", idx -> idx + 5);   // returns Optional.of("world")
          * 
          * // Extract to the end of string
          * StrUtil.substringBetween("key=value", "=", idx -> 10);   // returns Optional.of("value")
@@ -21850,7 +21900,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, "::", idx -> idx + 5);    // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param funcOfExclusiveEndIndex function to calculate the ending index based on delimiter position.
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21875,7 +21925,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract from 5 characters before the last delimiter
-         * StrUtil.substringBetween("hello.world.java", idx -> idx - 5, ".");     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello.world.java", idx -> idx - 5, ".");   // returns Optional.of("world")
          * 
          * // Extract from the beginning
          * StrUtil.substringBetween("prefix::value", idx -> 0, "::");   // returns Optional.of("prefix")
@@ -21883,7 +21933,7 @@ public final class Strings {
          * StrUtil.substringBetween(null, idx -> idx - 5, ".");         // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param funcOfExclusiveBeginIndex function to calculate the starting index based on delimiter position.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21912,7 +21962,7 @@ public final class Strings {
          * StrUtil.substringBetweenFirstAndLast(null, "<tag>");                  // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiter the string delimiter marking both the beginning and end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
          * @see Strings#substringBetweenFirstAndLast(String, String, String)
@@ -21939,7 +21989,7 @@ public final class Strings {
          * StrUtil.substringBetweenFirstAndLast(null, "<start>", "</end>");                  // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
@@ -21969,7 +22019,7 @@ public final class Strings {
          * StrUtil.substringBetweenFirstAndLast(null, 0, "<start>", "</end>");                                // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to extract from. Can be {@code null}.
+         * @param str the string to extract from, can be {@code null}.
          * @param fromIndex the index from which to start searching.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
@@ -22001,7 +22051,7 @@ public final class Strings {
          * StrUtil.createInteger(null);     // returns OptionalInt.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code OptionalInt} containing the parsed integer value, or empty if parsing fails.
          * @see Numbers#createInteger(String)
          */
@@ -22038,7 +22088,7 @@ public final class Strings {
          * StrUtil.createLong(null);            // returns OptionalLong.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code OptionalLong} containing the parsed long value, or empty if parsing fails.
          * @see Numbers#createLong(String)
          */
@@ -22076,7 +22126,7 @@ public final class Strings {
          * StrUtil.createFloat(null);         // returns OptionalFloat.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code OptionalFloat} containing the parsed float value, or empty if parsing fails.
          * @see Numbers#createFloat(String)
          */
@@ -22114,7 +22164,7 @@ public final class Strings {
          * StrUtil.createDouble(null);           // returns OptionalDouble.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code OptionalDouble} containing the parsed double value, or empty if parsing fails.
          * @see Numbers#createDouble(String)
          */
@@ -22151,7 +22201,7 @@ public final class Strings {
          * StrUtil.createBigInteger(null);                                // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code Optional<BigInteger>} containing the parsed BigInteger value, or empty if parsing fails.
          * @see Numbers#createBigInteger(String)
          */
@@ -22188,7 +22238,7 @@ public final class Strings {
          * StrUtil.createBigDecimal(null);                                 // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code Optional<BigDecimal>} containing the parsed BigDecimal value, or empty if parsing fails.
          * @see Numbers#createBigDecimal(String)
          */
@@ -22227,7 +22277,7 @@ public final class Strings {
          * StrUtil.createNumber(null);                    // returns Optional.empty()
          * }</pre>
          *
-         * @param str the string to parse. Can be {@code null} or blank.
+         * @param str the string to parse, can be {@code null} or blank.
          * @return {@code Optional<Number>} containing the parsed Number value, or empty if parsing fails.
          * @see Numbers#createNumber(String)
          */

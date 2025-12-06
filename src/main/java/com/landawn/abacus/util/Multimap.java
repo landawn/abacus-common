@@ -93,7 +93,7 @@ import com.landawn.abacus.util.stream.Stream;
  * listMultimap.put("scores", 85);
  * listMultimap.put("scores", 92);
  * listMultimap.put("scores", 78);
- * List<Integer> scores = listMultimap.get("scores");  // [85, 92, 78]
+ * List<Integer> scores = listMultimap.get("scores");   // [85, 92, 78]
  *
  * // Bulk operations
  * listMultimap.putMany("grades", Arrays.asList(90, 85, 88));
@@ -735,10 +735,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.put("numbers", 2);
      * multimap.put("numbers", 1);
      * 
-     * multimap.removeOne("numbers", 1);  // Removes first occurrence of 1
+     * multimap.removeOne("numbers", 1);   // Removes first occurrence of 1
      * // "numbers" now maps to [2, 1]
      * 
-     * multimap.removeOne("numbers", 3);  // Returns false, 3 not found
+     * multimap.removeOne("numbers", 3);   // Returns false, 3 not found
      * }</pre>
      *
      * @param key the key whose associated collection is to be modified
@@ -1336,7 +1336,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // SetMultimap example
      * SetMultimap<String, Integer> setMap = N.newSetMultimap();
      * setMap.putMany("nums", Arrays.asList(1, 2, 3));
-     * setMap.replaceOne("nums", 2, 20);  // Removes 2, adds 20
+     * setMap.replaceOne("nums", 2, 20);   // Removes 2, adds 20
      * }</pre>
      *
      * @param key the key whose value collection should be modified
@@ -1557,7 +1557,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
-                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue); //NOSONAR
+                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue);   //NOSONAR
             }
         }
 
@@ -1593,7 +1593,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
-                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue); //NOSONAR
+                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue);   //NOSONAR
             }
         }
 
@@ -1851,7 +1851,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // Won't overwrite existing values
      * multimap.put("admin", "super");
      * multimap.computeIfAbsent("admin", 
-     *     key -> Arrays.asList("basic"));  // Returns existing ["super"]
+     *     key -> Arrays.asList("basic"));   // Returns existing ["super"]
      * 
      * // Compute based on key properties
      * multimap.computeIfAbsent("guest_temp", key -> {
@@ -2161,7 +2161,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // Replace all if new value meets condition
      * multimap.merge("threshold", 100, (oldVals, newVal) -> {
      *     if (newVal > 50) {
-     *         return Arrays.asList(newVal);  // Replace all
+     *         return Arrays.asList(newVal);   // Replace all
      *     }
      *     return oldVals;  // Keep existing
      * });
@@ -2814,7 +2814,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * 
      * // Live view - changes reflect
      * multimap.put("key3", 3);
-     * System.out.println(keys.size());  // 3
+     * System.out.println(keys.size());   // 3
      * 
      * // Iteration
      * for (String key : keys) {
@@ -2853,7 +2853,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }
      * 
      * // Count total collections
-     * int totalCollections = valueCollections.size();  // 2
+     * int totalCollections = valueCollections.size();   // 2
      * }</pre>
      *
      * <p><b>Note:</b> If you need all individual elements rather than collections,
@@ -3012,9 +3012,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.putMany("group2", Arrays.asList(4, 5));
      *
      * Map<String, List<Integer>> map = multimap.toMap();
-     * map.get("group1").add(99);  // Only affects the map, not the multimap
+     * map.get("group1").add(99);   // Only affects the map, not the multimap
      *
-     * multimap.put("group1", 100);  // Only affects the multimap, not the map
+     * multimap.put("group1", 100);   // Only affects the multimap, not the map
      * }</pre>
      *
      * @return a new independent Map containing all key-collection pairs from this Multimap
@@ -3262,26 +3262,71 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns the number of key-value pairs in the Multimap.
+     * Returns the number of keys in this Multimap.
+     * This counts distinct keys, not the total number of individual values.
      *
-     * This method counts the number of keys in the Multimap. Each key and its corresponding collection of values is considered a single entry.
-     * Therefore, the size is equal to the number of distinct keys in the Multimap.
+     * <p>Each key with its collection of values is considered one entry.
+     * To get the total number of individual values across all collections,
+     * use {@link #totalCountOfValues()} instead.</p>
      *
-     * @return The number of key-value pairs in the Multimap.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("key1", Arrays.asList(1, 2, 3));
+     * multimap.putMany("key2", Arrays.asList(4, 5));
+     *
+     * int keyCount = multimap.size();                   // Returns 2 (two keys)
+     * int valueCount = multimap.totalCountOfValues();   // Returns 5 (five values)
+     *
+     * // Empty multimap
+     * ListMultimap<String, Integer> empty = N.newListMultimap();
+     * empty.size();   // Returns 0
+     *
+     * // After adding multiple values to same key
+     * multimap.put("key1", 10);
+     * multimap.size();   // Still 2 (same keys)
+     * }</pre>
+     *
+     * @return the number of distinct keys in the Multimap
+     * @see #totalCountOfValues()
+     * @see #isEmpty()
      */
     public int size() {
         return backingMap.size();
     }
 
     /**
-     * Returns the total count of all the elements in all value collections in the Multimap.
+     * Returns the total count of all individual elements across all value collections in this Multimap.
+     * This sums up the sizes of all value collections to give the total number of values.
      *
-     * This method iterates over all value collections in the Multimap and sums up their sizes.
-     * The size of a value collection is the number of elements it contains.
-     * Therefore, the total count of values is the sum of the sizes of all value collections.
+     * <p>Unlike {@link #size()} which counts keys, this method counts every individual value
+     * across all collections. For example, if you have 3 keys with 2, 5, and 3 values respectively,
+     * this method returns 10 (2+5+3), while {@link #size()} returns 3.</p>
      *
-     * @return The total count of all the elements in all value collections in the Multimap.
-     * @throws ArithmeticException if the total count of values overflows an int
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.putMany("group1", Arrays.asList(1, 2, 3));
+     * multimap.putMany("group2", Arrays.asList(4, 5));
+     * multimap.putMany("group3", Arrays.asList(6, 7, 8, 9));
+     *
+     * int totalValues = multimap.totalCountOfValues();   // Returns 9
+     * int keyCount = multimap.size();                    // Returns 3
+     *
+     * // Empty collections are counted as 0
+     * ListMultimap<String, Integer> sparse = N.newListMultimap();
+     * sparse.put("a", 1);
+     * sparse.totalCountOfValues();   // Returns 1
+     *
+     * // Useful for capacity planning
+     * int averageValuesPerKey = multimap.isEmpty() ? 0 :
+     *     multimap.totalCountOfValues() / multimap.size();   // Returns 3
+     * }</pre>
+     *
+     * @return the total count of all individual elements in all value collections
+     * @throws ArithmeticException if the total count of values overflows an int (exceeds Integer.MAX_VALUE)
+     * @see #size()
+     * @see #isEmpty()
      */
     public int totalCountOfValues() throws ArithmeticException {
         if (backingMap.isEmpty()) {
@@ -3298,9 +3343,46 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Checks if the Multimap is empty.
+     * Checks if this Multimap contains no keys.
+     * Returns {@code true} if there are no keys in the Multimap, {@code false} otherwise.
      *
-     * @return {@code true} if the Multimap contains no key-value pairs, {@code false} otherwise.
+     * <p>This method checks whether the Multimap has any keys. It returns {@code true}
+     * only when {@link #size()} would return 0.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     *
+     * // Initially empty
+     * multimap.isEmpty();   // Returns true
+     *
+     * // After adding values
+     * multimap.put("key1", 1);
+     * multimap.isEmpty();   // Returns false
+     *
+     * // After removing all keys
+     * multimap.removeAll("key1");
+     * multimap.isEmpty();   // Returns true
+     *
+     * // Conditional processing
+     * if (!multimap.isEmpty()) {
+     *     multimap.forEach((key, values) -> {
+     *         System.out.println(key + ": " + values.size() + " values");
+     *     });
+     * }
+     *
+     * // With acceptIfNotEmpty
+     * multimap.acceptIfNotEmpty(mm -> {
+     *     processData(mm);
+     * }).orElse(() -> {
+     *     System.out.println("No data available");
+     * });
+     * }</pre>
+     *
+     * @return {@code true} if the Multimap contains no keys, {@code false} otherwise
+     * @see #size()
+     * @see #totalCountOfValues()
+     * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
     public boolean isEmpty() {
         return backingMap.isEmpty();
@@ -3480,17 +3562,42 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         return If.is(size() > 0).then(this, action);
     }
 
+    /**
+     * Returns the hash code value for this Multimap.
+     * The hash code is computed from the backing map's hash code, which in turn is based
+     * on the hash codes of all key-value collection pairs.
+     *
+     * <p>Two Multimaps are guaranteed to have the same hash code if they are equal according
+     * to the {@link #equals(Object)} method. This ensures proper behavior in hash-based
+     * collections like HashMap and HashSet.</p>
+     *
+     * @return the hash code value for this Multimap
+     * @see #equals(Object)
+     */
     @Override
     public int hashCode() {
         return backingMap.hashCode();
     }
 
     /**
-     * Checks if this Multimap is equal to the specified object.
-     * The method returns {@code true} if the specified object is also a Multimap and has the same keys and values.
+     * Compares the specified object with this Multimap for equality.
+     * Returns {@code true} if the specified object is also a Multimap and both have
+     * identical key-value collection mappings.
      *
-     * @param obj The object to be compared with this Multimap for equality.
-     * @return {@code true} if the specified object is equal to this Multimap, {@code false} otherwise.
+     * <p>Two Multimaps are considered equal if:</p>
+     * <ul>
+     *   <li>They have the same set of keys</li>
+     *   <li>For each key, the associated value collections are equal</li>
+     *   <li>The equality check uses the backing map's equals method</li>
+     * </ul>
+     *
+     * <p><b>Note:</b> Multimap types (ListMultimap vs SetMultimap) don't affect equality.
+     * Only the actual key-collection mappings matter. However, collection types within
+     * the values do matter (e.g., [1,2,2] is not equal to [1,2] for lists).</p>
+     *
+     * @param obj the object to be compared for equality with this Multimap
+     * @return {@code true} if the specified object is equal to this Multimap, {@code false} otherwise
+     * @see #hashCode()
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -3499,13 +3606,26 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
-     * Returns a string representation of this Multimap.
+     * Returns a string representation of this Multimap in standard Map format.
+     * The string format matches that of a standard Java Map, showing all key-collection pairs.
      *
-     * The string representation consists of a list of key-value mappings in the Multimap, enclosed in braces ("{}").
-     * Adjacent mappings are separated by the characters ", " (comma and space).
-     * Each key-value mapping is rendered as the key followed by an equal sign ("=") followed by the associated value.
+     * <p>The string representation consists of:</p>
+     * <ul>
+     *   <li>Key-value mappings enclosed in braces: {@code "{}"}</li>
+     *   <li>Adjacent mappings separated by comma and space: {@code ", "}</li>
+     *   <li>Each mapping rendered as: {@code key=collection}</li>
+     *   <li>The order depends on the backing map type (HashMap, LinkedHashMap, etc.)</li>
+     * </ul>
      *
-     * @return a string representation of this Multimap.
+     * <p><b>Example output:</b></p>
+     * <pre>
+     * {key1=[value1, value2], key2=[value3, value4, value5]}
+     * </pre>
+     *
+     * <p><b>Note:</b> This method is primarily intended for debugging and logging.
+     * The exact format may vary depending on the backing map and collection implementations.</p>
+     *
+     * @return a string representation of this Multimap
      */
     @Override
     public String toString() {

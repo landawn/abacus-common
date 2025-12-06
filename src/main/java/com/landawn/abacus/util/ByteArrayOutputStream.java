@@ -37,7 +37,7 @@ import java.util.Arrays;
  * baos.write("Hello".getBytes());
  * baos.write((byte) ' ');
  * baos.write("World".getBytes());
- * String result = baos.toString();  // "Hello World"
+ * String result = baos.toString();   // "Hello World"
  * }</pre>
  * 
  * @see java.io.ByteArrayOutputStream
@@ -114,7 +114,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * byte[] data = "Hello World".getBytes();
-     * baos.write(data, 6, 5);  // Writes "World"
+     * baos.write(data, 6, 5);   // Writes "World"
      * }</pre>
      *
      * @param b the byte array containing data to write
@@ -165,7 +165,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * baos.write("Hello".getBytes());
      * 
      * FileOutputStream fos = new FileOutputStream("output.txt");
-     * baos.writeTo(fos);  // Writes "Hello" to the file
+     * baos.writeTo(fos);   // Writes "Hello" to the file
      * fos.close();
      * }</pre>
      *
@@ -185,9 +185,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
-     * System.out.println(baos.capacity());  // 100
+     * System.out.println(baos.capacity());   // 100
      * baos.write(new byte[50]);
-     * System.out.println(baos.capacity());  // Still 100
+     * System.out.println(baos.capacity());   // Still 100
      * }</pre>
      * 
      * @return the current capacity, or 0 if the buffer is null
@@ -209,7 +209,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
      * byte[] buffer = baos.array();
-     * int validBytes = baos.size();  // Use only buffer[0] to buffer[validBytes-1]
+     * int validBytes = baos.size();   // Use only buffer[0] to buffer[validBytes-1]
      * }</pre>
      * 
      * @return the internal byte array buffer
@@ -224,9 +224,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * System.out.println(baos.size());  // 0
+     * System.out.println(baos.size());   // 0
      * baos.write("Hello".getBytes());
-     * System.out.println(baos.size());  // 5
+     * System.out.println(baos.size());   // 5
      * }</pre>
      * 
      * @return the number of valid bytes in the buffer
@@ -245,9 +245,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
-     * System.out.println(baos.size());  // 5
+     * System.out.println(baos.size());   // 5
      * baos.reset();
-     * System.out.println(baos.size());  // 0
+     * System.out.println(baos.size());   // 0
      * }</pre>
      */
     public void reset() {
@@ -264,7 +264,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
-     * byte[] data = baos.toByteArray();  // Returns new array with "Hello"
+     * byte[] data = baos.toByteArray();   // Returns new array with "Hello"
      * }</pre>
      * 
      * @return a new byte array containing the valid data
@@ -280,14 +280,14 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello World".getBytes());
-     * String result = baos.toString();  // "Hello World"
+     * String result = baos.toString();   // "Hello World"
      * }</pre>
      * 
      * @return a String decoded from the buffer contents
      */
     @Override
     public String toString() {
-        return new String(buf, 0, count); // NOSONAR
+        return new String(buf, 0, count);   // NOSONAR
     }
 
     /**
@@ -297,7 +297,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes("UTF-8"));
-     * String result = baos.toString("UTF-8");  // "Hello"
+     * String result = baos.toString("UTF-8");   // "Hello"
      * }</pre>
      *
      * @param charsetName the name of the charset to use for decoding
@@ -315,7 +315,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes(StandardCharsets.UTF_8));
-     * String result = baos.toString(StandardCharsets.UTF_8);  // "Hello"
+     * String result = baos.toString(StandardCharsets.UTF_8);   // "Hello"
      * }</pre>
      *
      * @param charset the charset to use for decoding

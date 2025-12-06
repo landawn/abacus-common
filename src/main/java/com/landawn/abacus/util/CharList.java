@@ -78,23 +78,23 @@ import com.landawn.abacus.util.stream.CharStream;
  * <pre>{@code
  * // Creating and initializing character lists
  * CharList buffer = CharList.of('H', 'e', 'l', 'l', 'o');
- * CharList alphabet = CharList.range('A', 'Z');  // ['A', 'B', 'C', ..., 'Z']
- * CharList digits = CharList.range('0', '9');  // ['0', '1', '2', ..., '9']
- * CharList textBuffer = new CharList(1000);  // Pre-sized for text processing
+ * CharList alphabet = CharList.range('A', 'Z');   // ['A', 'B', 'C', ..., 'Z']
+ * CharList digits = CharList.range('0', '9');   // ['0', '1', '2', ..., '9']
+ * CharList textBuffer = new CharList(1000);   // Pre-sized for text processing
  *
  * // String integration
- * CharList fromString = CharList.of("Hello World");  // Convert from string
- * String result = buffer.toString();  // Convert to string: "Hello"
- * char[] charArray = buffer.toArray();  // Convert to char array
+ * CharList fromString = CharList.of("Hello World");   // Convert from string
+ * String result = buffer.toString();   // Convert to string: "Hello"
+ * char[] charArray = buffer.toArray();   // Convert to char array
  *
  * // Text manipulation operations
- * buffer.add(' ');  // Append space
- * buffer.addAll(CharList.of("World"));  // Append more characters
- * char firstChar = buffer.get(0);  // Access by index: 'H'
- * buffer.set(0, 'h');  // Modify: "hello World"
+ * buffer.add(' ');   // Append space
+ * buffer.addAll(CharList.of("World"));   // Append more characters
+ * char firstChar = buffer.get(0);   // Access by index: 'H'
+ * buffer.set(0, 'h');   // Modify: "hello World"
  *
  * // Character searching and analysis
- * int spaceIndex = buffer.indexOf(' ');  // Find space character
+ * int spaceIndex = buffer.indexOf(' ');   // Find space character
  * boolean hasVowels = buffer.stream().anyMatch(c -> "aeiou".indexOf(c) >= 0);
  * long letterCount = buffer.stream().filter(Character::isLetter).count();
  *
@@ -105,19 +105,19 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * // Set operations for character analysis
  * CharList vowels = CharList.of('a', 'e', 'i', 'o', 'u');
- * CharList consonants = alphabet.difference(vowels);  // Remove vowels
- * CharList common = buffer.intersection(vowels);  // Find vowels in text
+ * CharList consonants = alphabet.difference(vowels);   // Remove vowels
+ * CharList common = buffer.intersection(vowels);   // Find vowels in text
  *
  * // High-performance sorting and searching
- * buffer.sort();  // Sort characters
- * int index = buffer.binarySearch('e');  // Fast character lookup
+ * buffer.sort();   // Sort characters
+ * int index = buffer.binarySearch('e');   // Fast character lookup
  *
  * // Efficient text building
  * CharList builder = new CharList();
  * builder.addAll("The quick ");
  * builder.addAll("brown fox ");
  * builder.addAll("jumps over");
- * String sentence = builder.toString();  // "The quick brown fox jumps over"
+ * String sentence = builder.toString();   // "The quick brown fox jumps over"
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -734,7 +734,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -780,7 +780,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);   // Increments modCount
 
         final int numMoved = size - index;
 
@@ -1443,12 +1443,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'b', 'b', 'd');
-     * CharList result = list1.intersection(list2);  // result will be ['a', 'b']
+     * CharList result = list1.intersection(list2);   // result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both lists) and one occurrence of 'b'
      *
      * CharList list3 = CharList.of('x', 'x', 'y');
      * CharList list4 = CharList.of('x', 'z');
-     * CharList result2 = list3.intersection(list4);  // result will be ['x']
+     * CharList result2 = list3.intersection(list4);   // result will be ['x']
      * // One occurrence of 'x' (minimum count in both lists)
      * }</pre>
      *
@@ -1489,12 +1489,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'b', 'b', 'd'};
-     * CharList result = list1.intersection(array);  // result will be ['a', 'b']
+     * CharList result = list1.intersection(array);   // result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both sources) and one occurrence of 'b'
      *
      * CharList list2 = CharList.of('x', 'x', 'y');
      * char[] array2 = new char[] {'x', 'z'};
-     * CharList result2 = list2.intersection(array2);  // result will be ['x']
+     * CharList result2 = list2.intersection(array2);   // result will be ['x']
      * // One occurrence of 'x' (minimum count in both sources)
      * }</pre>
      *
@@ -1525,12 +1525,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'd');
-     * CharList result = list1.difference(list2);  // result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(list2);   // result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and list2 has one
      *
      * CharList list3 = CharList.of('e', 'f');
      * CharList list4 = CharList.of('e', 'e', 'f');
-     * CharList result2 = list3.difference(list4);  // result will be [] (empty)
+     * CharList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1570,12 +1570,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'd'};
-     * CharList result = list1.difference(array);  // result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(array);   // result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and array has one
      *
      * CharList list2 = CharList.of('e', 'f');
      * char[] array2 = new char[] {'e', 'e', 'f'};
-     * CharList result2 = list2.difference(array2);  // result will be [] (empty)
+     * CharList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1607,7 +1607,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'b', 'c');
      * CharList list2 = CharList.of('b', 'c', 'd');
-     * CharList result = list1.symmetricDifference(list2);  // result will be ['a', 'd']
+     * CharList result = list1.symmetricDifference(list2);   // result will be ['a', 'd']
      * }</pre>
      * 
      * @param b the CharList to find the symmetric difference with

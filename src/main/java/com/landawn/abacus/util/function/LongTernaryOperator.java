@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTernaryOperator sum = (a, b, c) -> a + b + c;
- * long result = sum.applyAsLong(10L, 20L, 30L);  // returns 60L
+ * long result = sum.applyAsLong(10L, 20L, 30L);   // returns 60L
  *
  * LongTernaryOperator median = (a, b, c) -> {
  *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
@@ -56,6 +56,25 @@ public interface LongTernaryOperator extends Throwables.LongTernaryOperator<Runt
      *   <li>Bitwise operations</li>
      *   <li>Custom business logic involving three long values</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Sum of three values
+     * LongTernaryOperator sum = (a, b, c) -> a + b + c;
+     * long total = sum.applyAsLong(10L, 20L, 30L);   // returns 60L
+     *
+     * // Average of three values
+     * LongTernaryOperator average = (a, b, c) -> (a + b + c) / 3;
+     * long avg = average.applyAsLong(10L, 20L, 30L);   // returns 20L
+     *
+     * // Find middle value (median)
+     * LongTernaryOperator median = (a, b, c) -> {
+     *     if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
+     *     if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+     *     return c;
+     * };
+     * long mid = median.applyAsLong(5L, 15L, 10L);   // returns 10L
+     * }</pre>
      *
      * @param a the first operand
      * @param b the second operand

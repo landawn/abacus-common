@@ -37,7 +37,7 @@ import static java.lang.Character.MIN_SURROGATE;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String text = "Hello 世界";
- * int utf8Length = Utf8.encodedLength(text);  // More efficient than text.getBytes("UTF-8").length
+ * int utf8Length = Utf8.encodedLength(text);   // More efficient than text.getBytes("UTF-8").length
  * 
  * byte[] bytes = getDataFromNetwork();
  * if (Utf8.isWellFormed(bytes)) {
@@ -67,13 +67,13 @@ public class Utf8 {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String ascii = "Hello World";
-     * int length1 = Utf8.encodedLength(ascii);  // Returns 11 (1 byte per char)
+     * int length1 = Utf8.encodedLength(ascii);   // Returns 11 (1 byte per char)
      * 
      * String unicode = "Hello 世界";
-     * int length2 = Utf8.encodedLength(unicode);  // Returns 12 (6 + 3 + 3)
+     * int length2 = Utf8.encodedLength(unicode);   // Returns 12 (6 + 3 + 3)
      * 
      * String emoji = "Hello 👋";
-     * int length3 = Utf8.encodedLength(emoji);  // Accounts for surrogate pairs
+     * int length3 = Utf8.encodedLength(emoji);   // Accounts for surrogate pairs
      * }</pre>
      *
      * @param sequence the character sequence to measure
@@ -95,7 +95,7 @@ public class Utf8 {
         for (; i < utf16Length; i++) {
             final char c = sequence.charAt(i);
             if (c < 0x800) {
-                utf8Length += ((0x7f - c) >>> 31); // branch free!
+                utf8Length += ((0x7f - c) >>> 31);   // branch free!
             } else {
                 utf8Length += encodedLengthGeneral(sequence, i);
                 break;
@@ -151,10 +151,10 @@ public class Utf8 {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] validUtf8 = "Hello 世界".getBytes(StandardCharsets.UTF_8);
-     * boolean valid1 = Utf8.isWellFormed(validUtf8);  // Returns true
+     * boolean valid1 = Utf8.isWellFormed(validUtf8);   // Returns true
      * 
      * byte[] invalid = {(byte)0xC0, (byte)0x80};  // Overlong encoding of NULL
-     * boolean valid2 = Utf8.isWellFormed(invalid);  // Returns false
+     * boolean valid2 = Utf8.isWellFormed(invalid);   // Returns false
      * }</pre>
      *
      * @param bytes the byte array to validate

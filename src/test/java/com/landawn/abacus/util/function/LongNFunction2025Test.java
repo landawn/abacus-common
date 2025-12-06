@@ -99,7 +99,7 @@ public class LongNFunction2025Test extends TestBase {
         final java.util.function.Function<String, Integer> toLength = String::length;
 
         final LongNFunction<Integer> composed = function.andThen(toString).andThen(toLength);
-        final Integer result = composed.apply(2L, 3L, 4L); // 2*3*4 = 24, "24".length() = 2
+        final Integer result = composed.apply(2L, 3L, 4L);   // 2*3*4 = 24, "24".length() = 2
 
         assertEquals(2, result);
     }
@@ -215,7 +215,7 @@ public class LongNFunction2025Test extends TestBase {
             return Math.sqrt(sumSquares);
         };
 
-        final Double result = function.apply(3L, 4L); // sqrt(9 + 16) = 5
+        final Double result = function.apply(3L, 4L);   // sqrt(9 + 16) = 5
         assertEquals(5.0, result, 0.001);
     }
 }

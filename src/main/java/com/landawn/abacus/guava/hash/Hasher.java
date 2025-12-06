@@ -119,7 +119,7 @@ public interface Hasher {
      * }</pre>
      *
      * @param bytes the byte array containing data to add to the hash computation
-     * @param off the starting offset in the array (inclusive, zero-based)
+     * @param off the starting offset in the array (zero-based, inclusive)
      * @param len the number of bytes to process from the array
      * @return this hasher instance for method chaining
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if
@@ -135,7 +135,7 @@ public interface Hasher {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buffer = ByteBuffer.wrap("data".getBytes());
-     * hasher.put(buffer);  // Buffer position is now at limit
+     * hasher.put(buffer);   // Buffer position is now at limit
      * }</pre>
      *
      * @param bytes the ByteBuffer containing data to add to the hash computation
@@ -282,7 +282,7 @@ public interface Hasher {
      * }</pre>
      *
      * @param chars the character array containing data to add to the hash computation
-     * @param off the starting offset in the array (inclusive, zero-based)
+     * @param off the starting offset in the array (zero-based, inclusive)
      * @param len the number of characters to process from the array
      * @return this hasher instance for method chaining
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if

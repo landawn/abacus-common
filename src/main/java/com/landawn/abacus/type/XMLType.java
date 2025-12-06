@@ -41,6 +41,12 @@ public class XMLType<T> extends AbstractType<T> {
     //    private final Type<T>[] parameterTypes;
     //    private final Type<T> elementType;
 
+    /**
+     * Constructs an XMLType instance for the specified class.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param clsName the name of the class to be handled by this XML type
+     */
     @SuppressWarnings("unchecked")
     XMLType(final String clsName) {
         super(XML + WD.LESS_THAN + TypeFactory.getType(clsName).name() + WD.GREATER_THAN);

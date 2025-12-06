@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
- * double value = indexedDouble.value();  // 3.14159
- * long index = indexedDouble.index();  // 5
+ * double value = indexedDouble.value();   // 3.14159
+ * long index = indexedDouble.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -99,7 +99,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
-     * double value = indexed.value();  // 3.14159
+     * double value = indexed.value();   // 3.14159
      * }</pre>
      *
      * @return the double value
@@ -153,7 +153,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
-     * System.out.println(indexed);  // prints: [5]=3.14159
+     * System.out.println(indexed);   // prints: [5]=3.14159
      * }</pre>
      *
      * @return a string representation in the format [index]=value

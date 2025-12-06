@@ -58,7 +58,7 @@ public class LongFunction2025Test extends TestBase {
         final java.util.function.Function<String, Integer> toLength = String::length;
 
         final LongFunction<Integer> composed = function.andThen(toString).andThen(toLength);
-        final Integer result = composed.apply(5L); // 5 * 2 = 10, "10".length() = 2
+        final Integer result = composed.apply(5L);   // 5 * 2 = 10, "10".length() = 2
 
         assertEquals(2, result);
     }

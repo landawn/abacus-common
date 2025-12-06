@@ -230,7 +230,7 @@ public final class CodeGenerationUtil {
                 .append(" {")
                 .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
                 .append(LINE_SEPARATOR)
-                .append(LINE_SEPARATOR); //
+                .append(LINE_SEPARATOR);   //
 
         for (final String propName : Beans.getPropNameList(entityClass)) {
 
@@ -496,7 +496,7 @@ public final class CodeGenerationUtil {
                     .append(interfaceName)
                     .append(" {")
                     .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
-                    .append(LINE_SEPARATOR); //
+                    .append(LINE_SEPARATOR);   //
 
             final List<String> propNames = new ArrayList<>(propNameMap.keySet());
             N.sort(propNames);
@@ -597,7 +597,7 @@ public final class CodeGenerationUtil {
                         .append(N.defaultIfEmpty(codeConfig.getClassNameForLowerCaseWithUnderscore(), SL))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPARATOR); //
+                        .append(LINE_SEPARATOR);   //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
@@ -707,7 +707,7 @@ public final class CodeGenerationUtil {
                         .append(N.defaultIfEmpty(codeConfig.getClassNameForUpperCaseWithUnderscore(), SU))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPARATOR); //
+                        .append(LINE_SEPARATOR);   //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
@@ -825,7 +825,7 @@ public final class CodeGenerationUtil {
                         .append(functionClassName)
                         .append(" {")
                         .append(Character.isLowerCase(functionClassName.charAt(0)) ? " // NOSONAR" : "")
-                        .append(LINE_SEPARATOR); //
+                        .append(LINE_SEPARATOR);   //
 
                 for (final ListMultimap<Tuple2<String, String>, String> funcPropNameMap : funcPropNameMapList) {
                     final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(funcPropNameMap.keySet());

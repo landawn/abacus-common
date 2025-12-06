@@ -45,7 +45,7 @@ public class HttpSettings2025Test extends TestBase {
         HttpSettings settings = HttpSettings.create();
         HttpSettings result = settings.setConnectionTimeout(5000L);
         assertEquals(5000L, settings.getConnectionTimeout());
-        assertEquals(settings, result); // Verify method chaining
+        assertEquals(settings, result);   // Verify method chaining
     }
 
     @Test

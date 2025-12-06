@@ -178,7 +178,7 @@ public class HttpResponse {
      * List<String> contentType = headers.get("Content-Type");
      * }</pre>
      *
-     * @return An unmodifiable map of header names to their values
+     * @return A map of header names to their values
      */
     public Map<String, List<String>> headers() {
         return headers;
@@ -194,7 +194,7 @@ public class HttpResponse {
      * // Process raw bytes
      * }</pre>
      *
-     * @return The response body as a byte array, never {@code null} (may be empty)
+     * @return The response body as a byte array
      */
     public byte[] body() {
         return body;
@@ -335,14 +335,12 @@ public class HttpResponse {
      * Returns a string representation of this HttpResponse.
      * The string includes the status code, message, request URL, and elapsed time.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Example output:</b></p>
      * <pre>{@code
      * HttpResponse{statusCode=200, message=OK, url=https://api.example.com/users, elapsedTime=123}
      * }</pre>
      *
      * @return A string representation of this object
-     * 
-     * <p>Example output:</p>
      */
     @Override
     public String toString() {

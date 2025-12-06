@@ -38,12 +38,12 @@ public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T
      * <pre>{@code
      * IntBiObjFunction<String, String, String> formatter =
      *     (index, prefix, suffix) -> prefix + index + suffix;
-     * String result = formatter.apply(5, "Item_", "_end");  // Returns "Item_5_end"
+     * String result = formatter.apply(5, "Item_", "_end");   // Returns "Item_5_end"
      *
      * IntBiObjFunction<List<String>, String, Boolean> listInserter =
      *     (index, list, element) -> { list.add(index, element); return true; };
      * List<String> myList = new ArrayList<>(Arrays.asList("a", "b", "c"));
-     * listInserter.apply(1, myList, "x");  // list becomes ["a", "x", "b", "c"]
+     * listInserter.apply(1, myList, "x");   // list becomes ["a", "x", "b", "c"]
      * }</pre>
      *
      * @param i the {@code int} argument
@@ -65,7 +65,7 @@ public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T
      *     (i, s1, s2) -> i + s1.length() + s2.length();
      * Function<Integer, String> toString = Object::toString;
      * IntBiObjFunction<String, String, String> combined = summer.andThen(toString);
-     * String result = combined.apply(5, "ab", "xyz");  // Returns "10"
+     * String result = combined.apply(5, "ab", "xyz");   // Returns "10"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function

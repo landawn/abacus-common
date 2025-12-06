@@ -455,6 +455,21 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * If the iterables have different lengths, the resulting TriIterator will continue with the default values
      * for the shorter iterable until the longest iterable is exhausted.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice", "Bob");
+     * List<Integer> ages = Arrays.asList(25, 30, 35);
+     * List<Boolean> active = Arrays.asList(true);
+     * TriIterator<String, Integer, Boolean> iter = TriIterator.zip(
+     *     names, ages, active, "Unknown", 0, false);
+     * iter.forEachRemaining((name, age, isActive) ->
+     *     System.out.println(name + ", " + age + ", " + isActive));
+     * // Output:
+     * // Alice, 25, true
+     * // Bob, 30, false     (default for active)
+     * // Unknown, 35, false (defaults for name and active)
+     * }</pre>
+     *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
      * @param <C> the type of elements in the third iterable
@@ -477,6 +492,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * The resulting TriIterator will iterate over triples of elements from the three iterators.
      * If the iterators have different lengths, the resulting TriIterator will have the length of the shortest iterator.
      * If any of iterator is {@code null}, returns an empty TriIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+     * List<Integer> ages = Arrays.asList(25, 30, 35);
+     * List<String> cities = Arrays.asList("NYC", "LA", "Chicago");
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(
+     *     names.iterator(), ages.iterator(), cities.iterator());
+     * iter.forEachRemaining((name, age, city) ->
+     *     System.out.println(name + " is " + age + " from " + city));
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
@@ -579,6 +605,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * The resulting TriIterator will iterate over triples of elements from the three iterators.
      * If the iterators have different lengths, the resulting TriIterator will continue with the default values
      * for the shorter iterator until the longest iterator is exhausted.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice", "Bob");
+     * List<Integer> ages = Arrays.asList(25, 30, 35);
+     * List<String> cities = Arrays.asList("NYC");
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(
+     *     names.iterator(), ages.iterator(), cities.iterator(),
+     *     "Unknown", 0, "N/A");
+     * iter.forEachRemaining((name, age, city) ->
+     *     System.out.println(name + ", " + age + ", " + city));
+     * // Output:
+     * // Alice, 25, NYC
+     * // Bob, 30, N/A       (default for city)
+     * // Unknown, 35, N/A   (defaults for name and city)
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterator
      * @param <B> the type of elements in the second iterator
@@ -688,6 +730,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * The resulting TriIterator will iterate over triples of elements produced by the unzip function.
      * If the iterable is {@code null}, an empty TriIterator is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Unzip a list of CSV strings into three separate components
+     * List<String> records = Arrays.asList("Alice,25,NYC", "Bob,30,LA", "Charlie,35,Chicago");
+     * TriIterator<String, Integer, String> iter = TriIterator.unzip(records, (record, triple) -> {
+     *     String[] parts = record.split(",");
+     *     triple.setLeft(parts[0]);
+     *     triple.setMiddle(Integer.parseInt(parts[1]));
+     *     triple.setRight(parts[2]);
+     * });
+     * iter.forEachRemaining((name, age, city) ->
+     *     System.out.println(name + " is " + age + " from " + city));
+     * }</pre>
+     *
      * @param <T> the type of elements in the input iterable
      * @param <A> the type of elements in the first component of the triple
      * @param <B> the type of elements in the second component of the triple
@@ -708,6 +764,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Unzips an iterator of elements into a TriIterator.
      * The resulting TriIterator will iterate over triples of elements produced by the unzip function.
      * If the iterator is {@code null}, an empty TriIterator is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Unzip an iterator of complex objects into three components
+     * List<String> data = Arrays.asList("John:Developer:5", "Jane:Manager:8", "Bob:Analyst:3");
+     * TriIterator<String, String, Integer> iter = TriIterator.unzip(data.iterator(), (item, triple) -> {
+     *     String[] parts = item.split(":");
+     *     triple.setLeft(parts[0]);         // name
+     *     triple.setMiddle(parts[1]);       // role
+     *     triple.setRight(Integer.parseInt(parts[2])); // years
+     * });
+     * iter.forEachRemaining((name, role, years) ->
+     *     System.out.println(name + " works as " + role + " for " + years + " years"));
+     * }</pre>
      *
      * @param <T> the type of elements in the input iterator
      * @param <A> the type of elements in the first component of the triple
@@ -777,6 +847,21 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Performs the given action for each remaining element in the iterator until all elements
      * have been processed or the action throws an exception.
      *
+     * <p>This is the preferred method for iterating over triples compared to calling {@link #next()}
+     * repeatedly, as it avoids the overhead of creating Triple objects. The three elements are passed
+     * directly to the action consumer, providing better performance and more convenient access to the
+     * individual components.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
+     * iter.forEachRemaining((name, age, city) ->
+     *     System.out.println(name + " (" + age + ") lives in " + city));
+     * }</pre>
+     *
      * @param action the action to be performed for each element
      */
     public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
@@ -784,6 +869,24 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Performs the given action for each remaining element in the iterator until all elements
      * have been processed or the action throws an exception.
+     *
+     * <p>This method is similar to {@link #forEachRemaining(TriConsumer)} but supports actions that may throw
+     * checked exceptions. This is particularly useful when the iteration logic involves I/O operations,
+     * database access, or other operations that declare checked exceptions, eliminating the need to
+     * wrap exceptions in unchecked RuntimeExceptions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] ids = {"user1", "user2", "user3"};
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * String[] emails = {"alice@example.com", "bob@example.com", "charlie@example.com"};
+     * TriIterator<String, String, String> iter = TriIterator.zip(ids, names, emails);
+     *
+     * // Example with IOException - no try-catch needed at call site
+     * iter.foreachRemaining((id, name, email) -> {
+     *     writeToFile(id, name, email);  // method that throws IOException
+     * });
+     * }</pre>
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element
@@ -1126,6 +1229,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Returns an Optional containing the first triple of elements in the iterator.
      * If the iterator is empty, returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
+     * Optional<Triple<String, Integer, String>> firstTriple = iter.first();
+     * firstTriple.ifPresent(triple ->
+     *     System.out.println(triple.left() + " is " + triple.middle() + " from " + triple.right()));
+     * // Output: Alice is 25 from NYC
+     * }</pre>
+     *
      * @return an Optional containing the first triple of elements, or an empty Optional if the iterator is empty
      */
     public Optional<Triple<A, B, C>> first() {
@@ -1139,6 +1254,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Returns an Optional containing the last triple of elements in the iterator.
      * If the iterator is empty, returns an empty Optional.
+     *
+     * <p><strong>Note:</strong> This method consumes all elements in the iterator.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
+     * Optional<Triple<String, Integer, String>> lastTriple = iter.last();
+     * lastTriple.ifPresent(triple ->
+     *     System.out.println(triple.left() + " is " + triple.middle() + " from " + triple.right()));
+     * // Output: Charlie is 35 from Chicago
+     * }</pre>
      *
      * @return an Optional containing the last triple of elements, or an empty Optional if the iterator is empty
      */
@@ -1158,6 +1287,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Returns a Stream of elements produced by applying the given mapper function to each triple of elements in this TriIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * Stream<String> stream = TriIterator.zip(names, ages, cities)
+     *     .stream((name, age, city) -> name + " (" + age + ") - " + city);
+     * stream.forEach(System.out::println);
+     * // Output:
+     * // Alice (25) - NYC
+     * // Bob (30) - LA
+     * // Charlie (35) - Chicago
+     * }</pre>
+     *
      * @param <R> the type of elements in the resulting Stream
      * @param mapper the function to apply to each triple of elements
      * @return a Stream containing the elements produced by the mapper function
@@ -1168,6 +1311,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
     /**
      * Converts the elements in this TriIterator to an array of Triple objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * Triple<String, Integer, String>[] array = TriIterator.zip(names, ages, cities).toArray();
+     * for (Triple<String, Integer, String> triple : array) {
+     *     System.out.println(triple.left() + " - " + triple.middle() + " - " + triple.right());
+     * }
+     * }</pre>
      *
      * @return An array containing the remaining triples of elements in this TriIterator.
      */
@@ -1191,6 +1345,16 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
     /**
      * Converts the elements in this TriIterator to a List of Triple objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob", "Charlie"};
+     * Integer[] ages = {25, 30, 35};
+     * String[] cities = {"NYC", "LA", "Chicago"};
+     * List<Triple<String, Integer, String>> list = TriIterator.zip(names, ages, cities).toList();
+     * list.forEach(triple ->
+     *     System.out.println(triple.left() + " is " + triple.middle() + " from " + triple.right()));
+     * }</pre>
      *
      * @return a List containing all triples of elements in this TriIterator
      */

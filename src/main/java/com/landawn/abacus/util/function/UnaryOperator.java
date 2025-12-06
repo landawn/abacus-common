@@ -43,16 +43,16 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * UnaryOperator<String> upperCase = String::toUpperCase;
      *
      * UnaryOperator<String> trimThenUpper = upperCase.compose(trim);
-     * String result = trimThenUpper.apply("  hello  ");  // returns "HELLO"
+     * String result = trimThenUpper.apply("  hello  ");   // returns "HELLO"
      *
      * UnaryOperator<Integer> doubleIt = x -> x * 2;
      * UnaryOperator<Integer> addTen = x -> x + 10;
      *
      * UnaryOperator<Integer> addTenThenDouble = doubleIt.compose(addTen);
-     * Integer result2 = addTenThenDouble.apply(5);  // returns 30 ((5 + 10) * 2)
+     * Integer result2 = addTenThenDouble.apply(5);   // returns 30 ((5 + 10) * 2)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the before operator and then applies this operator
      * @see #andThen(java.util.function.UnaryOperator)
      */
@@ -71,16 +71,16 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * UnaryOperator<String> upperCase = String::toUpperCase;
      *
      * UnaryOperator<String> trimAndUpper = trim.andThen(upperCase);
-     * String result = trimAndUpper.apply("  hello  ");  // returns "HELLO"
+     * String result = trimAndUpper.apply("  hello  ");   // returns "HELLO"
      *
      * UnaryOperator<Integer> doubleIt = x -> x * 2;
      * UnaryOperator<Integer> addTen = x -> x + 10;
      *
      * UnaryOperator<Integer> doubleThenAddTen = doubleIt.andThen(addTen);
-     * Integer result2 = doubleThenAddTen.apply(5);  // returns 20 ((5 * 2) + 10)
+     * Integer result2 = doubleThenAddTen.apply(5);   // returns 20 ((5 * 2) + 10)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the after operator
      * @see #compose(java.util.function.UnaryOperator)
      */
@@ -95,7 +95,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> identity = UnaryOperator.identity();
-     * String result = identity.apply("hello");  // returns "hello"
+     * String result = identity.apply("hello");   // returns "hello"
      *
      * List<UnaryOperator<Integer>> operations = Arrays.asList(
      *     x -> x * 2,
@@ -106,7 +106,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * // Can be used in streams
      * Stream.of("a", "b", "c")
      *     .map(UnaryOperator.<String>identity())
-     *     .collect(Collectors.toList());  // returns ["a", "b", "c"]
+     *     .collect(Collectors.toList());   // returns ["a", "b", "c"]
      * }</pre>
      *
      * @param <T> the type of the input and output of the operator

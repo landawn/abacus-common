@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -80,13 +81,60 @@ import com.landawn.abacus.type.Type;
  * Properties<String, Object> xmlProps = PropertiesUtil.loadFromXml(new File("config.xml"));
  * }</pre>
  * 
- * @see Configuration
  * @see Properties
  */
 @SuppressWarnings("java:S1192")
 public final class PropertiesUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
+
+    private static final String CVS_NAME = ".cvs";
+
+    private static final String SVN_NAME = ".svn";
+
+    private static final String GIT_NAME = ".git";
+
+    private static final List<String> COMMON_CONFIG_PATH = new ArrayList<>();
+
+    static {
+        COMMON_CONFIG_PATH.add("./config");
+        COMMON_CONFIG_PATH.add("./conf");
+        COMMON_CONFIG_PATH.add("./classes");
+        COMMON_CONFIG_PATH.add("./classes/config");
+        COMMON_CONFIG_PATH.add("./classes/conf");
+        COMMON_CONFIG_PATH.add("./target/classes/config");
+        COMMON_CONFIG_PATH.add("./target/classes/conf");
+        COMMON_CONFIG_PATH.add("./build/classes/config");
+        COMMON_CONFIG_PATH.add("./build/classes/conf");
+        COMMON_CONFIG_PATH.add("./bin/classes/config");
+        COMMON_CONFIG_PATH.add("./bin/classes/conf");
+        COMMON_CONFIG_PATH.add("./target/classes");
+        COMMON_CONFIG_PATH.add("./build/classes");
+        COMMON_CONFIG_PATH.add("./bin/classes");
+        COMMON_CONFIG_PATH.add("./../config");
+        COMMON_CONFIG_PATH.add("./../conf");
+        COMMON_CONFIG_PATH.add("./../classes");
+        COMMON_CONFIG_PATH.add("./../classes/config");
+        COMMON_CONFIG_PATH.add("./../classes/conf");
+        COMMON_CONFIG_PATH.add("./../target/classes/config");
+        COMMON_CONFIG_PATH.add("./../target/classes/conf");
+        COMMON_CONFIG_PATH.add("./../build/classes/config");
+        COMMON_CONFIG_PATH.add("./../build/classes/conf");
+        COMMON_CONFIG_PATH.add("./../bin/classes/config");
+        COMMON_CONFIG_PATH.add("./../bin/classes/conf");
+        COMMON_CONFIG_PATH.add("./../target/classes");
+        COMMON_CONFIG_PATH.add("./../build/classes");
+        COMMON_CONFIG_PATH.add("./../bin/classes");
+
+        COMMON_CONFIG_PATH.add("./resources/config");
+        COMMON_CONFIG_PATH.add("./resources/conf");
+        COMMON_CONFIG_PATH.add("./resources");
+        COMMON_CONFIG_PATH.add("./../resources/config");
+        COMMON_CONFIG_PATH.add("./../resources/conf");
+        COMMON_CONFIG_PATH.add("./../resources");
+    }
+
+    private static final Map<String, String> configFilePathPool = new ConcurrentHashMap<>();
 
     private static final String TYPE = "type";
 
@@ -166,23 +214,96 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Finds the file with the specified configuration file name.
-     * This method searches for the file in the classpath and file system.
-     *
+     * Gets a list of common configuration paths where configuration files are typically located.
+     * This method returns absolute paths to existing directories from the predefined list of
+     * common configuration locations. The search includes Maven/Gradle build directories,
+     * resources directories, and standard config/conf directories at both current and parent levels.
+     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File configFile = PropertiesUtil.findFile("application.properties");
-     * if (configFile != null && configFile.exists()) {
-     *     // File found
+     * List<String> paths = Configuration.getCommonConfigPath();
+     * for (String path : paths) {
+     *     System.out.println("Config path: " + path);
      * }
      * }</pre>
      *
-     * @param configFileName the name of the configuration file to find
-     * @return the File object representing the found file, or {@code null} if not found
+     * @return a list of absolute paths to existing configuration directories
      */
-    @MayReturnNull
-    public static File findFile(final String configFileName) {
-        return Configuration.findFile(configFileName);
+    public static List<String> getCommonConfigPath() {
+        String currentLocation = getCurrentSourceCodeLocation().getAbsolutePath();
+
+        if (logger.isInfoEnabled()) {
+            logger.info("current source location: " + currentLocation);
+        }
+
+        if (!(currentLocation.endsWith("/") || currentLocation.endsWith("\\"))) {
+            currentLocation = currentLocation + File.separatorChar;
+        }
+
+        final List<String> result = new ArrayList<>();
+        File file = null;
+
+        for (final String path : COMMON_CONFIG_PATH) {
+            file = new File(currentLocation + path);
+
+            if (file.exists() && file.isDirectory()) {
+                result.add(file.getAbsolutePath());
+            }
+        }
+
+        for (final String path : COMMON_CONFIG_PATH) {
+            file = new File(path);
+
+            if (file.exists() && file.isDirectory()) {
+                result.add(file.getAbsolutePath());
+            }
+        }
+
+        return result;
+    }
+
+    private static File getCurrentSourceCodeLocation() {
+        File dir = new File(ClassUtil.getSourceCodeLocation(PropertiesUtil.class));
+
+        if (dir.isFile() && dir.getParentFile().exists()) {
+            dir = dir.getParentFile();
+        }
+
+        final String path = dir.getAbsolutePath().replace('\\', '/');
+
+        // if the class/library is loaded from local maven repository.
+        if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0 //NOSONAR
+                || path.indexOf("/.m2/repository/com/landawn/abacus-common-se-jdk7/") > 0) { //NOSONAR
+            return new File(IOUtil.CURRENT_DIR);
+        }
+
+        return dir;
+    }
+
+    /**
+     * Formats a file path by replacing URL-encoded spaces (%20) with actual spaces.
+     * If the original file doesn't exist but a file with decoded spaces does exist,
+     * returns the decoded file. This method helps handle file paths that may have
+     * been URL-encoded.
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("/path/with%20spaces/file.xml");
+     * File formatted = Configuration.formatPath(file);
+     * // Returns File with path "/path/with spaces/file.xml"
+     * }</pre>
+     *
+     * @param file the file whose path should be formatted
+     * @return a File object with properly formatted path
+     */
+    public static File formatPath(File file) {
+        final String formattedPath = file.getAbsolutePath().replace("%20", " ");
+
+        if (!file.exists() || (new File(formattedPath)).exists()) { //NOSONAR
+            file = new File(formattedPath); //NOSONAR
+        }
+
+        return file;
     }
 
     /**
@@ -202,12 +323,263 @@ public final class PropertiesUtil {
      */
     @MayReturnNull
     public static File findDir(final String configDir) {
-        return Configuration.findDir(configDir);
+        return findFile(configDir, true, null);
+    }
+
+    /**
+     * Finds the file with the specified configuration file name.
+     * This method searches for the file in the classpath and file system.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File configFile = PropertiesUtil.findFile("application.properties");
+     * if (configFile != null && configFile.exists()) {
+     *     // File found
+     * }
+     * }</pre>
+     *
+     * @param configFileName the name of the configuration file to find
+     * @return the File object representing the found file, or {@code null} if not found
+     */
+    @MayReturnNull
+    public static File findFile(final String configFileName) {
+        return findFile(configFileName, false, null);
+    }
+
+    /**
+     * Finds the file specified by the given configuration file name.
+     *
+     * @param configFileName The name of the configuration file to be searched.
+     * @param isDir Indicates whether the target is a directory.
+     * @param foundDir A set of directories that have already been searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
+     * @throws RuntimeException if the target file name is empty or {@code null}.
+     */
+    private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) {
+        if (Strings.isEmpty(configFileName)) {
+            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("start to find file " + configFileName);
+        }
+
+        // find out the configuration file
+        File configurationFile = new File(configFileName);
+
+        if (configurationFile.exists()) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("found file " + configurationFile.getAbsolutePath());
+            }
+
+            return configurationFile;
+        }
+
+        final String cachedPath = configFilePathPool.get(configFileName);
+
+        if (cachedPath != null) {
+            final File file = new File(cachedPath);
+
+            if (file.exists()) {
+                return file;
+            } else {
+                configFilePathPool.remove(configFileName);
+            }
+        }
+
+        String folderPrefix = null;
+        String simpleConfigFileName = configFileName.trim().replace('\\', File.separatorChar).replace('/', File.separatorChar);
+
+        final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
+
+        if (index > -1) {
+            folderPrefix = simpleConfigFileName.substring(0, index);
+            folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+            folderPrefix = folderPrefix.replace("\\.\\.\\" + File.separatorChar, "");
+
+            simpleConfigFileName = simpleConfigFileName.substring(index + 1);
+        }
+
+        if (foundDir == null) {
+            foundDir = N.newHashSet();
+        }
+
+        for (final String configPath : getCommonConfigPath()) {
+            configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, new File(configPath), isDir, foundDir);
+
+            if (configurationFile != null && configurationFile.exists()) {
+                configFilePathPool.put(configFileName, configurationFile.getAbsolutePath());
+
+                return configurationFile;
+            }
+        }
+
+        final File dir = new File(IOUtil.CURRENT_DIR);
+
+        if (logger.isInfoEnabled()) {
+            logger.info("start to find simplified file: '" + simpleConfigFileName + "' from source path: '" + dir.getAbsolutePath()
+                    + "'. current folder identified by './' is: '" + IOUtil.CURRENT_DIR + "'.");
+        }
+
+        configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, dir, isDir, foundDir);
+
+        if (configurationFile != null && configurationFile.exists()) {
+            configFilePathPool.put(configFileName, configurationFile.getAbsolutePath());
+
+            return configurationFile;
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds a file by searching from the directory of a source file.
+     * The search starts in the parent directory of the source file, then falls back
+     * to common configuration paths if not found. This method is useful for finding
+     * related configuration files that are referenced from within another configuration file.
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File mainConfig = new File("/app/config/main.xml");
+     * File dbConfig = Configuration.findFileByFile(mainConfig, "database.xml");
+     * // First looks in /app/config/, then searches common paths
+     * }</pre>
+     *
+     * @param srcFile the source file whose directory will be used as the starting point
+     * @param targetFileName the name of the file to find
+     * @return the found file, or {@code null} if not found
+     */
+    @MayReturnNull
+    public static File findFileByFile(final File srcFile, final String targetFileName) {
+        File targetFile = new File(targetFileName);
+
+        if (!targetFile.exists()) {
+            if ((srcFile != null) && srcFile.exists()) {
+                targetFile = findFileInDir(targetFileName, srcFile.getParentFile(), false);
+            }
+
+            if (targetFile == null || !targetFile.exists()) {
+                return findFile(targetFileName);
+            }
+        }
+
+        return targetFile;
+    }
+
+    /**
+     * Finds a file or directory within a specified directory.
+     * The search is recursive and will search all subdirectories.
+     * Directories named .cvs, .svn, and .git are ignored during the search.
+     * The file name can include a relative path which will be preserved during the search.
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File rootDir = new File("/app");
+     * File configFile = Configuration.findFileInDir("config/database.xml", rootDir, false);
+     * // Searches for database.xml in config subdirectories under /app
+     * }</pre>
+     *
+     * @param configFileName the name of the file or directory to find (can include relative path)
+     * @param dir the directory to search in
+     * @param isDir {@code true} if searching for a directory, {@code false} for a file
+     * @return the found file or directory, or {@code null} if not found
+     * @throws RuntimeException if the target file name is empty or null
+     */
+    @MayReturnNull
+    public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
+        if (Strings.isEmpty(configFileName)) {
+            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
+        }
+
+        String folderPrefix = null;
+        String simpleConfigFileName = configFileName.trim().replace('\\', File.separatorChar).replace('/', File.separatorChar);
+
+        final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
+
+        if (index > -1) {
+            folderPrefix = simpleConfigFileName.substring(0, index);
+            folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+
+            simpleConfigFileName = simpleConfigFileName.substring(index + 1);
+        }
+
+        return findFileInDir(folderPrefix, simpleConfigFileName, dir, isDir, null);
+    }
+
+    /**
+     * Finds the file specified by the given configuration file name in the specified directory.
+     *
+     * @param folderPrefix The prefix of the folder where the search should start.
+     * @param configFileName The name of the configuration file to be searched.
+     * @param dir The directory in which to search for the file.
+     * @param isDir Indicates whether the target is a directory.
+     * @param foundDir A set of directories that have already been searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
+     */
+    private static File findFileInDir(final String folderPrefix, final String configFileName, File dir, final boolean isDir, Set<String> foundDir) {
+        if (dir == null) {
+            return null;
+        }
+
+        dir = PropertiesUtil.formatPath(dir);
+
+        if (foundDir == null) {
+            foundDir = N.newHashSet();
+        } else if (foundDir.contains(dir.getAbsolutePath())) {
+            return null;
+        }
+
+        foundDir.add(dir.getAbsolutePath());
+
+        final String absolutePath = dir.getAbsolutePath().replace("%20", " "); //NOSONAR
+
+        if (logger.isInfoEnabled()) {
+            logger.info("finding file [" + configFileName + "] in directory [" + absolutePath + "] ...");
+        }
+
+        if (SVN_NAME.equals(dir.getName()) || GIT_NAME.equals(dir.getName()) || CVS_NAME.equals(dir.getName())) {
+            return null;
+        }
+
+        final File[] files = dir.listFiles();
+
+        if ((files == null) || (files.length == 0)) {
+            return null;
+        }
+
+        if (Strings.isEmpty(folderPrefix) || ((absolutePath.length() > folderPrefix.length())
+                && absolutePath.substring(absolutePath.length() - folderPrefix.length()).equalsIgnoreCase(folderPrefix))) {
+            for (final File file : files) {
+                if (file.getName().equalsIgnoreCase(configFileName)) {
+                    if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) { //NOSONAR
+
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("found file [" + file.getAbsolutePath() + "]");
+                        }
+
+                        return file;
+                    }
+                }
+            }
+        }
+
+        for (final File file : files) {
+            if (file.isDirectory() && !foundDir.contains(file.getAbsolutePath())) {
+                final File result = findFileInDir(folderPrefix, configFileName, file, isDir, foundDir);
+
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
      * Loads properties from the specified file.
-     * The properties are loaded as key-value pairs of strings.
+     * The properties are loaded as key-value pairs of strings in the standard Java properties format
+     * (key=value pairs, one per line, with support for comments starting with # or !).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -217,7 +589,7 @@ public final class PropertiesUtil {
      *
      * @param source the file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
      */
     public static Properties<String, String> load(final File source) {
         return load(source, false);
@@ -237,9 +609,9 @@ public final class PropertiesUtil {
      *
      * @param source the file from which to load the properties.
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
-     *                    There is a background thread to check the file last modification time every second.
+     *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
      */
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
         Properties<String, String> properties = null;
@@ -272,7 +644,8 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified InputStream.
-     * The stream should contain properties in the standard Java properties format.
+     * The stream should contain properties in the standard Java properties format
+     * (key=value pairs, one per line, with support for comments starting with # or !).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -283,7 +656,7 @@ public final class PropertiesUtil {
      *
      * @param source the InputStream from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
      */
     public static Properties<String, String> load(final InputStream source) {
         final java.util.Properties tmp = new java.util.Properties();
@@ -303,7 +676,8 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified Reader.
-     * The reader should provide properties in the standard Java properties format.
+     * The reader should provide properties in the standard Java properties format
+     * (key=value pairs, one per line, with support for comments starting with # or !).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -314,7 +688,7 @@ public final class PropertiesUtil {
      *
      * @param source the Reader from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading from the reader
      */
     public static Properties<String, String> load(final Reader source) {
         final java.util.Properties tmp = new java.util.Properties();
@@ -362,7 +736,7 @@ public final class PropertiesUtil {
      *
      * @param source the XML file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final File source) {
@@ -372,6 +746,7 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML file with an option for auto-refresh.
      * When auto-refresh is enabled, the properties will be automatically updated when the file is modified.
+     * A background thread checks the file's last modification time every second.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -381,8 +756,9 @@ public final class PropertiesUtil {
      *
      * @param source the XML file from which to load the properties.
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
+     *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
@@ -391,6 +767,8 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML InputStream.
+     * The XML structure should have property names as element names and property values as element content.
+     * Optional {@code type} attributes can specify the data type for property values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -401,7 +779,7 @@ public final class PropertiesUtil {
      *
      * @param source the InputStream from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final InputStream source) {
@@ -410,6 +788,8 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML Reader.
+     * The XML structure should have property names as element names and property values as element content.
+     * Optional {@code type} attributes can specify the data type for property values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -420,7 +800,7 @@ public final class PropertiesUtil {
      *
      * @param source the Reader from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading from the reader
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final Reader source) {
@@ -436,7 +816,7 @@ public final class PropertiesUtil {
      * public class MyProperties extends Properties<String, Object> {
      *     // Custom properties class
      * }
-     * 
+     *
      * MyProperties props = PropertiesUtil.loadFromXml(new File("config.xml"), MyProperties.class);
      * }</pre>
      *
@@ -444,7 +824,7 @@ public final class PropertiesUtil {
      * @param source the XML file from which to load the properties.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParseException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass) {
@@ -690,7 +1070,7 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include in the stored file.
      * @param output the file to which the properties will be stored.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while writing to the file
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output) {
         Writer writer = null;
@@ -723,7 +1103,7 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include in the stored output.
      * @param output the OutputStream to which the properties will be stored.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
@@ -748,7 +1128,7 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include in the stored output.
      * @param output the Writer to which the properties will be stored.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      */
     public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
         final java.util.Properties tmp = new java.util.Properties();
@@ -779,9 +1159,11 @@ public final class PropertiesUtil {
      *
      * @param properties the properties to store.
      * @param rootElementName the name of the root element in the XML.
-     * @param writeTypeInfo whether to write type information for property values.
+     * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
+     *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
+     *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the file to which the properties will be stored.
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs while writing to the file
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
         Writer writer = null;
@@ -813,9 +1195,11 @@ public final class PropertiesUtil {
      *
      * @param properties the properties to store.
      * @param rootElementName the name of the root element in the XML.
-     * @param writeTypeInfo whether to write type information for property values.
+     * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
+     *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
+     *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the OutputStream to which the properties will be stored.
-     * @throws UncheckedIOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
             throws UncheckedIOException {
@@ -834,9 +1218,11 @@ public final class PropertiesUtil {
      *
      * @param properties the properties to store.
      * @param rootElementName the name of the root element in the XML.
-     * @param writeTypeInfo whether to write type information for property values.
+     * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
+     *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
+     *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the Writer to which the properties will be stored.
-     * @throws UncheckedIOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
             throws UncheckedIOException {
@@ -955,8 +1341,16 @@ public final class PropertiesUtil {
 
     /**
      * Generate Java code from the specified XML string.
-     * This method analyzes the XML structure and generates a corresponding Java class
-     * that extends Properties and provides type-safe accessors for the properties.
+     * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
+     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     *
+     * <p>The generated code includes:</p>
+     * <ul>
+     *   <li>Nested static classes for complex properties</li>
+     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Automatic handling of property types based on XML type attributes</li>
+     *   <li>Support for nested and list properties</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -966,11 +1360,11 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param xml the XML content as a string.
-     * @param srcPath the source path where the generated Java code will be saved.
+     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public.
-     * @throws RuntimeException if XML parsing fails or file I/O error occurs
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xml2Java(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         xml2Java(IOUtil.string2InputStream(xml), srcPath, packageName, className, isPublicField);
@@ -978,7 +1372,16 @@ public final class PropertiesUtil {
 
     /**
      * Generate Java code from the specified XML file.
-     * This method analyzes the XML structure and generates a corresponding Java class.
+     * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
+     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     *
+     * <p>The generated code includes:</p>
+     * <ul>
+     *   <li>Nested static classes for complex properties</li>
+     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Automatic handling of property types based on XML type attributes</li>
+     *   <li>Support for nested and list properties</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -987,11 +1390,11 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param xml the XML file from which to generate Java code.
-     * @param srcPath the source path where the generated Java code will be saved.
+     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public.
-     * @throws RuntimeException if XML parsing fails or file I/O error occurs
+     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xml2Java(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         Reader reader = null;
@@ -1007,8 +1410,16 @@ public final class PropertiesUtil {
 
     /**
      * Generates Java code from the specified XML InputStream.
-     * This method analyzes the XML structure and creates a Java class hierarchy that mirrors it,
-     * with typed getters and setters for each property.
+     * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
+     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     *
+     * <p>The generated code includes:</p>
+     * <ul>
+     *   <li>Nested static classes for complex properties</li>
+     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Automatic handling of property types based on XML type attributes</li>
+     *   <li>Support for nested and list properties</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1022,7 +1433,7 @@ public final class PropertiesUtil {
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
      * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
-     * @throws RuntimeException if XML parsing fails or file I/O error occurs
+     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         xml2Java(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);

@@ -269,6 +269,16 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator over the elements in the specified Collection.
      * If the Collection is {@code null} or empty, returns an empty ObjIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("apple", "banana", "cherry");
+     * ObjIterator<String> iter = ObjIterator.of(list);
+     * iter.toList();   // Returns ["apple", "banana", "cherry"]
+     *
+     * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
+     * ObjIterator<Integer> setIter = ObjIterator.of(set);
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param iterable the Collection whose elements are to be iterated
      * @return an ObjIterator over the collection elements
@@ -738,10 +748,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("first", "second");
-     * Nullable<String> first = iter.first();  // Nullable.of("first")
+     * Nullable<String> first = iter.first();   // Nullable.of("first")
      * 
      * ObjIterator<String> empty = ObjIterator.empty();
-     * Nullable<String> none = empty.first();  // Nullable.empty()
+     * Nullable<String> none = empty.first();   // Nullable.empty()
      * }</pre>
      *
      * @return a {@code Nullable} containing the first element, or empty if no elements
@@ -762,7 +772,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of(null, null, "found", "next");
-     * Optional<String> first = iter.firstNonNull();  // Optional.of("found")
+     * Optional<String> first = iter.firstNonNull();   // Optional.of("found")
      * }</pre>
      *
      * @return an Optional containing the first {@code non-null} element, or empty if none found
@@ -789,7 +799,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3, 4);
-     * Nullable<Integer> last = iter.last();  // Nullable.of(4)
+     * Nullable<Integer> last = iter.last();   // Nullable.of(4)
      * }</pre>
      *
      * @return a {@code Nullable} containing the last element, or empty if no elements
@@ -829,6 +839,15 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Converts the remaining elements in this iterator to an Object array.
      * This operation consumes all remaining elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjIterator<String> iter = ObjIterator.of("x", "y", "z");
+     * Object[] array = iter.toArray();   // Object[]{"x", "y", "z"}
+     *
+     * ObjIterator<Integer> numbers = ObjIterator.of(10, 20, 30);
+     * Object[] numArray = numbers.toArray();   // Object[]{10, 20, 30}
+     * }</pre>
+     *
      * @return an array containing all remaining elements
      */
     public Object[] toArray() {
@@ -844,7 +863,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
-     * String[] array = iter.toArray(new String[0]);  // {"a", "b", "c"}
+     * String[] array = iter.toArray(new String[0]);   // {"a", "b", "c"}
      * }</pre>
      *
      * @param <A> the component type of the array
@@ -863,7 +882,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3);
-     * List<Integer> list = iter.toList();  // [1, 2, 3]
+     * List<Integer> list = iter.toList();   // [1, 2, 3]
      * }</pre>
      *
      * @return a List containing all remaining elements
@@ -888,7 +907,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * long count = iter.stream()
      *     .filter(s -> s.length() > 0)
-     *     .count();  // 3
+     *     .count();   // 3
      * }</pre>
      *
      * @return a Stream of the remaining elements

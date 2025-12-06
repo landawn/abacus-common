@@ -47,7 +47,7 @@ import java.util.function.ToIntFunction;
  * 
  * Map<Wrapper<int[]>, String> map = new HashMap<>();
  * map.put(Wrapper.of(array1), "value");
- * String result = map.get(Wrapper.of(array2));  // Returns "value"
+ * String result = map.get(Wrapper.of(array2));   // Returns "value"
  * 
  * // Custom wrapper with specific hash/equals logic
  * Person person = new Person("John", 30);
@@ -57,7 +57,7 @@ import java.util.function.ToIntFunction;
  * );
  * }</pre>
  *
- * @param <T> The type of the object that this wrapper will hold
+ * @param <T> the type of the object that this wrapper will hold.
  * @see Keyed
  * @see IndexedKeyed
  */
@@ -80,20 +80,34 @@ public abstract class Wrapper<T> implements Immutable {
      * Creates a new Wrapper instance for the given array with deep equality semantics.
      * This method automatically detects arrays and applies appropriate deep hash code
      * and deep equals implementations. Zero-length arrays are cached for efficiency.
-     * 
+     *
+     * <p>This factory method is specifically designed for arrays and uses deep comparison
+     * semantics, making it ideal for using arrays as keys in HashMaps or elements in HashSets.
+     * The wrapped array should not be modified after wrapping to ensure consistent hash codes.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Using primitive arrays as map keys
      * int[] nums = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(nums);
-     * 
+     *
+     * Map<Wrapper<int[]>, String> map = new HashMap<>();
+     * map.put(wrapper, "value");
+     *
      * // Works with multi-dimensional arrays
      * String[][] matrix = {{"a", "b"}, {"c", "d"}};
      * Wrapper<String[][]> matrixWrapper = Wrapper.of(matrix);
+     *
+     * // Zero-length arrays are cached
+     * Wrapper<int[]> empty1 = Wrapper.of(new int[0]);
+     * Wrapper<int[]> empty2 = Wrapper.of(new int[0]);
+     * // Both wrappers share the same cached instance
      * }</pre>
      *
-     * @param <T> The type of the array elements
-     * @param array The array to be wrapped (must be an array type)
-     * @return A Wrapper instance for the given array
+     * @param <T> the type of the array to be wrapped.
+     * @param array the array to be wrapped; can be any array type (primitive or object arrays),
+     *              or {@code null}.
+     * @return a Wrapper instance for the given array with deep equality semantics.
      */
     public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
@@ -120,24 +134,42 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Creates a new Wrapper instance with custom hash and equals functions.
      * This method is useful when the wrapped value's natural hashCode and equals methods
-     * are not suitable for use in collections.
-     * 
+     * are not suitable for use in collections, or when you need to define custom equality
+     * semantics based on specific fields or computed values.
+     *
+     * <p>The custom functions allow you to control exactly how the wrapped object behaves
+     * in hash-based collections, enabling use cases like comparing objects by specific fields,
+     * ignoring certain properties, or using custom comparison logic.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a Person object but only consider the ID for equality
      * Person person = new Person(123, "John", 30);
      * Wrapper<Person> wrapper = Wrapper.of(person,
-     *     p -> p.getId(),                    // Hash by ID
+     *     p -> p.getId(),                      // Hash by ID
      *     (p1, p2) -> p1.getId() == p2.getId() // Compare by ID
+     * );
+     *
+     * // Use in a Set - only unique IDs allowed
+     * Set<Wrapper<Person>> uniquePersons = new HashSet<>();
+     * uniquePersons.add(wrapper);
+     *
+     * // Case-insensitive string wrapper
+     * String text = "Hello";
+     * Wrapper<String> caseInsensitive = Wrapper.of(text,
+     *     s -> s.toLowerCase().hashCode(),
+     *     (s1, s2) -> s1.equalsIgnoreCase(s2)
      * );
      * }</pre>
      *
-     * @param <T> The type of the value to be wrapped
-     * @param value The value to be wrapped
-     * @param hashFunction The function to calculate the hash code of the wrapped value
-     * @param equalsFunction The function to compare the wrapped value with other objects
-     * @return A Wrapper instance for the given value
-     * @throws IllegalArgumentException if the hashFunction or equalsFunction is {@code null}
+     * @param <T> the type of the value to be wrapped.
+     * @param value the value to be wrapped; can be {@code null}.
+     * @param hashFunction the function to calculate the hash code of the wrapped value;
+     *                     must not be {@code null}.
+     * @param equalsFunction the function to compare the wrapped value with other objects;
+     *                       must not be {@code null}.
+     * @return a Wrapper instance with the specified custom hash and equals behavior.
+     * @throws IllegalArgumentException if {@code hashFunction} or {@code equalsFunction} is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
@@ -151,24 +183,47 @@ public abstract class Wrapper<T> implements Immutable {
      * Creates a new Wrapper instance with custom hash, equals, and toString functions.
      * This provides complete control over how the wrapped object behaves in collections
      * and how it's represented as a string.
-     * 
+     *
+     * <p>This is the most flexible factory method, allowing you to customize all three aspects
+     * of the wrapper's behavior: hash code computation, equality comparison, and string representation.
+     * This is particularly useful for complex objects where you need fine-grained control over
+     * comparison logic and debugging output.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ComplexObject obj = new ComplexObject();
+     * // Complete custom behavior for a complex object
+     * ComplexObject obj = new ComplexObject(123, "data", Arrays.asList(1, 2, 3));
      * Wrapper<ComplexObject> wrapper = Wrapper.of(obj,
-     *     o -> o.computeHash(),           // Custom hash
-     *     (o1, o2) -> o1.isEquivalent(o2), // Custom equals
-     *     o -> o.toDisplayString()         // Custom toString
+     *     o -> o.computeCustomHash(),        // Custom hash function
+     *     (o1, o2) -> o1.isEquivalent(o2),   // Custom equals logic
+     *     o -> o.toDisplayString()           // Custom toString for debugging
+     * );
+     *
+     * // Use in collections with custom display
+     * Map<Wrapper<ComplexObject>, String> map = new HashMap<>();
+     * map.put(wrapper, "value");
+     * System.out.println(wrapper);  // Uses custom toString
+     *
+     * // Wrapper for records/tuples with specific formatting
+     * Tuple<String, Integer> tuple = new Tuple<>("key", 100);
+     * Wrapper<Tuple<String, Integer>> tupleWrapper = Wrapper.of(tuple,
+     *     t -> Objects.hash(t.first, t.second),
+     *     (t1, t2) -> Objects.equals(t1.first, t2.first) && Objects.equals(t1.second, t2.second),
+     *     t -> String.format("(%s: %d)", t.first, t.second)
      * );
      * }</pre>
      *
-     * @param <T> The type of the value to be wrapped
-     * @param value The value to be wrapped
-     * @param hashFunction The function to calculate the hash code of the wrapped value
-     * @param equalsFunction The function to compare the wrapped value with other objects
-     * @param toStringFunction The function to generate string representation of the wrapped value
-     * @return A Wrapper instance for the given value
-     * @throws IllegalArgumentException if any of the function parameters is {@code null}
+     * @param <T> the type of the value to be wrapped.
+     * @param value the value to be wrapped; can be {@code null}.
+     * @param hashFunction the function to calculate the hash code of the wrapped value;
+     *                     must not be {@code null}.
+     * @param equalsFunction the function to compare the wrapped value with other objects;
+     *                       must not be {@code null}.
+     * @param toStringFunction the function to generate string representation of the wrapped value;
+     *                         must not be {@code null}.
+     * @return a Wrapper instance with the specified custom hash, equals, and toString behavior.
+     * @throws IllegalArgumentException if any of the function parameters ({@code hashFunction},
+     *                                  {@code equalsFunction}, or {@code toStringFunction}) is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
             final Function<? super T, String> toStringFunction) throws IllegalArgumentException {
@@ -181,15 +236,31 @@ public abstract class Wrapper<T> implements Immutable {
 
     /**
      * Returns the wrapped value.
-     * 
+     *
+     * <p>This method provides access to the underlying object that was wrapped. The returned
+     * value is the same instance that was passed to the {@code of()} factory method, not a copy.
+     * Modifications to the returned value (if mutable) will affect the wrapper's behavior in
+     * collections if the modifications change the hash code or equality semantics.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Retrieve the wrapped array
      * int[] array = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(array);
-     * int[] unwrapped = wrapper.value();  // Returns the original array
+     * int[] unwrapped = wrapper.value();   // Returns the original array
+     *
+     * // Access wrapped object in a map
+     * Map<Wrapper<String[]>, String> map = new HashMap<>();
+     * String[] key = {"a", "b"};
+     * map.put(Wrapper.of(key), "value");
+     *
+     * for (Wrapper<String[]> wrappedKey : map.keySet()) {
+     *     String[] originalKey = wrappedKey.value();
+     *     // Process original array
+     * }
      * }</pre>
      *
-     * @return the wrapped value
+     * @return the wrapped value, which may be {@code null} if a {@code null} value was wrapped.
      */
     public T value() {
         return value;
@@ -217,7 +288,7 @@ public abstract class Wrapper<T> implements Immutable {
      * assert w1.hashCode() == w2.hashCode();
      * }</pre>
      *
-     * @return the hash code of the wrapped value
+     * @return the hash code of the wrapped value.
      */
     @Override
     public abstract int hashCode();
@@ -244,8 +315,8 @@ public abstract class Wrapper<T> implements Immutable {
      * assert w1.equals(w2);
      * }</pre>
      *
-     * @param obj the object to compare with
-     * @return {@code true} if the objects are equal, {@code false} otherwise
+     * @param obj the object to compare with.
+     * @return {@code true} if the objects are equal, {@code false} otherwise.
      */
     @Override
     public abstract boolean equals(final Object obj);

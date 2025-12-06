@@ -56,8 +56,8 @@ public class LongBiPredicate2025Test extends TestBase {
         final LongBiPredicate combined = isPositive.and(sumLessThan100);
 
         assertTrue(combined.test(10L, 20L));
-        assertFalse(combined.test(10L, 100L)); // sum not less than 100
-        assertFalse(combined.test(-10L, 20L)); // not all positive
+        assertFalse(combined.test(10L, 100L));   // sum not less than 100
+        assertFalse(combined.test(-10L, 20L));   // not all positive
     }
 
     @Test
@@ -67,9 +67,9 @@ public class LongBiPredicate2025Test extends TestBase {
 
         final LongBiPredicate combined = isZero.or(isNegative);
 
-        assertTrue(combined.test(0L, 10L)); // has zero
-        assertTrue(combined.test(-5L, 10L)); // has negative
-        assertFalse(combined.test(5L, 10L)); // neither
+        assertTrue(combined.test(0L, 10L));   // has zero
+        assertTrue(combined.test(-5L, 10L));   // has negative
+        assertFalse(combined.test(5L, 10L));   // neither
     }
 
     @Test
@@ -144,7 +144,7 @@ public class LongBiPredicate2025Test extends TestBase {
         assertFalse(combined.test(1L, 2L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
@@ -165,16 +165,16 @@ public class LongBiPredicate2025Test extends TestBase {
         assertTrue(combined.test(1L, 2L));
 
         assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
+        assertFalse(secondCalled[0]);   // Should not be called due to short-circuit
     }
 
     @Test
     public void testComplexChaining() {
         final LongBiPredicate predicate = LongBiPredicate.GREATER_THAN.and((t, u) -> t + u < 100).or((t, u) -> t == u);
 
-        assertTrue(predicate.test(10L, 5L)); // 10 > 5 AND 15 < 100
-        assertTrue(predicate.test(5L, 5L)); // 5 == 5
-        assertFalse(predicate.test(5L, 10L)); // 5 < 10 AND 5 != 10
+        assertTrue(predicate.test(10L, 5L));   // 10 > 5 AND 15 < 100
+        assertTrue(predicate.test(5L, 5L));   // 5 == 5
+        assertFalse(predicate.test(5L, 10L));   // 5 < 10 AND 5 != 10
     }
 
     @Test

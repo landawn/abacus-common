@@ -82,7 +82,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *     getElement.andThen(parseLength);
      *
      * String[] words = {"Hello", "World", "Java"};
-     * Integer length = getElementLength.apply(words, 1);  // Returns 5 (length of "World")
+     * Integer length = getElementLength.apply(words, 1);   // Returns 5 (length of "World")
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

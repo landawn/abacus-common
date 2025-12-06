@@ -21,15 +21,24 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      */
     public static final String STRING_BUFFER = StringBuffer.class.getSimpleName();
 
+    /**
+     * Constructs a StringBufferType instance.
+     * This constructor is package-private and should only be called by TypeFactory.
+     */
     StringBufferType() {
         super(STRING_BUFFER);
     }
 
     /**
-     * Returns the Class object representing the type handled by this type handler.
-     * Note: This returns StringBuffer.class, not StringBuffer.class.
+     * Returns the Class object representing the StringBuffer type.
      *
-     * @return the Class object for StringBuffer
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuffer> type = TypeFactory.getType(StringBuffer.class);
+     * Class<StringBuffer> clazz = type.clazz();   // Returns StringBuffer.class
+     * }</pre>
+     *
+     * @return the Class object for StringBuffer.class
      */
     @Override
     public Class<StringBuffer> clazz() {
@@ -40,8 +49,15 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * Converts a StringBuffer object to its string representation.
      * This method returns the string content of the StringBuffer.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuffer> type = TypeFactory.getType(StringBuffer.class);
+     * StringBuffer sb = new StringBuffer("Hello World");
+     * String str = type.stringOf(sb);   // Returns "Hello World"
+     * }</pre>
+     *
      * @param x the StringBuffer object to convert
-          * @return the string representation of the StringBuffer's content, or {@code null} if x is null
+     * @return the string representation of the StringBuffer's content, or {@code null} if x is null
      */
     @Override
     public String stringOf(final StringBuffer x) {
@@ -52,8 +68,14 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * Creates a StringBuffer object from its string representation.
      * This method creates a new StringBuffer containing the provided string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<StringBuffer> type = TypeFactory.getType(StringBuffer.class);
+     * StringBuffer sb = type.valueOf("Hello World");   // Creates StringBuffer with "Hello World"
+     * }</pre>
+     *
      * @param str the string to convert to a StringBuffer
-          * @return a new StringBuffer containing the string content, or {@code null} if str is null
+     * @return a new StringBuffer containing the string content, or {@code null} if str is null
      */
     @Override
     public StringBuffer valueOf(final String str) {

@@ -84,7 +84,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator empty = IntIterator.empty();
-     * empty.hasNext();  // returns false
+     * empty.hasNext();   // returns false
      * }</pre>
      *
      * @return an empty {@code IntIterator}
@@ -103,7 +103,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
-     * IntList list = iter.toList();  // [1, 2, 3, 4, 5]
+     * IntList list = iter.toList();   // [1, 2, 3, 4, 5]
      * }</pre>
      *
      * @param a the int array (may be {@code null})
@@ -123,7 +123,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     * IntIterator iter = IntIterator.of(array, 1, 4);  // iterates over 2, 3, 4
+     * IntIterator iter = IntIterator.of(array, 1, 4);   // iterates over 2, 3, 4
      * }</pre>
      *
      * @param a the int array (may be {@code null})
@@ -181,7 +181,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * IntIterator iter = IntIterator.defer(() -> IntIterator.of(computeExpensiveArray()));
      * // Array computation happens only when iter is first used
      * if (condition) {
-     *     iter.hasNext();  // Triggers computation
+     *     iter.hasNext();   // Triggers computation
      * }
      * }</pre>
      *
@@ -295,6 +295,16 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         };
     }
 
+    /**
+     * Returns the next element in the iteration as a boxed Integer.
+     *
+     * <p><b>Note:</b> This method is deprecated because it causes unnecessary boxing overhead.
+     * Use {@link #nextInt()} instead for better performance.</p>
+     *
+     * @return the next element in the iteration as a boxed Integer
+     * @throws NoSuchElementException if the iteration has no more elements
+     * @deprecated Use {@link #nextInt()} to avoid boxing overhead
+     */
     @Deprecated
     @Override
     public Integer next() {
@@ -331,7 +341,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * // Skip more than available
      * IntIterator iter2 = IntIterator.of(1, 2);
-     * iter2.skip(10).hasNext();  // Returns false
+     * iter2.skip(10).hasNext();   // Returns false
      * }</pre>
      *
      * @param n the number of elements to skip, must be non-negative
@@ -391,10 +401,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Limit infinite iterator
      * IntIterator iter = IntIterator.generate(() -> 1);
      * IntIterator limited = iter.limit(3);
-     * limited.toArray();  // Returns [1, 1, 1]
+     * limited.toArray();   // Returns [1, 1, 1]
      *
      * // Limit to 0 returns empty
-     * IntIterator.of(1, 2, 3).limit(0).hasNext();  // Returns false
+     * IntIterator.of(1, 2, 3).limit(0).hasNext();   // Returns false
      * }</pre>
      *
      * @param count the maximum number of elements to return, must be non-negative
@@ -437,7 +447,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
      * IntIterator evens = iter.filter(x -> x % 2 == 0);
-     * evens.toArray();  // Returns [2, 4]
+     * evens.toArray();   // Returns [2, 4]
      * }</pre>
      *
      * @param predicate the predicate to test elements
@@ -484,13 +494,15 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Returns the first element as an OptionalInt, or empty if no elements exist.
-     * 
+     *
+     * <p><b>Note:</b> This method consumes one element from the iterator if it exists.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalInt first = IntIterator.of(1, 2, 3).first();   // OptionalInt.of(1)
      * OptionalInt empty = IntIterator.empty().first();       // OptionalInt.empty()
      * }</pre>
-     * 
+     *
      * @return an OptionalInt containing the first element, or empty
      */
     public OptionalInt first() {
@@ -540,7 +552,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * int[] empty = IntIterator.empty().toArray();  // empty.length == 0
+     * int[] empty = IntIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return an int array containing all remaining elements
@@ -563,7 +575,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // list contains [1, 2, 3]
      *
      * // Empty iterator returns empty list
-     * IntList empty = IntIterator.empty().toList();  // empty.size() == 0
+     * IntList empty = IntIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return an IntList containing all remaining elements
@@ -586,7 +598,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * int sum = IntIterator.of(1, 2, 3, 4, 5)
      *     .stream()
      *     .filter(x -> x > 2)
-     *     .sum();  // sum = 12
+     *     .sum();   // sum = 12
      * }</pre>
      * 
      * @return an IntStream backed by this iterator

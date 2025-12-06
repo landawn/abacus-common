@@ -26,12 +26,23 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 
+    /**
+     * Constructs an OptionalByteType.
+     * This constructor initializes the type handler for OptionalByte objects.
+     */
     protected OptionalByteType() {
         super(OPTIONAL_BYTE);
     }
 
     /**
      * Returns the Java class type that this type handler manages.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * Class<OptionalByte> clazz = type.clazz();
+     * // clazz equals OptionalByte.class
+     * }</pre>
      *
      * @return the {@link OptionalByte} class object
      */
@@ -75,6 +86,21 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Converts an {@link OptionalByte} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * OptionalByte opt = OptionalByte.of((byte) 42);
+     * String str = type.stringOf(opt);
+     * // str equals "42"
+     *
+     * opt = OptionalByte.empty();
+     * str = type.stringOf(opt);
+     * // str equals null
+     *
+     * str = type.stringOf(null);
+     * // str equals null
+     * }</pre>
+     *
      * @param x the OptionalByte object to convert
      * @return the string representation of the byte value, or {@code null} if empty or null
      */
@@ -85,6 +111,22 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Converts a string representation to an {@link OptionalByte} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * OptionalByte opt = type.valueOf("127");
+     * // opt.get() equals (byte) 127
+     *
+     * opt = type.valueOf("-128");
+     * // opt.get() equals (byte) -128
+     *
+     * opt = type.valueOf(null);
+     * // opt.isEmpty() returns true
+     *
+     * opt = type.valueOf("");
+     * // opt.isEmpty() returns true
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalByte containing the parsed byte value, or empty if the input is empty or null
@@ -98,6 +140,19 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Retrieves a byte value from a ResultSet at the specified column index and wraps it in an {@link OptionalByte}.
      * Handles type conversion if the database column is not a byte type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * ResultSet rs = statement.executeQuery("SELECT status_code FROM records");
+     * if (rs.next()) {
+     *     OptionalByte statusCode = type.get(rs, 1);
+     *     if (statusCode.isPresent()) {
+     *         byte code = statusCode.get();
+     *         // Process the status code
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -130,6 +185,24 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalByte}.
      * If the OptionalByte is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO records (status_code) VALUES (?)");
+     *
+     * OptionalByte statusCode = OptionalByte.of((byte) 1);
+     * type.set(stmt, 1, statusCode);
+     * stmt.executeUpdate();
+     * // Sets status_code to 1
+     *
+     * statusCode = OptionalByte.empty();
+     * type.set(stmt, 1, statusCode);
+     * // Sets status_code to SQL NULL
+     *
+     * type.set(stmt, 1, null);
+     * // Sets status_code to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -166,6 +239,20 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Appends the string representation of an {@link OptionalByte} to an Appendable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * StringBuilder sb = new StringBuilder();
+     *
+     * OptionalByte opt = OptionalByte.of((byte) 100);
+     * type.appendTo(sb, opt);
+     * // sb.toString() equals "100"
+     *
+     * sb = new StringBuilder();
+     * type.appendTo(sb, OptionalByte.empty());
+     * // sb.toString() equals "null"
+     * }</pre>
+     *
      * @param appendable the Appendable to write to
      * @param x the OptionalByte value to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -182,6 +269,20 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Writes the character representation of an {@link OptionalByte} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * CharacterWriter writer = new CharacterWriter();
+     *
+     * OptionalByte opt = OptionalByte.of((byte) 127);
+     * type.writeCharacter(writer, opt, null);
+     * // Writes: 127
+     *
+     * writer = new CharacterWriter();
+     * type.writeCharacter(writer, OptionalByte.empty(), null);
+     * // Writes: null
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalByte value to write

@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * ObjCharConsumer<StringBuilder> appendChar = (sb, ch) -> sb.append(ch);
  * StringBuilder builder = new StringBuilder("Hello");
- * appendChar.accept(builder, '!');  // builder becomes "Hello!"
+ * appendChar.accept(builder, '!');   // builder becomes "Hello!"
  *
  * ObjCharConsumer<Map<String, Character>> putChar = (map, value) ->
  *     map.put("lastChar", value);

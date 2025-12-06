@@ -30,18 +30,19 @@ package com.landawn.abacus.type;
  *
  * // Convert various objects to String
  * String str1 = stringType.valueOf("hello");      // returns "hello"
- * String str2 = stringType.valueOf(123);          // returns "123"
- * String str3 = stringType.valueOf(null);         // returns null
+ * String str2 = stringType.valueOf((Object) 123); // returns "123"
+ * String str3 = stringType.valueOf((String) null); // returns null
  *
- * // Use with database operations
+ * // Use with database operations (assuming conn is a valid Connection)
  * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)")) {
  *     stringType.set(stmt, 1, "John Doe");
  *     stmt.executeUpdate();
  * }
  *
- * try (ResultSet rs = stmt.executeQuery("SELECT name FROM users")) {
+ * try (PreparedStatement stmt2 = conn.prepareStatement("SELECT name FROM users");
+ *      ResultSet rs = stmt2.executeQuery()) {
  *     if (rs.next()) {
- *         String name = stringType.get(rs, 1);  // or get(rs, "name")
+ *         String name = stringType.get(rs, 1);   // or get(rs, "name")
  *     }
  * }
  * }</pre>
@@ -53,6 +54,10 @@ public class StringType extends AbstractStringType {
      */
     public static final String STRING = String.class.getSimpleName();
 
+    /**
+     * Package-private constructor for StringType.
+     * This constructor is called by the TypeFactory to create String type instances.
+     */
     StringType() {
         super(STRING);
     }

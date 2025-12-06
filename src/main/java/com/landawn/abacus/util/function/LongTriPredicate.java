@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <pre>{@code
  * LongTriPredicate isTriangle = (a, b, c) ->
  *     a + b > c && a + c > b && b + c > a;
- * boolean result = isTriangle.test(3L, 4L, 5L);  // returns true
+ * boolean result = isTriangle.test(3L, 4L, 5L);   // returns true
  *
  * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
  * LongTriPredicate sumGreaterThan100 = (a, b, c) -> a + b + c > 100;
@@ -101,7 +101,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <pre>{@code
      * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * LongTriPredicate notAllPositive = allPositive.negate();
-     * notAllPositive.test(1L, -2L, 3L);  // returns {@code true} (not all positive)
+     * notAllPositive.test(1L, -2L, 3L);   // returns {@code true} (not all positive)
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -126,7 +126,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * LongTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100;
      * LongTriPredicate combined = allPositive.and(sumLessThan100);
-     * combined.test(10L, 20L, 30L);  // returns {@code true} (all positive AND sum < 100)
+     * combined.test(10L, 20L, 30L);   // returns {@code true} (all positive AND sum < 100)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
@@ -153,7 +153,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * LongTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
      * LongTriPredicate sumGreaterThan1000 = (a, b, c) -> a + b + c > 1000;
      * LongTriPredicate combined = anyZero.or(sumGreaterThan1000);
-     * combined.test(0L, 50L, 50L);  // returns {@code true} (first value is zero)
+     * combined.test(0L, 50L, 50L);   // returns {@code true} (first value is zero)
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate

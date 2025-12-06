@@ -62,8 +62,8 @@ public class LongTriConsumer2025Test extends TestBase {
         chained.accept(2L, 3L, 4L);
 
         assertEquals(2, results.size());
-        assertEquals(9L, results.get(0)); // 2+3+4
-        assertEquals(24L, results.get(1)); // 2*3*4
+        assertEquals(9L, results.get(0));   // 2+3+4
+        assertEquals(24L, results.get(1));   // 2*3*4
     }
 
     @Test

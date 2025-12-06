@@ -95,7 +95,7 @@ public class BooleanConsumer2025Test extends TestBase {
         BooleanConsumer chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true));
-        assertEquals(1, results.size()); // First consumer should have executed
+        assertEquals(1, results.size());   // First consumer should have executed
     }
 
     @Test

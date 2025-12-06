@@ -542,9 +542,17 @@ public class DigestUtil {
 
     /**
      * Returns an SHA-1 MessageDigest instance.
-     * 
-     * @return An SHA-1 MessageDigest instance
-     * @throws IllegalArgumentException If SHA-1 is not available
+     *
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use. Consider using SHA-256 or SHA-512.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MessageDigest sha = DigestUtil.getShaDigest();     // Deprecated
+     * MessageDigest sha1 = DigestUtil.getSha1Digest();   // Preferred
+     * }</pre>
+     *
+     * @return An SHA-1 MessageDigest instance (produces 20-byte/160-bit hashes)
+     * @throws IllegalArgumentException If SHA-1 is not available (should not happen with standard JRE)
      * @deprecated Use {@link #getSha1Digest()} instead
      */
     @Deprecated
@@ -601,6 +609,13 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("legacy.dat")) {
+     *     byte[] hash = DigestUtil.md2(is);
+     * }
+     * }</pre>
+     *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
      * @throws IOException If an I/O error occurs while reading the stream
@@ -614,6 +629,11 @@ public class DigestUtil {
      * Calculates the MD2 digest of a string (converted to UTF-8 bytes).
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.md2("legacy text");
+     * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
@@ -648,6 +668,13 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("legacy.dat")) {
+     *     String hash = DigestUtil.md2Hex(is);
+     * }
+     * }</pre>
+     *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
      * @throws IOException If an I/O error occurs while reading the stream
@@ -661,6 +688,11 @@ public class DigestUtil {
      * Calculates the MD2 digest of a string and returns it as a hex string.
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.md2Hex("legacy text");
+     * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
@@ -694,6 +726,13 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("document.txt")) {
+     *     byte[] checksum = DigestUtil.md5(is);
+     * }
+     * }</pre>
+     *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
      * @throws IOException If an I/O error occurs while reading the stream
@@ -707,6 +746,11 @@ public class DigestUtil {
      * Calculates the MD5 digest of a string (converted to UTF-8 bytes).
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] checksum = DigestUtil.md5("file contents");
+     * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
@@ -740,6 +784,13 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("document.txt")) {
+     *     String checksum = DigestUtil.md5Hex(is);
+     * }
+     * }</pre>
+     *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
      * @throws IOException If an I/O error occurs while reading the stream
@@ -769,8 +820,16 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest of the input data.
      *
-     * @param data The data to digest
-     * @return SHA-1 digest as a byte array
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha("data".getBytes());    // Deprecated
+     * byte[] hash = DigestUtil.sha1("data".getBytes());   // Preferred
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-1 digest as a 20-byte array
      * @deprecated Use {@link #sha1(byte[])} instead
      */
     @Deprecated
@@ -780,10 +839,21 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-1 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-1 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha(is);  // Deprecated
+     *     // Prefer: DigestUtil.sha1(is)
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-1 digest as a 20-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
      * @deprecated Use {@link #sha1(InputStream)} instead
      */
     @Deprecated
@@ -794,8 +864,16 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest of a string.
      *
-     * @param data The string to digest
-     * @return SHA-1 digest as a byte array
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha("message");    // Deprecated
+     * byte[] hash = DigestUtil.sha1("message");   // Preferred
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-1 digest as a 20-byte array
      * @deprecated Use {@link #sha1(String)} instead
      */
     @Deprecated
@@ -805,11 +883,18 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-1 digest of the input data and returns it as a 20-byte array.
-     * Note: SHA-1 is deprecated for cryptographic use.
      *
-     * @param data The data to digest
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha1("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
-     * 
+     *
      */
     public static byte[] sha1(final byte[] data) {
         return getSha1Digest().digest(data);
@@ -817,11 +902,22 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-1 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha1(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha1(final InputStream data) throws IOException {
         return digest(getSha1Digest(), data);
@@ -830,7 +926,15 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha1("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
      */
     public static byte[] sha1(final String data) {
@@ -840,9 +944,17 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest and returns it as a 40-character hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA-1 digest as a hex string
-     * 
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha1Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     *
      */
     public static String sha1Hex(final byte[] data) {
         return Hex.encodeToString(sha1(data));
@@ -850,11 +962,22 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-1 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-1 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha1Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha1Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha1(data));
@@ -863,9 +986,17 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-1 digest as a hex string
-     * 
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
+     * collision vulnerabilities. Consider using SHA-256 or SHA-512 instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha1Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     *
      */
     public static String sha1Hex(final String data) {
         return Hex.encodeToString(sha1(data));
@@ -880,10 +1011,8 @@ public class DigestUtil {
      * byte[] secureHash = DigestUtil.sha256(sensitiveData);
      * }</pre>
      *
-     * @param data The data to digest
+     * @param data The data to digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
-     * 
-     * 
      */
     public static byte[] sha256(final byte[] data) {
         return getSha256Digest().digest(data);
@@ -891,11 +1020,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-256 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("document.pdf")) {
+     *     byte[] hash = DigestUtil.sha256(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha256(final InputStream data) throws IOException {
         return digest(getSha256Digest(), data);
@@ -904,9 +1041,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-256 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha256("sensitive data");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
-     * 
+     *
      */
     public static byte[] sha256(final String data) {
         return sha256(Strings.getBytesUtf8(data));
@@ -921,10 +1063,8 @@ public class DigestUtil {
      * String hash = DigestUtil.sha256Hex("password" + salt);
      * }</pre>
      *
-     * @param data The data to digest
-     * @return SHA-256 digest as a hex string
-     * 
-     * 
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-256 digest as a 64-character lowercase hexadecimal string
      */
     public static String sha256Hex(final byte[] data) {
         return Hex.encodeToString(sha256(data));
@@ -932,11 +1072,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-256 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-256 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("document.pdf")) {
+     *     String hash = DigestUtil.sha256Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha256(data));
@@ -945,9 +1093,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-256 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-256 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha256Hex("password" + salt);
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-256 digest as a 64-character lowercase hexadecimal string
+     *
      */
     public static String sha256Hex(final String data) {
         return Hex.encodeToString(sha256(data));
@@ -955,11 +1108,16 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-224 digest of the input data.
-     * SHA-3 is an alternative to SHA-2 with different internal structure.
+     * SHA-3 is an alternative to SHA-2 with different internal structure based on the Keccak algorithm.
      *
-     * @param data The data to digest
-     * @return SHA3-224 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_224("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-224 digest as a 28-byte array
+     *
      */
     public static byte[] sha3_224(final byte[] data) {
         return getSha3_224Digest().digest(data);
@@ -967,11 +1125,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-224 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-224 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha3_224(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-224 digest as a 28-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha3_224(final InputStream data) throws IOException {
         return digest(getSha3_224Digest(), data);
@@ -980,9 +1146,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-224 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA3-224 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_224("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-224 digest as a 28-byte array
+     *
      */
     public static byte[] sha3_224(final String data) {
         return sha3_224(Strings.getBytesUtf8(data));
@@ -991,9 +1162,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-224 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA3-224 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_224Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
+     *
      */
     public static String sha3_224Hex(final byte[] data) {
         return Hex.encodeToString(sha3_224(data));
@@ -1001,11 +1177,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-224 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-224 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha3_224Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha3_224Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_224(data));
@@ -1014,9 +1198,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-224 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA3-224 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_224Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
+     *
      */
     public static String sha3_224Hex(final String data) {
         return Hex.encodeToString(sha3_224(data));
@@ -1025,9 +1214,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-256 digest of the input data.
      *
-     * @param data The data to digest
-     * @return SHA3-256 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_256("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-256 digest as a 32-byte array
+     *
      */
     public static byte[] sha3_256(final byte[] data) {
         return getSha3_256Digest().digest(data);
@@ -1035,11 +1229,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-256 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-256 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha3_256(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-256 digest as a 32-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha3_256(final InputStream data) throws IOException {
         return digest(getSha3_256Digest(), data);
@@ -1048,9 +1250,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-256 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA3-256 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_256("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-256 digest as a 32-byte array
+     *
      */
     public static byte[] sha3_256(final String data) {
         return sha3_256(Strings.getBytesUtf8(data));
@@ -1059,9 +1266,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-256 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA3-256 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_256Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
+     *
      */
     public static String sha3_256Hex(final byte[] data) {
         return Hex.encodeToString(sha3_256(data));
@@ -1069,11 +1281,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-256 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-256 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha3_256Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha3_256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_256(data));
@@ -1082,9 +1302,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-256 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA3-256 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_256Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
+     *
      */
     public static String sha3_256Hex(final String data) {
         return Hex.encodeToString(sha3_256(data));
@@ -1093,9 +1318,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-384 digest of the input data.
      *
-     * @param data The data to digest
-     * @return SHA3-384 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_384("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-384 digest as a 48-byte array
+     *
      */
     public static byte[] sha3_384(final byte[] data) {
         return getSha3_384Digest().digest(data);
@@ -1103,11 +1333,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-384 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-384 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha3_384(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-384 digest as a 48-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha3_384(final InputStream data) throws IOException {
         return digest(getSha3_384Digest(), data);
@@ -1116,9 +1354,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-384 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA3-384 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_384("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-384 digest as a 48-byte array
+     *
      */
     public static byte[] sha3_384(final String data) {
         return sha3_384(Strings.getBytesUtf8(data));
@@ -1127,9 +1370,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-384 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA3-384 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_384Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
+     *
      */
     public static String sha3_384Hex(final byte[] data) {
         return Hex.encodeToString(sha3_384(data));
@@ -1137,11 +1385,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-384 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-384 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha3_384Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha3_384Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_384(data));
@@ -1150,9 +1406,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-384 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA3-384 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_384Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
+     *
      */
     public static String sha3_384Hex(final String data) {
         return Hex.encodeToString(sha3_384(data));
@@ -1162,9 +1423,14 @@ public class DigestUtil {
      * Calculates the SHA3-512 digest of the input data.
      * Provides the highest security level in the SHA-3 family.
      *
-     * @param data The data to digest
-     * @return SHA3-512 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_512("critical data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-512 digest as a 64-byte array
+     *
      */
     public static byte[] sha3_512(final byte[] data) {
         return getSha3_512Digest().digest(data);
@@ -1172,11 +1438,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-512 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-512 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha3_512(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-512 digest as a 64-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha3_512(final InputStream data) throws IOException {
         return digest(getSha3_512Digest(), data);
@@ -1185,9 +1459,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-512 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA3-512 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha3_512("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-512 digest as a 64-byte array
+     *
      */
     public static byte[] sha3_512(final String data) {
         return sha3_512(Strings.getBytesUtf8(data));
@@ -1196,9 +1475,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-512 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA3-512 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_512Hex("critical data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
+     *
      */
     public static String sha3_512Hex(final byte[] data) {
         return Hex.encodeToString(sha3_512(data));
@@ -1206,11 +1490,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA3-512 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA3-512 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha3_512Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha3_512Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha3_512(data));
@@ -1219,9 +1511,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA3-512 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA3-512 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha3_512Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
+     *
      */
     public static String sha3_512Hex(final String data) {
         return Hex.encodeToString(sha3_512(data));
@@ -1230,9 +1527,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-384 digest of the input data and returns it as a 48-byte array.
      *
-     * @param data The data to digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha384("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
-     * 
+     *
      */
     public static byte[] sha384(final byte[] data) {
         return getSha384Digest().digest(data);
@@ -1240,11 +1542,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-384 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha384(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha384(final InputStream data) throws IOException {
         return digest(getSha384Digest(), data);
@@ -1253,9 +1563,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-384 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha384("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
-     * 
+     *
      */
     public static byte[] sha384(final String data) {
         return sha384(Strings.getBytesUtf8(data));
@@ -1264,9 +1579,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-384 digest and returns it as a 96-character hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA-384 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha384Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-384 digest as a 96-character lowercase hexadecimal string
+     *
      */
     public static String sha384Hex(final byte[] data) {
         return Hex.encodeToString(sha384(data));
@@ -1274,11 +1594,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-384 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-384 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha384Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha384Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha384(data));
@@ -1287,9 +1615,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-384 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-384 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha384Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-384 digest as a 96-character lowercase hexadecimal string
+     *
      */
     public static String sha384Hex(final String data) {
         return Hex.encodeToString(sha384(data));
@@ -1299,9 +1632,14 @@ public class DigestUtil {
      * Calculates the SHA-512 digest of the input data and returns it as a 64-byte array.
      * Provides maximum security in the SHA-2 family.
      *
-     * @param data The data to digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512("critical data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
-     * 
+     *
      */
     public static byte[] sha512(final byte[] data) {
         return getSha512Digest().digest(data);
@@ -1309,11 +1647,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha512(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha512(final InputStream data) throws IOException {
         return digest(getSha512Digest(), data);
@@ -1322,9 +1668,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
-     * 
+     *
      */
     public static byte[] sha512(final String data) {
         return sha512(Strings.getBytesUtf8(data));
@@ -1332,11 +1683,16 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512/224 digest of the input data.
-     * This is a truncated variant of SHA-512.
+     * This is a truncated variant of SHA-512 that produces 224-bit output.
      *
-     * @param data The data to digest
-     * @return SHA-512/224 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512_224("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 28-byte array
+     *
      */
     public static byte[] sha512_224(final byte[] data) {
         return getSha512_224Digest().digest(data);
@@ -1344,11 +1700,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512/224 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-512/224 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha512_224(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 28-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha512_224(final InputStream data) throws IOException {
         return digest(getSha512_224Digest(), data);
@@ -1357,9 +1721,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/224 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA-512/224 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512_224("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 28-byte array
+     *
      */
     public static byte[] sha512_224(final String data) {
         return sha512_224(Strings.getBytesUtf8(data));
@@ -1368,9 +1737,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/224 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA-512/224 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha512_224Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
+     *
      */
     public static String sha512_224Hex(final byte[] data) {
         return Hex.encodeToString(sha512_224(data));
@@ -1378,11 +1752,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512/224 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-512/224 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha512_224Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha512_224Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512_224(data));
@@ -1391,9 +1773,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/224 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-512/224 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha512_224Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
+     *
      */
     public static String sha512_224Hex(final String data) {
         return Hex.encodeToString(sha512_224(data));
@@ -1403,9 +1790,14 @@ public class DigestUtil {
      * Calculates the SHA-512/256 digest of the input data.
      * This truncated variant offers better 64-bit performance than SHA-256.
      *
-     * @param data The data to digest
-     * @return SHA-512/256 digest as a byte array
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512_256("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 32-byte array
+     *
      */
     public static byte[] sha512_256(final byte[] data) {
         return getSha512_256Digest().digest(data);
@@ -1413,11 +1805,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512/256 digest of data from an InputStream.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-512/256 digest as a byte array
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     byte[] hash = DigestUtil.sha512_256(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 32-byte array
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static byte[] sha512_256(final InputStream data) throws IOException {
         return digest(getSha512_256Digest(), data);
@@ -1426,8 +1826,13 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/256 digest of a string (converted to UTF-8 bytes).
      *
-     * @param data The string to digest
-     * @return SHA-512/256 digest as a byte array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] hash = DigestUtil.sha512_256("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 32-byte array
      *
      */
     public static byte[] sha512_256(final String data) {
@@ -1437,9 +1842,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/256 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA-512/256 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha512_256Hex("data".getBytes());
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
+     *
      */
     public static String sha512_256Hex(final byte[] data) {
         return Hex.encodeToString(sha512_256(data));
@@ -1447,11 +1857,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512/256 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-512/256 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha512_256Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha512_256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512_256(data));
@@ -1460,9 +1878,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512/256 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-512/256 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha512_256Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
+     *
      */
     public static String sha512_256Hex(final String data) {
         return Hex.encodeToString(sha512_256(data));
@@ -1476,10 +1899,8 @@ public class DigestUtil {
      * String hash = DigestUtil.sha512Hex("critical data".getBytes());
      * }</pre>
      *
-     * @param data The data to digest
-     * @return SHA-512 digest as a hex string
-     * 
-     * 
+     * @param data The data to digest.
+     * @return SHA-512 digest as a hex string.
      */
     public static String sha512Hex(final byte[] data) {
         return Hex.encodeToString(sha512(data));
@@ -1487,11 +1908,19 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-512 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-512 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.sha512Hex(is);
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
+     *
      */
     public static String sha512Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512(data));
@@ -1500,9 +1929,14 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-512 digest as a hex string
-     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.sha512Hex("message");
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-512 digest as a 128-character lowercase hexadecimal string
+     *
      */
     public static String sha512Hex(final String data) {
         return Hex.encodeToString(sha512(data));
@@ -1511,8 +1945,16 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest and returns it as a hexadecimal string.
      *
-     * @param data The data to digest
-     * @return SHA-1 digest as a hex string
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.shaHex("data".getBytes());    // Deprecated
+     * String hash = DigestUtil.sha1Hex("data".getBytes());   // Preferred
+     * }</pre>
+     *
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
      * @deprecated Use {@link #sha1Hex(byte[])} instead
      */
     @Deprecated
@@ -1522,10 +1964,21 @@ public class DigestUtil {
 
     /**
      * Calculates the SHA-1 digest of stream data and returns it as a hex string.
+     * The stream is read completely but NOT closed.
      *
-     * @param data The InputStream to read and digest
-     * @return SHA-1 digest as a hex string
-     * @throws IOException If an error occurs while reading the stream
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("file.dat")) {
+     *     String hash = DigestUtil.shaHex(is);  // Deprecated
+     *     // Prefer: DigestUtil.sha1Hex(is)
+     * }
+     * }</pre>
+     *
+     * @param data The InputStream to read and digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     * @throws IOException If an I/O error occurs while reading the stream
      * @deprecated Use {@link #sha1Hex(InputStream)} instead
      */
     @Deprecated
@@ -1536,8 +1989,16 @@ public class DigestUtil {
     /**
      * Calculates the SHA-1 digest of a string and returns it as a hex string.
      *
-     * @param data The string to digest
-     * @return SHA-1 digest as a hex string
+     * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String hash = DigestUtil.shaHex("message");    // Deprecated
+     * String hash = DigestUtil.sha1Hex("message");   // Preferred
+     * }</pre>
+     *
+     * @param data The string to digest (must not be {@code null})
+     * @return SHA-1 digest as a 40-character lowercase hexadecimal string
      * @deprecated Use {@link #sha1Hex(String)} instead
      */
     @Deprecated
@@ -1557,11 +2018,9 @@ public class DigestUtil {
      * byte[] finalHash = md.digest();
      * }</pre>
      *
-     * @param messageDigest The MessageDigest to update
-     * @param valueToDigest The byte array to add to the digest
-     * @return The updated MessageDigest (same instance as input)
-     * 
-     * 
+     * @param messageDigest The MessageDigest to update.
+     * @param valueToDigest The byte array to add to the digest.
+     * @return The updated MessageDigest (same instance as input).
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -1572,10 +2031,18 @@ public class DigestUtil {
      * Updates the given MessageDigest with data from a ByteBuffer.
      * The ByteBuffer's position will be advanced to its limit.
      *
-     * @param messageDigest The MessageDigest to update
-     * @param valueToDigest The ByteBuffer containing data to add to the digest
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MessageDigest md = DigestUtil.getSha256Digest();
+     * ByteBuffer buffer = ByteBuffer.wrap("data".getBytes());
+     * DigestUtil.updateDigest(md, buffer);
+     * byte[] hash = md.digest();
+     * }</pre>
+     *
+     * @param messageDigest The MessageDigest to update (must not be {@code null})
+     * @param valueToDigest The ByteBuffer containing data to add to the digest (must not be {@code null})
      * @return The updated MessageDigest (same instance as input)
-     * 
+     *
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final ByteBuffer valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -1586,11 +2053,18 @@ public class DigestUtil {
      * Reads through a File and updates the MessageDigest with its contents.
      * The file is read using a buffered stream for efficiency.
      *
-     * @param digest The MessageDigest to update
-     * @param data The File to read
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MessageDigest md = DigestUtil.getSha256Digest();
+     * DigestUtil.updateDigest(md, new File("document.pdf"));
+     * byte[] hash = md.digest();
+     * }</pre>
+     *
+     * @param digest The MessageDigest to update (must not be {@code null})
+     * @param data The File to read (must exist and be readable)
      * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an error occurs while reading the file
-     * 
+     * @throws IOException If an I/O error occurs while reading the file
+     *
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final File data) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(data))) {
@@ -1602,10 +2076,10 @@ public class DigestUtil {
      * Updates a MessageDigest from data read from a FileChannel using NIO.
      * This is efficient for large files.
      *
-     * @param digest The MessageDigest to update
-     * @param data The FileChannel to read from
-     * @return The updated MessageDigest
-     * @throws IOException If an error occurs while reading
+     * @param digest The MessageDigest to update.
+     * @param data The FileChannel to read from.
+     * @return The updated MessageDigest.
+     * @throws IOException If an error occurs while reading.
      */
     private static MessageDigest updateDigest(final MessageDigest digest, final FileChannel data) throws IOException {
         final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -1631,12 +2105,10 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param digest The MessageDigest to update
-     * @param inputStream The InputStream to read
-     * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an error occurs while reading the stream
-     * 
-     * 
+     * @param digest The MessageDigest to update.
+     * @param inputStream The InputStream to read.
+     * @return The updated MessageDigest (same instance as input).
+     * @throws IOException If an error occurs while reading the stream.
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final InputStream inputStream) throws IOException {
         final byte[] buffer = new byte[BUFFER_SIZE];
@@ -1653,12 +2125,20 @@ public class DigestUtil {
     /**
      * Reads through a file at the specified Path and updates the MessageDigest.
      *
-     * @param digest The MessageDigest to update
-     * @param path The Path to the file to read
-     * @param options Options for opening the file
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MessageDigest md = DigestUtil.getSha256Digest();
+     * DigestUtil.updateDigest(md, Paths.get("data.txt"));
+     * byte[] hash = md.digest();
+     * }</pre>
+     *
+     * @param digest The MessageDigest to update (must not be {@code null})
+     * @param path The Path to the file to read (must not be {@code null})
+     * @param options Optional open options for the file (e.g., StandardOpenOption.READ).
+     *                If not specified, default options are used.
      * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an error occurs while reading the file
-     * 
+     * @throws IOException If an I/O error occurs while reading the file
+     *
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final Path path, final OpenOption... options) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(path, options))) {
@@ -1669,12 +2149,22 @@ public class DigestUtil {
     /**
      * Reads through a RandomAccessFile using NIO and updates the MessageDigest.
      * This method is efficient for large files as it uses FileChannel.
+     * The RandomAccessFile is read from its current position to the end.
      *
-     * @param digest The MessageDigest to update
-     * @param data The RandomAccessFile to read
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MessageDigest md = DigestUtil.getSha256Digest();
+     * try (RandomAccessFile raf = new RandomAccessFile("large.dat", "r")) {
+     *     DigestUtil.updateDigest(md, raf);
+     * }
+     * byte[] hash = md.digest();
+     * }</pre>
+     *
+     * @param digest The MessageDigest to update (must not be {@code null})
+     * @param data The RandomAccessFile to read (must not be {@code null})
      * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an error occurs while reading
-     * 
+     * @throws IOException If an I/O error occurs while reading
+     *
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
         return updateDigest(digest, data.getChannel());
@@ -1692,11 +2182,9 @@ public class DigestUtil {
      * String hash = Hex.encodeToString(md.digest());
      * }</pre>
      *
-     * @param messageDigest The MessageDigest to update
-     * @param valueToDigest The string value to add to the digest
-     * @return The updated MessageDigest (same instance as input)
-     * 
-     * 
+     * @param messageDigest The MessageDigest to update.
+     * @param valueToDigest The string value to add to the digest.
+     * @return The updated MessageDigest (same instance as input).
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
         messageDigest.update(Strings.getBytesUtf8(valueToDigest));
@@ -1813,9 +2301,9 @@ public class DigestUtil {
          * }
          * }</pre>
          *
-         * @return An array of all algorithm name constants
-         * 
-         * 
+         * @return An array of all algorithm name constants.
+         *
+         *
          */
         public static String[] values() {
             // Do not use a constant array here as that can be changed externally by accident or design

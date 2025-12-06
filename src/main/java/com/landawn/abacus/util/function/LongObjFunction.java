@@ -40,6 +40,16 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * <p>This method takes a primitive long value as the first argument and an object of type T
      * as the second argument, then processes them to produce a result of type R.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongObjFunction<String, Integer> lengthPlusLong = (l, s) -> s.length() + (int)l;
+     * int result = lengthPlusLong.apply(5L, "hello");  // Returns 10 (5 + 5)
+     *
+     * LongObjFunction<List<String>, String> getElement = (index, list) ->
+     *     index >= 0 && index < list.size() ? list.get((int)index) : null;
+     * String element = getElement.apply(1L, Arrays.asList("a", "b", "c"));  // Returns "b"
+     * }</pre>
+     *
      * @param t the long-valued first argument
      * @param u the object second argument of type T
      * @return the function result of type R

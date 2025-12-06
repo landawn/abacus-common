@@ -74,7 +74,7 @@ public class BooleanTriPredicate2025Test extends TestBase {
 
         BooleanTriPredicate combined = firstFalse.and(shouldNotExecute);
 
-        assertFalse(combined.test(true, true, true)); // Should not throw exception
+        assertFalse(combined.test(true, true, true));   // Should not throw exception
     }
 
     @Test
@@ -98,7 +98,7 @@ public class BooleanTriPredicate2025Test extends TestBase {
 
         BooleanTriPredicate combined = firstTrue.or(shouldNotExecute);
 
-        assertTrue(combined.test(true, true, true)); // Should not throw exception
+        assertTrue(combined.test(true, true, true));   // Should not throw exception
     }
 
     @Test

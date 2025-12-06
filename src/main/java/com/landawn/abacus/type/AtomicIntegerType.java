@@ -38,6 +38,10 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     public static final String ATOMIC_INTEGER = AtomicInteger.class.getSimpleName();
 
+    /**
+     * Package-private constructor for AtomicIntegerType.
+     * This constructor is called by the TypeFactory to create AtomicInteger type instances.
+     */
     AtomicIntegerType() {
         super(ATOMIC_INTEGER);
     }

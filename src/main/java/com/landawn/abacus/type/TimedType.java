@@ -49,6 +49,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a TimedType instance with the specified value type.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param valueTypeName the name of the type wrapped in the Timed object
+     */
     TimedType(final String valueTypeName) {
         super(getTypeName(valueTypeName, false));
 
@@ -142,7 +148,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

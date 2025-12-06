@@ -120,7 +120,7 @@ public class Strings200Test extends TestBase {
         assertTrue(Strings.isValidUrl("https://example.com/path?query=val#fragment"));
         assertTrue(Strings.isValidUrl("ftp://user:pass@example.com:21/path"));
         assertFalse(Strings.isValidUrl("example.com"));
-        assertFalse(Strings.isValidHttpUrl("htp://example.com")); // Invalid scheme
+        assertFalse(Strings.isValidHttpUrl("htp://example.com"));   // Invalid scheme
         assertFalse(Strings.isValidUrl(null));
         assertFalse(Strings.isValidUrl(""));
     }
@@ -671,7 +671,7 @@ public class Strings200Test extends TestBase {
     @Test
     public void testQuoteEscapedWithChar() {
         assertEquals("ab\\\"c", Strings.quoteEscaped("ab\"c", '"'));
-        assertEquals("ab'c", Strings.quoteEscaped("ab'c", '"')); // ' not escaped
+        assertEquals("ab'c", Strings.quoteEscaped("ab'c", '"'));   // ' not escaped
         assertNull(Strings.quoteEscaped(null, '"'));
     }
 

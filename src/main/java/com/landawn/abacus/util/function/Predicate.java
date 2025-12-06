@@ -65,7 +65,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<String> isNotEmpty = isEmpty.negate();
      *
-     * boolean result = isNotEmpty.test("Hello");  // Returns true
+     * boolean result = isNotEmpty.test("Hello");   // Returns true
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -91,7 +91,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * Predicate<String> startsWithA = str -> str.startsWith("A");
      *
      * Predicate<String> isNotEmptyAndStartsWithA = isNotEmpty.and(startsWithA);
-     * boolean result = isNotEmptyAndStartsWithA.test("Apple");  // Returns true
+     * boolean result = isNotEmptyAndStartsWithA.test("Apple");   // Returns true
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.

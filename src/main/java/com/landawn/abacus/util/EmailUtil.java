@@ -98,14 +98,23 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to
-     * @param from the sender's email address
-     * @param subject the email subject
-     * @param content the plain text content of the email
-     * @param userName the username for SMTP authentication
-     * @param password the password for SMTP authentication
-     * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
-     * @throws RuntimeException if sending the email fails
+     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
+     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param subject the email subject. May be {@code null} or empty
+     * @param content the plain text content of the email. May be {@code null} or empty
+     * @param userName the username for SMTP authentication. Must not be {@code null}
+     * @param password the password for SMTP authentication. Must not be {@code null}
+     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     *              <ul>
+     *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
+     *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
+     *              <li>{@code mail.smtp.auth} - enable authentication (true/false)</li>
+     *              <li>{@code mail.smtp.starttls.enable} - enable STARTTLS (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
+     *              </ul>
+     * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
+     *                          connection issues, or messaging errors
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
      */
@@ -131,15 +140,25 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to
-     * @param from the sender's email address
-     * @param subject the email subject
-     * @param content the plain text content of the email
-     * @param attachedFiles array of file paths to attach, or {@code null} if no attachments
-     * @param userName the username for SMTP authentication
-     * @param password the password for SMTP authentication
-     * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
-     * @throws RuntimeException if sending the email fails
+     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
+     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param subject the email subject. May be {@code null} or empty
+     * @param content the plain text content of the email. May be {@code null} or empty
+     * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
+     *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
+     * @param userName the username for SMTP authentication. Must not be {@code null}
+     * @param password the password for SMTP authentication. Must not be {@code null}
+     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     *              <ul>
+     *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
+     *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
+     *              <li>{@code mail.smtp.auth} - enable authentication (true/false)</li>
+     *              <li>{@code mail.smtp.starttls.enable} - enable STARTTLS (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
+     *              </ul>
+     * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
+     *                          connection issues, file access errors, or messaging errors
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
      * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
@@ -170,14 +189,23 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to
-     * @param from the sender's email address
-     * @param subject the email subject
-     * @param content the HTML content of the email
-     * @param userName the username for SMTP authentication
-     * @param password the password for SMTP authentication
-     * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
-     * @throws RuntimeException if sending the email fails
+     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
+     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param subject the email subject. May be {@code null} or empty
+     * @param content the HTML content of the email. May be {@code null} or empty
+     * @param userName the username for SMTP authentication. Must not be {@code null}
+     * @param password the password for SMTP authentication. Must not be {@code null}
+     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     *              <ul>
+     *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
+     *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
+     *              <li>{@code mail.smtp.auth} - enable authentication (true/false)</li>
+     *              <li>{@code mail.smtp.starttls.enable} - enable STARTTLS (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
+     *              </ul>
+     * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
+     *                          connection issues, or messaging errors
      * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
      */
@@ -212,15 +240,25 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to
-     * @param from the sender's email address
-     * @param subject the email subject
-     * @param content the HTML content of the email
-     * @param attachedFiles array of file paths to attach, or {@code null} if no attachments
-     * @param userName the username for SMTP authentication
-     * @param password the password for SMTP authentication
-     * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
-     * @throws RuntimeException if sending the email fails
+     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
+     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param subject the email subject. May be {@code null} or empty
+     * @param content the HTML content of the email. May be {@code null} or empty
+     * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
+     *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
+     * @param userName the username for SMTP authentication. Must not be {@code null}
+     * @param password the password for SMTP authentication. Must not be {@code null}
+     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     *              <ul>
+     *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
+     *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
+     *              <li>{@code mail.smtp.auth} - enable authentication (true/false)</li>
+     *              <li>{@code mail.smtp.starttls.enable} - enable STARTTLS (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
+     *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
+     *              </ul>
+     * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
+     *                          connection issues, file access errors, or messaging errors
      * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */

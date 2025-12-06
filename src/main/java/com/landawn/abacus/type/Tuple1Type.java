@@ -49,6 +49,12 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple1Type instance with the specified element type.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the element type
+     */
     Tuple1Type(final String t1TypeName) {
         super(getTypeName(t1TypeName, false));
 
@@ -60,6 +66,12 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     /**
      * Returns the declaring name of this type, which uses simple class names.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple1<String>> type = TypeFactory.getType("Tuple1<String>");
+     * String name = type.declaringName();   // Returns "Tuple1<String>"
+     * }</pre>
      *
      * @return the declaring name of this Tuple1 type
      */
@@ -82,6 +94,13 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * Returns the parameter types of this generic type.
      * For Tuple1, this is an array containing a single element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple1<String>> type = TypeFactory.getType("Tuple1<String>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // paramTypes[0] is Type<String>
+     * }</pre>
+     *
      * @return an array containing the element type
      */
     @Override
@@ -98,6 +117,13 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * Converts a Tuple1 object to its string representation.
      * The format is a JSON array: [value].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple1<String>> type = TypeFactory.getType("Tuple1<String>");
+     * Tuple1<String> tuple = Tuple.of("Hello");
+     * String str = type.stringOf(tuple);   // Returns ["Hello"]
+     * }</pre>
+     *
      * @param x the Tuple1 object to convert
      * @return the JSON string representation, or {@code null} if x is null
      */
@@ -109,6 +135,13 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     /**
      * Creates a Tuple1 object from its string representation.
      * Expects a JSON array format: [value].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Tuple1<String>> type = TypeFactory.getType("Tuple1<String>");
+     * Tuple1<String> tuple = type.valueOf("[\"Hello\"]");
+     * // tuple._1 = "Hello"
+     * }</pre>
      *
      * @param str the string to parse
      * @return a Tuple1 object containing the parsed value, or {@code null} if str is empty
@@ -142,7 +175,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

@@ -105,6 +105,7 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return A new HttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
@@ -123,6 +124,7 @@ public final class HttpRequest {
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -1388,9 +1390,12 @@ public final class HttpRequest {
     /**
      * Executes an asynchronous HEAD request with a custom executor and the specified result class.
      *
+     * <p><b>Note:</b> This method has unusual parameter ordering (executor, resultClass) compared to
+     * other async methods which use (resultClass, executor). This is maintained for backward compatibility.</p>
+     *
      * @param <T> The type of the response object
-     * @param executor The executor to use for the asynchronous operation
-     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
      */
     public <T> ContinuableFuture<T> asyncHead(final Executor executor, final Class<T> resultClass) {

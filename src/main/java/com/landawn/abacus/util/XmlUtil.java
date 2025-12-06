@@ -171,14 +171,14 @@ public final class XmlUtil {
                     logger.warn("It's recommended to use woodstox: https://github.com/FasterXML/woodstox");
                 }
 
-                // xmlInputFactory.setProperty("javax.xml.stream.bufferSize", BUFFER_SIZE); // 8KB buffer
+                // xmlInputFactory.setProperty("javax.xml.stream.bufferSize", BUFFER_SIZE);   // 8KB buffer
             }
         } catch (final Throwable e) {
             if (logger.isWarnEnabled()) {
                 logger.warn("It's recommended to use woodstox: https://github.com/FasterXML/woodstox");
             }
 
-            // xmlInputFactory.setProperty("javax.xml.stream.bufferSize", BUFFER_SIZE); // 8KB buffer
+            // xmlInputFactory.setProperty("javax.xml.stream.bufferSize", BUFFER_SIZE);   // 8KB buffer
         }
     }
 
@@ -268,7 +268,7 @@ public final class XmlUtil {
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
      * Person person = XmlUtil.unmarshal(Person.class, xml);
-     * System.out.println(person.getName());  // Prints: John
+     * System.out.println(person.getName());   // Prints: John
      * }</pre>
      *
      * @param <T> The type of the object to be returned
@@ -860,7 +860,7 @@ public final class XmlUtil {
      * @see Transformer#transform(Source, Result)
      */
     public static void transform(final Document source, File output) {
-        output = Configuration.formatPath(output);
+        output = PropertiesUtil.formatPath(output);
 
         Writer writer = null;
 
@@ -1246,11 +1246,11 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("name");
      * elem.setTextContent("John");
-     * boolean isText = XmlUtil.isTextElement(elem);  // Returns true
+     * boolean isText = XmlUtil.isTextElement(elem);   // Returns true
      * 
      * Element parent = doc.createElement("person");
      * parent.appendChild(elem);
-     * boolean isParentText = XmlUtil.isTextElement(parent);  // Returns false
+     * boolean isParentText = XmlUtil.isTextElement(parent);   // Returns false
      * }</pre>
      *
      * @param node The node to be checked
@@ -1276,7 +1276,7 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
-     * String content = XmlUtil.getTextContent(elem);  // Returns "  Hello World  "
+     * String content = XmlUtil.getTextContent(elem);   // Returns "  Hello World  "
      * }</pre>
      *
      * @param node The XML node from which to get the text content
@@ -1492,7 +1492,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output);   //NOSONAR
 
         try {
             bufWriter.writeCharacter(cbuf, off, len);
@@ -1546,7 +1546,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final String str, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output);   //NOSONAR
 
         try {
             bufWriter.writeCharacter(str, off, len);
@@ -1598,7 +1598,7 @@ public final class XmlUtil {
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output) throws IOException {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);   //NOSONAR
 
         try {
             bw.writeCharacter(cbuf, off, len);
@@ -1641,7 +1641,7 @@ public final class XmlUtil {
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
-     * String result = writer.toString();  // "Hello <world>"
+     * String result = writer.toString();   // "Hello <world>"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1652,7 +1652,7 @@ public final class XmlUtil {
      */
     public static void writeCharacters(final String str, final int off, final int len, final Writer output) throws IOException {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);   //NOSONAR
 
         try {
             bw.writeCharacter(str, off, len);

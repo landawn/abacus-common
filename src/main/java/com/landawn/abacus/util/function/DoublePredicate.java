@@ -76,7 +76,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoublePredicate isPositive = value -> value > 0.0;
-     * boolean result = isPositive.test(3.14);  // Returns true
+     * boolean result = isPositive.test(3.14);   // Returns true
      * }</pre>
      *
      * @param value the double input argument

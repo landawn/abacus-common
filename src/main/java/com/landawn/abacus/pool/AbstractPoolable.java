@@ -28,7 +28,7 @@ package com.landawn.abacus.pool;
  *     private final Connection connection;
  *     
  *     public PooledConnection(Connection conn) {
- *         super(3600000, 300000);  // 1 hour lifetime, 5 minute max idle
+ *         super(3600000, 300000);   // 1 hour lifetime, 5 minute max idle
  *         this.connection = conn;
  *     }
  *     
@@ -67,7 +67,7 @@ public abstract class AbstractPoolable implements Poolable {
      * <pre>{@code
      * public class MyPooledResource extends AbstractPoolable {
      *     public MyPooledResource() {
-     *         super(3600000, 300000);  // 1 hour lifetime, 5 minutes max idle
+     *         super(3600000, 300000);   // 1 hour lifetime, 5 minutes max idle
      *     }
      *
      *     @Override
@@ -88,8 +88,11 @@ public abstract class AbstractPoolable implements Poolable {
     /**
      * Returns the activity print for this poolable object.
      * The activity print tracks creation time, access patterns, and expiration status.
-     * 
-     * @return the ActivityPrint associated with this object
+     *
+     * <p>The returned ActivityPrint is the same instance throughout the object's lifetime
+     * to ensure consistent tracking of access patterns and expiration.
+     *
+     * @return the ActivityPrint associated with this object, never {@code null}
      */
     @Override
     public ActivityPrint activityPrint() {

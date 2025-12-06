@@ -32,7 +32,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * sum.add(0.1);
  * sum.add(0.2);
  * sum.add(0.3);
- * double result = sum.sum();  // More accurate than simple addition
+ * double result = sum.sum();   // More accurate than simple addition
  * 
  * // Or use the static factory method:
  * KahanSummation sum2 = KahanSummation.of(0.1, 0.2, 0.3);
@@ -62,7 +62,7 @@ public final class KahanSummation { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0);
-     * System.out.println(sum.sum());  // 6.0
+     * System.out.println(sum.sum());   // 6.0
      * }</pre>
      *
      * @param a the array of double values to sum
@@ -130,7 +130,7 @@ public final class KahanSummation { // NOSONAR
      * sum1.add(1.0);
      * 
      * // Combine with pre-computed values
-     * sum1.combine(5, 10.0);  // Add 5 values with sum 10.0
+     * sum1.combine(5, 10.0);   // Add 5 values with sum 10.0
      * }</pre>
      *
      * @param countA the count of values to combine
@@ -173,7 +173,7 @@ public final class KahanSummation { // NOSONAR
      * KahanSummation sum = new KahanSummation();
      * sum.add(1.0);
      * sum.add(2.0);
-     * System.out.println(sum.count());  // 2
+     * System.out.println(sum.count());   // 2
      * }</pre>
      *
      * @return the number of values that have been added
@@ -194,7 +194,7 @@ public final class KahanSummation { // NOSONAR
      * for (int i = 0; i < 1000000; i++) {
      *     sum.add(0.01);
      * }
-     * double result = sum.sum();  // More accurate than simple addition
+     * double result = sum.sum();   // More accurate than simple addition
      * }</pre>
      *
      * @return the sum with Kahan error compensation applied
@@ -216,7 +216,7 @@ public final class KahanSummation { // NOSONAR
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0, 4.0);
      * OptionalDouble avg = sum.average();
-     * System.out.println(avg.orElse(0));  // 2.5
+     * System.out.println(avg.orElse(0));   // 2.5
      * }</pre>
      *
      * @return an OptionalDouble containing the average, or empty if no values have been added
@@ -233,7 +233,7 @@ public final class KahanSummation { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0);
-     * System.out.println(sum);  // {count=3, sum=6.000000, average=2.000000}
+     * System.out.println(sum);   // {count=3, sum=6.000000, average=2.000000}
      * }</pre>
      *
      * @return a string representation containing count, sum, and average

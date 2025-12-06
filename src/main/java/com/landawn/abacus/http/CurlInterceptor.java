@@ -53,9 +53,11 @@ class CurlInterceptor implements Interceptor {
 
     /**
      * Creates a new CurlInterceptor with the default single quote character for shell escaping.
-     * 
+     * This constructor uses {@link #DEFAULT_QUOTE_CHAR} as the quote character.
+     *
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command.
+     * @see #CurlInterceptor(char, Consumer)
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {
         this(DEFAULT_QUOTE_CHAR, logHandler);
@@ -63,11 +65,11 @@ class CurlInterceptor implements Interceptor {
 
     /**
      * Creates a new CurlInterceptor with a specified quote character for shell escaping.
-     * 
+     *
      * @param quoteChar The character to use for quoting values in the cURL command.
      *                  Can be either single quote (') or double quote (") depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
-     *                   This is typically used to log or store the command.
+     *                   This is typically used to log or store the command. Must not be {@code null}.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) {
         this.logHandler = logHandler;

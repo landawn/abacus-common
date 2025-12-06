@@ -36,11 +36,11 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * 
  * // Only the key is used for equality
  * Keyed<String, User> sameKey = Keyed.of("userId123", new User("Jane", "Smith"));
- * System.out.println(userKeyed.equals(sameKey));  // true
+ * System.out.println(userKeyed.equals(sameKey));   // true
  * }</pre>
  *
- * @param <K> the type of the key
- * @param <T> the type of the value
+ * @param <K> the type of the key.
+ * @param <T> the type of the value.
  * @see IndexedKeyed
  * @see Wrapper
  */
@@ -63,8 +63,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p>This constructor is package-private and used internally by the factory method
      * {@link #of(Object, Object)} and subclasses.</p>
      *
-     * @param key the key used for hashing and equality comparisons (can be {@code null})
-     * @param val the value associated with the key (can be {@code null})
+     * @param key the key used for hashing and equality comparisons (can be {@code null}).
+     * @param val the value associated with the key (can be {@code null}).
      */
     Keyed(final K key, final T val) {
         this.key = key;
@@ -83,14 +83,14 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<Integer, String> keyed = Keyed.of(42, "The Answer");
-     * Keyed<String, User> withNull = Keyed.of("id", null);  // value can be null
+     * Keyed<String, User> withNull = Keyed.of("id", null);   // value can be null
      * }</pre>
      *
-     * @param <K> the type of the key
-     * @param <T> the type of the value
-     * @param key the key used for hashing and equality comparisons (can be {@code null})
-     * @param val the value associated with the key (can be {@code null})
-     * @return a new {@code Keyed} instance containing the specified key-value pair
+     * @param <K> the type of the key.
+     * @param <T> the type of the value.
+     * @param key the key used for hashing and equality comparisons (can be {@code null}).
+     * @param val the value associated with the key (can be {@code null}).
+     * @return a new {@code Keyed} instance containing the specified key-value pair.
      */
     public static <K, T> Keyed<K, T> of(final K key, final T val) {
         return new Keyed<>(key, val);
@@ -105,13 +105,13 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<String, Integer> keyed = Keyed.of("myKey", 42);
-     * String key = keyed.key();  // returns "myKey"
+     * String key = keyed.key();   // returns "myKey"
      *
      * Keyed<String, Integer> nullKey = Keyed.of(null, 100);
-     * String nullKeyValue = nullKey.key();  // returns null
+     * String nullKeyValue = nullKey.key();   // returns null
      * }</pre>
      *
-     * @return the key (can be {@code null})
+     * @return the key (can be {@code null}).
      */
     @MayReturnNull
     public K key() {
@@ -128,13 +128,13 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<String, Integer> keyed = Keyed.of("myKey", 42);
-     * Integer value = keyed.val();  // returns 42
+     * Integer value = keyed.val();   // returns 42
      *
      * Keyed<String, Integer> nullVal = Keyed.of("key", null);
-     * Integer nullValue = nullVal.val();  // returns null
+     * Integer nullValue = nullVal.val();   // returns null
      * }</pre>
      *
-     * @return the value (can be {@code null})
+     * @return the value (can be {@code null}).
      */
     @MayReturnNull
     public T val() {
@@ -153,10 +153,10 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <pre>{@code
      * Keyed<String, Integer> k1 = Keyed.of("key", 100);
      * Keyed<String, Integer> k2 = Keyed.of("key", 200);
-     * assert k1.hashCode() == k2.hashCode();  // true, only key matters
+     * assert k1.hashCode() == k2.hashCode();   // true, only key matters
      * }</pre>
      *
-     * @return the hash code of the key, or 0 if the key is {@code null}
+     * @return the hash code of the key, or 0 if the key is {@code null}.
      */
     @Override
     public int hashCode() {
@@ -187,9 +187,9 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * k1.equals(k3);   // false - different keys
      * }</pre>
      *
-     * @param obj the reference object with which to compare
+     * @param obj the reference object with which to compare.
      * @return {@code true} if this object has the same key as the obj argument;
-     *         {@code false} otherwise
+     *         {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -221,7 +221,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Keyed.of("key", null).toString()     =key, val=null}"
      * }</pre>
      *
-     * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}"
+     * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}".
      */
     @Override
     public String toString() {

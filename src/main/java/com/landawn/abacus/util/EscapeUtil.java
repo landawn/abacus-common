@@ -423,10 +423,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml4("<p>Hello</p>")         = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
-     * EscapeUtil.escapeHtml4("bread &amp; butter")   = "bread &amp;amp; butter"
-     * EscapeUtil.escapeHtml4("\"quoted\"")           = "&amp;quot;quoted&amp;quot;"
-     * EscapeUtil.escapeHtml4(null)                   = null
+     * EscapeUtil.escapeHtml4("<p>Hello</p>")     = "&lt;p&gt;Hello&lt;/p&gt;"
+     * EscapeUtil.escapeHtml4("bread & butter")   = "bread &amp; butter"
+     * EscapeUtil.escapeHtml4("\"quoted\"")       = "&quot;quoted&quot;"
+     * EscapeUtil.escapeHtml4(null)               = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -448,9 +448,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml3("<div>")       = "&amp;lt;div&amp;gt;"
-     * EscapeUtil.escapeHtml3("A &amp; B")   = "A &amp;amp; B"
-     * EscapeUtil.escapeHtml3(null)          = null
+     * EscapeUtil.escapeHtml3("<div>")   = "&lt;div&gt;"
+     * EscapeUtil.escapeHtml3("A & B")   = "A &amp; B"
+     * EscapeUtil.escapeHtml3(null)      = null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -477,11 +477,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")   = "<p>Hello</p>"
-     * EscapeUtil.unescapeHtml4("bread &amp;amp; butter")                     = "bread &amp; butter"
-     * EscapeUtil.unescapeHtml4("&amp;copy; 2024")                            = "© 2024"
-     * EscapeUtil.unescapeHtml4("&amp;#65;")                                  = "A"
-     * EscapeUtil.unescapeHtml4(null)                                         = null
+     * EscapeUtil.unescapeHtml4("&lt;p&gt;Hello&lt;/p&gt;")   = "<p>Hello</p>"
+     * EscapeUtil.unescapeHtml4("bread &amp; butter")         = "bread & butter"
+     * EscapeUtil.unescapeHtml4("&copy; 2024")                = "© 2024"
+     * EscapeUtil.unescapeHtml4("&#65;")                      = "A"
+     * EscapeUtil.unescapeHtml4(null)                         = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -502,9 +502,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")   = "<div>"
-     * EscapeUtil.unescapeHtml3("A &amp;amp; B")         = "A &amp; B"
-     * EscapeUtil.unescapeHtml3(null)                    = null
+     * EscapeUtil.unescapeHtml3("&lt;div&gt;")   = "<div>"
+     * EscapeUtil.unescapeHtml3("A &amp; B")     = "A & B"
+     * EscapeUtil.unescapeHtml3(null)            = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -534,9 +534,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml10("<root>data</root>")   = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
-     * EscapeUtil.escapeXml10("A &amp; B")           = "A &amp;amp; B"
-     * EscapeUtil.escapeXml10("It's \"cool\"")       = "It&amp;apos;s &amp;quot;cool&amp;quot;"
+     * EscapeUtil.escapeXml10("<root>data</root>")   = "&lt;root&gt;data&lt;/root&gt;"
+     * EscapeUtil.escapeXml10("A & B")               = "A &amp; B"
+     * EscapeUtil.escapeXml10("It's \"cool\"")       = "It&apos;s &quot;cool&quot;"
      * EscapeUtil.escapeXml10(null)                  = null
      * }</pre>
      *
@@ -569,8 +569,8 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml11("<tag>value</tag>")   = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
-     * EscapeUtil.escapeXml11("A &amp; B")          = "A &amp;amp; B"
+     * EscapeUtil.escapeXml11("<tag>value</tag>")   = "&lt;tag&gt;value&lt;/tag&gt;"
+     * EscapeUtil.escapeXml11("A & B")              = "A &amp; B"
      * EscapeUtil.escapeXml11(null)                 = null
      * }</pre>
      *
@@ -598,11 +598,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")         = "<root>"
-     * EscapeUtil.unescapeXml("A &amp;amp; B")                = "A &amp; B"
-     * EscapeUtil.unescapeXml("&amp;apos;quoted&amp;apos;")   = "'quoted'"
-     * EscapeUtil.unescapeXml("&amp;#65;")                    = "A"
-     * EscapeUtil.unescapeXml(null)                           = null
+     * EscapeUtil.unescapeXml("&lt;root&gt;")         = "<root>"
+     * EscapeUtil.unescapeXml("A &amp; B")            = "A & B"
+     * EscapeUtil.unescapeXml("&apos;quoted&apos;")   = "'quoted'"
+     * EscapeUtil.unescapeXml("&#65;")                = "A"
+     * EscapeUtil.unescapeXml(null)                   = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -705,9 +705,16 @@ public final class EscapeUtil {
         public abstract int translate(CharSequence input, int index, Writer out) throws IOException;
 
         /**
-         * Helper for non-Writer usage.
-         * @param input CharSequence to be translated
-         * @return String output of translation
+         * Translates the input CharSequence and returns the result as a String.
+         * This is a convenience method for translation without requiring an explicit Writer.
+         *
+         * <p>This method internally uses a {@link StringWriter} to collect the translated output,
+         * which eliminates the need for callers to manage Writer instances.</p>
+         *
+         * @param input CharSequence to be translated, may be null
+         * @return the translated String, or {@code null} if the input is {@code null}
+         * @throws RuntimeException if an {@link IOException} occurs during translation (this should never
+         *         happen when writing to a StringWriter, but is included for completeness)
          */
         @MayReturnNull
         public final String translate(final CharSequence input) {

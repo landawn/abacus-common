@@ -57,9 +57,9 @@ public class BooleanTernaryOperator2025Test extends TestBase {
             return count % 2 == 0;
         };
 
-        assertFalse(operator.applyAsBoolean(true, false, false)); // 1 true
-        assertTrue(operator.applyAsBoolean(true, true, false)); // 2 trues
-        assertFalse(operator.applyAsBoolean(true, true, true)); // 3 trues
-        assertTrue(operator.applyAsBoolean(false, false, false)); // 0 trues
+        assertFalse(operator.applyAsBoolean(true, false, false));   // 1 true
+        assertTrue(operator.applyAsBoolean(true, true, false));   // 2 trues
+        assertFalse(operator.applyAsBoolean(true, true, true));   // 3 trues
+        assertTrue(operator.applyAsBoolean(false, false, false));   // 0 trues
     }
 }

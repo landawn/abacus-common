@@ -568,7 +568,14 @@ public final class HttpHeaders {
 
     /**
      * Creates a new HttpHeaders instance with three headers.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json",
+     *                                      "Accept", "application/json",
+     *                                      "Authorization", "Bearer token123");
+     * }</pre>
+     *
      * @param name1 The first header name
      * @param value1 The first header value
      * @param name2 The second header name
@@ -610,7 +617,17 @@ public final class HttpHeaders {
     /**
      * Creates a new HttpHeaders instance with a copy of the provided headers map.
      * The headers are copied into a new map of the same type as the input.
-     * 
+     * Unlike {@link #of(Map)}, this method creates a copy rather than using the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> originalMap = new HashMap<>();
+     * originalMap.put("Content-Type", "application/json");
+     * HttpHeaders headers = HttpHeaders.copyOf(originalMap);
+     * // Modifications to originalMap won't affect headers
+     * originalMap.put("Accept", "text/plain");  // headers is unaffected
+     * }</pre>
+     *
      * @param headers The map of header names to values to copy
      * @return A new HttpHeaders instance with a copy of the headers
      * @throws IllegalArgumentException if headers is null
@@ -645,7 +662,7 @@ public final class HttpHeaders {
         } else if (headerValue instanceof Date) {
             return HttpDate.format((Date) headerValue);
         } else if (headerValue instanceof Instant) {
-            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli())); // NOSONAR
+            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli()));   // NOSONAR
         } else {
             return N.stringOf(headerValue);
         }
@@ -731,10 +748,13 @@ public final class HttpHeaders {
 
     /**
      * Sets the User-Agent header.
+     * The User-Agent header identifies the client software making the request,
+     * typically including application name, version, and platform information.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setUserAgent("MyApp/1.0");
+     * headers.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
      * }</pre>
      *
      * @param userAgent The user agent string
@@ -748,13 +768,16 @@ public final class HttpHeaders {
 
     /**
      * Sets the Cookie header.
+     * The Cookie header contains stored HTTP cookies previously sent by the server.
+     * Multiple name-value pairs are separated by semicolons.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setCookie("sessionId=abc123; userId=456");
+     * headers.setCookie("token=xyz789");
      * }</pre>
      *
-     * @param cookie The cookie string
+     * @param cookie The cookie string in the format "name=value; name2=value2"
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setCookie(final String cookie) {
@@ -765,13 +788,17 @@ public final class HttpHeaders {
 
     /**
      * Sets the Authorization header.
+     * This header contains credentials for authenticating the client with the server.
+     * Common authentication schemes include Basic (base64-encoded username:password),
+     * Bearer (token-based authentication), and Digest.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAuthorization("Bearer eyJhbGciOiJIUzI1NiIs...");
+     * headers.setAuthorization("Basic dXNlcjpwYXNz");
      * }</pre>
      *
-     * @param value The authorization value (e.g., "Bearer token123")
+     * @param value The authorization value (e.g., "Bearer token123", "Basic credentials")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setAuthorization(final String value) {
@@ -820,10 +847,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Cache-Control header.
+     * This header specifies directives for caching mechanisms in both requests and responses.
+     * It controls how, and for how long, the response should be cached by browsers and intermediary caches.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setCacheControl("no-cache, no-store");
+     * headers.setCacheControl("max-age=3600");
+     * headers.setCacheControl("public, max-age=86400");
      * }</pre>
      *
      * @param value The cache control directives (e.g., "no-cache", "max-age=3600")
@@ -894,10 +925,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Accept header.
+     * This header informs the server about the types of media the client can process and accept.
+     * It's used for content negotiation, allowing the server to select an appropriate representation.
+     * Quality values (q-factors) can be used to indicate preference order.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAccept("application/json, text/plain");
+     * headers.setAccept("application/json;q=0.9, text/plain;q=0.8");
      * }</pre>
      *
      * @param value The media types the client can accept (e.g., "application/json")
@@ -911,13 +946,18 @@ public final class HttpHeaders {
 
     /**
      * Sets the Accept-Encoding header.
+     * This header indicates which content encodings (typically compression algorithms)
+     * the client can understand. The server can use this to compress the response,
+     * reducing bandwidth and improving performance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAcceptEncoding("gzip, deflate, br");
+     * headers.setAcceptEncoding("gzip");
+     * headers.setAcceptEncoding("*");
      * }</pre>
      *
-     * @param contentEncoding The acceptable encodings (e.g., "gzip, deflate")
+     * @param contentEncoding The acceptable encodings (e.g., "gzip, deflate", "br")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setAcceptEncoding(final String contentEncoding) {
@@ -1060,6 +1100,8 @@ public final class HttpHeaders {
 
     /**
      * Returns a set of all header names in this HttpHeaders.
+     * The returned set is backed by the underlying map, so changes to the HttpHeaders
+     * are reflected in the set, and vice-versa. To remove headers, use {@link #remove(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1069,7 +1111,7 @@ public final class HttpHeaders {
      * }
      * }</pre>
      *
-     * @return An unmodifiable set view of the header names
+     * @return A set view of the header names backed by the underlying map
      */
     public Set<String> headerNameSet() {
         return map.keySet();
@@ -1144,7 +1186,7 @@ public final class HttpHeaders {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders copy = headers.copy();
-     * copy.set("X-Modified", "true");  // Original is not affected
+     * copy.set("X-Modified", "true");   // Original is not affected
      * }</pre>
      *
      * @return A new HttpHeaders instance with a copy of all headers

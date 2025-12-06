@@ -11,21 +11,34 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -4540,4 +4553,336 @@ public class CommonUtil2025Test extends TestBase {
         assertNotNull(proxy);
     }
 
+    @Test
+    public void testIsUnmodifiable_NullCollection() {
+        assertTrue(CommonUtil.isUnmodifiable((Collection) null));
+    }
+
+    @Test
+    public void testIsUnmodifiable_EmptyList() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.emptyList()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_EmptySet() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.emptySet()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_Singleton() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.singleton("value")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_SingletonList() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.singletonList("value")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableList() {
+        List<String> modifiable = new ArrayList<>(Arrays.asList("a", "b"));
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableList(modifiable)));
+
+        assertTrue(CommonUtil.isUnmodifiable(List.of("a", "b").stream().toList()));
+        assertFalse(CommonUtil.isUnmodifiable(List.of("a", "b").stream().collect(Collectors.toList())));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableSet() {
+        Set<String> modifiable = new HashSet<>(Arrays.asList("a", "b"));
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableSet(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableSortedSet() {
+        SortedSet<String> modifiable = new TreeSet<>(Arrays.asList("a", "b"));
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableSortedSet(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableNavigableSet() {
+        NavigableSet<String> modifiable = new TreeSet<>(Arrays.asList("a", "b"));
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableNavigableSet(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ListOf() {
+        assertTrue(CommonUtil.isUnmodifiable(List.of("a", "b")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_SetOf() {
+        assertTrue(CommonUtil.isUnmodifiable(Set.of("a", "b")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ArrayList() {
+        assertFalse(CommonUtil.isUnmodifiable(new ArrayList<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_HashSet() {
+        assertFalse(CommonUtil.isUnmodifiable(new HashSet<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_LinkedList() {
+        assertFalse(CommonUtil.isUnmodifiable(new LinkedList<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_TreeSet() {
+        assertFalse(CommonUtil.isUnmodifiable(new TreeSet<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ConcurrentHashSet() {
+        assertFalse(CommonUtil.isUnmodifiable(ConcurrentHashMap.newKeySet()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_CachingBehavior() {
+        // First call - performs mutation test
+        Collection<String> c1 = new ArrayList<>();
+        assertFalse(CommonUtil.isUnmodifiable(c1));
+
+        // Second call - uses cached result
+        Collection<String> c2 = new ArrayList<>();
+        assertFalse(CommonUtil.isUnmodifiable(c2));
+        // First call - performs mutation test
+        Map<String, String> m1 = new HashMap<>();
+        assertFalse(CommonUtil.isUnmodifiable(m1));
+
+        // Second call - uses cached result
+        Map<String, String> m2 = new HashMap<>();
+        assertFalse(CommonUtil.isUnmodifiable(m2));
+
+    }
+
+    @Test
+    public void testIsUnmodifiable_ModifiableCollectionNotMutated() {
+        List<String> list = new ArrayList<>();
+        list.add("original");
+
+        assertFalse(CommonUtil.isUnmodifiable(list));
+
+        // Verify original element still present
+        assertEquals(1, list.size());
+        assertEquals("original", list.get(0));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ImmutableList() {
+        assertTrue(CommonUtil.isUnmodifiable(ImmutableList.of("a", "b")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ImmutableSet() {
+        assertTrue(CommonUtil.isUnmodifiable(ImmutableSet.of("a", "b")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_CustomUnmodifiableCollection() {
+        Collection<String> custom = new AbstractCollection<String>() {
+            @Override
+            public Iterator<String> iterator() {
+                return Collections.emptyIterator();
+            }
+
+            @Override
+            public int size() {
+                return 0;
+            }
+
+            @Override
+            public boolean add(String s) {
+                throw new UnsupportedOperationException();
+            }
+        };
+
+        assertTrue(CommonUtil.isUnmodifiable(custom));
+    }
+
+    @Test
+    public void testIsUnmodifiable_CollectionThrowingOtherException() {
+        Collection<String> custom = new AbstractCollection<String>() {
+            @Override
+            public Iterator<String> iterator() {
+                return Collections.emptyIterator();
+            }
+
+            @Override
+            public int size() {
+                return 0;
+            }
+
+            @Override
+            public boolean add(String s) {
+                throw new IllegalStateException("Custom exception");
+            }
+        };
+
+        assertFalse(CommonUtil.isUnmodifiable(custom));
+    }
+
+    @Test
+    public void testIsUnmodifiable_NullMap() {
+        assertTrue(CommonUtil.isUnmodifiable((Map) null));
+    }
+
+    @Test
+    public void testIsUnmodifiable_EmptyMap() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.emptyMap()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_SingletonMap() {
+        assertTrue(CommonUtil.isUnmodifiable(Collections.singletonMap("key", "value")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableMap() {
+        Map<String, String> modifiable = new HashMap<>();
+        modifiable.put("key", "value");
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableMap(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableSortedMap() {
+        SortedMap<String, String> modifiable = new TreeMap<>();
+        modifiable.put("key", "value");
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableSortedMap(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableNavigableMap() {
+        NavigableMap<String, String> modifiable = new TreeMap<>();
+        modifiable.put("key", "value");
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableNavigableMap(modifiable)));
+    }
+
+    @Test
+    public void testIsUnmodifiable_MapOf() {
+        assertTrue(CommonUtil.isUnmodifiable(Map.of("k1", "v1", "k2", "v2")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_MapOfEntries() {
+        assertTrue(CommonUtil.isUnmodifiable(Map.ofEntries(Map.entry("k1", "v1"), Map.entry("k2", "v2"))));
+    }
+
+    @Test
+    public void testIsUnmodifiable_HashMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new HashMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_TreeMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new TreeMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_LinkedHashMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new LinkedHashMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ConcurrentHashMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new ConcurrentHashMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_IdentityHashMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new IdentityHashMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_WeakHashMap() {
+        assertFalse(CommonUtil.isUnmodifiable(new WeakHashMap<>()));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ModifiableMapNotMutated() {
+        Map<String, String> map = new HashMap<>();
+        map.put("original", "value");
+
+        assertFalse(CommonUtil.isUnmodifiable(map));
+
+        // Verify original entry still present
+        assertEquals(1, map.size());
+        assertEquals("value", map.get("original"));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ImmutableMap() {
+        assertTrue(CommonUtil.isUnmodifiable(ImmutableMap.of("k1", "v1")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ImmutableBiMap() {
+        assertTrue(CommonUtil.isUnmodifiable(ImmutableBiMap.of("k1", "v1")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_ImmutableSortedMap() {
+        assertTrue(CommonUtil.isUnmodifiable(ImmutableSortedMap.of("k1", "v1")));
+    }
+
+    @Test
+    public void testIsUnmodifiable_CustomUnmodifiableMap() {
+        Map<String, String> custom = new AbstractMap<String, String>() {
+            @Override
+            public Set<Entry<String, String>> entrySet() {
+                return Collections.emptySet();
+            }
+
+            @Override
+            public String put(String key, String value) {
+                throw new UnsupportedOperationException();
+            }
+        };
+
+        assertTrue(CommonUtil.isUnmodifiable(custom));
+    }
+
+    @Test
+    public void testIsUnmodifiable_MapThrowingOtherException() {
+        Map<String, String> custom = new AbstractMap<String, String>() {
+            @Override
+            public Set<Entry<String, String>> entrySet() {
+                return Collections.emptySet();
+            }
+
+            @Override
+            public String put(String key, String value) {
+                throw new IllegalStateException("Custom exception");
+            }
+        };
+
+        assertFalse(CommonUtil.isUnmodifiable(custom));
+    }
+
+    @Test
+    public void testIsUnmodifiable_MapWithNullKeySupport() {
+        Map<String, String> map = new HashMap<>();
+        map.put(null, "value");
+        assertFalse(CommonUtil.isUnmodifiable(map));
+    }
+
+    @Test
+    public void testIsUnmodifiable_EnumMap() {
+        Map<DayOfWeek, String> enumMap = new EnumMap<>(DayOfWeek.class);
+        assertFalse(CommonUtil.isUnmodifiable(enumMap));
+    }
+
+    @Test
+    public void testIsUnmodifiable_UnmodifiableEnumMap() {
+        Map<DayOfWeek, String> enumMap = new EnumMap<>(DayOfWeek.class);
+        enumMap.put(DayOfWeek.MONDAY, "First day");
+        assertTrue(CommonUtil.isUnmodifiable(Collections.unmodifiableMap(enumMap)));
+    }
+
+    enum DayOfWeek {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+    }
 }

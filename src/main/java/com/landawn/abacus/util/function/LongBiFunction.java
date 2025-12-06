@@ -71,7 +71,7 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
      * <pre>{@code
      * LongBiFunction<Long> difference = (a, b) -> Math.abs(a - b);
      * LongBiFunction<String> differenceAsString = difference.andThen(String::valueOf);
-     * String result = differenceAsString.apply(100L, 75L);  // "25"
+     * String result = differenceAsString.apply(100L, 75L);   // "25"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

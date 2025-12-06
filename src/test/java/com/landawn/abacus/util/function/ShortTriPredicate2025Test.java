@@ -80,9 +80,9 @@ public class ShortTriPredicate2025Test extends TestBase {
         ShortTriPredicate sumGreaterThanTen = (a, b, c) -> (a + b + c) > 10;
         ShortTriPredicate combined = allPositive.and(sumGreaterThanTen);
 
-        assertTrue(combined.test((short) 4, (short) 5, (short) 6)); // all positive and sum > 10
-        assertFalse(combined.test((short) 1, (short) 1, (short) 1)); // all positive but sum not > 10
-        assertFalse(combined.test((short) -1, (short) 10, (short) 10)); // sum > 10 but not all positive
+        assertTrue(combined.test((short) 4, (short) 5, (short) 6));   // all positive and sum > 10
+        assertFalse(combined.test((short) 1, (short) 1, (short) 1));   // all positive but sum not > 10
+        assertFalse(combined.test((short) -1, (short) 10, (short) 10));   // sum > 10 but not all positive
     }
 
     @Test
@@ -106,10 +106,10 @@ public class ShortTriPredicate2025Test extends TestBase {
         ShortTriPredicate sumIsEven = (a, b, c) -> (a + b + c) % 2 == 0;
         ShortTriPredicate combined = anyZero.or(sumIsEven);
 
-        assertTrue(combined.test((short) 0, (short) 1, (short) 2)); // has zero
-        assertTrue(combined.test((short) 1, (short) 2, (short) 3)); // sum is even
-        assertTrue(combined.test((short) 0, (short) 2, (short) 4)); // both conditions
-        assertFalse(combined.test((short) 1, (short) 2, (short) 4)); // neither condition
+        assertTrue(combined.test((short) 0, (short) 1, (short) 2));   // has zero
+        assertTrue(combined.test((short) 1, (short) 2, (short) 3));   // sum is even
+        assertTrue(combined.test((short) 0, (short) 2, (short) 4));   // both conditions
+        assertFalse(combined.test((short) 1, (short) 2, (short) 4));   // neither condition
     }
 
     @Test
@@ -135,8 +135,8 @@ public class ShortTriPredicate2025Test extends TestBase {
 
         ShortTriPredicate complex = allEven.and(sumLessThanHundred).or(firstPositive.negate());
 
-        assertTrue(complex.test((short) 2, (short) 4, (short) 6)); // all even and sum < 100
-        assertTrue(complex.test((short) -5, (short) 1, (short) 2)); // first not positive
-        assertFalse(complex.test((short) 10, (short) 50, (short) 50)); // even but sum >= 100, and first is positive
+        assertTrue(complex.test((short) 2, (short) 4, (short) 6));   // all even and sum < 100
+        assertTrue(complex.test((short) -5, (short) 1, (short) 2));   // first not positive
+        assertFalse(complex.test((short) 10, (short) 50, (short) 50));   // even but sum >= 100, and first is positive
     }
 }

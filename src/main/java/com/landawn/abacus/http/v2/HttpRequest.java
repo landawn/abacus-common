@@ -139,7 +139,7 @@ public final class HttpRequest {
 
     /**
      * Creates a new HttpRequest instance with the specified URL using the default HTTP client.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest request = HttpRequest.url("https://api.example.com/users");
@@ -147,6 +147,7 @@ public final class HttpRequest {
      *
      * @param url the URL string for the request
      * @return a new HttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url) {
         return new HttpRequest(url, null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -1406,6 +1407,18 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed while the request executes
      * in the background.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .jsonBody(updatedUser)
+     *         .asyncPut(BodyHandlers.ofString());
+     *
+     * future.thenAccept(response -> {
+     *     System.out.println("Updated: " + response.body());
+     * });
+     * }</pre>
+     *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
@@ -1420,6 +1433,19 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = new User("John", "Smith");
+     * CompletableFuture<User> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .jsonBody(updatedUser)
+     *         .asyncPut(User.class);
+     *
+     * future.thenAccept(user -> {
+     *     System.out.println("Updated user: " + user.getName());
+     * });
+     * }</pre>
+     *
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return a CompletableFuture that will complete with the deserialized response body
@@ -1432,6 +1458,18 @@ public final class HttpRequest {
      * Executes a PUT request asynchronously with a custom response body handler and push promise handler.
      * The push promise handler is used for HTTP/2 server push, which allows the server to send
      * additional resources before the client requests them.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
+     *     acceptor.apply(BodyHandlers.ofString());
+     * };
+     *
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://http2.example.com/users/123")
+     *         .jsonBody(updatedUser)
+     *         .asyncPut(BodyHandlers.ofString(), pushHandler);
+     * }</pre>
      *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
@@ -1448,6 +1486,21 @@ public final class HttpRequest {
      * Executes a PATCH request asynchronously and returns a CompletableFuture with a String body response.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> updates = new HashMap<>();
+     * updates.put("email", "newemail@example.com");
+     *
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .jsonBody(updates)
+     *         .asyncPatch();
+     *
+     * future.thenAccept(response -> {
+     *     System.out.println("Patched: " + response.body());
+     * });
+     * }</pre>
+     *
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncPatch() {
@@ -1458,6 +1511,21 @@ public final class HttpRequest {
      * Executes a PATCH request asynchronously with a custom response body handler.
      * This allows you to control how the response body is processed while the request executes
      * in the background.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> updates = new HashMap<>();
+     * updates.put("status", "active");
+     *
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .jsonBody(updates)
+     *         .asyncPatch(BodyHandlers.ofString());
+     *
+     * future.thenAccept(response -> {
+     *     System.out.println("Response: " + response.body());
+     * });
+     * }</pre>
      *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
@@ -1473,6 +1541,21 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> updates = new HashMap<>();
+     * updates.put("email", "newemail@example.com");
+     *
+     * CompletableFuture<User> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .jsonBody(updates)
+     *         .asyncPatch(User.class);
+     *
+     * future.thenAccept(user -> {
+     *     System.out.println("Updated user: " + user.getEmail());
+     * });
+     * }</pre>
+     *
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return a CompletableFuture that will complete with the deserialized response body
@@ -1485,6 +1568,18 @@ public final class HttpRequest {
      * Executes a PATCH request asynchronously with a custom response body handler and push promise handler.
      * The push promise handler is used for HTTP/2 server push, which allows the server to send
      * additional resources before the client requests them.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
+     *     acceptor.apply(BodyHandlers.ofString());
+     * };
+     *
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://http2.example.com/users/123")
+     *         .jsonBody(updates)
+     *         .asyncPatch(BodyHandlers.ofString(), pushHandler);
+     * }</pre>
      *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
@@ -1501,6 +1596,17 @@ public final class HttpRequest {
      * Executes a DELETE request asynchronously and returns a CompletableFuture with a String body response.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .asyncDelete();
+     *
+     * future.thenAccept(response -> {
+     *     System.out.println("Deleted with status: " + response.statusCode());
+     * });
+     * }</pre>
+     *
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncDelete() {
@@ -1511,6 +1617,17 @@ public final class HttpRequest {
      * Executes a DELETE request asynchronously with a custom response body handler.
      * This allows you to control how the response body is processed while the request executes
      * in the background.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CompletableFuture<HttpResponse<Void>> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .asyncDelete(BodyHandlers.discarding());
+     *
+     * future.thenAccept(response -> {
+     *     System.out.println("Deleted with status: " + response.statusCode());
+     * });
+     * }</pre>
      *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
@@ -1526,6 +1643,17 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CompletableFuture<DeleteResponse> future =
+     *     HttpRequest.url("https://api.example.com/users/123")
+     *         .asyncDelete(DeleteResponse.class);
+     *
+     * future.thenAccept(result -> {
+     *     System.out.println("Delete result: " + result.getMessage());
+     * });
+     * }</pre>
+     *
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return a CompletableFuture that will complete with the deserialized response body
@@ -1538,6 +1666,17 @@ public final class HttpRequest {
      * Executes a DELETE request asynchronously with a custom response body handler and push promise handler.
      * The push promise handler is used for HTTP/2 server push, which allows the server to send
      * additional resources before the client requests them.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
+     *     acceptor.apply(BodyHandlers.ofString());
+     * };
+     *
+     * CompletableFuture<HttpResponse<String>> future =
+     *     HttpRequest.url("https://http2.example.com/users/123")
+     *         .asyncDelete(BodyHandlers.ofString(), pushHandler);
+     * }</pre>
      *
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body

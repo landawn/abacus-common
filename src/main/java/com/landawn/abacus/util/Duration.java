@@ -82,20 +82,20 @@ import java.time.temporal.TemporalUnit;
  * Duration halfSecond = Duration.ofMillis(500);
  *
  * // Duration arithmetic
- * Duration total = fiveMinutes.plus(twoHours);  // 2 hours 5 minutes
- * Duration difference = oneDay.minus(twoHours);  // 22 hours
- * Duration doubled = fiveMinutes.multipliedBy(2);  // 10 minutes
- * Duration halved = twoHours.dividedBy(2);  // 1 hour
+ * Duration total = fiveMinutes.plus(twoHours);   // 2 hours 5 minutes
+ * Duration difference = oneDay.minus(twoHours);   // 22 hours
+ * Duration doubled = fiveMinutes.multipliedBy(2);   // 10 minutes
+ * Duration halved = twoHours.dividedBy(2);   // 1 hour
  *
  * // Duration properties and testing
- * boolean isZero = Duration.ZERO.isZero();  // true
- * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();  // true
- * Duration positive = fiveMinutes.minus(twoHours).abs();  // 1 hour 55 minutes
+ * boolean isZero = Duration.ZERO.isZero();   // true
+ * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();   // true
+ * Duration positive = fiveMinutes.minus(twoHours).abs();   // 1 hour 55 minutes
  *
  * // Converting to different units
- * long totalMinutes = twoHours.toMinutes();  // 120
- * long totalSeconds = fiveMinutes.toSeconds();  // 300
- * long totalMillis = halfSecond.toMillis();  // 500
+ * long totalMinutes = twoHours.toMinutes();   // 120
+ * long totalSeconds = fiveMinutes.toSeconds();   // 300
+ * long totalMillis = halfSecond.toMillis();   // 500
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -104,7 +104,7 @@ import java.time.temporal.TemporalUnit;
  * Duration workDay = Duration.ofHours(8);
  * Duration lunchBreak = Duration.ofMinutes(30);
  * Duration shortBreaks = Duration.ofMinutes(15).multipliedBy(2);
- * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);  // 7 hours
+ * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);   // 7 hours
  *
  * // Performance measurement
  * Duration executionTime = measureExecutionTime(() -> performOperation());
@@ -114,7 +114,7 @@ import java.time.temporal.TemporalUnit;
  *
  * // Duration formatting for display
  * Duration uptime = Duration.ofDays(5).plusHours(3).plusMinutes(45);
- * String formatted = uptime.toString();  // "PT123H45M0S" (ISO 8601 format)
+ * String formatted = uptime.toString();   // "PT123H45M0S" (ISO 8601 format)
  *
  * // Interoperability with java.time.Duration
  * Duration customDuration = Duration.ofMinutes(90);
@@ -318,9 +318,17 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This method will throw an ArithmeticException if the multiplication would cause an overflow.
      * </p>
      *
-     * @param days the number of days, positive or negative
-     * @return a Duration representing the specified number of days
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration oneWeek = Duration.ofDays(7);
+     * Duration negativeDuration = Duration.ofDays(-3);   // -3 days
+     * long millis = oneWeek.toMillis();                  // 604800000
+     * }</pre>
+     *
+     * @param days the number of days, positive or negative.
+     * @return a Duration representing the specified number of days.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public static Duration ofDays(final long days) {
         return create(Numbers.multiplyExact(days, MILLIS_PER_DAY));
@@ -333,9 +341,17 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This method will throw an ArithmeticException if the multiplication would cause an overflow.
      * </p>
      *
-     * @param hours the number of hours, positive or negative
-     * @return a Duration representing the specified number of hours
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration workDay = Duration.ofHours(8);
+     * Duration negativeHour = Duration.ofHours(-1);   // -1 hour
+     * long minutes = twoHours.toMinutes();            // 120
+     * }</pre>
+     *
+     * @param hours the number of hours, positive or negative.
+     * @return a Duration representing the specified number of hours.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public static Duration ofHours(final long hours) {
         return create(Numbers.multiplyExact(hours, MILLIS_PER_HOUR));
@@ -348,9 +364,17 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This method will throw an ArithmeticException if the multiplication would cause an overflow.
      * </p>
      *
-     * @param minutes the number of minutes, positive or negative
-     * @return a Duration representing the specified number of minutes
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * Duration oneHourThirty = Duration.ofMinutes(90);
+     * Duration negativeMinutes = Duration.ofMinutes(-15);   // -15 minutes
+     * long seconds = fiveMinutes.toSeconds();               // 300
+     * }</pre>
+     *
+     * @param minutes the number of minutes, positive or negative.
+     * @return a Duration representing the specified number of minutes.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public static Duration ofMinutes(final long minutes) {
         return create(Numbers.multiplyExact(minutes, MILLIS_PER_MINUTE));
@@ -363,9 +387,17 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This method will throw an ArithmeticException if the multiplication would cause an overflow.
      * </p>
      *
-     * @param seconds the number of seconds, positive or negative
-     * @return a Duration representing the specified number of seconds
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration thirtySeconds = Duration.ofSeconds(30);
+     * Duration twoMinutes = Duration.ofSeconds(120);
+     * Duration negativeSeconds = Duration.ofSeconds(-10);   // -10 seconds
+     * long millis = thirtySeconds.toMillis();               // 30000
+     * }</pre>
+     *
+     * @param seconds the number of seconds, positive or negative.
+     * @return a Duration representing the specified number of seconds.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public static Duration ofSeconds(final long seconds) {
         return create(Numbers.multiplyExact(seconds, MILLIS_PER_SECOND));
@@ -378,8 +410,16 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * If the milliseconds value is 0, this method returns the constant ZERO instance for efficiency.
      * </p>
      *
-     * @param millis the number of milliseconds, positive or negative
-     * @return a Duration representing the specified number of milliseconds
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration halfSecond = Duration.ofMillis(500);
+     * Duration oneSecond = Duration.ofMillis(1000);
+     * Duration negativeMillis = Duration.ofMillis(-250);   // -250 milliseconds
+     * boolean isZero = Duration.ofMillis(0).isZero();      // true
+     * }</pre>
+     *
+     * @param millis the number of milliseconds, positive or negative.
+     * @return a Duration representing the specified number of milliseconds.
      */
     public static Duration ofMillis(final long millis) {
         return create(millis);
@@ -420,10 +460,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
      *
-     * @param start the start date (inclusive). Must not be {@code null}.
-     * @param end the end date (exclusive). Must not be {@code null}.
-     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
-     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @param start the start date (inclusive), must not be {@code null}.
+     * @param end the end date (exclusive), must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
+     *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either date is {@code null}.
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
@@ -473,10 +513,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
      *
-     * @param start the start calendar (inclusive). Must not be {@code null}.
-     * @param end the end calendar (exclusive). Must not be {@code null}.
-     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
-     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @param start the start calendar (inclusive), must not be {@code null}.
+     * @param end the end calendar (exclusive), must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
+     *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
@@ -522,10 +562,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * }
      * }</pre>
      *
-     * @param start the start temporal (inclusive). Must not be {@code null}.
-     * @param end the end temporal (exclusive). Must not be {@code null}.
-     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
-     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @param start the start temporal (inclusive), must not be {@code null}.
+     * @param end the end temporal (exclusive), must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
+     *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either temporal is {@code null}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.util.Calendar, java.util.Calendar)
@@ -548,7 +588,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This is useful for checking if a duration represents no elapsed time.
      * </p>
      *
-     * @return {@code true} if this duration is zero, {@code false} otherwise
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration zero = Duration.ZERO;
+     * boolean isZero = zero.isZero();  // true
+     *
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * boolean notZero = fiveMinutes.isZero();  // false
+     *
+     * Duration result = fiveMinutes.minus(fiveMinutes);
+     * boolean isResultZero = result.isZero();  // true
+     * }</pre>
+     *
+     * @return {@code true} if this duration is zero, {@code false} otherwise.
      */
     public boolean isZero() {
         return milliseconds == 0;
@@ -561,7 +613,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Negative durations can represent time intervals going backwards or time deficits.
      * </p>
      *
-     * @return {@code true} if this duration is negative, {@code false} otherwise
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration positive = Duration.ofHours(2);
+     * boolean isNegative = positive.isNegative();  // false
+     *
+     * Duration negative = Duration.ofMinutes(-30);
+     * boolean isNeg = negative.isNegative();  // true
+     *
+     * Duration diff = Duration.ofMinutes(10).minus(Duration.ofHours(1));
+     * boolean isDiffNegative = diff.isNegative();  // true (-50 minutes)
+     * }</pre>
+     *
+     * @return {@code true} if this duration is negative, {@code false} otherwise.
      */
     public boolean isNegative() {
         return milliseconds < 0;
@@ -575,9 +639,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param duration the duration to add, not null
-     * @return a Duration based on this duration with the specified duration added
-     * @throws ArithmeticException if numeric overflow occurs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration thirtyMinutes = Duration.ofMinutes(30);
+     * Duration total = twoHours.plus(thirtyMinutes);  // 2 hours 30 minutes
+     *
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration twoHalfDays = oneDay.plus(Duration.ofHours(12));  // 1.5 days
+     * }</pre>
+     *
+     * @param duration the duration to add, not null.
+     * @return a Duration based on this duration with the specified duration added.
+     * @throws ArithmeticException if numeric overflow occurs.
      */
     public Duration plus(final Duration duration) {
         return plusMillis(duration.milliseconds);
@@ -591,9 +665,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param daysToAdd the days to add, may be negative
-     * @return a Duration based on this duration with the specified days added
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneWeek = Duration.ofDays(7);
+     * Duration tenDays = oneWeek.plusDays(3);  // 10 days
+     *
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration oneDayTwoHours = twoHours.plusDays(1);  // 26 hours
+     * }</pre>
+     *
+     * @param daysToAdd the days to add, may be negative.
+     * @return a Duration based on this duration with the specified days added.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration plusDays(final long daysToAdd) {
         return plusMillis(Numbers.multiplyExact(daysToAdd, MILLIS_PER_DAY));
@@ -607,9 +690,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param hoursToAdd the hours to add, may be negative
-     * @return a Duration based on this duration with the specified hours added
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration oneDayThreeHours = oneDay.plusHours(3);  // 27 hours
+     *
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration fiveHours = twoHours.plusHours(3);  // 5 hours
+     * }</pre>
+     *
+     * @param hoursToAdd the hours to add, may be negative.
+     * @return a Duration based on this duration with the specified hours added.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration plusHours(final long hoursToAdd) {
         return plusMillis(Numbers.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
@@ -623,9 +715,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param minutesToAdd the minutes to add, may be negative
-     * @return a Duration based on this duration with the specified minutes added
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneHour = Duration.ofHours(1);
+     * Duration oneHourFifteen = oneHour.plusMinutes(15);  // 75 minutes
+     *
+     * Duration thirtyMinutes = Duration.ofMinutes(30);
+     * Duration twoHours = thirtyMinutes.plusMinutes(90);  // 120 minutes
+     * }</pre>
+     *
+     * @param minutesToAdd the minutes to add, may be negative.
+     * @return a Duration based on this duration with the specified minutes added.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration plusMinutes(final long minutesToAdd) {
         return plusMillis(Numbers.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
@@ -639,9 +740,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param secondsToAdd the seconds to add, may be negative
-     * @return a Duration based on this duration with the specified seconds added
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneMinute = Duration.ofMinutes(1);
+     * Duration oneMinuteFifteen = oneMinute.plusSeconds(15);  // 75 seconds
+     *
+     * Duration tenSeconds = Duration.ofSeconds(10);
+     * Duration oneMinuteTen = tenSeconds.plusSeconds(60);  // 70 seconds
+     * }</pre>
+     *
+     * @param secondsToAdd the seconds to add, may be negative.
+     * @return a Duration based on this duration with the specified seconds added.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration plusSeconds(final long secondsToAdd) {
         return plusMillis(Numbers.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
@@ -655,9 +765,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param millisToAdd the milliseconds to add, may be negative
-     * @return a Duration based on this duration with the specified milliseconds added, or this instance if millisToAdd is 0
-     * @throws ArithmeticException if numeric overflow occurs during the addition
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneSecond = Duration.ofSeconds(1);
+     * Duration onePointFive = oneSecond.plusMillis(500);  // 1500 milliseconds
+     *
+     * Duration halfSecond = Duration.ofMillis(500);
+     * Duration twoSeconds = halfSecond.plusMillis(1500);  // 2000 milliseconds
+     * }</pre>
+     *
+     * @param millisToAdd the milliseconds to add, may be negative.
+     * @return a Duration based on this duration with the specified milliseconds added, or this instance if millisToAdd is 0.
+     * @throws ArithmeticException if numeric overflow occurs during the addition.
      */
     public Duration plusMillis(final long millisToAdd) {
         if (millisToAdd == 0) {
@@ -675,9 +794,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param duration the duration to subtract, not null
-     * @return a Duration based on this duration with the specified duration subtracted
-     * @throws ArithmeticException if numeric overflow occurs
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration thirtyMinutes = Duration.ofMinutes(30);
+     * Duration oneHourThirty = twoHours.minus(thirtyMinutes);  // 90 minutes
+     *
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration twentyTwoHours = oneDay.minus(Duration.ofHours(2));  // 22 hours
+     * }</pre>
+     *
+     * @param duration the duration to subtract, not null.
+     * @return a Duration based on this duration with the specified duration subtracted.
+     * @throws ArithmeticException if numeric overflow occurs.
      */
     public Duration minus(final Duration duration) {
         return minusMillis(duration.milliseconds);
@@ -691,9 +820,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param daysToSubtract the days to subtract, may be negative
-     * @return a Duration based on this duration with the specified days subtracted
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration tenDays = Duration.ofDays(10);
+     * Duration sevenDays = tenDays.minusDays(3);  // 7 days
+     *
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration negativeDay = oneDay.minusDays(2);  // -1 day
+     * }</pre>
+     *
+     * @param daysToSubtract the days to subtract, may be negative.
+     * @return a Duration based on this duration with the specified days subtracted.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration minusDays(final long daysToSubtract) {
         return minusMillis(Numbers.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
@@ -707,9 +845,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param hoursToSubtract the hours to subtract, may be negative
-     * @return a Duration based on this duration with the specified hours subtracted
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneDay = Duration.ofDays(1);
+     * Duration twentyHours = oneDay.minusHours(4);  // 20 hours
+     *
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration negativeHour = twoHours.minusHours(3);  // -1 hour
+     * }</pre>
+     *
+     * @param hoursToSubtract the hours to subtract, may be negative.
+     * @return a Duration based on this duration with the specified hours subtracted.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration minusHours(final long hoursToSubtract) {
         return minusMillis(Numbers.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
@@ -723,9 +870,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param minutesToSubtract the minutes to subtract, may be negative
-     * @return a Duration based on this duration with the specified minutes subtracted
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneHour = Duration.ofHours(1);
+     * Duration fortyFiveMinutes = oneHour.minusMinutes(15);  // 45 minutes
+     *
+     * Duration thirtyMinutes = Duration.ofMinutes(30);
+     * Duration negativeMinutes = thirtyMinutes.minusMinutes(45);  // -15 minutes
+     * }</pre>
+     *
+     * @param minutesToSubtract the minutes to subtract, may be negative.
+     * @return a Duration based on this duration with the specified minutes subtracted.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration minusMinutes(final long minutesToSubtract) {
         return minusMillis(Numbers.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
@@ -739,9 +895,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param secondsToSubtract the seconds to subtract, may be negative
-     * @return a Duration based on this duration with the specified seconds subtracted
-     * @throws ArithmeticException if numeric overflow occurs during the calculation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoMinutes = Duration.ofMinutes(2);
+     * Duration oneMinuteFortyFive = twoMinutes.minusSeconds(15);  // 105 seconds
+     *
+     * Duration thirtySeconds = Duration.ofSeconds(30);
+     * Duration negativeSeconds = thirtySeconds.minusSeconds(45);  // -15 seconds
+     * }</pre>
+     *
+     * @param secondsToSubtract the seconds to subtract, may be negative.
+     * @return a Duration based on this duration with the specified seconds subtracted.
+     * @throws ArithmeticException if numeric overflow occurs during the calculation.
      */
     public Duration minusSeconds(final long secondsToSubtract) {
         return minusMillis(Numbers.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
@@ -755,9 +920,18 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @param millisToSubtract the milliseconds to subtract, may be negative
-     * @return a Duration based on this duration with the specified milliseconds subtracted, or this instance if millisToSubtract is 0
-     * @throws ArithmeticException if numeric overflow occurs during the subtraction
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneSecond = Duration.ofSeconds(1);
+     * Duration halfSecond = oneSecond.minusMillis(500);  // 500 milliseconds
+     *
+     * Duration halfSecond = Duration.ofMillis(500);
+     * Duration negativeMillis = halfSecond.minusMillis(750);  // -250 milliseconds
+     * }</pre>
+     *
+     * @param millisToSubtract the milliseconds to subtract, may be negative.
+     * @return a Duration based on this duration with the specified milliseconds subtracted, or this instance if millisToSubtract is 0.
+     * @throws ArithmeticException if numeric overflow occurs during the subtraction.
      */
     public Duration minusMillis(final long millisToSubtract) {
         if (millisToSubtract == 0) {
@@ -779,9 +953,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * </ul>
      * <p>This instance is immutable and unaffected by this method call.</p>
      *
-     * @param multiplicand the value to multiply the duration by, positive or negative
-     * @return a Duration based on this duration multiplied by the specified scalar
-     * @throws ArithmeticException if numeric overflow occurs during the multiplication
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneHour = Duration.ofHours(1);
+     * Duration threeHours = oneHour.multipliedBy(3);  // 3 hours
+     *
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * Duration twentyMinutes = fiveMinutes.multipliedBy(4);  // 20 minutes
+     *
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration negativeTwoHours = twoHours.multipliedBy(-1);  // -2 hours
+     * }</pre>
+     *
+     * @param multiplicand the value to multiply the duration by, positive or negative.
+     * @return a Duration based on this duration multiplied by the specified scalar.
+     * @throws ArithmeticException if numeric overflow occurs during the multiplication.
      */
     public Duration multipliedBy(final long multiplicand) {
         if (multiplicand == 0) {
@@ -805,9 +991,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * </ul>
      * <p>This instance is immutable and unaffected by this method call.</p>
      *
-     * @param divisor the value to divide the duration by, positive or negative but not zero
-     * @return a Duration based on this duration divided by the specified divisor
-     * @throws ArithmeticException if the divisor is zero
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration oneHour = twoHours.dividedBy(2);  // 1 hour
+     *
+     * Duration tenMinutes = Duration.ofMinutes(10);
+     * Duration twoMinutes = tenMinutes.dividedBy(5);  // 2 minutes
+     *
+     * Duration fiveSeconds = Duration.ofSeconds(5);
+     * Duration oneSecond = fiveSeconds.dividedBy(5);  // 1 second
+     * }</pre>
+     *
+     * @param divisor the value to divide the duration by, positive or negative but not zero.
+     * @return a Duration based on this duration divided by the specified divisor.
+     * @throws ArithmeticException if the divisor is zero.
      */
     public Duration dividedBy(final long divisor) {
         if (divisor == 0) {
@@ -831,8 +1029,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p>This method is equivalent to {@code multipliedBy(-1)}.
      * This instance is immutable and unaffected by this method call.</p>
      *
-     * @return a Duration based on this duration with the amount negated
-     * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds)
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration negativeTwoHours = twoHours.negated();  // -2 hours
+     *
+     * Duration negativeOneHour = Duration.ofHours(-1);
+     * Duration oneHour = negativeOneHour.negated();  // 1 hour
+     *
+     * Duration zero = Duration.ZERO.negated();  // still 0
+     * }</pre>
+     *
+     * @return a Duration based on this duration with the amount negated.
+     * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds).
      */
     public Duration negated() {
         return multipliedBy(-1);
@@ -846,8 +1055,20 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
-     * @return a Duration based on this duration with an absolute length
-     * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds)
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * Duration absTwoHours = twoHours.abs();  // 2 hours (unchanged)
+     *
+     * Duration negativeOneHour = Duration.ofHours(-1);
+     * Duration oneHour = negativeOneHour.abs();  // 1 hour (now positive)
+     *
+     * Duration diff = Duration.ofMinutes(30).minus(Duration.ofHours(1));
+     * Duration absoluteDiff = diff.abs();  // 30 minutes (positive)
+     * }</pre>
+     *
+     * @return a Duration based on this duration with an absolute length.
+     * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds).
      */
     public Duration abs() {
         return isNegative() ? negated() : this;
@@ -861,7 +1082,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * For example, a duration of 25 hours would return 1 day.
      * </p>
      *
-     * @return the number of days in the duration, may be negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneWeek = Duration.ofDays(7);
+     * long days = oneWeek.toDays();  // 7
+     *
+     * Duration thirtyHours = Duration.ofHours(30);
+     * long daysInThirtyHours = thirtyHours.toDays();  // 1 (truncated)
+     *
+     * Duration oneDay = Duration.ofDays(1).plusHours(12);
+     * long daysCount = oneDay.toDays();  // 1 (partial day ignored)
+     * }</pre>
+     *
+     * @return the number of days in the duration, may be negative.
      */
     public long toDays() {
         return milliseconds / MILLIS_PER_DAY;
@@ -875,7 +1108,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * For example, a duration of 90 minutes would return 1 hour.
      * </p>
      *
-     * @return the number of hours in the duration, may be negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * long hours = twoHours.toHours();  // 2
+     *
+     * Duration ninetyMinutes = Duration.ofMinutes(90);
+     * long hoursInNinety = ninetyMinutes.toHours();  // 1 (truncated)
+     *
+     * Duration oneDay = Duration.ofDays(1);
+     * long hoursInDay = oneDay.toHours();  // 24
+     * }</pre>
+     *
+     * @return the number of hours in the duration, may be negative.
      */
     public long toHours() {
         return milliseconds / MILLIS_PER_HOUR;
@@ -889,7 +1134,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * For example, a duration of 90 seconds would return 1 minute.
      * </p>
      *
-     * @return the number of minutes in the duration, may be negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration twoHours = Duration.ofHours(2);
+     * long minutes = twoHours.toMinutes();  // 120
+     *
+     * Duration ninetySeconds = Duration.ofSeconds(90);
+     * long minutesInNinety = ninetySeconds.toMinutes();  // 1 (truncated)
+     *
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * long minutesCount = fiveMinutes.toMinutes();  // 5
+     * }</pre>
+     *
+     * @return the number of minutes in the duration, may be negative.
      */
     public long toMinutes() {
         return milliseconds / MILLIS_PER_MINUTE;
@@ -903,7 +1160,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * For example, a duration of 1,500 milliseconds would return 1 second.
      * </p>
      *
-     * @return the number of seconds in the duration, may be negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * long seconds = fiveMinutes.toSeconds();  // 300
+     *
+     * Duration fifteenHundredMillis = Duration.ofMillis(1500);
+     * long secondsInFifteen = fifteenHundredMillis.toSeconds();  // 1 (truncated)
+     *
+     * Duration oneHour = Duration.ofHours(1);
+     * long secondsInHour = oneHour.toSeconds();  // 3600
+     * }</pre>
+     *
+     * @return the number of seconds in the duration, may be negative.
      */
     public long toSeconds() {
         return milliseconds / MILLIS_PER_SECOND;
@@ -916,7 +1185,19 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * is internally stored. This is the most precise representation of the duration.
      * </p>
      *
-     * @return the number of milliseconds in the duration, may be negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneSecond = Duration.ofSeconds(1);
+     * long millis = oneSecond.toMillis();  // 1000
+     *
+     * Duration halfSecond = Duration.ofMillis(500);
+     * long millisCount = halfSecond.toMillis();  // 500
+     *
+     * Duration fiveMinutes = Duration.ofMinutes(5);
+     * long millisInFive = fiveMinutes.toMillis();  // 300000
+     * }</pre>
+     *
+     * @return the number of milliseconds in the duration, may be negative.
      */
     public long toMillis() {
         return milliseconds;
@@ -933,10 +1214,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration d = Duration.ofHours(2);
-     * java.time.Duration jdkDuration = d.toJdkDuration();  // 2 hours
+     * java.time.Duration jdkDuration = d.toJdkDuration();   // 2 hours
      * }</pre>
      *
-     * @return a {@code java.time.Duration} with the same milliseconds value, not null
+     * @return a {@code java.time.Duration} with the same milliseconds value, not null.
      */
     public java.time.Duration toJdkDuration() {
         return java.time.Duration.ofMillis(milliseconds);
@@ -950,8 +1231,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * regardless of whether the durations are positive or negative.
      * </p>
      *
-     * @param other the other duration to compare to, not null
-     * @return the comparator value, negative if less, positive if greater, zero if equal
+     * @param other the other duration to compare to, not null.
+     * @return the comparator value, negative if less, positive if greater, zero if equal.
      */
     @Override
     public int compareTo(final Duration other) {
@@ -965,8 +1246,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Two durations are considered equal if they represent the exact same amount of time.
      * </p>
      *
-     * @param obj the object to check, {@code null} returns false
-     * @return {@code true} if this is equal to the other duration
+     * @param obj the object to check, {@code null} returns false.
+     * @return {@code true} if this is equal to the other duration.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -984,7 +1265,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Equal durations will have the same hash code.
      * </p>
      *
-     * @return a suitable hash code
+     * @return a suitable hash code.
      */
     @Override
     public int hashCode() {
@@ -1012,7 +1293,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"PT-0.5S" - negative 500 milliseconds</li>
      * </ul>
      *
-     * @return an ISO-8601 representation of this duration, not null
+     * @return an ISO-8601 representation of this duration, not null.
      */
     @Override
     public String toString() {

@@ -82,6 +82,7 @@ public final class AddrUtil {
      * @param servers the string containing server addresses separated by whitespace or commas; must not be {@code null} or result in empty list after splitting
      * @return a non-empty list of trimmed server address strings
      * @throws IllegalArgumentException if the servers string is {@code null}, or results in an empty list after splitting and trimming
+     * @throws NullPointerException if {@code servers} is {@code null}
      */
     public static List<String> getServerList(final String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);
@@ -110,7 +111,7 @@ public final class AddrUtil {
      *   <li>Hostnames: {@code "localhost:8080"} or {@code "example.com:443"}</li>
      * </ul>
      *
-     * <p>The port number must be a valid integer. Each address must contain at least one colon
+     * <p>The port number must be a valid integer in the range 0-65535. Each address must contain at least one colon
      * separating the host and port. Both the host part and port part must be non-empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -122,7 +123,8 @@ public final class AddrUtil {
      *
      * @param servers the string containing server addresses to parse; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the parsed addresses
-     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port)
+     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535)
+     * @throws NullPointerException if {@code servers} is {@code null}
      * @see #getAddressList(Collection)
      * @see #getServerList(String)
      */
@@ -189,7 +191,7 @@ public final class AddrUtil {
      * </ul>
      *
      * <p>Each address must contain at least one colon separating the host and port.
-     * The port must be a valid integer. Both host and port parts must be non-empty.</p>
+     * The port must be a valid integer in the range 0-65535. Both host and port parts must be non-empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -199,7 +201,8 @@ public final class AddrUtil {
      *
      * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
-     * @throws IllegalArgumentException if any server address is invalid (missing colon, invalid port number, empty host or port) or if the collection results in an empty address list
+     * @throws IllegalArgumentException if any server address is invalid (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535) or if the collection results in an empty address list
+     * @throws NullPointerException if {@code servers} is {@code null}
      * @see #getAddressList(String)
      * @see #getServerList(String)
      */
@@ -244,8 +247,9 @@ public final class AddrUtil {
      * is taken from the URL's explicit port (if specified) or the default port for the protocol.</p>
      *
      * <p>If the URL does not specify a port explicitly and {@link URL#getPort()} returns -1,
-     * the resulting {@link InetSocketAddress} will be created with port -1, which typically
-     * needs to be handled by the calling code.</p>
+     * the method will attempt to use {@link URL#getDefaultPort()} to get the protocol's default port.
+     * If no default port is available, the resulting {@link InetSocketAddress} will be created with port -1,
+     * which typically needs to be handled by the calling code.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -256,6 +260,7 @@ public final class AddrUtil {
      *
      * @param url a {@link URL} from which the host and port are to be extracted; must not be {@code null}
      * @return an {@link InetSocketAddress} instance corresponding to the host and port of the URL
+     * @throws NullPointerException if {@code url} is {@code null}
      * @see #getAddressListFromURL(Collection)
      */
     public static InetSocketAddress getAddressFromURL(final URL url) {
@@ -271,7 +276,8 @@ public final class AddrUtil {
      *
      * <p>This method handles {@code null} or empty input collections gracefully by returning an
      * empty list. If a URL does not specify a port explicitly and {@link URL#getPort()} returns -1,
-     * the resulting {@link InetSocketAddress} will be created with port -1.</p>
+     * the method will attempt to use {@link URL#getDefaultPort()} to get the protocol's default port.
+     * If no default port is available, the resulting {@link InetSocketAddress} will be created with port -1.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -302,6 +308,12 @@ public final class AddrUtil {
         return addrs;
     }
 
+    /**
+     * Extracts the port number from a URL, falling back to the default port if not explicitly specified.
+     *
+     * @param url the URL from which to extract the port
+     * @return the explicit port if specified, or the default port for the URL's protocol, or -1 if neither is available
+     */
     private static int getPort(final URL url) {
         int port = url.getPort();
 

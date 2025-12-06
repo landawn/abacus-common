@@ -59,7 +59,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableFloat num = new MutableFloat();  // value is 0.0f
+     * MutableFloat num = new MutableFloat();   // value is 0.0f
      * }</pre>
      */
     MutableFloat() {
@@ -70,7 +70,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableFloat num = new MutableFloat(3.14f);  // value is 3.14f
+     * MutableFloat num = new MutableFloat(3.14f);   // value is 3.14f
      * }</pre>
      * 
      * @param value the initial value to store
@@ -101,7 +101,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(42.5f);
-     * float val = num.value();  // returns 42.5f
+     * float val = num.value();   // returns 42.5f
      * }</pre>
      * 
      * @return the current float value
@@ -132,7 +132,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * num.setValue(20.7f);  // value is now 20.7f
+     * num.setValue(20.7f);   // value is now 20.7f
      *
      * // Special values are allowed
      * num.setValue(Float.NaN);
@@ -158,7 +158,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float old = num.getAndSet(20.7f);  // returns 10.5f, value is now 20.7f
+     * float old = num.getAndSet(20.7f);   // returns 10.5f, value is now 20.7f
      *
      * // Useful for tracking changes
      * MutableFloat temperature = MutableFloat.of(98.6f);
@@ -185,11 +185,11 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float newVal = num.setAndGet(20.7f);  // returns 20.7f, value is now 20.7f
+     * float newVal = num.setAndGet(20.7f);   // returns 20.7f, value is now 20.7f
      *
      * // Useful in method chaining or inline assignments
      * MutableFloat score = MutableFloat.of(0.0f);
-     * System.out.println("New score: " + score.setAndGet(95.5f));  // prints and updates
+     * System.out.println("New score: " + score.setAndGet(95.5f));   // prints and updates
      *
      * // Can be used in calculations
      * float result = score.setAndGet(100.0f) * 0.9f;  // Sets to 100.0f and calculates
@@ -252,7 +252,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(Float.NaN);
-     * boolean isNaN = num.isNaN();  // returns true
+     * boolean isNaN = num.isNaN();   // returns true
      * }</pre>
      * 
      * @return {@code true} if the value is NaN, {@code false} otherwise
@@ -267,7 +267,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(Float.POSITIVE_INFINITY);
-     * boolean isInf = num.isInfinite();  // returns true
+     * boolean isInf = num.isInfinite();   // returns true
      * }</pre>
      * 
      * @return {@code true} if the value is infinite, {@code false} otherwise
@@ -284,7 +284,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * num.increment();  // value is now 11.5f
+     * num.increment();   // value is now 11.5f
      * }</pre>
      */
     public void increment() {
@@ -297,7 +297,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * num.decrement();  // value is now 9.5f
+     * num.decrement();   // value is now 9.5f
      * }</pre>
      */
     public void decrement() {
@@ -315,7 +315,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * num.add(5.3f);  // value is now 15.8f
+     * num.add(5.3f);   // value is now 15.8f
      *
      * // Accumulating values in a loop
      * MutableFloat sum = MutableFloat.of(0.0f);
@@ -325,7 +325,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * // Be aware of overflow
      * MutableFloat large = MutableFloat.of(Float.MAX_VALUE);
-     * large.add(Float.MAX_VALUE);  // Results in POSITIVE_INFINITY
+     * large.add(Float.MAX_VALUE);   // Results in POSITIVE_INFINITY
      * }</pre>
      *
      * @param operand the value to add
@@ -343,15 +343,15 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * num.subtract(3.2f);  // value is now 7.3f
+     * num.subtract(3.2f);   // value is now 7.3f
      *
      * // Tracking decrements
      * MutableFloat balance = MutableFloat.of(1000.0f);
-     * balance.subtract(250.0f);  // balance is now 750.0f
+     * balance.subtract(250.0f);   // balance is now 750.0f
      *
      * // Be aware of underflow
      * MutableFloat small = MutableFloat.of(-Float.MAX_VALUE);
-     * small.subtract(Float.MAX_VALUE);  // Results in NEGATIVE_INFINITY
+     * small.subtract(Float.MAX_VALUE);   // Results in NEGATIVE_INFINITY
      * }</pre>
      *
      * @param operand the value to subtract
@@ -366,7 +366,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float old = num.getAndIncrement();  // returns 10.5f, value is now 11.5f
+     * float old = num.getAndIncrement();   // returns 10.5f, value is now 11.5f
      * }</pre>
      * 
      * @return the value before incrementing
@@ -381,7 +381,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float old = num.getAndDecrement();  // returns 10.5f, value is now 9.5f
+     * float old = num.getAndDecrement();   // returns 10.5f, value is now 9.5f
      * }</pre>
      * 
      * @return the value before decrementing
@@ -396,7 +396,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float newVal = num.incrementAndGet();  // returns 11.5f, value is now 11.5f
+     * float newVal = num.incrementAndGet();   // returns 11.5f, value is now 11.5f
      * }</pre>
      * 
      * @return the value after incrementing
@@ -411,7 +411,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float newVal = num.decrementAndGet();  // returns 9.5f, value is now 9.5f
+     * float newVal = num.decrementAndGet();   // returns 9.5f, value is now 9.5f
      * }</pre>
      * 
      * @return the value after decrementing
@@ -429,7 +429,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float old = num.getAndAdd(5.3f);  // returns 10.5f, value is now 15.8f
+     * float old = num.getAndAdd(5.3f);   // returns 10.5f, value is now 15.8f
      *
      * // Tracking changes
      * MutableFloat counter = MutableFloat.of(100.0f);
@@ -461,7 +461,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * float newVal = num.addAndGet(5.3f);  // returns 15.8f, value is now 15.8f
+     * float newVal = num.addAndGet(5.3f);   // returns 15.8f, value is now 15.8f
      *
      * // Using the result directly in calculations
      * MutableFloat score = MutableFloat.of(85.0f);
@@ -470,7 +470,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * // Conditional logic based on updated value
      * MutableFloat progress = MutableFloat.of(75.0f);
      * if (progress.addAndGet(15.0f) >= 100.0f) {
-     *     System.out.println("Task complete!");  // Executes if progress reaches 100%
+     *     System.out.println("Task complete!");   // Executes if progress reaches 100%
      * }
      * }</pre>
      *
@@ -485,10 +485,19 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     // shortValue and byteValue rely on Number implementation
 
     /**
-     * Returns the value of this MutableFloat as an int.
-     * This may involve rounding or truncation.
-     * 
-     * @return the value as an int
+     * Returns the value of this MutableFloat as an int by truncating the fractional part.
+     *
+     * <p>The conversion follows standard Java casting rules from float to int:</p>
+     * <ul>
+     * <li>The fractional part is discarded (truncated towards zero)</li>
+     * <li>NaN is converted to 0</li>
+     * <li>Values larger than {@code Integer.MAX_VALUE} are converted to {@code Integer.MAX_VALUE}</li>
+     * <li>Values smaller than {@code Integer.MIN_VALUE} are converted to {@code Integer.MIN_VALUE}</li>
+     * <li>Positive infinity is converted to {@code Integer.MAX_VALUE}</li>
+     * <li>Negative infinity is converted to {@code Integer.MIN_VALUE}</li>
+     * </ul>
+     *
+     * @return the value as an int, with fractional part truncated
      */
     @Override
     public int intValue() {
@@ -496,10 +505,19 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Returns the value of this MutableFloat as a long.
-     * This may involve rounding or truncation.
-     * 
-     * @return the value as a long
+     * Returns the value of this MutableFloat as a long by truncating the fractional part.
+     *
+     * <p>The conversion follows standard Java casting rules from float to long:</p>
+     * <ul>
+     * <li>The fractional part is discarded (truncated towards zero)</li>
+     * <li>NaN is converted to 0</li>
+     * <li>Values larger than {@code Long.MAX_VALUE} are converted to {@code Long.MAX_VALUE}</li>
+     * <li>Values smaller than {@code Long.MIN_VALUE} are converted to {@code Long.MIN_VALUE}</li>
+     * <li>Positive infinity is converted to {@code Long.MAX_VALUE}</li>
+     * <li>Negative infinity is converted to {@code Long.MIN_VALUE}</li>
+     * </ul>
+     *
+     * @return the value as a long, with fractional part truncated
      */
     @Override
     public long longValue() {
@@ -530,17 +548,35 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Compares this MutableFloat to another MutableFloat in ascending order.
-     * The comparison is consistent with Float.compare() and handles NaN values.
+     * The comparison is consistent with {@link Float#compare(float, float)} and properly handles
+     * NaN and signed zero values according to IEEE 754 standards.
+     *
+     * <p>Comparison rules:</p>
+     * <ul>
+     * <li>NaN is considered equal to NaN and greater than all other values</li>
+     * <li>Positive zero is considered greater than negative zero</li>
+     * <li>All other comparisons follow natural numeric ordering</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat a = MutableFloat.of(10.5f);
      * MutableFloat b = MutableFloat.of(20.5f);
-     * int result = a.compareTo(b);  // returns negative value
+     * int result = a.compareTo(b);   // returns negative value (a < b)
+     *
+     * // Sorting example
+     * List<MutableFloat> list = Arrays.asList(
+     *     MutableFloat.of(5.5f),
+     *     MutableFloat.of(2.2f),
+     *     MutableFloat.of(8.8f)
+     * );
+     * Collections.sort(list);   // Sorts in ascending order
      * }</pre>
      *
      * @param other the other MutableFloat to compare to, not null
-     * @return negative if this is less, zero if equal, positive if greater
+     * @return a negative integer, zero, or a positive integer as this object
+     *         is less than, equal to, or greater than the specified object
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     public int compareTo(final MutableFloat other) {
@@ -604,7 +640,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(3.14f);
-     * String str = num.toString();  // returns "3.14"
+     * String str = num.toString();   // returns "3.14"
      * }</pre>
      * 
      * @return the String representation of the current value

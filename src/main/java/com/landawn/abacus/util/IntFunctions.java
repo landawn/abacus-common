@@ -87,7 +87,7 @@ import com.landawn.abacus.util.function.IntFunction;
  * <pre>{@code
  * // Create a function for ArrayList with initial capacity
  * IntFunction<List<String>> listCreator = IntFunctions.ofList();
- * List<String> list = listCreator.apply(100);  // ArrayList with capacity 100
+ * List<String> list = listCreator.apply(100);   // ArrayList with capacity 100
  *
  * // Create a function for TreeSet (capacity ignored)
  * IntFunction<Set<Integer>> setCreator = IntFunctions.ofSet();
@@ -95,11 +95,11 @@ import com.landawn.abacus.util.function.IntFunction;
  *
  * // Create a function for HashMap with initial capacity
  * IntFunction<Map<String, Object>> mapCreator = IntFunctions.ofMap();
- * Map<String, Object> map = mapCreator.apply(200);  // HashMap with capacity 200
+ * Map<String, Object> map = mapCreator.apply(200);   // HashMap with capacity 200
  *
  * // Create a function for primitive arrays
  * IntFunction<int[]> arrayCreator = IntFunctions.ofIntArray();
- * int[] array = arrayCreator.apply(1000);  // int array with length 1000
+ * int[] array = arrayCreator.apply(1000);   // int array with length 1000
  *
  * // Dynamic collection type creation
  * IntFunction<? extends Collection<String>> dynamicCreator = 

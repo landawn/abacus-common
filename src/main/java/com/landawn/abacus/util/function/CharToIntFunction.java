@@ -34,7 +34,7 @@ public interface CharToIntFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToIntFunction defaultConversion = CharToIntFunction.DEFAULT;
-     * int codePoint = defaultConversion.applyAsInt('A');  // Returns 65
+     * int codePoint = defaultConversion.applyAsInt('A');   // Returns 65
      * }</pre>
      */
     CharToIntFunction DEFAULT = value -> value;
@@ -46,10 +46,10 @@ public interface CharToIntFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToIntFunction toCodePoint = c -> (int) c;
-     * int code = toCodePoint.applyAsInt('Z');  // Returns 90
+     * int code = toCodePoint.applyAsInt('Z');   // Returns 90
      *
      * CharToIntFunction digitValue = c -> Character.isDigit(c) ? c - '0' : -1;
-     * int value = digitValue.applyAsInt('7');  // Returns 7
+     * int value = digitValue.applyAsInt('7');   // Returns 7
      * }</pre>
      *
      * @param value the char function argument

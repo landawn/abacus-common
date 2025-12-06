@@ -90,7 +90,7 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new ObjectPool instance with the specified capacity and eviction delay
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay) {
@@ -102,8 +102,8 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting elements (LAST_ACCESS_TIME, ACCESS_COUNT, or EXPIRATION_TIME)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict
      * @return a new ObjectPool instance with the specified configuration
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
@@ -116,8 +116,8 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting elements
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of pool elements
      * @return a new ObjectPool instance with memory constraints
@@ -133,8 +133,8 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting elements
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing (typically 0.1 to 0.5)
      * @return a new ObjectPool instance with custom balancing configuration
@@ -150,10 +150,10 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting elements (default: LAST_ACCESS_TIME)
-     * @param autoBalance whether to automatically remove objects when the pool is full (default: true)
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param autoBalance whether to automatically remove objects when the pool is full
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of pool elements, or {@code null} if not using memory limits
      * @return a new ObjectPool instance with full configuration
@@ -183,7 +183,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay) {
@@ -196,8 +196,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting entries (LAST_ACCESS_TIME, ACCESS_COUNT, or EXPIRATION_TIME)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict
      * @return a new KeyedObjectPool instance with the specified configuration
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
@@ -212,8 +212,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting entries
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of key-value pairs
      * @return a new KeyedObjectPool instance with memory constraints
@@ -230,8 +230,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting entries
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing (typically 0.1 to 0.5)
      * @return a new KeyedObjectPool instance with custom balancing configuration
@@ -264,8 +264,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for evicting entries (default: LAST_ACCESS_TIME)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict (default: LAST_ACCESS_TIME)
      * @param autoBalance whether to automatically remove entries when the pool is full (default: true)
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit

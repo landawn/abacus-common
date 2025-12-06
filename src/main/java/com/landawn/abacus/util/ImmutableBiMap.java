@@ -47,10 +47,10 @@ import com.landawn.abacus.annotation.Internal;
  * );
  * 
  * // Forward lookup
- * Integer value = biMap.get("two");  // returns 2
+ * Integer value = biMap.get("two");   // returns 2
  * 
  * // Reverse lookup
- * String key = biMap.getByValue(2);  // returns "two"
+ * String key = biMap.getByValue(2);   // returns "two"
  * }</pre>
  *
  * @param <K> the type of keys maintained by this map
@@ -87,7 +87,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
-     * System.out.println(empty.size());  // prints: 0
+     * System.out.println(empty.size());   // prints: 0
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableBiMap
@@ -394,7 +394,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * mutable.put("two", 2);
      * 
      * ImmutableBiMap<String, Integer> immutable = ImmutableBiMap.copyOf(mutable);
-     * mutable.put("three", 3);  // Does not affect 'immutable'
+     * mutable.put("three", 3);   // Does not affect 'immutable'
      * }</pre>
      *
      * @param <K> the type of keys in the BiMap
@@ -442,7 +442,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * mutable.put("one", 1);
      * 
      * ImmutableBiMap<String, Integer> wrapped = ImmutableBiMap.wrap(mutable);
-     * mutable.put("two", 2);  // This WILL affect 'wrapped'!
+     * mutable.put("two", 2);   // This WILL affect 'wrapped'!
      * }</pre>
      *
      * @param <K> the type of keys in the BiMap

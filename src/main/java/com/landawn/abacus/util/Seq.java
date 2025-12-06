@@ -145,6 +145,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.ExceptionUtil
  * @see com.landawn.abacus.util.CSVUtil
  * @see java.util.stream.Stream
+ *
+ * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
+ * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
 @Beta
 @LazyEvaluation
@@ -260,9 +263,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns an empty {@code Seq} with no elements.
      * This is a static factory method that creates a new empty sequence each time it's called.
      *
-     * @param <T> the type of elements (never actually contained since the sequence is empty)
-     * @param <E> the type of exception that the sequence operations can throw
-     * @return an empty {@code Seq}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> emptySeq = Seq.empty();
+     * // emptySeq.count() returns 0
+     * }</pre>
+     *
+     * @param <T> the type of elements (never actually contained since the sequence is empty).
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @return an empty {@code Seq}.
+     * @see #of(Object...)
      */
     public static <T, E extends Exception> Seq<T, E> empty() {
         return new Seq<>(Throwables.Iterator.empty());
@@ -272,16 +282,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} that is lazily populated by the provided supplier.
      * The supplier is invoked only when a terminal operation is performed on the sequence.
      * This allows for deferred execution and lazy evaluation of the sequence creation.
+     * The supplier is memoized to ensure it is called at most once.
      *
-     * <br />
      * <p><b>Implementation Note:</b>
      * This is equivalent to: {@code Seq.just(supplier).flatMap(Supplier::get)}.</p>
      *
-     * @param <T> the type of elements in the sequence
-     * @param <E> the type of exception that the sequence operations can throw
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Defer creation of expensive sequence until actually needed
+     * Seq<String, IOException> deferredSeq = Seq.defer(() ->
+     *     Seq.ofLines(new File("data.txt"))
+     * );
+     * // File is not read until a terminal operation is called
+     * List<String> lines = deferredSeq.toList();
+     * }</pre>
+     *
+     * @param <T> the type of elements in the sequence.
+     * @param <E> the type of exception that the sequence operations can throw.
      * @param supplier a supplier that provides the sequence when invoked. Must not be {@code null}.
-     * @return a lazily populated {@code Seq}
-     * @throws IllegalArgumentException if the supplier is null
+     * @return a lazily populated {@code Seq}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @see #just(Object)
      */
     public static <T, E extends Exception> Seq<T, E> defer(final Supplier<? extends Seq<? extends T, ? extends E>> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
@@ -294,10 +315,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a single element.
      * This is a convenience method equivalent to {@link #of(Object...)}.
      *
-     * @param <T> the type of the element
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param e the single element to be contained in the sequence
-     * @return a {@code Seq} containing the specified element
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq = Seq.just("hello");
+     * // seq contains one element: "hello"
+     * seq.forEach(System.out::println); // prints: hello
+     * }</pre>
+     *
+     * @param <T> the type of the element.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param e the single element to be contained in the sequence.
+     * @return a {@code Seq} containing the specified element.
+     * @see #of(Object...)
+     * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> just(final T e) {
         return of(e);
@@ -307,12 +337,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a single element with the specified exception type.
      * This is a convenience method that allows explicit specification of the exception type
      * even though the actual creation logic is the same as {@link #just(Object)}.
+     * This is useful for type inference in generic contexts.
      *
-     * @param <T> the type of the element
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param e the single element to be contained in the sequence
-     * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing the specified element
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Explicitly specify exception type for type inference
+     * Seq<String, IOException> seq = Seq.just("hello", IOException.class);
+     * // Useful when the exception type needs to be explicit
+     * }</pre>
+     *
+     * @param <T> the type of the element.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param e the single element to be contained in the sequence.
+     * @param exceptionType the class of exception type (used for type inference only).
+     * @return a {@code Seq} containing the specified element.
+     * @see #just(Object)
      */
     public static <T, E extends Exception> Seq<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(e);
@@ -322,10 +361,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing the specified element if it is not {@code null},
      * otherwise returns an empty {@code Seq}.
      *
-     * @param <T> the type of the element
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param e the element to be contained in the sequence if not null
-     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq1 = Seq.ofNullable("hello");
+     * // seq1 contains: "hello"
+     *
+     * Seq<String, Exception> seq2 = Seq.ofNullable(null);
+     * // seq2 is empty
+     * }</pre>
+     *
+     * @param <T> the type of the element.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param e the element to be contained in the sequence if not {@code null}.
+     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}.
+     * @see #just(Object)
+     * @see #empty()
      */
     public static <T, E extends Exception> Seq<T, E> ofNullable(final T e) {
         if (e == null) {
@@ -338,13 +388,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing the specified element if it is not {@code null},
      * otherwise returns an empty {@code Seq}. This method allows explicit specification
-     * of the exception type.
+     * of the exception type for better type inference in generic contexts.
      *
-     * @param <T> the type of the element
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param e the element to be contained in the sequence if not null
-     * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Explicitly specify exception type
+     * Seq<String, IOException> seq = Seq.ofNullable(getNullableValue(), IOException.class);
+     * }</pre>
+     *
+     * @param <T> the type of the element.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param e the element to be contained in the sequence if not {@code null}.
+     * @param exceptionType the class of exception type (used for type inference only).
+     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}.
+     * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         if (e == null) {
@@ -358,10 +415,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing the specified elements.
      * If the array is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <T> the type of elements in the sequence
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the array of elements to be contained in the sequence
-     * @return a {@code Seq} containing the specified elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq = Seq.of("a", "b", "c");
+     * // seq contains: "a", "b", "c"
+     *
+     * Seq<Integer, Exception> empty = Seq.of();
+     * // empty sequence
+     * }</pre>
+     *
+     * @param <T> the type of elements in the sequence.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the array of elements to be contained in the sequence.
+     * @return a {@code Seq} containing the specified elements, or an empty sequence if the array is {@code null} or empty.
      * @see #just(Object)
      * @see #just(Object, Class)
      */
@@ -415,9 +481,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each boolean value is boxed into a Boolean object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the boolean array to create the sequence from
-     * @return a {@code Seq<Boolean, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true};
+     * Seq<Boolean, Exception> seq = Seq.of(array);
+     * // seq contains: true, false, true
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the boolean array to create the sequence from.
+     * @return a {@code Seq<Boolean, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Boolean, E> of(final boolean[] a) {
         if (N.isEmpty(a)) {
@@ -464,9 +538,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each char value is boxed into a Character object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the char array to create the sequence from
-     * @return a {@code Seq<Character, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b', 'c'};
+     * Seq<Character, Exception> seq = Seq.of(array);
+     * // seq contains: 'a', 'b', 'c'
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the char array to create the sequence from.
+     * @return a {@code Seq<Character, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Character, E> of(final char[] a) {
         if (N.isEmpty(a)) {
@@ -513,9 +595,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each byte value is boxed into a Byte object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the byte array to create the sequence from
-     * @return a {@code Seq<Byte, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2, 3};
+     * Seq<Byte, Exception> seq = Seq.of(array);
+     * // seq contains: 1, 2, 3
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the byte array to create the sequence from.
+     * @return a {@code Seq<Byte, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Byte, E> of(final byte[] a) {
         if (N.isEmpty(a)) {
@@ -562,9 +652,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each short value is boxed into a Short object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the short array to create the sequence from
-     * @return a {@code Seq<Short, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {10, 20, 30};
+     * Seq<Short, Exception> seq = Seq.of(array);
+     * // seq contains: 10, 20, 30
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the short array to create the sequence from.
+     * @return a {@code Seq<Short, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Short, E> of(final short[] a) {
         if (N.isEmpty(a)) {
@@ -611,9 +709,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each int value is boxed into an Integer object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the int array to create the sequence from
-     * @return a {@code Seq<Integer, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3, 4, 5};
+     * Seq<Integer, Exception> seq = Seq.of(array);
+     * // seq contains: 1, 2, 3, 4, 5
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the int array to create the sequence from.
+     * @return a {@code Seq<Integer, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Integer, E> of(final int[] a) {
         if (N.isEmpty(a)) {
@@ -660,9 +766,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each long value is boxed into a Long object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the long array to create the sequence from
-     * @return a {@code Seq<Long, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {100L, 200L, 300L};
+     * Seq<Long, Exception> seq = Seq.of(array);
+     * // seq contains: 100, 200, 300
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the long array to create the sequence from.
+     * @return a {@code Seq<Long, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Long, E> of(final long[] a) {
         if (N.isEmpty(a)) {
@@ -709,9 +823,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each float value is boxed into a Float object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the float array to create the sequence from
-     * @return a {@code Seq<Float, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.5f, 2.5f, 3.5f};
+     * Seq<Float, Exception> seq = Seq.of(array);
+     * // seq contains: 1.5, 2.5, 3.5
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the float array to create the sequence from.
+     * @return a {@code Seq<Float, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Float, E> of(final float[] a) {
         if (N.isEmpty(a)) {
@@ -758,9 +880,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the array is {@code null} or empty, an empty sequence is returned.
      * Each double value is boxed into a Double object.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param a the double array to create the sequence from
-     * @return a {@code Seq<Double, E>} containing the elements from the array
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.1, 2.2, 3.3};
+     * Seq<Double, Exception> seq = Seq.of(array);
+     * // seq contains: 1.1, 2.2, 3.3
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param a the double array to create the sequence from.
+     * @return a {@code Seq<Double, E>} containing the elements from the array, or an empty sequence if the array is {@code null} or empty.
+     * @see #of(Object...)
      */
     public static <E extends Exception> Seq<Double, E> of(final double[] a) {
         if (N.isEmpty(a)) {
@@ -806,36 +936,67 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing the value from the specified Optional if present,
      * otherwise returns an empty {@code Seq}.
      *
-     * @param <T> the type of the value in the Optional
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param op the Optional to create the sequence from
-     * @return a {@code Seq} containing the Optional value if present, otherwise empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Optional<String> opt = Optional.of("value");
+     * Seq<String, Exception> seq = Seq.of(opt);
+     * // seq contains: "value"
+     *
+     * Optional<String> empty = Optional.empty();
+     * Seq<String, Exception> emptySeq = Seq.of(empty);
+     * // emptySeq is empty
+     * }</pre>
+     *
+     * @param <T> the type of the value in the Optional.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param op the Optional to create the sequence from.
+     * @return a {@code Seq} containing the Optional value if present, otherwise an empty sequence.
+     * @see #of(java.util.Optional)
+     * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Optional<T> op) {
-        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get());   //NOSONAR
     }
 
     /**
      * Returns a {@code Seq} containing the value from the specified java.util.Optional if present,
      * otherwise returns an empty {@code Seq}.
      *
-     * @param <T> the type of the value in the Optional
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param op the java.util.Optional to create the sequence from
-     * @return a {@code Seq} containing the Optional value if present, otherwise empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.Optional<String> opt = java.util.Optional.of("value");
+     * Seq<String, Exception> seq = Seq.of(opt);
+     * // seq contains: "value"
+     * }</pre>
+     *
+     * @param <T> the type of the value in the Optional.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param op the java.util.Optional to create the sequence from.
+     * @return a {@code Seq} containing the Optional value if present, otherwise an empty sequence.
+     * @see #of(Optional)
+     * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> of(final java.util.Optional<T> op) {
-        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get());   //NOSONAR
     }
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterable.
      * If the Iterable is {@code null}, an empty sequence is returned.
      *
-     * @param <T> the type of elements in the Iterable
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param iterable the Iterable to create the sequence from
-     * @return a {@code Seq} containing all elements from the Iterable
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Seq<String, Exception> seq = Seq.of(list);
+     * // seq contains: "a", "b", "c"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the Iterable.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param iterable the Iterable to create the sequence from.
+     * @return a {@code Seq} containing all elements from the Iterable, or an empty sequence if the Iterable is {@code null}.
+     * @see #of(Iterator)
+     * @see #of(Object...)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Iterable<? extends T> iterable) {
         if (iterable == null) {
@@ -847,14 +1008,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterable.
-     * This method allows explicit specification of the exception type.
+     * This method allows explicit specification of the exception type for better type inference.
      * If the Iterable is {@code null}, an empty sequence is returned.
      *
-     * @param <T> the type of elements in the Iterable
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param iterable the Iterable to create the sequence from
-     * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing all elements from the Iterable
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Seq<String, IOException> seq = Seq.of(list, IOException.class);
+     * // Useful when you need to specify the exception type explicitly
+     * }</pre>
+     *
+     * @param <T> the type of elements in the Iterable.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param iterable the Iterable to create the sequence from.
+     * @param exceptionType the class of exception type (used for type inference only).
+     * @return a {@code Seq} containing all elements from the Iterable, or an empty sequence if the Iterable is {@code null}.
+     * @see #of(Iterable)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Iterable<? extends T> iterable, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iterable);
@@ -863,11 +1032,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterator.
      * If the Iterator is {@code null}, an empty sequence is returned.
+     * Note: The iterator will be consumed as the sequence is iterated.
      *
-     * @param <T> the type of elements in the Iterator
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param iter the Iterator to create the sequence from
-     * @return a {@code Seq} containing all elements from the Iterator
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iterator = list.iterator();
+     * Seq<String, Exception> seq = Seq.of(iterator);
+     * // seq will consume the iterator as elements are accessed
+     * }</pre>
+     *
+     * @param <T> the type of elements in the Iterator.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param iter the Iterator to create the sequence from.
+     * @return a {@code Seq} containing all elements from the Iterator, or an empty sequence if the Iterator is {@code null}.
+     * @see #of(Iterable)
+     * @see #of(Throwables.Iterator)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -880,11 +1059,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all elements from the specified Throwables.Iterator.
      * If the Iterator is {@code null}, an empty sequence is returned.
+     * Note: The iterator will be consumed as the sequence is iterated.
      *
-     * @param <T> the type of elements in the Iterator
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param iter the Throwables.Iterator to create the sequence from
-     * @return a {@code Seq} containing all elements from the Iterator
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Iterator<String, IOException> iter = createIterator();
+     * Seq<String, IOException> seq = Seq.of(iter);
+     * // seq will consume the iterator as elements are accessed
+     * }</pre>
+     *
+     * @param <T> the type of elements in the Iterator.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param iter the Throwables.Iterator to create the sequence from.
+     * @return a {@code Seq} containing all elements from the Iterator, or an empty sequence if the Iterator is {@code null}.
+     * @see #of(Iterator)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Throwables.Iterator<? extends T, ? extends E> iter) {
         if (iter == null) {
@@ -899,11 +1087,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * This method allows explicit specification of the exception type.
      * If the Iterator is {@code null}, an empty sequence is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iterator = list.iterator();
+     * Seq<String, SQLException> seq = Seq.of(iterator, SQLException.class);
+     * // Useful when you need to specify the exception type explicitly
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator
      * @param <E> the type of exception that the sequence operations can throw
      * @param iter the Iterator to create the sequence from
      * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing all elements from the Iterator
+     * @return a {@code Seq} containing all elements from the Iterator, or an empty sequence if the Iterator is {@code null}.
+     * @see #of(Iterator)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Iterator<? extends T> iter, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iter);
@@ -913,10 +1109,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing all elements from the specified Enumeration.
      * If the Enumeration is {@code null}, an empty sequence is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Enumeration<String> enumeration = Collections.enumeration(list);
+     * Seq<String, Exception> seq = Seq.of(enumeration);
+     * // seq will consume the enumeration as elements are accessed
+     * }</pre>
+     *
      * @param <T> the type of elements in the Enumeration
      * @param <E> the type of exception that the sequence operations can throw
      * @param enumeration the Enumeration to create the sequence from
-     * @return a {@code Seq} containing all elements from the Enumeration
+     * @return a {@code Seq} containing all elements from the Enumeration, or an empty sequence if the Enumeration is {@code null}.
+     * @see #of(Enumeration, Class)
+     * @see #of(Iterator)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Enumeration<? extends T> enumeration) {
         if (enumeration == null) {
@@ -931,11 +1136,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * This method allows explicit specification of the exception type.
      * If the Enumeration is {@code null}, an empty sequence is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Enumeration<String> enumeration = Collections.enumeration(list);
+     * Seq<String, IOException> seq = Seq.of(enumeration, IOException.class);
+     * // Useful when you need to specify the exception type explicitly
+     * }</pre>
+     *
      * @param <T> the type of elements in the Enumeration
      * @param <E> the type of exception that the sequence operations can throw
      * @param enumeration the Enumeration to create the sequence from
      * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing all elements from the Enumeration
+     * @return a {@code Seq} containing all elements from the Enumeration, or an empty sequence if the Enumeration is {@code null}.
+     * @see #of(Enumeration)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Enumeration<? extends T> enumeration, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(enumeration);
@@ -945,11 +1158,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing all entries from the specified Map.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param m the Map to create the sequence from
-     * @return a {@code Seq<Map.Entry<K, V>, E>} containing all entries from the Map
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * Seq<Map.Entry<String, Integer>, Exception> seq = Seq.of(map);
+     * // seq contains: Entry("a"=1), Entry("b"=2)
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param m the Map to create the sequence from.
+     * @return a {@code Seq<Map.Entry<K, V>, E>} containing all entries from the Map, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofKeys(Map)
+     * @see #ofValues(Map)
      */
     public static <K, V, E extends Exception> Seq<Map.Entry<K, V>, E> of(final Map<K, V> m) {
         if (N.isEmpty(m)) {
@@ -964,12 +1188,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * This method allows explicit specification of the exception type.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * Seq<Map.Entry<String, Integer>, SQLException> seq = Seq.of(map, SQLException.class);
+     * // Useful when you need to specify the exception type explicitly
+     * }</pre>
+     *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param <E> the type of exception that the sequence operations can throw
      * @param m the Map to create the sequence from
      * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq<Map.Entry<K, V>, E>} containing all entries from the Map
+     * @return a {@code Seq<Map.Entry<K, V>, E>} containing all entries from the Map, or an empty sequence if the Map is {@code null} or empty.
+     * @see #of(Map)
      */
     public static <K, V, E extends Exception> Seq<Map.Entry<K, V>, E> of(final Map<K, V> m, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(m);
@@ -979,10 +1212,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing all keys from the specified Map.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map whose keys will be used to create the sequence
-     * @return a {@code Seq<K, E>} containing all keys from the Map
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<String, Exception> keys = Seq.ofKeys(map);
+     * // keys contains: "a", "b", "c"
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map whose keys will be used to create the sequence.
+     * @return a {@code Seq<K, E>} containing all keys from the Map, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofValues(Map)
+     * @see #of(Map)
      */
     public static <K, E extends Exception> Seq<K, E> ofKeys(final Map<K, ?> map) {
         if (N.isEmpty(map)) {
@@ -997,12 +1239,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * values satisfy the given predicate.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map to filter
-     * @param valueFilter the predicate to test the values
-     * @return a {@code Seq<K, E>} containing keys whose values satisfy the predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<String, Exception> keys = Seq.ofKeys(map, v -> v > 1);
+     * // keys contains: "b", "c"
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map to filter.
+     * @param valueFilter the predicate to test the values. Must not be {@code null}.
+     * @return a {@code Seq<K, E>} containing keys whose values satisfy the predicate, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofKeys(Map)
+     * @see #ofKeys(Map, Throwables.BiPredicate)
      */
     public static <K, V, E extends Exception> Seq<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
         if (N.isEmpty(map)) {
@@ -1018,12 +1269,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * pairs satisfy the given bi-predicate.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map to filter
-     * @param filter the bi-predicate to test the key-value pairs
-     * @return a {@code Seq<K, E>} containing keys that satisfy the bi-predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<String, Exception> keys = Seq.ofKeys(map, (k, v) -> k.equals("a") || v > 2);
+     * // keys contains: "a", "c"
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map to filter.
+     * @param filter the bi-predicate to test the key-value pairs. Must not be {@code null}.
+     * @return a {@code Seq<K, E>} containing keys that satisfy the bi-predicate, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofKeys(Map, Throwables.Predicate)
+     * @see #ofValues(Map, Throwables.BiPredicate)
      */
     public static <K, V, E extends Exception> Seq<K, E> ofKeys(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isEmpty(map)) {
@@ -1038,10 +1298,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing all values from the specified Map.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map whose values will be used to create the sequence
-     * @return a {@code Seq<V, E>} containing all values from the Map
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<Integer, Exception> values = Seq.ofValues(map);
+     * // values contains: 1, 2, 3
+     * }</pre>
+     *
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map whose values will be used to create the sequence.
+     * @return a {@code Seq<V, E>} containing all values from the Map, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofKeys(Map)
+     * @see #of(Map)
      */
     public static <V, E extends Exception> Seq<V, E> ofValues(final Map<?, V> map) {
         if (N.isEmpty(map)) {
@@ -1056,12 +1325,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * keys satisfy the given predicate.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map to filter
-     * @param keyFilter the predicate to test the keys
-     * @return a {@code Seq<V, E>} containing values whose keys satisfy the predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<Integer, Exception> values = Seq.ofValues(map, k -> k.compareTo("b") >= 0);
+     * // values contains: 2, 3
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map to filter.
+     * @param keyFilter the predicate to test the keys. Must not be {@code null}.
+     * @return a {@code Seq<V, E>} containing values whose keys satisfy the predicate, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofValues(Map)
+     * @see #ofValues(Map, Throwables.BiPredicate)
      */
     public static <K, V, E extends Exception> Seq<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
         if (N.isEmpty(map)) {
@@ -1077,12 +1355,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * pairs satisfy the given bi-predicate.
      * If the Map is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param map the Map to filter
-     * @param filter the bi-predicate to test the key-value pairs
-     * @return a {@code Seq<V, E>} containing values that satisfy the bi-predicate
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+     * Seq<Integer, Exception> values = Seq.ofValues(map, (k, v) -> k.equals("a") || v > 2);
+     * // values contains: 1, 3
+     * }</pre>
+     *
+     * @param <K> the type of keys in the Map.
+     * @param <V> the type of values in the Map.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param map the Map to filter.
+     * @param filter the bi-predicate to test the key-value pairs. Must not be {@code null}.
+     * @return a {@code Seq<V, E>} containing values that satisfy the bi-predicate, or an empty sequence if the Map is {@code null} or empty.
+     * @see #ofValues(Map, Throwables.Predicate)
+     * @see #ofKeys(Map, Throwables.BiPredicate)
      */
     public static <K, V, E extends Exception> Seq<V, E> ofValues(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isEmpty(map)) {
@@ -1095,11 +1382,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified array in reverse order.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <T> the type of elements in the array
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param array the array whose elements will be reversed
-     * @return a {@code Seq} containing the array elements in reverse order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * Seq<String, Exception> reversed = Seq.ofReversed(array);
+     * // reversed contains: "c", "b", "a"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param array the array whose elements will be reversed.
+     * @return a {@code Seq} containing the array elements in reverse order, or an empty sequence if the array is {@code null} or empty.
+     * @see #ofReversed(List)
+     * @see #of(Object...)
      */
     public static <T, E extends Exception> Seq<T, E> ofReversed(final T[] array) {
         final int len = N.len(array);
@@ -1110,11 +1407,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified list in reverse order.
+     * If the list is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <T> the type of elements in the list
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param list the list whose elements will be reversed
-     * @return a {@code Seq} containing the list elements in reverse order
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Seq<String, Exception> reversed = Seq.ofReversed(list);
+     * // reversed contains: "c", "b", "a"
+     * }</pre>
+     *
+     * @param <T> the type of elements in the list.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param list the list whose elements will be reversed.
+     * @return a {@code Seq} containing the list elements in reverse order, or an empty sequence if the list is {@code null} or empty.
+     * @see #ofReversed(Object[])
+     * @see #of(Iterable)
      */
     public static <T, E extends Exception> Seq<T, E> ofReversed(final List<? extends T> list) {
         final int size = N.size(list);
@@ -1127,12 +1434,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} that repeats the given element for the specified number of times.
      * If n is 0, an empty sequence is returned.
      *
-     * @param <T> the type of the element
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param element the element to repeat
-     * @param n the number of times to repeat the element
-     * @return a {@code Seq} containing the element repeated n times
-     * @throws IllegalArgumentException if n is negative
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq = Seq.repeat("hello", 3);
+     * // seq contains: "hello", "hello", "hello"
+     *
+     * Seq<Integer, Exception> empty = Seq.repeat(42, 0);
+     * // empty sequence
+     * }</pre>
+     *
+     * @param <T> the type of the element.
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param element the element to repeat.
+     * @param n the number of times to repeat the element. Must not be negative.
+     * @return a {@code Seq} containing the element repeated n times, or an empty sequence if n is 0.
+     * @throws IllegalArgumentException if {@code n} is negative.
+     * @see #range(int, int)
      */
     public static <T, E extends Exception> Seq<T, E> repeat(final T element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1164,10 +1481,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a range of integers from startInclusive (inclusive)
      * to endExclusive (exclusive) with increment of 1.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param startInclusive the starting value (inclusive)
-     * @param endExclusive the ending value (exclusive)
-     * @return a {@code Seq<Integer, E>} containing the range of integers
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<Integer, Exception> seq = Seq.range(0, 5);
+     * // seq contains: 0, 1, 2, 3, 4
+     *
+     * Seq<Integer, Exception> negative = Seq.range(5, 0);
+     * // empty sequence (endExclusive <= startInclusive)
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param startInclusive the starting value (inclusive).
+     * @param endExclusive the ending value (exclusive).
+     * @return a {@code Seq<Integer, E>} containing the range of integers, or an empty sequence if {@code endExclusive <= startInclusive}.
+     * @see #range(int, int, int)
+     * @see #rangeClosed(int, int)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive) {
@@ -1179,11 +1507,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a range of integers from startInclusive (inclusive)
      * to endExclusive (exclusive) with the specified increment.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param startInclusive the starting value (inclusive)
-     * @param endExclusive the ending value (exclusive)
-     * @param by the increment value (can be negative but not zero)
-     * @return a {@code Seq<Integer, E>} containing the range of integers
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<Integer, Exception> seq = Seq.range(0, 10, 2);
+     * // seq contains: 0, 2, 4, 6, 8
+     *
+     * Seq<Integer, Exception> reverse = Seq.range(10, 0, -2);
+     * // reverse contains: 10, 8, 6, 4, 2
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param startInclusive the starting value (inclusive).
+     * @param endExclusive the ending value (exclusive).
+     * @param by the increment value. Can be negative for descending ranges, but must not be zero.
+     * @return a {@code Seq<Integer, E>} containing the range of integers with the specified step.
+     * @see #range(int, int)
+     * @see #rangeClosed(int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
@@ -1195,10 +1534,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a range of integers from startInclusive (inclusive)
      * to endInclusive (inclusive) with increment of 1.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param startInclusive the starting value (inclusive)
-     * @param endInclusive the ending value (inclusive)
-     * @return a {@code Seq<Integer, E>} containing the range of integers
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<Integer, Exception> seq = Seq.rangeClosed(0, 5);
+     * // seq contains: 0, 1, 2, 3, 4, 5
+     *
+     * Seq<Integer, Exception> single = Seq.rangeClosed(5, 5);
+     * // single element: 5
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param startInclusive the starting value (inclusive).
+     * @param endInclusive the ending value (inclusive).
+     * @return a {@code Seq<Integer, E>} containing the range of integers from start to end inclusive.
+     * @see #range(int, int)
+     * @see #rangeClosed(int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive) {
@@ -1210,11 +1560,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a {@code Seq} containing a range of integers from startInclusive (inclusive)
      * to endInclusive (inclusive) with the specified increment.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param startInclusive the starting value (inclusive)
-     * @param endInclusive the ending value (inclusive)
-     * @param by the increment value (can be negative but not zero)
-     * @return a {@code Seq<Integer, E>} containing the range of integers
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<Integer, Exception> seq = Seq.rangeClosed(0, 10, 2);
+     * // seq contains: 0, 2, 4, 6, 8, 10
+     *
+     * Seq<Integer, Exception> reverse = Seq.rangeClosed(10, 0, -2);
+     * // reverse contains: 10, 8, 6, 4, 2, 0
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param startInclusive the starting value (inclusive).
+     * @param endInclusive the ending value (inclusive).
+     * @param by the increment value. Can be negative for descending ranges, but must not be zero.
+     * @return a {@code Seq<Integer, E>} containing the range of integers from start to end inclusive with the specified step.
+     * @see #rangeClosed(int, int)
+     * @see #range(int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive, final int by) {
@@ -1224,11 +1585,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified delimiter character.
+     * If the string is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param str the character sequence to split
-     * @param delimiter the delimiter character to use for splitting
-     * @return a {@code Seq<String, E>} containing the split strings
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq = Seq.split("a,b,c", ',');
+     * // seq contains: "a", "b", "c"
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param str the character sequence to split.
+     * @param delimiter the delimiter character to use for splitting.
+     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @see #split(CharSequence, CharSequence)
+     * @see #split(CharSequence, Pattern)
+     * @see #splitToLines(String)
      */
     public static <E extends Exception> Seq<String, E> split(final CharSequence str, final char delimiter) {
         return of(Splitter.with(delimiter).iterate(str));
@@ -1236,11 +1607,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified delimiter string.
+     * If the string is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param str the character sequence to split
-     * @param delimiter the delimiter string to use for splitting
-     * @return a {@code Seq<String, E>} containing the split strings
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<String, Exception> seq = Seq.split("a::b::c", "::");
+     * // seq contains: "a", "b", "c"
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param str the character sequence to split.
+     * @param delimiter the delimiter string to use for splitting.
+     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @see #split(CharSequence, char)
+     * @see #split(CharSequence, Pattern)
+     * @see #splitToLines(String)
      */
     public static <E extends Exception> Seq<String, E> split(final CharSequence str, final CharSequence delimiter) {
         return of(Splitter.with(delimiter).iterate(str));
@@ -1248,11 +1629,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified pattern.
+     * If the string is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param str the character sequence to split
-     * @param pattern the pattern to use for splitting
-     * @return a {@code Seq<String, E>} containing the split strings
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\s+");
+     * Seq<String, Exception> seq = Seq.split("a  b   c", pattern);
+     * // seq contains: "a", "b", "c"
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param str the character sequence to split.
+     * @param pattern the regex pattern to use for splitting. Must not be {@code null}.
+     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @see #split(CharSequence, char)
+     * @see #split(CharSequence, CharSequence)
+     * @see #splitToLines(String)
      */
     public static <E extends Exception> Seq<String, E> split(final CharSequence str, final Pattern pattern) {
         return of(Splitter.with(pattern).iterate(str));
@@ -1267,10 +1659,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Splits the given string into a sequence of lines.
      * Line terminators recognized are line feed "\n" (LF), carriage return "\r" (CR),
      * and carriage return followed immediately by a line feed "\r\n" (CRLF).
+     * If the string is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param str the string to split into lines
-     * @return a {@code Seq<String, E>} containing the lines
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String text = "line1\nline2\r\nline3\rline4";
+     * Seq<String, Exception> lines = Seq.splitToLines(text);
+     * // lines contains: "line1", "line2", "line3", "line4"
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param str the string to split into lines.
+     * @return a {@code Seq<String, E>} containing the lines, or an empty sequence if the string is {@code null} or empty.
+     * @see #splitToLines(String, boolean, boolean)
+     * @see #ofLines(File)
      */
     public static <E extends Exception> Seq<String, E> splitToLines(final String str) {
         return of(lineSplitter.iterate(str));
@@ -1280,12 +1682,25 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Splits the given string into a sequence of lines with optional trimming and omission of empty lines.
      * Line terminators recognized are line feed "\n" (LF), carriage return "\r" (CR),
      * and carriage return followed immediately by a line feed "\r\n" (CRLF).
+     * If the string is {@code null} or empty, an empty sequence is returned.
      *
-     * @param <E> the type of exception that the sequence operations can throw
-     * @param str the string to split into lines
-     * @param trim if {@code true}, trims whitespace from the beginning and end of each line
-     * @param omitEmptyLines if {@code true}, omits empty lines from the result
-     * @return a {@code Seq<String, E>} containing the processed lines
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String text = " line1 \n  \nline3  ";
+     * Seq<String, Exception> lines = Seq.splitToLines(text, true, true);
+     * // lines contains: "line1", "line3" (trimmed and empty lines omitted)
+     *
+     * Seq<String, Exception> withEmpty = Seq.splitToLines(text, false, false);
+     * // withEmpty contains: " line1 ", "  ", "line3  "
+     * }</pre>
+     *
+     * @param <E> the type of exception that the sequence operations can throw.
+     * @param str the string to split into lines.
+     * @param trim if {@code true}, trims whitespace from the beginning and end of each line.
+     * @param omitEmptyLines if {@code true}, omits empty lines (or whitespace-only lines if trim is {@code true}) from the result.
+     * @return a {@code Seq<String, E>} containing the processed lines, or an empty sequence if the string is {@code null} or empty.
+     * @see #splitToLines(String)
+     * @see #ofLines(File)
      */
     public static <E extends Exception> Seq<String, E> splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
         if (trim) {
@@ -1440,9 +1855,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Creates a {@code Seq} that reads lines from the specified file using the default charset.
+     * The file is read lazily as the sequence is consumed.
+     * The file resources are automatically closed when the sequence is closed or fully consumed.
      *
-     * @param file the file to read lines from
-     * @return a {@code Seq<String, IOException>} containing the lines of the file
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Seq<String, IOException> lines = Seq.ofLines(new File("data.txt"))) {
+     *     lines.filter(line -> !line.isEmpty())
+     *          .forEach(System.out::println);
+     * }
+     * }</pre>
+     *
+     * @param file the file to read lines from. Must not be {@code null}.
+     * @return a {@code Seq<String, IOException>} containing the lines of the file.
+     * @throws IllegalArgumentException if {@code file} is {@code null}.
+     * @see #ofLines(File, Charset)
+     * @see #ofLines(Path)
+     * @see #splitToLines(String)
      */
     public static Seq<String, IOException> ofLines(final File file) {
         return ofLines(file, Charsets.DEFAULT);
@@ -1450,25 +1879,50 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Creates a {@code Seq} that reads lines from the specified file using the given charset.
+     * The file is read lazily as the sequence is consumed.
+     * The file resources are automatically closed when the sequence is closed or fully consumed.
      *
-     * @param file the file to read lines from
-     * @param charset the charset to use for decoding the file
-     * @return a {@code Seq<String, IOException>} containing the lines of the file
-     * @throws IllegalArgumentException if the file is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Seq<String, IOException> lines = Seq.ofLines(new File("data.txt"), StandardCharsets.UTF_8)) {
+     *     lines.map(String::toUpperCase)
+     *          .forEach(System.out::println);
+     * }
+     * }</pre>
+     *
+     * @param file the file to read lines from. Must not be {@code null}.
+     * @param charset the charset to use for decoding the file. Must not be {@code null}.
+     * @return a {@code Seq<String, IOException>} containing the lines of the file.
+     * @throws IllegalArgumentException if {@code file} is {@code null}.
+     * @see #ofLines(File)
+     * @see #ofLines(Path, Charset)
      */
     public static Seq<String, IOException> ofLines(final File file, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
 
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
-        return create(iter).onClose(newCloseHandler(iter)); //NOSONAR
+        return create(iter).onClose(newCloseHandler(iter));   //NOSONAR
     }
 
     /**
      * Creates a {@code Seq} that reads lines from the specified path using the default charset.
+     * The file is read lazily as the sequence is consumed.
+     * The file resources are automatically closed when the sequence is closed or fully consumed.
      *
-     * @param path the path to read lines from
-     * @return a {@code Seq<String, IOException>} containing the lines of the file
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Seq<String, IOException> lines = Seq.ofLines(Paths.get("data.txt"))) {
+     *     lines.filter(line -> line.startsWith("ERROR"))
+     *          .forEach(System.out::println);
+     * }
+     * }</pre>
+     *
+     * @param path the path to read lines from. Must not be {@code null}.
+     * @return a {@code Seq<String, IOException>} containing the lines of the file.
+     * @throws IllegalArgumentException if {@code path} is {@code null}.
+     * @see #ofLines(Path, Charset)
+     * @see #ofLines(File)
      */
     public static Seq<String, IOException> ofLines(final Path path) {
         return ofLines(path, Charsets.DEFAULT);
@@ -1476,11 +1930,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Creates a {@code Seq} that reads lines from the specified path using the given charset.
+     * The file is read lazily as the sequence is consumed.
+     * The file resources are automatically closed when the sequence is closed or fully consumed.
      *
-     * @param path the path to read lines from
-     * @param charset the charset to use for decoding the file
-     * @return a {@code Seq<String, IOException>} containing the lines of the file
-     * @throws IllegalArgumentException if the path is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Seq<String, IOException> lines = Seq.ofLines(Paths.get("data.txt"), StandardCharsets.UTF_8)) {
+     *     long count = lines.count();
+     *     System.out.println("Total lines: " + count);
+     * }
+     * }</pre>
+     *
+     * @param path the path to read lines from. Must not be {@code null}.
+     * @param charset the charset to use for decoding the file. Must not be {@code null}.
+     * @return a {@code Seq<String, IOException>} containing the lines of the file.
+     * @throws IllegalArgumentException if {@code path} is {@code null}.
+     * @see #ofLines(Path)
+     * @see #ofLines(File, Charset)
      */
     public static Seq<String, IOException> ofLines(final Path path, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(path, cs.path);
@@ -1492,12 +1958,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Creates a {@code Seq} that reads lines from the given Reader.
+     * The reader is read lazily as the sequence is consumed.
      * <br />
-     * It's user's responsibility to close the input {@code reader} after the sequence is completed.
+     * It's user's responsibility to close the input {@code reader} after the sequence is completed,
+     * unless {@code closeReaderWhenStreamIsClosed} is set to {@code true} in the overloaded method.
      *
-     * @param reader the Reader to read lines from
-     * @return a {@code Seq<String, IOException>} containing the lines read from the Reader
-     * @throws IllegalArgumentException if the reader is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Reader reader = new StringReader("line1\nline2\nline3");
+     * Seq<String, IOException> lines = Seq.ofLines(reader);
+     * // User must close reader after use
+     * }</pre>
+     *
+     * @param reader the Reader to read lines from. Must not be {@code null}.
+     * @return a {@code Seq<String, IOException>} containing the lines read from the Reader.
+     * @throws IllegalArgumentException if {@code reader} is {@code null}.
+     * @see #ofLines(Reader, boolean)
+     * @see #ofLines(File)
      */
     public static Seq<String, IOException> ofLines(final Reader reader) throws IllegalArgumentException {
         return ofLines(reader, false);
@@ -1505,11 +1982,28 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Creates a {@code Seq} that reads lines from the given Reader.
+     * The reader is read lazily as the sequence is consumed.
      *
-     * @param reader the Reader to read lines from
-     * @param closeReaderWhenStreamIsClosed if {@code true}, the input {@code Reader} will be closed when the sequence is closed
-     * @return a {@code Seq<String, IOException>} containing the lines read from the Reader
-     * @throws IllegalArgumentException if the reader is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Reader will be automatically closed
+     * try (Seq<String, IOException> lines = Seq.ofLines(new FileReader("data.txt"), true)) {
+     *     lines.forEach(System.out::println);
+     * }
+     *
+     * // Reader must be closed manually
+     * Reader reader = new StringReader("data");
+     * Seq<String, IOException> lines = Seq.ofLines(reader, false);
+     * // ... use lines ...
+     * reader.close();
+     * }</pre>
+     *
+     * @param reader the Reader to read lines from. Must not be {@code null}.
+     * @param closeReaderWhenStreamIsClosed if {@code true}, the input {@code Reader} will be closed when the sequence is closed.
+     * @return a {@code Seq<String, IOException>} containing the lines read from the Reader.
+     * @throws IllegalArgumentException if {@code reader} is {@code null}.
+     * @see #ofLines(Reader)
+     * @see #ofLines(File)
      */
     public static Seq<String, IOException> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgNotNull(reader);
@@ -1517,9 +2011,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, Charsets.DEFAULT, reader, closeReaderWhenStreamIsClosed);
 
         if (closeReaderWhenStreamIsClosed) {
-            return of(iter).onClose(iter::close); //NOSONAR
+            return of(iter).onClose(iter::close);   //NOSONAR
         } else {
-            return of(iter); //NOSONAR
+            return of(iter);   //NOSONAR
         }
     }
 
@@ -1527,6 +2021,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Lists all files in the specified parent directory.
      * If the directory doesn't exist, an empty sequence is returned.
      * This method only lists the immediate children files in the directory (not recursive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File dir = new File("/path/to/directory");
+     * Seq<File, IOException> files = Seq.listFiles(dir);
+     * files.forEach(file -> System.out.println(file.getName()));
+     * }</pre>
      *
      * @param parentPath the parent directory to list files from. Must not be {@code null}.
      * @return a {@code Seq<File, IOException>} containing all files in the directory.
@@ -1550,8 +2051,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Directories are included in the results when recursively is {@code true}.
      * The method uses a breadth-first traversal when recursive listing is enabled.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File dir = new File("/path/to/directory");
+     *
+     * // List only immediate children
+     * Seq<File, IOException> files = Seq.listFiles(dir, false);
+     *
+     * // List all files recursively
+     * Seq<File, IOException> allFiles = Seq.listFiles(dir, true);
+     * allFiles.filter(File::isFile)
+     *         .forEach(file -> System.out.println(file.getAbsolutePath()));
+     * }</pre>
+     *
      * @param parentPath the parent directory to list files from. Must not be {@code null}.
-     * @param recursively if {@code true}, lists files recursively in all subdirectories; 
+     * @param recursively if {@code true}, lists files recursively in all subdirectories;
      *                    if {@code false}, lists only immediate children files
      * @return a sequence containing File objects representing the files in the parent directory.
      *         Returns an empty sequence if the parent directory doesn't exist or is not a directory.
@@ -3872,7 +4386,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * It's particularly useful when you have a transformation that may not produce a valid result
      * for every input element.</p>
      *
-     * <p>Note: This method is adapted from StreamEx library.</p>
+     * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.</p>
      *
      * @param mapper the function to apply to each element, which returns an OptionalLong.
      *               The function should return OptionalLong.empty() for elements that should be filtered out.
@@ -3898,7 +4412,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * It's particularly useful when you have a transformation that may not produce a valid result
      * for every input element.</p>
      *
-     * <p>Note: This method is adapted from StreamEx library.</p>
+     * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.</p>
      *
      * @param mapper the function to apply to each element, which returns an OptionalDouble.
      *               The function should return OptionalDouble.empty() for elements that should be filtered out.
@@ -3991,10 +4505,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4], produces: [f(1,2), f(2,3), f(3,4)]
-     * seq.slidingMap((a, b) -> a + b);  // Results: [3, 5, 7]
+     * seq.slidingMap((a, b) -> a + b);   // Results: [3, 5, 7]
      *
      * // For sequence [1], produces: [f(1,null)]
-     * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b));  // Results: ["1,null"]
+     * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b));   // Results: ["1,null"]
      * }</pre>
      *
      * @param <R> the element type of the new stream
@@ -4018,10 +4532,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4] with increment=2, produces: [f(1,2), f(3,4)]
-     * seq.slidingMap(2, (a, b) -> a + b);  // Results: [3, 7]
+     * seq.slidingMap(2, (a, b) -> a + b);   // Results: [3, 7]
      *
      * // For sequence [1, 2, 3, 4, 5] with increment=2, produces: [f(1,2), f(3,4), f(5,null)]
-     * seq.slidingMap(2, (a, b) -> a + "," + b);  // Results: ["1,2", "3,4", "5,null"]
+     * seq.slidingMap(2, (a, b) -> a + "," + b);   // Results: ["1,2", "3,4", "5,null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4047,10 +4561,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5] with increment=2, ignoreNotPaired=false
-     * seq.slidingMap(2, false, (a, b) -> a + "," + b);  // Results: ["1,2", "3,4", "5,null"]
+     * seq.slidingMap(2, false, (a, b) -> a + "," + b);   // Results: ["1,2", "3,4", "5,null"]
      *
      * // For sequence [1, 2, 3, 4, 5] with increment=2, ignoreNotPaired=true
-     * seq.slidingMap(2, true, (a, b) -> a + b);  // Results: [3, 7] (element 5 is ignored)
+     * seq.slidingMap(2, true, (a, b) -> a + b);   // Results: [3, 7] (element 5 is ignored)
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4094,7 +4608,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     prev = elements.next();
                 }
 
-                return elements.hasNext(); //  || (!ignoreNotPaired && prev != none);
+                return elements.hasNext();   // || (!ignoreNotPaired && prev != none);
             }
 
             @Override
@@ -4131,10 +4645,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5], produces: [f(1,2,3), f(2,3,4), f(3,4,5)]
-     * seq.slidingMap((a, b, c) -> a + b + c);  // Results: [6, 9, 12]
+     * seq.slidingMap((a, b, c) -> a + b + c);   // Results: [6, 9, 12]
      *
      * // For sequence [1], produces: [f(1,null,null)]
-     * seq.slidingMap((a, b, c) -> String.format("%s,%s,%s", a, b, c));  // Results: ["1,null,null"]
+     * seq.slidingMap((a, b, c) -> String.format("%s,%s,%s", a, b, c));   // Results: ["1,null,null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4158,10 +4672,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For sequence [1, 2, 3, 4, 5, 6] with increment=3, produces: [f(1,2,3), f(4,5,6)]
-     * seq.slidingMap(3, (a, b, c) -> a + b + c);  // Results: [6, 15]
+     * seq.slidingMap(3, (a, b, c) -> a + b + c);   // Results: [6, 15]
      *
      * // For sequence [1, 2, 3, 4, 5, 6, 7, 8] with increment=3, produces: [f(1,2,3), f(4,5,6), f(7,8,null)]
-     * seq.slidingMap(3, (a, b, c) -> String.format("%s+%s+%s", a, b, c));  // Results: ["1+2+3", "4+5+6", "7+8+null"]
+     * seq.slidingMap(3, (a, b, c) -> String.format("%s+%s+%s", a, b, c));   // Results: ["1+2+3", "4+5+6", "7+8+null"]
      * }</pre>
      *
      * @param <R> the element type of the new sequence
@@ -4243,7 +4757,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     }
                 }
 
-                return elements.hasNext(); // || (!ignoreNotPaired && (prev != none));
+                return elements.hasNext();   // || (!ignoreNotPaired && (prev != none));
             }
 
             @Override
@@ -5051,7 +5565,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param a the elements to be prepended to this sequence
-     * @return a new sequence with the specified elements prepended
+     * @return a new Seq with the specified elements prepended
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -5941,7 +6455,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a sequence of Lists, where each List contains a chunk of elements from the original stream.
+     * Returns a sequence of Lists, where each List contains a chunk of elements from the original sequence.
      * The size of each chunk is specified by the chunkSize parameter. The final chunk may be smaller if there are not enough elements.
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
@@ -5954,7 +6468,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param chunkSize the desired size of each chunk (the last chunk may be smaller)
-     * @return a sequence of Lists, each containing a chunk of elements from the original stream
+     * @return a sequence of Lists, each containing a chunk of elements from the original sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if chunkSize is less than or equal to 0
      */
@@ -6560,8 +7074,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
      * <p>And {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param windowSize the size of the sliding window, must be greater than 0
      * @param increment the increment by which the window moves forward, must be greater than 0
@@ -6583,8 +7096,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This method allows customization of the collection type used for windows. For example,
      * you can create windows as ArrayList, LinkedList, HashSet, etc.</p>
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param <C> the type of the collection to be returned for each window
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -6625,7 +7137,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
                 // In second case, elements.hasNext() will return true before processing the first element,
-                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
+                return elements.hasNext();   // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -6699,7 +7211,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 } else {
                     @SuppressWarnings("DuplicateExpressions")
                     final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
+                    final int prevSize = queue == null ? 0 : queue.size();   //NOSONAR
 
                     if (m < prevSize) {
                         for (int i = 0; i < m; i++) {
@@ -6737,8 +7249,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This method is useful when you need to apply complex aggregations to each window,
      * such as joining strings, computing statistics, or creating custom data structures.</p>
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param <R> the type of the result produced by the collector
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -6783,7 +7294,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
                 // In second case, elements.hasNext() will return true before processing the first element,
-                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
+                return elements.hasNext();   // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -6859,7 +7370,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 } else {
                     @SuppressWarnings("DuplicateExpressions")
                     final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
+                    final int prevSize = queue == null ? 0 : queue.size();   //NOSONAR
 
                     if (m < prevSize) {
                         for (int i = 0; i < m; i++) {
@@ -6895,8 +7406,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If <i>n</i> is greater than the number of elements in the sequence, an empty sequence is returned.
      * If <i>n</i> is 0, the original sequence is returned unchanged.
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param n the number of elements to skip, must not be negative
      * @return a new sequence with the first <i>n</i> elements skipped
@@ -6947,8 +7457,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Skips the first <i>n</i> elements of the sequence and performs the given action on each skipped element.
      * This method is useful when you need to process skipped elements, such as for logging or statistics.
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param n the number of elements to skip, must not be negative
      * @param actionOnSkippedItem the action to be performed on each skipped element
@@ -6982,8 +7491,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Filters out {@code null} elements from this {@code Seq}.
      * Only {@code non-null} elements will be included in the returned sequence.
      *
-     * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @return a new {@code Seq} instance with {@code null} elements removed
      * @see #filter(Throwables.Predicate)
@@ -7125,9 +7633,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
      * It may cause <code>OutOfMemoryError</code> if {@code n} is big enough.
      *
-     * <p>All elements must be consumed to determine which are the last n elements.
-     * The sequence will be closed after retrieving the last n elements when a terminal operation is triggered.</p>
-     *
      * <br />
      * All the elements will be loaded to get the last {@code n} elements and the sequence will be closed after that, if a terminal operation is triggered.
      *
@@ -7202,10 +7707,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * This is an intermediate operation and will not close the sequence.
      *
-     * @param n the number of top elements to retain, must be positive
+     * @param n the number of top elements to retain, must not be negative
      * @return a new {@code Seq} consisting of the top {@code n} elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if {@code n} is not positive
+     * @throws IllegalArgumentException if {@code n} is negative
      * @see Stream#top(int)
      * @see #top(int, Comparator)
      */
@@ -7725,6 +8230,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to integer values extracted by the provided key extractor function.
+     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -7745,6 +8251,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to long values extracted by the provided key extractor function.
+     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -7765,6 +8272,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to double values extracted by the provided key extractor function.
+     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -8376,7 +8884,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of("a", "b", "c")
      *    .zipWith(Arrays.asList(1, 2, 3, 4),
      *             (s, i) -> s + i)
-     *    .toList();  // Returns ["a1", "b2", "c3"]
+     *    .toList();   // Returns ["a1", "b2", "c3"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Collection
@@ -8409,7 +8917,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Arrays.asList(1, 2, 3),
      *             "z", 0,
      *             (s, i) -> s + i)
-     *    .toList();  // Returns ["a1", "b2", "z3"]
+     *    .toList();   // Returns ["a1", "b2", "z3"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Collection
@@ -8442,7 +8950,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Arrays.asList(1, 2),
      *             Arrays.asList(true, false, true),
      *             (s, i, b) -> s + i + b)
-     *    .toList();  // Returns ["a1true", "b2false"]
+     *    .toList();   // Returns ["a1true", "b2false"]
      * }</pre>
      *
      * @param <T2> the type of elements in the first given Collection
@@ -8478,7 +8986,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             Arrays.asList(true, false, true),
      *             "z", 0, false,
      *             (s, i, b) -> s + i + b)
-     *    .toList();  // Returns ["a1true", "b0false", "z0true"]
+     *    .toList();   // Returns ["a1true", "b0false", "z0true"]
      * }</pre>
      *
      * @param <T2> the type of elements in the first given Collection
@@ -8513,7 +9021,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a", "b", "c", "d"),
      *             (i, s) -> i + s)
-     *    .toList();  // Returns ["1a", "2b", "3c"]
+     *    .toList();   // Returns ["1a", "2b", "3c"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Seq
@@ -8544,7 +9052,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <pre>{@code
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a"), 0, "z", (i, s) -> i + s)
-     *    .toList();  // Returns ["1a", "2z", "3z"]
+     *    .toList();   // Returns ["1a", "2z", "3z"]
      * }</pre>
      *
      * @param <T2> the type of elements in the given Seq
@@ -8577,7 +9085,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of(1, 2, 3)
      *    .zipWith(Seq.of("a", "b"), Seq.of(true, false),
      *             (i, s, b) -> i + s + b)
-     *    .toList();  // Returns ["1atrue", "2bfalse"]
+     *    .toList();   // Returns ["1atrue", "2bfalse"]
      * }</pre>
      *
      * @param <T2> the type of elements in the second Seq
@@ -8612,7 +9120,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Seq.of("a"), Seq.of(true),
      *             0, "z", false,
      *             (i, s, b) -> i + s + b)
-     *    .toList();  // Returns ["1atrue", "2zfalse", "3zfalse"]
+     *    .toList();   // Returns ["1atrue", "2zfalse", "3zfalse"]
      * }</pre>
      *
      * @param <T2> the type of elements in the second Seq
@@ -8685,7 +9193,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * // With exception handling
      * seq.forEach(element -> {
-     *     processElement(element);  // may throw IOException
+     *     processElement(element);   // may throw IOException
      * });
      * }</pre>
      *
@@ -9671,18 +10179,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains all of the specified elements.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasAll = seq.containsAll(2, 4);
      * // hasAll == true
      * }</pre>
-     * 
+     *
      * @param a the elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains all of the specified elements, otherwise {@code false}
+     * @return {@code true} if this sequence contains all of the specified elements,
+     *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAny(Object[])
@@ -9720,9 +10229,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains all elements in the specified collection.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
@@ -9730,9 +10239,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasAll = seq.containsAll(list);
      * // hasAll == true
      * }</pre>
-     * 
+     *
      * @param c the collection of elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains all elements in the specified collection, otherwise {@code false}
+     * @return {@code true} if this sequence contains all elements in the specified collection,
+     *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAny(Collection)
@@ -9763,18 +10273,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains any of the specified elements.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasAny = seq.containsAny(7, 3, 9);
      * // hasAny == true (contains 3)
      * }</pre>
-     * 
+     *
      * @param a the elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains any of the specified elements, otherwise {@code false}
+     * @return {@code true} if this sequence contains any of the specified elements,
+     *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Object[])
@@ -9813,9 +10324,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains any element from the specified collection.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
@@ -9823,9 +10334,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasAny = seq.containsAny(list);
      * // hasAny == true (contains 3)
      * }</pre>
-     * 
+     *
      * @param c the collection of elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains any element from the specified collection, otherwise {@code false}
+     * @return {@code true} if this sequence contains any element from the specified collection,
+     *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Collection)
@@ -9854,21 +10366,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains none of the specified elements.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
      * boolean hasNone = seq.containsNone(6, 7, 8);
      * // hasNone == true
      * }</pre>
-     * 
+     *
      * @param a the elements to check for non-containment in this sequence
-     * @return {@code true} if this sequence doesn't contain any of the specified elements, 
+     * @return {@code true} if this sequence doesn't contain any of the specified elements,
      *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
+     * @see #containsAll(Object[])
      * @see #containsAny(Object[])
      */
     @TerminalOp
@@ -9889,9 +10402,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns whether this sequence contains none of the elements from the specified collection.
-     * 
+     *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
@@ -9899,12 +10412,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasNone = seq.containsNone(list);
      * // hasNone == true
      * }</pre>
-     * 
+     *
      * @param c the collection of elements to check for non-containment in this sequence
-     * @return {@code true} if this sequence doesn't contain any element from the specified collection, 
+     * @return {@code true} if this sequence doesn't contain any element from the specified collection,
      *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
+     * @see #containsAll(Collection)
      * @see #containsAny(Collection)
      */
     @TerminalOp
@@ -9930,10 +10444,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 2, 3, 2, 4);
-     * boolean hasDups1 = seq1.hasDuplicates();  // true
+     * boolean hasDups1 = seq1.hasDuplicates();   // true
      * 
      * Seq<Integer> seq2 = Seq.of(1, 2, 3, 4, 5);
-     * boolean hasDups2 = seq2.hasDuplicates();  // false
+     * boolean hasDups2 = seq2.hasDuplicates();   // false
      * }</pre>
      * 
      * @return {@code true} if this sequence contains at least one duplicate element, otherwise {@code false}
@@ -10233,10 +10747,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq1 = Seq.of("single");
-     * Optional<String> only1 = seq1.onlyOne();  // only1.get() == "single"
+     * Optional<String> only1 = seq1.onlyOne();   // only1.get() == "single"
      * 
      * Seq<String> seq2 = Seq.of("first", "second");
-     * seq2.onlyOne();  // throws TooManyElementsException
+     * seq2.onlyOne();   // throws TooManyElementsException
      * }</pre>
      * 
      * @return an {@code Optional} describing the only element of this sequence, 
@@ -10274,7 +10788,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
-     * long count = seq.count();  // count == 4
+     * long count = seq.count();   // count == 4
      * }</pre>
      * 
      * @return the count of elements in this sequence
@@ -10294,20 +10808,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns an array containing all the elements of this sequence.
-     * 
+     *
      * <p>This is a <b>terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * Object[] array = seq.toArray();
      * // array = ["a", "b", "c"]
      * }</pre>
-     * 
+     *
      * @return an array containing all the elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #toArray(IntFunction)
+     * @see #toList()
      */
     @TerminalOp
     public Object[] toArray() throws IllegalStateException, E {
@@ -10482,17 +10997,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns an immutable list containing all the elements of this sequence in encounter order.
      * The returned list is unmodifiable.
-     * 
+     *
      * <p>This is a <b>terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c");
      * ImmutableList<String> list = seq.toImmutableList();
-     * // list.add("d");  // would throw UnsupportedOperationException
+     * // list.add("d");   // would throw UnsupportedOperationException
      * }</pre>
-     * 
-     * @return an immutable list containing all the elements of this sequence
+     *
+     * @return an immutable list containing all the elements of this sequence in encounter order
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #toList()
@@ -10505,17 +11020,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns an immutable set containing all the distinct elements of this sequence.
+     * Duplicate elements are removed based on their {@code equals} method.
      * The returned set is unmodifiable.
-     * 
+     *
      * <p>This is a <b>terminal operation</b>.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 2, 4);
      * ImmutableSet<Integer> set = seq.toImmutableSet();
      * // set contains [1, 2, 3, 4] and cannot be modified
      * }</pre>
-     * 
+     *
      * @return an immutable set containing all the distinct elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -11703,6 +12219,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract integer values from the elements. Must not be {@code null}.
      * @return the sum of the integer values as a long
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -11739,6 +12256,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract long values from the elements. Must not be {@code null}.
      * @return the sum of the long values
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -11775,6 +12293,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract double values from the elements. Must not be {@code null}.
      * @return the sum of the double values
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -11815,6 +12334,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract integer values from the elements. Must not be {@code null}.
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -11858,6 +12378,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract long values from the elements. Must not be {@code null}.
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -11901,6 +12422,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to extract double values from the elements. Must not be {@code null}.
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12344,7 +12866,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Reuse a Joiner
      * Joiner joiner = Joiner.with(", ", "[", "]");
      * Seq.of("a", "b", "c").joinTo(joiner);
-     * String result = joiner.toString();  // "[a, b, c]"
+     * String result = joiner.toString();   // "[a, b, c]"
      * }</pre>
      *
      * @param joiner the Joiner to append the elements to
@@ -12508,9 +13030,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes a Stream representation of this sequence 
      *                 and returns a new Stream. Must not be {@code null}
-     * @param deferred if {@code true}, the transformation is deferred and will only be executed when 
+     * @param deferred if {@code true}, the transformation is deferred and will only be executed when
      *                 the returned sequence is consumed. If {@code false}, the transformation is applied immediately
      * @return a new Seq containing the elements from the transformed Stream
+     * @throws IllegalStateException if the sequence has already been closed
      * @throws IllegalArgumentException if the transfer function is {@code null}
      * @see #transform(Function)
      * @see #transformB(Function)
@@ -13005,19 +13528,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Process users - resources will be closed automatically
      * List<String> names = users
      *     .map(User::getName)
-     *     .toList();  // Terminal operation triggers close handlers
+     *     .toList();   // Terminal operation triggers close handlers
      * }</pre>
      * 
      * <p><b>Note:</b> Close handlers are executed in a synchronized manner to prevent concurrent
      * execution. If a close handler throws an exception, subsequent handlers will still be executed,
      * and all exceptions will be aggregated.</p>
      *
-     * @param closeHandler the Runnable to be executed when the sequence is closed. If {@code null} or
-     *                     empty, the sequence is returned unchanged
+     * @param closeHandler the Runnable to be executed when the sequence is closed. Must not be {@code null}.
      * @return a sequence with the close handler registered. This may be the same sequence instance.
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the specified closeHandler is {@code null} (though {@code null} is handled
-     *                                  gracefully by returning the sequence unchanged)
+     * @throws IllegalArgumentException if the specified closeHandler is {@code null}
      */
     @IntermediateOp
     public Seq<T, E> onClose(final Runnable closeHandler) throws IllegalStateException, IllegalArgumentException {
@@ -13075,7 +13596,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     lines.limit(10).forEach(System.out::println);
      * } finally {
      *     if (lines != null) {
-     *         lines.close();  // Explicit close in finally block
+     *         lines.close();   // Explicit close in finally block
      *     }
      * }
      * 
@@ -13740,7 +14261,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         } else if (b == null) {
             return DEFAULT_COMPARATOR_MAP.containsValue(a);
         } else {
-            return (a == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(b)) || (b == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(a)); // NOSONAR
+            return (a == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(b)) || (b == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(a));   // NOSONAR
         }
     }
 

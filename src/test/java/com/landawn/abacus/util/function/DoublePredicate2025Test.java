@@ -189,8 +189,8 @@ public class DoublePredicate2025Test extends TestBase {
     public void testBetween() {
         DoublePredicate predicate = DoublePredicate.between(5.0, 10.0);
         assertTrue(predicate.test(7.0));
-        assertFalse(predicate.test(5.0)); // exclusive
-        assertFalse(predicate.test(10.0)); // exclusive
+        assertFalse(predicate.test(5.0));   // exclusive
+        assertFalse(predicate.test(10.0));   // exclusive
         assertFalse(predicate.test(3.0));
         assertFalse(predicate.test(11.0));
     }
@@ -199,9 +199,9 @@ public class DoublePredicate2025Test extends TestBase {
     public void testComplex_AndOrNegate() {
         DoublePredicate predicate = DoublePredicate.greaterThan(5.0).and(DoublePredicate.lessThan(10.0)).or(DoublePredicate.equal(15.0)).negate();
 
-        assertFalse(predicate.test(7.0)); // (7>5 && 7<10) = true, negated = false
-        assertFalse(predicate.test(15.0)); // (15==15) = true, negated = false
-        assertTrue(predicate.test(3.0)); // (3>5 && 3<10) = false, (3==15) = false, negated = true
+        assertFalse(predicate.test(7.0));   // (7>5 && 7<10) = true, negated = false
+        assertFalse(predicate.test(15.0));   // (15==15) = true, negated = false
+        assertTrue(predicate.test(3.0));   // (3>5 && 3<10) = false, (3==15) = false, negated = true
     }
 
     @Test

@@ -40,7 +40,7 @@ package com.landawn.abacus.util;
  * 
  * // Parse a version string
  * JavaVersion version = JavaVersion.of("11");
- * System.out.println(version);  // Prints: 11
+ * System.out.println(version);   // Prints: 11
  * }</pre>
  * 
  * <p>

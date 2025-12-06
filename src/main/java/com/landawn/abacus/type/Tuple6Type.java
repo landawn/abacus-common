@@ -33,7 +33,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for {@link Tuple6} objects.
  * This class provides serialization and deserialization support for tuple instances
- * containing seven elements of potentially different types.
+ * containing six elements of potentially different types.
  *
  * @param <T1> the type of the first element in the tuple
  * @param <T2> the type of the second element in the tuple
@@ -64,6 +64,17 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Constructs a Tuple6Type instance with the specified element types.
+     * This constructor is package-private and should only be called by TypeFactory.
+     *
+     * @param t1TypeName the name of the first element type
+     * @param t2TypeName the name of the second element type
+     * @param t3TypeName the name of the third element type
+     * @param t4TypeName the name of the fourth element type
+     * @param t5TypeName the name of the fifth element type
+     * @param t6TypeName the name of the sixth element type
+     */
     Tuple6Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
             final String t6TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, false));
@@ -81,7 +92,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Returns the declaring name of this type, which includes simple class names.
-     * For example: "Tuple6&lt;String, Integer, Double, Boolean, Long, Float, Byte&gt;" instead of the fully qualified name.
+     * For example: "Tuple6&lt;String, Integer, Double, Boolean, Long, Float&gt;" instead of the fully qualified name.
      *
      * @return the declaring name of this Tuple6 type
      */
@@ -102,7 +113,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Returns the parameter types of this tuple type.
-     * The returned array contains the types of all seven elements in order.
+     * The returned array contains the types of all six elements in order.
      *
      * @return an array containing the types of the tuple elements
      */
@@ -112,10 +123,10 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
     }
 
     /**
-     * Indicates whether this type is serializable.
-     * Tuple6Type is always serializable.
+     * Indicates whether this type is a generic type.
+     * Tuple6Type is always a generic type as it has type parameters.
      *
-     * @return {@code true} always, as Tuple6 is serializable
+     * @return {@code true} always, as Tuple6 is a parameterized type
      */
     @Override
     public boolean isGenericType() {
@@ -124,7 +135,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Converts the given Tuple6 object to its string representation.
-     * The tuple is serialized as a JSON array containing its seven elements.
+     * The tuple is serialized as a JSON array containing its six elements.
      *
      * @param x the Tuple6 object to convert
      * @return a JSON string representation of the tuple, or {@code null} if x is null
@@ -136,7 +147,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Parses the given string into a Tuple6 object.
-     * The string should be a JSON array representation with exactly seven elements.
+     * The string should be a JSON array representation with exactly six elements.
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
      *
      * @param str the JSON string to parse
@@ -163,7 +174,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Appends the string representation of the Tuple6 to the given Appendable.
-     * The output format is: [element1, element2, element3, element4, element5, element6, element7]
+     * The output format is: [element1, element2, element3, element4, element5, element6]
      * Special handling is provided for Writer instances to improve performance.
      *
      * @param appendable the Appendable to write to
@@ -177,7 +188,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
@@ -228,7 +239,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
 
     /**
      * Writes the character representation of the Tuple6 to the given CharacterWriter.
-     * The output format is: [element1, element2, element3, element4, element5, element6, element7]
+     * The output format is: [element1, element2, element3, element4, element5, element6]
      * This method is optimized for character-based output streams.
      *
      * @param writer the CharacterWriter to write to

@@ -48,6 +48,18 @@ public class BytesType extends AbstractType<byte[]> {
      * Converts a byte array to its string representation using Base64 encoding.
      * This method is used for serialization purposes.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<byte[]> type = TypeFactory.getType(byte[].class);
+     * byte[] data = "Hello World".getBytes();
+     * String encoded = type.stringOf(data);
+     * // encoded: "SGVsbG8gV29ybGQ=" (Base64 of "Hello World")
+     *
+     * byte[] binary = new byte[]{0x48, 0x65, 0x6C, 0x6C, 0x6F};
+     * String result = type.stringOf(binary);
+     * // result: Base64 encoded string
+     * }</pre>
+     *
      * @param x the byte array to convert. Can be {@code null}.
      * @return A Base64 encoded string representation of the byte array, or {@code null} if the input is null
      */
@@ -59,6 +71,17 @@ public class BytesType extends AbstractType<byte[]> {
     /**
      * Converts a Base64 encoded string back to a byte array.
      * This method is used for deserialization purposes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<byte[]> type = TypeFactory.getType(byte[].class);
+     * String encoded = "SGVsbG8gV29ybGQ=";  // Base64 for "Hello World"
+     * byte[] data = type.valueOf(encoded);
+     * // data: byte array containing "Hello World"
+     *
+     * String result = new String(data);
+     * // result: "Hello World"
+     * }</pre>
      *
      * @param str the Base64 encoded string to convert. Can be {@code null}.
      * @return The decoded byte array, or {@code null} if the input string is null
