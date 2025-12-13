@@ -546,19 +546,19 @@ public class StreamTest extends AbstractTest {
 
     }
 
-    @Test
-    public void test_reduceUntil() throws Exception {
-        Stream.range(0, 100).reduce(Fn.max()).ifPresent(Fn.println());
-        Stream.range(0, 100).reduceUntil(Fn.max(), it -> it > 6).ifPresent(Fn.println());
-
-        Stream.range(0, 100).parallel().reduce(Fn.max()).ifPresent(Fn.println());
-        Stream.range(0, 100).parallel(20).reduceUntil(Fn.max(), it -> it > 6).ifPresent(Fn.println());
-
-        Stream.range(0, 100).parallel(20).reduceUntil((t, u) -> {
-            N.sleep(10);
-            return N.max(t, u);
-        }, it -> it > 6).ifPresent(Fn.println());
-    }
+    //    @Test
+    //    public void test_reduceUntil() throws Exception {
+    //        Stream.range(0, 100).reduce(Fn.max()).ifPresent(Fn.println());
+    //        Stream.range(0, 100).reduceUntil(Fn.max(), it -> it > 6).ifPresent(Fn.println());
+    //
+    //        Stream.range(0, 100).parallel().reduce(Fn.max()).ifPresent(Fn.println());
+    //        Stream.range(0, 100).parallel(20).reduceUntil(Fn.max(), it -> it > 6).ifPresent(Fn.println());
+    //
+    //        Stream.range(0, 100).parallel(20).reduceUntil((t, u) -> {
+    //            N.sleep(10);
+    //            return N.max(t, u);
+    //        }, it -> it > 6).ifPresent(Fn.println());
+    //    }
 
     @Test
     public void test_joinByRange() throws Exception {

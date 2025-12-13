@@ -30,20 +30,16 @@ import com.landawn.abacus.util.Throwables;
 public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given argument.
-     *
-     * <p>This method consumes a short value, performing some side-effect operation
-     * without returning any result. Common use cases include printing values,
-     * updating state, or performing I/O operations.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortConsumer printer = value -> System.out.println("Value: " + value);
-     * printer.accept((short) 42);   // Prints "Value: 42"
+     * printer.accept((short) 42);   // Prints: Value: 42
      *
      * List<Short> results = new ArrayList<>();
      * ShortConsumer collector = value -> results.add(value);
      * collector.accept((short) 10);
-     * collector.accept((short) 20);   // results now contains [10, 20]
      * }</pre>
      *
      * @param t the input argument
@@ -59,16 +55,12 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortConsumer logger = value -> System.out.println("Processing: " + value);
-     * ShortConsumer validator = value -> {
-     *     if (value < 0) throw new IllegalArgumentException("Negative value");
-     * };
-     *
+     * ShortConsumer validator = value -> { if (value < 0) throw new IllegalArgumentException(); };
      * ShortConsumer combined = logger.andThen(validator);
-     * combined.accept((short) 10);   // Prints "Processing: 10", then validates
-     * // combined.accept((short) -5);   // Prints "Processing: -5", then throws exception
+     * combined.accept((short) 10);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortConsumer andThen(final ShortConsumer after) {

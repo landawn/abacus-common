@@ -89,10 +89,10 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedReflectiveOperationException} by wrapping the specified
      * {@link ReflectiveOperationException} or any of its subclasses.
-     * 
+     *
      * <p>This constructor preserves all information from the original exception including
      * its message, stack trace, and any suppressed exceptions.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -106,7 +106,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
      *              This can be any subclass of ReflectiveOperationException including
      *              ClassNotFoundException, NoSuchMethodException, IllegalAccessException, etc.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedReflectiveOperationException(final ReflectiveOperationException cause) {
         super(cause);
@@ -132,11 +132,11 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param message the detail message providing context about the reflection failure.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
      *              This can be any subclass of ReflectiveOperationException.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedReflectiveOperationException(final String message, final ReflectiveOperationException cause) {
         super(message, cause);

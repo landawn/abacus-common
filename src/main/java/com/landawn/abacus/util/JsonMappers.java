@@ -990,6 +990,7 @@ public final class JsonMappers {
      * @see #fromJson(URL, Class, DeserializationConfig)
      * @see #fromJson(URL, TypeReference)
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
@@ -1023,6 +1024,7 @@ public final class JsonMappers {
      * @see #fromJson(URL, Class)
      * @see DeserializationConfig
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final Class<? extends T> targetType, final DeserializationConfig config) {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
@@ -1559,6 +1561,7 @@ public final class JsonMappers {
      * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
      * @see TypeReference
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
@@ -1594,6 +1597,7 @@ public final class JsonMappers {
      * @see TypeReference
      * @see DeserializationConfig
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
@@ -2162,6 +2166,7 @@ public final class JsonMappers {
          * @return the deserialized object of type T
          * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
          */
+        @SuppressWarnings("deprecation")
         public <T> T fromJson(final URL json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
@@ -2377,6 +2382,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
          * @see TypeReference
          */
+        @SuppressWarnings("deprecation")
         public <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);

@@ -90,11 +90,10 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
-     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
+     * @param targetType the Type descriptor of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
     <T> T deserialize(Node source, Type<? extends T> targetType);
 
@@ -117,11 +116,10 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
-     * @param targetType the class of the object to create; must not be {@code null}
+     * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
     <T> T deserialize(Node source, Class<? extends T> targetType);
 
@@ -148,12 +146,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
+     * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @param targetType the Type descriptor of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
     <T> T deserialize(Node source, XMLDeserializationConfig config, Type<? extends T> targetType);
 
@@ -179,12 +176,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
+     * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the object to create; must not be {@code null}
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
     <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetType);
 
@@ -207,12 +203,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the file containing XML data to deserialize; must not be {@code null}
+     * @param source the file containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}, or {@code null} if the file is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
-     * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
      */
     <T> T deserialize(File source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -235,12 +230,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the input stream containing XML data to deserialize; must not be {@code null}
+     * @param source the input stream containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}, or {@code null} if the input stream is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
-     * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
      */
     <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -266,12 +260,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the reader containing XML data to deserialize; must not be {@code null}
+     * @param source the reader containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}, or {@code null} if the reader is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
-     * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
      */
     <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -303,12 +296,11 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the DOM node containing XML data to deserialize; must not be {@code null}
+     * @param source the DOM node containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}, or {@code null} if the node is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
-     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
     <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 }

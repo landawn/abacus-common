@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> { //NOSONAR
     /**
-     * Performs this operation on the given char argument.
+     * Performs this operation on the given argument.
      * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
@@ -43,7 +43,7 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      * appender.accept('i');   // sb now contains "Hi"
      * }</pre>
      *
-     * @param t the char input argument
+     * @param t the input argument
      */
     @Override
     void accept(char t);

@@ -17,6 +17,15 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link com.landawn.abacus.util.MutableByte} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * MutableByte instances, which are mutable wrappers around primitive byte values.
+ *
+ * @see com.landawn.abacus.util.MutableByte
+ * @see NumberType
+ */
 public class MutableByteType extends NumberType<MutableByte> {
 
     public static final String MUTABLE_BYTE = MutableByte.class.getSimpleName();
@@ -256,15 +265,14 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
      *
      * MutableByte mb = MutableByte.of((byte) 42);
-     * type.writeCharacter(writer, mb, config);
+     * type.writeCharacter(writer, mb, null);
      * String result = writer.toString();
      * // result: "42"
      *
      * writer.reset();
-     * type.writeCharacter(writer, null, config);
+     * type.writeCharacter(writer, null, null);
      * result = writer.toString();
      * // result: "null"
      * }</pre>

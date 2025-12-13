@@ -66,10 +66,10 @@ public class UncheckedInterruptedException extends UncheckedException {
 
     /**
      * Constructs a new {@code UncheckedInterruptedException} by wrapping the specified {@link InterruptedException}.
-     * 
+     *
      * <p>This constructor preserves all information from the original InterruptedException including
      * its message, stack trace, and any suppressed exceptions.</p>
-     * 
+     *
      * <p><strong>Note:</strong> Remember to restore the thread's interrupted status before throwing
      * this exception if the interruption hasn't been fully handled:</p>
      *
@@ -82,7 +82,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedInterruptedException(final InterruptedException cause) {
         super(cause);
@@ -106,10 +106,10 @@ public class UncheckedInterruptedException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param message the detail message providing context about the interruption.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedInterruptedException(final String message, final InterruptedException cause) {
         super(message, cause);

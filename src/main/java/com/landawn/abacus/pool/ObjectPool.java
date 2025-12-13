@@ -213,6 +213,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws InterruptedException if interrupted while waiting
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     E take(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**

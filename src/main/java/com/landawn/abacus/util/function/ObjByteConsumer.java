@@ -62,26 +62,10 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
-     * <p>This method processes an object of type T and a byte value, typically producing
-     * side effects such as writing the byte to a stream, storing it in a buffer,
-     * or modifying the object based on the byte value.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Writing bytes to output streams or byte buffers</li>
-     *   <li>Setting byte values in arrays or collections</li>
-     *   <li>Processing binary data one byte at a time</li>
-     *   <li>Updating object state based on byte values</li>
-     *   <li>Encoding/decoding operations involving individual bytes</li>
-     * </ul>
-     *
-     * <p>Note: The byte type in Java is signed and ranges from -128 to 127.
-     * When working with unsigned byte values (0-255), appropriate conversions
-     * may be necessary.
-     *
-     * @param t the object input argument
-     * @param value the byte input argument
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, byte value);

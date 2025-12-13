@@ -71,10 +71,10 @@ public class UncheckedParseException extends UncheckedException {
 
     /**
      * Constructs a new {@code UncheckedParseException} by wrapping the specified {@link java.text.ParseException}.
-     * 
+     *
      * <p>This constructor preserves all information from the original ParseException including
      * its message, error offset, stack trace, and any suppressed exceptions.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -86,7 +86,7 @@ public class UncheckedParseException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link java.text.ParseException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedParseException(final java.text.ParseException cause) {
         super(cause);
@@ -111,10 +111,10 @@ public class UncheckedParseException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param message the detail message providing context about the parsing failure.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the {@link java.text.ParseException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedParseException(final String message, final java.text.ParseException cause) {
         super(message, cause);

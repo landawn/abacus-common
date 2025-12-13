@@ -402,7 +402,7 @@ public final class Clazz {
      * }</pre>
      *
      * @param <T> the target type parameter.
-     * @param cls the class to cast (must not be null).
+     * @param cls the class to cast; must not be null
      * @return a typed Class reference with generic type information.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)

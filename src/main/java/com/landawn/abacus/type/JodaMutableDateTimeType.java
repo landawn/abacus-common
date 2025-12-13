@@ -25,6 +25,17 @@ import org.joda.time.MutableDateTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Joda-Time MutableDateTime objects.
+ * <p>
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@code org.joda.time.MutableDateTime} instances. MutableDateTime is a mutable version of DateTime
+ * that allows modification after creation. It supports multiple string formats including
+ * ISO 8601 formats and provides database conversion using {@code java.sql.Timestamp}.
+ *
+ * @see org.joda.time.MutableDateTime
+ * @see AbstractJodaDateTimeType
+ */
 public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
 
     public static final String JODA_MUTABLE_DATE_TIME = "JodaMutableDateTime";

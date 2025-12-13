@@ -2682,7 +2682,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the elements in the array.
-     * @param element the value to be repeated in the array. Must not be {@code null}.
+     * @param element the value to be repeated in the array; must not be {@code null}
      * @param n the length of the array to be generated. Must be non-negative.
      * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>element</i> is {@code null} or if <i>n</i> is negative.

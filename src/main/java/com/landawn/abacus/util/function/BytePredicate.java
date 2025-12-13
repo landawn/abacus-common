@@ -53,7 +53,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     BytePredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
-     * Evaluates this predicate on the given byte argument.
+     * Evaluates this predicate on the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -61,7 +61,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * boolean result = isPositive.test((byte) 5);   // Returns true
      * }</pre>
      *
-     * @param value the byte input argument
+     * @param value the input argument
      * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override

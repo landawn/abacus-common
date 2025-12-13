@@ -43,6 +43,19 @@ public class NClobReaderType extends ReaderType {
      * Retrieves an NCLOB value from a ResultSet at the specified column index and converts it to a Reader.
      * The NCLOB resource is automatically freed after obtaining the character stream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading NCLOB content from database
+     * Reader reader = type.get(rs, 1);
+     * if (reader != null) {
+     *     String content = IOUtils.readAllChars(reader);
+     *     reader.close();
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the NCLOB from
      * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
@@ -58,6 +71,23 @@ public class NClobReaderType extends ReaderType {
      * Retrieves an NCLOB value from a ResultSet using the specified column label and converts it to a Reader.
      * The NCLOB resource is automatically freed after obtaining the character stream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading NCLOB by column name
+     * Reader reader = type.get(rs, "document_content");
+     * if (reader != null) {
+     *     BufferedReader br = new BufferedReader(reader);
+     *     String line;
+     *     while ((line = br.readLine()) != null) {
+     *         System.out.println(line);
+     *     }
+     *     br.close();
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
@@ -71,6 +101,19 @@ public class NClobReaderType extends ReaderType {
     /**
      * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader.
      * The database will read from the Reader until end-of-file is reached.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO documents (id, content) VALUES (?, ?)");
+     *
+     * // Setting NCLOB from Reader
+     * String content = "Large document content...";
+     * Reader reader = new StringReader(content);
+     * type.set(stmt, 2, reader);
+     * stmt.executeUpdate();
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -86,6 +129,18 @@ public class NClobReaderType extends ReaderType {
      * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader.
      * The database will read from the Reader until end-of-file is reached.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * CallableStatement stmt = connection.prepareCall("{call save_document(?, ?)}");
+     *
+     * // Setting NCLOB using named parameter
+     * String content = "Document content...";
+     * Reader reader = new StringReader(content);
+     * type.set(stmt, "p_content", reader);
+     * stmt.execute();
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader containing the character data to be stored as NCLOB
@@ -99,6 +154,19 @@ public class NClobReaderType extends ReaderType {
     /**
      * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader with a specified length.
      * Only the specified number of characters will be read from the Reader.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO summaries (id, summary) VALUES (?, ?)");
+     *
+     * // Setting NCLOB with specific length
+     * String longText = "Very long text content...";
+     * Reader reader = new StringReader(longText);
+     * type.set(stmt, 2, reader, 1000);  // Only read first 1000 characters
+     * stmt.executeUpdate();
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -114,6 +182,18 @@ public class NClobReaderType extends ReaderType {
     /**
      * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader with a specified length.
      * Only the specified number of characters will be read from the Reader.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType("NClobReader");
+     * CallableStatement stmt = connection.prepareCall("{call add_summary(?, ?)}");
+     *
+     * // Setting NCLOB with specific length using named parameter
+     * String text = "Summary text...";
+     * Reader reader = new StringReader(text);
+     * type.set(stmt, "p_summary", reader, 500);  // Only read first 500 characters
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

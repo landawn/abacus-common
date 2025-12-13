@@ -98,13 +98,13 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
-     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param recipients array of email addresses to send the email to; must not be {@code null} or empty
+     * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the plain text content of the email. May be {@code null} or empty
-     * @param userName the username for SMTP authentication. Must not be {@code null}
-     * @param password the password for SMTP authentication. Must not be {@code null}
-     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     * @param userName the username for SMTP authentication; must not be {@code null}
+     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -140,15 +140,15 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
-     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param recipients array of email addresses to send the email to; must not be {@code null} or empty
+     * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the plain text content of the email. May be {@code null} or empty
      * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
-     * @param userName the username for SMTP authentication. Must not be {@code null}
-     * @param password the password for SMTP authentication. Must not be {@code null}
-     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     * @param userName the username for SMTP authentication; must not be {@code null}
+     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -189,13 +189,13 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
-     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param recipients array of email addresses to send the email to; must not be {@code null} or empty
+     * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the HTML content of the email. May be {@code null} or empty
-     * @param userName the username for SMTP authentication. Must not be {@code null}
-     * @param password the password for SMTP authentication. Must not be {@code null}
-     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     * @param userName the username for SMTP authentication; must not be {@code null}
+     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -240,15 +240,15 @@ public final class EmailUtil {
      * );
      * }</pre>
      *
-     * @param recipients array of email addresses to send the email to. Must not be {@code null} or empty
-     * @param from the sender's email address. Must not be {@code null} or empty
+     * @param recipients array of email addresses to send the email to; must not be {@code null} or empty
+     * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the HTML content of the email. May be {@code null} or empty
      * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
-     * @param userName the username for SMTP authentication. Must not be {@code null}
-     * @param password the password for SMTP authentication. Must not be {@code null}
-     * @param props mail server properties. Must not be {@code null}. Common properties include:
+     * @param userName the username for SMTP authentication; must not be {@code null}
+     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>

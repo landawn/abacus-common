@@ -9219,6 +9219,176 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
+     * Performs the given action for each element of this sequence, and then performs the provided onComplete action. 
+     * <p>The onComplete action is executed even if no elements are present in the sequence, but is not executed
+     * if an exception occurs during element processing.</p>
+     *
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> results = new ArrayList<>();
+     * seq.forEach(
+     *     element -> results.add(process(element)),
+     *     () -> System.out.println("Processed " + results.size() + " items")
+     * );
+     * }</pre>
+     *
+     * @param <E2> the type of exception that the action may throw
+     * @param <E3> the type of exception that the onComplete action may throw
+     * @param action a non-interfering action to perform on each element
+     * @param onComplete a Runnable to execute after all elements have been processed
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the action or onComplete is null
+     * @throws E if an exception occurs during iteration
+     * @throws E2 if the action throws an exception
+     * @throws E3 if the onComplete action throws an exception
+     */
+    @TerminalOp
+    public <E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action, final Throwables.Runnable<E3> onComplete)
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
+        assertNotClosed();
+        checkArgNotNull(action, cs.action);
+        checkArgNotNull(onComplete, cs.onComplete);
+    
+        try {
+            while (elements.hasNext()) {
+                action.accept(elements.next());
+            }
+    
+            onComplete.run();
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Iterates over the elements, applying a flat-mapping function to each element and executing an action on the results.
+     *
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Print all person-hobby combinations
+     * Seq<Person> people = Seq.of(person1, person2);
+     * people.forEach(
+     *     person -> person.getHobbies(),
+     *     (person, hobby) -> System.out.println(person.getName() + " enjoys " + hobby)
+     * );
+     * }</pre>
+     *
+     * @param <U> the type of elements in the iterable returned by the flat-mapper
+     * @param <E2> the type of exception that the flat-mapper may throw
+     * @param <E3> the type of exception that the action may throw
+     * @param flatMapper a function that returns an Iterable for each element
+     * @param action a BiConsumer that processes the original element and each item from the Iterable
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the flatMapper or action is null
+     * @throws E if an exception occurs during iteration
+     * @throws E2 if the flat-mapper throws an exception
+     * @throws E3 if the action throws an exception
+     */
+    @TerminalOp
+    public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E2> flatMapper,
+            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
+        assertNotClosed();
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(action, cs.action);
+    
+        Iterable<? extends U> c = null;
+        T next = null;
+    
+        try {
+            while (elements.hasNext()) {
+                next = elements.next();
+                c = flatMapper.apply(next);
+    
+                if (c != null) {
+                    for (final U u : c) {
+                        action.accept(next, u);
+                    }
+                }
+            }
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Iterates over the elements, applying two levels of flat-mapping and executing an action on the results.
+     * <p>This is a terminal operation that combines two levels of flat-mapping with forEach. For each element,
+     * the first flatMapper produces an Iterable, then for each item in that Iterable, the second flatMapper
+     * produces another Iterable. The action is executed for each combination of the original element and
+     * the items from both levels of flat-mapping.</p>
+     *
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Print all company-department-employee combinations
+     * Seq<Company> companies = Seq.of(company1, company2);
+     * companies.forEach(
+     *     company -> company.getDepartments(),
+     *     department -> department.getEmployees(),
+     *     (company, department, employee) -> 
+     *         System.out.println(company.getName() + " - " + 
+     *                          department.getName() + " - " + 
+     *                          employee.getName())
+     * );
+     * }</pre>
+     *
+     * @param <T2> the type of elements in the first level iterable
+     * @param <T3> the type of elements in the second level iterable
+     * @param <E2> the type of exception that the first flat-mapper may throw
+     * @param <E3> the type of exception that the second flat-mapper may throw
+     * @param <E4> the type of exception that the action may throw
+     * @param flatMapper a function that returns an Iterable of T2 for each element
+     * @param flatMapper2 a function that returns an Iterable of T3 for each T2
+     * @param action a TriConsumer that processes the original element, T2, and T3
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if any of the parameters is null
+     * @throws E if an exception occurs during iteration
+     * @throws E2 if the first flat-mapper throws an exception
+     * @throws E3 if the second flat-mapper throws an exception
+     * @throws E4 if the action throws an exception
+     */
+    @TerminalOp
+    public <T2, T3, E2 extends Exception, E3 extends Exception, E4 extends Exception> void forEach(
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E2> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E3> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E4> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
+        assertNotClosed();
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(flatMapper2, cs.flatMapper2);
+        checkArgNotNull(action, cs.action);
+    
+        Iterable<T2> c2 = null;
+        Iterable<T3> c3 = null;
+        T next = null;
+    
+        try {
+            while (elements.hasNext()) {
+                next = elements.next();
+                c2 = flatMapper.apply(next);
+    
+                if (c2 != null) {
+                    for (final T2 t2 : c2) {
+                        c3 = flatMapper2.apply(t2);
+    
+                        if (c3 != null) {
+                            for (final T3 t3 : c3) {
+                                action.accept(next, t2, t3);
+                            }
+                        }
+                    }
+                }
+            }
+        } finally {
+            close();
+        }
+    }
+
+    /**
      * Performs the given action for each element of this sequence, providing the element's index.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
@@ -9240,6 +9410,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
+    @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
@@ -9336,176 +9507,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this sequence, and then performs the provided onComplete action. 
-     * <p>The onComplete action is executed even if no elements are present in the sequence, but is not executed
-     * if an exception occurs during element processing.</p>
-     *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> results = new ArrayList<>();
-     * seq.forEach(
-     *     element -> results.add(process(element)),
-     *     () -> System.out.println("Processed " + results.size() + " items")
-     * );
-     * }</pre>
-     *
-     * @param <E2> the type of exception that the action may throw
-     * @param <E3> the type of exception that the onComplete action may throw
-     * @param action a non-interfering action to perform on each element
-     * @param onComplete a Runnable to execute after all elements have been processed
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the action or onComplete is null
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
-     * @throws E3 if the onComplete action throws an exception
-     */
-    @TerminalOp
-    public <E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action, final Throwables.Runnable<E3> onComplete)
-            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
-        assertNotClosed();
-        checkArgNotNull(action, cs.action);
-        checkArgNotNull(onComplete, cs.onComplete);
-
-        try {
-            while (elements.hasNext()) {
-                action.accept(elements.next());
-            }
-
-            onComplete.run();
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Iterates over the elements, applying a flat-mapping function to each element and executing an action on the results.
-     *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Print all person-hobby combinations
-     * Seq<Person> people = Seq.of(person1, person2);
-     * people.forEach(
-     *     person -> person.getHobbies(),
-     *     (person, hobby) -> System.out.println(person.getName() + " enjoys " + hobby)
-     * );
-     * }</pre>
-     *
-     * @param <U> the type of elements in the iterable returned by the flat-mapper
-     * @param <E2> the type of exception that the flat-mapper may throw
-     * @param <E3> the type of exception that the action may throw
-     * @param flatMapper a function that returns an Iterable for each element
-     * @param action a BiConsumer that processes the original element and each item from the Iterable
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the flatMapper or action is null
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the flat-mapper throws an exception
-     * @throws E3 if the action throws an exception
-     */
-    @TerminalOp
-    public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E2> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
-        assertNotClosed();
-        checkArgNotNull(flatMapper, cs.flatMapper);
-        checkArgNotNull(action, cs.action);
-
-        Iterable<? extends U> c = null;
-        T next = null;
-
-        try {
-            while (elements.hasNext()) {
-                next = elements.next();
-                c = flatMapper.apply(next);
-
-                if (c != null) {
-                    for (final U u : c) {
-                        action.accept(next, u);
-                    }
-                }
-            }
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Iterates over the elements, applying two levels of flat-mapping and executing an action on the results.
-     * <p>This is a terminal operation that combines two levels of flat-mapping with forEach. For each element,
-     * the first flatMapper produces an Iterable, then for each item in that Iterable, the second flatMapper
-     * produces another Iterable. The action is executed for each combination of the original element and
-     * the items from both levels of flat-mapping.</p>
-     *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Print all company-department-employee combinations
-     * Seq<Company> companies = Seq.of(company1, company2);
-     * companies.forEach(
-     *     company -> company.getDepartments(),
-     *     department -> department.getEmployees(),
-     *     (company, department, employee) -> 
-     *         System.out.println(company.getName() + " - " + 
-     *                          department.getName() + " - " + 
-     *                          employee.getName())
-     * );
-     * }</pre>
-     *
-     * @param <T2> the type of elements in the first level iterable
-     * @param <T3> the type of elements in the second level iterable
-     * @param <E2> the type of exception that the first flat-mapper may throw
-     * @param <E3> the type of exception that the second flat-mapper may throw
-     * @param <E4> the type of exception that the action may throw
-     * @param flatMapper a function that returns an Iterable of T2 for each element
-     * @param flatMapper2 a function that returns an Iterable of T3 for each T2
-     * @param action a TriConsumer that processes the original element, T2, and T3
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if any of the parameters is null
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the first flat-mapper throws an exception
-     * @throws E3 if the second flat-mapper throws an exception
-     * @throws E4 if the action throws an exception
-     */
-    @TerminalOp
-    public <T2, T3, E2 extends Exception, E3 extends Exception, E4 extends Exception> void forEach(
-            final Throwables.Function<? super T, ? extends Iterable<T2>, E2> flatMapper,
-            final Throwables.Function<? super T2, ? extends Iterable<T3>, E3> flatMapper2,
-            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E4> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
-        assertNotClosed();
-        checkArgNotNull(flatMapper, cs.flatMapper);
-        checkArgNotNull(flatMapper2, cs.flatMapper2);
-        checkArgNotNull(action, cs.action);
-
-        Iterable<T2> c2 = null;
-        Iterable<T3> c3 = null;
-        T next = null;
-
-        try {
-            while (elements.hasNext()) {
-                next = elements.next();
-                c2 = flatMapper.apply(next);
-
-                if (c2 != null) {
-                    for (final T2 t2 : c2) {
-                        c3 = flatMapper2.apply(t2);
-
-                        if (c3 != null) {
-                            for (final T3 t3 : c3) {
-                                action.accept(next, t2, t3);
-                            }
-                        }
-                    }
-                }
-            }
-        } finally {
-            close();
-        }
-    }
-
-    /**
      * Performs the given action on each adjacent pair of elements in this sequence.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
@@ -9529,6 +9530,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
+    @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
@@ -9566,6 +9568,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
+    @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
@@ -9628,6 +9631,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
+    @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
@@ -9665,6 +9669,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
+    @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {

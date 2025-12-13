@@ -41,17 +41,7 @@ import com.landawn.abacus.util.Throwables;
 public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>, java.util.function.LongConsumer { //NOSONAR
     /**
      * Performs this operation on the given argument.
-     *
-     * <p>The consumer processes a long value and performs some side-effect
-     * operation. Common use cases include:
-     * <ul>
-     *   <li>Printing or logging long values</li>
-     *   <li>Accumulating or aggregating long values</li>
-     *   <li>Updating state or counters based on long input</li>
-     *   <li>Writing long values to output streams or databases</li>
-     *   <li>Triggering actions based on long values (e.g., timestamps)</li>
-     *   <li>Collecting statistics from long values</li>
-     * </ul>
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -61,33 +51,27 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * LongStream.range(1, 5).forEach(printer);
      * }</pre>
      *
-     * @param t the input argument, a long value to be processed
+     * @param t the input argument
      */
     @Override
     void accept(long t);
 
     /**
-     * Returns a composed {@code LongConsumer} that performs, in sequence, this
-     * operation followed by the {@code after} operation. If performing either
-     * operation throws an exception, it is relayed to the caller of the
-     * composed operation. If performing this operation throws an exception,
+     * Returns a composed {@code LongConsumer} that performs, in sequence, this operation followed by
+     * the {@code after} operation. If performing either operation throws an exception, it is relayed
+     * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
-     *
-     * <p>This method allows for chaining multiple consumers to create a pipeline
-     * of operations that will be executed sequentially on the same input value.
-     * This is useful for composing complex behaviors from simpler ones.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongConsumer saveToDatabase = value -> System.out.println("Saving: " + value);
-     * LongConsumer logValue = value -> System.out.println("Processed: " + value);
-     * LongConsumer combined = saveToDatabase.andThen(logValue);
-     * combined.accept(12345L);   // First saves to database, then logs
+     * LongConsumer logger = value -> System.out.println("Processing: " + value);
+     * LongConsumer validator = value -> { if (value < 0) throw new IllegalArgumentException(); };
+     * LongConsumer combined = logger.andThen(validator);
+     * combined.accept(100L);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
-     * @return a composed {@code LongConsumer} that performs in sequence this
-     *         operation followed by the {@code after} operation
+     * @return a composed {@code LongConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     @Override
     default LongConsumer andThen(final java.util.function.LongConsumer after) {

@@ -363,11 +363,11 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param file the file to write to.
-     * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants).
-     * @return a BufferedWriter instance for writing to the file.
+     * @param file the file to write to
+     * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants)
+     * @return a BufferedWriter instance for writing to the file
      * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,
-     *     does not exist but cannot be created, or cannot be opened for any other reason.
+     *     does not exist but cannot be created, or cannot be opened for any other reason
      */
     public static BufferedWriter newWriter(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
@@ -386,8 +386,8 @@ public abstract class Files { //NOSONAR
      * byte[] bytes = source.read();
      * }</pre>
      *
-     * @param file the file to create a ByteSource for.
-     * @return a ByteSource that reads from the given file.
+     * @param file the file to create a ByteSource for
+     * @return a ByteSource that reads from the given file
      */
     public static ByteSource asByteSource(final File file) {
         return com.google.common.io.Files.asByteSource(file);
@@ -409,9 +409,9 @@ public abstract class Files { //NOSONAR
      * long size = source.size();
      * }</pre>
      *
-     * @param path the path to create a ByteSource for.
-     * @param options zero or more open options that control how the file is opened.
-     * @return a ByteSource that reads from the given path.
+     * @param path the path to create a ByteSource for
+     * @param options zero or more open options that control how the file is opened
+     * @return a ByteSource that reads from the given path
      */
     public static ByteSource asByteSource(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
@@ -431,15 +431,15 @@ public abstract class Files { //NOSONAR
      * // Overwrite file
      * ByteSink sink = Files.asByteSink(new File("output.bin"));
      * sink.write(byteArray);
-     * 
+     *
      * // Append to file
      * ByteSink appendSink = Files.asByteSink(new File("log.bin"), FileWriteMode.APPEND);
      * appendSink.write(moreBytes);
      * }</pre>
      *
-     * @param file the file to create a ByteSink for.
-     * @param modes optional file write modes; if empty, the file will be truncated.
-     * @return a ByteSink that writes to the given file.
+     * @param file the file to create a ByteSink for
+     * @param modes optional file write modes; if empty, the file will be truncated
+     * @return a ByteSink that writes to the given file
      */
     public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
         return com.google.common.io.Files.asByteSink(file, modes);

@@ -317,8 +317,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * // Uses LinkedHashMap for keys and TreeMap for values
      * }</pre>
      *
-     * @param keyMapType the Class object representing the type of Map to be used for storing keys. Must not be {@code null}.
-     * @param valueMapType the Class object representing the type of Map to be used for storing values. Must not be {@code null}. 
+     * @param keyMapType the Class object representing the type of Map to be used for storing keys; must not be {@code null}
+     * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null} 
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -335,8 +335,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * // Uses custom suppliers for both maps
      * }</pre>
      *
-     * @param keyMapSupplier the Supplier object providing the Map to be used for storing keys. Must not be {@code null}.
-     * @param valueMapSupplier the Supplier object providing the Map to be used for storing values. Must not be {@code null}.
+     * @param keyMapSupplier the Supplier object providing the Map to be used for storing keys; must not be {@code null}
+     * @param valueMapSupplier the Supplier object providing the Map to be used for storing values; must not be {@code null}
      */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         this.keyMapSupplier = keyMapSupplier;

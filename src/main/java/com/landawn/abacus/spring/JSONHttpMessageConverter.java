@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
-import org.springframework.lang.Nullable;
 
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.N;
@@ -228,7 +227,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @throws RuntimeException if JSON serialization fails due to unsupported types or serialization errors
      */
     @Override
-    protected void writeInternal(final Object obj, final @Nullable Type type, final Writer writer) {
+    protected void writeInternal(final Object obj, final Type type, final Writer writer) {
         N.toJson(obj, writer);
     }
 }

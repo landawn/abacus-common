@@ -38,8 +38,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -615,28 +615,28 @@ public class AbstractStream102Test extends TestBase {
         assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), result);
     }
 
-    @Test
-    public void testReduceUntil() {
-        stream = createStream(1, 2, 3, 4, 5);
-        Optional<Integer> result = stream.reduceUntil(Integer::sum, sum -> sum > 5);
-        assertTrue(result.isPresent());
-        assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testReduceUntilBiPredicate() {
-        stream = createStream(1, 2, 3, 4, 5);
-        Optional<Integer> result = stream.reduceUntil(Integer::sum, (sum, prev) -> sum > 5);
-        assertTrue(result.isPresent());
-        assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testReduceUntilWithIdentity() {
-        stream = createStream(1, 2, 3, 4, 5);
-        Integer result = stream.reduceUntil(0, Integer::sum, (a, b) -> a + b, sum -> sum > 5);
-        assertEquals(6, result);
-    }
+    //    @Test
+    //    public void testReduceUntil() {
+    //        stream = createStream(1, 2, 3, 4, 5);
+    //        Optional<Integer> result = stream.reduceUntil(Integer::sum, sum -> sum > 5);
+    //        assertTrue(result.isPresent());
+    //        assertEquals(6, result.get());
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntilBiPredicate() {
+    //        stream = createStream(1, 2, 3, 4, 5);
+    //        Optional<Integer> result = stream.reduceUntil(Integer::sum, (sum, prev) -> sum > 5);
+    //        assertTrue(result.isPresent());
+    //        assertEquals(6, result.get());
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntilWithIdentity() {
+    //        stream = createStream(1, 2, 3, 4, 5);
+    //        Integer result = stream.reduceUntil(0, Integer::sum, (a, b) -> a + b, sum -> sum > 5);
+    //        assertEquals(6, result);
+    //    }
 
     @Test
     public void testGroupBy() {

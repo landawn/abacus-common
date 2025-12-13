@@ -319,7 +319,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
      * will affect the original array and vice versa.</p>
      *
-     * @param a the array to be used as the element array for this list. Must not be {@code null}.
+     * @param a the array to be used as the element array for this list; must not be {@code null}
      */
     public BooleanList(final boolean[] a) {
         this(N.requireNonNull(a), a.length);
@@ -332,7 +332,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
      * will affect the original array and vice versa.</p>
      *
-     * @param a the array to be used as the element array for this list. Must not be {@code null}.
+     * @param a the array to be used as the element array for this list; must not be {@code null}
      * @param size the number of elements in the list. Must be between 0 and the array length (inclusive).
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
@@ -394,7 +394,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied; must not be {@code null}
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new BooleanList containing a copy of the elements in the specified range
@@ -803,7 +803,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeIf(b -> b);   // removes all true values, list is now [false, false]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed; {@code false} otherwise
      */
     public boolean removeIf(final BooleanPredicate p) {
@@ -1215,7 +1215,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, true, false, true]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
+     * @param operator the operator to apply to each element; must not be {@code null}
      */
     public void replaceAll(final BooleanUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1236,7 +1236,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, false, false, false], modified is true
      * }</pre>
      *
-     * @param predicate the predicate to test each element. Must not be {@code null}.
+     * @param predicate the predicate to test each element; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} otherwise
      */
@@ -1759,7 +1759,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Performs the given action for each element in this list in sequential order.
      * The action is performed on each element from index 0 to size-1.
      *
-     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @param action the action to be performed for each element; must not be {@code null}
      */
     public void forEach(final BooleanConsumer action) {
         forEach(0, size, action);
@@ -1775,7 +1775,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or -1 to process from fromIndex to 0
-     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || (fromIndex > toIndex && toIndex != -1)})
      */
@@ -1981,7 +1981,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Each possible permutation occurs with approximately equal probability, assuming that
      * the source of randomness is fair.
      *
-     * @param rnd the random number generator to use for shuffling. Must not be {@code null}.
+     * @param rnd the random number generator to use for shuffling; must not be {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -2046,7 +2046,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy. May be -1 when fromIndex &gt; toIndex
-     * @param step the sampling interval. Must not be zero. Positive for forward sampling,
+     * @param step the sampling interval; must not be zero. Positive for forward sampling,
      *             negative for backward sampling
      * @return a new {@code BooleanList} containing the sampled elements
      * @throws IndexOutOfBoundsException if the indices are out of range

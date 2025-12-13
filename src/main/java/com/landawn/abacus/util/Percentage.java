@@ -138,16 +138,17 @@ public enum Percentage {
     /**
      * Returns an immutable set of Percentage values within the specified range.
      * The range is inclusive of the start value and exclusive of the end value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> mediumRange = Percentage.range(Percentage._40, Percentage._60);
      * // Returns set containing: _40, _45, _50, _55
      * }</pre>
      *
-     * @param startInclusive the starting percentage (inclusive)
-     * @param endExclusive the ending percentage (exclusive)
-     * @return an immutable set containing all Percentage values in the specified range
+     * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
+     * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
+     * @return an immutable set containing all Percentage values in the specified range.
+     * @throws IllegalArgumentException if {@code startInclusive} or {@code endExclusive} is {@code null}.
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
@@ -173,17 +174,18 @@ public enum Percentage {
      * Returns an immutable set of Percentage values within the specified range with a step increment.
      * The range is inclusive of the start value and exclusive of the end value.
      * Only percentages that are at the specified step intervals from the start are included.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> everyTenth = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
      * // Returns set containing: _10, _20, _30, _40
      * }</pre>
      *
-     * @param startInclusive the starting percentage (inclusive)
-     * @param endExclusive the ending percentage (exclusive)
-     * @param by the step increment between percentages
-     * @return an immutable set containing Percentage values at the specified intervals
+     * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
+     * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
+     * @param by the step increment between percentages, must not be {@code null}.
+     * @return an immutable set containing Percentage values at the specified intervals.
+     * @throws IllegalArgumentException if any parameter is {@code null}.
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
@@ -213,16 +215,17 @@ public enum Percentage {
     /**
      * Returns an immutable set of Percentage values within the specified closed range.
      * Both the start and end values are inclusive.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> highRange = Percentage.rangeClosed(Percentage._90, Percentage._99);
      * // Returns set containing: _90, _91, _92, _93, _94, _95, _96, _97, _98, _99
      * }</pre>
      *
-     * @param startInclusive the starting percentage (inclusive)
-     * @param endInclusive the ending percentage (inclusive)
-     * @return an immutable set containing all Percentage values in the specified closed range
+     * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
+     * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
+     * @return an immutable set containing all Percentage values in the specified closed range.
+     * @throws IllegalArgumentException if {@code startInclusive} or {@code endInclusive} is {@code null}.
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
@@ -248,17 +251,18 @@ public enum Percentage {
      * Returns an immutable set of Percentage values within the specified closed range with a step increment.
      * Both the start and end values are inclusive.
      * Only percentages that are at the specified step intervals from the start are included.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> everyFifth = Percentage.rangeClosed(Percentage._5, Percentage._20, Percentage._5);
      * // Returns set containing: _5, _10, _20
      * }</pre>
      *
-     * @param startInclusive the starting percentage (inclusive)
-     * @param endInclusive the ending percentage (inclusive)  
-     * @param by the step increment between percentages
-     * @return an immutable set containing Percentage values at the specified intervals
+     * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
+     * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
+     * @param by the step increment between percentages, must not be {@code null}.
+     * @return an immutable set containing Percentage values at the specified intervals.
+     * @throws IllegalArgumentException if any parameter is {@code null}.
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
@@ -290,8 +294,9 @@ public enum Percentage {
      * The integer value is calculated by multiplying the decimal value by 1,000,000.
      * This internal method is used for precise comparisons and calculations.
      *
-     * @param p the percentage to convert
-     * @return the integer representation of the percentage
+     * @param p the percentage to convert, must not be {@code null}.
+     * @return the integer representation of the percentage.
+     * @throws NullPointerException if {@code p} is {@code null}.
      */
     private static int intValue(final Percentage p) {
         return (int) (p.val * 1_000_000);

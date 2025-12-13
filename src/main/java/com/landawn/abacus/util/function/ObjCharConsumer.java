@@ -54,22 +54,10 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
-     * <p>This method processes an object of type T and a char value, typically producing
-     * side effects such as appending the char to a buffer, storing it in a collection,
-     * or modifying the object based on the char value.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Appending characters to StringBuilder or StringBuffer</li>
-     *   <li>Writing characters to output streams or buffers</li>
-     *   <li>Setting character values in maps or collections</li>
-     *   <li>Processing text data character by character</li>
-     *   <li>Updating object state based on character input</li>
-     * </ul>
-     *
-     * @param t the object input argument
-     * @param value the char input argument
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, char value);

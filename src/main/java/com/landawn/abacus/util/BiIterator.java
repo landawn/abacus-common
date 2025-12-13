@@ -1341,6 +1341,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @return an array containing all remaining pairs from this BiIterator
      */
+    @SuppressWarnings("deprecation")
     public Pair<A, B>[] toArray() {
         return toArray(new Pair[0]);
     }

@@ -82,7 +82,7 @@ public class UncheckedException extends RuntimeException {
      * }</pre>
      *
      * @param cause the checked exception to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final Throwable cause) {
         super(getCause(cause));
@@ -116,10 +116,10 @@ public class UncheckedException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @param message the detail message providing context for why the exception was wrapped.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the checked exception to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final String message, final Throwable cause) {
         super(message, getCause(cause));
@@ -139,7 +139,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @param cause the exception to validate and use as the cause
      * @return the validated exception to be used as the cause
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     private static Throwable getCause(final Throwable cause) {
         N.checkArgNotNull(cause, cs.cause);

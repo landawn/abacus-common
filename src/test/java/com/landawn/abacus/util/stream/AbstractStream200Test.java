@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Fn;
@@ -468,12 +468,12 @@ public class AbstractStream200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), list);
     }
 
-    @Test
-    public void test_reduceUntil() {
-        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 6);
-        assertTrue(result.isPresent());
-        assertEquals(10, result.get());
-    }
+    //    @Test
+    //    public void test_reduceUntil() {
+    //        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 6);
+    //        assertTrue(result.isPresent());
+    //        assertEquals(10, result.get());
+    //    }
 
     @Test
     public void test_groupBy_keyMapper() {

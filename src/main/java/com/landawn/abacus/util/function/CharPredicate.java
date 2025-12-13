@@ -71,7 +71,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     CharPredicate NOT_ZERO = value -> value != 0;
 
     /**
-     * Evaluates this predicate on the given char argument.
+     * Evaluates this predicate on the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -79,7 +79,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * boolean result = isDigit.test('5');   // Returns true
      * }</pre>
      *
-     * @param value the char input argument
+     * @param value the input argument
      * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override

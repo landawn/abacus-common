@@ -41,6 +41,19 @@ public class NCharacterStreamType extends ReaderType {
      * Retrieves a national character stream (Reader) from a ResultSet at the specified column index.
      * The returned Reader can be used to read Unicode character data from the database.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading Unicode text from NCLOB column
+     * Reader reader = type.get(rs, 1);
+     * if (reader != null) {
+     *     String content = IOUtils.readAllChars(reader);
+     *     reader.close();
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the character stream from
      * @return a Reader for the national character stream, or {@code null} if the column value is SQL NULL
@@ -54,6 +67,23 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Retrieves a national character stream (Reader) from a ResultSet using the specified column label.
      * The returned Reader can be used to read Unicode character data from the database.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading Unicode text from NCLOB column by name
+     * Reader reader = type.get(rs, "description");
+     * if (reader != null) {
+     *     BufferedReader br = new BufferedReader(reader);
+     *     String line;
+     *     while ((line = br.readLine()) != null) {
+     *         System.out.println(line);
+     *     }
+     *     br.close();
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
@@ -69,6 +99,19 @@ public class NCharacterStreamType extends ReaderType {
      * Sets a parameter in a PreparedStatement to a national character stream value.
      * The Reader will be read until end-of-file is reached for the stream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO documents (id, content) VALUES (?, ?)");
+     *
+     * // Setting Unicode text to NCLOB column
+     * String unicodeText = "Unicode content: \u4E2D\u6587";
+     * Reader reader = new StringReader(unicodeText);
+     * type.set(stmt, 2, reader);
+     * stmt.executeUpdate();
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Reader containing the Unicode character stream to set
@@ -82,6 +125,18 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a named parameter in a CallableStatement to a national character stream value.
      * The Reader will be read until end-of-file is reached for the stream.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_document(?, ?)}");
+     *
+     * // Setting Unicode text to named parameter
+     * String unicodeText = "Content: \u65E5\u672C\u8A9E";
+     * Reader reader = new StringReader(unicodeText);
+     * type.set(stmt, "p_content", reader);
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -97,6 +152,19 @@ public class NCharacterStreamType extends ReaderType {
      * Sets a parameter in a PreparedStatement to a national character stream value with a specified length.
      * Only the specified number of characters will be read from the Reader.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO documents (id, summary) VALUES (?, ?)");
+     *
+     * // Setting Unicode text with specific length
+     * String longText = "Very long Unicode text...";
+     * Reader reader = new StringReader(longText);
+     * type.set(stmt, 2, reader, 100);  // Only read first 100 characters
+     * stmt.executeUpdate();
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Reader containing the Unicode character stream to set
@@ -111,6 +179,18 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a named parameter in a CallableStatement to a national character stream value with a specified length.
      * Only the specified number of characters will be read from the Reader.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
+     * CallableStatement stmt = connection.prepareCall("{call add_summary(?, ?)}");
+     *
+     * // Setting Unicode text with specific length to named parameter
+     * String text = "Summary text in Unicode...";
+     * Reader reader = new StringReader(text);
+     * type.set(stmt, "p_summary", reader, 50);  // Only read first 50 characters
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

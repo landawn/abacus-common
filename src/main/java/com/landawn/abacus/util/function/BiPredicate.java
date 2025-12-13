@@ -41,7 +41,7 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * @param t the first input argument
      * @param u the second input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(T t, U u);

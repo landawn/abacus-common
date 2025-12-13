@@ -79,7 +79,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * boolean result = isPositive.test(3.14);   // Returns true
      * }</pre>
      *
-     * @param value the double input argument
+     * @param value the input argument
      * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override

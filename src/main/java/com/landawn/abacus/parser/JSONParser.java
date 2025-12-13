@@ -76,10 +76,10 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param <T> the target type parameter
-     * @param source the JSON string to parse, must be valid JSON format
-     * @param targetType the type of the target object to deserialize into
-     * @return the parsed object of type T, never null
-     * @throws IllegalArgumentException if the source string is {@code null} or invalid JSON
+     * @param source the JSON string to parse (must not be {@code null})
+     * @param targetType the type of the target object to deserialize into (must not be {@code null})
+     * @return the parsed object of type T, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
     <T> T readString(String source, Type<? extends T> targetType);
 
@@ -98,10 +98,10 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param <T> the target type parameter
-     * @param source the JSON string to parse, must be valid JSON format
-     * @param targetType the class of the target object to deserialize into
-     * @return the parsed object of type T, never null
-     * @throws IllegalArgumentException if the source string is {@code null} or invalid JSON
+     * @param source the JSON string to parse (must not be {@code null})
+     * @param targetType the class of the target object to deserialize into (must not be {@code null})
+     * @return the parsed object of type T, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
     <T> T readString(String source, Class<? extends T> targetType);
 
@@ -122,11 +122,11 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param <T> the target type parameter
-     * @param source the JSON string to parse, must be valid JSON format
+     * @param source the JSON string to parse (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the type of the target object to deserialize into
-     * @return the parsed object of type T, never null
-     * @throws IllegalArgumentException if the source string is {@code null} or invalid JSON
+     * @param targetType the type of the target object to deserialize into (must not be {@code null})
+     * @return the parsed object of type T, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
     <T> T readString(String source, JSONDeserializationConfig config, Type<? extends T> targetType);
 
@@ -147,11 +147,11 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param <T> the target type parameter
-     * @param source the JSON string to parse, must be valid JSON format
+     * @param source the JSON string to parse (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the target object to deserialize into
-     * @return the parsed object of type T, never null
-     * @throws IllegalArgumentException if the source string is {@code null} or invalid JSON
+     * @param targetType the class of the target object to deserialize into (must not be {@code null})
+     * @return the parsed object of type T, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
     <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetType);
 
@@ -168,9 +168,9 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * // numbers array is now filled with values [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON array
-     * @param output the pre-allocated array to populate with parsed values, must not be null
-     * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or array size doesn't match
+     * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
+     * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
+     * @throws IllegalArgumentException if source or output is {@code null}, or if the source contains invalid JSON, or if array size doesn't match
      */
     void readString(String source, Object[] output);
 
@@ -188,10 +188,10 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * parser.readString(json, config, numbers);
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON array
+     * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param output the pre-allocated array to populate with parsed values, must not be null
-     * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or array size doesn't match
+     * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
+     * @throws IllegalArgumentException if source or output is {@code null}, or if the source contains invalid JSON, or if array size doesn't match
      */
     void readString(String source, JSONDeserializationConfig config, Object[] output);
 

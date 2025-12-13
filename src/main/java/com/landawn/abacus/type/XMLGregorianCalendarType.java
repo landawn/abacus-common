@@ -30,6 +30,47 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link javax.xml.datatype.XMLGregorianCalendar} instances.
+ * <p>
+ * This class provides conversion between XMLGregorianCalendar objects and their string representations,
+ * supporting various date/time formats including ISO 8601 and epoch milliseconds. It also handles
+ * database operations for storing and retrieving XMLGregorianCalendar values as JDBC Timestamps.
+ * </p>
+ *
+ * <p><b>Supported Formats:</b></p>
+ * <ul>
+ *   <li>ISO 8601 date-time format</li>
+ *   <li>ISO 8601 timestamp format</li>
+ *   <li>Epoch milliseconds (LONG format)</li>
+ *   <li>"SYS_TIME" keyword for current time</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get the XMLGregorianCalendar type handler
+ * Type<XMLGregorianCalendar> type = TypeFactory.getType(XMLGregorianCalendar.class);
+ *
+ * // Convert string to XMLGregorianCalendar
+ * XMLGregorianCalendar cal = type.valueOf("2023-10-15T10:30:00");
+ *
+ * // Get current time
+ * XMLGregorianCalendar now = type.valueOf("SYS_TIME");
+ *
+ * // Convert to string
+ * String str = type.stringOf(cal);
+ *
+ * // Use with PreparedStatement
+ * type.set(preparedStatement, 1, cal);
+ *
+ * // Retrieve from ResultSet
+ * XMLGregorianCalendar result = type.get(resultSet, "created_date");
+ * }</pre>
+ *
+ * @see javax.xml.datatype.XMLGregorianCalendar
+ * @see com.landawn.abacus.util.Dates
+ * @see AbstractType
+ */
 public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
 
     public static final String XML_GREGORIAN_CALENDAR = XMLGregorianCalendar.class.getSimpleName();

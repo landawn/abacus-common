@@ -319,7 +319,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Changes to the array will be reflected in the list and vice versa.
      * The size of the list will be set to the length of the array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list; must not be {@code null}
      */
     public ByteList(final byte[] a) {
         this(N.requireNonNull(a), a.length);
@@ -331,7 +331,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * that uses only a portion of the provided array. The size parameter must not exceed
      * the length of the array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list; must not be {@code null}
      * @param size the number of elements from the array to be included in the list.
      *             Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
@@ -394,7 +394,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied; must not be {@code null}
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new ByteList containing a copy of the elements in the specified range
@@ -427,7 +427,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param startInclusive the starting value (inclusive) of the sequence
      * @param endExclusive the ending value (exclusive) of the sequence
-     * @param by the step value between consecutive elements. Must not be zero.
+     * @param by the step value between consecutive elements; must not be zero
      * @return a new ByteList containing the sequential values with the specified step
      * @throws IllegalArgumentException if by is zero
      */
@@ -458,7 +458,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param startInclusive the starting value (inclusive) of the sequence
      * @param endInclusive the ending value (inclusive) of the sequence
-     * @param by the step value between consecutive elements. Must not be zero.
+     * @param by the step value between consecutive elements; must not be zero
      * @return a new ByteList containing the sequential values with the specified step
      * @throws IllegalArgumentException if by is zero
      */
@@ -847,7 +847,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      */
     public boolean removeIf(final BytePredicate p) {
@@ -1233,7 +1233,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [2, 4, 6]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
+     * @param operator the operator to apply to each element; must not be {@code null}
      */
     public void replaceAll(final ByteUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1256,7 +1256,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 0, 3, 0, 5]
      * }</pre>
      *
-     * @param predicate the predicate to test each element. Must not be {@code null}.
+     * @param predicate the predicate to test each element; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
      */

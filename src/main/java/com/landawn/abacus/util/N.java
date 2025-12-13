@@ -183,7 +183,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
- * Map<String, Long> freq = N.occurrencesMap(list);        // {apple=2, banana=1, null=1}
+ * Map<String, Integer> freq = N.occurrencesMap(list);     // {apple=2, banana=1, null=1}
  * List<String> unique = N.distinct(list);                 // [apple, banana, null]
  * List<String> filtered = N.filter(list, N::isNotNull);   // [apple, banana, apple]
  *
@@ -204,15 +204,15 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Async operations with built-in executor
  * N.sleep(1000);   // Thread sleep utility
- * N.asyncRun(() -> doBackgroundTask());   // Async execution
+ * N.asyncExecute(() -> doBackgroundTask());   // Async execution
  *
  * // Type conversions and parsing
  * int parsed = Numbers.toInt("123");      // Parse integer (throws NumberFormatException if invalid)
- * List<Integer> converted = N.toList(numbers);   // Array to list conversion
+ * List<Integer> converted = Array.asList(numbers);   // Array to list conversion
  *
  * // String operations
- * boolean isValid = N.isNotBlank("  text  ");    // String validation
- * String trimmed = N.trim("  text  ");    // Safe trimming
+ * boolean isValid = N.notBlank("  text  ");      // String validation
+ * String trimmed = Strings.trim("  text  ");     // Safe trimming
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -304,7 +304,7 @@ import com.landawn.abacus.util.stream.Stream;
  *         catch (NumberFormatException e) { return null; }
  *     })
  *     .filter(Objects::nonNull)                                        // Keep valid numbers
- *     .collect(N.toList());   // Collect to list
+ *     .collect(Collectors.toList());   // Collect to list
  *
  * // Mathematical analysis
  * double average = N.averageInt(processedNumbers);   // Calculate average
@@ -312,7 +312,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Map<Integer, Integer> frequencies = N.occurrencesMap(processedNumbers);   // Count frequencies
  *
  * // Async processing
- * N.asyncRun(() -> {
+ * N.asyncExecute(() -> {
  *     N.forEach(processedNumbers, number -> processNumber(number));   // Process asynchronously
  * });
  *

@@ -30,6 +30,50 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for {@link java.time.ZonedDateTime} instances.
+ * <p>
+ * This class provides conversion between ZonedDateTime objects and their string representations,
+ * supporting ISO 8601 formats and epoch milliseconds. It handles database operations by converting
+ * ZonedDateTime to/from JDBC Timestamp using the default system timezone.
+ * </p>
+ *
+ * <p><b>Supported Input Formats:</b></p>
+ * <ul>
+ *   <li>ISO 8601 date-time with 'Z' suffix (e.g., "2023-10-15T10:30:00Z")</li>
+ *   <li>ISO 8601 timestamp with milliseconds (e.g., "2023-10-15T10:30:00.123Z")</li>
+ *   <li>Standard ZonedDateTime string format</li>
+ *   <li>Epoch milliseconds as numeric string</li>
+ *   <li>"SYS_TIME" keyword for current time</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get the ZonedDateTime type handler
+ * Type<ZonedDateTime> type = TypeFactory.getType(ZonedDateTime.class);
+ *
+ * // Convert string to ZonedDateTime
+ * ZonedDateTime zdt = type.valueOf("2023-10-15T10:30:00Z");
+ *
+ * // Convert from epoch milliseconds
+ * ZonedDateTime fromEpoch = type.valueOf(1697364600000L);
+ *
+ * // Get current time
+ * ZonedDateTime now = type.valueOf("SYS_TIME");
+ *
+ * // Convert to ISO 8601 timestamp string
+ * String str = type.stringOf(zdt);
+ *
+ * // Use with PreparedStatement
+ * type.set(preparedStatement, 1, zdt);
+ *
+ * // Retrieve from ResultSet
+ * ZonedDateTime result = type.get(resultSet, "event_time");
+ * }</pre>
+ *
+ * @see java.time.ZonedDateTime
+ * @see AbstractTemporalType
+ */
 public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();

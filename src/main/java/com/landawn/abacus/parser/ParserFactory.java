@@ -275,8 +275,8 @@ public final class ParserFactory {
      * JSONParser parser = ParserFactory.createJSONParser(jsc, jdc);
      * }</pre>
      *
-     * @param jsc the JSON serialization configuration
-     * @param jdc the JSON deserialization configuration
+     * @param jsc the JSON serialization configuration (may be {@code null} for default behavior)
+     * @param jdc the JSON deserialization configuration (may be {@code null} for default behavior)
      * @return a new {@link JSONParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
@@ -317,8 +317,8 @@ public final class ParserFactory {
      * XMLParser parser = ParserFactory.createAbacusXMLParser(xsc, xdc);
      * }</pre>
      *
-     * @param xsc the XML serialization configuration
-     * @param xdc the XML deserialization configuration
+     * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
+     * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
      * @return a new abacus-common {@link XMLParser} instance with the specified configurations
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
@@ -388,8 +388,8 @@ public final class ParserFactory {
      * XMLParser parser = ParserFactory.createXMLParser(xsc, xdc);
      * }</pre>
      *
-     * @param xsc the XML serialization configuration
-     * @param xdc the XML deserialization configuration
+     * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
+     * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
      * @return a new standard {@link XMLParser} instance with the specified configurations
      * @throws NoClassDefFoundError if XML support is not available
      */
@@ -443,8 +443,8 @@ public final class ParserFactory {
      * XMLParser parser = ParserFactory.createJAXBParser(xsc, xdc);
      * }</pre>
      *
-     * @param xsc the XML serialization configuration, configures how objects are converted to XML
-     * @param xdc the XML deserialization configuration, configures how XML is converted to objects
+     * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
+     * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
      * @return a new JAXB {@link XMLParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
@@ -463,8 +463,8 @@ public final class ParserFactory {
      * ParserFactory.registerKryo(MyValueObject.class);
      * }</pre>
      *
-     * @param type the class to register
-     * @throws IllegalArgumentException if type is null
+     * @param type the class to register (must not be {@code null})
+     * @throws IllegalArgumentException if type is {@code null}
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -484,9 +484,9 @@ public final class ParserFactory {
      * ParserFactory.registerKryo(Product.class, 102);
      * }</pre>
      *
-     * @param type the class to register
+     * @param type the class to register (must not be {@code null})
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type is null
+     * @throws IllegalArgumentException if type is {@code null}
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -505,9 +505,9 @@ public final class ParserFactory {
      * ParserFactory.registerKryo(Money.class, new MoneySerializer());
      * }</pre>
      *
-     * @param type the class to register
-     * @param serializer the custom serializer for this class
-     * @throws IllegalArgumentException if type or serializer is null
+     * @param type the class to register (must not be {@code null})
+     * @param serializer the custom serializer for this class (must not be {@code null})
+     * @throws IllegalArgumentException if type or serializer is {@code null}
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -527,10 +527,10 @@ public final class ParserFactory {
      * ParserFactory.registerKryo(UUID.class, new UUIDSerializer(), 201);
      * }</pre>
      *
-     * @param type the class to register
-     * @param serializer the custom serializer for this class
+     * @param type the class to register (must not be {@code null})
+     * @param serializer the custom serializer for this class (must not be {@code null})
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is null
+     * @throws IllegalArgumentException if type or serializer is {@code null}
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

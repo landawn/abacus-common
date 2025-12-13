@@ -671,6 +671,7 @@ public final class XmlMappers {
      * @throws RuntimeException if deserialization fails or URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromXml(final URL xml, final Class<? extends T> targetType) {
         try {
             return defaultXmlMapper.readValue(xml, targetType);
@@ -690,6 +691,7 @@ public final class XmlMappers {
      * @throws RuntimeException if deserialization fails or URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromXml(final URL xml, final Class<? extends T> targetType, final DeserializationConfig config) {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
@@ -992,6 +994,7 @@ public final class XmlMappers {
      * @throws RuntimeException if deserialization fails or URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromXml(final URL xml, final TypeReference<? extends T> targetType) {
         try {
             return defaultXmlMapper.readValue(xml, targetType);
@@ -1011,6 +1014,7 @@ public final class XmlMappers {
      * @throws RuntimeException if deserialization fails or URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
+    @SuppressWarnings("deprecation")
     public static <T> T fromXml(final URL xml, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
@@ -1475,6 +1479,7 @@ public final class XmlMappers {
          * @throws RuntimeException if deserialization fails or URL cannot be accessed
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
+        @SuppressWarnings("deprecation")
         public <T> T fromXml(final URL xml, final Class<? extends T> targetType) {
             try {
                 return xmlMapper.readValue(xml, targetType);
@@ -1635,6 +1640,7 @@ public final class XmlMappers {
           * @throws RuntimeException if deserialization fails or URL cannot be accessed
           * @see com.fasterxml.jackson.core.type.TypeReference
           */
+        @SuppressWarnings("deprecation")
         public <T> T fromXml(final URL xml, final TypeReference<? extends T> targetType) {
             try {
                 return xmlMapper.readValue(xml, targetType);

@@ -41,6 +41,16 @@ public class NStringType extends AbstractStringType {
      * Retrieves a national character string value from a ResultSet at the specified column index.
      * This method is designed to handle Unicode strings stored in national character columns.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> type = TypeFactory.getType("NString");
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading Unicode text from NVARCHAR column
+     * String name = type.get(rs, 1);
+     * // Returns: "こんにちは" (Japanese text) or other Unicode content
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the string from
      * @return the national string value from the ResultSet, or {@code null} if the column value is SQL NULL
@@ -54,6 +64,16 @@ public class NStringType extends AbstractStringType {
     /**
      * Retrieves a national character string value from a ResultSet using the specified column label.
      * This method is designed to handle Unicode strings stored in national character columns.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> type = TypeFactory.getType("NString");
+     * ResultSet rs = ...;  // obtained from database query
+     *
+     * // Reading Unicode text by column name
+     * String description = type.get(rs, "description");
+     * // Returns: "\u4E2D\u6587" (Chinese text) or other Unicode content
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
@@ -69,6 +89,18 @@ public class NStringType extends AbstractStringType {
      * Sets a parameter in a PreparedStatement to a national character string value.
      * This method ensures the string is stored using the database's national character set.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> type = TypeFactory.getType("NString");
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO products (id, name) VALUES (?, ?)");
+     *
+     * // Setting Unicode text to NVARCHAR column
+     * String productName = "\u4EA7\u54C1\u540D\u79F0";  // Chinese: "Product Name"
+     * type.set(stmt, 2, productName);
+     * stmt.executeUpdate();
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the national string value to set, or {@code null} to set SQL NULL
@@ -82,6 +114,17 @@ public class NStringType extends AbstractStringType {
     /**
      * Sets a named parameter in a CallableStatement to a national character string value.
      * This method ensures the string is stored using the database's national character set.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> type = TypeFactory.getType("NString");
+     * CallableStatement stmt = connection.prepareCall("{call update_product(?, ?)}");
+     *
+     * // Setting Unicode text using named parameter
+     * String description = "\u65E5\u672C\u8A9E\u306E\u8AAC\u660E";  // Japanese: "Japanese description"
+     * type.set(stmt, "p_description", description);
+     * stmt.execute();
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.KryoParser;
@@ -279,7 +277,7 @@ public final class OkHttpRequest {
      * @param tag the tag to attach to the request
      * @return this OkHttpRequest instance for method chaining
      */
-    public OkHttpRequest tag(@Nullable final Object tag) {
+    public OkHttpRequest tag(final Object tag) {
         requestBuilder.tag(tag);
         return this;
     }
@@ -313,7 +311,7 @@ public final class OkHttpRequest {
      * @param tag the tag to attach, or {@code null} to remove existing tag
      * @return this OkHttpRequest instance for method chaining
      */
-    public <T> OkHttpRequest tag(final Class<? super T> type, @Nullable final T tag) {
+    public <T> OkHttpRequest tag(final Class<? super T> type, final T tag) {
         requestBuilder.tag(type, tag);
         return this;
     }
@@ -755,7 +753,7 @@ public final class OkHttpRequest {
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, String)
      */
-    public OkHttpRequest body(final String content, @Nullable final MediaType contentType) {
+    public OkHttpRequest body(final String content, final MediaType contentType) {
         body = RequestBody.create(content, contentType);
 
         return this;
@@ -769,7 +767,7 @@ public final class OkHttpRequest {
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, byte[])
      */
-    public OkHttpRequest body(final byte[] content, @Nullable final MediaType contentType) {
+    public OkHttpRequest body(final byte[] content, final MediaType contentType) {
         body = RequestBody.create(content, contentType);
 
         return this;
@@ -785,7 +783,7 @@ public final class OkHttpRequest {
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, byte[], int, int)
      */
-    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, @Nullable final MediaType contentType) {
+    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, final MediaType contentType) {
         body = RequestBody.create(content, contentType, offset, byteCount);
 
         return this;
@@ -798,7 +796,7 @@ public final class OkHttpRequest {
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
      */
-    public OkHttpRequest body(final File content, @Nullable final MediaType contentType) {
+    public OkHttpRequest body(final File content, final MediaType contentType) {
         body = RequestBody.create(content, contentType);
 
         return this;

@@ -65,22 +65,10 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
-     * <p>This method processes an object of type T and a boolean value, typically producing
-     * side effects such as modifying the object based on the boolean flag, conditional logging,
-     * or toggling states.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Setting boolean properties or flags on objects</li>
-     *   <li>Conditional processing based on a boolean parameter</li>
-     *   <li>Enabling/disabling features or states in an object</li>
-     *   <li>Logging or output operations controlled by a boolean flag</li>
-     *   <li>Toggling visibility, permissions, or access rights</li>
-     * </ul>
-     *
-     * @param t the object input argument
-     * @param value the boolean input argument
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, boolean value);

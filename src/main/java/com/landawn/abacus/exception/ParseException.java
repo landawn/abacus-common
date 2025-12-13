@@ -59,7 +59,7 @@ public class ParseException extends RuntimeException {
     /**
      * Constructs a new {@code ParseException} with no detail message.
      * The cause is not initialized, and the token value is set to the default of -2.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ParseException();
@@ -71,14 +71,14 @@ public class ParseException extends RuntimeException {
     /**
      * Constructs a new {@code ParseException} with the specified detail message.
      * The cause is not initialized, and the token value is set to the default of -2.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ParseException("Malformed JSON at line " + lineNumber);
      * }</pre>
      *
-     * @param message the detail message which provides information about the parsing error.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      */
     public ParseException(String message) {
         super(message);
@@ -88,7 +88,7 @@ public class ParseException extends RuntimeException {
      * Constructs a new {@code ParseException} with the specified token and detail message.
      * This constructor is useful when you want to indicate the specific token or position
      * where the parsing error occurred.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Token could represent a position, token type, or error code
@@ -97,8 +97,8 @@ public class ParseException extends RuntimeException {
      *
      * @param token an integer value representing the token, position, or error code where the parsing failed.
      *              This value can be retrieved later using {@link #getToken()}.
-     * @param message the detail message which provides information about the parsing error.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      */
     public ParseException(int token, String message) {
         super(message);
@@ -108,10 +108,10 @@ public class ParseException extends RuntimeException {
     /**
      * Constructs a new {@code ParseException} with the specified detail message and cause.
      * The token value is set to the default of -2.
-     * 
+     *
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -121,8 +121,8 @@ public class ParseException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @param message the detail message which provides information about the parsing error.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
      *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
      */
@@ -132,12 +132,12 @@ public class ParseException extends RuntimeException {
 
     /**
      * Constructs a new {@code ParseException} with the specified cause and a detail
-     * message of {@code (cause==null ? {@code null} : cause.toString())} (which typically contains the
+     * message of {@code (cause==null ? null : cause.toString())} (which typically contains the
      * class and detail message of {@code cause}). The token value is set to the default of -2.
-     * 
+     *
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (IOException e) {

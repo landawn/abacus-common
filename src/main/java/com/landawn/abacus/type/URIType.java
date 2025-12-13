@@ -22,6 +22,34 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.net.URI} instances.
+ * <p>
+ * This class provides conversion between URI objects and their string representations,
+ * as well as database operations for storing and retrieving URI values via JDBC.
+ * </p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get the URI type handler
+ * Type<URI> type = TypeFactory.getType(URI.class);
+ *
+ * // Convert string to URI
+ * URI uri = type.valueOf("https://example.com/path?query=value");
+ *
+ * // Convert URI to string
+ * String str = type.stringOf(uri);
+ *
+ * // Use with PreparedStatement
+ * type.set(preparedStatement, 1, uri);
+ *
+ * // Retrieve from ResultSet
+ * URI result = type.get(resultSet, "uri_column");
+ * }</pre>
+ *
+ * @see java.net.URI
+ * @see AbstractType
+ */
 public class URIType extends AbstractType<URI> {
 
     public static final String URI = URI.class.getSimpleName();

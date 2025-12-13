@@ -43,16 +43,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
     CharFunction<Character> BOX = value -> value;
 
     /**
-     * Applies this function to the given char-valued argument and produces a result.
-     *
-     * <p>This method transforms a {@code char} value into a result of type {@code R}.
-     * Common use cases include:
-     * <ul>
-     *   <li>Converting characters to their numeric code points or other representations</li>
-     *   <li>Categorizing characters (e.g., determining if uppercase, lowercase, digit)</li>
-     *   <li>Mapping characters to lookup tables or configuration objects</li>
-     *   <li>Creating strings or formatted output from characters</li>
-     * </ul>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -63,8 +54,8 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * Boolean digit = isDigit.apply('5');   // Returns true
      * }</pre>
      *
-     * @param value the char input argument
-     * @return the function result of type R
+     * @param value the function argument
+     * @return the function result
      */
     @Override
     R apply(char value);

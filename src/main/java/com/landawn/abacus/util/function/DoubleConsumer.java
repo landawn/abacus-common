@@ -31,6 +31,7 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeException>, java.util.function.DoubleConsumer { //NOSONAR
     /**
      * Performs this operation on the given argument.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40,7 +41,7 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * DoubleStream.of(1.1, 2.2, 3.3).forEach(printer);
      * }</pre>
      *
-     * @param t the double input argument
+     * @param t the input argument
      */
     @Override
     void accept(double t);

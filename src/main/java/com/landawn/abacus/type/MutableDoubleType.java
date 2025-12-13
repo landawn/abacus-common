@@ -17,6 +17,15 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link com.landawn.abacus.util.MutableDouble} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * MutableDouble instances, which are mutable wrappers around primitive double values.
+ *
+ * @see com.landawn.abacus.util.MutableDouble
+ * @see NumberType
+ */
 public class MutableDoubleType extends NumberType<MutableDouble> {
 
     public static final String MUTABLE_DOUBLE = MutableDouble.class.getSimpleName();
@@ -236,7 +245,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * type.writeCharacter(writer, md, null);
      * // Writes: 3.14159
      *
-     * type.writeCharacter(writer, {@code null}, null);
+     * type.writeCharacter(writer, null, null);
      * // Writes: null
      * }</pre>
      *

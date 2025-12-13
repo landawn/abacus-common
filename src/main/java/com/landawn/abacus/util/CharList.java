@@ -439,7 +439,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied; must not be {@code null}
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new CharList containing a copy of the elements in the specified range
@@ -902,7 +902,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Errors or runtime exceptions thrown during iteration or by the predicate
      * are relayed to the caller.
      *
-     * @param p a predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed
      */
     public boolean removeIf(final CharPredicate p) {
@@ -1241,7 +1241,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces each element of this list with the result of applying the operator to that element.
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
+     * @param operator the operator to apply to each element; must not be {@code null}
      */
     public void replaceAll(final CharUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1252,7 +1252,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces all elements that satisfy the given predicate with the specified new value.
      *
-     * @param predicate the predicate to test elements. Must not be {@code null}.
+     * @param predicate the predicate to test elements; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced
      */

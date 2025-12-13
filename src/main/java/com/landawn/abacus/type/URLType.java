@@ -25,6 +25,36 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.net.URL} instances.
+ * <p>
+ * This class provides conversion between URL objects and their string representations,
+ * as well as database operations for storing and retrieving URL values via JDBC.
+ * Unlike {@link URIType}, this handler works with URLs which require a valid protocol.
+ * </p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get the URL type handler
+ * Type<URL> type = TypeFactory.getType(URL.class);
+ *
+ * // Convert string to URL
+ * URL url = type.valueOf("https://example.com/path");
+ *
+ * // Convert URL to string (external form)
+ * String str = type.stringOf(url);
+ *
+ * // Use with PreparedStatement
+ * type.set(preparedStatement, 1, url);
+ *
+ * // Retrieve from ResultSet
+ * URL result = type.get(resultSet, "url_column");
+ * }</pre>
+ *
+ * @see java.net.URL
+ * @see URIType
+ * @see AbstractType
+ */
 public class URLType extends AbstractType<URL> {
 
     public static final String URL = URL.class.getSimpleName();

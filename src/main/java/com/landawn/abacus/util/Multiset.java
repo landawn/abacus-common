@@ -1121,6 +1121,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param c the collection containing elements to be removed.
      * @return {@code true} if this multiset changed as a result of the call.
      */
+    @SuppressWarnings("deprecation")
     public boolean removeAllOccurrences(final Collection<?> c) {
         return removeAll(c);
     }

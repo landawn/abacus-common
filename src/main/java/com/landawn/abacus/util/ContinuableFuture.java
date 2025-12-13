@@ -31,6 +31,12 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Tuple.Tuple4;
 
+// This class is heavily inspired by CompletableFuture but redesigned for better usability and flexibility.
+// Another important reason for creating this class is to support the java versions prior to Java 8 and Android platforms.
+// Now, it seems this class is not necessary any more after Java 8 is widely adopted.
+// Try to remove it several times but failed because it provides some important features not available in CompletableFuture,
+// Keep it here for the time being.
+
 /**
  * A powerful and flexible asynchronous computation framework that extends the standard {@link Future} interface
  * with advanced functional composition capabilities, recursive cancellation support, and fluent chaining operations.
@@ -1138,16 +1144,6 @@ public class ContinuableFuture<T> implements Future<T> {
      * This method returns immediately with a new {@code ContinuableFuture} that will complete
      * with the transformed result when this future completes and the function is applied.
      *
-     * <p><b>⚠️ BETA API - Subject to Change:</b></p>
-     * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
-     * Potential changes include:
-     * <ul>
-     *   <li>The exception wrapping behavior (currently wraps in RuntimeException) may change to preserve the original exception type</li>
-     *   <li>The execution timing (lazy vs eager) may be configurable in future versions</li>
-     *   <li>Additional overloads with executor parameters may be introduced</li>
-     *   <li>Method signature or name may be refined based on usage patterns and feedback</li>
-     * </ul>
-     *
      * <p>If the function throws an exception, the returned future will complete exceptionally
      * with that exception wrapped in a {@code RuntimeException}.
      *
@@ -1412,7 +1408,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided action after both this future and the other future complete.
+     * Executes the provided action asynchronously after both this future and the other future complete.
      * The action is executed asynchronously using the configured executor.
      * 
      * <p>The returned future completes when the action completes.
@@ -1443,7 +1439,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided bi-consumer after both this future and the other future complete,
+     * Executes the provided bi-consumer asynchronously after both this future and the other future complete,
      * passing both results to the consumer. The consumer is executed asynchronously using
      * the configured executor.
      * 
@@ -1475,7 +1471,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided consumer after both this future and the other future complete,
+     * Executes the provided consumer asynchronously after both this future and the other future complete,
      * passing a {@link Tuple4} containing both results and any exceptions to the consumer.
      * The consumer is executed regardless of whether the futures completed successfully.
      * 
@@ -1521,7 +1517,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided quad-consumer after both this future and the other future complete,
+     * Executes the provided quad-consumer asynchronously after both this future and the other future complete,
      * passing all four values (both results and exceptions) as separate parameters. The consumer
      * is executed regardless of whether the futures completed successfully.
      * 
@@ -1561,7 +1557,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided callable after both this future and the other future complete successfully.
+     * Executes the provided callable asynchronously after both this future and the other future complete successfully.
      * The callable is executed asynchronously using the configured executor of this future.
      *
      * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
@@ -1593,7 +1589,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided bi-function after both this future and the other future complete successfully,
+     * Executes the provided bi-function asynchronously after both this future and the other future complete successfully,
      * passing both results to the bi-function. The bi-function is executed asynchronously using the
      * configured executor of this future.
      *
@@ -1623,7 +1619,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided function after both this future and the other future complete,
+     * Executes the provided function asynchronously after both this future and the other future complete,
      * regardless of whether they complete successfully or exceptionally. The function is executed
      * asynchronously using the configured executor of this future and receives a {@link Tuple4}
      * containing both results and their exceptions (if any).
@@ -1670,7 +1666,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided QuadFunction after both this ContinuableFuture and the other ContinuableFuture complete,
+     * Executes the provided QuadFunction asynchronously after both this ContinuableFuture and the other ContinuableFuture complete,
      * regardless of whether they complete successfully or exceptionally.
      * The function receives four parameters: the results and exceptions from both futures.
      * 
@@ -1711,7 +1707,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Runnable action after either this ContinuableFuture or the other ContinuableFuture completes
+     * Executes the provided Runnable action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
      * (successfully or exceptionally).
      * 
      * <p>This method is useful for triggering an action as soon as any of the futures completes,
@@ -1742,7 +1738,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture completes
+     * Executes the provided Consumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
      * (successfully or exceptionally). The Consumer receives the result of whichever future completes first.
      * If the future that completes first fails, the consumer receives {@code null}.
      * 
@@ -1775,7 +1771,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture completes
+     * Executes the provided Consumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
      * (successfully or exceptionally).The BiConsumer receives both the result (if successful)
      * and the exception (if failed) from whichever future completes first.
      * 
@@ -1813,7 +1809,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Callable action after either this ContinuableFuture or the other ContinuableFuture
+     * Executes the provided Callable action asynchronously after either this ContinuableFuture or the other ContinuableFuture
      * completes (successfully or exceptionally).
      * 
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
@@ -1844,7 +1840,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided function after either this ContinuableFuture or the other ContinuableFuture
+     * Executes the provided function asynchronously after either this ContinuableFuture or the other ContinuableFuture
      * completes (successfully or exceptionally). The function transforms the result of whichever future completes first.
      * If the future that completes first fails, the function receives {@code null}.
      * 
@@ -1877,7 +1873,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided BiFunction after either this ContinuableFuture or the other ContinuableFuture
+     * Executes the provided BiFunction asynchronously after either this ContinuableFuture or the other ContinuableFuture
      * completes (successfully or exceptionally). The BiFunction receives both the result (if successful)
      * and the exception (if failed) from whichever future completes first, and returns a transformed result.
      * 
@@ -1914,7 +1910,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Runnable action after the first successful completion between this ContinuableFuture
+     * Executes the provided Runnable action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. If both futures fail, the action is not executed and the returned
      * future completes exceptionally with the first exception.
      * 
@@ -1955,7 +1951,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Consumer action after the first successful completion between this ContinuableFuture
+     * Executes the provided Consumer action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The Consumer receives the result of the first future that completes successfully.
      * 
      * <p>If both futures fail, the action is not executed and the returned future completes exceptionally
@@ -2003,7 +1999,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided BiConsumer action after the first successful completion between this ContinuableFuture
+     * Executes the provided BiConsumer action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The BiConsumer receives the result and exception, where at least one will be {@code non-null}.
      *
      * <p><b>⚠️ BETA API - Subject to Change:</b></p>
@@ -2064,7 +2060,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Callable action after the first successful completion between this ContinuableFuture
+     * Executes the provided Callable action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. If both futures fail, the callable is not executed and the returned
      * future completes exceptionally with the first exception.
      * 
@@ -2105,7 +2101,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided function after the first successful completion between this ContinuableFuture
+     * Executes the provided function asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The function transforms the result of the first future that completes successfully.
      * 
      * <p>If both futures fail, the function is not executed and the returned future completes exceptionally
@@ -2152,7 +2148,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided BiFunction after the first successful completion between this ContinuableFuture
+     * Executes the provided BiFunction asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The BiFunction receives the result and exception, where at least one will be {@code non-null}.
      * 
      * <p>If the first future to complete succeeds, the BiFunction receives (result, null).
@@ -2242,6 +2238,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the delay parameter; must not be null.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
      */
+    @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
         if (delay <= 0) {
             return this;
@@ -2274,6 +2271,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture configured with the specified executor.
      * @throws IllegalArgumentException if {@code executor} is null.
      */
+    @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenUse(final Executor executor) {
         return with(executor, 0, TimeUnit.MILLISECONDS);
     }

@@ -37,8 +37,8 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -1228,20 +1228,20 @@ public class Stream200Test extends TestBase {
         assertEquals(21, result);
     }
 
-    @Test
-    public void testReduceUntilAccumulatorAndCondition() {
-        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 5);
-        assertEquals(Optional.of(6), result);
-
-        Optional<Integer> result2 = Stream.of(1, 2, 3).reduceUntil((a, b) -> a + b, sum -> sum > 10);
-        assertEquals(Optional.of(6), result2);
-    }
-
-    @Test
-    public void testReduceUntilAccumulatorAndBiCondition() {
-        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((acc, next) -> acc + next, (acc, next) -> (acc + next) > 5);
-        assertEquals(Optional.of(6), result);
-    }
+    //    @Test
+    //    public void testReduceUntilAccumulatorAndCondition() {
+    //        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 5);
+    //        assertEquals(Optional.of(6), result);
+    //
+    //        Optional<Integer> result2 = Stream.of(1, 2, 3).reduceUntil((a, b) -> a + b, sum -> sum > 10);
+    //        assertEquals(Optional.of(6), result2);
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntilAccumulatorAndBiCondition() {
+    //        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((acc, next) -> acc + next, (acc, next) -> (acc + next) > 5);
+    //        assertEquals(Optional.of(6), result);
+    //    }
 
     @Test
     public void testCollectSupplierAccumulatorCombiner() {

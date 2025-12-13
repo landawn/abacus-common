@@ -16,6 +16,15 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link com.landawn.abacus.util.MutableBoolean} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * MutableBoolean instances, which are mutable wrappers around primitive boolean values.
+ *
+ * @see com.landawn.abacus.util.MutableBoolean
+ * @see AbstractType
+ */
 public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     public static final String MUTABLE_BOOLEAN = MutableBoolean.class.getSimpleName();
@@ -268,15 +277,14 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
      *
      * MutableBoolean mb = MutableBoolean.of(true);
-     * type.writeCharacter(writer, mb, config);
+     * type.writeCharacter(writer, mb, null);
      * String result = writer.toString();
      * // result: "true"
      *
      * writer.reset();
-     * type.writeCharacter(writer, null, config);
+     * type.writeCharacter(writer, null, null);
      * result = writer.toString();
      * // result: "null"
      * }</pre>

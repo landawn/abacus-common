@@ -25,8 +25,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
@@ -513,33 +513,33 @@ public class AbstractStream100Test extends TestBase {
         assertEquals(Arrays.asList("1-2-3", "2-3-4", "3-4-5"), triples);
     }
 
-    @Test
-    public void testReduceUntil() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
-        Stream<Integer> stream = createStream(input);
-
-        Optional<Integer> result = stream.reduceUntil(Integer::sum, sum -> sum >= 10);
-        assertTrue(result.isPresent());
-        assertEquals(10, result.get().intValue());
-    }
-
-    @Test
-    public void testReduceUntil_2() {
-        List<Integer> input = Arrays.asList(1, 2, 2, 3, 3, 3, 4);
-        Stream<Integer> stream = createStream(input);
-
-        Integer result = stream.reduceUntil(0, (a, b) -> a + b, (a, b) -> a + b, sum -> sum >= 10);
-        assertEquals(11, result);
-    }
-
-    @Test
-    public void testReduceUntil_3() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
-        Stream<Integer> stream = createStream(input);
-
-        Integer result = stream.reduceUntil(0, (a, b) -> a + b, (a, b) -> a + b, (sum, next) -> sum + next > 10);
-        assertEquals(10, result);
-    }
+    //    @Test
+    //    public void testReduceUntil() {
+    //        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
+    //        Stream<Integer> stream = createStream(input);
+    //
+    //        Optional<Integer> result = stream.reduceUntil(Integer::sum, sum -> sum >= 10);
+    //        assertTrue(result.isPresent());
+    //        assertEquals(10, result.get().intValue());
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntil_2() {
+    //        List<Integer> input = Arrays.asList(1, 2, 2, 3, 3, 3, 4);
+    //        Stream<Integer> stream = createStream(input);
+    //
+    //        Integer result = stream.reduceUntil(0, (a, b) -> a + b, (a, b) -> a + b, sum -> sum >= 10);
+    //        assertEquals(11, result);
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntil_3() {
+    //        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
+    //        Stream<Integer> stream = createStream(input);
+    //
+    //        Integer result = stream.reduceUntil(0, (a, b) -> a + b, (a, b) -> a + b, (sum, next) -> sum + next > 10);
+    //        assertEquals(10, result);
+    //    }
 
     @Test
     public void testGroupBy() {

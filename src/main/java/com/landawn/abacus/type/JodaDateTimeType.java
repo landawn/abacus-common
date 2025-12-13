@@ -25,6 +25,16 @@ import org.joda.time.DateTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for Joda-Time DateTime objects.
+ * <p>
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@code org.joda.time.DateTime} instances. It supports multiple string formats including ISO 8601 formats
+ * and provides database conversion using {@code java.sql.Timestamp}.
+ *
+ * @see org.joda.time.DateTime
+ * @see AbstractJodaDateTimeType
+ */
 public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     public static final String JODA_DATE_TIME = "JodaDateTime";

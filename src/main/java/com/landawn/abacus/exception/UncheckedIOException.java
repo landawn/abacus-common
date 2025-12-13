@@ -67,10 +67,10 @@ public class UncheckedIOException extends UncheckedException {
 
     /**
      * Constructs a new {@code UncheckedIOException} by wrapping the specified {@link IOException}.
-     * 
+     *
      * <p>This constructor preserves all information from the original IOException including
      * its message, stack trace, and any suppressed exceptions.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -81,7 +81,7 @@ public class UncheckedIOException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link IOException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedIOException(final IOException cause) {
         super(cause);
@@ -104,10 +104,10 @@ public class UncheckedIOException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param message the detail message providing context about the I/O failure.
-     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
      * @param cause the {@link IOException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if cause is null
+     * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);

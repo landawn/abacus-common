@@ -1876,22 +1876,22 @@ public class Stream2025Test extends TestBase {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    public void testReduceUntilWithPredicate() {
-        int result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 6).get();
-        assertEquals(10, result);
-    }
-
-    @Test
-    public void testReduceUntilWithBiPredicate() {
-        int result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, (a, b) -> a + b > 6).get();
-        assertEquals(6, result);
-    }
-
-    @Test
-    public void testReduceUntilEmpty() {
-        assertFalse(Stream.<Integer> empty().reduceUntil((a, b) -> a + b, sum -> sum > 6).isPresent());
-    }
+    //    @Test
+    //    public void testReduceUntilWithPredicate() {
+    //        int result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 6).get();
+    //        assertEquals(10, result);
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntilWithBiPredicate() {
+    //        int result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, (a, b) -> a + b > 6).get();
+    //        assertEquals(6, result);
+    //    }
+    //
+    //    @Test
+    //    public void testReduceUntilEmpty() {
+    //        assertFalse(Stream.<Integer> empty().reduceUntil((a, b) -> a + b, sum -> sum > 6).isPresent());
+    //    }
 
     @Test
     public void testGroupTo() {

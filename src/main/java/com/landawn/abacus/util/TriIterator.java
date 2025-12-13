@@ -1325,6 +1325,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @return An array containing the remaining triples of elements in this TriIterator.
      */
+    @SuppressWarnings("deprecation")
     public Triple<A, B, C>[] toArray() {
         return toArray(new Triple[0]);
     }

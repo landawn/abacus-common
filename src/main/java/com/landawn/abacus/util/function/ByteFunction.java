@@ -65,8 +65,8 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * Integer unsigned = toUnsigned.apply((byte) -1);   // Returns 255
      * }</pre>
      *
-     * @param value the byte input argument
-     * @return the function result of type R
+     * @param value the function argument
+     * @return the function result
      */
     @Override
     R apply(byte value);

@@ -35,19 +35,8 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> { //NOSONAR
     /**
-     * Performs this operation on the given float argument.
-     *
-     * <p>This method is expected to operate via side-effects, such as modifying external state,
-     * printing output, or updating data structures. The specific behavior depends on the implementation.</p>
-     *
-     * <p>Common use cases include:</p>
-     * <ul>
-     *   <li>Accumulating float values (e.g., sum, product, statistics)</li>
-     *   <li>Writing float values to output (console, file, network)</li>
-     *   <li>Updating state based on float input</li>
-     *   <li>Collecting float values in a data structure</li>
-     *   <li>Triggering actions based on float value thresholds</li>
-     * </ul>
+     * Performs this operation on the given argument.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -55,33 +44,22 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * printer.accept(3.14f);   // Prints: Value: 3.14
      * }</pre>
      *
-     * @param t the float value to be processed
+     * @param t the input argument
      */
     @Override
     void accept(float t);
 
     /**
-     * Returns a composed {@code FloatConsumer} that performs, in sequence, this operation
-     * followed by the {@code after} operation. If performing either operation throws an exception,
-     * it is relayed to the caller of the composed operation. If performing this operation throws
-     * an exception, the {@code after} operation will not be performed.
-     *
-     * <p>This method allows for chaining multiple consumer operations. The composed consumer will:</p>
-     * <ol>
-     *   <li>First execute this consumer's {@code accept} method with the given argument</li>
-     *   <li>Then execute the {@code after} consumer's {@code accept} method with the same argument</li>
-     * </ol>
+     * Returns a composed {@code FloatConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Float> values = new ArrayList<>();
-     * FloatConsumer addToList = values::add;
-     * FloatConsumer printValue = v -> System.out.println("Processing: " + v);
-     *
-     * // This will first add to list, then print the value
-     * FloatConsumer combined = addToList.andThen(printValue);
-     * combined.accept(42.5f);
-     * // The value is added to the list AND printed
+     * FloatConsumer logger = value -> System.out.println("Processing: " + value);
+     * FloatConsumer validator = value -> { if (value < 0) throw new IllegalArgumentException(); };
+     * FloatConsumer combined = logger.andThen(validator);
+     * combined.accept(5.5f);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

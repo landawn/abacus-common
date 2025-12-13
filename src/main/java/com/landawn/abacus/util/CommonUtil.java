@@ -4007,9 +4007,9 @@ sealed class CommonUtil permits N {
      * equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first boolean array, must not be null
+     * @param a the first boolean array; must not be null
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second boolean array, must not be null
+     * @param b the second boolean array; must not be null
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4059,7 +4059,7 @@ sealed class CommonUtil permits N {
      * equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first char array, must not be null
+     * @param a the first char array; must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second char array, must not be null
      * @param fromIndexB the starting index in the second array, inclusive
@@ -10359,7 +10359,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
-     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @param enumClass the class object of the enum type whose constants are to be listed; must not be {@code null}
      * @return an ImmutableList containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
@@ -10389,7 +10389,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
-     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @param enumClass the class object of the enum type whose constants are to be listed; must not be {@code null}
      * @return an ImmutableSet containing all the enum constants in the order they're declared in the enum class.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
@@ -10420,7 +10420,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
-     * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
+     * @param enumClass the class object of the enum type whose constants are to be listed; must not be {@code null}
      * @return an ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
@@ -11126,7 +11126,7 @@ sealed class CommonUtil permits N {
      * Invokes the specified constructor with the provided arguments to create new instances of a class.
      *
      * @param <T> the type of the object to be created.
-     * @param c the Constructor object representing the constructor to be invoked. Must not be {@code null}.
+     * @param c the Constructor object representing the constructor to be invoked; must not be {@code null}
      * @param args the array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
      * @return a new instance of the class that the constructor belongs to.
      * @throws InstantiationException if the class that declares the underlying constructor represents an abstract class.
@@ -11160,7 +11160,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type of the interface for the proxy class to implement.
-     * @param interfaceClass the Class object of the interface for the proxy class to implement. Must not be {@code null}.
+     * @param interfaceClass the Class object of the interface for the proxy class to implement; must not be {@code null}
      * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
@@ -11176,7 +11176,7 @@ sealed class CommonUtil permits N {
      * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
      *
      * @param <T> the type of the interface for the proxy class to implement.
-     * @param interfaceClasses the array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
+     * @param interfaceClasses the array of Class objects of the interfaces for the proxy class to implement; must not be {@code null}
      * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
@@ -19628,7 +19628,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
+     * @param iter the Iterator to retrieve the element from; must not be {@code null}
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterator
      * @throws IllegalArgumentException if the Iterator is {@code null} or the index is negative

@@ -20,9 +20,10 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.N;
 
 /**
- * Type handler for standard Boolean operations.
- * This class provides handling for java.lang.Boolean values in database operations,
- * with automatic type conversion for non-Boolean database values.
+ * Type handler for Boolean (wrapper class) values.
+ * This class provides database operations and type information for Boolean objects.
+ * It handles the conversion between database values and Java Boolean objects,
+ * with automatic type conversion for non-Boolean database values, supporting {@code null} values.
  */
 public final class BooleanType extends AbstractBooleanType {
 
@@ -62,7 +63,7 @@ public final class BooleanType extends AbstractBooleanType {
 
     /**
      * Retrieves a Boolean value from a ResultSet at the specified column index.
-     * This method handles type conversion for non-Boolean database columns,
+     * This method handles various data types in the database and converts them to Boolean,
      * automatically converting numeric and string values to Boolean.
      *
      * <p><b>Usage Examples:</b></p>
@@ -90,7 +91,7 @@ public final class BooleanType extends AbstractBooleanType {
 
     /**
      * Retrieves a Boolean value from a ResultSet using the specified column label.
-     * This method handles type conversion for non-Boolean database columns,
+     * This method handles various data types in the database and converts them to Boolean,
      * automatically converting numeric and string values to Boolean.
      *
      * <p><b>Usage Examples:</b></p>

@@ -6038,8 +6038,8 @@ public final class Beans {
      * // Returns true if common properties (name, email) are equal
      * }</pre>
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
+     * @param bean1 the first bean to compare; must not be null
+     * @param bean2 the second bean to compare; must not be null
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if no common property is found
      */
@@ -6074,9 +6074,9 @@ public final class Beans {
      * // Returns true because name and email are equal, age is not compared
      * }</pre>
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
+     * @param bean1 the first bean to compare; must not be null
+     * @param bean2 the second bean to compare; must not be null
+     * @param propNamesToCompare the collection of property names to compare; must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
      */
@@ -6104,8 +6104,8 @@ public final class Beans {
      * <p><b>Note:</b> This method uses reflection to access properties which may impact
      * performance in tight loops or high-frequency operations.</p>
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
+     * @param bean1 the first bean to compare; must not be null
+     * @param bean2 the second bean to compare; must not be null
      * @param propNamesToCompare the collection of property names to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null

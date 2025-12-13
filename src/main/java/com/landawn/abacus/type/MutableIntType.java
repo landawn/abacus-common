@@ -17,6 +17,15 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link com.landawn.abacus.util.MutableInt} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * MutableInt instances, which are mutable wrappers around primitive int values.
+ *
+ * @see com.landawn.abacus.util.MutableInt
+ * @see NumberType
+ */
 public class MutableIntType extends NumberType<MutableInt> {
 
     public static final String MUTABLE_INT = MutableInt.class.getSimpleName();

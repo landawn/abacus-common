@@ -16,6 +16,15 @@ import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link com.landawn.abacus.util.MutableChar} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * MutableChar instances, which are mutable wrappers around primitive char values.
+ *
+ * @see com.landawn.abacus.util.MutableChar
+ * @see AbstractType
+ */
 public class MutableCharType extends AbstractType<MutableChar> {
 
     public static final String MUTABLE_CHAR = MutableChar.class.getSimpleName();
@@ -235,14 +244,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * type.writeCharacter(writer, mc, null);
      * // Writes: D
      *
-     * // With quotation configured
-     * JSONXMLSerializationConfig config = new JSONXMLSerializationConfig();
+     * // With quotation configured (using concrete subclass)
+     * JSONSerializationConfig config = JSONSerializationConfig.create();
      * config.setCharQuotation('\'');
      * type.writeCharacter(writer, mc, config);
      * // Writes: 'D'
      *
-     * // For {@code null} value
-     * type.writeCharacter(writer, {@code null}, null);
+     * // For null value
+     * type.writeCharacter(writer, null, null);
      * // Writes: null
      * }</pre>
      *
