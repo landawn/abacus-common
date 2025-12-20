@@ -233,6 +233,8 @@ compile 'com.landawn:abacus-common:7.0.0'
 
 * Most methods are designed to support broad and general use cases. `null` parameters are generally permitted as long as they do not violate the method’s intended contract. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is the user’s responsibility to handle `null` values appropriately if they are considered invalid in a given context.
 
+* There are many overloaded methods (for example, `N.occurrencesOf(...)` and `N.filter(...)`). In general, extensive method overloading is not recommended, as it is often unnecessary and can be considered a bad design smell in many scenarios. However, in this library, extreme code simplification and high performance are two very important goals, and the use of overloading serves those objectives.
+
 * Immutable vs. Mutable: Immutable objects are not preferred over mutable ones in this library. Mutable variables and parameters are generally used as the base cases. <u>*a),*</u> when a variable is passed as a method parameter, it should typically not be modified within the called method, unless it is explicitly intended to serve as an output parameter or modifying the input parameter is (part of) the purpose of the method call. <u>*b),*</u> a value returned from a method may be freely modified by the caller, as the caller is considered the owner/holder of the returned value. If the returned value is not meant to be modified by the caller, an immutable value should be returned instead. <u>*c),*</u> variables must not be modified concurrently by multiple threads without proper synchronization, regardless of whether they are mutable or immutable. In other words, if no modifications occur, it makes no difference whether the variables are mutable or immutable.
 
 * Given the large number of methods across this library, maintaining strict consistency in handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException`, and similar is inherently challenging. Therefore, these exceptions should not be treated differently, and the following approach **must be avoided**:
@@ -267,6 +269,8 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 [Java Stream API](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html)
 
 [When to use parallel streams](http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html)
+
+[Performance Hints](https://abseil.io/fast/hints.html#performance-hints)
 
 [Top Java 8 stream questions on stackoverflow](./Top_java_8_stream_questions_so.md)
 
