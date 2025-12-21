@@ -1388,7 +1388,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg) {
-        template = String.valueOf(template);   // null -> "null"
+        template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16);
@@ -1439,7 +1439,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2) {
-        template = String.valueOf(template);   // null -> "null"
+        template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 32);
@@ -1453,17 +1453,17 @@ public abstract class AbstractLogger implements Logger {
         }
 
         int templateStart = 0;
-        int cnt = 0;
+        int substitutedArgsCount = 0;
 
         if (placeholderStart >= 0) {
-            cnt++;
+            substitutedArgsCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(N.toString(arg1));
             templateStart = placeholderStart + 2;
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
-                cnt++;
+                substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(N.toString(arg2));
                 templateStart = placeholderStart + 2;
@@ -1472,13 +1472,14 @@ public abstract class AbstractLogger implements Logger {
             sb.append(template, templateStart, template.length());
         }
 
-        if (cnt == 0) {
+        if (substitutedArgsCount == 0) {
+            sb.append(template);
             sb.append(" [");
             sb.append(N.toString(arg1));
             sb.append(", ");
             sb.append(N.toString(arg2));
             sb.append(']');
-        } else if (cnt == 1) {
+        } else if (substitutedArgsCount == 1) {
             sb.append(" [");
             sb.append(N.toString(arg2));
             sb.append(']');
@@ -1513,7 +1514,7 @@ public abstract class AbstractLogger implements Logger {
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
-        template = String.valueOf(template);   // null -> "null"
+        template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 48);
@@ -1527,24 +1528,24 @@ public abstract class AbstractLogger implements Logger {
         }
 
         int templateStart = 0;
-        int cnt = 0;
+        int substitutedArgsCount = 0;
 
         if (placeholderStart >= 0) {
-            cnt++;
+            substitutedArgsCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(N.toString(arg1));
             templateStart = placeholderStart + 2;
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
-                cnt++;
+                substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(N.toString(arg2));
                 templateStart = placeholderStart + 2;
                 placeholderStart = template.indexOf(placeholder, templateStart);
 
                 if (placeholderStart >= 0) {
-                    cnt++;
+                    substitutedArgsCount++;
                     sb.append(template, templateStart, placeholderStart);
                     sb.append(N.toString(arg3));
                     templateStart = placeholderStart + 2;
@@ -1554,7 +1555,8 @@ public abstract class AbstractLogger implements Logger {
             sb.append(template, templateStart, template.length());
         }
 
-        if (cnt == 0) {
+        if (substitutedArgsCount == 0) {
+            sb.append(template);
             sb.append(" [");
             sb.append(N.toString(arg1));
             sb.append(", ");
@@ -1562,13 +1564,13 @@ public abstract class AbstractLogger implements Logger {
             sb.append(", ");
             sb.append(N.toString(arg3));
             sb.append(']');
-        } else if (cnt == 1) {
+        } else if (substitutedArgsCount == 1) {
             sb.append(" [");
             sb.append(N.toString(arg2));
             sb.append(", ");
             sb.append(N.toString(arg3));
             sb.append(']');
-        } else if (cnt == 2) {
+        } else if (substitutedArgsCount == 2) {
             sb.append(" [");
             sb.append(N.toString(arg3));
             sb.append(']');
@@ -1602,7 +1604,7 @@ public abstract class AbstractLogger implements Logger {
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, final Object... args) {
-        template = String.valueOf(template);   // null -> "null"
+        template = String.valueOf(template); // null -> "null"
 
         if (N.isEmpty(args)) {
             return template;

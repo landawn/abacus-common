@@ -41,7 +41,7 @@ public interface ToShortBiFunction<T, U> {
      * ToShortBiFunction<Integer, Integer> adder = (a, b) -> (short)(a + b);
      * short sum = adder.applyAsShort(100, 200);   // returns 300
      *
-     * ToShortBiFunction<String, Integer> charCodeAt = (str, index) -> (short) str.charAt(index);
+     * ToShortBiFunction<String, Integer> charCodeAt = (str, index) -> (str != null && index >= 0 && index < str.length()) ? (short) str.charAt(index) : 0;
      * short charCode = charCodeAt.applyAsShort("Hello", 0);   // returns 72 (ASCII code for 'H')
      * }</pre>
      *

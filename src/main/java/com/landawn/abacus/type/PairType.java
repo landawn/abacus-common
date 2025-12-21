@@ -152,6 +152,10 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
+        if (a == null || a.length < 2) {
+            throw new IllegalArgumentException("Invalid Pair format. Expected array with at least 2 elements but got: " + str);
+        }
+
         final L left = a[0] == null ? null : ((L) (leftType.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
         final R right = a[1] == null ? null : ((R) (rightType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], rightType)));
 
@@ -174,7 +178,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

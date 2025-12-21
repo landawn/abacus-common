@@ -198,6 +198,10 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
         final int index = str.indexOf(_SEPARATOR);
 
+        if (index < 0) {
+            throw new IllegalArgumentException("Invalid HBaseColumn format. Expected 'version:value' but got: " + str);
+        }
+
         final long version = Long.parseLong(str.substring(0, index));
         final T value = elementType.valueOf(str.substring(index + 1));
 

@@ -110,16 +110,16 @@ public final class PrimitiveShortType extends AbstractShortType {
      */
     @Override
     public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Short) {
-            return (Short) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).shortValue();
+        } else if (result instanceof Short) {
+            return (Short) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).shortValue();
         } else {
-            return Numbers.toShort(ret.toString());
+            return Numbers.toShort(result.toString());
         }
     }
 
@@ -148,16 +148,16 @@ public final class PrimitiveShortType extends AbstractShortType {
      */
     @Override
     public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Short) {
-            return (Short) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).shortValue();
+        } else if (result instanceof Short) {
+            return (Short) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).shortValue();
         } else {
-            return Numbers.toShort(ret.toString());
+            return Numbers.toShort(result.toString());
         }
     }
 }

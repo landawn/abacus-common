@@ -118,7 +118,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(final Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get());   // elementType.stringOf(x.get());   //NOSONAR
+        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());   //NOSONAR
     }
 
     /**
@@ -182,7 +182,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Optional<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || x.isEmpty()) ? null : x.get());   //NOSONAR
+        stmt.setObject(columnIndex, (x == null || x.isEmpty()) ? null : x.get()); //NOSONAR
     }
 
     /**
@@ -197,7 +197,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Optional<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || x.isEmpty()) ? null : x.get());   //NOSONAR
+        stmt.setObject(parameterName, (x == null || x.isEmpty()) ? null : x.get()); //NOSONAR
     }
 
     /**

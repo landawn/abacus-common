@@ -357,7 +357,7 @@ public final class PropertiesUtil {
      */
     private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) {
         if (Strings.isEmpty(configFileName)) {
-            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
+            throw new RuntimeException("target file name cannot be empty or null: " + configFileName);
         }
 
         if (logger.isInfoEnabled()) {
@@ -488,7 +488,7 @@ public final class PropertiesUtil {
     @MayReturnNull
     public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
         if (Strings.isEmpty(configFileName)) {
-            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
+            throw new RuntimeException("target file name cannot be empty or null: " + configFileName);
         }
 
         String folderPrefix = null;

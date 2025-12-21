@@ -80,12 +80,12 @@ public final class BooleanType extends AbstractBooleanType {
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null || ret instanceof Boolean) {
-            return (Boolean) ret;
+        if (result == null || result instanceof Boolean) {
+            return (Boolean) result;
         } else {
-            return N.convert(ret, Boolean.class);
+            return N.convert(result, Boolean.class);
         }
     }
 
@@ -108,12 +108,12 @@ public final class BooleanType extends AbstractBooleanType {
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null || ret instanceof Boolean) {
-            return (Boolean) ret;
+        if (result == null || result instanceof Boolean) {
+            return (Boolean) result;
         } else {
-            return N.convert(ret, Boolean.class);
+            return N.convert(result, Boolean.class);
         }
     }
 }

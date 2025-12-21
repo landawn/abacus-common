@@ -274,7 +274,7 @@ public final class HARUtil {
     @SuppressWarnings("rawtypes")
     public static String sendRequestByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
-        final List<Map> entries = Maps.getByPath(map, "log.entries");   //NOSONAR
+        final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR

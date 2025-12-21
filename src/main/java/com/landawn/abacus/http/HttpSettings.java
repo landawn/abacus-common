@@ -662,7 +662,7 @@ public final class HttpSettings {
      * Returns a string representation of this HttpSettings object.
      * The string includes all configured settings for debugging purposes.
      *
-     * @return A string representation of this object
+     * @return a string representation of this object
      */
     @Override
     public String toString() {

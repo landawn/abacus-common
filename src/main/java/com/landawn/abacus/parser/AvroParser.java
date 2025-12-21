@@ -261,7 +261,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                         dataFileWriter.append(c);
                     }
                 } else {
-                    throw new IllegalArgumentException("Unsupported type: " + type.name());   //NOSONAR
+                    throw new IllegalArgumentException("Unsupported type: " + type.name()); //NOSONAR
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);

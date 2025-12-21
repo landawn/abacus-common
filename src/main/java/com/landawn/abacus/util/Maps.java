@@ -465,7 +465,7 @@ public final class Maps {
             return N.newMap(cls, size);
         } catch (final Exception e) {
             try {
-                N.newMap(cls, 1);   // Attempt to create a map with size 1 to check if the class is instantiable.
+                N.newMap(cls, 1); // Attempt to create a map with size 1 to check if the class is instantiable.
             } catch (final Exception e1) {
                 UNABLE_CREATED_MAP_CLASSES.add(m.getClass());
             }
@@ -495,7 +495,7 @@ public final class Maps {
             return N.newMap(cls, size);
         } catch (final Exception e) {
             try {
-                N.newMap(cls, 1);   // Attempt to create a map with size 1 to check if the class is instantiable.
+                N.newMap(cls, 1); // Attempt to create a map with size 1 to check if the class is instantiable.
             } catch (final Exception e1) {
                 UNABLE_CREATED_MAP_CLASSES.add(m.getClass());
             }
@@ -1750,7 +1750,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}.
      */
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull");   // NOSONAR
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultForNull;
@@ -1890,7 +1890,7 @@ public final class Maps {
      * @see N#convert(Object, Type)
      */
     public static <K, T> T getNonNull(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull");   // NOSONAR
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultForNull;
@@ -1943,7 +1943,7 @@ public final class Maps {
 
         // if (val != null || map.containsKey(key)) {
         if (val == null) {
-            val = defaultValueSupplier.get();   // Objects.requireNonNull(defaultValueSupplier.get());
+            val = defaultValueSupplier.get(); // Objects.requireNonNull(defaultValueSupplier.get());
             map.put(key, val);
         }
 
@@ -3093,7 +3093,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the filter is null.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);   // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3147,7 +3147,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the filter is null.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);   // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3201,7 +3201,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the filter is null.
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);   // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3256,7 +3256,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the filter is null.
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);   // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3429,7 +3429,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the predicate is null.
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);   // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -3471,7 +3471,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the predicate is null.
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);   // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -3512,7 +3512,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the predicate is null.
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);   // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -3553,7 +3553,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the predicate is null.
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);   // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();

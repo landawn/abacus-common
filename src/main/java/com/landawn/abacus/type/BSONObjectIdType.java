@@ -70,6 +70,6 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      */
     @Override
     public ObjectId valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new ObjectId(str);
+        return Strings.isBlank(str) ? null : new ObjectId(str.trim());
     }
 }

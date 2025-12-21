@@ -1531,7 +1531,7 @@ public final class Beans {
             // for Double-Checked Locking is Broke initialize it before
             final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableFieldMap.keySet();   // initialize? //NOSONAR
+            unmodifiableFieldMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
             // put it into map.
@@ -1541,7 +1541,7 @@ public final class Beans {
 
             final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.wrap(propGetMethodMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableGetMethodMap.keySet();   // initialize? //NOSONAR
+            unmodifiableGetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             Map<String, Method> existingGetMethodMap = beanPropGetMethodPool.get(cls);
@@ -1556,7 +1556,7 @@ public final class Beans {
             // for Double-Checked Locking is Broke to initialize it before put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
             //noinspection ResultOfMethodCallIgnored
-            unmodifiableSetMethodMap.keySet();   // initialize? //NOSONAR
+            unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             Map<String, Method> existingSetMethodMap = beanPropSetMethodPool.get(cls);
@@ -1593,7 +1593,7 @@ public final class Beans {
 
                 final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
                 //noinspection ResultOfMethodCallIgnored
-                unmodifiableBuilderPropSetMethodMap.keySet();   // initialize? //NOSONAR
+                unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
                 beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
                 final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
@@ -3004,7 +3004,7 @@ public final class Beans {
                 propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass);   //NOSONAR
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass); //NOSONAR
                 }
 
                 propValue = propInfo.getPropValue(bean);
@@ -5627,7 +5627,7 @@ public final class Beans {
                 if (targetPropInfo == null) {
                     //noinspection ConstantValue
                     if (!ignoreUnmatchedProperty) { //NOSONAR
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass());   //NOSONAR
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
                     }
                 } else {
                     propValue = srcBeanInfo.getPropValue(sourceBean, propName);
@@ -6006,9 +6006,9 @@ public final class Beans {
             } else if (double.class.equals(parameterClass) || Double.class.equals(parameterClass)) {
                 propValue = N.RAND.nextDouble();
             } else if (byte.class.equals(parameterClass) || Byte.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue();   //NOSONAR
+                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue(); //NOSONAR
             } else if (short.class.equals(parameterClass) || Short.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue();   //NOSONAR
+                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue(); //NOSONAR
             } else if (Number.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(N.RAND.nextInt()));
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {

@@ -739,7 +739,7 @@ public final class IOUtil {
             // This may be slow on some machine. Move it from static initialization block to method.
 
             final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID) //NOSONAR
-                    || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID);   //NOSONAR
+                    || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID); //NOSONAR
 
             // implementation for android support
             if (IS_PLATFORM_ANDROID) {
@@ -1129,7 +1129,7 @@ public final class IOUtil {
      */
     public static Writer stringBuilder2Writer(final StringBuilder sb) throws IllegalArgumentException {
         if (sb == null) {
-            throw new IllegalArgumentException("The input StringBuilder can't be null.");
+            throw new IllegalArgumentException("The input StringBuilder cannot be null");
         }
 
         return new StringWriter(sb);
@@ -1892,7 +1892,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -1918,7 +1918,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param encoding the name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
@@ -1946,7 +1946,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
      * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
@@ -2075,7 +2075,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
      * @return a {@code String} containing the characters read from the file.
@@ -2101,7 +2101,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
@@ -2239,7 +2239,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -2265,7 +2265,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param encoding the name of the character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
@@ -2293,7 +2293,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param source the file to read from, must not be {@code null}.
+     * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
      * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
@@ -2400,7 +2400,7 @@ public final class IOUtil {
     public static List<String> readAllLines(final Reader source) throws UncheckedIOException {
         final List<String> res = new ArrayList<>();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
-        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);   //NOSONAR
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             String line = null;
@@ -2572,7 +2572,7 @@ public final class IOUtil {
         N.checkArgNotNegative(count, cs.count);
 
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
-        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);   //NOSONAR
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
         final List<String> res = new ArrayList<>();
 
         try {
@@ -2765,7 +2765,7 @@ public final class IOUtil {
     @MayReturnNull
     public static String readLastLine(final Reader source) throws IOException {
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
-        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);   //NOSONAR
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             String ret = null;
@@ -2874,7 +2874,7 @@ public final class IOUtil {
         N.checkArgNotNegative(lineIndex, cs.lineIndex);
 
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
-        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);   //NOSONAR
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             if ((lineIndex > 0)) {
@@ -2890,7 +2890,7 @@ public final class IOUtil {
             //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " exceeded the total line count of the specified reader/file");   // Should throw IllegalArgumentException
             //    }
 
-            return br.readLine();   //NOSONAR
+            return br.readLine(); //NOSONAR
         } finally {
             if (!isBufferedReader) {
                 Objectory.recycle(br);
@@ -3386,7 +3386,7 @@ public final class IOUtil {
         }
 
         final boolean isBufferedWriter = isBufferedWriter(output);
-        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);   //NOSONAR
+        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
 
         try {
             Object line = null;
@@ -3497,7 +3497,7 @@ public final class IOUtil {
         }
 
         final boolean isBufferedWriter = isBufferedWriter(output);
-        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);   //NOSONAR
+        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
 
         try {
             for (final Object line : lines) {
@@ -6119,7 +6119,7 @@ public final class IOUtil {
      */
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
-            return new FileReader(file, DEFAULT_CHARSET);   // NOSONAR
+            return new FileReader(file, DEFAULT_CHARSET); // NOSONAR
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -6171,7 +6171,7 @@ public final class IOUtil {
         try {
             createNewFileIfNotExists(file);
 
-            return new FileWriter(file, DEFAULT_CHARSET);   // NOSONAR
+            return new FileWriter(file, DEFAULT_CHARSET); // NOSONAR
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -6248,7 +6248,7 @@ public final class IOUtil {
      * @see InputStreamReader#InputStreamReader(InputStream, Charset)
      */
     public static InputStreamReader newInputStreamReader(final InputStream is) {
-        return new InputStreamReader(is, DEFAULT_CHARSET);   // NOSONAR
+        return new InputStreamReader(is, DEFAULT_CHARSET); // NOSONAR
     }
 
     /**
@@ -6269,7 +6269,7 @@ public final class IOUtil {
      * @see InputStreamReader#InputStreamReader(InputStream, Charset)
      */
     public static InputStreamReader newInputStreamReader(final InputStream is, final Charset charset) {
-        return new InputStreamReader(is, checkCharset(charset));   // NOSONAR
+        return new InputStreamReader(is, checkCharset(charset)); // NOSONAR
     }
 
     /**
@@ -6288,7 +6288,7 @@ public final class IOUtil {
      * @see OutputStreamWriter#OutputStreamWriter(OutputStream, Charset)
      */
     public static OutputStreamWriter newOutputStreamWriter(final OutputStream os) {
-        return new OutputStreamWriter(os, DEFAULT_CHARSET);   // NOSONAR
+        return new OutputStreamWriter(os, DEFAULT_CHARSET); // NOSONAR
     }
 
     /**
@@ -6581,7 +6581,7 @@ public final class IOUtil {
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
     public static java.io.BufferedReader newBufferedReader(final InputStream is) throws UncheckedIOException {
-        return new java.io.BufferedReader(newInputStreamReader(is, DEFAULT_CHARSET));   // NOSONAR
+        return new java.io.BufferedReader(newInputStreamReader(is, DEFAULT_CHARSET)); // NOSONAR
     }
 
     /**
@@ -6696,7 +6696,7 @@ public final class IOUtil {
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
     public static java.io.BufferedWriter newBufferedWriter(final OutputStream os) {
-        return new java.io.BufferedWriter(newOutputStreamWriter(os));   // NOSONAR
+        return new java.io.BufferedWriter(newOutputStreamWriter(os)); // NOSONAR
     }
 
     /**
@@ -7800,7 +7800,7 @@ public final class IOUtil {
      */
     public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
         if (!srcFile.exists()) {
-            throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
+            throw new IllegalArgumentException("The source file does not exist: " + srcFile.getAbsolutePath());
         }
 
         checkDestDirectory(destDir);
@@ -7836,7 +7836,9 @@ public final class IOUtil {
      * @return {@code true} if the renaming succeeded, {@code false} otherwise.
      */
     public static boolean renameTo(final File srcFile, final String newFileName) {
-        return srcFile.renameTo(new File(srcFile.getParent() + IOUtil.DIR_SEPARATOR + newFileName));
+        final String parent = srcFile.getParent();
+        final File newFile = parent == null ? new File(newFileName) : new File(parent + IOUtil.DIR_SEPARATOR + newFileName);
+        return srcFile.renameTo(newFile);
     }
 
     /**
@@ -7875,7 +7877,7 @@ public final class IOUtil {
             return false;
         }
 
-        return file.delete();   //NOSONAR
+        return file.delete(); //NOSONAR
     }
 
     /**
@@ -7972,7 +7974,7 @@ public final class IOUtil {
             }
         }
 
-        return file.delete();   //NOSONAR
+        return file.delete(); //NOSONAR
     }
 
     /**
@@ -8496,7 +8498,7 @@ public final class IOUtil {
         checkFileExists(file, true);
 
         if (file.isDirectory()) {
-            return sizeOfDirectory0(file, considerNonExistingFileAsEmpty);   // private method; expects directory
+            return sizeOfDirectory0(file, considerNonExistingFileAsEmpty); // private method; expects directory
         }
 
         return file.length();
@@ -8556,7 +8558,7 @@ public final class IOUtil {
             return sizeOfDirectory0(file, considerNonExistingFileAsEmpty);
         }
 
-        return file.length();   // will be 0 if file does not exist
+        return file.length(); // will be 0 if file does not exist
     }
 
     private static long sizeOfDirectory0(final File directory, final boolean considerNonExistingDirectoryAsEmpty) {
@@ -8570,7 +8572,7 @@ public final class IOUtil {
 
         for (final File file : files) {
             if (!isSymbolicLink(file)) {
-                size += sizeOf0(file, considerNonExistingDirectoryAsEmpty);   // internal method
+                size += sizeOf0(file, considerNonExistingDirectoryAsEmpty); // internal method
                 if (size < 0) {
                     break;
                 }
@@ -8599,7 +8601,7 @@ public final class IOUtil {
         checkFileExists(file, true);
 
         if (file.isDirectory()) {
-            return sizeOfDirectoryAsBigInteger(file);   // private method; expects directory
+            return sizeOfDirectoryAsBigInteger(file); // private method; expects directory
         }
 
         return BigInteger.valueOf(file.length());
@@ -8630,7 +8632,7 @@ public final class IOUtil {
             return sizeOfDirectoryAsBigInteger0(file);
         }
 
-        return BigInteger.valueOf(file.length());   // will be 0 if file does not exist
+        return BigInteger.valueOf(file.length()); // will be 0 if file does not exist
     }
 
     private static BigInteger sizeOfDirectoryAsBigInteger0(final File directory) {
@@ -8644,7 +8646,7 @@ public final class IOUtil {
 
         for (final File file : files) {
             if (!isSymbolicLink(file)) {
-                size = size.add(sizeOfAsBigInteger0(file));   // internal method 
+                size = size.add(sizeOfAsBigInteger0(file)); // internal method 
             }
         }
 
@@ -8699,7 +8701,7 @@ public final class IOUtil {
         }
 
         if (!destDir.canWrite()) {
-            throw new IOException("Destination '" + destDir + "' cannot be written to");   //NOSONAR
+            throw new IOException("Destination '" + destDir + "' cannot be written to"); //NOSONAR
         }
     }
 
@@ -9131,7 +9133,7 @@ public final class IOUtil {
                 long partLength = sizeOfPart;
 
                 if (i == numOfParts - 1) {
-                    partLength += fileLength % numOfParts;
+                    partLength += fileLength % sizeOfPart;
                 }
 
                 int count = 0;
@@ -9262,7 +9264,7 @@ public final class IOUtil {
             String line = null;
             long bytes = 0;
             while (cnt < byReadingLineNum && (line = br.readLine()) != null) {
-                bytes += line.getBytes().length; // NOSONAR
+                bytes += line.getBytes(DEFAULT_CHARSET).length;
 
                 cnt++;
             }
@@ -9880,8 +9882,8 @@ public final class IOUtil {
             return true;
         }
 
-        try (final InputStream input1 = IOUtil.newFileInputStream(file1);   //
-                final InputStream input2 = IOUtil.newFileInputStream(file2)) {
+        try (final InputStream input1 = IOUtil.newFileInputStream(file1); //
+             final InputStream input2 = IOUtil.newFileInputStream(file2)) {
             return contentEquals(input1, input2);
         }
     }
@@ -9932,7 +9934,7 @@ public final class IOUtil {
 
         final Charset charset = Strings.isEmpty(charsetName) ? DEFAULT_CHARSET : Charsets.get(charsetName);
         try (Reader input1 = new InputStreamReader(Files.newInputStream(file1.toPath()), charset);
-                Reader input2 = new InputStreamReader(Files.newInputStream(file2.toPath()), charset)) {
+             Reader input2 = new InputStreamReader(Files.newInputStream(file2.toPath()), charset)) {
             return contentEqualsIgnoreEOL(input1, input2);
         }
     }
@@ -10100,8 +10102,8 @@ public final class IOUtil {
 
         final boolean isInput1BufferedReader = IOUtil.isBufferedReader(input1);
         final boolean isInput2BufferedReader = IOUtil.isBufferedReader(input2);
-        final BufferedReader br1 = isInput1BufferedReader ? (BufferedReader) input1 : Objectory.createBufferedReader(input1);   //NOSONAR
-        final BufferedReader br2 = isInput2BufferedReader ? (BufferedReader) input2 : Objectory.createBufferedReader(input2);   //NOSONAR
+        final BufferedReader br1 = isInput1BufferedReader ? (BufferedReader) input1 : Objectory.createBufferedReader(input1); //NOSONAR
+        final BufferedReader br2 = isInput2BufferedReader ? (BufferedReader) input2 : Objectory.createBufferedReader(input2); //NOSONAR
 
         try {
             String line1 = br1.readLine();
@@ -10871,8 +10873,9 @@ public final class IOUtil {
                 throw e;
             }
         } else if (source.getName().endsWith(ZIP)) {
-            final ZipFile zf = new ZipFile(source);
+            ZipFile zf = null;
             try {
+                zf = new ZipFile(source);
                 final ZipEntry ze = zf.entries().nextElement();
                 is = zf.getInputStream(ze);
                 outputZipFile.setValue(zf);

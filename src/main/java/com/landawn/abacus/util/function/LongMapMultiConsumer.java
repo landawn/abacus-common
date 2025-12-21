@@ -57,10 +57,10 @@ public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMa
      * }</pre>
      *
      * @param value the input long value to be transformed
-     * @param ic the consumer that accepts the transformed values. The implementation
-     *           should call {@code ic.accept(long)} for each output value. May be
-     *           called zero or more times
+     * @param consumer the consumer that accepts the transformed values. The implementation
+     *                 should call {@code consumer.accept(long)} for each output value. May be
+     *                 called zero or more times
      */
     @Override
-    void accept(long value, java.util.function.LongConsumer ic);
+    void accept(long value, java.util.function.LongConsumer consumer);
 }

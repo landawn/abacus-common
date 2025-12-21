@@ -283,8 +283,8 @@ final class ISO8601Util {
                         // milliseconds can be optional in the format
                         if (checkOffset(date, offset, '.')) {
                             offset += 1;
-                            final int endOffset = indexOfNonDigit(date, offset + 1);   // assume at least one digit
-                            final int parseEndOffset = Math.min(endOffset, offset + 3);   // parse up to 3 digits
+                            final int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
+                            final int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
                             final int fraction = parseInt(date, offset, parseEndOffset);
                             // compensate for "missing" digits
                             switch (parseEndOffset - offset) { // number of digits parsed

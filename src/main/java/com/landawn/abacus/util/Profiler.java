@@ -614,7 +614,7 @@ public final class Profiler {
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
         if ((threadNum <= 0) || (loopNum <= 0) || (threadDelay < 0) || (loopDelay < 0)) {
-            throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay);   //NOSONAR
+            throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay); //NOSONAR
         }
         if (N.notEmpty(args) && (args.size() > 1) && (args.size() != threadNum)) {
             throw new IllegalArgumentException(
@@ -915,7 +915,7 @@ public final class Profiler {
             return;
         }
 
-        Runtime.getRuntime().gc();   //NOSONAR
+        Runtime.getRuntime().gc(); //NOSONAR
         N.sleep(1000);
     }
 
@@ -1203,7 +1203,7 @@ public final class Profiler {
          */
         protected String time2String(final long timeInMillis) {
             final Timestamp timestamp = Dates.createTimestamp(timeInMillis);
-            return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT);   // + " " + N.LOCAL_TIME_ZONE.getID();
+            return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
         }
     }
 
@@ -1920,7 +1920,7 @@ public final class Profiler {
          * @see #writeXmlResult(Writer) for machine-readable XML output
          */
         public void printResult() {
-            writeResult(new PrintWriter(System.out));   //NOSONAR
+            writeResult(new PrintWriter(System.out)); //NOSONAR
         }
 
         /**
@@ -2109,7 +2109,7 @@ public final class Profiler {
             final List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
                 output.println();
-                output.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)");   //NOSONAR
+                output.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)"); //NOSONAR
                 for (final Object element : failedMethodList) {
                     output.println("--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
@@ -2255,12 +2255,12 @@ public final class Profiler {
          */
         private void writeHtmlResult(final PrintWriter output) {
             output.println(SEPARATOR_LINE);
-            output.println("<br/>" + "(unit: milliseconds)");   //NOSONAR
+            output.println("<br/>" + "(unit: milliseconds)"); //NOSONAR
             output.println("<br/>" + "threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
             output.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()));
             output.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()));
             output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
-            output.println("<br/>");   //NOSONAR
+            output.println("<br/>"); //NOSONAR
 
             output.println("<br/>");
             output.println("<table width=\"1200\" border=\"1\">");
@@ -2290,7 +2290,7 @@ public final class Profiler {
                 final double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
                 output.println("<tr>");
-                output.println("<td>" + methodName + "</td>");   //NOSONAR
+                output.println("<td>" + methodName + "</td>"); //NOSONAR
                 output.println("<td>" + elapsedTimeFormat.format(avgTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.format(minTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.format(maxTime) + "</td>");
@@ -2322,7 +2322,7 @@ public final class Profiler {
             MethodStatistics methodStatistics;
             final List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                output.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>");   //NOSONAR
+                output.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>"); //NOSONAR
                 for (final Object element : failedMethodList) {
                     output.println("<br/>" + "--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
@@ -2538,7 +2538,7 @@ public final class Profiler {
             }
             final List<MethodStatistics> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>");   //NOSONAR
+                output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>"); //NOSONAR
                 for (final MethodStatistics methodStatistics : failedMethodList) {
                     output.println("<error>" + methodStatistics.toString() + "</error>");
                 }

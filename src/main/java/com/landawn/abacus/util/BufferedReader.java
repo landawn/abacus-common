@@ -484,7 +484,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             }
 
             // Bound skip by beginning and end of the source
-            final long ns = Math.min(strLength - nextChar, n);   //NOSONAR
+            final long ns = Math.min(strLength - nextChar, n); //NOSONAR
             nextChar += (int) ns;
 
             return ns;

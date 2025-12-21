@@ -49,6 +49,17 @@ public interface ByteNConsumer {
      *
      * <p>The byte array is passed to both consumers in the same order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteNConsumer logger = values -> System.out.println("Count: " + values.length);
+     * ByteNConsumer printer = values -> {
+     *     for (byte v : values) System.out.print(v + " ");
+     *     System.out.println();
+     * };
+     * ByteNConsumer combined = logger.andThen(printer);
+     * combined.accept((byte) 1, (byte) 2, (byte) 3);   // Logs count then prints values
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ByteNConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation

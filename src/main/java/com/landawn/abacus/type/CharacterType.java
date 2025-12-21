@@ -29,6 +29,7 @@ public final class CharacterType extends AbstractCharacterType {
      * The type name constant for Character type identification.
      */
     public static final String CHARACTER = Character.class.getSimpleName();
+
     /**
      * Package-private constructor for CharacterType.
      * This constructor is called by the TypeFactory to create Character type instances.
@@ -77,12 +78,12 @@ public final class CharacterType extends AbstractCharacterType {
      */
     @Override
     public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final String ret = rs.getString(columnIndex);
+        final String result = rs.getString(columnIndex);
 
-        if (ret == null) {
+        if (result == null || result.isEmpty()) {
             return null; // NOSONAR
         } else {
-            return ret.charAt(0);
+            return result.charAt(0);
         }
     }
 
@@ -104,12 +105,12 @@ public final class CharacterType extends AbstractCharacterType {
      */
     @Override
     public Character get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final String ret = rs.getString(columnLabel);
+        final String result = rs.getString(columnLabel);
 
-        if (ret == null) {
+        if (result == null || result.isEmpty()) {
             return null; // NOSONAR
         } else {
-            return ret.charAt(0);
+            return result.charAt(0);
         }
     }
 }

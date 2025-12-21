@@ -1419,14 +1419,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a Pair containing two Sets: the first with all unique first elements, the second with all unique second elements
      */
     public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
-        final Set<A> listA = supplier.get();
-        final Set<B> listB = supplier.get();
+        final Set<A> setA = supplier.get();
+        final Set<B> setB = supplier.get();
 
         this.foreachRemaining((a, b) -> {
-            listA.add(a);
-            listB.add(b);
+            setA.add(a);
+            setB.add(b);
         });
 
-        return Pair.of(listA, listB);
+        return Pair.of(setA, setB);
     }
 }

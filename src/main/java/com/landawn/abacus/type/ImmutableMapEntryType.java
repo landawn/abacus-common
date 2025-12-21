@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.AbstractMap;
+import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -156,7 +157,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
             return null; // NOSONAR
         }
 
-        return ImmutableEntry.copyOf(Utils.jsonParser.deserialize(str, jdc, Clazz.<K, V> ofMap()).entrySet().iterator().next());
+        final Map<K, V> map = Utils.jsonParser.deserialize(str, jdc, Clazz.<K, V> ofMap());
+
+        if (map == null || map.isEmpty()) {
+            return null; // NOSONAR
+        }
+
+        return ImmutableEntry.copyOf(map.entrySet().iterator().next());
     }
 
     /**

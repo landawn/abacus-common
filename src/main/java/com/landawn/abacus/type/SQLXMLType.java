@@ -79,7 +79,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      */
     @Override
     public String stringOf(final SQLXML x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("SQLXML cannot be converted to string representation");
     }
 
     /**
@@ -100,7 +100,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      */
     @Override
     public SQLXML valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("SQLXML cannot be created from string representation");
     }
 
     /**

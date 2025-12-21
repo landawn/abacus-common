@@ -955,7 +955,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> of(final Optional<T> op) {
-        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get());   //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
     }
 
     /**
@@ -977,7 +977,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @see #ofNullable(Object)
      */
     public static <T, E extends Exception> Seq<T, E> of(final java.util.Optional<T> op) {
-        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get());   //NOSONAR
+        return op == null || op.isEmpty() ? Seq.empty() : Seq.of(op.get()); //NOSONAR
     }
 
     /**
@@ -1902,7 +1902,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
-        return create(iter).onClose(newCloseHandler(iter));   //NOSONAR
+        return create(iter).onClose(newCloseHandler(iter)); //NOSONAR
     }
 
     /**
@@ -2011,9 +2011,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, Charsets.DEFAULT, reader, closeReaderWhenStreamIsClosed);
 
         if (closeReaderWhenStreamIsClosed) {
-            return of(iter).onClose(iter::close);   //NOSONAR
+            return of(iter).onClose(iter::close); //NOSONAR
         } else {
-            return of(iter);   //NOSONAR
+            return of(iter); //NOSONAR
         }
     }
 
@@ -4608,7 +4608,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     prev = elements.next();
                 }
 
-                return elements.hasNext();   // || (!ignoreNotPaired && prev != none);
+                return elements.hasNext(); // || (!ignoreNotPaired && prev != none);
             }
 
             @Override
@@ -4757,7 +4757,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     }
                 }
 
-                return elements.hasNext();   // || (!ignoreNotPaired && (prev != none));
+                return elements.hasNext(); // || (!ignoreNotPaired && (prev != none));
             }
 
             @Override
@@ -7137,7 +7137,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
                 // In second case, elements.hasNext() will return true before processing the first element,
-                return elements.hasNext();   // || (queue != null && !queue.isEmpty());
+                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -7211,7 +7211,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 } else {
                     @SuppressWarnings("DuplicateExpressions")
                     final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                    final int prevSize = queue == null ? 0 : queue.size();   //NOSONAR
+                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
 
                     if (m < prevSize) {
                         for (int i = 0; i < m; i++) {
@@ -7294,7 +7294,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
                 // In second case, elements.hasNext() will return true before processing the first element,
-                return elements.hasNext();   // || (queue != null && !queue.isEmpty());
+                return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
             @Override
@@ -7370,7 +7370,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 } else {
                     @SuppressWarnings("DuplicateExpressions")
                     final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                    final int prevSize = queue == null ? 0 : queue.size();   //NOSONAR
+                    final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
 
                     if (m < prevSize) {
                         for (int i = 0; i < m; i++) {
@@ -9250,12 +9250,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(action, cs.action);
         checkArgNotNull(onComplete, cs.onComplete);
-    
+
         try {
             while (elements.hasNext()) {
                 action.accept(elements.next());
             }
-    
+
             onComplete.run();
         } finally {
             close();
@@ -9294,15 +9294,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(flatMapper, cs.flatMapper);
         checkArgNotNull(action, cs.action);
-    
+
         Iterable<? extends U> c = null;
         T next = null;
-    
+
         try {
             while (elements.hasNext()) {
                 next = elements.next();
                 c = flatMapper.apply(next);
-    
+
                 if (c != null) {
                     for (final U u : c) {
                         action.accept(next, u);
@@ -9361,20 +9361,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(flatMapper, cs.flatMapper);
         checkArgNotNull(flatMapper2, cs.flatMapper2);
         checkArgNotNull(action, cs.action);
-    
+
         Iterable<T2> c2 = null;
         Iterable<T3> c3 = null;
         T next = null;
-    
+
         try {
             while (elements.hasNext()) {
                 next = elements.next();
                 c2 = flatMapper.apply(next);
-    
+
                 if (c2 != null) {
                     for (final T2 t2 : c2) {
                         c3 = flatMapper2.apply(t2);
-    
+
                         if (c3 != null) {
                             for (final T3 t3 : c3) {
                                 action.accept(next, t2, t3);
@@ -14266,7 +14266,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         } else if (b == null) {
             return DEFAULT_COMPARATOR_MAP.containsValue(a);
         } else {
-            return (a == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(b)) || (b == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(a));   // NOSONAR
+            return (a == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(b)) || (b == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(a)); // NOSONAR
         }
     }
 

@@ -105,7 +105,7 @@ public class NClobType extends AbstractType<NClob> {
             try {
                 x.free();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);   //NOSONAR
+                throw new UncheckedSQLException(e); //NOSONAR
             }
         }
     }
@@ -121,7 +121,7 @@ public class NClobType extends AbstractType<NClob> {
      */
     @Override
     public NClob valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("NClob cannot be created from string representation");
     }
 
     /**

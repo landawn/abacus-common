@@ -700,14 +700,14 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code hashFunctions} is empty
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
-        final Iterator<HashFunction> iter = hashFunctions.iterator();
-        final List<com.google.common.hash.HashFunction> gHashFunctionList = new ArrayList<>();
+        final Iterator<HashFunction> iterator = hashFunctions.iterator();
+        final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
 
-        while (iter.hasNext()) {
-            gHashFunctionList.add(((GuavaHashFunction) iter.next()).gHashFunction);
+        while (iterator.hasNext()) {
+            guavaHashFunctions.add(((GuavaHashFunction) iterator.next()).gHashFunction);
         }
 
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.concatenating(gHashFunctionList));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.concatenating(guavaHashFunctions));
     }
 
     /**

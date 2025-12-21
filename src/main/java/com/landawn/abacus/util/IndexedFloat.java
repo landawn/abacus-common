@@ -101,7 +101,7 @@ public final class IndexedFloat extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + (int) (value * 31);   // NOSONAR
+        return (int) index + (int) (value * 31); // NOSONAR
     }
 
     /**

@@ -114,9 +114,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Gets the value as a Float instance.
-     * 
+     *
      * @return the current value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public float getValue() {
@@ -580,9 +580,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      */
     @Override
     public int compareTo(final MutableFloat other) {
-        if (other == null) {
-            throw new NullPointerException("Cannot compare to null");
-        }
         return Float.compare(value, other.value);
     }
 

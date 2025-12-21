@@ -125,7 +125,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Gets the value as a boolean primitive.
      *
      * @return the current boolean value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public boolean getValue() { // NOSONAR

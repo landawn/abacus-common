@@ -45,10 +45,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * char randomChar2 = CharSupplier.RANDOM.getAsChar();   // Returns another random char, e.g., '&'
      * }</pre>
      */
-    CharSupplier RANDOM = () -> {
-        int value = Util.RAND_CHAR.nextInt() % Util.CHAR_MOD;
-        return (char) (value < 0 ? value + Util.CHAR_MOD : value);
-    };
+    CharSupplier RANDOM = () -> (char) Util.RAND_CHAR.nextInt(Util.CHAR_MOD);
 
     /**
      * Gets a char result.

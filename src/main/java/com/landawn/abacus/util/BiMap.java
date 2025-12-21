@@ -947,27 +947,27 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     private V put(final K key, final V value, final boolean isForce) {
         if ((key == null) || (value == null)) {
-            throw new IllegalArgumentException("key or value can't be null");
+            throw new IllegalArgumentException("Key and value cannot be null");
         } else if (!isForce && valueMap.containsKey(value) && !key.equals(valueMap.get(value))) {
             throw new IllegalArgumentException("Value already exists: " + value);
         }
 
-        final V v = keyMap.remove(key);
+        final V oldValue = keyMap.remove(key);
 
-        if (v != null) {
-            valueMap.remove(v);
+        if (oldValue != null) {
+            valueMap.remove(oldValue);
         }
 
-        final K k = valueMap.remove(value);
+        final K oldKey = valueMap.remove(value);
 
-        if (k != null) {
-            keyMap.remove(k);
+        if (oldKey != null) {
+            keyMap.remove(oldKey);
         }
 
         keyMap.put(key, value);
         valueMap.put(value, key);
 
-        return v;
+        return oldValue;
     }
 
     /**
@@ -1011,13 +1011,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public V remove(final Object key) {
-        final V value = keyMap.remove(key);
+        final V removedValue = keyMap.remove(key);
 
-        if (value != null) {
-            valueMap.remove(value);
+        if (removedValue != null) {
+            valueMap.remove(removedValue);
         }
 
-        return value;
+        return removedValue;
     }
 
     /**
@@ -1036,13 +1036,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     public K removeByValue(final Object value) {
         @SuppressWarnings("SuspiciousMethodCalls")
-        final K key = valueMap.remove(value);
+        final K removedKey = valueMap.remove(value);
 
-        if (key != null) {
-            keyMap.remove(key);
+        if (removedKey != null) {
+            keyMap.remove(removedKey);
         }
 
-        return key;
+        return removedKey;
     }
 
     /**

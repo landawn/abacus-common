@@ -97,21 +97,21 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
             return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }
 
-        final String[] strs = split(str);
-        final int len = strs.length;
-        final Boolean[] a = new Boolean[len];
+        final String[] elements = split(str);
+        final int len = elements.length;
+        final Boolean[] array = new Boolean[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                if (strs[i].length() == 4 && strs[i].equals(NULL_STRING)) {
-                    a[i] = null;
+                if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
+                    array[i] = null;
                 } else {
-                    a[i] = elementType.valueOf(strs[i]);
+                    array[i] = elementType.valueOf(elements[i]);
                 }
             }
         }
 
-        return a;
+        return array;
     }
 
     /**
@@ -138,7 +138,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    appendable.append(x[i] ? TRUE_STRING : FALSE_STRING);   //NOSONAR
+                    appendable.append(x[i] ? TRUE_STRING : FALSE_STRING); //NOSONAR
                 }
             }
 
@@ -171,7 +171,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);   //NOSONAR
+                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
                 }
             }
 

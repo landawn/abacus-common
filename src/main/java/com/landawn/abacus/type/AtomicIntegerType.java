@@ -111,7 +111,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public AtomicInteger valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str));
+        return Strings.isEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str.trim()));
     }
 
     /**

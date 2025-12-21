@@ -129,7 +129,7 @@ public class RefType extends AbstractType<Ref> {
      */
     @Override
     public String stringOf(final Ref x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Ref cannot be converted to string representation");
     }
 
     /**
@@ -153,7 +153,7 @@ public class RefType extends AbstractType<Ref> {
      */
     @Override
     public Ref valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Ref cannot be created from string representation");
     }
 
     /**

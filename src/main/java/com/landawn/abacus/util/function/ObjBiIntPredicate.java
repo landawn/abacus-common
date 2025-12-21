@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * ObjBiIntPredicate<int[][]> isValidPosition = (matrix, row, col) ->
  *     row >= 0 && row < matrix.length &&
- *     col >= 0 && col < matrix[0].length;
+ *     col >= 0 && matrix.length > 0 && col < matrix[0].length;
  *
  * ObjBiIntPredicate<List<?>> isRangeWithinBounds = (list, from, to) ->
  *     from >= 0 && to <= list.size() && from <= to;

@@ -438,7 +438,7 @@ public final class HttpClient {
         N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url cannot be null or empty");
 
         if ((maxConnection < 0) || (connectionTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
-            throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis can't be less than 0: " + maxConnection + ", "
+            throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis cannot be less than 0:" + maxConnection + ", "
                     + connectionTimeoutInMillis + ", " + readTimeoutInMillis);
         }
 
@@ -1607,7 +1607,7 @@ public final class HttpClient {
 
         if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
             _activeConnectionCounter.decrementAndGet();
-            throw new RuntimeException("Can not get connection, exceeded max connection number: " + _maxConnection);
+            throw new RuntimeException("Cannot create connection: exceeded maximum connection limit of " + _maxConnection);
         }
 
         try {

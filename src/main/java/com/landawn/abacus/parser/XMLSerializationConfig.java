@@ -65,10 +65,18 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * </ul>
      */
     public XMLSerializationConfig() {
-        setCharQuotation(WD.CHAR_ZERO);   // NOSONAR
-        setStringQuotation(WD.CHAR_ZERO);   // NOSONAR
+        setCharQuotation(WD.CHAR_ZERO); // NOSONAR
+        setStringQuotation(WD.CHAR_ZERO); // NOSONAR
     }
 
+    /**
+     * Sets the string quotation character.
+     * Note: This method is deprecated as XML does not use quotation for string values.
+     *
+     * @param stringQuotation the character to use for quoting strings
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as XML does not quote string values.
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig setStringQuotation(final char stringQuotation) {
@@ -77,6 +85,14 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
+    /**
+     * Sets the character quotation for char values.
+     * Note: This method is deprecated as XML does not use quotation for char values.
+     *
+     * @param charQuotation the character to use for quoting char values
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as XML does not quote char values.
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig setCharQuotation(final char charQuotation) {
@@ -85,6 +101,13 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
+    /**
+     * Disables character quotation.
+     * Note: This method is deprecated as XML does not use quotation for char values.
+     *
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as XML does not quote char values.
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noCharQuotation() {
@@ -93,6 +116,13 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
+    /**
+     * Disables string quotation.
+     * Note: This method is deprecated as XML does not use quotation for string values.
+     *
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as XML does not quote string values.
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noStringQuotation() {
@@ -101,6 +131,13 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
+    /**
+     * Disables all quotation.
+     * Note: This method is deprecated as XML does not use quotation for values.
+     *
+     * @return this instance for method chaining
+     * @deprecated this method should not be called as XML does not quote values.
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noQuotation() {
@@ -215,6 +252,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
+    /**
+     * Calculates the hash code for this configuration object.
+     * The hash code is based on all configuration settings.
+     *
+     * @return the hash code value for this object
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -269,6 +312,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return false;
     }
 
+    /**
+     * Returns a string representation of this configuration object.
+     * The string contains all configuration settings in a readable format.
+     *
+     * @return a string representation of this configuration
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="

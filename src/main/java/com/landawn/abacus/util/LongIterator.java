@@ -706,10 +706,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         int idx = 0;
 
         while (hasNext()) {
-            if (idx < 0) {
+            action.accept(idx, nextLong());
+            if (++idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
-            action.accept(idx++, nextLong());
         }
     }
 }

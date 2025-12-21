@@ -531,8 +531,8 @@ public final class ExcelUtil {
      */
     public static Dataset loadSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             return loadSheet(workbook.getSheetAt(sheetIndex), rowExtractor);
 
         } catch (IOException e) {
@@ -568,8 +568,8 @@ public final class ExcelUtil {
      */
     public static Dataset loadSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheet(sheetName);
             return loadSheet(sheet, rowExtractor);
 
@@ -671,8 +671,8 @@ public final class ExcelUtil {
      */
     public static <T> List<T> readSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             return readSheet(workbook.getSheetAt(sheetIndex), skipFirstRow, rowMapper);
 
         } catch (IOException e) {
@@ -714,8 +714,8 @@ public final class ExcelUtil {
      */
     public static <T> List<T> readSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheet(sheetName);
             return readSheet(sheet, skipFirstRow, rowMapper);
 
@@ -729,7 +729,7 @@ public final class ExcelUtil {
         final Iterator<Row> rowIter = sheet.rowIterator();
 
         if (skipFirstRow && rowIter.hasNext()) {
-            rowIter.next();   // skip the first row
+            rowIter.next(); // skip the first row
         }
 
         while (rowIter.hasNext()) {
@@ -971,36 +971,36 @@ public final class ExcelUtil {
      */
     public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet(sheetName);
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet(sheetName);
 
-        final int columnCount = headers.size();
+            final int columnCount = headers.size();
 
-        final Row headerRow = sheet.createRow(0);
+            final Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < columnCount; i++) {
-            headerRow.createCell(i).setCellValue(N.stringOf(headers.get(i)));
-        }
-
-        int rowNum = 1;
-
-        for (Collection<?> rowData : rows) {
-            final Row row = sheet.createRow(rowNum++);
-            final Iterator<?> iter = rowData.iterator();
-
-            for (int i = 0; i < rowData.size(); i++) {
-                setCellValue(row.createCell(i), iter.next());
+            for (int i = 0; i < columnCount; i++) {
+                headerRow.createCell(i).setCellValue(N.stringOf(headers.get(i)));
             }
-        }
 
-        if (sheetSetter != null) {
-            sheetSetter.accept(sheet);
-        }
+            int rowNum = 1;
 
-        // Write to file
-        try (OutputStream os = new FileOutputStream(outputExcelFile)) {
-            workbook.write(os);
-            workbook.close();
+            for (Collection<?> rowData : rows) {
+                final Row row = sheet.createRow(rowNum++);
+                final Iterator<?> iter = rowData.iterator();
+
+                for (int i = 0; i < rowData.size(); i++) {
+                    setCellValue(row.createCell(i), iter.next());
+                }
+            }
+
+            if (sheetSetter != null) {
+                sheetSetter.accept(sheet);
+            }
+
+            // Write to file
+            try (OutputStream os = new FileOutputStream(outputExcelFile)) {
+                workbook.write(os);
+            }
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -1094,35 +1094,35 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet(sheetName);
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet(sheetName);
 
-        final int columnCount = dataset.columnCount();
+            final int columnCount = dataset.columnCount();
 
-        final Row headerRow = sheet.createRow(0);
+            final Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < columnCount; i++) {
-            headerRow.createCell(i).setCellValue(dataset.getColumnName(i));
-        }
-
-        final MutableInt rowNum = MutableInt.of(1);
-
-        dataset.forEach(rowData -> {
-            final Row row = sheet.createRow(rowNum.getAndIncrement());
-
-            for (int i = 0; i < rowData.length(); i++) {
-                setCellValue(row.createCell(i), rowData.get(i));
+            for (int i = 0; i < columnCount; i++) {
+                headerRow.createCell(i).setCellValue(dataset.getColumnName(i));
             }
-        });
 
-        if (sheetSetter != null) {
-            sheetSetter.accept(sheet);
-        }
+            final MutableInt rowNum = MutableInt.of(1);
 
-        // Write to file
-        try (OutputStream os = new FileOutputStream(outputExcelFile)) {
-            workbook.write(os);
-            workbook.close();
+            dataset.forEach(rowData -> {
+                final Row row = sheet.createRow(rowNum.getAndIncrement());
+
+                for (int i = 0; i < rowData.length(); i++) {
+                    setCellValue(row.createCell(i), rowData.get(i));
+                }
+            });
+
+            if (sheetSetter != null) {
+                sheetSetter.accept(sheet);
+            }
+
+            // Write to file
+            try (OutputStream os = new FileOutputStream(outputExcelFile)) {
+                workbook.write(os);
+            }
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -1237,8 +1237,8 @@ public final class ExcelUtil {
      *                            or if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, List<String> csvHeaders, File outputCsvFile, Charset charset) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
 
             saveSheetAsCsv(sheet, csvHeaders, outputCsvFile, charset);
@@ -1280,8 +1280,8 @@ public final class ExcelUtil {
      *                            or if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, File outputCsvFile, Charset charset) {
-        try (InputStream is = new FileInputStream(excelFile);   //
-                Workbook workbook = new XSSFWorkbook(is)) {
+        try (InputStream is = new FileInputStream(excelFile); //
+             Workbook workbook = new XSSFWorkbook(is)) {
             final Sheet sheet = workbook.getSheet(sheetName);
 
             saveSheetAsCsv(sheet, csvHeaders, outputCsvFile, charset);

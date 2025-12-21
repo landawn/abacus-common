@@ -93,21 +93,21 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
-        final String[] strs = split(str);
-        final int len = strs.length;
-        final Double[] a = new Double[len];
+        final String[] elements = split(str);
+        final int len = elements.length;
+        final Double[] array = new Double[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                if (strs[i].length() == 4 && strs[i].equals(NULL_STRING)) {
-                    a[i] = null;
+                if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
+                    array[i] = null;
                 } else {
-                    a[i] = elementType.valueOf(strs[i]);
+                    array[i] = elementType.valueOf(elements[i]);
                 }
             }
         }
 
-        return a;
+        return array;
     }
 
     /**

@@ -117,33 +117,35 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
-        final String[] strs = split(str);
-        final int len = strs.length;
-        final Character[] a = new Character[len];
+        final String[] elements = split(str);
+        final int len = elements.length;
+        final Character[] array = new Character[len];
 
         if (len > 0) {
-            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == WD._QUOTATION_S) || (strs[0].charAt(0) == WD._QUOTATION_D));
+            boolean isQuoted = (elements[0].length() > 1) && ((elements[0].charAt(0) == WD._QUOTATION_S) || (elements[0].charAt(0) == WD._QUOTATION_D));
 
             if (isQuoted) {
                 for (int i = 0; i < len; i++) {
-                    if (strs[i].length() == 4 && strs[i].equals(NULL_STRING)) {
-                        a[i] = null;
+                    if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
+                        array[i] = null;
+                    } else if (elements[i].length() >= 2) {
+                        array[i] = elementType.valueOf(elements[i].substring(1, elements[i].length() - 1));
                     } else {
-                        a[i] = elementType.valueOf(strs[i].substring(1, strs[i].length() - 1));
+                        array[i] = elementType.valueOf(elements[i]);
                     }
                 }
             } else {
                 for (int i = 0; i < len; i++) {
-                    if (strs[i].length() == 4 && strs[i].equals(NULL_STRING)) {
-                        a[i] = null;
+                    if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
+                        array[i] = null;
                     } else {
-                        a[i] = elementType.valueOf(strs[i]);
+                        array[i] = elementType.valueOf(elements[i]);
                     }
                 }
             }
         }
 
-        return a;
+        return array;
     }
 
     /**

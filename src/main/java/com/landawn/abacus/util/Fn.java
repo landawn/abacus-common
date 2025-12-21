@@ -1044,7 +1044,7 @@ public final class Fn {
                     //noinspection ResultOfMethodCallIgnored
                     service.awaitTermination(terminationTimeout, timeUnit);
                 } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();   // Restore interrupt status
+                    Thread.currentThread().interrupt(); // Restore interrupt status
                     // Shutdown already initiated, so we can safely ignore the interruption
                 }
             }
@@ -3960,7 +3960,7 @@ public final class Fn {
         try {
             return f.get();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();   // Restore interrupt status
+            Thread.currentThread().interrupt(); // Restore interrupt status
             throw ExceptionUtil.toRuntimeException(e, true);
         } catch (ExecutionException e) {
             throw ExceptionUtil.toRuntimeException(e, true);

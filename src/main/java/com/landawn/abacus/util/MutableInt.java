@@ -116,7 +116,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * Gets the value as a primitive int.
      *
      * @return the current int value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public int getValue() {

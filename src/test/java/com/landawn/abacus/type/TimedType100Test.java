@@ -73,7 +73,7 @@ public class TimedType100Test extends TestBase {
 
         assertNull(timedType.valueOf(null));
         assertNull(timedType.valueOf(""));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> timedType.valueOf(" "));
+        assertThrows(IllegalArgumentException.class, () -> timedType.valueOf(" "));
     }
 
     @Test

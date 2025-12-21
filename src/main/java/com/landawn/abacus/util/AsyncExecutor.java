@@ -450,7 +450,7 @@ public class AsyncExecutor {
      * @return a ContinuableFuture representing the pending result of this computation.
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
-        final Executor executor = getExecutor();   //NOSONAR
+        final Executor executor = getExecutor(); //NOSONAR
 
         executor.execute(futureTask);
 
@@ -567,7 +567,7 @@ public class AsyncExecutor {
             return;
         }
 
-        logger.warn("Starting to shutdown task in AsyncExecutor");
+        logger.warn("Starting AsyncExecutor shutdown");
 
         try {
             isShutdown = true; // Mark as shutdown before actually shutting down to prevent new tasks
@@ -578,10 +578,10 @@ public class AsyncExecutor {
                 executorService.awaitTermination(terminationTimeout, timeUnit);
             }
         } catch (final InterruptedException e) {
-            logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");
+            logger.warn("Not all AsyncExecutor tasks completed successfully before shutdown");
         } finally {
             executor = null;
-            logger.warn("Completed to shutdown task in AsyncExecutor");
+            logger.warn("AsyncExecutor shutdown completed");
         }
     }
 

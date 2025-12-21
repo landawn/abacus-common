@@ -54,6 +54,12 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriPredicate allTrue = (a, b, c) -> a && b && c;
+     * BooleanTriPredicate notAllTrue = allTrue.negate();
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default BooleanTriPredicate negate() {
@@ -67,6 +73,13 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriPredicate allTrue = (a, b, c) -> a && b && c;
+     * BooleanTriPredicate anyTrue = (a, b, c) -> a || b || c;
+     * BooleanTriPredicate combined = allTrue.and(anyTrue);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -82,6 +95,13 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriPredicate allTrue = (a, b, c) -> a && b && c;
+     * BooleanTriPredicate anyFalse = (a, b, c) -> !a || !b || !c;
+     * BooleanTriPredicate combined = allTrue.or(anyFalse);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

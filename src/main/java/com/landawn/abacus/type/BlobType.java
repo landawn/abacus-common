@@ -64,7 +64,7 @@ public class BlobType extends AbstractType<Blob> {
      */
     @Override
     public String stringOf(final Blob x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Blob cannot be converted to string representation");
     }
 
     /**
@@ -77,7 +77,7 @@ public class BlobType extends AbstractType<Blob> {
      */
     @Override
     public Blob valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Blob cannot be created from string representation");
     }
 
     /**

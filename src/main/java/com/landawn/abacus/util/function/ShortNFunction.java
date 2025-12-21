@@ -62,8 +62,19 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      * the {@code after} function to the result. If evaluation of either function throws an exception,
      * it is relayed to the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortNFunction<Integer> sum = args -> {
+     *     int total = 0;
+     *     for (short value : args) total += value;
+     *     return total;
+     * };
+     * ShortNFunction<String> formatted = sum.andThen(String::valueOf);
+     * String result = formatted.apply((short) 1, (short) 2, (short) 3);   // "6"
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     @Override

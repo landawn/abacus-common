@@ -164,6 +164,10 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
+        if (a == null || a.length < 3) {
+            throw new IllegalArgumentException("Invalid Triple format. Expected array with at least 3 elements but got: " + str);
+        }
+
         final L left = a[0] == null ? null : ((L) (leftType.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
         final M middle = a[1] == null ? null : ((M) (middleType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], middleType)));
         final R right = a[2] == null ? null : ((R) (rightType.clazz().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], rightType)));
@@ -186,7 +190,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

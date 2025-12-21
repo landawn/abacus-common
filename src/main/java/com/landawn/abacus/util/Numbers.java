@@ -4295,10 +4295,10 @@ public final class Numbers {
                 increment = !isPowerOfTwo(x);
                 break;
             case DOWN:
-                increment = exponent < 0 & !isPowerOfTwo(x);   //NOSONAR
+                increment = exponent < 0 & !isPowerOfTwo(x); //NOSONAR
                 break;
             case UP:
-                increment = exponent >= 0 & !isPowerOfTwo(x);   //NOSONAR
+                increment = exponent >= 0 & !isPowerOfTwo(x); //NOSONAR
                 break;
             case HALF_DOWN:
             case HALF_EVEN:
@@ -4352,7 +4352,7 @@ public final class Numbers {
         final int logFloor = x.bitLength() - 1;
         switch (mode) {
             case UNNECESSARY:
-                checkRoundingUnnecessary(isPowerOfTwo(x));   // fall through
+                checkRoundingUnnecessary(isPowerOfTwo(x)); // fall through
             case DOWN, FLOOR:
                 return logFloor;
 
@@ -4904,7 +4904,7 @@ public final class Numbers {
         final int sqrtFloor = sqrtFloor(x);
         switch (mode) {
             case UNNECESSARY:
-                checkRoundingUnnecessary(sqrtFloor * sqrtFloor == x);   // fall through
+                checkRoundingUnnecessary(sqrtFloor * sqrtFloor == x); // fall through
             case FLOOR:
             case DOWN:
                 return sqrtFloor;
@@ -5073,7 +5073,7 @@ public final class Numbers {
         final BigInteger sqrtFloor = sqrtFloor(x);
         switch (mode) {
             case UNNECESSARY:
-                checkRoundingUnnecessary(sqrtFloor.pow(2).equals(x));   // fall through
+                checkRoundingUnnecessary(sqrtFloor.pow(2).equals(x)); // fall through
             case FLOOR:
             case DOWN:
                 return sqrtFloor;
@@ -5081,7 +5081,7 @@ public final class Numbers {
             case UP:
                 final int sqrtFloorInt = sqrtFloor.intValue();
                 final boolean sqrtFloorIsExact = (sqrtFloorInt * sqrtFloorInt == x.intValue()) // fast check mod 2^32
-                        && sqrtFloor.pow(2).equals(x);   // slow exact check
+                        && sqrtFloor.pow(2).equals(x); // slow exact check
                 return sqrtFloorIsExact ? sqrtFloor : sqrtFloor.add(BigInteger.ONE);
             case HALF_DOWN:
             case HALF_UP:
@@ -5177,7 +5177,7 @@ public final class Numbers {
     public static int divide(final int p, final int q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         if (q == 0) {
-            throw new ArithmeticException("/ by zero");   // for GWT
+            throw new ArithmeticException("/ by zero"); // for GWT
         }
         final int div = p / q;
         final int rem = p - q * div; // equal to p % q
@@ -5303,7 +5303,7 @@ public final class Numbers {
                 // subtracting two nonnegative longs can't overflow
                 // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
                 if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
-                    increment = (mode == HALF_UP || (mode == HALF_EVEN && (div & 1) != 0));   //NOSONAR
+                    increment = (mode == HALF_UP || (mode == HALF_EVEN && (div & 1) != 0)); //NOSONAR
                 } else {
                     increment = cmpRemToHalfDivisor > 0; // closer to the UP value
                 }
@@ -5500,7 +5500,7 @@ public final class Numbers {
             // a is now nonnegative and even
 
             b += minDeltaOrZero; // sets b to min(old a, b)
-            a >>= Integer.numberOfTrailingZeros(a);   // divide out all 2s, since 2 doesn't divide b
+            a >>= Integer.numberOfTrailingZeros(a); // divide out all 2s, since 2 doesn't divide b
         }
         return a << min(aTwos, bTwos);
     }
@@ -5580,7 +5580,7 @@ public final class Numbers {
             // a is now nonnegative and even
 
             b += minDeltaOrZero; // sets b to min(old a, b)
-            a >>= Long.numberOfTrailingZeros(a);   // divide out all 2s, since 2 doesn't divide b
+            a >>= Long.numberOfTrailingZeros(a); // divide out all 2s, since 2 doesn't divide b
         }
         return a << min(aTwos, bTwos);
     }
@@ -7031,7 +7031,7 @@ public final class Numbers {
                 if (isMathematicalInteger(x)) {
                     return x;
                 } else {
-                    return (long) x + (x > 0 ? 1 : -1);   //NOSONAR
+                    return (long) x + (x > 0 ? 1 : -1); //NOSONAR
                 }
 
             case HALF_EVEN:
@@ -7691,7 +7691,7 @@ public final class Numbers {
         denominator /= commondivisor; //NOSONAR
         // We know gcd(x, denominator) = 1, and x * numerator / denominator is exact,
         // so denominator must be a divisor of numerator.
-        return x * (numerator / denominator);   //NOSONAR
+        return x * (numerator / denominator); //NOSONAR
     }
 
     static double nextDown(final double d) {
@@ -8140,14 +8140,14 @@ public final class Numbers {
                  * unsigned long, we don't have to do a mod on every operation, only when intermediate
                  * results can exceed 2^63.
                  */
-                long result = times2ToThe32Mod(aHi * bHi /* < 2^62 */, m);   // < m < 2^63
+                long result = times2ToThe32Mod(aHi * bHi /* < 2^62 */, m); // < m < 2^63
                 result += aHi * bLo; // aHi * bLo < 2^63, result < 2^64
                 if (result < 0) {
                     result = UnsignedLongs.remainder(result, m);
                 }
                 // result < 2^63 again
                 result += aLo * bHi; // aLo * bHi < 2^63, result < 2^64
-                result = times2ToThe32Mod(result, m);   // result < m < 2^63
+                result = times2ToThe32Mod(result, m); // result < m < 2^63
                 return plusMod(result, UnsignedLongs.remainder(aLo * bLo /* < 2^64 */, m), m);
             }
 
@@ -8163,14 +8163,14 @@ public final class Numbers {
                  * unsigned long, we don't have to do a mod on every operation, only when intermediate
                  * results can exceed 2^63.
                  */
-                long result = times2ToThe32Mod(aHi * aHi /* < 2^62 */, m);   // < m < 2^63
+                long result = times2ToThe32Mod(aHi * aHi /* < 2^62 */, m); // < m < 2^63
                 long hiLo = aHi * aLo * 2;
                 if (hiLo < 0) {
                     hiLo = UnsignedLongs.remainder(hiLo, m);
                 }
                 // hiLo < 2^63
                 result += hiLo; // result < 2^64
-                result = times2ToThe32Mod(result, m);   // result < m < 2^63
+                result = times2ToThe32Mod(result, m); // result < m < 2^63
                 return plusMod(result, UnsignedLongs.remainder(aLo * aLo /* < 2^64 */, m), m);
             }
         };

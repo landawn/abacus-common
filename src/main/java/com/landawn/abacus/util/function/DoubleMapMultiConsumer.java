@@ -57,10 +57,10 @@ public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.Do
      * }</pre>
      *
      * @param value the input double value to be transformed
-     * @param ic the consumer that accepts the transformed values. The implementation
-     *           should call {@code ic.accept(double)} for each output value. May be
-     *           called zero or more times
+     * @param consumer the consumer that accepts the transformed values. The implementation
+     *                 should call {@code consumer.accept(double)} for each output value. May be
+     *                 called zero or more times
      */
     @Override
-    void accept(double value, java.util.function.DoubleConsumer ic);
+    void accept(double value, java.util.function.DoubleConsumer consumer);
 }

@@ -77,12 +77,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     private final Map<K, V> valueMap;
 
     ImmutableMap(final Map<? extends K, ? extends V> map) {
-        this(map, ClassUtil.isPossibleImmutable(map.getClass()));   // to create immutable keySet(), values(), entrySet()
+        this(map, ClassUtil.isPossibleImmutable(map.getClass())); // to create immutable keySet(), values(), entrySet()
     }
 
     ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
         this.valueMap = (Map<K, V>) map;
-        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap);   // to create immutable keySet(), values(), entrySet()
+        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap); // to create immutable keySet(), values(), entrySet()
     }
 
     /**

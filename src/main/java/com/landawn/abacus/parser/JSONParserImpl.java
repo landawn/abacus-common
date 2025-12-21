@@ -459,7 +459,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz()) //NOSONAR
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");   //NOSONAR
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported"); //NOSONAR
         }
     }
 
@@ -2169,7 +2169,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> T deserialize(InputStream source, JSONDeserializationConfig config, Type<? extends T> targetType) {
         // No need to close the reader because the InputStream will/should be closely externally.
-        final Reader reader = IOUtil.newInputStreamReader(source);   // NOSONAR
+        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
         return deserialize(reader, config, targetType);
     }
@@ -2355,7 +2355,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());   //NOSONAR
+                throw new ParseException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
             }
 
             return null; // result;
@@ -2579,7 +2579,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             || (isPropName && Strings.isEmpty(propName) && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");   //NOSONAR
+                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
                     } else {
                         if (jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
@@ -3158,7 +3158,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     } else {
                         if (mapEntity == null) {
-                            throw new ParseException(token, "Bean name can't be null or empty");
+                            throw new ParseException(token, "Bean name cannot be null or empty");
                         }
                     }
 
@@ -3217,7 +3217,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     } else {
                         if (entityId == null) {
-                            throw new ParseException(token, "Bean name can't be null or empty");
+                            throw new ParseException(token, "Bean name cannot be null or empty");
                         }
                     }
 
@@ -4127,7 +4127,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config,
             final Type<? extends T> elementType) {
-        final Reader reader = IOUtil.newInputStreamReader(source);   // NOSONAR
+        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
         return stream(reader, closeInputStreamWhenStreamIsClosed, config, elementType);
     }

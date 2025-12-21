@@ -352,7 +352,7 @@ public final class Holder<T> implements Mutable {
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action, "action");   //NOSONAR
+        N.checkArgNotNull(action, "action"); //NOSONAR
 
         if (isNotNull()) {
             action.accept(value);

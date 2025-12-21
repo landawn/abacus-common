@@ -294,7 +294,7 @@ public class HttpResponse {
      * Computes the hash code for this HttpResponse.
      * The hash code is based on the request URL, status code, message, headers, body format, and body content.
      *
-     * @return The hash code value for this object
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -340,7 +340,7 @@ public class HttpResponse {
      * HttpResponse{statusCode=200, message=OK, url=https://api.example.com/users, elapsedTime=123}
      * }</pre>
      *
-     * @return A string representation of this object
+     * @return a string representation of this object
      */
     @Override
     public String toString() {

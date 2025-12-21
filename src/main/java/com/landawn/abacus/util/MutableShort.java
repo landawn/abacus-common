@@ -116,7 +116,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Returns the current short value.
      *
      * @return the current short value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public short getValue() {

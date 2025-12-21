@@ -30,6 +30,7 @@ public final class FloatType extends AbstractFloatType {
      * The type name constant for Float type identification.
      */
     public static final String FLOAT = Float.class.getSimpleName();
+
     /**
      * Package-private constructor for FloatType.
      * This constructor is called by the TypeFactory to create Float type instances.
@@ -78,14 +79,14 @@ public final class FloatType extends AbstractFloatType {
      */
     @Override
     public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Float) {
-            return (Float) ret;
+        } else if (result instanceof Float) {
+            return (Float) result;
         } else {
-            return Numbers.toFloat(ret);
+            return Numbers.toFloat(result);
         }
     }
 
@@ -107,14 +108,14 @@ public final class FloatType extends AbstractFloatType {
      */
     @Override
     public Float get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Float) {
-            return (Float) ret;
+        } else if (result instanceof Float) {
+            return (Float) result;
         } else {
-            return Numbers.toFloat(ret);
+            return Numbers.toFloat(result);
         }
     }
 }

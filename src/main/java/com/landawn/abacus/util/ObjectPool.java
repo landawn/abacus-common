@@ -99,7 +99,15 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         N.checkArgPositive(capacity, cs.capacity);
 
         this.capacity = capacity;
-        table = new Entry[capacity];
+        // Table size must be a power of 2 for indexMask (hash & indexMask) to work correctly
+        int tableSize = Integer.highestOneBit(capacity);
+        if (tableSize < capacity) {
+            tableSize = tableSize << 1;
+        }
+        if (tableSize < 1) {
+            tableSize = 1;
+        }
+        table = new Entry[tableSize];
         indexMask = table.length - 1;
     }
 

@@ -117,7 +117,7 @@ public class Seid implements EntityId {
     public Seid(final String propName, final Object propValue) {
         this(NameUtil.getParentName(propName));
 
-        set(propName, propValue);   // NOSONAR
+        set(propName, propValue); // NOSONAR
     }
 
     /**
@@ -137,7 +137,7 @@ public class Seid implements EntityId {
     public Seid(final Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
-        set(nameValues);   // NOSONAR
+        set(nameValues); // NOSONAR
     }
 
     /**
@@ -286,7 +286,7 @@ public class Seid implements EntityId {
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
         if (N.isEmpty(idPropNames)) {
-            throw new IllegalArgumentException("Id property names can't be null or empty");
+            throw new IllegalArgumentException("Id property names cannot be null or empty");
         }
 
         final Class<?> cls = entity.getClass();

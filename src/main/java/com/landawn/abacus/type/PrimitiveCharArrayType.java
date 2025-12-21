@@ -147,7 +147,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
             if (isQuoted) {
                 for (int i = 0; i < len; i++) {
-                    a[i] = elementType.valueOf(strs[i].substring(1, strs[i].length() - 1));
+                    if (strs[i].length() >= 2) {
+                        a[i] = elementType.valueOf(strs[i].substring(1, strs[i].length() - 1));
+                    } else {
+                        a[i] = elementType.valueOf(strs[i]);
+                    }
                 }
             } else {
                 for (int i = 0; i < len; i++) {
@@ -184,7 +188,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 try {
                     clob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);   //NOSONAR
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else {

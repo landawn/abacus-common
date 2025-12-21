@@ -88,10 +88,10 @@ public class UncheckedException extends RuntimeException {
         super(getCause(cause));
         // this.checkedException = cause;
 
-        final Throwable[] suspend = cause.getSuppressed();
-        if (N.notEmpty(suspend)) {
-            for (Throwable e : suspend) {
-                this.addSuppressed(e);
+        final Throwable[] suppressedExceptions = cause.getSuppressed();
+        if (N.notEmpty(suppressedExceptions)) {
+            for (Throwable suppressedException : suppressedExceptions) {
+                this.addSuppressed(suppressedException);
             }
         }
     }
@@ -125,10 +125,10 @@ public class UncheckedException extends RuntimeException {
         super(message, getCause(cause));
         // this.checkedException = cause;
 
-        final Throwable[] suspend = cause.getSuppressed();
-        if (N.notEmpty(suspend)) {
-            for (Throwable e : suspend) {
-                this.addSuppressed(e);
+        final Throwable[] suppressedExceptions = cause.getSuppressed();
+        if (N.notEmpty(suppressedExceptions)) {
+            for (Throwable suppressedException : suppressedExceptions) {
+                this.addSuppressed(suppressedException);
             }
         }
     }
@@ -137,7 +137,7 @@ public class UncheckedException extends RuntimeException {
      * Validates and returns the cause for this exception.
      * This method ensures that the provided checked exception is not {@code null} before using it as the cause.
      *
-     * @param cause the exception to validate and use as the cause
+     * @param cause the exception to validate and use as the cause. Must not be {@code null}.
      * @return the validated exception to be used as the cause
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */

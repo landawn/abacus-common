@@ -204,8 +204,11 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use JSON format for headers in current thread
      * CSVUtil.setHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
-     * Dataset ds = CSVUtil.loadCSV(file);   // Will use JSON parser
-     * CSVUtil.resetHeaderParser();          // Reset to default
+     * try {
+     *     Dataset ds = CSVUtil.loadCSV(file);   // Will use JSON parser
+     * } finally {
+     *     CSVUtil.resetHeaderParser();          // Reset to default
+     * }
      * }</pre>
      *
      * @param parser the Function to set as the CSV header parser, must not be null.
@@ -229,8 +232,11 @@ public final class CSVUtil {
      * <pre>{@code
      * // Use splitter for simple CSV files in current thread
      * CSVUtil.setLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
-     * Dataset ds = CSVUtil.loadCSV(file);   // Will use splitter parser
-     * CSVUtil.resetLineParser();            // Reset to default
+     * try {
+     *     Dataset ds = CSVUtil.loadCSV(file);   // Will use splitter parser
+     * } finally {
+     *     CSVUtil.resetLineParser();            // Reset to default
+     * }
      * }</pre>
      *
      * @param parser the BiConsumer to set as the CSV line parser, must not be null.
@@ -251,9 +257,13 @@ public final class CSVUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CSVUtil.setHeaderParser(customParser);
-     * // ... use custom parser
-     * CSVUtil.resetHeaderParser();   // Back to default
+     * // Use JSON format for headers in current thread
+     * CSVUtil.setHeaderParser(CSVUtil.CSV_HEADER_PARSER_IN_JSON);
+     * try {
+     *     Dataset ds = CSVUtil.loadCSV(file);   // Will use JSON parser
+     * } finally {
+     *     CSVUtil.resetHeaderParser();          // Reset to default
+     * }
      * }</pre>
      *
      * @see #setHeaderParser(Function)
@@ -270,9 +280,13 @@ public final class CSVUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CSVUtil.setLineParser(customParser);
-     * // ... use custom parser
-     * CSVUtil.resetLineParser();   // Back to default
+     * // Use splitter for simple CSV files in current thread
+     * CSVUtil.setLineParser(CSVUtil.CSV_LINE_PARSER_BY_SPLITTER);
+     * try {
+     *     Dataset ds = CSVUtil.loadCSV(file);   // Will use splitter parser
+     * } finally {
+     *     CSVUtil.resetLineParser();            // Reset to default
+     * }
      * }</pre>
      *
      * @see #setLineParser(BiConsumer)
@@ -329,8 +343,11 @@ public final class CSVUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVUtil.setEscapeCharToBackSlashForWrite();
-     * // Write CSV with backslash escaping
-     * CSVUtil.resetEscapeCharForWrite();   // Reset to default
+     * try {
+     *     // Write CSV with backslash escaping
+     * } finally {
+     *     CSVUtil.resetEscapeCharForWrite();   // Reset to default
+     * }
      * }</pre>
      * 
      * @see #resetEscapeCharForWrite()
@@ -346,8 +363,11 @@ public final class CSVUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVUtil.setEscapeCharToBackSlashForWrite();
-     * // ... write with backslash escaping
-     * CSVUtil.resetEscapeCharForWrite();   // Back to default
+     * try {
+     *     // ... write with backslash escaping
+     * } finally {
+     *     CSVUtil.resetEscapeCharForWrite();   // Back to default
+     * }
      * }</pre>
      */
     public static void resetEscapeCharForWrite() {
@@ -623,7 +643,7 @@ public final class CSVUtil {
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count); //NOSONAR
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count); //NOSONAR
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
@@ -961,7 +981,7 @@ public final class CSVUtil {
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(beanClassForColumnType, cs.beanClassForColumnType);
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
@@ -1256,10 +1276,10 @@ public final class CSVUtil {
     public static Dataset loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
 
         if (N.isEmpty(columnTypeMap)) {
-            throw new IllegalArgumentException("columnTypeMap can't be null or empty");
+            throw new IllegalArgumentException("columnTypeMap cannot be null or empty");
         }
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
@@ -1571,7 +1591,7 @@ public final class CSVUtil {
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
@@ -1914,7 +1934,7 @@ public final class CSVUtil {
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed)
             throws IllegalArgumentException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(targetType, cs.targetType);
 
         //noinspection resource
@@ -2392,7 +2412,7 @@ public final class CSVUtil {
             final Predicate<? super String[]> rowFilter,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
 
         //noinspection resource
         return Stream.defer(() -> {
@@ -2641,7 +2661,8 @@ public final class CSVUtil {
         N.checkArgNotNull(csvFile, "csvFile");
         N.checkArgNotNull(jsonFile, "jsonFile");
 
-        try (Reader csvReader = IOUtil.newFileReader(csvFile); Writer jsonWriter = IOUtil.newFileWriter(jsonFile)) {
+        try (Reader csvReader = IOUtil.newFileReader(csvFile);
+             Writer jsonWriter = IOUtil.newFileWriter(jsonFile)) {
             return csv2json(csvReader, selectColumnNames, jsonWriter, beanClassForColumnTypeInference);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -2692,11 +2713,11 @@ public final class CSVUtil {
     private static long csv2json(final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count, final Writer jsonWriter,
             final Class<?> beanClassForColumnTypeInference, final boolean canBeanClassForTypeWritingBeNull) throws UncheckedIOException {
         if (beanClassForColumnTypeInference == null && !canBeanClassForTypeWritingBeNull) {
-            throw new IllegalArgumentException("'beanClassForColumnTypeInference' can't be null.");
+            throw new IllegalArgumentException("'beanClassForColumnTypeInference' cannot be null");
         }
 
         try (final BufferedReader reader = IOUtil.newBufferedReader(csvReader); //
-                final BufferedJSONWriter bw = Objectory.createBufferedJSONWriter(jsonWriter)) {
+             final BufferedJSONWriter bw = Objectory.createBufferedJSONWriter(jsonWriter)) {
             final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
             final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
 
@@ -2872,7 +2893,8 @@ public final class CSVUtil {
         N.checkArgNotNull(csvFile, "csvFile");
         N.checkArgNotNull(jsonFile, "jsonFile");
 
-        try (Reader jsonReader = IOUtil.newFileReader(jsonFile); Writer csvWriter = IOUtil.newFileWriter(csvFile)) {
+        try (Reader jsonReader = IOUtil.newFileReader(jsonFile);
+             Writer csvWriter = IOUtil.newFileWriter(csvFile)) {
             return json2csv(jsonReader, selectCsvHeaders, csvWriter);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -2921,7 +2943,7 @@ public final class CSVUtil {
         try (final Stream<Map<String, Object>> strem = jsonParser.stream(jsonReader, false, Type.ofMap(String.class, Object.class))
                 .skip(offset < 0 ? 0 : offset)
                 .limit(count <= 0 ? 0 : count); //
-                final BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(csvWriter)) {
+             final BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(csvWriter)) {
             final List<Object> headers = N.newArrayList(selectCsvHeaders);
 
             final char separator = WD._COMMA;
@@ -3460,7 +3482,8 @@ public final class CSVUtil {
 
             final Callable<Long> action = () -> {
                 if (sourceFile != null) {
-                    try (Reader csvReader = IOUtil.newFileReader(sourceFile); Writer outputJsonWriter = IOUtil.newFileWriter(outputJsonFile)) {
+                    try (Reader csvReader = IOUtil.newFileReader(sourceFile);
+                         Writer outputJsonWriter = IOUtil.newFileWriter(outputJsonFile)) {
                         return CSVUtil.csv2json(csvReader, selectColumnNames, offset, count, outputJsonWriter, beanClassForColumnTypeInference, true);
                     } catch (final IOException e) {
                         throw new UncheckedIOException(e);
@@ -3520,7 +3543,8 @@ public final class CSVUtil {
 
             final Callable<Long> action = () -> {
                 if (sourceFile != null) {
-                    try (Reader jsonReader = IOUtil.newFileReader(sourceFile); Writer outputCsvWriter = IOUtil.newFileWriter(outputCsvFile)) {
+                    try (Reader jsonReader = IOUtil.newFileReader(sourceFile);
+                         Writer outputCsvWriter = IOUtil.newFileWriter(outputCsvFile)) {
                         return CSVUtil.json2csv(jsonReader, selectColumnNames, offset, count, outputCsvWriter);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);

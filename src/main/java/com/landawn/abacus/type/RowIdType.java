@@ -152,7 +152,7 @@ public class RowIdType extends AbstractType<RowId> {
      */
     @Override
     public RowId valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("RowId cannot be created from string representation");
     }
 
     /**

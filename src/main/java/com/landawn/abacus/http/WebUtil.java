@@ -131,7 +131,7 @@ public final class WebUtil {
                             .append(header.substring(0, idx).trim())
                             .append("\", \"")
                             .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")");   //NOSONAR
+                            .append("\")"); //NOSONAR
                 }
             } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
                 body = tokens.get(++i);
@@ -274,7 +274,7 @@ public final class WebUtil {
                             .append(header.substring(0, idx).trim())
                             .append("\", \"")
                             .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")");   //NOSONAR
+                            .append("\")"); //NOSONAR
 
                     if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
                         mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
@@ -334,7 +334,7 @@ public final class WebUtil {
     private static List<String> parseCurl(final String curl) {
         N.checkArgNotEmpty(curl, cs.curl);
         final String str = curl.trim();
-        N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
+        N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script does not start with 'curl'");
 
         final List<String> tokens = new ArrayList<>();
         final int len = str.length();

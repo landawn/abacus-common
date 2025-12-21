@@ -287,7 +287,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      */
     @Override
     public String toString() {
-        return new String(buf, 0, count);   // NOSONAR
+        return new String(buf, 0, count); // NOSONAR
     }
 
     /**

@@ -127,6 +127,10 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
+        if (a == null || a.length < 2) {
+            throw new IllegalArgumentException("Invalid Timed format. Expected array with at least 2 elements [timestamp, value] but got: " + str);
+        }
+
         final long timestamp = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
         final T value = a[1] == null ? null : ((T) (valueType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
 
@@ -148,7 +152,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);

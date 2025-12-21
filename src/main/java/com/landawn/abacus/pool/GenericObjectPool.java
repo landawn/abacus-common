@@ -227,20 +227,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * }
      * }</pre>
      *
-     * @param e the object to add, must not be {@code null}
+     * @param element the object to add, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean add(final E e) throws IllegalStateException {
+    public boolean add(final E element) throws IllegalStateException {
         assertNotClosed();
 
-        if (e == null) {
-            throw new IllegalArgumentException();
+        if (element == null) {
+            throw new IllegalArgumentException("Element cannot be null");
         }
 
-        if (e.activityPrint().isExpired()) {
+        if (element.activityPrint().isExpired()) {
             return false;
         }
 
@@ -259,7 +259,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             if (memoryMeasure != null) {
                 try {
-                    final long elementSize = memoryMeasure.sizeOf(e);
+                    final long elementSize = memoryMeasure.sizeOf(element);
 
                     if (elementSize < 0) {
                         logger.warn("Memory measure returned negative size for element: " + elementSize);
@@ -271,14 +271,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         return false;
                     }
 
-                    pool.push(e);
-                    totalDataSize.addAndGet(elementSize);   //NOSONAR
+                    pool.push(element);
+                    totalDataSize.addAndGet(elementSize); //NOSONAR
                 } catch (final Exception ex) {
                     logger.warn("Error measuring memory size of element", ex);
                     return false;
                 }
             } else {
-                pool.push(e);
+                pool.push(element);
             }
 
             notEmpty.signal();
@@ -293,21 +293,21 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Adds an object to the pool with optional automatic destruction on failure.
      * This method ensures proper cleanup of resources if the object cannot be added.
      *
-     * @param e the object to add, must not be {@code null}
+     * @param element the object to add, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {
+    public boolean add(final E element, final boolean autoDestroyOnFailedToAdd) {
         boolean success = false;
 
         try {
-            success = add(e);
+            success = add(element);
         } finally {
-            if (autoDestroyOnFailedToAdd && !success && e != null) {
-                e.destroy(Caller.PUT_ADD_FAILURE);
+            if (autoDestroyOnFailedToAdd && !success && element != null) {
+                element.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
@@ -336,7 +336,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * }
      * }</pre>
      *
-     * @param e the object to add, must not be {@code null}
+     * @param element the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
@@ -346,14 +346,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
-    public boolean add(final E e, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
-        if (e == null) {
-            throw new IllegalArgumentException();
+        if (element == null) {
+            throw new IllegalArgumentException("Element cannot be null");
         }
 
-        if (e.activityPrint().isExpired()) {
+        if (element.activityPrint().isExpired()) {
             return false;
         }
 
@@ -370,21 +370,24 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             int maxSpins = 10000;
             while (maxSpins-- > 0) {
                 if (pool.size() < capacity) {
-                    if (memoryMeasure != null && memoryMeasure.sizeOf(e) > maxMemorySize - totalDataSize.get()) {
-                        // ignore.
+                    if (memoryMeasure != null) {
+                        final long elementSize = memoryMeasure.sizeOf(element);
 
-                        return false;
-                    } else {
-                        pool.push(e);
+                        if (elementSize > maxMemorySize - totalDataSize.get()) {
+                            // ignore.
 
-                        if (memoryMeasure != null) {
-                            totalDataSize.addAndGet(memoryMeasure.sizeOf(e));   //NOSONAR
+                            return false;
                         }
 
-                        notEmpty.signal();
-
-                        return true;
+                        pool.push(element);
+                        totalDataSize.addAndGet(elementSize); //NOSONAR
+                    } else {
+                        pool.push(element);
                     }
+
+                    notEmpty.signal();
+
+                    return true;
                 }
 
                 if (nanos <= 0) {
@@ -404,7 +407,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
      * Combines timeout waiting with automatic resource cleanup.
      *
-     * @param e the object to add, must not be {@code null}
+     * @param element the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
@@ -412,14 +415,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
-    public boolean add(final E e, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd) throws InterruptedException {
+    public boolean add(final E element, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd) throws InterruptedException {
         boolean success = false;
 
         try {
-            success = add(e, timeout, unit);
+            success = add(element, timeout, unit);
         } finally {
-            if (autoDestroyOnFailedToAdd && !success && e != null) {
-                e.destroy(Caller.PUT_ADD_FAILURE);
+            if (autoDestroyOnFailedToAdd && !success && element != null) {
+                element.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
@@ -463,25 +466,25 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public E take() throws IllegalStateException {
         assertNotClosed();
 
-        E e = null;
+        E element = null;
 
         lock.lock();
 
         try {
-            e = pool.size() > 0 ? pool.pop() : null;
+            element = pool.size() > 0 ? pool.pop() : null;
 
-            if (e != null) {
-                final ActivityPrint activityPrint = e.activityPrint();
+            if (element != null) {
+                final ActivityPrint activityPrint = element.activityPrint();
 
                 if (activityPrint.isExpired()) {
-                    destroy(e, Caller.EVICT);
-                    e = null;
+                    destroy(element, Caller.EVICT);
+                    element = null;
                 } else {
                     activityPrint.updateLastAccessTime();
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(e));   //NOSONAR
+                        totalDataSize.addAndGet(-memoryMeasure.sizeOf(element)); //NOSONAR
                     }
                 }
 
@@ -490,14 +493,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         } finally {
             lock.unlock();
 
-            if (e != null) {
+            if (element != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
             }
         }
 
-        return e;
+        return element;
     }
 
     /**
@@ -518,34 +521,34 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public E take(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
-        E e = null;
+        E element = null;
         long nanos = unit.toNanos(timeout);
 
         lock.lock();
 
         try {
             while (true) {
-                e = pool.size() > 0 ? pool.pop() : null;
+                element = pool.size() > 0 ? pool.pop() : null;
 
-                if (e != null) {
-                    final ActivityPrint activityPrint = e.activityPrint();
+                if (element != null) {
+                    final ActivityPrint activityPrint = element.activityPrint();
 
                     if (activityPrint.isExpired()) {
-                        destroy(e, Caller.EVICT);
-                        e = null;
+                        destroy(element, Caller.EVICT);
+                        element = null;
                     } else {
                         activityPrint.updateLastAccessTime();
                         activityPrint.updateAccessCount();
 
                         if (memoryMeasure != null) {
-                            totalDataSize.addAndGet(-memoryMeasure.sizeOf(e));   //NOSONAR
+                            totalDataSize.addAndGet(-memoryMeasure.sizeOf(element)); //NOSONAR
                         }
                     }
 
                     notFull.signal();
 
-                    if (e != null) {
-                        return e;
+                    if (element != null) {
+                        return element;
                     }
                 }
 
@@ -558,7 +561,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         } finally {
             lock.unlock();
 
-            if (e != null) {
+            if (element != null) {
                 hitCount.incrementAndGet();
             } else {
                 missCount.incrementAndGet();
@@ -611,7 +614,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor));   // NOSONAR
+            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -718,17 +721,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         } else if (vacationNumber > 0) {
             final Queue<E> heap = new PriorityQueue<>(vacationNumber, cmp);
 
-            for (final E e : pool) {
+            for (final E element : pool) {
                 if (heap.size() < vacationNumber) {
-                    heap.offer(e);
-                } else if (cmp.compare(e, heap.peek()) < 0) {
+                    heap.offer(element);
+                } else if (cmp.compare(element, heap.peek()) < 0) {
                     heap.poll();
-                    heap.offer(e);
+                    heap.offer(element);
                 }
             }
 
-            for (final E e : heap) {
-                pool.remove(e);
+            for (final E element : heap) {
+                pool.remove(element);
             }
 
             destroyAll(heap, Caller.VACATE);
@@ -746,13 +749,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         List<E> removingObjects = null;
 
         try {
-            for (final E e : pool) {
-                if (e.activityPrint().isExpired()) {
+            for (final E element : pool) {
+                if (element.activityPrint().isExpired()) {
                     if (removingObjects == null) {
                         removingObjects = Objectory.createList();
                     }
 
-                    removingObjects.add(e);
+                    removingObjects.add(element);
                 }
             }
 
@@ -788,7 +791,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             if (memoryMeasure != null) {
-                totalDataSize.addAndGet(-memoryMeasure.sizeOf(value));
+                try {
+                    totalDataSize.addAndGet(-memoryMeasure.sizeOf(value));
+                } catch (final Exception e) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Error measuring memory size during destroy: " + ExceptionUtil.getErrorMessage(e, true));
+                    }
+                }
             }
 
             try {
@@ -804,13 +813,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Destroys all objects in the provided collection.
      *
-     * @param c the collection of objects to destroy
+     * @param collection the collection of objects to destroy
      * @param caller the reason for destruction
      */
-    protected void destroyAll(final Collection<E> c, final Caller caller) {
-        if (N.notEmpty(c)) {
-            for (final E e : c) {
-                destroy(e, caller);
+    protected void destroyAll(final Collection<E> collection, final Caller caller) {
+        if (N.notEmpty(collection)) {
+            for (final E element : collection) {
+                destroy(element, caller);
             }
         }
     }

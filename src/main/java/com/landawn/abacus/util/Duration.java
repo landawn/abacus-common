@@ -470,8 +470,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
     public static Duration between(final java.util.Date start, final java.util.Date end) {
-        N.checkArgNotNull(start, "Start Date can't be null");
-        N.checkArgNotNull(end, "End Date can't be null");
+        N.checkArgNotNull(start, "Start Date cannot be null");
+        N.checkArgNotNull(end, "End Date cannot be null");
 
         return Duration.ofMillis(end.getTime() - start.getTime());
     }
@@ -523,8 +523,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
     public static Duration between(final java.util.Calendar start, final java.util.Calendar end) {
-        N.checkArgNotNull(start, "Start Calendar can't be null");
-        N.checkArgNotNull(end, "End Calendar can't be null");
+        N.checkArgNotNull(start, "Start Calendar cannot be null");
+        N.checkArgNotNull(end, "End Calendar cannot be null");
 
         return Duration.ofMillis(end.getTimeInMillis() - start.getTimeInMillis());
     }
@@ -575,8 +575,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
     public static Duration between(final Temporal start, final Temporal end) {
-        N.checkArgNotNull(start, "Start Temporal can't be null");
-        N.checkArgNotNull(end, "End Temporal can't be null");
+        N.checkArgNotNull(start, "Start Temporal cannot be null");
+        N.checkArgNotNull(end, "End Temporal cannot be null");
 
         return Duration.ofMillis(start.until(end, ChronoUnit.MILLIS));
     }

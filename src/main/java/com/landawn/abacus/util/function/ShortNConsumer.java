@@ -63,6 +63,18 @@ public interface ShortNConsumer {
      * <p>Note that both operations will receive the same array reference, so if either operation
      * modifies the array, the changes will be visible to the other operation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortNConsumer logger = values -> System.out.println("Count: " + values.length);
+     * ShortNConsumer summer = values -> {
+     *     int sum = 0;
+     *     for (short v : values) sum += v;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * ShortNConsumer combined = logger.andThen(summer);
+     * combined.accept((short) 1, (short) 2, (short) 3);   // Logs count then sum
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
      */

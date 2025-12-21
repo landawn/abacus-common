@@ -190,6 +190,10 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             return null; // NOSONAR
         }
 
+        if (str.length() < 3) {
+            throw new IllegalArgumentException("Invalid Range format. Expected format like '[lower, upper]' but got: " + str);
+        }
+
         final String prefix = str.substring(0, 1);
         final String postfix = str.substring(str.length() - 1);
 
@@ -229,7 +233,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(prefix);

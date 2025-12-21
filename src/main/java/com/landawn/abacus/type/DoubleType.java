@@ -30,6 +30,7 @@ public final class DoubleType extends AbstractDoubleType {
      * The type name constant for Double type identification.
      */
     public static final String DOUBLE = Double.class.getSimpleName();
+
     /**
      * Package-private constructor for DoubleType.
      * This constructor is called by the TypeFactory to create Double type instances.
@@ -78,14 +79,14 @@ public final class DoubleType extends AbstractDoubleType {
      */
     @Override
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Double) {
-            return (Double) ret;
+        } else if (result instanceof Double) {
+            return (Double) result;
         } else {
-            return Numbers.toDouble(ret);
+            return Numbers.toDouble(result);
         }
     }
 
@@ -107,14 +108,14 @@ public final class DoubleType extends AbstractDoubleType {
      */
     @Override
     public Double get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Double) {
-            return (Double) ret;
+        } else if (result instanceof Double) {
+            return (Double) result;
         } else {
-            return Numbers.toDouble(ret);
+            return Numbers.toDouble(result);
         }
     }
 }

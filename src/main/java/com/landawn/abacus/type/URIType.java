@@ -127,7 +127,7 @@ public class URIType extends AbstractType<URI> {
             return null; // NOSONAR
         }
 
-        return java.net.URI.create(str);   // NOSONAR
+        return java.net.URI.create(str); // NOSONAR
     }
 
     /**

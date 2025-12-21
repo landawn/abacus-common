@@ -704,10 +704,22 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         lock = value;
     }
 
+    /**
+     * Reinitializes this writer to write to the specified OutputStream.
+     * This allows reusing the same writer instance with a different output stream.
+     *
+     * @param os the new OutputStream to write to
+     */
     void reinit(final OutputStream os) {
-        reinit(IOUtil.newOutputStreamWriter(os));   // NOSONAR
+        reinit(IOUtil.newOutputStreamWriter(os)); // NOSONAR
     }
 
+    /**
+     * Reinitializes this writer to write to the specified Writer.
+     * This allows reusing the same writer instance with a different underlying writer.
+     *
+     * @param writer the new Writer to write to
+     */
     void reinit(final Writer writer) {
         isClosed = false;
         out = writer;

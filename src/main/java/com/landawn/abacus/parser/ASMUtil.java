@@ -48,7 +48,7 @@ final class ASMUtil {
     private static final boolean isASMAvailable; // NOSONAR
 
     static {
-        boolean tmp = false;
+        boolean asmAvailable = false;
 
         try {
             Class.forName("com.esotericsoftware.reflectasm.MethodAccess");
@@ -70,7 +70,7 @@ final class ASMUtil {
             final TestBeanA bean = new TestBeanA();
 
             setMethodAccess.invoke(bean, setMethodAccessIndex, "Tom");
-            tmp = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
+            asmAvailable = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
         } catch (final Throwable e) { // NOSONAR
             // ignore.
@@ -78,7 +78,7 @@ final class ASMUtil {
             logger.warn("ASM is not available by com.esotericsoftware.reflectasm due to exception: ", e.getClass().getName());
         }
 
-        isASMAvailable = tmp;
+        isASMAvailable = asmAvailable;
 
         if (isASMAvailable) {
             logger.info("ASM is available by com.esotericsoftware.reflectasm");

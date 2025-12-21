@@ -47,6 +47,14 @@ public interface BooleanNConsumer {
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanNConsumer logger = values -> System.out.println("Count: " + values.length);
+     * BooleanNConsumer printer = values -> Arrays.stream(values).forEach(System.out::println);
+     * BooleanNConsumer combined = logger.andThen(printer);
+     * combined.accept(true, false, true);   // Logs count then prints values
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanNConsumer} that performs in sequence this operation followed by the {@code after} operation
      */

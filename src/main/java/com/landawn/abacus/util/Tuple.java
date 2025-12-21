@@ -1689,7 +1689,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return a new Tuple2 with elements in reversed order.
          */
         public Tuple2<T2, T1> reverse() {
-            return of(_2, _1);   //NOSONAR
+            return of(_2, _1); //NOSONAR
         }
 
         /**

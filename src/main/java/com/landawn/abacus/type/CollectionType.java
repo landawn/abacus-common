@@ -89,25 +89,25 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     CollectionType(final Class<T> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 
-        String tmp = null;
+        String declaringNameValue;
 
         if (typeClass.isInterface()) {
-            tmp = getTypeName(typeClass, parameterTypeName, true);
+            declaringNameValue = getTypeName(typeClass, parameterTypeName, true);
         } else {
             if (List.class.isAssignableFrom(typeClass)) {
-                tmp = getTypeName(List.class, parameterTypeName, true);
+                declaringNameValue = getTypeName(List.class, parameterTypeName, true);
             } else if (Set.class.isAssignableFrom(typeClass)) {
-                tmp = getTypeName(Set.class, parameterTypeName, true);
+                declaringNameValue = getTypeName(Set.class, parameterTypeName, true);
             } else if (Queue.class.isAssignableFrom(typeClass)) {
-                tmp = getTypeName(Queue.class, parameterTypeName, true);
+                declaringNameValue = getTypeName(Queue.class, parameterTypeName, true);
             } else {
-                tmp = getTypeName(Collection.class, parameterTypeName, true);
+                declaringNameValue = getTypeName(Collection.class, parameterTypeName, true);
 
                 final Class<?>[] interfaceClasses = typeClass.getInterfaces();
 
                 for (final Class<?> interfaceClass : interfaceClasses) {
                     if (Collection.class.isAssignableFrom(interfaceClass) && !interfaceClass.equals(Collection.class)) {
-                        tmp = getTypeName(interfaceClass, parameterTypeName, true);
+                        declaringNameValue = getTypeName(interfaceClass, parameterTypeName, true);
 
                         break;
                     }
@@ -115,7 +115,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             }
         }
 
-        declaringName = tmp;
+        declaringName = declaringNameValue;
 
         this.typeClass = typeClass;
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
@@ -256,15 +256,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 bw.write(WD._BRACKET_L);
 
                 int i = 0;
-                for (final E e : x) {
+                for (final E element : x) {
                     if (i++ > 0) {
                         bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
-                    if (e == null) {
+                    if (element == null) {
                         bw.write(NULL_CHAR_ARRAY);
                     } else {
-                        elementType.writeCharacter(bw, e, Utils.jsc);
+                        elementType.writeCharacter(bw, element, Utils.jsc);
                     }
                 }
 
@@ -316,21 +316,21 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
 
                     int i = 0;
-                    for (final E e : x) {
+                    for (final E element : x) {
                         if (i++ > 0) {
                             bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
 
-                        if (e == null) {
+                        if (element == null) {
                             bw.write(NULL_CHAR_ARRAY);
                         } else {
-                            elementType.appendTo(bw, e);
+                            elementType.appendTo(bw, element);
                         }
                     }
 
@@ -350,15 +350,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 appendable.append(WD._BRACKET_L);
 
                 int i = 0;
-                for (final E e : x) {
+                for (final E element : x) {
                     if (i++ > 0) {
                         appendable.append(ELEMENT_SEPARATOR);
                     }
 
-                    if (e == null) {
+                    if (element == null) {
                         appendable.append(NULL_STRING);
                     } else {
-                        elementType.appendTo(appendable, e);
+                        elementType.appendTo(appendable, element);
                     }
                 }
 
@@ -386,22 +386,22 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 writer.write(WD._BRACKET_L);
 
                 int i = 0;
-                for (final E e : x) {
+                for (final E element : x) {
                     if (i++ > 0) {
                         writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
-                    if (e == null) {
+                    if (element == null) {
                         writer.write(NULL_CHAR_ARRAY);
                     } else {
-                        elementType.writeCharacter(writer, e, config);
+                        elementType.writeCharacter(writer, element, config);
                     }
                 }
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+            } catch (final IOException ioException) {
+                throw new UncheckedIOException(ioException);
             }
         }
     }

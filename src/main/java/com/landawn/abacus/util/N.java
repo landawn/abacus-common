@@ -1521,7 +1521,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #slice(List, int, int)
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a)) {
             return ImmutableList.empty();
@@ -1625,7 +1625,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return ObjIterator.empty();
         }
 
-        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex);   // NOSONAR
+        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex); // NOSONAR
     }
 
     /**
@@ -1647,7 +1647,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #split(boolean[], int, int, int)
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");   //NOSONAR
+        checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1686,7 +1686,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1761,7 +1761,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1836,7 +1836,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1911,7 +1911,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1986,7 +1986,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -2061,7 +2061,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -2136,7 +2136,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -2211,7 +2211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -2288,7 +2288,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -2458,7 +2458,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #toList(Iterator)
      */
     public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) throws IllegalArgumentException {
-        checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
+        checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, cannot be: %s", chunkSize);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -4062,6 +4062,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional array into an one-dimensional array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[][] matrix = {{"a", "b"}, {"c", "d", "e"}};
+     * String[] result = N.flatten(matrix, String.class);
+     * // Returns ["a", "b", "c", "d", "e"]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the two-dimensional array to be flattened, may be {@code null} or empty
      * @param componentType the class object representing the component type of the new array, must not be {@code null}
@@ -4096,6 +4103,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional List.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<String>> nested = Arrays.asList(
+     *     Arrays.asList("a", "b"),
+     *     Arrays.asList("c", "d", "e")
+     * );
+     * List<String> result = N.flatten(nested);
+     * // Returns ["a", "b", "c", "d", "e"]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the {@code Iterable}.
      * @param c the two-dimensional {@code Iterable} to be flattened.
      * @return a one-dimensional List containing all elements in the input {@code Iterable}.
@@ -4107,6 +4124,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<String>> nested = Arrays.asList(
+     *     Arrays.asList("a", "b"),
+     *     Arrays.asList("c", "d")
+     * );
+     * Set<String> result = N.flatten(nested, size -> new HashSet<>());
+     * // Returns a Set containing ["a", "b", "c", "d"]
+     * }</pre>
      *
      * @param <T> the type of the elements in the {@code Iterable}.
      * @param <C> the type of the Collection to be returned.
@@ -4146,6 +4173,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens an {@code Iterator} of {@code Iterator<T>} into an one-dimensional Iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Iterator<String>> nested = Arrays.asList(
+     *     Arrays.asList("a", "b").iterator(),
+     *     Arrays.asList("c", "d").iterator()
+     * ).iterator();
+     * ObjIterator<String> result = N.flatten(nested);
+     * // Iterates through: "a", "b", "c", "d"
+     * }</pre>
      *
      * @param <T> the type of the elements in the Iterator.
      * @param iters the two-dimensional Iterator to be flattened.
@@ -4190,6 +4227,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result List.
      * This method is marked as Beta and may be subject to changes or removal in a future versions.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Object> mixed = Arrays.asList(
+     *     "a",
+     *     Arrays.asList("b", "c"),
+     *     "d",
+     *     Arrays.asList("e")
+     * );
+     * List<?> result = N.flattenEachElement(mixed);
+     * // Returns ["a", "b", "c", "d", "e"]
+     * }</pre>
+     *
      * @param c the {@code Iterable} to be processed. Each element is checked if it's an {@code Iterable} and flattened if so.
      * @return a List containing the flattened elements of the input {@code Iterable}. If the input {@code Iterable} is {@code null}, an empty List is returned.
      */
@@ -4201,6 +4250,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result Collection.
      * This method is marked as Beta and may be subject to changes or removal in a future versions.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Object> mixed = Arrays.asList(
+     *     "x",
+     *     Arrays.asList("y", "z"),
+     *     "w"
+     * );
+     * Set<Object> result = N.flattenEachElement(mixed, HashSet::new);
+     * // Returns a Set containing ["x", "y", "z", "w"]
+     * }</pre>
      *
      * @param <T> the type of the elements in the {@code Iterable}.
      * @param <C> the type of the Collection to be returned.
@@ -7254,6 +7314,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Sets all elements in the given array using the provided converter function.
      * If the specified array is {@code null} or empty, does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "cherry"};
+     * N.setAll(words, (i, word) -> i + ": " + word.toUpperCase());
+     * // words is now ["0: APPLE", "1: BANANA", "2: CHERRY"]
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param <E> the type of exception that the converter may throw
      * @param a the array to be modified
@@ -7277,6 +7344,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Sets all elements in the given list using the provided converter function.
      * If the specified list is {@code null} or empty, does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> items = new ArrayList<>(Arrays.asList("A", "B", "C"));
+     * N.setAll(items, (i, item) -> item + (i + 1));
+     * // items is now ["A1", "B2", "C3"]
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param <E> the type of exception that the converter may throw
@@ -7852,6 +7926,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3};
+     * byte[] result = N.addAll(data, (byte) 4, (byte) 5);
+     * // Returns {1, 2, 3, 4, 5}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new byte array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
@@ -7875,6 +7956,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements added at the end.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = {10, 20, 30};
+     * short[] result = N.addAll(values, (short) 40, (short) 50);
+     * // Returns {10, 20, 30, 40, 50}
+     * }</pre>
      *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
@@ -7933,6 +8021,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] ids = {100L, 200L, 300L};
+     * long[] result = N.addAll(ids, 400L, 500L);
+     * // Returns {100L, 200L, 300L, 400L, 500L}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new long array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
@@ -7957,6 +8052,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 2.5f, 3.5f};
+     * float[] result = N.addAll(prices, 4.5f, 5.5f);
+     * // Returns {1.5f, 2.5f, 3.5f, 4.5f, 5.5f}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new float array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
@@ -7980,6 +8082,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements added at the end.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = {1.1, 2.2, 3.3};
+     * double[] result = N.addAll(values, 4.4, 5.5);
+     * // Returns {1.1, 2.2, 3.3, 4.4, 5.5}
+     * }</pre>
      *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
@@ -8037,6 +8146,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements added at the end.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] numbers = {1, 2, 3};
+     * Integer[] result = N.addAll(numbers, 4, 5, 6);
+     * // Returns {1, 2, 3, 4, 5, 6}
+     * }</pre>
      *
      * @param <T> the type of elements in the array.
      * @param a the original array.
@@ -8203,6 +8319,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] letters = {'a', 'c', 'd'};
+     * char[] result = N.insert(letters, 1, 'b');
+     * // Returns {'a', 'b', 'c', 'd'}
+     * }</pre>
+     *
      * @param a the original char array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the char value to be inserted into the array
@@ -8236,6 +8359,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 3, 4};
+     * byte[] result = N.insert(data, 1, (byte) 2);
+     * // Returns {1, 2, 3, 4}
+     * }</pre>
+     *
      * @param a the original byte array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the byte value to be inserted into the array
@@ -8268,6 +8398,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified element inserted at the specified index.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = {10, 30, 40};
+     * short[] result = N.insert(values, 1, (short) 20);
+     * // Returns {10, 20, 30, 40}
+     * }</pre>
      *
      * @param a the original short array
      * @param index the position in the array where the new element should be inserted
@@ -8344,6 +8481,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] ids = {100L, 300L, 400L};
+     * long[] result = N.insert(ids, 1, 200L);
+     * // Returns {100L, 200L, 300L, 400L}
+     * }</pre>
+     *
      * @param a the original long array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the long value to be inserted into the array
@@ -8376,6 +8520,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified element inserted at the specified index.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 3.5f, 4.5f};
+     * float[] result = N.insert(prices, 1, 2.5f);
+     * // Returns {1.5f, 2.5f, 3.5f, 4.5f}
+     * }</pre>
      *
      * @param a the original float array
      * @param index the position in the array where the new element should be inserted
@@ -9329,7 +9480,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9386,7 +9537,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9443,7 +9594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9500,7 +9651,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9566,7 +9717,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9623,7 +9774,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9680,7 +9831,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -9737,7 +9888,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int arrayLen = a.length;
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
-            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex);   //NOSONAR
+            throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int countToDelete = 1;
@@ -11138,7 +11289,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Deprecated
     static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -11248,7 +11399,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #removeDuplicates(char[], boolean)
      */
     public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -11341,7 +11492,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -11434,7 +11585,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -11540,7 +11691,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -11633,7 +11784,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -11726,7 +11877,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -11820,7 +11971,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -11925,7 +12076,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING_ARRAY;
@@ -11951,7 +12102,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             //noinspection ManualArrayToCollectionCopy
             for (int i = fromIndex; i < toIndex; i++) {
-                set.add(a[i]);   //NOSONAR
+                set.add(a[i]); //NOSONAR
             }
 
             if (set.size() == toIndex - fromIndex) {
@@ -12034,7 +12185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return a;
@@ -12148,7 +12299,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
@@ -12188,7 +12339,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_CHAR_ARRAY : a.clone();
@@ -12228,7 +12379,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_BYTE_ARRAY : a.clone();
@@ -12268,7 +12419,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_SHORT_ARRAY : a.clone();
@@ -12308,7 +12459,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_INT_ARRAY : a.clone();
@@ -12348,7 +12499,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_LONG_ARRAY : a.clone();
@@ -12388,7 +12539,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
@@ -12428,7 +12579,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
@@ -12460,7 +12611,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
@@ -13686,7 +13837,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -13753,7 +13904,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -13827,7 +13978,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -13901,7 +14052,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -13975,7 +14126,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -14049,7 +14200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -14123,7 +14274,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -14197,7 +14348,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -14282,7 +14433,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
     static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -14451,7 +14602,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(char[], int, int)
      */
     public static int sum(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -14510,7 +14661,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(byte[], int, int)
      */
     public static int sum(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -14569,7 +14720,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(short[], int, int)
      */
     public static int sum(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -14677,7 +14828,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(int[], int, int)
      */
     public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -14736,7 +14887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(long[], int, int)
      */
     public static long sum(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -14799,7 +14950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(float[], int, int)
      */
     public static float sum(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0f;
@@ -14856,7 +15007,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(float[], int, int)
      */
     public static double sumToDouble(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0f;
@@ -14917,7 +15068,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #average(double[], int, int)
      */
     public static double sum(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -14978,7 +15129,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(char[], int, int)
      */
     public static double average(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15031,7 +15182,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(byte[], int, int)
      */
     public static double average(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15084,7 +15235,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(short[], int, int)
      */
     public static double average(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15137,7 +15288,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(int[], int, int)
      */
     public static double average(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15196,7 +15347,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(long[], int, int)
      */
     public static double average(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15251,7 +15402,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(float[], int, int)
      */
     public static double average(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15312,7 +15463,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sum(double[], int, int)
      */
     public static double average(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -15414,7 +15565,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0;
@@ -15636,7 +15787,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#sumLong(Iterable, ToLongFunction)
      */
     public static <T> long sumLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0L;
@@ -15807,7 +15958,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> double sumDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0D;
@@ -16079,7 +16230,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> double averageInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -16252,7 +16403,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> double averageLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -16400,7 +16551,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> double averageDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -17047,7 +17198,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(char...)
      */
     public static char min(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");   //NOSONAR
+        checkArgNotEmpty(a, "The specified array cannot be null or empty"); //NOSONAR
 
         return min(a, 0, a.length);
     }
@@ -17691,7 +17842,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return min(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty");   //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
 
         return min(iter, cmp);
     }
@@ -19702,7 +19853,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return max(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty");   //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
 
         return max(iter, cmp);
     }
@@ -21418,7 +21569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The collection cannot be null or empty");   //NOSONAR
+            throw new IllegalArgumentException("The collection cannot be null or empty"); //NOSONAR
         }
 
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -21484,7 +21635,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);   //NOSONAR
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex); //NOSONAR
 
         final int len = toIndex - fromIndex;
 
@@ -23637,7 +23788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Percentage
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");   //NOSONAR
+        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty"); //NOSONAR
 
         final int len = sortedArray.length;
         final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
@@ -24054,7 +24205,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(boolean[], BooleanPredicate)
      */
     public static boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -24120,7 +24271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(char[], CharPredicate)
      */
     public static char[] filter(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -24186,7 +24337,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(byte[], BytePredicate)
      */
     public static byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -24252,7 +24403,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(short[], ShortPredicate)
      */
     public static short[] filter(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -24318,7 +24469,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static int[] filter(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -24384,7 +24535,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(long[], LongPredicate)
      */
     public static long[] filter(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -24450,7 +24601,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(float[], FloatPredicate)
      */
     public static float[] filter(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -24516,7 +24667,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(double[], DoublePredicate)
      */
     public static double[] filter(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -24637,7 +24788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>> C filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
             final IntFunction<C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -24701,7 +24852,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>> C filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Predicate<? super T> filter, final IntFunction<C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, size(c));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, size(c)); // NOSONAR
 
         if (isEmpty(c) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -24903,7 +25054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex, final ToBooleanFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -25050,7 +25201,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex, final ToCharFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -25197,7 +25348,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex, final ToByteFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -25344,7 +25495,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex, final ToShortFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -25491,7 +25642,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -25702,7 +25853,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -25913,7 +26064,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex, final ToFloatFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -26060,7 +26211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> mapper)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -26333,7 +26484,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, C extends Collection<R>> C map(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -26670,7 +26821,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, C extends Collection<R>> C flatMap(final T[] a, final int fromIndex, final int toIndex,
             final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -27932,7 +28083,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     private static int initSizeForFlatMap(final int size) {
-        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP);   // NOSONAR
+        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP); // NOSONAR
     }
 
     /**
@@ -27950,7 +28101,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(boolean[], int, int)
      */
     public static boolean[] distinct(final boolean[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -27989,7 +28140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(char[], int, int)
      */
     public static char[] distinct(final char[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28028,7 +28179,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(byte[], int, int)
      */
     public static byte[] distinct(final byte[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28067,7 +28218,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(short[], int, int)
      */
     public static short[] distinct(final short[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28106,7 +28257,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(int[], int, int)
      */
     public static int[] distinct(final int[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28145,7 +28296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(long[], int, int)
      */
     public static long[] distinct(final long[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28184,7 +28335,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(float[], int, int)
      */
     public static float[] distinct(final float[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28223,7 +28374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinct(double[], int, int)
      */
     public static double[] distinct(final double[] a) {
-        return distinct(a, 0, len(a));   // NOSONAR
+        return distinct(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -28291,7 +28442,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #distinctBy(Object[], int, int, Function)
      */
     public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -28473,7 +28624,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ?> keyExtractor)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -29016,9 +29167,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(Object[], Predicate)
      */
     public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
-        checkArgNotNegative(atLeast, "atLeast");   //NOSONAR
-        checkArgNotNegative(atMost, "atMost");   //NOSONAR
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");   //NOSONAR
+        checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
+        checkArgNotNegative(atMost, "atMost"); //NOSONAR
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
 
         if (isEmpty(a)) {
             return atLeast == 0;
@@ -29281,7 +29432,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(boolean[], BooleanPredicate)
      */
     public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -29340,7 +29491,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(char[], CharPredicate)
      */
     public static int count(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -29399,7 +29550,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(byte[], BytePredicate)
      */
     public static int count(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
@@ -29457,7 +29608,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(short[], ShortPredicate)
      */
     public static int count(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -29516,7 +29667,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(int[], IntPredicate)
      */
     public static int count(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -29575,7 +29726,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(long[], LongPredicate)
      */
     public static int count(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
@@ -29633,7 +29784,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(float[], FloatPredicate)
      */
     public static int count(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
@@ -29691,7 +29842,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(double[], DoublePredicate)
      */
     public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
@@ -29749,7 +29900,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      */
     public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));   // NOSONAR
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
@@ -30645,20 +30796,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) {
         final int len = getSizeOrDefault(c, 0);
 
-        final LC l = (LC) supplier.apply(len);
-        final RC r = (RC) supplier.apply(len);
-        final Pair<A, B> p = new Pair<>();
+        final LC leftCollection = (LC) supplier.apply(len);
+        final RC rightCollection = (RC) supplier.apply(len);
+        final Pair<A, B> pair = new Pair<>();
 
         if (c != null) {
-            for (final T e : c) {
-                unzip.accept(e, p);
+            for (final T element : c) {
+                unzip.accept(element, pair);
 
-                l.add(p.left());
-                r.add(p.right());
+                leftCollection.add(pair.left());
+                rightCollection.add(pair.right());
             }
         }
 
-        return Pair.of(l, r);
+        return Pair.of(leftCollection, rightCollection);
     }
 
     /**
@@ -30705,22 +30856,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier) {
         final int len = getSizeOrDefault(c, 0);
 
-        final LC l = (LC) supplier.apply(len);
-        final MC m = (MC) supplier.apply(len);
-        final RC r = (RC) supplier.apply(len);
-        final Triple<A, B, C> t = new Triple<>();
+        final LC leftCollection = (LC) supplier.apply(len);
+        final MC middleCollection = (MC) supplier.apply(len);
+        final RC rightCollection = (RC) supplier.apply(len);
+        final Triple<A, B, C> triple = new Triple<>();
 
         if (c != null) {
-            for (final T e : c) {
-                unzip.accept(e, t);
+            for (final T element : c) {
+                unzip.accept(element, triple);
 
-                l.add(t.left());
-                m.add(t.middle());
-                r.add(t.right());
+                leftCollection.add(triple.left());
+                middleCollection.add(triple.middle());
+                rightCollection.add(triple.right());
             }
         }
 
-        return Triple.of(l, m, r);
+        return Triple.of(leftCollection, middleCollection, rightCollection);
     }
 
     /**
@@ -33711,7 +33862,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final Throwables.Runnable<E> action)
             throws IllegalArgumentException, E {
-        checkArgument(step != 0, "The input parameter 'step' cannot be zero");   //NOSONAR
+        checkArgument(step != 0, "The input parameter 'step' cannot be zero"); //NOSONAR
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
             return;
@@ -33893,7 +34044,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Throwables.Consumer<? super T, E> action)
             throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), len(a));   // NOSONAR
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), len(a)); // NOSONAR
         if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
@@ -35386,7 +35537,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.IntObjConsumer<? super T, E> action) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), len(a));   // NOSONAR
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return;
@@ -39167,15 +39318,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj).toString());   //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj).toString()); //NOSONAR
         } else if (obj instanceof Object[]) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Object[]) obj).toString());   //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Object[]) obj).toString()); //NOSONAR
         } else if (obj instanceof Map) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj).toString());   //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj).toString()); //NOSONAR
         } else {
-            System.out.println(toString(obj));   //NOSONAR
+            System.out.println(toString(obj)); //NOSONAR
         }
 
         return obj;
@@ -39225,7 +39376,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see java.util.Formatter
      */
     public static void fprintln(final String format, final Object... args) {
-        System.out.printf(format, args);   //NOSONAR
-        System.out.println();   //NOSONAR
+        System.out.printf(format, args); //NOSONAR
+        System.out.println(); //NOSONAR
     }
 }

@@ -90,8 +90,8 @@ public final class Traverser<T> {
      * <p><b>Note:</b> This traverser may follow symbolic links, which could lead to
      * infinite loops if there are circular symbolic links in the file system.
      */
-    public static final Traverser<File> FILES = forTree(t -> {
-        final File[] subFiles = t.listFiles();
+    public static final Traverser<File> FILES = forTree(directory -> {
+        final File[] subFiles = directory.listFiles();
         return N.isEmpty(subFiles) ? N.emptyList() : Arrays.asList(subFiles);
     });
 

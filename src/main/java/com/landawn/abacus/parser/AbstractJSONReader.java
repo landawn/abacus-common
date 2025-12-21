@@ -96,27 +96,18 @@ abstract class AbstractJSONReader implements JSONReader { //NOSONAR
         alphanumerics['x'] = 'x';
         alphanumerics['X'] = 'X';
 
-        //noinspection OverwrittenKey
         alphanumerics['e'] = 'e';
         alphanumerics['E'] = 'E';
 
         alphanumerics['a'] = 'a';
         alphanumerics['b'] = 'b';
         alphanumerics['c'] = 'c';
-        //noinspection OverwrittenKey
         alphanumerics['d'] = 'd';
-        //noinspection DataFlowIssue,OverwrittenKey
-        alphanumerics['e'] = 'e';
-        //noinspection OverwrittenKey
         alphanumerics['f'] = 'f';
 
         alphanumerics['l'] = 'l';
         alphanumerics['L'] = 'L';
-        //noinspection DataFlowIssue,OverwrittenKey
-        alphanumerics['f'] = 'f';
         alphanumerics['F'] = 'F';
-        //noinspection DataFlowIssue,OverwrittenKey
-        alphanumerics['d'] = 'd';
         alphanumerics['D'] = 'D';
     }
 

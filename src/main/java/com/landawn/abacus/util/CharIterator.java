@@ -626,10 +626,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         int idx = 0;
 
         while (hasNext()) {
-            if (idx < 0) {
+            action.accept(idx, nextChar());
+            if (++idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
-            action.accept(idx++, nextChar());
         }
     }
 }

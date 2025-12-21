@@ -1492,7 +1492,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output);   //NOSONAR
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(cbuf, off, len);
@@ -1546,7 +1546,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final String str, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output);   //NOSONAR
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(str, off, len);
@@ -1598,7 +1598,7 @@ public final class XmlUtil {
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output) throws IOException {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);   //NOSONAR
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(cbuf, off, len);
@@ -1652,7 +1652,7 @@ public final class XmlUtil {
      */
     public static void writeCharacters(final String str, final int off, final int len, final Writer output) throws IOException {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);   //NOSONAR
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(str, off, len);

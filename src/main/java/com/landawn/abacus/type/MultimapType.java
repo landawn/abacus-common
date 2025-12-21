@@ -229,7 +229,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
-        if (Set.class.isAssignableFrom(parameterTypes[2].clazz())) {
+        // Determine the value collection type: use parameterTypes[2] if available, otherwise parameterTypes[1]
+        final Type<?> valueCollectionType = parameterTypes.length > 2 ? parameterTypes[2] : parameterTypes[1];
+
+        if (Set.class.isAssignableFrom(valueCollectionType.clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

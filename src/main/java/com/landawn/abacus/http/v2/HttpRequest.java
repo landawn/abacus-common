@@ -92,7 +92,7 @@ public final class HttpRequest {
 
     HttpRequest(final String url, final URI uri, final HttpClient httpClient, final HttpClient.Builder clientBuilder,
             final java.net.http.HttpRequest.Builder requestBuilder) {
-        N.checkArgument(!(Strings.isEmpty(url) && uri == null), "'uri' or 'url' can't be null or empty");
+        N.checkArgument(!(Strings.isEmpty(url) && uri == null), "'uri' or 'url' cannot be null or empty");
 
         this.url = url;
         this.uri = uri;
@@ -222,8 +222,8 @@ public final class HttpRequest {
                 java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
-    HttpRequest closeHttpClientAfterExecution(final boolean b) {
-        closeHttpClientAfterExecution = b;
+    HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
+        closeHttpClientAfterExecution = shouldClose;
 
         return this;
     }

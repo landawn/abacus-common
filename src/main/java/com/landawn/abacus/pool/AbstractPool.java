@@ -180,7 +180,7 @@ public abstract class AbstractPool implements Pool {
         }
 
         this.capacity = capacity;
-        this.evictDelay = evictDelay < 0 ? 0 : evictDelay; // NOSONAR - allow 0 to disable eviction
+        this.evictDelay = evictDelay; // 0 means disabled
         this.maxMemorySize = maxMemorySize;
         this.evictionPolicy = evictionPolicy == null ? EvictionPolicy.LAST_ACCESS_TIME : evictionPolicy;
         this.autoBalance = autoBalance;
@@ -189,12 +189,12 @@ public abstract class AbstractPool implements Pool {
         final Class<?> cls = this.getClass();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.warn("Starting to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
+            logger.warn("Starting pool shutdown: " + ClassUtil.getCanonicalClassName(cls));
 
             try {
                 close();
             } finally {
-                logger.warn("Completed to shutdown pool: " + ClassUtil.getCanonicalClassName(cls));
+                logger.warn("Pool shutdown completed: " + ClassUtil.getCanonicalClassName(cls));
             }
         }));
     }

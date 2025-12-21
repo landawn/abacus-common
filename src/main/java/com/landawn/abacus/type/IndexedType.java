@@ -146,6 +146,10 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
+        if (a == null || a.length < 2) {
+            throw new IllegalArgumentException("Invalid Indexed format. Expected array with at least 2 elements [index, value] but got: " + str);
+        }
+
         final long index = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
         final T value = a[1] == null ? null : ((T) (valueType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
 

@@ -53,8 +53,8 @@ public class ParseException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 7678894353902496315L;
 
-    /** The token value associated with this parse exception. Default value is -2. */
-    private int token = -2; //NOSONAR
+    /** The error token position or type associated with this parse exception. Default value is -2. */
+    private int errorToken = -2; //NOSONAR
 
     /**
      * Constructs a new {@code ParseException} with no detail message.
@@ -95,14 +95,14 @@ public class ParseException extends RuntimeException {
      * throw new ParseException(42, "Unexpected character '}' at position 42");
      * }</pre>
      *
-     * @param token an integer value representing the token, position, or error code where the parsing failed.
-     *              This value can be retrieved later using {@link #getToken()}.
+     * @param errorToken an integer value representing the token, position, or error code where the parsing failed.
+     *                   This value can be retrieved later using {@link #getToken()}.
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      */
-    public ParseException(int token, String message) {
+    public ParseException(int errorToken, String message) {
         super(message);
-        this.token = token;
+        this.errorToken = errorToken;
     }
 
     /**
@@ -174,6 +174,6 @@ public class ParseException extends RuntimeException {
      * @return the token value where the parsing error occurred, or -2 if not specified
      */
     public int getToken() {
-        return token;
+        return errorToken;
     }
 }

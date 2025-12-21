@@ -279,9 +279,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
         final String txtValue = XmlUtil.getTextContent(propNode);
 
         if (Strings.isEmpty(txtValue)) {
-            final Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
+            final Node attributeNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
 
-            if ((attrNode != null) && Boolean.parseBoolean(attrNode.getNodeValue())) { //NOSONAR
+            if ((attributeNode != null) && Boolean.parseBoolean(attributeNode.getNodeValue())) { //NOSONAR
                 return null;
             }
         }
@@ -365,24 +365,24 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * }</pre>
      *
      * @param xmlReader the XML stream reader positioned at an element
-     * @param attrName the name of the attribute to retrieve
+     * @param attributeName the name of the attribute to retrieve
      * @return the attribute value, or {@code null} if the attribute is not found
      */
-    protected static String getAttribute(final XMLStreamReader xmlReader, final String attrName) {
-        final int attrCount = xmlReader.getAttributeCount();
+    protected static String getAttribute(final XMLStreamReader xmlReader, final String attributeName) {
+        final int attributeCount = xmlReader.getAttributeCount();
         //noinspection StatementWithEmptyBody
-        if (attrCount == 0) {
+        if (attributeCount == 0) {
             // continue;
-        } else if (attrCount == 1) {
+        } else if (attributeCount == 1) {
             //noinspection StatementWithEmptyBody
-            if (attrName.equals(xmlReader.getAttributeLocalName(0))) {
+            if (attributeName.equals(xmlReader.getAttributeLocalName(0))) {
                 return xmlReader.getAttributeValue(0);
             } else {
                 // continue
             }
         } else {
-            for (int i = 0; i < attrCount; i++) {
-                if (attrName.equals(xmlReader.getAttributeLocalName(i))) {
+            for (int i = 0; i < attributeCount; i++) {
+                if (attributeName.equals(xmlReader.getAttributeLocalName(i))) {
                     return xmlReader.getAttributeValue(i);
                 }
             }

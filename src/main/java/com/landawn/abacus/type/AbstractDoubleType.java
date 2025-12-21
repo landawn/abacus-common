@@ -23,7 +23,6 @@ import java.sql.Types;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -59,7 +58,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
             return null; // NOSONAR
         }
 
-        return N.stringOf(x.toString());
+        return x.toString();
     }
 
     /**
@@ -86,14 +85,19 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      */
     @Override
     public Double valueOf(final String str) {
+        if (Strings.isEmpty(str)) {
+            return (Double) defaultValue();
+        }
+
+        final String trimmedStr = str.trim();
         try {
-            return Strings.isEmpty(str) ? ((Double) defaultValue()) : Double.valueOf(str);
+            return Double.valueOf(trimmedStr);
         } catch (final NumberFormatException e) {
-            if (str.length() > 1) {
-                final char ch = str.charAt(str.length() - 1);
+            if (trimmedStr.length() > 1) {
+                final char ch = trimmedStr.charAt(trimmedStr.length() - 1);
 
                 if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
-                    return Double.valueOf(str.substring(0, str.length() - 1));
+                    return Double.valueOf(trimmedStr.substring(0, trimmedStr.length() - 1));
                 }
             }
 

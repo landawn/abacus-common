@@ -470,7 +470,7 @@ public final class Iterators {
      * @see N#count(Iterator, Predicate)
      */
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);   //NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); //NOSONAR
 
         if (iter == null) {
             return 0;
@@ -624,7 +624,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);   //NOSONAR
+        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -670,7 +670,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);   //NOSONAR
+        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -718,7 +718,7 @@ public final class Iterators {
      * @see N#repeatElements(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
+        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
             return ObjIterator.empty();
@@ -799,7 +799,7 @@ public final class Iterators {
      * @see N#repeatCollection(Collection, int)
      */
     public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
+        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
             return ObjIterator.empty();
@@ -854,8 +854,8 @@ public final class Iterators {
      * @see N#repeatElementsToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
-        N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
-        N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
+        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
+        N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
 
         if (N.isEmpty(c) || size == 0) {
             return ObjIterator.empty();
@@ -918,8 +918,8 @@ public final class Iterators {
      * @see N#repeatCollectionToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
-        N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
-        N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
+        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
+        N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
 
         if (N.isEmpty(c) || size == 0) {
             return ObjIterator.empty();
@@ -2560,6 +2560,14 @@ public final class Iterators {
      * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in a sorted order.
      * The elements in the Iterable objects should implement Comparable interface.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> listA = Arrays.asList(1, 3, 5, 7);
+     * List<Integer> listB = Arrays.asList(2, 4, 6, 8);
+     * ObjIterator<Integer> merged = Iterators.mergeSorted(listA, listB);
+     * // Iterates through: 1, 2, 3, 4, 5, 6, 7, 8
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable objects, which should implement Comparable interface.
      * @param sortedA the first Iterable object to be merged. It should be in non-descending order.
      * @param sortedB the second Iterable object to be merged. It should be in non-descending order.
@@ -2572,6 +2580,14 @@ public final class Iterators {
 
     /**
      * Merges two sorted {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in the order determined by the provided {@code Comparator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> listA = Arrays.asList("apple", "cherry", "grape");
+     * List<String> listB = Arrays.asList("banana", "date", "fig");
+     * ObjIterator<String> merged = Iterators.mergeSorted(listA, listB, Comparator.naturalOrder());
+     * // Iterates through: "apple", "banana", "cherry", "date", "fig", "grape"
+     * }</pre>
      *
      * @param <T> the type of elements in the {@code Iterable} objects.
      * @param sortedA the first {@code Iterable} object to be merged. It should be in non-descending order.
@@ -2967,6 +2983,16 @@ public final class Iterators {
     /**
      * Unzips an Iterator into a TriIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a:1:x", "b:2:y").iterator();
+     * TriIterator<String, Integer, String> result = Iterators.unzipp(iter, (s, triple) -> {
+     *     String[] parts = s.split(":");
+     *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
+     * });
+     * // Iterates through Triple("a", 1, "x"), Triple("b", 2, "y")
+     * }</pre>
      *
      * @param <T> the type of elements in the original Iterator.
      * @param <A> the type of the first element in the resulting TriIterator.
@@ -4742,7 +4768,7 @@ public final class Iterators {
      */
     static void checkOffsetCount(final int offset, final int count) throws IllegalArgumentException {
         if (offset < 0 || count < 0) {
-            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " can't be negative");
+            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " cannot be negative");
         }
     }
 
@@ -4756,7 +4782,7 @@ public final class Iterators {
      */
     static void checkOffsetCount(final long offset, final long count) throws IllegalArgumentException {
         if (offset < 0 || count < 0) {
-            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " can't be negative");
+            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " cannot be negative");
         }
     }
 

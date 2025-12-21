@@ -2564,11 +2564,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             if (bean1 != null && !Beans.isBeanClass(bean1.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class");   // NOSONAR
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             if (bean2 != null && !Beans.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class");   // NOSONAR
+                throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
@@ -2971,11 +2971,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final Class<T2> clsB = firstB != null ? (Class<T2>) firstB.getClass() : null;
 
             if (clsA != null && !Beans.isBeanClass(clsA)) {
-                throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class");   // NOSONAR
+                throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             if (clsB != null && !Beans.isBeanClass(clsB)) {
-                throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class");   // NOSONAR
+                throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             final boolean isEmptyPropNamesToCompare = N.isEmpty(propNamesToCompare);

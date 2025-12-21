@@ -234,7 +234,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
@@ -267,15 +267,15 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                 appendable.append(WD._BRACKET_L);
 
                 int i = 0;
-                for (final T e : x) {
+                for (final T element : x) {
                     if (i++ > 0) {
                         appendable.append(ELEMENT_SEPARATOR);
                     }
 
-                    if (e == null) {
+                    if (element == null) {
                         appendable.append(NULL_STRING);
                     } else {
-                        elementType.appendTo(appendable, e);
+                        elementType.appendTo(appendable, element);
                     }
                 }
 
@@ -334,15 +334,15 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             return null; // NOSONAR
         }
 
-        final Object[] a = N.newArray(typeClass.getComponentType(), c.size());
+        final Object[] array = N.newArray(typeClass.getComponentType(), c.size());
 
         int i = 0;
 
-        for (final Object e : c) {
-            a[i++] = e;
+        for (final Object element : c) {
+            array[i++] = element;
         }
 
-        return (T[]) a;
+        return (T[]) array;
     }
 
     /**

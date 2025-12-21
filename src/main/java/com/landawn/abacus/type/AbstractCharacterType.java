@@ -124,12 +124,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      */
     @Override
     public Character get(ResultSet rs, int columnIndex) throws SQLException {
-        final String ret = rs.getString(columnIndex);
+        final String result = rs.getString(columnIndex);
 
-        if (ret == null) {
+        if (result == null || result.isEmpty()) {
             return (char) 0;
         } else {
-            return ret.charAt(0);
+            return result.charAt(0);
         }
     }
 
@@ -145,12 +145,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      */
     @Override
     public Character get(ResultSet rs, String columnLabel) throws SQLException {
-        final String ret = rs.getString(columnLabel);
+        final String result = rs.getString(columnLabel);
 
-        if (ret == null) {
+        if (result == null || result.isEmpty()) {
             return (char) 0;
         } else {
-            return ret.charAt(0);
+            return result.charAt(0);
         }
     }
 

@@ -171,7 +171,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 try {
                     blob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);   //NOSONAR
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else {

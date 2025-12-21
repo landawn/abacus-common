@@ -112,7 +112,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str));
+        return Strings.isBlank(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str.trim()));
     }
 
     /**

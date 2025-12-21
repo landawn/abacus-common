@@ -38,7 +38,7 @@ public interface ToByteBiFunction<T, U> {
      * byte result1 = adder.applyAsByte(10, 20);   // returns 30
      *
      * ToByteBiFunction<String, Integer> charAt = (str, index) ->
-     *     (byte) str.charAt(index);
+     *     (str != null && index >= 0 && index < str.length()) ? (byte) str.charAt(index) : 0;
      * byte result2 = charAt.applyAsByte("Hello", 0);   // returns 72 (ASCII 'H')
      *
      * ToByteBiFunction<Byte, Byte> max = (a, b) -> (byte) Math.max(a, b);

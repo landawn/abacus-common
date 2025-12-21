@@ -170,7 +170,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public AtomicLong valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new AtomicLong(Long.parseLong(str));
+        return Strings.isEmpty(str) ? null : new AtomicLong(Long.parseLong(str.trim()));
     }
 
     /**

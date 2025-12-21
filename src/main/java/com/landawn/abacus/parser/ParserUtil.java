@@ -1038,7 +1038,7 @@ public final class ParserUtil {
                             break;
                         } else if (field != null) {
                             try { //NOSONAR
-                                field.set(tmp, N.defaultValueOf(field.getType()));   //NOSONAR
+                                field.set(tmp, N.defaultValueOf(field.getType())); //NOSONAR
                                 localIsImmutable = false;
 
                                 break;
@@ -1069,13 +1069,13 @@ public final class ParserUtil {
 
             if (beanClass.isAnnotationPresent(Id.class)) {
                 final String[] values = beanClass.getAnnotation(Id.class).value();
-                N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
+                N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class cannot be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
             }
 
             if (beanClass.isAnnotationPresent(ReadOnlyId.class)) {
                 final String[] values = beanClass.getAnnotation(ReadOnlyId.class).value();
-                N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
+                N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class cannot be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
                 readOnlyIdPropNames.addAll(Arrays.asList(values));
             }
@@ -1138,20 +1138,20 @@ public final class ParserUtil {
                 final ImmutableList<String> aliases = propInfo.aliases;
 
                 if (N.notEmpty(aliases)) {
-                    for (final String str : aliases) {
-                        if (propInfoMap.containsKey(str)) {
-                            throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
+                    for (final String alias : aliases) {
+                        if (propInfoMap.containsKey(alias)) {
+                            throw new IllegalArgumentException("Cannot set alias: " + alias + " for property/field: " + propInfo.field + " because " + alias
                                     + " is a property/field name in class: " + beanClass);
                         }
 
-                        propInfoMap.put(str, propInfoOpt);
+                        propInfoMap.put(alias, propInfoOpt);
                     }
                 }
 
                 if (!isJsonXmlSerializable(propInfo.field, jsonXmlConfig)) {
                     if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
                         throw new IllegalArgumentException(
-                                "JsonXmlField.Expose can't be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
+                                "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
                     }
 
                     // skip
@@ -1161,7 +1161,7 @@ public final class ParserUtil {
                     if (propInfo.isTransient) {
                         if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
                             throw new IllegalArgumentException(
-                                    "JsonXmlField.Expose can't be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
+                                    "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
                         }
 
                         transientSeriPropNameSet.add(propName);
@@ -1671,7 +1671,7 @@ public final class ParserUtil {
 
                         if (propInfo == null) {
                             if (i == 0) {
-                                return N.emptyList();   // return directly because the first part is not valid property/field name of the target bean class.
+                                return N.emptyList(); // return directly because the first part is not valid property/field name of the target bean class.
                             }
 
                             propInfoQueue.clear();
@@ -2283,7 +2283,7 @@ public final class ParserUtil {
             isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
 
             if (isLongDateFormat && (java.time.LocalTime.class.isAssignableFrom(clazz) || java.time.LocalDate.class.isAssignableFrom(clazz))) {
-                throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime/LocalDate");
+                throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime/LocalDate");
             }
 
             final String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
@@ -2696,7 +2696,7 @@ public final class ParserUtil {
                 @Override
                 public java.time.LocalDate read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalDate");
+                        throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalDate");
                     } else {
                         return java.time.LocalDate.parse(strValue, propInfo.dateTimeFormatter);
                     }
@@ -2705,7 +2705,7 @@ public final class ParserUtil {
                 @Override
                 public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) {
                     if (propInfo.isLongDateFormat) {
-                        throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalDate");
+                        throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalDate");
                     } else {
                         propInfo.dateTimeFormatter.formatTo(x, writer);
                     }
@@ -2716,7 +2716,7 @@ public final class ParserUtil {
                 @Override
                 public java.time.LocalTime read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime");
+                        throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime");
                     } else {
                         return java.time.LocalTime.parse(strValue, propInfo.dateTimeFormatter);
                     }
@@ -2725,7 +2725,7 @@ public final class ParserUtil {
                 @Override
                 public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) {
                     if (propInfo.isLongDateFormat) {
-                        throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime");
+                        throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime");
                     } else {
                         propInfo.dateTimeFormatter.formatTo(x, writer);
                     }
@@ -3189,12 +3189,12 @@ public final class ParserUtil {
                         final char ch = annoType.charAt(i);
 
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
-                            final String str = annoType.substring(start, i);
+                            final String typeSegment = annoType.substring(start, i);
 
-                            if (!str.isEmpty() && Type.of(str).isObjectType() && !Type.of(pkgName + "." + str).isObjectType()) {
-                                sb.append(pkgName).append(".").append(str);
+                            if (!typeSegment.isEmpty() && Type.of(typeSegment).isObjectType() && !Type.of(pkgName + "." + typeSegment).isObjectType()) {
+                                sb.append(pkgName).append(".").append(typeSegment);
                             } else {
-                                sb.append(str);
+                                sb.append(typeSegment);
                             }
 
                             sb.append(ch);
@@ -3203,12 +3203,12 @@ public final class ParserUtil {
                     }
 
                     if (start < annoType.length()) {
-                        final String str = annoType.substring(start);
+                        final String typeSegment = annoType.substring(start);
 
-                        if (Type.of(str).isObjectType() && !Type.of(pkgName + "." + str).isObjectType()) {
-                            sb.append(pkgName).append(".").append(str);
+                        if (Type.of(typeSegment).isObjectType() && !Type.of(pkgName + "." + typeSegment).isObjectType()) {
+                            sb.append(pkgName).append(".").append(typeSegment);
                         } else {
-                            sb.append(str);
+                            sb.append(typeSegment);
                         }
                     }
 
@@ -3344,7 +3344,7 @@ public final class ParserUtil {
                     Beans.setPropValueByGet(obj, getMethod, propValue);
                 } else {
                     try {
-                        field.set(obj, propValue);   //NOSONAR
+                        field.set(obj, propValue); //NOSONAR
                     } catch (final IllegalAccessException e) {
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
@@ -3363,7 +3363,7 @@ public final class ParserUtil {
                     } else if (canSetFieldByGetMethod) {
                         Beans.setPropValueByGet(obj, getMethod, propValue);
                     } else {
-                        field.set(obj, propValue);   //NOSONAR
+                        field.set(obj, propValue); //NOSONAR
                     }
 
                     if (failureCountForSetProp > 0) {
@@ -3396,7 +3396,7 @@ public final class ParserUtil {
                         Beans.setPropValueByGet(obj, getMethod, propValue);
                     } else {
                         try {
-                            field.set(obj, propValue);   //NOSONAR
+                            field.set(obj, propValue); //NOSONAR
                         } catch (final IllegalAccessException e2) {
                             throw ExceptionUtil.toRuntimeException(e, true);
                         }
@@ -3455,7 +3455,7 @@ public final class ParserUtil {
         public XmlNameTag(final String name, final String typeName, final boolean isBean) {
             this.name = name.toCharArray();
 
-            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;");   //NOSONAR
+            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
 
             if (isBean) {
                 epStart = ("<bean name=\"" + name + "\">").toCharArray();

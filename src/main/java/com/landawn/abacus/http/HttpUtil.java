@@ -1243,7 +1243,7 @@ public final class HttpUtil {
 
         try {
             // Install the all-trusting trust manager
-            final SSLContext sc = SSLContext.getInstance("SSL");   //NOSONAR
+            final SSLContext sc = SSLContext.getInstance("SSL"); //NOSONAR
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 

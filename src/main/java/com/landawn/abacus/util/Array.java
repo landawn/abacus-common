@@ -1164,7 +1164,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         }
 
         if ((long) endExclusive - startInclusive > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");   //NOSONAR
+            throw new IllegalArgumentException("overflow"); //NOSONAR
         }
 
         final int[] a = new int[endExclusive - startInclusive];
@@ -1236,7 +1236,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");   //NOSONAR
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero"); //NOSONAR
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1281,7 +1281,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1325,7 +1325,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1369,7 +1369,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1419,7 +1419,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
@@ -1484,7 +1484,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return Array.of(startInclusive);
         }
 
-        final char[] a = new char[endInclusive - startInclusive + 1];
+        final int range = endInclusive - startInclusive + 1;
+        final char[] a = new char[range];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1518,7 +1519,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return Array.of(startInclusive);
         }
 
-        final byte[] a = new byte[endInclusive - startInclusive + 1];
+        final int range = endInclusive - startInclusive + 1;
+        final byte[] a = new byte[range];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1552,7 +1554,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return Array.of(startInclusive);
         }
 
-        final short[] a = new short[endInclusive - startInclusive + 1];
+        final int range = endInclusive - startInclusive + 1;
+        final short[] a = new short[range];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1664,7 +1667,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endInclusive == startInclusive) {
@@ -1712,7 +1715,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endInclusive == startInclusive) {
@@ -1759,7 +1762,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endInclusive == startInclusive) {
@@ -1806,7 +1809,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endInclusive == startInclusive) {
@@ -1859,7 +1862,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
 
         if (endInclusive == startInclusive) {
@@ -2596,6 +2599,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the <i>elementClass</i> parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = Array.repeat("hello", 3, String.class);
+     * // Returns ["hello", "hello", "hello"]
+     *
+     * Integer[] numbers = Array.repeat(42, 5, Integer.class);
+     * // Returns [42, 42, 42, 42, 42]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array.
      * @param element the value to be repeated in the array.
      * @param n the length of the array to be generated.
@@ -2767,7 +2779,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
             }
         } else {
             for (int i = 0; i < len; i++) {
-                a[i] = (int) (Math.abs(N.RAND.nextLong() % mod) + startInclusive);
+                long random = N.RAND.nextLong();
+                long result = random % mod;
+                if (result < 0) {
+                    result += mod;
+                }
+                a[i] = (int) (result + startInclusive);
             }
         }
 

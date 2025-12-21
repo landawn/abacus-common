@@ -2917,17 +2917,17 @@ sealed class CommonUtil permits N {
         }
 
         int templateStart = 0;
-        int cnt = 0;
+        int placeholderCount = 0;
 
         if (placeholderStart >= 0) {
-            cnt++;
+            placeholderCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(stringArg1);
             templateStart = placeholderStart + 2;
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
-                cnt++;
+                placeholderCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(stringArg2);
                 templateStart = placeholderStart + 2;
@@ -2938,13 +2938,13 @@ sealed class CommonUtil permits N {
             sb.append(template);
         }
 
-        if (cnt == 0) {
+        if (placeholderCount == 0) {
             sb.append(": [");
             sb.append(stringArg1);
             sb.append(", ");
             sb.append(stringArg2);
             sb.append(']');
-        } else if (cnt == 1) {
+        } else if (placeholderCount == 1) {
             sb.append(": [");
             sb.append(stringArg2);
             sb.append(']');
@@ -2986,24 +2986,24 @@ sealed class CommonUtil permits N {
         }
 
         int templateStart = 0;
-        int cnt = 0;
+        int placeholderCount = 0;
 
         if (placeholderStart >= 0) {
-            cnt++;
+            placeholderCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(stringArg1);
             templateStart = placeholderStart + 2;
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
-                cnt++;
+                placeholderCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(stringArg2);
                 templateStart = placeholderStart + 2;
                 placeholderStart = template.indexOf(placeholder, templateStart);
 
                 if (placeholderStart >= 0) {
-                    cnt++;
+                    placeholderCount++;
                     sb.append(template, templateStart, placeholderStart);
                     sb.append(stringArg3);
                     templateStart = placeholderStart + 2;
@@ -3015,7 +3015,7 @@ sealed class CommonUtil permits N {
             sb.append(template);
         }
 
-        if (cnt == 0) {
+        if (placeholderCount == 0) {
             sb.append(": [");
             sb.append(stringArg1);
             sb.append(", ");
@@ -3023,13 +3023,13 @@ sealed class CommonUtil permits N {
             sb.append(", ");
             sb.append(stringArg3);
             sb.append(']');
-        } else if (cnt == 1) {
+        } else if (placeholderCount == 1) {
             sb.append(": [");
             sb.append(stringArg2);
             sb.append(", ");
             sb.append(stringArg3);
             sb.append(']');
-        } else if (cnt == 2) {
+        } else if (placeholderCount == 2) {
             sb.append(": [");
             sb.append(stringArg3);
             sb.append(']');
@@ -5394,43 +5394,43 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        long ret = 1;
+        long hash = 1;
 
         if (obj instanceof Iterable iter) {
             for (final Object e : iter) {
-                ret = 31 * ret + hashCodeEverything(e);
+                hash = 31 * hash + hashCodeEverything(e);
             }
         } else if (obj instanceof Map) {
             final Map<Object, Object> map = (Map) obj;
 
             for (final Map.Entry<Object, Object> entry : map.entrySet()) {
-                ret = 31 * ret + hashCodeEverything(entry.getKey());
-                ret = 31 * ret + hashCodeEverything(entry.getValue());
+                hash = 31 * hash + hashCodeEverything(entry.getKey());
+                hash = 31 * hash + hashCodeEverything(entry.getValue());
             }
         } else if (obj.getClass().isArray()) {
             if (obj instanceof Object[] a) {
                 for (final Object e : a) {
-                    ret = 31 * ret + hashCodeEverything(e);
+                    hash = 31 * hash + hashCodeEverything(e);
                 }
             } else {
-                ret = 31 * ret + N.deepHashCode(obj);
+                hash = 31 * hash + N.deepHashCode(obj);
             }
         } else if (obj instanceof Iterator iter) {
             while (iter.hasNext()) {
-                ret = 31 * ret + hashCodeEverything(iter.next());
+                hash = 31 * hash + hashCodeEverything(iter.next());
             }
         } else if (Beans.isBeanClass(obj.getClass())) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(obj.getClass());
 
             for (final PropInfo propInfo : beanInfo.propInfoList) {
-                ret = 31 * ret + N.hashCode(propInfo.name);
-                ret = 31 * ret + hashCodeEverything(propInfo.getPropValue(obj));
+                hash = 31 * hash + N.hashCode(propInfo.name);
+                hash = 31 * hash + hashCodeEverything(propInfo.getPropValue(obj));
             }
         } else {
-            ret = 31 * ret + N.hashCode(obj);
+            hash = 31 * hash + N.hashCode(obj);
         }
 
-        return ret;
+        return hash;
     }
 
     /**
@@ -13150,7 +13150,7 @@ sealed class CommonUtil permits N {
     private static void checkIfColumnNamesAreSame(final Dataset a, final Dataset b) {
         if (!(a.columnNameList().size() == b.columnNameList().size() && a.columnNameList().containsAll(b.columnNameList())
                 && b.columnNameList().containsAll(a.columnNameList()))) {
-            throw new IllegalArgumentException("These two Datasets don't have same column names: " + a.columnNameList() + ", " + b.columnNameList());
+            throw new IllegalArgumentException("These two Datasets do not have the same column names: " + a.columnNameList() + ", " + b.columnNameList());
         }
     }
 
@@ -19824,7 +19824,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if <i>n</i> is negative
      */
     public static <T> List<T> firstElements(final T[] a, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(a) || n == 0) {
             return new ArrayList<>();
@@ -19845,7 +19845,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(c) || n == 0) {
             return new ArrayList<>();
@@ -19885,7 +19885,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(iter) || n == 0) {
             return new ArrayList<>();
@@ -19924,7 +19924,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if <i>n</i> is negative
      */
     public static <T> List<T> lastElements(final T[] a, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(a) || n == 0) {
             return new ArrayList<>();
@@ -19945,7 +19945,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(c) || n == 0) {
             return new ArrayList<>();
@@ -19984,7 +19984,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
-        checkArgument(n >= 0, "'n' can't be negative: " + n);
+        checkArgument(n >= 0, "'n' cannot be negative:" + n);
 
         if (isEmpty(iter) || n == 0) {
             return new ArrayList<>();

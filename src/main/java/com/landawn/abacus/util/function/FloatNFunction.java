@@ -35,6 +35,17 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
      * <p>The function implementation should define how the variable number of float
      * arguments are processed to produce the result.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatNFunction<Float> average = args -> {
+     *     if (args.length == 0) return 0.0f;
+     *     float sum = 0;
+     *     for (float f : args) sum += f;
+     *     return sum / args.length;
+     * };
+     * Float avg = average.apply(1.0f, 2.0f, 3.0f);   // Returns 2.0f
+     * }</pre>
+     *
      * @param args the float values to be processed. May be empty, in which case
      *             the function should handle the empty array appropriately.
      * @return the function result
@@ -47,6 +58,17 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
      * and then applies the {@code after} function to the result. If evaluation of
      * either function throws an exception, it is relayed to the caller of the
      * composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatNFunction<Float> sum = args -> {
+     *     float total = 0;
+     *     for (float f : args) total += f;
+     *     return total;
+     * };
+     * FloatNFunction<String> formatted = sum.andThen(f -> String.format("%.2f", f));
+     * String result = formatted.apply(1.1f, 2.2f, 3.3f);   // "6.60"
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function

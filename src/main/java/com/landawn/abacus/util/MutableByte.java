@@ -119,7 +119,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * the same functionality with a more concise name.</p>
      *
      * @return the current byte value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public byte getValue() {

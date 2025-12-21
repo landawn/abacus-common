@@ -344,7 +344,7 @@ class JSONStringReader extends AbstractJSONReader {
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
         int pointPosition = -1;
-        int cnt = ret == 0 ? 0 : 1;
+        int digitCount = ret == 0 ? 0 : 1;
         int ch = 0;
         int typeFlag = 0;
 
@@ -352,21 +352,21 @@ class JSONStringReader extends AbstractJSONReader {
             ch = strValue[strBeginIndex++];
 
             if (ch >= '0' && ch <= '9') {
-                if (cnt < MAX_PARSABLE_NUM_LEN || (cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
+                if (digitCount < MAX_PARSABLE_NUM_LEN || (digitCount == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
                     ret = ret * 10 + (ch - '0');
 
                     if (ret > 0 || pointPosition > 0) {
-                        cnt++;
+                        digitCount++;
                     }
                 } else {
-                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
+                    digitCount += 2; // So digitCount will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
                 }
             } else if (ch == '.' && pointPosition < 0) {
-                if (cnt == 0) {
-                    cnt = 1;
+                if (digitCount == 0) {
+                    digitCount = 1;
                 }
 
-                pointPosition = cnt;
+                pointPosition = digitCount;
             } else {
                 if (ch < 128) {
                     nextEvent = charEvents[ch];
@@ -382,7 +382,7 @@ class JSONStringReader extends AbstractJSONReader {
                 if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                     typeFlag = ch;
                 } else if (ch > 32) { // ignore <= 32 whitespace chars.
-                    cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                    digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
                 }
 
                 while (strBeginIndex < strEndIndex) {
@@ -401,7 +401,7 @@ class JSONStringReader extends AbstractJSONReader {
                     if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                         typeFlag = ch;
                     } else if (ch > 32) { // ignore <= 32 whitespace chars.
-                        cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                        digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
                     }
                 }
 
@@ -416,17 +416,17 @@ class JSONStringReader extends AbstractJSONReader {
             nextEvent = -1;
         }
 
-        if (cnt >= 0 && cnt <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != cnt) {
+        if (digitCount >= 0 && digitCount <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != digitCount) {
             if (negative) {
                 ret = -ret;
             }
 
-            if (nextTokenValueType.isNumber() || typeFlag > 0) {
+            if (nextTokenValueType != null && (nextTokenValueType.isNumber() || typeFlag > 0)) {
                 if (pointPosition > 0) {
                     if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
-                        numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPosition]);
+                        numValue = (float) (((double) ret) / POWERS_OF_TEN[digitCount - pointPosition]);
                     } else { // ignore 'l' or 'L' if it's specified.
-                        numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
+                        numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                     }
                 } else if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                     numValue = (float) ret;
@@ -437,7 +437,7 @@ class JSONStringReader extends AbstractJSONReader {
                 }
             } else {
                 if (pointPosition > 0) {
-                    numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
+                    numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                 } else if (ret >= Integer.MIN_VALUE && ret <= Integer.MAX_VALUE) {
                     numValue = (int) ret;
                 } else {
@@ -554,18 +554,18 @@ class JSONStringReader extends AbstractJSONReader {
             }
 
             if (type.isObjectType()) {
-                final String str = String
+                final String numberText = String
                         .valueOf(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
 
-                if (Strings.isEmpty(str)) {
-                    return (T) str;
+                if (Strings.isEmpty(numberText)) {
+                    return (T) numberText;
                 }
 
                 try {
-                    final Number num = Numbers.createNumber(str);
+                    final Number num = Numbers.createNumber(numberText);
 
                     if (num instanceof Float) {
-                        final char lastChar = str.charAt(str.length() - 1);
+                        final char lastChar = numberText.charAt(numberText.length() - 1);
 
                         if (!(lastChar == 'f' || lastChar == 'F')) {
                             return (T) Double.valueOf(Numbers.toDouble(num));
@@ -576,11 +576,11 @@ class JSONStringReader extends AbstractJSONReader {
                 } catch (final Exception e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
-                        logger.warn("Failed to parse: " + str + " to Number");
+                        logger.warn("Failed to parse: " + numberText + " to Number");
                     }
                 }
 
-                return (T) str;
+                return (T) numberText;
             }
         }
 
@@ -641,16 +641,23 @@ class JSONStringReader extends AbstractJSONReader {
      * @throws NumberFormatException if any unicode escape sequences are malformed.
      */
     protected char readEscapeCharacter() {
+        if (strBeginIndex >= strEndIndex) {
+            throw new ParseException("Incomplete escape sequence at end of input");
+        }
+
         final int escaped = strValue[strBeginIndex++];
 
         switch (escaped) {
             case 'u':
 
-                // Equivalent to Integer.parseInt(stringPool.get(buffer, pos,
-                // 4), 16);
+                // Equivalent to Integer.parseInt(stringPool.get(buffer, pos, 4), 16);
                 char result = 0;
 
                 for (int i = 0, c = 0; i < 4; i++) {
+                    if (strBeginIndex >= strEndIndex) {
+                        throw new ParseException("Incomplete unicode escape sequence: expected 4 hex digits");
+                    }
+
                     c = strValue[strBeginIndex++];
 
                     result <<= 4;

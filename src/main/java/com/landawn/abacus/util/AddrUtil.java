@@ -133,38 +133,38 @@ public final class AddrUtil {
             throw new IllegalArgumentException("Null or empty host list");
         }
 
-        final List<String> hoststuffs = URL_SPLITTER.split(servers);
+        final List<String> addressStrings = URL_SPLITTER.split(servers);
 
-        if (N.isEmpty(hoststuffs)) {
+        if (N.isEmpty(addressStrings)) {
             throw new IllegalArgumentException("Invalid addresses: " + servers);
         }
 
         final List<InetSocketAddress> addrs = new ArrayList<>();
 
-        for (final String hoststuff : hoststuffs) {
-            if (hoststuff.isEmpty()) {
+        for (final String addressString : addressStrings) {
+            if (addressString.isEmpty()) {
                 continue;
             }
 
             // Handle IPv6 addresses properly
-            final int lastColonIndex = hoststuff.lastIndexOf(':');
+            final int lastColonIndex = addressString.lastIndexOf(':');
 
             if (lastColonIndex == -1) {
-                throw new IllegalArgumentException("Invalid server '" + hoststuff + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
             }
 
-            final String hostPart = hoststuff.substring(0, lastColonIndex);
-            final String portNum = hoststuff.substring(lastColonIndex + 1);
+            final String hostPart = addressString.substring(0, lastColonIndex);
+            final String portNum = addressString.substring(lastColonIndex + 1);
 
             if (hostPart.isEmpty() || portNum.isEmpty()) {
-                throw new IllegalArgumentException("Invalid server '" + hoststuff + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
             }
 
             try {
                 final int port = Integer.parseInt(portNum);
                 addrs.add(new InetSocketAddress(hostPart, port));
             } catch (final NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid port number '" + portNum + "' in server: " + hoststuff, e);
+                throw new IllegalArgumentException("Invalid port number '" + portNum + "' in server: " + addressString, e);
             }
         }
         assert !addrs.isEmpty() : "No addrs found";

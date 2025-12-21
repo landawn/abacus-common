@@ -109,21 +109,21 @@ public final class LongArrayType extends ObjectArrayType<Long> {
             return N.EMPTY_LONG_OBJ_ARRAY;
         }
 
-        final String[] strs = split(str);
-        final int len = strs.length;
-        final Long[] a = new Long[len];
+        final String[] elements = split(str);
+        final int len = elements.length;
+        final Long[] array = new Long[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                if (strs[i].length() == 4 && strs[i].equals(NULL_STRING)) {
-                    a[i] = null;
+                if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
+                    array[i] = null;
                 } else {
-                    a[i] = elementType.valueOf(strs[i]);
+                    array[i] = elementType.valueOf(elements[i]);
                 }
             }
         }
 
-        return a;
+        return array;
     }
 
     /**

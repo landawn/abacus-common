@@ -10523,7 +10523,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset that is a deep copy of the current Dataset.
      */
     @Beta
-    Dataset clone();   //NOSONAR
+    Dataset clone(); //NOSONAR
 
     /**
      * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.

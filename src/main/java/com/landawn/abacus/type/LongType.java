@@ -30,6 +30,7 @@ public final class LongType extends AbstractLongType {
      * The type name constant for Long type identification.
      */
     public static final String LONG = Long.class.getSimpleName();
+
     /**
      * Package-private constructor for LongType.
      * This constructor is called by the TypeFactory to create Long type instances.
@@ -78,16 +79,16 @@ public final class LongType extends AbstractLongType {
      */
     @Override
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Long) {
-            return (Long) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).longValue();
+        } else if (result instanceof Long) {
+            return (Long) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).longValue();
         } else {
-            return Numbers.toLong(ret.toString());
+            return Numbers.toLong(result.toString());
         }
     }
 
@@ -109,16 +110,16 @@ public final class LongType extends AbstractLongType {
      */
     @Override
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Long) {
-            return (Long) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).longValue();
+        } else if (result instanceof Long) {
+            return (Long) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).longValue();
         } else {
-            return Numbers.toLong(ret.toString());
+            return Numbers.toLong(result.toString());
         }
     }
 }

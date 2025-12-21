@@ -79,7 +79,7 @@ public class SQLArrayType extends AbstractType<Array> {
      */
     @Override
     public String stringOf(final Array x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("SQL Array cannot be converted to string representation");
     }
 
     /**
@@ -100,7 +100,7 @@ public class SQLArrayType extends AbstractType<Array> {
      */
     @Override
     public Array valueOf(final String str) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("SQL Array cannot be created from string representation");
     }
 
     /**

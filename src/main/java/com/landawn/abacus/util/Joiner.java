@@ -1847,7 +1847,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
     public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);   //NOSONAR
+        N.checkArgNotNull(filter, cs.filter); //NOSONAR
 
         if (c != null) {
             StringBuilder sb = null;
@@ -2563,7 +2563,7 @@ public final class Joiner implements Closeable {
 
         final Class<?> cls = bean.getClass();
 
-        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");   //NOSONAR
+        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;

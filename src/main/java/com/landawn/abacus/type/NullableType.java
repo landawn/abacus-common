@@ -117,7 +117,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public String stringOf(final Nullable<T> x) {
-        return (x == null || x.isNull()) ? null : N.stringOf(x.get());   // elementType.stringOf(x.get());
+        return (x == null || x.isNull()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
     }
 
     /**

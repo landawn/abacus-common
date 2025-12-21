@@ -55,6 +55,18 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      * If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteNFunction<Integer> summer = values -> {
+     *     int sum = 0;
+     *     for (byte v : values) sum += v;
+     *     return sum;
+     * };
+     * Function<Integer, String> formatter = i -> "Sum: " + i;
+     * ByteNFunction<String> combined = summer.andThen(formatter);
+     * String result = combined.apply((byte) 1, (byte) 2, (byte) 3);   // Returns "Sum: 6"
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the

@@ -77,6 +77,13 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * <p>If this predicate returns {@code true} for given inputs, the negated
      * predicate will return {@code false}, and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriPredicate isValidTriangle = (a, b, c) -> a + b > c && a + c > b && b + c > a;
+     * IntTriPredicate isInvalidTriangle = isValidTriangle.negate();
+     * boolean result = isInvalidTriangle.test(1, 2, 10);   // Returns true (invalid triangle)
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default IntTriPredicate negate() {
@@ -92,6 +99,14 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * IntTriPredicate allLessThan100 = (a, b, c) -> a < 100 && b < 100 && c < 100;
+     * IntTriPredicate combined = allPositive.and(allLessThan100);
+     * boolean result = combined.test(10, 20, 30);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      *              Must not be {@code null}.
@@ -111,6 +126,14 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriPredicate anyNegative = (a, b, c) -> a < 0 || b < 0 || c < 0;
+     * IntTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
+     * IntTriPredicate combined = anyNegative.or(anyZero);
+     * boolean result = combined.test(0, 5, 10);   // Returns true (has zero)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      *              Must not be {@code null}.

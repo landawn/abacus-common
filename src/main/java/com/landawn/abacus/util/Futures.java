@@ -972,7 +972,7 @@ public final class Futures {
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
-        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");   //NOSONAR
+        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
 
@@ -984,7 +984,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -1498,7 +1498,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -1639,7 +1639,7 @@ public final class Futures {
 
                 for (final Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);   //NOSONAR
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;

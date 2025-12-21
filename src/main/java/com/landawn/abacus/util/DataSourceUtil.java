@@ -189,7 +189,7 @@ public final class DataSourceUtil {
     public static void close(final ResultSet rs, final boolean closeStatement, final boolean closeConnection)
             throws IllegalArgumentException, UncheckedSQLException {
         if (closeConnection && !closeStatement) {
-            throw new IllegalArgumentException("'closeStatement' can't be false while 'closeConnection' is true");
+            throw new IllegalArgumentException("'closeStatement' cannot be false while 'closeConnection' is true");
         }
 
         if (rs == null) {
@@ -302,7 +302,7 @@ public final class DataSourceUtil {
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);   //NOSONAR
+                throw new UncheckedSQLException(e); //NOSONAR
             }
         }
     }
@@ -339,7 +339,7 @@ public final class DataSourceUtil {
                     conn.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);   //NOSONAR
+                throw new UncheckedSQLException(e); //NOSONAR
             }
         }
     }
@@ -379,14 +379,14 @@ public final class DataSourceUtil {
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);   //NOSONAR
+                throw new UncheckedSQLException(e); //NOSONAR
             } finally {
                 try {
                     if (conn != null) {
                         conn.close();
                     }
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);   //NOSONAR
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         }
@@ -458,7 +458,7 @@ public final class DataSourceUtil {
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement, final boolean closeConnection) throws IllegalArgumentException {
         if (closeConnection && !closeStatement) {
-            throw new IllegalArgumentException("'closeStatement' can't be false while 'closeConnection' is true");
+            throw new IllegalArgumentException("'closeStatement' cannot be false while 'closeConnection' is true");
         }
 
         if (rs == null) {

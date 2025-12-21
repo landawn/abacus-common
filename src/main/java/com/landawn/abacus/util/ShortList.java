@@ -667,7 +667,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 
@@ -715,7 +715,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 
@@ -1439,15 +1439,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final Multiset<Short> bOccurrences = b.toMultiset();
 
-        final ShortList c = new ShortList(N.min(9, size(), b.size()));
+        final ShortList result = new ShortList(N.min(9, size(), b.size()));
 
         for (int i = 0, len = size(); i < len; i++) {
             if (bOccurrences.remove(elementData[i])) {
-                c.add(elementData[i]);
+                result.add(elementData[i]);
             }
         }
 
-        return c;
+        return result;
     }
 
     /**
@@ -1522,15 +1522,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final Multiset<Short> bOccurrences = b.toMultiset();
 
-        final ShortList c = new ShortList(N.min(size(), N.max(9, size() - b.size())));
+        final ShortList result = new ShortList(N.min(size(), N.max(9, size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
             if (!bOccurrences.remove(elementData[i])) {
-                c.add(elementData[i]);
+                result.add(elementData[i]);
             }
         }
 
-        return c;
+        return result;
     }
 
     /**
@@ -1610,17 +1610,17 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         }
 
         final Multiset<Short> bOccurrences = b.toMultiset();
-        final ShortList c = new ShortList(N.max(9, Math.abs(size() - b.size())));
+        final ShortList result = new ShortList(N.max(9, Math.abs(size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
             if (!bOccurrences.remove(elementData[i])) {
-                c.add(elementData[i]);
+                result.add(elementData[i]);
             }
         }
 
         for (int i = 0, len = b.size(); i < len; i++) {
             if (bOccurrences.remove(b.elementData[i])) {
-                c.add(b.elementData[i]);
+                result.add(b.elementData[i]);
             }
 
             if (bOccurrences.isEmpty()) {
@@ -1628,7 +1628,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             }
         }
 
-        return c;
+        return result;
     }
 
     /**
@@ -2351,13 +2351,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C c = supplier.apply(toIndex - fromIndex);
+        final C collection = supplier.apply(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
-            c.add(elementData[i]);
+            collection.add(elementData[i]);
         }
 
-        return c;
+        return collection;
     }
 
     /**

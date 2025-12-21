@@ -50,7 +50,19 @@ public interface IntNConsumer {
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntNConsumer logger = values -> System.out.println("Count: " + values.length);
+     * IntNConsumer summer = values -> {
+     *     int sum = 0;
+     *     for (int v : values) sum += v;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * IntNConsumer combined = logger.andThen(summer);
+     * combined.accept(1, 2, 3, 4);   // Prints: Count: 4 \n Sum: 10
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntNConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
      */

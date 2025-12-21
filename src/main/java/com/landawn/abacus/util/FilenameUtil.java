@@ -244,7 +244,7 @@ public final class FilenameUtil {
 
         // fix separators throughout
         final char otherSeparator = separator == SYSTEM_SEPARATOR ? OTHER_SEPARATOR : SYSTEM_SEPARATOR;
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 0; i < size; i++) {
             if (array[i] == otherSeparator) {
                 array[i] = separator;
             }
@@ -308,9 +308,9 @@ public final class FilenameUtil {
             return "";
         }
         if ((size <= prefix) || (lastIsDirectory && keepSeparator)) {
-            return new String(array, 0, size);   // keep trailing separator
+            return new String(array, 0, size); // keep trailing separator
         }
-        return new String(array, 0, size - 1);   // lose trailing separator
+        return new String(array, 0, size - 1); // lose trailing separator
     }
 
     //-----------------------------------------------------------------------
@@ -753,7 +753,7 @@ public final class FilenameUtil {
         }
         if (prefix >= filename.length()) {
             if (includeSeparator) {
-                return getPrefix(filename);   // add end slash if necessary
+                return getPrefix(filename); // add end slash if necessary
             } else {
                 return filename;
             }
@@ -1235,7 +1235,7 @@ public final class FilenameUtil {
         boolean anyChars = false;
         int textIdx = 0;
         int wcsIdx = 0;
-        final Stack<int[]> backtrack = new Stack<>();   //NOSONAR
+        final Stack<int[]> backtrack = new Stack<>(); //NOSONAR
 
         // loop around a backtrack stack, to handle complex * matching
         do {

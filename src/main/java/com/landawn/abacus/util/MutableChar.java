@@ -125,7 +125,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><strong>Deprecated:</strong> Use {@link #value()} instead for better naming consistency.</p>
      *
      * @return the current char value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public char getValue() {

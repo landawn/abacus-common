@@ -152,7 +152,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(final Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get());   // elementType.stringOf(x.get());
+        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
     }
 
     /**

@@ -2651,6 +2651,13 @@ public final class Iterables {
      * Returns the average of the integer values extracted from the elements in the provided array by the input {@code func} function as an {@code OptionalDouble}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd"};
+     * OptionalDouble avg = Iterables.averageInt(words, String::length);
+     * // Returns OptionalDouble[2.5] (average of 1, 2, 3, 4)
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array.
      * @param a the array of elements to evaluate.
      * @param func the function to extract an integer value from each element.
@@ -2668,6 +2675,13 @@ public final class Iterables {
     /**
      * Returns the average of the integer values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd", "eeeee"};
+     * OptionalDouble avg = Iterables.averageInt(words, 1, 4, String::length);
+     * // Returns OptionalDouble[3.0] (average of 2, 3, 4)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2709,6 +2723,13 @@ public final class Iterables {
     /**
      * Returns the average of the integer values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("a", "bb", "ccc", "dddd", "eeeee");
+     * OptionalDouble avg = Iterables.averageInt(words, 1, 4, String::length);
+     * // Returns OptionalDouble[3.0] (average of 2, 3, 4)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.

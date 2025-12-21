@@ -346,7 +346,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");//NOSONAR
+            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");//NOSONAR
         }
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, false), BoundType.OPEN_OPEN);
@@ -374,7 +374,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
+            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, true), BoundType.OPEN_CLOSED);
@@ -402,7 +402,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
+            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, false), BoundType.CLOSED_OPEN);
@@ -429,7 +429,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
+            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
@@ -734,8 +734,31 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        return (lowerEndpoint.isClosed ? contains(other.lowerEndpoint.value) : lowerEndpoint.value.compareTo(other.lowerEndpoint.value) < 0)
-                && (upperEndpoint.isClosed ? contains(other.upperEndpoint.value) : upperEndpoint.value.compareTo(other.upperEndpoint.value) > 0);
+        // Check lower bound containment
+        final int lowerCmp = lowerEndpoint.value.compareTo(other.lowerEndpoint.value);
+        final boolean lowerContained;
+        if (lowerCmp < 0) {
+            lowerContained = true; // this lower bound is strictly less
+        } else if (lowerCmp == 0) {
+            // Equal bounds: this contains other's lower if this is closed OR other is open
+            lowerContained = lowerEndpoint.isClosed || !other.lowerEndpoint.isClosed;
+        } else {
+            lowerContained = false; // this lower bound is greater
+        }
+
+        // Check upper bound containment
+        final int upperCmp = upperEndpoint.value.compareTo(other.upperEndpoint.value);
+        final boolean upperContained;
+        if (upperCmp > 0) {
+            upperContained = true; // this upper bound is strictly greater
+        } else if (upperCmp == 0) {
+            // Equal bounds: this contains other's upper if this is closed OR other is open
+            upperContained = upperEndpoint.isClosed || !other.upperEndpoint.isClosed;
+        } else {
+            upperContained = false; // this upper bound is less
+        }
+
+        return lowerContained && upperContained;
     }
 
     /**

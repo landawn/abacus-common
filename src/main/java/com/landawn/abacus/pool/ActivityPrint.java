@@ -95,11 +95,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     public ActivityPrint(final long liveTime, final long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
-            throw new IllegalArgumentException("Illegal liveTime[" + liveTime + "]. ");
+            throw new IllegalArgumentException("liveTime must be positive, got: " + liveTime);
         }
 
         if (maxIdleTime <= 0) {
-            throw new IllegalArgumentException("Illegal maxIdleTime[" + maxIdleTime + "]. ");
+            throw new IllegalArgumentException("maxIdleTime must be positive, got: " + maxIdleTime);
         }
 
         createdTime = System.currentTimeMillis();
@@ -152,7 +152,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     public ActivityPrint setLiveTime(final long liveTime) throws IllegalArgumentException {
         if (liveTime < 0) {
-            throw new IllegalArgumentException("Illegal live time: " + liveTime);
+            throw new IllegalArgumentException("liveTime cannot be negative, got: " + liveTime);
         }
 
         this.liveTime = liveTime;
@@ -183,7 +183,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     public ActivityPrint setMaxIdleTime(final long maxIdleTime) throws IllegalArgumentException {
         if (maxIdleTime < 0) {
-            throw new IllegalArgumentException("Illegal idle time: " + maxIdleTime);
+            throw new IllegalArgumentException("maxIdleTime cannot be negative, got: " + maxIdleTime);
         }
 
         this.maxIdleTime = maxIdleTime;
@@ -327,14 +327,14 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     @Override
     public int hashCode() {
-        long h = 7;
-        h = (h * 31) + createdTime;
-        h = (h * 31) + liveTime;
-        h = (h * 31) + maxIdleTime;
-        h = (h * 31) + lastAccessTime;
-        h = (h * 31) + accessCount;
+        int result = 7;
+        result = 31 * result + (int) (createdTime ^ (createdTime >>> 32));
+        result = 31 * result + (int) (liveTime ^ (liveTime >>> 32));
+        result = 31 * result + (int) (maxIdleTime ^ (maxIdleTime >>> 32));
+        result = 31 * result + (int) (lastAccessTime ^ (lastAccessTime >>> 32));
+        result = 31 * result + accessCount;
 
-        return (int) h;
+        return result;
     }
 
     /**

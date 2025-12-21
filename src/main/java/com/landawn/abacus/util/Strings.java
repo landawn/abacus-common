@@ -3743,7 +3743,7 @@ public final class Strings {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3785,7 +3785,7 @@ public final class Strings {
      * @see #capitalizeFully(String, String, Collection)
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3826,7 +3826,7 @@ public final class Strings {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3897,7 +3897,7 @@ public final class Strings {
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -3940,7 +3940,7 @@ public final class Strings {
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, cs.delimiter);   // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -6343,7 +6343,7 @@ public final class Strings {
     /**
      * Pattern used in {@link #stripAccents(String)}.
      */
-    private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");   //$NON-NLS-1$
+    private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+"); //$NON-NLS-1$
 
     private static void convertRemainingAccentCharacters(final StringBuilder decomposed) {
         char ch = 0;
@@ -10063,9 +10063,9 @@ public final class Strings {
                 continue;
             }
 
-            final int tmp = indexOf(str, substr, fromIndex);
+            final int foundIndex = indexOf(str, substr, fromIndex);
 
-            result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
+            result = foundIndex >= 0 && (result == N.INDEX_NOT_FOUND || foundIndex < result) ? foundIndex : result;
 
             if (result == fromIndex) {
                 break;
@@ -10231,9 +10231,9 @@ public final class Strings {
                 continue;
             }
 
-            final int tmp = lastIndexOf(str, substr, startIndexFromBack);
+            final int foundIndex = lastIndexOf(str, substr, startIndexFromBack);
 
-            result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
+            result = foundIndex >= 0 && (result == N.INDEX_NOT_FOUND || foundIndex < result) ? foundIndex : result;
 
             if (result == 0) {
                 break;
@@ -11859,17 +11859,17 @@ public final class Strings {
         }
 
         final int maxPrefixLength = Math.min(a.length(), b.length());
-        int cnt = 0;
+        int matchCount = 0;
 
-        while (cnt < maxPrefixLength && a.charAt(cnt) == b.charAt(cnt)) {
-            cnt++;
+        while (matchCount < maxPrefixLength && a.charAt(matchCount) == b.charAt(matchCount)) {
+            matchCount++;
         }
 
-        if (validSurrogatePairAt(a, cnt - 1) || validSurrogatePairAt(b, cnt - 1)) {
-            cnt--;
+        if (validSurrogatePairAt(a, matchCount - 1) || validSurrogatePairAt(b, matchCount - 1)) {
+            matchCount--;
         }
 
-        return cnt;
+        return matchCount;
     }
 
     /**
@@ -11905,17 +11905,17 @@ public final class Strings {
         final int aLength = a.length();
         final int bLength = b.length();
         final int maxSuffixLength = Math.min(aLength, bLength);
-        int cnt = 0;
+        int matchCount = 0;
 
-        while (cnt < maxSuffixLength && a.charAt(aLength - cnt - 1) == b.charAt(bLength - cnt - 1)) {
-            cnt++;
+        while (matchCount < maxSuffixLength && a.charAt(aLength - matchCount - 1) == b.charAt(bLength - matchCount - 1)) {
+            matchCount++;
         }
 
-        if (validSurrogatePairAt(a, aLength - cnt - 1) || validSurrogatePairAt(b, bLength - cnt - 1)) {
-            cnt--;
+        if (validSurrogatePairAt(a, aLength - matchCount - 1) || validSurrogatePairAt(b, bLength - matchCount - 1)) {
+            matchCount--;
         }
 
-        return cnt;
+        return matchCount;
     }
 
     /**
@@ -18593,7 +18593,7 @@ public final class Strings {
      */
     // TODO(diamondm) consider using Arrays.toString() for array parameters
     public static String lenientFormat(String template, Object... args) {
-        template = String.valueOf(template);   // null -> "null"
+        template = String.valueOf(template); // null -> "null"
 
         if (args == null) {
             args = new Object[] { "(Object[])null" };
@@ -18643,7 +18643,7 @@ public final class Strings {
             // Logger is created inline with fixed name to avoid forcing Proguard to create another class.
             // Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
 
-            LOGGER.warn("Exception during lenientFormat for " + objectToString, e);   //NOSONAR
+            LOGGER.warn("Exception during lenientFormat for " + objectToString, e); //NOSONAR
 
             return "<" + objectToString + " threw " + e.getClass().getName() + ">";
         }
@@ -19194,7 +19194,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes());   // NOSONAR
+        return BASE64_ENCODER.encodeToString(str.getBytes()); // NOSONAR
     }
 
     /**
@@ -19257,7 +19257,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes(charset));   // NOSONAR
+        return BASE64_ENCODER.encodeToString(str.getBytes(charset)); // NOSONAR
     }
 
     /**
@@ -19318,7 +19318,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(base64Decode(base64String));   // NOSONAR
+        return new String(base64Decode(base64String)); // NOSONAR
     }
 
     /**
@@ -19378,7 +19378,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(base64Decode(base64String), charset);   // NOSONAR
+        return new String(base64Decode(base64String), charset); // NOSONAR
     }
 
     /**
@@ -19472,7 +19472,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(BASE64_URL_DECODER.decode(base64String));   // NOSONAR
+        return new String(BASE64_URL_DECODER.decode(base64String)); // NOSONAR
     }
 
     /**
@@ -20282,13 +20282,13 @@ public final class Strings {
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
         if (!canBeNullOrEmpty && N.isEmpty(chs)) {
-            throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' can't be null or empty");
+            throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' cannot be null or empty");
         }
 
         for (final char ch : chs) {
             if (Character.isLowSurrogate(ch) || Character.isHighSurrogate(ch)) {
                 throw new IllegalArgumentException("Element char in the input char array or String parameter '" + parameterName
-                        + "' can't be low-surrogate or high-surrogate code unit. Please consider using String or String array instead if input parameter is char array");
+                        + "' cannot be low-surrogate or high-surrogate code unit. Please consider using String or String array instead if input parameter is char array");
             }
         }
     }

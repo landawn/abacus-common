@@ -716,7 +716,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 
@@ -764,7 +764,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 

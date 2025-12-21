@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Throwables;
  * String result = substring.apply("Hello World", 0, 5);   // returns "Hello"
  *
  * ObjBiIntFunction<int[][], Integer> getMatrixElement = (matrix, row, col) ->
- *     matrix[row][col];
+ *     (row >= 0 && row < matrix.length && col >= 0 && matrix.length > 0 && col < matrix[0].length) ? matrix[row][col] : null;
  * Integer value = getMatrixElement.apply(matrix, 2, 3);
  *
  * ObjBiIntFunction<List<String>, List<String>> subList = (list, from, to) ->

@@ -3311,7 +3311,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgNotNull(calendar, cs.calendar);   //NOSONAR
+        N.checkArgNotNull(calendar, cs.calendar); //NOSONAR
         N.checkArgNotNull(unit, cs.CalendarField);
 
         return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
@@ -5036,10 +5036,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         // Fragments bigger than a day require a breakdown to days
         switch (fragment) {
             case Calendar.YEAR:
-                result += unit.convert(calendar.get(Calendar.DAY_OF_YEAR) - offset, TimeUnit.DAYS);   //NOSONAR
+                result += unit.convert(calendar.get(Calendar.DAY_OF_YEAR) - offset, TimeUnit.DAYS); //NOSONAR
                 break;
             case Calendar.MONTH:
-                result += unit.convert(calendar.get(Calendar.DAY_OF_MONTH) - offset, TimeUnit.DAYS);   //NOSONAR
+                result += unit.convert(calendar.get(Calendar.DAY_OF_MONTH) - offset, TimeUnit.DAYS); //NOSONAR
                 break;
             default:
                 break;
@@ -6480,7 +6480,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
                 return OffsetDateTime.parse(text, dateTimeFormatter);
             } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
-                return ZonedDateTime.parse(text, dateTimeFormatter).toOffsetDateTime();   // Convert ZonedDateTime to OffsetDateTime
+                return ZonedDateTime.parse(text, dateTimeFormatter).toOffsetDateTime(); // Convert ZonedDateTime to OffsetDateTime
             } else {
                 // return OffsetDateTime.from(parseToTemporalAccessor(text));
                 final Calendar cal = parseToCalendar(text);

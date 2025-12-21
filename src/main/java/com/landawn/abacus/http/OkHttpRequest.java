@@ -103,7 +103,7 @@ public final class OkHttpRequest {
     private boolean closeHttpClientAfterExecution = false;
 
     OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
-        N.checkArgument(!(Strings.isEmpty(url) && httpUrl == null), "'url' can't be null or empty");
+        N.checkArgument(!(Strings.isEmpty(url) && httpUrl == null), "'url' cannot be null or empty");
 
         this.url = url;
         this.httpUrl = httpUrl;
@@ -229,8 +229,8 @@ public final class OkHttpRequest {
                         .build()).closeHttpClientAfterExecution(true);
     }
 
-    OkHttpRequest closeHttpClientAfterExecution(final boolean b) {
-        closeHttpClientAfterExecution = b;
+    OkHttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
+        closeHttpClientAfterExecution = shouldClose;
 
         return this;
     }
@@ -1059,7 +1059,7 @@ public final class OkHttpRequest {
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(resultClass, cs.resultClass);
-        N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
+        N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
         final Request request = createRequest(httpMethod);
 
         final Response resp = execute(request);

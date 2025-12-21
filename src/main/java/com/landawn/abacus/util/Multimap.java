@@ -1557,7 +1557,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
-                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue);   //NOSONAR
+                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -1593,7 +1593,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
-                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue);   //NOSONAR
+                wasModified |= replaceOne(entry.getKey(), entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -2251,11 +2251,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, V> entry : multimap.entrySet()) {
-                final V v = entry.getValue();
+                final V values = entry.getValue();
 
-                if (N.notEmpty(v)) {
-                    for (final E e : v) {
-                        res.put(e, entry.getKey());
+                if (N.notEmpty(values)) {
+                    for (final E element : values) {
+                        res.put(element, entry.getKey());
                     }
                 }
             }

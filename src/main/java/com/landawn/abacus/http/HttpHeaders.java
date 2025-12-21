@@ -662,7 +662,7 @@ public final class HttpHeaders {
         } else if (headerValue instanceof Date) {
             return HttpDate.format((Date) headerValue);
         } else if (headerValue instanceof Instant) {
-            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli()));   // NOSONAR
+            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli())); // NOSONAR
         } else {
             return N.stringOf(headerValue);
         }
@@ -1111,7 +1111,7 @@ public final class HttpHeaders {
      * }
      * }</pre>
      *
-     * @return A set view of the header names backed by the underlying map
+     * @return a set view of the header names backed by the underlying map
      */
     public Set<String> headerNameSet() {
         return map.keySet();
@@ -1173,7 +1173,7 @@ public final class HttpHeaders {
      * // Modifications to headerMap won't affect the original HttpHeaders
      * }</pre>
      *
-     * @return A new map containing all headers
+     * @return a new map containing all headers
      */
     public Map<String, Object> toMap() {
         return map instanceof LinkedHashMap || map instanceof SortedMap ? new LinkedHashMap<>(map) : new HashMap<>(map);
@@ -1189,7 +1189,7 @@ public final class HttpHeaders {
      * copy.set("X-Modified", "true");   // Original is not affected
      * }</pre>
      *
-     * @return A new HttpHeaders instance with a copy of all headers
+     * @return a new HttpHeaders instance with a copy of all headers
      */
     public HttpHeaders copy() {
         final Map<String, Object> copyMap = N.newMap(map.getClass(), map.size());

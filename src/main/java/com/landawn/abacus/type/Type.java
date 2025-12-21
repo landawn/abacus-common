@@ -938,7 +938,7 @@ public interface Type<T> {
      * @return {@code true} if this is an array type, {@code false} otherwise
      */
     default boolean isArray() {
-        return isPrimitiveArray() || isObjectArray();   // Default implementation, can be overridden by specific types
+        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
     /**
@@ -1118,7 +1118,7 @@ public interface Type<T> {
      *
      * @return the element type, or {@code null} if not applicable
      */
-    Type<?> getElementType();   //NOSONAR
+    Type<?> getElementType(); //NOSONAR
 
     /**
      * Gets the parameter types for generic types.
@@ -1126,7 +1126,7 @@ public interface Type<T> {
      *
      * @return array of parameter types, empty if none
      */
-    Type<?>[] getParameterTypes();   //NOSONAR
+    Type<?>[] getParameterTypes(); //NOSONAR
 
     /**
      * Returns the default value for this type.

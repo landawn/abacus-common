@@ -311,7 +311,7 @@ public final class Median {
      * @see N#median(char[])
      */
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");   //NOSONAR
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty"); //NOSONAR
 
         return of(a, 0, a.length);
     }
@@ -352,7 +352,7 @@ public final class Median {
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");   //NOSONAR
+            throw new IllegalArgumentException("The length of array cannot be null or empty"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -383,7 +383,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalChar.of(queue.poll())) : Pair.of(queue.peek(), OptionalChar.empty());
+            if (len % 2 == 0) {
+                final char first = queue.poll();
+                return Pair.of(first, OptionalChar.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalChar.empty());
+            }
         }
     }
 
@@ -416,7 +421,7 @@ public final class Median {
      * @see OptionalByte
      */
     public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -457,7 +462,7 @@ public final class Median {
      */
     public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -488,7 +493,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalByte.of(queue.poll())) : Pair.of(queue.peek(), OptionalByte.empty());
+            if (len % 2 == 0) {
+                final byte first = queue.poll();
+                return Pair.of(first, OptionalByte.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalByte.empty());
+            }
         }
     }
 
@@ -521,7 +531,7 @@ public final class Median {
      * @see OptionalShort
      */
     public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -562,7 +572,7 @@ public final class Median {
      */
     public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -593,7 +603,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalShort.of(queue.poll())) : Pair.of(queue.peek(), OptionalShort.empty());
+            if (len % 2 == 0) {
+                final short first = queue.poll();
+                return Pair.of(first, OptionalShort.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalShort.empty());
+            }
         }
     }
 
@@ -627,7 +642,7 @@ public final class Median {
      * @see OptionalInt
      */
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -668,7 +683,7 @@ public final class Median {
      */
     public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -699,7 +714,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalInt.of(queue.poll())) : Pair.of(queue.peek(), OptionalInt.empty());
+            if (len % 2 == 0) {
+                final int first = queue.poll();
+                return Pair.of(first, OptionalInt.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalInt.empty());
+            }
         }
     }
 
@@ -733,7 +753,7 @@ public final class Median {
      * @see OptionalLong
      */
     public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -774,7 +794,7 @@ public final class Median {
      */
     public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -805,7 +825,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalLong.of(queue.poll())) : Pair.of(queue.peek(), OptionalLong.empty());
+            if (len % 2 == 0) {
+                final long first = queue.poll();
+                return Pair.of(first, OptionalLong.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalLong.empty());
+            }
         }
     }
 
@@ -840,7 +865,7 @@ public final class Median {
      * @see OptionalFloat
      */
     public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -882,7 +907,7 @@ public final class Median {
      */
     public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -913,7 +938,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalFloat.of(queue.poll())) : Pair.of(queue.peek(), OptionalFloat.empty());
+            if (len % 2 == 0) {
+                final float first = queue.poll();
+                return Pair.of(first, OptionalFloat.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalFloat.empty());
+            }
         }
     }
 
@@ -949,7 +979,7 @@ public final class Median {
      * @see OptionalDouble
      */
     public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -991,7 +1021,7 @@ public final class Median {
      */
     public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -1022,7 +1052,12 @@ public final class Median {
             }
 
             //noinspection DataFlowIssue
-            return len % 2 == 0 ? Pair.of(queue.poll(), OptionalDouble.of(queue.poll())) : Pair.of(queue.peek(), OptionalDouble.empty());
+            if (len % 2 == 0) {
+                final double first = queue.poll();
+                return Pair.of(first, OptionalDouble.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), OptionalDouble.empty());
+            }
         }
     }
 
@@ -1057,7 +1092,7 @@ public final class Median {
      * @see #of(Object[], Comparator)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -1140,7 +1175,7 @@ public final class Median {
      * @see #of(Comparable[])
      */
     public static <T> Pair<T, Optional<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
 
         return of(a, 0, a.length, cmp);
     }
@@ -1193,7 +1228,7 @@ public final class Median {
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
@@ -1224,7 +1259,12 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Optional.of(queue.poll())) : Pair.of(queue.peek(), Optional.empty());
+            if (len % 2 == 0) {
+                final T first = queue.poll();
+                return Pair.of(first, Optional.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), Optional.empty());
+            }
         }
     }
 
@@ -1305,7 +1345,7 @@ public final class Median {
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
         if (N.isEmpty(c)) {
-            throw new IllegalArgumentException("The size of collection can't be null or empty");
+            throw new IllegalArgumentException("The size of collection cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator) Comparators.naturalOrder() : cmp;
@@ -1336,7 +1376,12 @@ public final class Median {
                 }
             }
 
-            return len % 2 == 0 ? Pair.of(queue.poll(), Optional.of(queue.poll())) : Pair.of(queue.peek(), Optional.empty());
+            if (len % 2 == 0) {
+                final T first = queue.poll();
+                return Pair.of(first, Optional.of(queue.poll()));
+            } else {
+                return Pair.of(queue.peek(), Optional.empty());
+            }
         }
     }
 
@@ -1431,7 +1476,7 @@ public final class Median {
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can't be null or empty");   //NOSONAR
+            throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, c.size());

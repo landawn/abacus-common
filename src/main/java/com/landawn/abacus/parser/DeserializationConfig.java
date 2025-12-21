@@ -147,7 +147,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the element type for collection and array deserialization using a Class.
      * This is used when deserializing to collections or arrays to specify
      * the type of elements they contain.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For deserializing JSON array to List<Person>
@@ -155,11 +155,11 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * List<Person> people = parser.deserialize(jsonArray, List.class);
      * }</pre>
      *
-     * @param cls the class of collection/array elements
+     * @param elementClass the class of collection/array elements
      * @return this configuration instance for method chaining
      */
-    public C setElementType(final Class<?> cls) {
-        return setElementType(Type.of(cls));
+    public C setElementType(final Class<?> elementClass) {
+        return setElementType(Type.of(elementClass));
     }
 
     /**

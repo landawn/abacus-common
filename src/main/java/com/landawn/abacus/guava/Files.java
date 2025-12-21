@@ -763,7 +763,7 @@ public abstract class Files { //NOSONAR
      */
     @Deprecated
     public static File createTempDir() {
-        return com.google.common.io.Files.createTempDir();   //NOSONAR
+        return com.google.common.io.Files.createTempDir(); //NOSONAR
     }
 
     /**
@@ -1451,7 +1451,7 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to read from.
-     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
+     * @param charset the character set used to decode the input stream; see {@link StandardCharsets} for
      *     helpful predefined constants.
      * @return a string containing the content read from the file.
      * @throws IOException if an I/O error occurs reading from the file.
@@ -1461,8 +1461,8 @@ public abstract class Files { //NOSONAR
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
      */
-    public static String readString(final File file, Charset cs) throws IOException {
-        return java.nio.file.Files.readString(file.toPath(), cs);
+    public static String readString(final File file, Charset charset) throws IOException {
+        return java.nio.file.Files.readString(file.toPath(), charset);
     }
 
     /**
@@ -1524,7 +1524,7 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to read from.
-     * @param cs the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
+     * @param charset the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
      * @return a mutable {@link List} containing all the lines from the file.
      * @throws IOException if an I/O error occurs while reading from the file.
      * @throws SecurityException in the case of the default provider, and a security manager is
@@ -1533,8 +1533,8 @@ public abstract class Files { //NOSONAR
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */
-    public static List<String> readAllLines(final File file, Charset cs) throws IOException {
-        return java.nio.file.Files.readAllLines(file.toPath(), cs);
+    public static List<String> readAllLines(final File file, Charset charset) throws IOException {
+        return java.nio.file.Files.readAllLines(file.toPath(), charset);
     }
 
     /**

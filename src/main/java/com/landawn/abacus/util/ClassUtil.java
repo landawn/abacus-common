@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.security.CodeSource;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -743,7 +744,11 @@ public final class ClassUtil {
      * @return the path to the source code location of the specified class, with URL encoding removed
      */
     public static String getSourceCodeLocation(final Class<?> clazz) {
-        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "); //NOSONAR
+        final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+        if (codeSource == null || codeSource.getLocation() == null) {
+            return null;
+        }
+        return codeSource.getLocation().getPath().replace("%20", " "); //NOSONAR
     }
 
     /**
@@ -1319,9 +1324,10 @@ public final class ClassUtil {
 
                                 try { //NOSONAR
                                     final Class<?> clazz = ClassUtil.forClass(className, false);
+                                    final Package pkg = clazz.getPackage();
 
-                                    if ((clazz.getCanonicalName() != null) && (clazz.getPackage().getName().equals(pkgName)
-                                            || (clazz.getPackage().getName().startsWith(pkgName) && isRecursive)) && predicate.test(clazz)) {
+                                    if ((clazz.getCanonicalName() != null) && (pkg != null)
+                                            && (pkg.getName().equals(pkgName) || (pkg.getName().startsWith(pkgName) && isRecursive)) && predicate.test(clazz)) {
                                         classes.add(clazz);
                                     }
                                 } catch (final Throwable e) {

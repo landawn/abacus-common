@@ -429,7 +429,7 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalBoolean}
-         * @throws IllegalArgumentException if the action is null
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalBoolean ifPresent(final Throwables.BooleanConsumer<E> action) throws IllegalArgumentException, E {
@@ -451,7 +451,7 @@ public class u { // NOSONAR
          * @param action the action to be performed, if a value is present
          * @param emptyAction the empty-based action to be performed, if no value is present
          * @return this {@code OptionalBoolean}
-         * @throws IllegalArgumentException if either action is null
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
          */
@@ -485,7 +485,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the value of this
          *         {@code OptionalBoolean}, if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if the predicate is null
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
          */
         public <E extends Exception> OptionalBoolean filter(final Throwables.BooleanPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -514,7 +514,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -537,7 +537,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -560,7 +560,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -583,7 +583,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalLong} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -606,7 +606,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalDouble} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -660,7 +660,7 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalBoolean}-bearing mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalBoolean flatMap(final Throwables.BooleanFunction<OptionalBoolean, E> mapper) throws IllegalArgumentException, E {
@@ -1177,7 +1177,7 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalChar}
-         * @throws IllegalArgumentException if the action is null
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalChar ifPresent(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, E {
@@ -1212,7 +1212,7 @@ public class u { // NOSONAR
          * @param action the action to be performed, if a value is present
          * @param emptyAction the empty-based action to be performed, if no value is present
          * @return this {@code OptionalChar}
-         * @throws IllegalArgumentException if either action is null
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
          */
@@ -1246,7 +1246,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the value of this
          *         {@code OptionalChar}, if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if the predicate is null
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
          */
         public <E extends Exception> OptionalChar filter(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -1269,7 +1269,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -1292,7 +1292,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
@@ -1315,7 +1315,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws IllegalArgumentException, E {
@@ -1369,7 +1369,7 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalChar}-bearing mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if the mapping function is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalChar flatMap(final Throwables.CharFunction<OptionalChar, E> mapper) throws IllegalArgumentException, E {

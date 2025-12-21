@@ -72,7 +72,7 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
-     * IntObjPredicate<String> charIsVowel = (index, str) -> "aeiouAEIOU".indexOf(str.charAt(index)) >= 0;
+     * IntObjPredicate<String> charIsVowel = (index, str) -> index >= 0 && index < str.length() && "aeiouAEIOU".indexOf(str.charAt(index)) >= 0;
      * IntObjPredicate<String> inRangeAndVowel = indexInRange.and(charIsVowel);
      * boolean result = inRangeAndVowel.test(1, "Hello");   // Returns true ('e' is a vowel)
      * }</pre>

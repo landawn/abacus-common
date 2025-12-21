@@ -44,7 +44,7 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      *
      * // Check if a map contains a key and value matches condition
      * IntBiObjPredicate<Map<String, String>, String> hasKeyAndValueLength =
-     *     (minLength, map, key) -> map.containsKey(key) && map.get(key).length() >= minLength;
+     *     (minLength, map, key) -> map.containsKey(key) && map.get(key) != null && map.get(key).length() >= minLength;
      * Map<String, String> map = Map.of("user1", "Alice", "user2", "Bob");
      * boolean result = hasKeyAndValueLength.test(3, map, "user1");   // returns true ("Alice".length() >= 3)
      * }</pre>

@@ -53,13 +53,13 @@ public final class BeanType<T> extends AbstractType<T> {
      * This constructor is called by the TypeFactory to create BeanType instances
      * for arbitrary JavaBean classes.
      *
-     * @param cls the Class object representing the bean type
+     * @param clazz the Class object representing the bean type
      * @param javaType the Java reflection Type for the bean (may be {@code null} for simple classes)
      */
-    BeanType(final Class<T> cls, final java.lang.reflect.Type javaType) {
-        super(javaType == null ? TypeFactory.getClassName(cls) : TypeFactory.getJavaTypeName(javaType));
-        this.typeClass = cls;
-        this.javaType = javaType == null ? cls : javaType;
+    BeanType(final Class<T> clazz, final java.lang.reflect.Type javaType) {
+        super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
+        this.typeClass = clazz;
+        this.javaType = javaType == null ? clazz : javaType;
     }
 
     /**

@@ -320,7 +320,7 @@ import com.landawn.abacus.util.function.TriFunction;
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR
 
-    static final Object NONE = ClassUtil.createNullMask();   //NOSONAR
+    static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
 
     static final Characteristics[] CH_NOID = {};
 
@@ -2521,7 +2521,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     private static final BinaryOperator<Holder<Object>> first_last_combiner = (t, u) -> {
         if (t.value() != NONE && u.value() != NONE) {
-            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream");   //NOSONAR
+            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream"); //NOSONAR
         }
 
         return t.value() != NONE ? t : u;
@@ -10376,11 +10376,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final Collector<? super T, ?, R5> downstream5) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");   //NOSONAR
-            N.checkArgNotNull(downstream2, "downstream2");   //NOSONAR
-            N.checkArgNotNull(downstream3, "downstream3");   //NOSONAR
-            N.checkArgNotNull(downstream4, "downstream4");   //NOSONAR
-            N.checkArgNotNull(downstream5, "downstream5");   //NOSONAR
+            N.checkArgNotNull(downstream1, "downstream1"); //NOSONAR
+            N.checkArgNotNull(downstream2, "downstream2"); //NOSONAR
+            N.checkArgNotNull(downstream3, "downstream3"); //NOSONAR
+            N.checkArgNotNull(downstream4, "downstream4"); //NOSONAR
+            N.checkArgNotNull(downstream5, "downstream5"); //NOSONAR
 
             final List<Collector<? super T, ?, ?>> downstreams = Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5);
 
@@ -10570,7 +10570,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, cs.downstream1);
             N.checkArgNotNull(downstream2, cs.downstream2);
-            N.checkArgNotNull(merger, "merger");   //NOSONAR
+            N.checkArgNotNull(merger, "merger"); //NOSONAR
 
             final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
             final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
@@ -10789,7 +10789,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
-            N.checkArgument(N.notEmpty(downstreams), "The specified 'collectors' can't be null or empty");
+            N.checkArgument(N.notEmpty(downstreams), "The specified 'collectors' cannot be null or empty");
             N.checkArgNotNull(merger, cs.merger);
 
             final int size = downstreams.size();

@@ -189,7 +189,7 @@ public class EventBus {
         if (executor != DEFAULT_EXECUTOR && executor instanceof ExecutorService executorService) {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 
-                logger.warn("Starting to shutdown task in EventBus");
+                logger.warn("Starting EventBus shutdown");
 
                 try {
                     executorService.shutdown();
@@ -197,9 +197,9 @@ public class EventBus {
                     //noinspection ResultOfMethodCallIgnored
                     executorService.awaitTermination(60, TimeUnit.SECONDS);
                 } catch (final InterruptedException e) {
-                    logger.warn("Not all the requests/tasks executed in Eventbus are completed successfully before shutdown.");
+                    logger.warn("Not all EventBus tasks completed successfully before shutdown");
                 } finally {
-                    logger.warn("Completed to shutdown task in Eventbus");
+                    logger.warn("EventBus shutdown completed");
                 }
             }));
         }
@@ -386,19 +386,18 @@ public class EventBus {
             logger.debug("Registering subscriber: " + subscriber + " with eventId: " + eventId + " and thread mode: " + threadMode);
         }
 
-        final Class<?> cls = subscriber.getClass();
-        final List<SubIdentifier> subList = getClassSubList(cls);
+        final Class<?> subscriberClass = subscriber.getClass();
+        final List<SubIdentifier> subIdentifiers = getClassSubList(subscriberClass);
 
-        if (N.isEmpty(subList)) {
-            throw new RuntimeException("No subscriber method found in class: " + ClassUtil.getCanonicalClassName(cls));
+        if (N.isEmpty(subIdentifiers)) {
+            throw new RuntimeException("No subscriber method found in class: " + ClassUtil.getCanonicalClassName(subscriberClass));
         }
 
-        final List<SubIdentifier> eventSubList = new ArrayList<>(subList.size());
+        final List<SubIdentifier> eventSubList = new ArrayList<>(subIdentifiers.size());
 
-        for (final SubIdentifier sub : subList) {
+        for (final SubIdentifier sub : subIdentifiers) {
             if (sub.isPossibleLambdaSubscriber && Strings.isEmpty(eventId)) {
-                throw new RuntimeException(
-                        "General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id");
+                throw new RuntimeException("Lambda subscribers must be registered with an event ID");
             }
 
             eventSubList.add(new SubIdentifier(sub, subscriber, eventId, threadMode));
@@ -457,7 +456,7 @@ public class EventBus {
                         try {
                             dispatch(sub, entry.getKey());
                         } catch (final Exception e) {
-                            logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e);   //NOSONAR
+                            logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e); //NOSONAR
                         }
                     }
                 }
@@ -467,16 +466,16 @@ public class EventBus {
         return this;
     }
 
-    private List<SubIdentifier> getClassSubList(final Class<?> cls) {
+    private List<SubIdentifier> getClassSubList(final Class<?> subscriberClass) {
         synchronized (classMetaSubMap) {
-            List<SubIdentifier> subs = classMetaSubMap.get(cls);
+            List<SubIdentifier> subscriberMethods = classMetaSubMap.get(subscriberClass);
 
-            if (subs == null) {
-                subs = new ArrayList<>();
-                final Set<Method> added = N.newHashSet();
+            if (subscriberMethods == null) {
+                subscriberMethods = new ArrayList<>();
+                final Set<Method> addedMethods = N.newHashSet();
 
-                final Set<Class<?>> allTypes = ClassUtil.getAllSuperTypes(cls);
-                allTypes.add(cls);
+                final Set<Class<?>> allTypes = ClassUtil.getAllSuperTypes(subscriberClass);
+                allTypes.add(subscriberClass);
 
                 for (final Class<?> supertype : allTypes) {
                     for (final Method method : supertype.getDeclaredMethods()) {
@@ -488,18 +487,18 @@ public class EventBus {
                                         method.getName() + " has " + parameterTypes.length + " parameters. Subscriber method must have exactly 1 parameter.");
                             }
 
-                            if (added.add(method)) {
-                                subs.add(new SubIdentifier(method));
+                            if (addedMethods.add(method)) {
+                                subscriberMethods.add(new SubIdentifier(method));
                             }
                         }
                     }
                 }
 
-                if (Subscriber.class.isAssignableFrom(cls)) {
-                    for (final Method method : cls.getDeclaredMethods()) {
+                if (Subscriber.class.isAssignableFrom(subscriberClass)) {
+                    for (final Method method : subscriberClass.getDeclaredMethods()) {
                         if (method.getName().equals("on") && method.getParameterTypes().length == 1) {
-                            if (added.add(method)) {
-                                subs.add(new SubIdentifier(method));
+                            if (addedMethods.add(method)) {
+                                subscriberMethods.add(new SubIdentifier(method));
                             }
 
                             break;
@@ -507,10 +506,10 @@ public class EventBus {
                     }
                 }
 
-                classMetaSubMap.put(cls, subs);
+                classMetaSubMap.put(subscriberClass, subscriberMethods);
             }
 
-            return subs;
+            return subscriberMethods;
         }
     }
 
@@ -645,42 +644,42 @@ public class EventBus {
      * @return this EventBus instance for method chaining
      */
     public EventBus post(final String eventId, final Object event) {
-        final Class<?> cls = event.getClass();
+        final Class<?> eventClass = event.getClass();
 
-        List<List<SubIdentifier>> listOfSubs = listOfSubEventSubs;
+        List<List<SubIdentifier>> subscriberLists = listOfSubEventSubs;
 
         if (Strings.isEmpty(eventId)) {
-            if (listOfSubs == null) {
+            if (subscriberLists == null) {
                 synchronized (registeredSubMap) {
-                    listOfSubs = new ArrayList<>(registeredSubMap.values());   // in case concurrent register/unregister.
-                    listOfSubEventSubs = listOfSubs;
+                    subscriberLists = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
+                    listOfSubEventSubs = subscriberLists;
                 }
             }
         } else {
-            List<SubIdentifier> listOfEventIdSub = listOfEventIdSubMap.get(eventId);
+            List<SubIdentifier> eventIdSubscribers = listOfEventIdSubMap.get(eventId);
 
-            if (listOfEventIdSub == null) {
+            if (eventIdSubscribers == null) {
                 synchronized (registeredEventIdSubMap) {
                     if (registeredEventIdSubMap.containsKey(eventId)) {
-                        listOfEventIdSub = new ArrayList<>(registeredEventIdSubMap.get(eventId));   // in case concurrent register/unregister.
+                        eventIdSubscribers = new ArrayList<>(registeredEventIdSubMap.get(eventId)); // in case concurrent register/unregister.
                     } else {
-                        listOfEventIdSub = N.emptyList();
+                        eventIdSubscribers = N.emptyList();
                     }
 
-                    listOfEventIdSubMap.put(eventId, listOfEventIdSub);
+                    listOfEventIdSubMap.put(eventId, eventIdSubscribers);
                 }
             }
 
-            listOfSubs = Collections.singletonList(listOfEventIdSub);
+            subscriberLists = Collections.singletonList(eventIdSubscribers);
         }
 
-        for (final List<SubIdentifier> subs : listOfSubs) {
-            for (final SubIdentifier sub : subs) {
-                if (sub.isMyEvent(eventId, cls)) {
+        for (final List<SubIdentifier> subscribers : subscriberLists) {
+            for (final SubIdentifier subscriber : subscribers) {
+                if (subscriber.isMyEvent(eventId, eventClass)) {
                     try {
-                        dispatch(sub, event);
+                        dispatch(subscriber, event);
                     } catch (final Exception e) {
-                        logger.error("Failed to post event: " + N.toString(event) + " to subscriber: " + N.toString(sub), e);
+                        logger.error("Failed to post event: " + N.toString(event) + " to subscriber: " + N.toString(subscriber), e);
                     }
                 }
             }
@@ -823,13 +822,11 @@ public class EventBus {
             }
 
             if (N.notEmpty(keyToRemove)) {
-                synchronized (stickyEventMap) {
-                    for (final Object event : keyToRemove) {
-                        stickyEventMap.remove(event);
-                    }
-
-                    mapOfStickyEvent = null;
+                for (final Object event : keyToRemove) {
+                    stickyEventMap.remove(event);
                 }
+
+                mapOfStickyEvent = null;
 
                 return true;
             }
@@ -1060,11 +1057,10 @@ public class EventBus {
                             logger.debug("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's in the interval: "
                                     + sub.intervalInMillis);
                         }
-                    } else if (sub.deduplicate && (sub.previousEvent != null || sub.lastPostTime > 0) && N.equals(sub.previousEvent, event)) {
+                    } else if (sub.deduplicate && sub.previousEvent != null && N.equals(sub.previousEvent, event)) {
                         // ignore.
                         if (logger.isDebugEnabled()) {
-                            logger.debug(
-                                    "Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's same as previous event");
+                            logger.debug("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " (duplicate of previous event)");
                         }
                     } else {
                         if (logger.isDebugEnabled()) {

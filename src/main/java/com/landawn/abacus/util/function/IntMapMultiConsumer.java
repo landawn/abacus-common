@@ -57,10 +57,10 @@ public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMu
      * }</pre>
      *
      * @param value the input int value to be transformed
-     * @param ic the consumer that accepts the transformed values. The implementation
-     *           should call {@code ic.accept(int)} for each output value. May be
-     *           called zero or more times
+     * @param consumer the consumer that accepts the transformed values. The implementation
+     *                 should call {@code consumer.accept(int)} for each output value. May be
+     *                 called zero or more times
      */
     @Override
-    void accept(int value, java.util.function.IntConsumer ic);
+    void accept(int value, java.util.function.IntConsumer consumer);
 }

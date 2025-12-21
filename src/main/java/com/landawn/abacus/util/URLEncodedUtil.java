@@ -387,11 +387,11 @@ public final class URLEncodedUtil {
             UNRESERVED.set(i);
         }
 
-        UNRESERVED.set('_');   // these are the characters of the "mark" list
+        UNRESERVED.set('_'); // these are the characters of the "mark" list
         UNRESERVED.set('-');
         UNRESERVED.set('.');
         UNRESERVED.set('*');
-        URL_ENCODER.or(UNRESERVED);   // skip remaining unreserved characters
+        URL_ENCODER.or(UNRESERVED); // skip remaining unreserved characters
         UNRESERVED.set('!');
         UNRESERVED.set('~');
         UNRESERVED.set('\'');
@@ -411,9 +411,9 @@ public final class URLEncodedUtil {
 
         // URL path safe
         PATH_SAFE.or(UNRESERVED);
-        PATH_SAFE.set('/');   // segment separator
-        PATH_SAFE.set(';');   // param separator
-        PATH_SAFE.set(':');   // rest as per list in 2396, i.e., : @ & = + $ ,
+        PATH_SAFE.set('/'); // segment separator
+        PATH_SAFE.set(';'); // param separator
+        PATH_SAFE.set(':'); // rest as per list in 2396, i.e., : @ & = + $ ,
         PATH_SAFE.set('@');
         PATH_SAFE.set('&');
         PATH_SAFE.set('=');
@@ -431,8 +431,8 @@ public final class URLEncodedUtil {
         RESERVED.set('+');
         RESERVED.set('$');
         RESERVED.set(',');
-        RESERVED.set('[');   // added by RFC 2732
-        RESERVED.set(']');   // added by RFC 2732
+        RESERVED.set('['); // added by RFC 2732
+        RESERVED.set(']'); // added by RFC 2732
 
         URIC.or(RESERVED);
         URIC.or(UNRESERVED);
@@ -1279,11 +1279,11 @@ public final class URLEncodedUtil {
             if ((c == '%') && (cb.remaining() >= 2)) {
                 final char uc = cb.get();
                 final char lc = cb.get();
-                final int u = Character.digit(uc, 16);
-                final int l = Character.digit(lc, 16);
+                final int upperDigit = Character.digit(uc, 16);
+                final int lowerDigit = Character.digit(lc, 16);
 
-                if ((u != -1) && (l != -1)) {
-                    bb.put((byte) ((u << 4) + l));
+                if ((upperDigit != -1) && (lowerDigit != -1)) {
+                    bb.put((byte) ((upperDigit << 4) + lowerDigit));
                 } else {
                     bb.put((byte) '%');
                     bb.put((byte) uc);

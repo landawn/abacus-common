@@ -105,6 +105,6 @@ public class UUIDType extends AbstractType<UUID> {
      */
     @Override
     public UUID valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str);   // NOSONAR
+        return Strings.isBlank(str) ? null : java.util.UUID.fromString(str.trim()); // NOSONAR
     }
 }

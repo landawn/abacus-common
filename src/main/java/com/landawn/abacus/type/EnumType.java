@@ -85,8 +85,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    EnumType(final String clsName, final boolean ordinal) {
-        super(ordinal ? clsName + "(true)" : clsName, (Class<T>) getEnumClass(ClassUtil.forClass(clsName)));
+    EnumType(final String className, final boolean ordinal) {
+        super(ordinal ? className + "(true)" : className, (Class<T>) getEnumClass(ClassUtil.forClass(className)));
 
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
         jsonXmlNameEnumMap = new HashMap<>();
@@ -178,9 +178,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             if (Strings.isAsciiDigitalInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
-                final T val = jsonXmlNameEnumMap.get(str);
+                final T value = jsonXmlNameEnumMap.get(str);
 
-                return Objects.requireNonNullElseGet(val, () -> Enum.valueOf(typeClass, str));
+                return Objects.requireNonNullElseGet(value, () -> Enum.valueOf(typeClass, str));
             }
         } else {
             return super.valueOf(str);
@@ -369,7 +369,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         return enumConstant.name();
     }
 
-    private static Class<?> getEnumClass(final Class<?> cls) {
-        return cls.isEnum() ? cls : cls.getEnclosingClass();
+    private static Class<?> getEnumClass(final Class<?> clazz) {
+        return clazz.isEnum() ? clazz : clazz.getEnclosingClass();
     }
 }

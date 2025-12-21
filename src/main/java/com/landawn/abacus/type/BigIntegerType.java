@@ -91,7 +91,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      */
     @Override
     public BigInteger valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : new BigInteger(str, 10);
+        return Strings.isEmpty(str) ? null : new BigInteger(str.trim(), 10);
     }
 
     /**
@@ -111,9 +111,9 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      */
     @Override
     public BigInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final String str = rs.getString(columnIndex);
+        final String stringValue = rs.getString(columnIndex);
 
-        return Strings.isEmpty(str) ? null : new BigInteger(str);
+        return Strings.isEmpty(stringValue) ? null : new BigInteger(stringValue.trim());
     }
 
     /**
@@ -133,9 +133,9 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      */
     @Override
     public BigInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final String str = rs.getString(columnLabel);
+        final String stringValue = rs.getString(columnLabel);
 
-        return Strings.isEmpty(str) ? null : new BigInteger(str);
+        return Strings.isEmpty(stringValue) ? null : new BigInteger(stringValue.trim());
     }
 
     /**

@@ -289,8 +289,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #columns(Collection, Collection, Object[][])
      */
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException {
-        N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
-        N.checkArgument(!N.anyNull(columnKeySet), "Column key can't be null");
+        N.checkArgument(!N.anyNull(rowKeySet), "Row key cannot be null");
+        N.checkArgument(!N.anyNull(columnKeySet), "Column key cannot be null");
         N.checkArgument(!N.hasDuplicates(rowKeySet), "Duplicate row keys are not allowed");
         N.checkArgument(!N.hasDuplicates(columnKeySet), "Duplicate column keys are not allowed");
 
@@ -335,7 +335,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int columnLength = this.columnLength();
 
         if (N.notEmpty(rows)) {
-            N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set");   //NOSONAR
+            N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set"); //NOSONAR
 
             for (final Object[] e : rows) {
                 N.checkArgument(e.length == columnLength, "The length of array is not equal to size of row/column key set");
@@ -465,7 +465,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int columnLength = instance.columnLength();
 
         if (N.notEmpty(rows)) {
-            N.checkArgument(rows.size() == rowLength, "The size of row collection is not equal to size row key set");   //NOSONAR
+            N.checkArgument(rows.size() == rowLength, "The size of row collection is not equal to size row key set"); //NOSONAR
 
             for (final Collection<? extends V> e : rows) {
                 N.checkArgument(e.size() == columnLength, "The size of row is not equal to size of column key set");
@@ -1441,7 +1441,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int columnLength = columnLength();
 
         if (N.notEmpty(row) && row.size() != columnLength) {
-            throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the size of column key set: " + columnLength);   //NOSONAR
+            throw new IllegalArgumentException("The size of specified row: " + row.size() + " does not match the size of column key set: " + columnLength); //NOSONAR
         }
 
         init();
@@ -1494,14 +1494,14 @@ public final class Sheet<R, C, V> implements Cloneable {
         checkFrozen();
 
         if (_rowKeySet.contains(rowKey)) {
-            throw new IllegalArgumentException("Row '" + rowKey + "' already existed");   //NOSONAR
+            throw new IllegalArgumentException("Row '" + rowKey + "' already existed"); //NOSONAR
         }
 
         final int rowLength = rowLength();
         final int columnLength = columnLength();
 
         if (N.notEmpty(row) && row.size() != columnLength) {
-            throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the size of column key set: " + columnLength);
+            throw new IllegalArgumentException("The size of specified row: " + row.size() + " does not match the size of column key set: " + columnLength);
         }
 
         init();
@@ -1567,7 +1567,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         if (N.notEmpty(row) && row.size() != columnLength) {
-            throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the size of column key set: " + columnLength);
+            throw new IllegalArgumentException("The size of specified row: " + row.size() + " does not match the size of column key set: " + columnLength);
         }
 
         if (rowIndex == rowLength) {
@@ -1696,7 +1696,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             if (_isInitialized) {
                 for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-                    _columnList.get(columnIndex).remove(removedRowIndex);   //NOSONAR
+                    _columnList.get(columnIndex).remove(removedRowIndex); //NOSONAR
                 }
             }
         }
@@ -2056,7 +2056,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int rowLength = rowLength();
 
         if (N.notEmpty(column) && column.size() != rowLength) {
-            throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the size of row key set: " + rowLength);   //NOSONAR
+            throw new IllegalArgumentException("The size of specified column: " + column.size() + " does not match the size of row key set: " + rowLength); //NOSONAR
         }
 
         init();
@@ -2110,7 +2110,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int columnLength = columnLength();
 
         if (N.notEmpty(column) && column.size() != rowLength) {
-            throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the size of row key set: " + rowLength);
+            throw new IllegalArgumentException("The size of specified column: " + column.size() + " does not match the size of row key set: " + rowLength);
         }
 
         init();
@@ -2171,7 +2171,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         if (N.notEmpty(column) && column.size() != rowLength) {
-            throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the size of row key set: " + rowLength);
+            throw new IllegalArgumentException("The size of specified column: " + column.size() + " does not match the size of row key set: " + rowLength);
         }
 
         if (columnIndex == columnLength) {
@@ -4506,7 +4506,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                 return Stream.of(new ObjIteratorEx<>() {
                     private final int curRowIndex = rowIndex++;
-                    private final R r = _rowKeyIndexMap.getByValue(curRowIndex);
+                    private final R rowKey = _rowKeyIndexMap.getByValue(curRowIndex);
                     private int columnIndex = 0;
 
                     @Override
@@ -4522,7 +4522,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                         final int curColumnIndex = columnIndex++;
 
-                        return Cell.of(r, _columnKeyIndexMap.getByValue(curColumnIndex),
+                        return Cell.of(rowKey, _columnKeyIndexMap.getByValue(curColumnIndex),
                                 _isInitialized ? _columnList.get(curColumnIndex).get(curRowIndex) : null);
                     }
 
@@ -4642,16 +4642,16 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
 
                 final int curColumnIndex = columnIndex++;
-                final C c = _columnKeyIndexMap.getByValue(curColumnIndex);
+                final C columnKey = _columnKeyIndexMap.getByValue(curColumnIndex);
 
                 if (_isInitialized) {
                     final List<V> column = _columnList.get(curColumnIndex);
 
                     //noinspection resource
-                    return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), c, column.get(rowIndex)));
+                    return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), columnKey, column.get(rowIndex)));
                 } else {
                     //noinspection resource
-                    return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), c, null));
+                    return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), columnKey, null));
                 }
 
             }
@@ -6401,7 +6401,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #println(Collection, Collection, String, Appendable)
      */
     public void println(String prefix) throws UncheckedIOException {
-        println(_rowKeySet, _columnKeySet, prefix, System.out);   // NOSONAR);
+        println(_rowKeySet, _columnKeySet, prefix, System.out); // NOSONAR);
     }
 
     /**
@@ -6432,7 +6432,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #println(Collection, Collection, Appendable)
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
-        println(rowKeySet, columnKeySet, System.out);   // NOSONAR
+        println(rowKeySet, columnKeySet, System.out); // NOSONAR
     }
 
     /**
@@ -6561,10 +6561,10 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
 
                 final List<String> columnNameList = new ArrayList<>(columnLen);
-                columnNameList.add(" ");   // add for row key column
+                columnNameList.add(" "); // add for row key column
 
                 if (N.isEmpty(columnKeySet)) {
-                    columnNameList.add(" ");   // add for row key column
+                    columnNameList.add(" "); // add for row key column
                 } else {
                     for (final C ck : columnKeySet) {
                         columnNameList.add(N.toString(ck));
@@ -6991,7 +6991,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkFrozen() throws IllegalStateException {
         if (_isFrozen) {
-            throw new IllegalStateException("This Sheet is frozen, can't modify it.");
+            throw new IllegalStateException("This Sheet is frozen and cannot be modified");
         }
     }
 

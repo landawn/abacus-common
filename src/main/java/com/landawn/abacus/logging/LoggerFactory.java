@@ -55,7 +55,8 @@ public final class LoggerFactory {
 
     private static final String JAVA_VM_VENDOR = System.getProperty("java.vm.vendor");
 
-    private static final boolean IS_ANDROID_PLATFORM = JAVA_VENDOR.toUpperCase().contains("ANDROID") || JAVA_VM_VENDOR.contains("ANDROID");
+    private static final boolean IS_ANDROID_PLATFORM = (JAVA_VENDOR != null && JAVA_VENDOR.toUpperCase().contains("ANDROID"))
+            || (JAVA_VM_VENDOR != null && JAVA_VM_VENDOR.toUpperCase().contains("ANDROID"));
 
     private static final Logger jdkLogger = new JDKLogger(LoggerFactory.class.getName());
 

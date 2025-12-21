@@ -349,7 +349,7 @@ public final class Multiset<E> implements Collection<E> {
                     result.backingMap.put(e, MutableInt.of(1));
                 } else {
                     if (count.value() == Integer.MAX_VALUE) {
-                        throw new IllegalArgumentException("The total count is out of the bound of int");   //NOSONAR
+                        throw new IllegalArgumentException("The total count is out of the bound of int"); //NOSONAR
                     }
 
                     count.add(1);
@@ -1766,7 +1766,7 @@ public final class Multiset<E> implements Collection<E> {
      */
     @Override
     public <T> T[] toArray(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotNull(a, "The specified array can't be null");
+        N.checkArgNotNull(a, "The specified array cannot be null");
 
         final int size = size();
         final T[] ret = a.length < size ? N.newArray(a.getClass().getComponentType(), size) : a;

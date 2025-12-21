@@ -67,14 +67,14 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Constructs a Triple with the specified left, middle, and right values.
      *
-     * @param l the left element value, may be {@code null}.
-     * @param m the middle element value, may be {@code null}.
-     * @param r the right element value, may be {@code null}.
+     * @param leftValue the left element value, may be {@code null}.
+     * @param middleValue the middle element value, may be {@code null}.
+     * @param rightValue the right element value, may be {@code null}.
      */
-    Triple(final L l, final M m, final R r) {
-        setLeft(l);
-        setMiddle(m);
-        setRight(r);
+    Triple(final L leftValue, final M middleValue, final R rightValue) {
+        setLeft(leftValue);
+        setMiddle(middleValue);
+        setRight(rightValue);
     }
 
     /**
@@ -93,13 +93,13 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <L> the type of the left element.
      * @param <M> the type of the middle element.
      * @param <R> the type of the right element.
-     * @param l the left element, may be {@code null}.
-     * @param m the middle element, may be {@code null}.
-     * @param r the right element, may be {@code null}.
+     * @param leftValue the left element, may be {@code null}.
+     * @param middleValue the middle element, may be {@code null}.
+     * @param rightValue the right element, may be {@code null}.
      * @return a new Triple instance containing the specified elements.
      */
-    public static <L, M, R> Triple<L, M, R> of(final L l, final M m, final R r) {
-        return new Triple<>(l, m, r);
+    public static <L, M, R> Triple<L, M, R> of(final L leftValue, final M middleValue, final R rightValue) {
+        return new Triple<>(leftValue, middleValue, rightValue);
     }
 
     private static final Triple<?, ?, ?>[] EMPTY_ARRAY = new Triple[0];

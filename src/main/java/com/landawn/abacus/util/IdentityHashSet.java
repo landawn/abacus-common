@@ -97,7 +97,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     public IdentityHashSet(final Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
 
-        addAll(c);   // NOSONAR
+        addAll(c); // NOSONAR
     }
 
     /**

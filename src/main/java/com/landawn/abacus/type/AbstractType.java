@@ -141,7 +141,7 @@ public abstract class AbstractType<T> implements Type<T> {
         }
 
         name = simpleName;
-        xmlName = name.replace("<", "&lt;").replace(">", "&gt;");   //NOSONAR
+        xmlName = name.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
     }
 
     /**
@@ -649,7 +649,7 @@ public abstract class AbstractType<T> implements Type<T> {
         if (isComparable()) {
             return (x == null) ? ((y == null) ? 0 : (-1)) : ((y == null) ? 1 : ((Comparable<? super T>) x).compareTo(y));
         } else {
-            throw new UnsupportedOperationException(name() + " doesn't support compare Operation");
+            throw new UnsupportedOperationException(name() + " does not support compare operation");
         }
     }
 
@@ -821,7 +821,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public T collection2Array(final Collection<?> c) {
-        throw new UnsupportedOperationException(name() + " doesn't support collection2Array Operation");
+        throw new UnsupportedOperationException(name() + " does not support collection2Array operation");
     }
 
     /**
@@ -836,7 +836,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
-        throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
+        throw new UnsupportedOperationException(name() + " does not support array2Collection operation");
     }
 
     /**
@@ -850,7 +850,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public <E> void array2Collection(final T array, final Collection<E> output) {
-        throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
+        throw new UnsupportedOperationException(name() + " does not support array2Collection operation");
     }
 
     /**
@@ -987,14 +987,14 @@ public abstract class AbstractType<T> implements Type<T> {
      * // result3: ["a", "b", "c"]
      * }</pre>
      *
-     * @param st the string to split
+     * @param string the string to split
      * @param separator the separator
      * @return array of split strings
      */
-    protected static String[] split(final String st, final String separator) {
+    protected static String[] split(final String string, final String separator) {
         final String newValue = separatorConvertor.get(separator);
 
-        return (newValue == null) ? st.split(separator) : st.split(newValue);
+        return (newValue == null) ? string.split(separator) : string.split(newValue);
     }
 
     /**
@@ -1103,7 +1103,11 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     protected static int parseInt(final char[] cbuf, final int offset, int len) throws NumberFormatException {
         if (offset < 0 || len < 0) {
-            throw new IllegalArgumentException("'offset' and 'len' can't be negative");
+            throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
+        }
+
+        if (cbuf == null || len == 0) {
+            return 0;
         }
 
         char ch = cbuf[offset + len - 1];
@@ -1112,11 +1116,11 @@ public abstract class AbstractType<T> implements Type<T> {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
+                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
             }
         }
 
-        if (len == 0 || (N.isEmpty(cbuf) && offset == 0)) {
+        if (len == 0) {
             return 0;
         }
 
@@ -1124,7 +1128,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 1: {
                 ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
-                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
+                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
                 }
 
                 return ch - '0';
@@ -1168,7 +1172,11 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     protected static long parseLong(final char[] cbuf, final int offset, int len) throws NumberFormatException {
         if (offset < 0 || len < 0) {
-            throw new IllegalArgumentException("'offset' and 'len' can't be negative");
+            throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
+        }
+
+        if (cbuf == null || len == 0) {
+            return 0;
         }
 
         char ch = cbuf[offset + len - 1];
@@ -1177,11 +1185,11 @@ public abstract class AbstractType<T> implements Type<T> {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");   //NOSONAR
+                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
             }
         }
 
-        if (len == 0 || (N.isEmpty(cbuf) && offset == 0)) {
+        if (len == 0) {
             return 0;
         }
 

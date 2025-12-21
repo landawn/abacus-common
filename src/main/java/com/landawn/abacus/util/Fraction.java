@@ -436,7 +436,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
 
         if (denominator < 0) {
             if (numerator == Integer.MIN_VALUE || denominator == Integer.MIN_VALUE) {
-                throw new ArithmeticException("overflow: can't negate");
+                throw new ArithmeticException("overflow: cannot negate");
             }
             numerator = -numerator;
             denominator = -denominator;
@@ -967,7 +967,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             throw new ArithmeticException("Unable to invert zero.");
         }
         if (numerator == Integer.MIN_VALUE) {
-            throw new ArithmeticException("overflow: can't negate numerator");
+            throw new ArithmeticException("overflow: cannot negate numerator");
         }
         if (numerator < 0) {
             return new Fraction(-denominator, -numerator);
@@ -1137,7 +1137,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             // |u| larger: t positive (replace u)
             // |v| larger: t negative (replace v)
         } while (t != 0);
-        return -u * (1 << k);   // gcd is u*2^k
+        return -u * (1 << k); // gcd is u*2^k
     }
 
     // Arithmetic
@@ -1273,7 +1273,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      */
     private Fraction addSub(final Fraction fraction, final boolean isAdd) {
         if (fraction == null) {
-            throw new IllegalArgumentException("The fraction must not be null");   //NOSONAR
+            throw new IllegalArgumentException("The fraction must not be null"); //NOSONAR
         }
         // zero is identity for addition.
         if (numerator == 0) {

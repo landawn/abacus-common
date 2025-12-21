@@ -94,7 +94,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      */
     @Override
     public BigDecimal valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
+        return Strings.isEmpty(str) ? null : new BigDecimal(str.trim(), MathContext.UNLIMITED);
     }
 
     /**
@@ -119,7 +119,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      */
     @Override
     public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
-        return len == 0 ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
+        return (cbuf == null || len == 0) ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
     }
 
     /**

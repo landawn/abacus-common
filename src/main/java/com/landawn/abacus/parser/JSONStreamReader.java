@@ -214,27 +214,27 @@ class JSONStreamReader extends JSONStringReader {
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
         int pointPosition = -1;
-        int cnt = ret == 0 ? 0 : 1;
+        int digitCount = ret == 0 ? 0 : 1;
         int ch = 0;
         int typeFlag = 0;
 
         while ((ch = nextChar()) >= 0) {
             if (ch >= '0' && ch <= '9') {
-                if (cnt < MAX_PARSABLE_NUM_LEN || (cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
+                if (digitCount < MAX_PARSABLE_NUM_LEN || (digitCount == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
                     ret = ret * 10 + (ch - '0');
 
                     if (ret > 0 || pointPosition > 0) {
-                        cnt++;
+                        digitCount++;
                     }
                 } else {
-                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
+                    digitCount += 2; // So digitCount will > MAX_PARSABLE_NUM_LEN + 1 to skip the result.
                 }
             } else if (ch == '.' && pointPosition < 0) {
-                if (cnt == 0) {
-                    cnt = 1;
+                if (digitCount == 0) {
+                    digitCount = 1;
                 }
 
-                pointPosition = cnt;
+                pointPosition = digitCount;
             } else {
                 do {
                     if (ch < 128) {
@@ -250,7 +250,7 @@ class JSONStreamReader extends JSONStringReader {
                     if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                         typeFlag = ch;
                     } else if (ch > 32) { // ignore <= 32 whitespace chars.
-                        cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                        digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
                     }
                 } while ((ch = nextChar()) >= 0);
 
@@ -277,17 +277,17 @@ class JSONStreamReader extends JSONStringReader {
             nextEvent = -1;
         }
 
-        if (cnt >= 0 && cnt <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != cnt) {
+        if (digitCount >= 0 && digitCount <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != digitCount) {
             if (negative) {
                 ret = -ret;
             }
 
-            if (nextTokenValueType.isNumber() || typeFlag > 0) {
+            if (nextTokenValueType != null && (nextTokenValueType.isNumber() || typeFlag > 0)) {
                 if (pointPosition > 0) {
                     if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
-                        numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPosition]);
+                        numValue = (float) (((double) ret) / POWERS_OF_TEN[digitCount - pointPosition]);
                     } else { // ignore 'l' or 'L' if it's specified.
-                        numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
+                        numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                     }
                 } else if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
                     numValue = (float) ret;
@@ -298,7 +298,7 @@ class JSONStreamReader extends JSONStringReader {
                 }
             } else {
                 if (pointPosition > 0) {
-                    numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPosition];
+                    numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                 } else if (ret >= Integer.MIN_VALUE && ret <= Integer.MAX_VALUE) {
                     numValue = (int) ret;
                 } else {

@@ -423,7 +423,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
-        return _columnIndexMap.containsKey(columnName);   // || _columnIndexMap.containsKey(NameUtil.getSimpleName(columnName));
+        return _columnIndexMap.containsKey(columnName); // || _columnIndexMap.containsKey(NameUtil.getSimpleName(columnName));
     }
 
     @Override
@@ -1317,7 +1317,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private int checkColumnNamesForCombination(final Collection<String> columnNames, final String newColumnName) {
         if (N.isEmpty(columnNames)) {
-            throw new IllegalArgumentException("Column names to be combined can't be null or empty.");
+            throw new IllegalArgumentException("Column names to be combined cannot be null or empty");
         }
 
         final int[] columnIndexes = checkColumnNames(columnNames);
@@ -1336,7 +1336,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnIndex = checkColumnName(columnName);
 
         if (N.isEmpty(newColumnNames)) {
-            throw new IllegalArgumentException("New column names can't be null or empty.");
+            throw new IllegalArgumentException("New column names cannot be null or empty");
         }
 
         if (!N.disjoint(_columnNameList, newColumnNames)) {
@@ -1380,7 +1380,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnIndex = checkColumnName(columnName);
 
         if (N.isEmpty(newColumnNames)) {
-            throw new IllegalArgumentException("New column names can't be null or empty.");
+            throw new IllegalArgumentException("New column names cannot be null or empty");
         }
 
         if (!N.disjoint(_columnNameList, newColumnNames)) {
@@ -2859,7 +2859,7 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Collection<String> selectPropNames,
             final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
         N.checkArgument(Beans.isBeanClass(rowType), "{} is not a bean class", rowType);
-        N.checkArgNotEmpty(idPropNames, "idPropNames can't be null or empty or No id property defined in bean class: " + rowType);
+        N.checkArgNotEmpty(idPropNames, "idPropNames cannot be null or empty. No id property defined in bean class: " + rowType);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
         Collection<String> idPropNamesToUse = idPropNames;
@@ -2925,7 +2925,7 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgNotEmpty(columnNames, cs.columnNames);
 
         if (mergeResult && N.isEmpty(idPropNames)) {
-            throw new IllegalArgumentException("\"idPropNames\" can't be null or empty when \"mergeResult\" is true");
+            throw new IllegalArgumentException("'idPropNames' cannot be null or empty when 'mergeResult' is true");
         }
 
         final int rowCount = toRowIndex - fromRowIndex;
@@ -3212,14 +3212,14 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         if (propInfo == null) {
-            propInfo = beanInfo.getPropInfo(prefix + "s");   // Trying to do something smart?
+            propInfo = beanInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
             final int len = prefix.length() + 1;
 
             if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean()))
                     && N.noneMatch(_columnNameList, it -> it.length() > len && it.charAt(len) == '.' && Strings.startsWithIgnoreCase(it, prefix + "s."))) {
                 // good
             } else {
-                propInfo = beanInfo.getPropInfo(prefix + "es");   // Trying to do something smart?
+                propInfo = beanInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
                 final int len2 = prefix.length() + 2;
 
                 if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean())) && N
@@ -4145,7 +4145,7 @@ public final class RowDataset implements Dataset, Cloneable {
         Writer writer = null;
 
         try {
-            writer = IOUtil.newOutputStreamWriter(output);   // NOSONAR
+            writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
 
             toCsv(fromRowIndex, toRowIndex, columnNames, writer);
 
@@ -6756,7 +6756,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private void checkJoinOnColumnNames(final Map<String, String> onColumnNames) {
         if (N.isEmpty(onColumnNames)) {
-            throw new IllegalArgumentException("The joining column names can't be null or empty");
+            throw new IllegalArgumentException("The joining column names cannot be null or empty");
         }
     }
 
@@ -8624,7 +8624,7 @@ public final class RowDataset implements Dataset, Cloneable {
         commonColumnNameList.retainAll(other.columnNameList());
 
         if (N.isEmpty(commonColumnNameList)) {
-            throw new IllegalArgumentException("This two Datasets don't have any common column names: " + _columnNameList + ", " + other.columnNameList());
+            throw new IllegalArgumentException("These two Datasets do not have any common column names: " + _columnNameList + ", " + other.columnNameList());
         }
 
         return commonColumnNameList;
@@ -8633,7 +8633,7 @@ public final class RowDataset implements Dataset, Cloneable {
     private void checkIfColumnNamesAreSame(final Dataset other, final boolean requiresSameColumns) throws IllegalArgumentException {
         //noinspection SlowListContainsAll
         if (requiresSameColumns && !(columnCount() == other.columnCount() && _columnNameList.containsAll(other.columnNameList()))) {
-            throw new IllegalArgumentException("These two Datasets don't have same column names: " + _columnNameList + ", " + other.columnNameList());
+            throw new IllegalArgumentException("These two Datasets do not have the same column names: " + _columnNameList + ", " + other.columnNameList());
         }
     }
 
@@ -8641,9 +8641,9 @@ public final class RowDataset implements Dataset, Cloneable {
             throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
-        N.checkArgument(containsAllColumns(keyColumnNames), "This Dataset={} doesn't contain all keyColumnNames={}", columnNameList(), keyColumnNames);
+        N.checkArgument(containsAllColumns(keyColumnNames), "This Dataset={} does not contain all keyColumnNames={}", columnNameList(), keyColumnNames);
 
-        N.checkArgument(other.containsAllColumns(keyColumnNames), "Other Dataset={} doesn't contain all keyColumnNames={}", other.columnNameList(),
+        N.checkArgument(other.containsAllColumns(keyColumnNames), "Other Dataset={} does not contain all keyColumnNames={}", other.columnNameList(),
                 keyColumnNames);
 
         checkIfColumnNamesAreSame(other, requiresSameColumns);
@@ -9265,12 +9265,12 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public void println(final int fromRowIndex, final int toRowIndex) {
-        println(fromRowIndex, toRowIndex, _columnNameList);   // NOSONAR
+        println(fromRowIndex, toRowIndex, _columnNameList); // NOSONAR
     }
 
     @Override
     public void println(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        println(fromRowIndex, toRowIndex, columnNames, System.out);   // NOSONAR
+        println(fromRowIndex, toRowIndex, columnNames, System.out); // NOSONAR
     }
 
     @Override
@@ -9494,7 +9494,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     void checkFrozen() {
         if (_isFrozen) {
-            throw new IllegalStateException("This Dataset is frozen, can't modify it.");
+            throw new IllegalStateException("This Dataset is frozen and cannot be modified");
         }
     }
 

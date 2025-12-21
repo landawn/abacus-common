@@ -235,12 +235,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * </ul>
      *
      * @param propClass the declared property class from the target bean (may be {@code null})
-     * @param attribeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return the class to use for instantiation, preferring the attribute type when compatible
      */
-    protected static Class<?> choosePropClass(final Class<?> propClass, final Class<?> attribeTypeClass) {
-        if ((attribeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attribeTypeClass))) {
-            return attribeTypeClass;
+    protected static Class<?> choosePropClass(final Class<?> propClass, final Class<?> attributeTypeClass) {
+        if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
+            return attributeTypeClass;
         }
 
         return propClass;
@@ -259,12 +259,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <p>For standard types, the creator creates the instance and the converter is a no-op.</p>
      *
      * @param propClass the declared property class from the target bean (may be {@code null})
-     * @param attribeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a tuple containing the creator function and converter function for the target type
      */
     protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConvertorForTargetType(final Class<?> propClass,
-            final Class<?> attribeTypeClass) {
-        final Class<?> t = choosePropClass(propClass, attribeTypeClass);
+            final Class<?> attributeTypeClass) {
+        final Class<?> t = choosePropClass(propClass, attributeTypeClass);
 
         Tuple2<Function<Class<?>, Object>, Function<Object, Object>> result = mapOfCreatorAndConvertorForTargetType.get(t);
 
@@ -290,19 +290,19 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *
      * @param <T> the return type
      * @param propClass the declared property class from the target bean (may be {@code null})
-     * @param attrTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a new instance of the appropriate type
      * @throws ParseException if no suitable type is available or instantiation fails
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attrTypeClass) {
-        if ((attrTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attrTypeClass))) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass) {
+        if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
             try {
-                return (T) N.newInstance(attrTypeClass);
+                return (T) N.newInstance(attributeTypeClass);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by type attribute: " + attrTypeClass.getCanonicalName());
+                    logger.warn("Failed to new instance by type attribute: " + attributeTypeClass.getCanonicalName());
                 }
             }
         }
@@ -311,7 +311,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return (T) N.newInstance(propClass);
         }
 
-        throw new ParseException("Failed to create property instance with property class by attribute " + attrTypeClass);
+        throw new ParseException("Failed to create property instance with property class by attribute " + attributeTypeClass);
     }
 
     /**

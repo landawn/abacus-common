@@ -73,9 +73,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     public Pair() {
     }
 
-    Pair(final L l, final R r) {
-        setLeft(l);
-        setRight(r);
+    Pair(final L leftValue, final R rightValue) {
+        setLeft(leftValue);
+        setRight(rightValue);
     }
 
     /**
@@ -94,12 +94,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <L> the type of the left element.
      * @param <R> the type of the right element.
-     * @param l the left element of the pair, may be {@code null}.
-     * @param r the right element of the pair, may be {@code null}.
+     * @param leftValue the left element of the pair, may be {@code null}.
+     * @param rightValue the right element of the pair, may be {@code null}.
      * @return a new Pair instance containing the specified left and right elements.
      */
-    public static <L, R> Pair<L, R> of(final L l, final R r) {
-        return new Pair<>(l, r);
+    public static <L, R> Pair<L, R> of(final L leftValue, final R rightValue) {
+        return new Pair<>(leftValue, rightValue);
     }
 
     /**

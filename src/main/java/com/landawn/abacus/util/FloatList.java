@@ -614,7 +614,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 
@@ -661,7 +661,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew);   // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         final int numMoved = size - index;
 

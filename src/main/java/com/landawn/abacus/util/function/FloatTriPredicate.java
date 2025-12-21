@@ -67,6 +67,13 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * FloatTriPredicate notAllPositive = allPositive.negate();
+     * boolean result = notAllPositive.test(-1.0f, 2.0f, 3.0f);   // Returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default FloatTriPredicate negate() {
@@ -82,6 +89,14 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * FloatTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100.0f;
+     * FloatTriPredicate combined = allPositive.and(sumLessThan100);
+     * boolean result = combined.test(10.0f, 20.0f, 30.0f);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
@@ -100,6 +115,14 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriPredicate anyNegative = (a, b, c) -> a < 0 || b < 0 || c < 0;
+     * FloatTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
+     * FloatTriPredicate combined = anyNegative.or(anyZero);
+     * boolean result = combined.test(0.0f, 5.0f, 10.0f);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical

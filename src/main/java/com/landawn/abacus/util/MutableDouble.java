@@ -116,7 +116,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Gets the value as a primitive double.
      *
      * @return the current double value
-     * @deprecated replace by {@link #value()}.
+     * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
     public double getValue() {

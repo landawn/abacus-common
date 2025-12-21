@@ -30,6 +30,7 @@ public final class IntegerType extends AbstractIntegerType {
      * The type name constant for Integer type identification.
      */
     public static final String INTEGER = Integer.class.getSimpleName();
+
     /**
      * Package-private constructor for IntegerType.
      * This constructor is called by the TypeFactory to create Integer type instances.
@@ -78,16 +79,16 @@ public final class IntegerType extends AbstractIntegerType {
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object ret = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Integer) {
-            return (Integer) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).intValue();
+        } else if (result instanceof Integer) {
+            return (Integer) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).intValue();
         } else {
-            return Numbers.toInt(ret.toString());
+            return Numbers.toInt(result.toString());
         }
     }
 
@@ -109,16 +110,16 @@ public final class IntegerType extends AbstractIntegerType {
      */
     @Override
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object ret = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        if (ret == null) {
+        if (result == null) {
             return null; // NOSONAR
-        } else if (ret instanceof Integer) {
-            return (Integer) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).intValue();
+        } else if (result instanceof Integer) {
+            return (Integer) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).intValue();
         } else {
-            return Numbers.toInt(ret.toString());
+            return Numbers.toInt(result.toString());
         }
     }
 }

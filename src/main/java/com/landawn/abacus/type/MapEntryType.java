@@ -188,7 +188,13 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
             return null; // NOSONAR
         }
 
-        return Utils.jsonParser.deserialize(str, jdc, Clazz.<K, V> ofMap()).entrySet().iterator().next();
+        final Map<K, V> map = Utils.jsonParser.deserialize(str, jdc, Clazz.<K, V> ofMap());
+
+        if (map == null || map.isEmpty()) {
+            return null; // NOSONAR
+        }
+
+        return map.entrySet().iterator().next();
     }
 
     /**

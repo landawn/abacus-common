@@ -62,6 +62,18 @@ public interface FloatNConsumer {
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatNConsumer logger = floats -> System.out.println("Count: " + floats.length);
+     * FloatNConsumer summer = floats -> {
+     *     float sum = 0;
+     *     for (float f : floats) sum += f;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * FloatNConsumer combined = logger.andThen(summer);
+     * combined.accept(1.0f, 2.0f, 3.0f);   // Prints count then sum
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation

@@ -155,8 +155,8 @@ public final class HttpRequest {
         return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
-    HttpRequest closeHttpClientAfterExecution(final boolean b) {
-        closeHttpClientAfterExecution = b;
+    HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
+        closeHttpClientAfterExecution = shouldClose;
 
         return this;
     }

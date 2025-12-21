@@ -155,6 +155,10 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
+        if (a == null || a.length < 1) {
+            throw new IllegalArgumentException("Invalid Tuple1 format. Expected array with at least 1 element but got: " + str);
+        }
+
         final T1 t1 = a[0] == null ? null : ((T1) (type1.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
 
         return Tuple.of(t1);
@@ -175,7 +179,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
         } else {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);   //NOSONAR
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
