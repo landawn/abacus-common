@@ -5,13 +5,13 @@
 
 **abacus-common** is a general-purpose Java programming library that provides a rich set of utilities, data structures, and functional APIs.
 
-##### Key Features
+##### Key Features:
 
 1. *Frequently used utilities* — e.g., `Strings`, `Numbers`, `Maps`, `Joiner`, `Splitter`.
 2. *Additional data structures* — `Dataset`, `Sheet`, `Multiset`, `Multimap`, `Pair`, `Tuple`, `Range`, `Fraction`.
 3. *Comprehensive functional programming APIs* — including `Stream`, `EntryStream`, `Collectors`.
 
-##### How it differs from other libraries
+##### How it differs from other libraries?
 
 1. *Comprehensive and consistent*:
    abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Collection/Map/...)` — instead of relying on separate utilities like `StringUtils/ArrayUtils/Collections/MapUtils.isEmpty(...)` from different classes/libraries.
