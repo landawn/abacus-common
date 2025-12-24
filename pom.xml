@@ -433,7 +433,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.12.0</version>
 				<configuration>
-					<doctitle>abacus-extra</doctitle>
+					<doctitle>abacus-common</doctitle>
 					<show>public</show>
 			        <source>25</source>
 			        <encoding>UTF-8</encoding>
