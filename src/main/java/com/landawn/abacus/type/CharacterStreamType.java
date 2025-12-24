@@ -22,8 +22,25 @@ package com.landawn.abacus.type;
  */
 public class CharacterStreamType extends ReaderType {
 
+    /**
+     * The type name constant for character stream type identification.
+     */
     public static final String CHARACTER_STREAM = "CharacterStream";
 
+    /**
+     * Package-private constructor for CharacterStreamType.
+     * This constructor is called by the TypeFactory to create CharacterStream type instances.
+     * CharacterStreamType provides database and serialization support for character streams
+     * accessed through Reader objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<Reader> type = TypeFactory.getType("CharacterStream");
+     * ResultSet rs = ...;
+     * Reader stream = type.get(rs, "text_data");
+     * }</pre>
+     */
     CharacterStreamType() {
         super(CHARACTER_STREAM);
     }

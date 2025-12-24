@@ -191,7 +191,7 @@ public final class Traverser<T> {
      * @see #forGraph(Function)
      */
     public static <T> Traverser<T> forTree(final Function<? super T, ? extends Iterable<T>> tree) {
-        return new Traverser<>(com.google.common.graph.Traverser.forGraph(tree::apply));
+        return new Traverser<>(com.google.common.graph.Traverser.forTree(tree::apply));
     }
 
     /**

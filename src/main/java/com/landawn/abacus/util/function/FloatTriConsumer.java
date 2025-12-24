@@ -37,7 +37,7 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
      * <pre>{@code
      * FloatTriConsumer coordinate3D = (x, y, z) ->
      *     System.out.printf("3D Point: (%.2f, %.2f, %.2f)%n", x, y, z);
-     * coordinate3D.accept(1.5f, 2.3f, 3.7f);   // Prints: three-dimensional Point: (1.50, 2.30, 3.70)
+     * coordinate3D.accept(1.5f, 2.3f, 3.7f);   // Prints: 3D Point: (1.50, 2.30, 3.70)
      * }</pre>
      *
      * @param a the first float input argument

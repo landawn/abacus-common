@@ -32,6 +32,25 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
 
+    /**
+     * Package-private constructor for ListMultimapType.
+     * Creates a type handler for ListMultimap instances with the specified key and value types.
+     * This constructor is called by the TypeFactory to create ListMultimap&lt;K, E&gt; type instances.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
+     * ListMultimap<String, Integer> multimap = N.newLinkedListMultimap();
+     * multimap.put("key", 1);
+     * multimap.put("key", 2);
+     * String json = type.stringOf(multimap);  // {"key":[1,2]}
+     * }</pre>
+     *
+     * @param typeClass the Class object for ListMultimap
+     * @param keyTypeName the name of the key type
+     * @param valueElementTypeName the name of the value element type
+     */
     ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);
     }
@@ -100,6 +119,10 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
         }
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
+        if (map == null) {
+            return null;
+        }
+
         final ListMultimap<K, E> multiMap = N.newLinkedListMultimap(map.size());
 
         for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

@@ -23,7 +23,6 @@ import java.util.Date;
 
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
@@ -150,7 +149,7 @@ public class JUDateType extends AbstractDateType<Date> {
      */
     @Override
     public Date valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentJUDate() : Dates.parseJUDate(str));
+        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentJUDate() : Dates.parseJUDate(str));
     }
 
     /**

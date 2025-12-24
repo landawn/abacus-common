@@ -397,7 +397,20 @@ public final class FilenameUtil {
             return false;
         }
 
-        return IOCase.SYSTEM.checkStartsWith(canonicalChild, canonicalParent);
+        if (!IOCase.SYSTEM.checkStartsWith(canonicalChild, canonicalParent)) {
+            return false;
+        }
+
+        if (canonicalParent.length() == 0) {
+            return true;
+        }
+
+        final char lastParentChar = canonicalParent.charAt(canonicalParent.length() - 1);
+        if (isSeparator(lastParentChar)) {
+            return true;
+        }
+
+        return canonicalChild.length() > canonicalParent.length() && isSeparator(canonicalChild.charAt(canonicalParent.length()));
     }
 
     //-----------------------------------------------------------------------

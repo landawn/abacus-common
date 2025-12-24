@@ -179,7 +179,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, 1, Boolean.TRUE);
 
-        verify(stmt).setString(1, "1");
+        verify(stmt).setInt(1, 1);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, 1, Boolean.FALSE);
 
-        verify(stmt).setString(1, "0");
+        verify(stmt).setInt(1, 0);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, 1, null);
 
-        verify(stmt).setNull(1, Types.BOOLEAN);
+        verify(stmt).setNull(1, Types.INTEGER);
     }
 
     @Test
@@ -206,7 +206,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, "paramName", Boolean.TRUE);
 
-        verify(stmt).setString("paramName", "1");
+        verify(stmt).setInt("paramName", 1);
     }
 
     @Test
@@ -215,7 +215,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, "paramName", Boolean.FALSE);
 
-        verify(stmt).setString("paramName", "0");
+        verify(stmt).setInt("paramName", 0);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class BooleanIntType100Test extends TestBase {
 
         type.set(stmt, "paramName", null);
 
-        verify(stmt).setNull("paramName", Types.BOOLEAN);
+        verify(stmt).setNull("paramName", Types.INTEGER);
     }
 
     @Test

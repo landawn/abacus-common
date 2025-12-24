@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.type;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * Type handler for Short wrapper type.
  * This class provides functionality to handle Short objects in database operations and type conversions.
@@ -54,5 +57,47 @@ public final class ShortType extends AbstractShortType {
     @Override
     public boolean isPrimitiveWrapper() {
         return true;
+    }
+
+    /**
+     * Retrieves a Short value from a ResultSet at the specified column index.
+     * This method handles various numeric types in the database and converts them to Short.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Short> type = TypeFactory.getType(Short.class);
+     * ResultSet rs = ...;  // from SQL query
+     * Short value = type.get(rs, 1);   // retrieves Short from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Short value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
+     */
+    @Override
+    public Short get(ResultSet rs, int columnIndex) throws SQLException {
+        return super.get(rs, columnIndex);
+    }
+
+    /**
+     * Retrieves a Short value from a ResultSet using the specified column label.
+     * This method handles various numeric types in the database and converts them to Short.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Short> type = TypeFactory.getType(Short.class);
+     * ResultSet rs = ...;  // from SQL query
+     * Short value = type.get(rs, "value");   // retrieves Short from "value" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Short value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
+     */
+    @Override
+    public Short get(ResultSet rs, String columnLabel) throws SQLException {
+        return super.get(rs, columnLabel);
     }
 }

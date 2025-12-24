@@ -20,6 +20,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -220,7 +221,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
-                return valueOf(rs.getInt(columnIndex));
+                final Object ordinal = rs.getObject(columnIndex);
+                return ordinal == null ? null : valueOf(Numbers.toInt(ordinal));
             } else {
                 return valueOf(rs.getString(columnIndex));
             }
@@ -244,7 +246,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
-                return valueOf(rs.getInt(columnLabel));
+                final int ordinal = rs.getInt(columnLabel);
+                return rs.wasNull() ? null : valueOf(ordinal);
             } else {
                 return valueOf(rs.getString(columnLabel));
             }
@@ -268,7 +271,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
-                stmt.setInt(columnIndex, (x == null) ? 0 : numberEnum.getByValue(x).intValue());
+                if (x == null) {
+                    stmt.setNull(columnIndex, Types.INTEGER);
+                } else {
+                    stmt.setInt(columnIndex, numberEnum.getByValue(x).intValue());
+                }
             } else {
                 stmt.setString(columnIndex, (x == null) ? null : x.name());
             }
@@ -292,7 +299,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
-                stmt.setInt(parameterName, (x == null) ? 0 : numberEnum.getByValue(x).intValue());
+                if (x == null) {
+                    stmt.setNull(parameterName, Types.INTEGER);
+                } else {
+                    stmt.setInt(parameterName, numberEnum.getByValue(x).intValue());
+                }
             } else {
                 stmt.setString(parameterName, (x == null) ? null : x.name());
             }

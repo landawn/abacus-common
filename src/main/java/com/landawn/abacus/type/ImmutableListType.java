@@ -198,7 +198,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      */
     @Override
     public ImmutableList<E> valueOf(final String str) {
-        return ImmutableList.wrap(listType.valueOf(str));
+        final List<E> list = listType.valueOf(str);
+
+        return list == null ? null : ImmutableList.wrap(list);
     }
 
     /**

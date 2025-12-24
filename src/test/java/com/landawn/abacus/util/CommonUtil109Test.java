@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
@@ -475,7 +476,7 @@ public class CommonUtil109Test extends TestBase {
         Assertions.assertEquals(-1, CommonUtil.indexOfSubList(source, notFound));
 
         Assertions.assertEquals(-1, CommonUtil.indexOfSubList(new ArrayList<>(), sub));
-        Assertions.assertEquals(-1, CommonUtil.indexOfSubList(source, new ArrayList<>()));
+        Assertions.assertEquals(0, CommonUtil.indexOfSubList(source, new ArrayList<>()));
     }
 
     @Test
@@ -732,7 +733,8 @@ public class CommonUtil109Test extends TestBase {
         Assertions.assertEquals(-1, CommonUtil.lastIndexOfSubList(source, notFound));
 
         Assertions.assertEquals(-1, CommonUtil.lastIndexOfSubList(new ArrayList<>(), sub));
-        Assertions.assertEquals(-1, CommonUtil.lastIndexOfSubList(source, new ArrayList<>()));
+        Assertions.assertEquals(6, CommonUtil.lastIndexOfSubList(source, new ArrayList<>()));
+        Assertions.assertEquals(6, Collections.lastIndexOfSubList(source, new ArrayList<>()));
     }
 
     @Test

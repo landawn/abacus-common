@@ -76,7 +76,7 @@ public class ShortList2025Test extends TestBase {
     public void testConstructorWithArrayAndInvalidSize() {
         short[] arr = { (short) 1, (short) 2, (short) 3 };
         assertThrows(IndexOutOfBoundsException.class, () -> new ShortList(arr, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> new ShortList(arr, -1));
+        assertThrows(IllegalArgumentException.class, () -> new ShortList(arr, -1));
     }
 
     @Test

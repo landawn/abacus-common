@@ -58,8 +58,8 @@ public class CommonUtil200Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 11, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(6, 5, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 1, -1));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, 1, -1));
     }
 
     @Test

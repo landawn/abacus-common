@@ -107,7 +107,7 @@ public class TimeType extends AbstractDateType<Time> {
      */
     @Override
     public Time valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTime() : Dates.parseTime(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentTime() : Dates.parseTime(str));
     }
 
     /**
@@ -162,7 +162,18 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
-     * Retrieves a Time value from the specified column in the ResultSet.
+     * Retrieves a Time value from the specified column in the ResultSet using the column label.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * try (ResultSet rs = stmt.executeQuery("SELECT start_time FROM events")) {
+     *     if (rs.next()) {
+     *         Time startTime = type.get(rs, "start_time");
+     *         System.out.println("Start time: " + startTime);
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet containing the query results
      * @param columnLabel the label of the column to retrieve
@@ -199,6 +210,16 @@ public class TimeType extends AbstractDateType<Time> {
 
     /**
      * Sets a Time value for the specified parameter name in the CallableStatement.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Time> type = TypeFactory.getType(Time.class);
+     * Time startTime = Time.valueOf("09:00:00");
+     * try (CallableStatement stmt = conn.prepareCall("{call scheduleEvent(?)}")) {
+     *     type.set(stmt, "startTime", startTime);
+     *     stmt.execute();
+     * }
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

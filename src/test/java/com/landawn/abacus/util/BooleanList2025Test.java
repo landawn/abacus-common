@@ -77,7 +77,7 @@ public class BooleanList2025Test extends TestBase {
     public void test_constructor_withArrayAndSize_invalid() {
         boolean[] arr = { true, false };
         assertThrows(IndexOutOfBoundsException.class, () -> new BooleanList(arr, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> new BooleanList(arr, -1));
+        assertThrows(IllegalArgumentException.class, () -> new BooleanList(arr, -1));
     }
 
     @Test

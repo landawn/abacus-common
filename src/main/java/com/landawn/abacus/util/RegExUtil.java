@@ -1842,7 +1842,9 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(checkSourceString(source)).replaceFirst(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        final String checkedSource = checkSourceString(source);
+
+        return pattern.matcher(checkedSource).replaceFirst(matcher -> replacer.apply(checkedSource.substring(matcher.start(), matcher.end())));
     }
 
     /**
@@ -2209,7 +2211,8 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(source.substring(matcher.start(), matcher.end())));
+        final String checkedSource = checkSourceString(source);
+        return pattern.matcher(checkedSource).replaceAll(matcher -> replacer.apply(checkedSource.substring(matcher.start(), matcher.end())));
     }
 
     /**

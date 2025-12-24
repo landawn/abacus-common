@@ -202,8 +202,15 @@ public final class Charsets {
         Charset charset = charsetPool.get(charsetName);
 
         if (charset == null) {
-            charset = Charset.forName(charsetName);
-            charsetPool.put(charsetName, charset);
+            synchronized (charsetPool) {
+                // Double-check pattern: verify charset is still null after acquiring lock
+                charset = charsetPool.get(charsetName);
+
+                if (charset == null) {
+                    charset = Charset.forName(charsetName);
+                    charsetPool.put(charsetName, charset);
+                }
+            }
         }
 
         return charset;

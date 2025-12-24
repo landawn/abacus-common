@@ -181,7 +181,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             return IOUtil.readAllChars(reader);
         } else if (obj instanceof Clob clob) {
             try {
-                return clob.getSubString(1, (int) clob.length()).toCharArray();
+                final long len = clob.length();
+                if (len > Integer.MAX_VALUE) {
+                    throw new UnsupportedOperationException("Clob too large to convert to char[]: " + len + " characters");
+                }
+                return clob.getSubString(1, (int) len).toCharArray();
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {

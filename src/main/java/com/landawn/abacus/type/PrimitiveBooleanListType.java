@@ -99,7 +99,12 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      */
     @Override
     public BooleanList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : BooleanList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final boolean[] array = arrayType.valueOf(str);
+        return array == null ? null : BooleanList.of(array);
     }
 
     /**

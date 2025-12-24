@@ -1555,7 +1555,11 @@ public final class Multiset<E> implements Collection<E> {
                 @SuppressWarnings("SuspiciousMethodCalls")
                 final MutableInt count = backingMap.get(entry.element());
 
-                return count == null ? entry.count() == 0 : count.value() == entry.count();
+                if (count == null) {
+                    return false;
+                }
+
+                return count.value() == entry.count();
             }
 
             return false;

@@ -26,6 +26,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
@@ -38,8 +39,25 @@ import com.landawn.abacus.util.Objectory;
  */
 public class ClobAsciiStreamType extends InputStreamType {
 
+    /**
+     * The type name constant for CLOB ASCII stream type identification.
+     */
     public static final String CLOB_ASCII_STREAM = "ClobAsciiStream";
 
+    /**
+     * Package-private constructor for ClobAsciiStreamType.
+     * This constructor is called by the TypeFactory to create ClobAsciiStream type instances.
+     * ClobAsciiStreamType specializes in converting between SQL CLOB objects and ASCII InputStreams.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<InputStream> type = TypeFactory.getType("ClobAsciiStream");
+     * ResultSet rs = ...;
+     * InputStream asciiStream = type.get(rs, "text_document");
+     * String content = IOUtil.readAllToString(asciiStream);
+     * }</pre>
+     */
     ClobAsciiStreamType() {
         super(CLOB_ASCII_STREAM);
     }
@@ -144,7 +162,7 @@ public class ClobAsciiStreamType extends InputStreamType {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer) {
-                IOUtil.write(IOUtil.newInputStreamReader(x), (Writer) appendable); // NOSONAR
+                IOUtil.write(IOUtil.newInputStreamReader(x, Charsets.US_ASCII), (Writer) appendable); // NOSONAR
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }
@@ -170,7 +188,7 @@ public class ClobAsciiStreamType extends InputStreamType {
                 writer.write(config.getStringQuotation());
             }
 
-            final Reader reader = IOUtil.newInputStreamReader(t); // NOSONAR
+            final Reader reader = IOUtil.newInputStreamReader(t, Charsets.US_ASCII); // NOSONAR
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {

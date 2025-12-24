@@ -244,7 +244,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            if (pool.size() >= capacity || (maxMemorySize > 0 && totalDataSize.get() > maxMemorySize)) {
+            if (pool.size() >= capacity) {
                 if (autoBalance) {
                     vacate();
                 } else {
@@ -252,11 +252,19 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            final long memorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, element);
+            final long keyValueMemorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, element);
 
-            if (memoryMeasure != null && memorySize > maxMemorySize - totalDataSize.get()) {
+            if (memoryMeasure != null && keyValueMemorySize < 0) {
+                logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                return false;
+            }
+
+            if (memoryMeasure != null && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                if (autoBalance) {
+                    vacate();
+                }
+
                 // ignore.
-
                 return false;
             } else {
                 final E oldValue = pool.put(key, element);
@@ -266,7 +274,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (memoryMeasure != null) {
-                    totalDataSize.addAndGet(memorySize);
+                    totalDataSize.addAndGet(keyValueMemorySize);
                 }
 
                 notEmpty.signal();
@@ -415,7 +423,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    totalDataSize.addAndGet(-memoryMeasure.sizeOf(key, element)); //NOSONAR
+                    final long keyValueMemorySize = memoryMeasure.sizeOf(key, element);
+
+                    if (keyValueMemorySize >= 0) {
+                        totalDataSize.addAndGet(-keyValueMemorySize); //NOSONAR
+                    } else {
+                        logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                    }
                 }
 
                 notFull.signal();
@@ -772,7 +786,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             if (memoryMeasure != null) {
                 try {
-                    totalDataSize.addAndGet(-memoryMeasure.sizeOf(key, value));
+                    final long keyValueMemorySize = memoryMeasure.sizeOf(key, value);
+
+                    if (keyValueMemorySize >= 0) {
+                        totalDataSize.addAndGet(-keyValueMemorySize);
+                    } else {
+                        logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                    }
                 } catch (final Exception exception) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Error measuring memory size during destroy: " + ExceptionUtil.getErrorMessage(exception, true));

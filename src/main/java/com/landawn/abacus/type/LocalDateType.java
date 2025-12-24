@@ -24,7 +24,6 @@ import java.time.LocalDate;
 
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link java.time.LocalDate} values.
@@ -125,11 +124,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      */
     @Override
     public LocalDate valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return LocalDate.now();
         }
 

@@ -546,7 +546,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (propInfo.isJsonRawValue) {
-                    strType.writeCharacter(bw, jsonParser.serialize(obj, getJSC(config)), config);
+                    strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
                 } else if (propInfo.jsonXmlType.isSerializable()) {
                     if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
                         // jsonParser.serialize(bw, propValue);

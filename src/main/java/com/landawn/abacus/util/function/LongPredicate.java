@@ -16,20 +16,17 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of one long-valued argument.
+ * Represents a predicate (boolean-valued function) of one {@code long}-valued argument.
+ * This is the {@code long}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(long)}.
  *
- * <p>The interface extends both {@code Throwables.LongPredicate} with {@code RuntimeException}
- * and {@code java.util.function.LongPredicate}, providing compatibility with the Java standard library
- * while adding additional utility methods and predefined predicates.
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
- * @see java.util.function.LongPredicate
  * @see java.util.function.Predicate
+ * @see java.util.function.LongPredicate
  * @see LongBiPredicate
  * @see LongTriPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongPredicate extends Throwables.LongPredicate<RuntimeException>, java.util.function.LongPredicate { //NOSONAR

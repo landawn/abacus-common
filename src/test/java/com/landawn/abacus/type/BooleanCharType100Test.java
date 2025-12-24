@@ -197,7 +197,7 @@ public class BooleanCharType100Test extends TestBase {
 
         type.set(stmt, 1, null);
 
-        verify(stmt).setNull(1, Types.BOOLEAN);
+        verify(stmt).setNull(1, Types.VARCHAR);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class BooleanCharType100Test extends TestBase {
 
         type.set(stmt, "paramName", null);
 
-        verify(stmt).setNull("paramName", Types.BOOLEAN);
+        verify(stmt).setNull("paramName", Types.VARCHAR);
     }
 
     @Test

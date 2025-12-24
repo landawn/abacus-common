@@ -12,6 +12,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -113,9 +114,9 @@ public class EnumType100Test extends TestBase {
 
     @Test
     public void testGetByColumnIndexWithOrdinal() throws SQLException {
-        when(resultSet.getInt(1)).thenReturn(1);
+        when(resultSet.getObject(1)).thenReturn(1);
         assertEquals(TestEnum.VALUE2, enumTypeByOrdinal.get(resultSet, 1));
-        verify(resultSet).getInt(1);
+        verify(resultSet).getObject(1);
     }
 
     @Test
@@ -147,7 +148,7 @@ public class EnumType100Test extends TestBase {
         verify(preparedStatement).setInt(1, 1);
 
         enumTypeByOrdinal.set(preparedStatement, 2, null);
-        verify(preparedStatement).setInt(2, 0);
+        verify(preparedStatement).setNull(2, Types.INTEGER);
     }
 
     @Test
@@ -165,7 +166,7 @@ public class EnumType100Test extends TestBase {
         verify(callableStatement).setInt("enumParam", 0);
 
         enumTypeByOrdinal.set(callableStatement, "nullParam", null);
-        verify(callableStatement).setInt("nullParam", 0);
+        verify(callableStatement).setNull("nullParam", Types.INTEGER);
     }
 
     @Test

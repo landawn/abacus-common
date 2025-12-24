@@ -16,18 +16,18 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts a byte-valued argument and produces a result.
- * This is the byte-consuming primitive specialization for {@link java.util.function.Function}.
+ * Represents a function that accepts a {@code byte}-valued argument and produces a result.
+ * This is the {@code byte}-consuming primitive specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(byte)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
  *
  * @see java.util.function.Function
  * @see ByteBiFunction
  * @see ByteTriFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR

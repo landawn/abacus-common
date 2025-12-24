@@ -43,6 +43,23 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private final Type<T> elementType;
 
+    /**
+     * Package-private constructor for HBaseColumnType.
+     * Creates a type handler for HBaseColumn objects containing values of the specified type.
+     * This constructor is called by the TypeFactory to create HBaseColumn&lt;T&gt; type instances.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * HBaseColumn<String> column = new HBaseColumn<>("value", 1234567890L);
+     * String serialized = type.stringOf(column);  // "1234567890:value"
+     * HBaseColumn<String> parsed = type.valueOf("1234567890:value");
+     * }</pre>
+     *
+     * @param typeClass the Class object for HBaseColumn
+     * @param parameterTypeName the name of the type for values stored in the HBaseColumn
+     */
     HBaseColumnType(final Class<HBaseColumn<T>> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 

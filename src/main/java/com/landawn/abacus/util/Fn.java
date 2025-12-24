@@ -855,7 +855,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.close(closeable);
             }
         };
@@ -879,7 +885,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.closeAll(a);
             }
         };
@@ -903,7 +915,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.closeAll(c);
             }
         };
@@ -928,7 +946,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.closeQuietly(closeable);
             }
         };
@@ -953,7 +977,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.closeAllQuietly(a);
             }
         };
@@ -978,7 +1008,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 IOUtil.closeAllQuietly(c);
             }
         };
@@ -1011,7 +1047,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 service.shutdown();
             }
         };
@@ -1038,7 +1080,13 @@ public final class Fn {
                     return;
                 }
 
-                isClosed = true;
+                synchronized (this) {
+                    if (isClosed) {
+                        return;
+                    }
+                    isClosed = true;
+                }
+
                 try {
                     service.shutdown();
                     //noinspection ResultOfMethodCallIgnored

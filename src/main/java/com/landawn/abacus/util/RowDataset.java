@@ -444,18 +444,19 @@ public final class RowDataset implements Dataset, Cloneable {
         final int idx = checkColumnName(columnName);
 
         if (columnName.equals(newColumnName)) {
-            // ignore.
-        } else {
-            if (_columnNameList.contains(newColumnName)) {
-                throw new IllegalArgumentException("The new column name: " + newColumnName + " is already included this Dataset: " + _columnNameList);
-            }
-
-            if (_columnIndexMap != null) {
-                _columnIndexMap.put(newColumnName, _columnIndexMap.remove(_columnNameList.get(idx)));
-            }
-
-            _columnNameList.set(idx, newColumnName);
+            // ignore - no modification needed
+            return;
         }
+
+        if (_columnNameList.contains(newColumnName)) {
+            throw new IllegalArgumentException("The new column name: " + newColumnName + " is already included this Dataset: " + _columnNameList);
+        }
+
+        if (_columnIndexMap != null) {
+            _columnIndexMap.put(newColumnName, _columnIndexMap.remove(_columnNameList.get(idx)));
+        }
+
+        _columnNameList.set(idx, newColumnName);
 
         modCount++;
     }
@@ -511,19 +512,20 @@ public final class RowDataset implements Dataset, Cloneable {
 
         final int currentPosition = checkColumnName(columnName);
 
-        if (newPosition < 0 || newPosition > columnCount()) {
-            throw new IndexOutOfBoundsException("New position must be >= 0 and <= " + columnCount());
+        if (newPosition < 0 || newPosition >= columnCount()) {
+            throw new IndexOutOfBoundsException("New position must be >= 0 and < " + columnCount());
         }
 
         if (currentPosition == newPosition) {
-            // ignore.
-        } else {
-            _columnNameList.add(newPosition, _columnNameList.remove(currentPosition));
-            _columnList.add(newPosition, _columnList.remove(currentPosition));
-
-            _columnIndexMap = null;
-            _columnIndexes = null;
+            // ignore - no modification needed
+            return;
         }
+
+        _columnNameList.add(newPosition, _columnNameList.remove(currentPosition));
+        _columnList.add(newPosition, _columnList.remove(currentPosition));
+
+        _columnIndexMap = null;
+        _columnIndexes = null;
 
         modCount++;
     }
@@ -634,8 +636,15 @@ public final class RowDataset implements Dataset, Cloneable {
     public void moveRow(final int rowIndex, final int newPosition) {
         checkFrozen();
 
-        checkRowIndex(rowIndex);
-        checkRowIndex(newPosition);
+        final int size = size();
+
+        if (rowIndex < 0 || rowIndex >= size) {
+            throw new IndexOutOfBoundsException("Row index must be >= 0 and < " + size);
+        }
+
+        if (newPosition < 0 || newPosition >= size) {
+            throw new IndexOutOfBoundsException("New position must be >= 0 and < " + size);
+        }
 
         if (rowIndex == newPosition) {
             return;
@@ -1356,6 +1365,11 @@ public final class RowDataset implements Dataset, Cloneable {
         for (final Object val : column) {
             final List<Object> newVals = divideFuncToUse.apply(val);
 
+            if (newVals == null || newVals.size() != newColumnsLen) {
+                throw new IllegalArgumentException(
+                        "divideFunc must return a list with exactly " + newColumnsLen + " elements, but got: " + (newVals == null ? "null" : newVals.size()));
+            }
+
             for (int i = 0; i < newColumnsLen; i++) {
                 newColumns.get(i).add(newVals.get(i));
             }
@@ -1828,21 +1842,21 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void removeDuplicateRowsBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyExtractor)
+    public void removeDuplicateRowsBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor)
             throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (columnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
-            removeDuplicateRowsBy(columnNames.iterator().next());
+        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
+            removeDuplicateRowsBy(keyColumnNames.iterator().next());
 
             return;
         }
 
         final int size = size();
-        final int[] columnIndexes = checkColumnNames(columnNames);
+        final int[] keyColumnIndexes = checkColumnNames(keyColumnNames);
 
         if (size <= 1) {
             return;
@@ -1856,14 +1870,15 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         final Set<Object> rowSet = N.newHashSet();
-        Object[] row = Objectory.createObjectArray(columnCount);
+        final int keyColumnCount = keyColumnIndexes.length;
+        Object[] row = Objectory.createObjectArray(keyColumnCount);
         Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(row) : null;
         final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(row);
         Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-            for (int i = 0, len = columnIndexes.length; i < len; i++) {
-                row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+            for (int i = 0, len = keyColumnIndexes.length; i < len; i++) {
+                row[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
             key = isNullOrIdentityKeyExtractor ? rowWrapper : hashKey(keyExtractor.apply(disposableArray));
@@ -1874,7 +1889,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 }
 
                 if (isNullOrIdentityKeyExtractor) {
-                    row = Objectory.createObjectArray(columnCount);
+                    row = Objectory.createObjectArray(keyColumnCount);
                     rowWrapper = Wrapper.of(row);
                 }
             }
@@ -8662,6 +8677,12 @@ public final class RowDataset implements Dataset, Cloneable {
         final int bColumnCount = other.columnCount();
 
         final int newColumnCount = aColumnCount + bColumnCount;
+
+        // Check for integer overflow in multiplication
+        if (aSize != 0 && bSize != 0 && bSize > Integer.MAX_VALUE / aSize) {
+            throw new ArithmeticException("Cartesian product would result in too many rows (integer overflow): " + aSize + " * " + bSize);
+        }
+
         final int newRowCount = aSize * bSize;
 
         final List<String> newColumnNameList = new ArrayList<>(newColumnCount);
@@ -8728,9 +8749,10 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgPositive(chunkSize, cs.chunkSize);
 
         final List<Dataset> res = new ArrayList<>();
+        final int totalSize = size();
 
-        for (int i = 0, totalSize = size(); i < totalSize; i = i <= totalSize - chunkSize ? i + chunkSize : totalSize) {
-            res.add(copy(i, i <= totalSize - chunkSize ? i + chunkSize : totalSize, columnNames, columnIndexes, true));
+        for (int i = 0; i < totalSize; i += chunkSize) {
+            res.add(copy(i, Math.min(i + chunkSize, totalSize), columnNames, columnIndexes, true));
         }
 
         return res;
@@ -8874,6 +8896,10 @@ public final class RowDataset implements Dataset, Cloneable {
         final int[] columnIndexes = checkColumnNames(columnNames);
 
         final int columnCount = columnIndexes.length;
+
+        if (inputRowClass == null && inputRowSupplier == null) {
+            throw new IllegalArgumentException("Either inputRowClass or inputRowSupplier must be non-null");
+        }
 
         final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) inputRowSupplier.apply(0).getClass() : inputRowClass;
         final Type<T> rowType = Type.of(rowClass);

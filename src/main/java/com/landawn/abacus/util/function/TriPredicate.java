@@ -99,7 +99,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @return a composed predicate that represents the short-circuiting logical AND of this
      *         predicate and the other predicate
      */
-    default TriPredicate<A, B, C> and(final TriPredicate<A, B, C> other) {
+    default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -128,7 +128,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @return a composed predicate that represents the short-circuiting logical OR of this
      *         predicate and the other predicate
      */
-    default TriPredicate<A, B, C> or(final TriPredicate<A, B, C> other) {
+    default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

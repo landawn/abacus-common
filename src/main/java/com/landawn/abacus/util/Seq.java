@@ -2041,7 +2041,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             return empty();
         }
 
-        return of(parentPath.listFiles());
+        final File[] files = parentPath.listFiles();
+        return files == null ? empty() : of(files);
     }
 
     /**
@@ -2078,7 +2079,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         if (!parentPath.exists()) {
             return empty();
         } else if (!recursively) {
-            return of(parentPath.listFiles());
+            final File[] files = parentPath.listFiles();
+            return files == null ? empty() : of(files);
         }
 
         final Throwables.Iterator<File, IOException> iter = new Throwables.Iterator<>() {
@@ -6518,8 +6520,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 final C result = collectionSupplier.apply(chunkSize);
                 int cnt = 0;
 
-                while (cnt++ < chunkSize && elements.hasNext()) {
+                while (cnt < chunkSize && elements.hasNext()) {
                     result.add(elements.next());
+                    cnt++;
                 }
 
                 return result;
@@ -6587,8 +6590,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 final Object container = supplier.get();
                 int cnt = 0;
 
-                while (cnt++ < chunkSize && elements.hasNext()) {
+                while (cnt < chunkSize && elements.hasNext()) {
                     accumulator.accept(container, elements.next());
+                    cnt++;
                 }
 
                 return finisher.apply(container);
@@ -6830,8 +6834,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     final List<T> list = new ArrayList<>();
                     int cnt = 0;
 
-                    while (cnt++ < where && iter.hasNext()) {
+                    while (cnt < where && iter.hasNext()) {
                         list.add(iter.next());
+                        cnt++;
                     }
 
                     result = new Seq<>(Throwables.Iterator.of(list.iterator()), sorted, cmp, null);
@@ -7235,8 +7240,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 final int countToKeepInQueue = windowSize - increment;
                 int cnt = queue.size();
 
-                while (cnt++ < countToKeepInQueue && elements.hasNext()) {
+                while (cnt < countToKeepInQueue && elements.hasNext()) {
                     queue.add(elements.next());
+                    cnt++;
                 }
             }
         }, closeHandlers);
@@ -7394,8 +7400,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 final int countToKeepInQueue = windowSize - increment;
                 int cnt = queue.size();
 
-                while (cnt++ < countToKeepInQueue && elements.hasNext()) {
+                while (cnt < countToKeepInQueue && elements.hasNext()) {
                     queue.add(elements.next());
+                    cnt++;
                 }
             }
         }, closeHandlers);

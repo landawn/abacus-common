@@ -94,7 +94,12 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      */
     @Override
     public DoubleList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : DoubleList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final double[] array = arrayType.valueOf(str);
+        return array == null ? null : DoubleList.of(array);
     }
 
     /**

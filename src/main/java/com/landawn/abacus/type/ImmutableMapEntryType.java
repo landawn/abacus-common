@@ -199,7 +199,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                     bw.write(WD._BRACE_L);
 
                     keyType.appendTo(bw, x.getKey());
-                    writer.append(WD._COLON);
+                    bw.write(WD._COLON);
                     valueType.appendTo(bw, x.getValue());
 
                     bw.write(WD._BRACE_R);

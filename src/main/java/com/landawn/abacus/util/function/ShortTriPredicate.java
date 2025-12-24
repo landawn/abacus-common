@@ -113,8 +113,8 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortTriPredicate hasZero = (a, b, c)                    == 0 || b == 0 || c == 0;
-     * ShortTriPredicate sumIsZero = (a, b, c) -> (a + b + c)   == 0;
+     * ShortTriPredicate hasZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
+     * ShortTriPredicate sumIsZero = (a, b, c) -> (a + b + c) == 0;
      * ShortTriPredicate combined = hasZero.or(sumIsZero);
      * boolean result = combined.test((short) 1, (short) 0, (short) 3);   // returns true
      * }</pre>

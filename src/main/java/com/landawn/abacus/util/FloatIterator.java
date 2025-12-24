@@ -750,10 +750,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         int idx = 0;
 
         while (hasNext()) {
-            action.accept(idx, nextFloat());
-            if (++idx < 0) {
+            if (idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
+
+            action.accept(idx, nextFloat());
+
+            idx++;
         }
     }
 }

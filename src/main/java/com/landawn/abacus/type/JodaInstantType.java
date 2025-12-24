@@ -27,9 +27,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for Joda-Time Instant objects.
@@ -134,11 +132,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @Override
     public Instant valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return Instant.now();
         }
 

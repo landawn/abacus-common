@@ -50,9 +50,9 @@ public class CommonUtil100Test extends TestBase {
     public void testCheckFromIndexSize_InvalidRange() {
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(-1, 5, 10));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 5, -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, 5, -1));
 
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(5, 6, 10));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 11, 10));
@@ -895,8 +895,8 @@ public class CommonUtil100Test extends TestBase {
         CommonUtil.checkFromIndexSize(10, 0, 10);
 
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(-1, 5, 10));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 5, -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, 5, -1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(6, 5, 10));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, 11, 10));
     }

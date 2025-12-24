@@ -126,7 +126,12 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      */
     @Override
     public FloatList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : FloatList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final float[] array = arrayType.valueOf(str);
+        return array == null ? null : FloatList.of(array);
     }
 
     /**

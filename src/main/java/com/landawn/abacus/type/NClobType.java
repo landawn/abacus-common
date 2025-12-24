@@ -98,7 +98,11 @@ public class NClobType extends AbstractType<NClob> {
         }
 
         try {
-            return x.getSubString(1, (int) x.length());
+            final long len = x.length();
+            if (len > Integer.MAX_VALUE) {
+                throw new UnsupportedOperationException("NClob too large to convert to String: " + len + " characters");
+            }
+            return x.getSubString(1, (int) len);
         } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {

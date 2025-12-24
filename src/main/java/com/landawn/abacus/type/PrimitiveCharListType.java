@@ -94,7 +94,12 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      */
     @Override
     public CharList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : CharList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final char[] array = arrayType.valueOf(str);
+        return array == null ? null : CharList.of(array);
     }
 
     /**

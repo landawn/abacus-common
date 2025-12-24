@@ -122,9 +122,11 @@ public class ISOUtil100Test extends TestBase {
     public void testParseBasicDate() {
         Date result = ISO8601Util.parse("2024-01-15");
         assertNotNull(result);
+        N.println(result);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(result);
+        cal.setTimeZone(Dates.UTC_TIME_ZONE);
         assertEquals(2024, cal.get(Calendar.YEAR));
         assertEquals(Calendar.JANUARY, cal.get(Calendar.MONTH));
         assertEquals(15, cal.get(Calendar.DAY_OF_MONTH));
@@ -333,6 +335,7 @@ public class ISOUtil100Test extends TestBase {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(result);
+        cal.setTimeZone(Dates.UTC_TIME_ZONE);
         assertEquals(0, cal.get(Calendar.HOUR_OF_DAY));
         assertEquals(0, cal.get(Calendar.MINUTE));
         assertEquals(0, cal.get(Calendar.SECOND));

@@ -973,6 +973,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             N.fill(elementData, tmp.length, size, 0f);
         }
 
+        // size = tmp.length; // incorrect. the array returned N.deleteAllByIndices(elementData, indices) contains empty elements after size.
         size = size - (elementData.length - tmp.length);
     }
 
@@ -1051,7 +1052,14 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         }
 
         final int size = this.size;//NOSONAR
-        final int newSize = size - (toIndex - fromIndex) + replacement.size();
+        // Use long arithmetic to prevent integer overflow
+        final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
+
+        if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
+            throw new OutOfMemoryError();
+        }
+
+        final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
             elementData = N.copyOf(elementData, newSize);
@@ -1091,7 +1099,14 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         }
 
         final int size = this.size;//NOSONAR
-        final int newSize = size - (toIndex - fromIndex) + replacement.length;
+        // Use long arithmetic to prevent integer overflow
+        final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
+
+        if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
+            throw new OutOfMemoryError();
+        }
+
+        final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
             elementData = N.copyOf(elementData, newSize);

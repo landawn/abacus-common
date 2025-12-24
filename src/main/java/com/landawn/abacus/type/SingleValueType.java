@@ -36,8 +36,8 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
-import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.TypeAttrParser;
 
 /**
  * Abstract base class for type handlers that wrap a single value. This class provides

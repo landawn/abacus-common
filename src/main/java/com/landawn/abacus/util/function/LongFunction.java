@@ -16,21 +16,12 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts a long-valued argument and produces a
- * result. This is the {@code long}-consuming primitive specialization for
- * {@link java.util.function.Function}.
+ * Represents a function that accepts a {@code long}-valued argument and produces a result.
+ * This is the {@code long}-consuming primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link Throwables.LongFunction} with
- * {@link RuntimeException} and {@link java.util.function.LongFunction},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
+ * <p>This is a functional interface whose functional method is {@link #apply(long)}.
  *
- * <p>This is a functional interface whose functional method is
- * {@link #apply(long)}.
- *
- * <p>Refer to JDK API documentation at:
- * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
  *

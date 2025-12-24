@@ -17,8 +17,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of one double-valued argument.
- * This is the double-consuming primitive type specialization of {@link java.util.function.Predicate}.
+ * Represents a predicate (boolean-valued function) of one {@code double}-valued argument.
+ * This is the {@code double}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(double)}.
  *

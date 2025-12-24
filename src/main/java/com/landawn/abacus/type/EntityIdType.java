@@ -26,10 +26,28 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class EntityIdType extends AbstractType<EntityId> {
 
+    /**
+     * The type name constant for EntityId type identification.
+     */
     public static final String ENTITY_ID = EntityId.class.getSimpleName();
 
     private final Class<EntityId> typeClass;
 
+    /**
+     * Package-private constructor for EntityIdType.
+     * This constructor is called by the TypeFactory to create EntityId type instances.
+     * EntityIds are composite identifiers used for entity identification and are serialized
+     * to/from JSON format.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<EntityId> type = TypeFactory.getType(EntityId.class);
+     * EntityId entityId = EntityId.of("User", 12345L);
+     * String json = type.stringOf(entityId);
+     * EntityId parsed = type.valueOf(json);
+     * }</pre>
+     */
     EntityIdType() {
         super(ENTITY_ID);
 

@@ -565,11 +565,11 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
                 + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDatasetByRow="
                 + N.toString(writeDatasetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
-                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + N.toString(failOnEmptyBean())
-                + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference())
-                + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName="
-                + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue)
-                + ", wrapRootValue=" + N.toString(wrapRootValue) + "}";
+                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", failOnEmptyBean="
+                + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", indentation="
+                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName)
+                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue="
+                + N.toString(wrapRootValue) + "}";
     }
 
     /**

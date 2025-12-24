@@ -2685,7 +2685,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.clazz()));
                     }
 
-                    if (eleType.clazz() == Object.class) {
+                    if (propType.clazz() == Object.class) {
                         propType = defaultValueType;
                     }
 

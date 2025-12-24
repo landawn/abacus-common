@@ -2924,6 +2924,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
         final int minute = c.get(Calendar.MINUTE);
         final int second = c.get(Calendar.SECOND);
 
+        // Validate year is within bounds for the cbufOfSTDInt array
+        if (year < 0 || year >= 10000) {
+            throw new IllegalArgumentException("Year " + year + " is outside the supported range [0, 9999] for fast formatting");
+        }
+
         char[] utcTimestamp = utcTimestampFormatCharsPool.poll();
 
         if (utcTimestamp == null) {
@@ -5443,13 +5448,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
             if (len == 4) {
                 return LOCAL_YEAR_FORMAT;
-            } else if (len == 5 || str.charAt(2) == '-') {
+            } else if (len == 8 && str.charAt(2) == ':' && str.charAt(5) == ':') {
+                return LOCAL_TIME_FORMAT;
+            } else if (len == 5 && str.charAt(2) == '-') {
                 return LOCAL_MONTH_DAY_FORMAT;
             } else if (len > 4 && str.charAt(4) == '-') {
                 switch (len) {
-                    case 8:
-                        return LOCAL_TIME_FORMAT;
-
                     case 10:
                         return LOCAL_DATE_FORMAT;
 
@@ -5538,6 +5542,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             c = Calendar.getInstance(timeZone);
         }
 
+        c.clear();
         //noinspection MagicConstant
         c.set(year, month, date, hourOfDay, minute, second);
         c.set(Calendar.MILLISECOND, milliSecond);

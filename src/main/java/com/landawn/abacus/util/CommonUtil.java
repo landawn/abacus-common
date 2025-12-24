@@ -701,7 +701,8 @@ sealed class CommonUtil permits N {
      * 
      * @param fromIndex the starting index (inclusive) - must be non-negative and ≤ toIndex
      * @param toIndex the ending index (exclusive) - must be ≥ fromIndex and ≤ length
-     * @param length the total length of the array/collection - must be non-negative
+     * @param length the size of the array/collection/string - must be non-negative
+     * @throws IllegalArgumentException if {@code length} is negative
      * @throws IndexOutOfBoundsException if any of the following conditions are true:
      *         <ul>
      *           <li>{@code fromIndex < 0}</li>
@@ -710,7 +711,11 @@ sealed class CommonUtil permits N {
      *         </ul>
      * @see #checkFromIndexSize(int, int, int)
      */
-    public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
+    public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
+        if (length < 0) {
+            throw new IllegalArgumentException("negative length/size: " + length);
+        }
+
         if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
             throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds for length " + length);
         }
@@ -744,7 +749,8 @@ sealed class CommonUtil permits N {
      * 
      * @param fromIndex the starting index (inclusive) - must be non-negative
      * @param size the number of elements in the range - must be non-negative
-     * @param length the total length of the array/collection - must be non-negative
+     * @param length the size of the array/collection/string - must be non-negative
+     * @throws IllegalArgumentException if {@code size} or {@code length} is negative
      * @throws IndexOutOfBoundsException if any of the following conditions are true:
      *         <ul>
      *           <li>{@code fromIndex < 0}</li>
@@ -753,8 +759,16 @@ sealed class CommonUtil permits N {
      *         </ul>
      * @see #checkFromToIndex(int, int, int)
      */
-    public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
-        if ((fromIndex < 0 || size < 0 || length < 0) || size > length - fromIndex) {
+    public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
+        if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        }
+
+        if (length < 0) {
+            throw new IllegalArgumentException("negative length/size: " + length);
+        }
+
+        if (fromIndex < 0 || size > length - fromIndex) {
             throw new IndexOutOfBoundsException("Start Index " + fromIndex + " with size " + size + " is out-of-bounds for length " + length);
         }
     }
@@ -773,7 +787,7 @@ sealed class CommonUtil permits N {
      * @see #checkPositionIndex(int, int)
      */
     @Deprecated
-    public static int checkIndex(final int index, final int size) {
+    public static int checkIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         return checkElementIndex(index, size);
     }
 
@@ -812,7 +826,7 @@ sealed class CommonUtil permits N {
      * @see #checkPositionIndex(int, int)
      * @see #checkFromToIndex(int, int, int)
      */
-    public static int checkElementIndex(final int index, final int size) {
+    public static int checkElementIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         return checkElementIndex(index, size, "index");
     }
 
@@ -850,7 +864,7 @@ sealed class CommonUtil permits N {
      * @see #checkElementIndex(int, int)
      * @see #checkPositionIndex(int, int, String)
      */
-    public static int checkElementIndex(final int index, final int size, final String desc) {
+    public static int checkElementIndex(final int index, final int size, final String desc) throws IllegalArgumentException, IndexOutOfBoundsException {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (size < 0) {
             throw new IllegalArgumentException("negative size: " + size);
@@ -10116,16 +10130,27 @@ sealed class CommonUtil permits N {
         if (targetType.clazz().equals(byte[].class)) {
             if (srcType.clazz().equals(Blob.class)) {
                 final Blob blob = (Blob) srcObj;
+                UncheckedSQLException primaryException = null;
 
                 try {
-                    return (T) blob.getBytes(1, (int) blob.length());
+                    final long blobLength = blob.length();
+                    if (blobLength > Integer.MAX_VALUE) {
+                        throw new IllegalArgumentException("Blob size (" + blobLength + ") exceeds maximum array size (" + Integer.MAX_VALUE + ")");
+                    }
+                    return (T) blob.getBytes(1, (int) blobLength);
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    primaryException = new UncheckedSQLException(e);
+                    throw primaryException;
                 } finally {
                     try {
                         blob.free();
                     } catch (final SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
+                        final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                        if (primaryException != null) {
+                            primaryException.addSuppressed(freeException);
+                        } else {
+                            throw freeException;
+                        }
                     }
                 }
             } else if (srcType.clazz().equals(InputStream.class)) {
@@ -10140,16 +10165,27 @@ sealed class CommonUtil permits N {
         } else if (targetType.clazz().equals(char[].class)) {
             if (srcType.clazz().equals(Clob.class)) {
                 final Clob clob = (Clob) srcObj;
+                UncheckedSQLException primaryException = null;
 
                 try {
-                    return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
+                    final long clobLength = clob.length();
+                    if (clobLength > Integer.MAX_VALUE) {
+                        throw new IllegalArgumentException("Clob size (" + clobLength + ") exceeds maximum array size (" + Integer.MAX_VALUE + ")");
+                    }
+                    return (T) clob.getSubString(1, (int) clobLength).toCharArray();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    primaryException = new UncheckedSQLException(e);
+                    throw primaryException;
                 } finally {
                     try {
                         clob.free();
                     } catch (final SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
+                        final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                        if (primaryException != null) {
+                            primaryException.addSuppressed(freeException);
+                        } else {
+                            throw freeException;
+                        }
                     }
                 }
             } else if (srcType.clazz().equals(Reader.class)) {
@@ -10174,16 +10210,27 @@ sealed class CommonUtil permits N {
                 return (T) ((CharSequence) srcObj).toString();
             } else if (srcType.clazz().equals(Clob.class)) {
                 final Clob clob = (Clob) srcObj;
+                UncheckedSQLException primaryException = null;
 
                 try {
-                    return (T) clob.getSubString(1, (int) clob.length());
+                    final long clobLength = clob.length();
+                    if (clobLength > Integer.MAX_VALUE) {
+                        throw new IllegalArgumentException("Clob size (" + clobLength + ") exceeds maximum array size (" + Integer.MAX_VALUE + ")");
+                    }
+                    return (T) clob.getSubString(1, (int) clobLength);
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    primaryException = new UncheckedSQLException(e);
+                    throw primaryException;
                 } finally {
                     try {
                         clob.free();
                     } catch (final SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
+                        final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                        if (primaryException != null) {
+                            primaryException.addSuppressed(freeException);
+                        } else {
+                            throw freeException;
+                        }
                     }
                 }
             } else if (srcType.clazz().equals(Reader.class)) {
@@ -11182,7 +11229,17 @@ sealed class CommonUtil permits N {
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
-        return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h); // NOSONAR
+        ClassLoader classLoader = CommonUtil.class.getClassLoader();
+
+        if (interfaceClasses != null && interfaceClasses.length > 0) {
+            classLoader = interfaceClasses[0].getClassLoader();
+
+            if (classLoader == null) {
+                classLoader = CommonUtil.class.getClassLoader();
+            }
+        }
+
+        return (T) Proxy.newProxyInstance(classLoader, interfaceClasses, h); // NOSONAR
     }
 
     /**
@@ -13234,6 +13291,11 @@ sealed class CommonUtil permits N {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
+            // be consistent with Collection.toArray(Object[])
+            if (a.length > 0) {
+                a[0] = null;
+            }
+
             return a;
         }
 
@@ -13259,13 +13321,18 @@ sealed class CommonUtil permits N {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
+            if (a.length > 0) {
+                a[0] = null;
+            }
+
             return a;
         } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(a);
         } else if (c instanceof List) {
             return ((List<T>) c).subList(fromIndex, toIndex).toArray(a);
         } else {
-            final A[] res = a.length >= toIndex - fromIndex ? a : (A[]) newArray(a.getClass().getComponentType(), toIndex - fromIndex);
+            final int size = toIndex - fromIndex;
+            final A[] res = a.length >= size ? a : (A[]) newArray(a.getClass().getComponentType(), size);
             final Iterator<? extends T> iter = c.iterator();
             int idx = 0;
 
@@ -13277,6 +13344,11 @@ sealed class CommonUtil permits N {
             while (idx < toIndex && iter.hasNext()) {
                 res[idx - fromIndex] = iter.next();
                 idx++;
+            }
+
+            // be consistent with Collection.toArray(Object[])
+            if (a.length > size) {
+                a[size] = null;
             }
 
             return res;
@@ -19634,11 +19706,13 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the Iterator is {@code null} or the index is negative
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable or Iterator
      */
-    public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T getElement(@NotNull final Iterator<? extends T> iter, final long index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(iter, cs.iter);
         N.checkArgNotNegative(index, cs.index);
 
-        while (index-- > 0 && iter.hasNext()) {
+        long idx = index;
+
+        while (idx-- > 0 && iter.hasNext()) {
             iter.next();
         }
 
@@ -25337,8 +25411,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25374,8 +25448,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25411,8 +25485,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25448,8 +25522,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25485,8 +25559,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25522,8 +25596,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25559,8 +25633,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25596,8 +25670,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25633,8 +25707,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, len(src));
-        checkFromToIndex(destPos, destPos + length, len(dest));
+        checkFromIndexSize(srcPos, length, len(src));
+        checkFromIndexSize(destPos, length, len(dest));
 
         if (isEmpty(src) && srcPos == 0 && length == 0) {
             return;
@@ -25670,8 +25744,8 @@ sealed class CommonUtil permits N {
      * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) throws IndexOutOfBoundsException {
-        checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
-        checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
+        checkFromIndexSize(srcPos, length, Array.getLength(src));
+        checkFromIndexSize(destPos, length, Array.getLength(dest));
 
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(src, srcPos, dest, destPos, length);
@@ -26491,6 +26565,8 @@ sealed class CommonUtil permits N {
      * @see Arrays#copyOfRange(Object[], int, int, Class)
      */
     public static <T> T[] copyOfRange(final Object[] original, final int fromIndex, final int toIndex, final Class<? extends T[]> newType) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         final int newLength = toIndex - fromIndex;
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
         copy(original, fromIndex, copy, 0, Math.min(original.length - fromIndex, newLength));
@@ -26621,6 +26697,10 @@ sealed class CommonUtil permits N {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
+        if (str == null) {
+            return Strings.EMPTY;
+        }
+
         if (fromIndex == 0 && toIndex == len) {
             return str;
         }
@@ -26643,10 +26723,16 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("deprecation")
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), str.length());
+        final int len = len(str);
+
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), len);
 
         if (step == 0) {
             throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
+        }
+
+        if (str == null) {
+            return Strings.EMPTY;
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
@@ -28426,6 +28512,8 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+        checkFromToIndex(fromIndex, toIndex, size(list));
+
         if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
@@ -29280,6 +29368,8 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+        checkFromToIndex(fromIndex, toIndex, size(list));
+
         if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
@@ -30504,6 +30594,8 @@ sealed class CommonUtil permits N {
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp) {
+        checkFromToIndex(fromIndex, toIndex, size(list));
+
         if (isEmpty(list)) {
             return INDEX_NOT_FOUND;
         }
@@ -31024,7 +31116,15 @@ sealed class CommonUtil permits N {
      * @see java.util.Collections#indexOfSubList(List, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
-        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
+        if (sourceList == null || subListToFind == null) {
+            return INDEX_NOT_FOUND;
+        }
+
+        if (subListToFind.isEmpty()) {
+            return 0;
+        }
+
+        if (sourceList.isEmpty()) {
             return INDEX_NOT_FOUND;
         }
 
@@ -31042,10 +31142,6 @@ sealed class CommonUtil permits N {
      * @see Index#ofSubList(List, int, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int fromIndex) {
-        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
-            return INDEX_NOT_FOUND;
-        }
-
         return Index.ofSubList(sourceList, fromIndex, subListToFind).orElse(INDEX_NOT_FOUND);
     }
 
@@ -31569,7 +31665,15 @@ sealed class CommonUtil permits N {
      * @return the index of the last occurrence of the specified sublist, or -1 if there is no such occurrence
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
-        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
+        if (sourceList == null || subListToFind == null) {
+            return INDEX_NOT_FOUND;
+        }
+
+        if (subListToFind.isEmpty()) {
+            return sourceList.size();
+        }
+
+        if (sourceList.isEmpty()) {
             return INDEX_NOT_FOUND;
         }
 
@@ -31586,10 +31690,6 @@ sealed class CommonUtil permits N {
      * @see Index#lastOfSubList(List, int, List)
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int startIndexFromBack) {
-        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
-            return INDEX_NOT_FOUND;
-        }
-
         return Index.lastOfSubList(sourceList, startIndexFromBack, subListToFind).orElse(INDEX_NOT_FOUND);
     }
 

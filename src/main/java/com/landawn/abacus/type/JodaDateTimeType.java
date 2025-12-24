@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import org.joda.time.DateTime;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for Joda-Time DateTime objects.
@@ -147,11 +146,11 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      */
     @Override
     public DateTime valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return new DateTime(System.currentTimeMillis());
         }
 

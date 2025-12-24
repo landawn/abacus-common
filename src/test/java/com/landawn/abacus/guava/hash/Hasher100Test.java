@@ -12,8 +12,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -329,7 +329,7 @@ public class Hasher100Test extends TestBase {
 
         Hasher hasher5 = Hashing.sha256().newHasher();
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, -1, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, -1));
+        assertThrows(IllegalArgumentException.class, () -> hasher5.put(buffer, 0, -1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, buffer.length + 1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, buffer.length, 1));
         hasher5.put((char[]) null, 0, 0);

@@ -1028,6 +1028,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
+     * Checks if a string represents the system time keyword.
+     * Accepts both "sysTime" and "SYS_TIME" (case-insensitive).
+     *
+     * @param date the string to check
+     * @return {@code true} if the string matches a system time keyword
+     */
+    protected static boolean isSysTime(final String date) {
+        return Strings.equalsIgnoreCase(date, SYS_TIME) || "SYS_TIME".equalsIgnoreCase(date);
+    }
+
+    /**
      * Checks if a character sequence possibly represents a long timestamp.
      * A string is considered a possible long if positions 2 and 4 contain digits.
      *

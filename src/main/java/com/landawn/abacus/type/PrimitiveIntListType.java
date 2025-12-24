@@ -137,7 +137,12 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      */
     @Override
     public IntList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : IntList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final int[] array = arrayType.valueOf(str);
+        return array == null ? null : IntList.of(array);
     }
 
     /**

@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -160,7 +160,7 @@ public class GuavaHasher100Test extends TestBase {
 
         Hasher hasher3 = Hashing.sha256().newHasher();
         assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, -1, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 0, -1));
+        assertThrows(IllegalArgumentException.class, () -> hasher3.put(chars, 0, -1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 0, chars.length + 1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, chars.length, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 2, 3));

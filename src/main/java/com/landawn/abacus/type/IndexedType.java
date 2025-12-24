@@ -46,6 +46,22 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final Type<?>[] parameterTypes;
 
+    /**
+     * Package-private constructor for IndexedType.
+     * Creates a type handler for Indexed objects containing values of the specified type.
+     * This constructor is called by the TypeFactory to create Indexed&lt;T&gt; type instances.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
+     * Indexed<String> indexed = Indexed.of("hello", 5);
+     * String serialized = type.stringOf(indexed);  // "[5,\"hello\"]"
+     * Indexed<String> deserialized = type.valueOf("[5,\"hello\"]");
+     * }</pre>
+     *
+     * @param valueTypeName the name of the type for values stored in the Indexed container
+     */
     IndexedType(final String valueTypeName) {
         super(getTypeName(valueTypeName, false));
 

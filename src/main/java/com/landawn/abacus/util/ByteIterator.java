@@ -780,10 +780,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         int idx = 0;
 
         while (hasNext()) {
-            action.accept(idx, nextByte());
-            if (++idx < 0) {
+            if (idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
+
+            action.accept(idx, nextByte());
+
+            idx++;
         }
     }
 }

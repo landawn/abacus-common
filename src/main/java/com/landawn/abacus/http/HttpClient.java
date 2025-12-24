@@ -1603,12 +1603,13 @@ public final class HttpClient {
     @SuppressWarnings("unused")
     public HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
             final Class<?> resultClass) throws UncheckedIOException {
-        HttpURLConnection connection = null;
-
         if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
             _activeConnectionCounter.decrementAndGet();
             throw new RuntimeException("Cannot create connection: exceeded maximum connection limit of " + _maxConnection);
         }
+
+        HttpURLConnection connection = null;
+        boolean success = false;
 
         try {
             synchronized (_netURL) {
@@ -1657,7 +1658,9 @@ public final class HttpClient {
 
             if (settings != null) {
                 connection.setDoInput(settings.doInput());
-                connection.setDoOutput(settings.doOutput());
+                connection.setDoOutput(doOutput && settings.doOutput());
+            } else if (doOutput) {
+                connection.setDoOutput(true);
             }
 
             connection.setUseCaches((settings != null && settings.getUseCaches()) || (_settings != null && _settings.getUseCaches()));
@@ -1667,9 +1670,14 @@ public final class HttpClient {
 
             connection.setRequestMethod(httpMethod.name());
 
+            success = true;
             return connection;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            if (!success) {
+                _activeConnectionCounter.decrementAndGet();
+            }
         }
     }
 

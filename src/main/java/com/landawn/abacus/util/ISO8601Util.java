@@ -254,7 +254,10 @@ final class ISO8601Util {
 
             if (!hasT && (date.length() <= offset)) {
                 //noinspection MagicConstant
-                final Calendar calendar = new GregorianCalendar(year, month - 1, day);
+                final Calendar calendar = new GregorianCalendar(TIMEZONE_Z);
+
+                calendar.clear();
+                calendar.set(year, month - 1, day);
 
                 pos.setIndex(offset);
                 return calendar.getTime();
@@ -348,6 +351,9 @@ final class ISO8601Util {
             }
 
             final Calendar calendar = new GregorianCalendar(timezone);
+
+            calendar.clear();
+
             calendar.setLenient(false);
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month - 1);

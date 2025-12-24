@@ -346,7 +346,7 @@ public abstract class Wrapper<T> implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(value, ((Wrapper<T>) obj).value));
+            return (obj == this) || (obj instanceof Wrapper<?> other && equalsFunction.test(value, (T) other.value));
         }
 
         @Override

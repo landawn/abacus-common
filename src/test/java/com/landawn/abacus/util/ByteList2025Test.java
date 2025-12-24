@@ -67,7 +67,7 @@ public class ByteList2025Test extends TestBase {
     public void test_constructor_withArrayAndSize_invalidSize() {
         byte[] arr = { 1, 2, 3 };
         assertThrows(IndexOutOfBoundsException.class, () -> new ByteList(arr, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> new ByteList(arr, -1));
+        assertThrows(IllegalArgumentException.class, () -> new ByteList(arr, -1));
     }
 
     @Test

@@ -57,7 +57,7 @@ public class LongList200Test extends TestBase {
         assertEquals(3, list.size());
         assertArrayEquals(new long[] { 1L, 2L, 3L }, list.toArray());
         assertThrows(IndexOutOfBoundsException.class, () -> new LongList(a, 6));
-        assertThrows(IndexOutOfBoundsException.class, () -> new LongList(a, -1));
+        assertThrows(IllegalArgumentException.class, () -> new LongList(a, -1));
     }
 
     @Test

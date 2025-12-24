@@ -141,7 +141,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return Instant.now();
         }
 

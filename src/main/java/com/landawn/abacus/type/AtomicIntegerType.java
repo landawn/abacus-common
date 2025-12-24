@@ -118,6 +118,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * Retrieves an AtomicInteger value from a ResultSet at the specified column index.
      * The integer value is read from the database and wrapped in a new AtomicInteger instance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * ResultSet rs = ...;  // from SQL query
+     * AtomicInteger counter = type.get(rs, 1);   // retrieves AtomicInteger from column 1
+     * int value = counter.get();  // get the underlying int value
+     * }</pre>
+     *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the integer value
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
@@ -131,6 +139,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Retrieves an AtomicInteger value from a ResultSet using the specified column label.
      * The integer value is read from the database and wrapped in a new AtomicInteger instance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * ResultSet rs = ...;  // from SQL query
+     * AtomicInteger counter = type.get(rs, "counter");   // retrieves AtomicInteger from "counter" column
+     * int value = counter.get();  // get the underlying int value
+     * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnLabel the label for the column specified with the SQL AS clause,
@@ -148,6 +164,17 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * The integer value is extracted from the AtomicInteger before setting.
      * If the AtomicInteger is {@code null}, sets 0 as the parameter value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * AtomicInteger counter = new AtomicInteger(42);
+     * try (PreparedStatement stmt = conn.prepareStatement("UPDATE stats SET counter = ? WHERE id = ?")) {
+     *     type.set(stmt, 1, counter);
+     *     stmt.setInt(2, 1);
+     *     stmt.executeUpdate();
+     * }
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the AtomicInteger value to set, may be {@code null} (treated as 0)
@@ -163,6 +190,16 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * The integer value is extracted from the AtomicInteger before setting.
      * If the AtomicInteger is {@code null}, sets 0 as the parameter value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * AtomicInteger counter = new AtomicInteger(100);
+     * try (CallableStatement stmt = conn.prepareCall("{call updateCounter(?)}")) {
+     *     type.set(stmt, "counter", counter);
+     *     stmt.execute();
+     * }
+     * }</pre>
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the AtomicInteger value to set, may be {@code null} (treated as 0)
@@ -176,6 +213,15 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Appends an AtomicInteger value to an Appendable object.
      * Uses the AtomicInteger's toString() method for the string representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * StringBuilder sb = new StringBuilder();
+     * AtomicInteger counter = new AtomicInteger(42);
+     * type.appendTo(sb, counter);
+     * // sb.toString() equals "42"
+     * }</pre>
      *
      * @param appendable the Appendable object to append to
      * @param x the AtomicInteger value to append, may be null
@@ -193,6 +239,15 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Writes an AtomicInteger value to a CharacterWriter.
      * Extracts the integer value and uses the writer's optimized writeInt method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     * CharacterWriter writer = new CharacterWriter();
+     * AtomicInteger counter = new AtomicInteger(42);
+     * type.writeCharacter(writer, counter, null);
+     * // Writes: 42
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the AtomicInteger value to write, may be null

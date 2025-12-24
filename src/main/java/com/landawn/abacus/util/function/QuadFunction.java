@@ -113,4 +113,23 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c, d) -> after.apply(apply(a, b, c, d));
     }
+
+    /**
+     * Converts this QuadFunction to a Throwables.QuadFunction that can throw checked exceptions.
+     * This method is useful when you need to use this function in a context that expects
+     * a Throwables.QuadFunction with a specific exception type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * QuadFunction<String, Integer, Boolean, Date, String> function = (s, i, b, d) -> { ... };
+     * var throwableFunction =
+     *     function.toThrowable();
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function may throw
+     * @return a Throwables.QuadFunction that wraps this function
+     */
+    default <E extends Throwable> Throwables.QuadFunction<A, B, C, D, R, E> toThrowable() {
+        return (Throwables.QuadFunction<A, B, C, D, R, E>) this;
+    }
 }

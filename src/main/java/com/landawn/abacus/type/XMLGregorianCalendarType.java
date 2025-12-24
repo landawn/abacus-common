@@ -27,7 +27,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -126,7 +125,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public XMLGregorianCalendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentXMLGregorianCalendar() : Dates.parseXMLGregorianCalendar(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentXMLGregorianCalendar() : Dates.parseXMLGregorianCalendar(str));
     }
 
     /**

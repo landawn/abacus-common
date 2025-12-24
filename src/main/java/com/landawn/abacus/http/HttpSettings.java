@@ -594,6 +594,10 @@ public final class HttpSettings {
      * @see HttpHeaders
      */
     public HttpSettings headers(final HttpHeaders headers) {
+        if (this.headers == headers) {
+            return this;
+        }
+
         headers().clear();
 
         if (headers != null) {

@@ -169,7 +169,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
             return IOUtil.readAllToString(reader);
         } else if (obj instanceof Clob clob) {
             try {
-                return clob.getSubString(1, (int) clob.length());
+                final long len = clob.length();
+                if (len > Integer.MAX_VALUE) {
+                    throw new UnsupportedOperationException("Clob too large to convert to String: " + len + " characters");
+                }
+                return clob.getSubString(1, (int) len);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {

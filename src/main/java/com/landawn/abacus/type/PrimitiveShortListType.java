@@ -137,7 +137,12 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      */
     @Override
     public ShortList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : ShortList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final short[] array = arrayType.valueOf(str);
+        return array == null ? null : ShortList.of(array);
     }
 
     /**

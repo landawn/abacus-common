@@ -6,16 +6,16 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of one byte-valued argument.
- * This is the byte-consuming primitive type specialization of {@link java.util.function.Predicate}.
+ * Represents a predicate (boolean-valued function) of one {@code byte}-valued argument.
+ * This is the {@code byte}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(byte)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
  * @see ByteBiPredicate
  * @see ByteTriPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> { //NOSONAR

@@ -77,7 +77,7 @@ public class CharList101Test extends TestBase {
     public void testConstructorWithInvalidSize() {
         char[] array = { 'a', 'b', 'c' };
         assertThrows(IndexOutOfBoundsException.class, () -> new CharList(array, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> new CharList(array, -1));
+        assertThrows(IllegalArgumentException.class, () -> new CharList(array, -1));
     }
 
     @Test

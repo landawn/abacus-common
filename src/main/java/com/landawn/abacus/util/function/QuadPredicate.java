@@ -159,4 +159,23 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
     default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
         return (a, b, c, d) -> test(a, b, c, d) || other.test(a, b, c, d);
     }
+
+    /**
+     * Converts this QuadPredicate to a Throwables.QuadPredicate that can throw checked exceptions.
+     * This method is useful when you need to use this predicate in a context that expects
+     * a Throwables.QuadPredicate with a specific exception type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * QuadPredicate<String, Integer, Boolean, Date> predicate = (s, i, b, d) -> { ... };
+     * var throwablePredicate =
+     *     predicate.toThrowable();
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned predicate may throw
+     * @return a Throwables.QuadPredicate that wraps this predicate
+     */
+    default <E extends Throwable> Throwables.QuadPredicate<A, B, C, D, E> toThrowable() {
+        return (Throwables.QuadPredicate<A, B, C, D, E>) this;
+    }
 }

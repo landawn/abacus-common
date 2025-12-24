@@ -72,7 +72,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testCheckFromIndexSize_InvalidRange() {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(-1, 5, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkFromIndexSize(0, -1, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(6, 5, 10));
     }
 
@@ -4060,6 +4060,13 @@ public class CommonUtil2025Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         List<Integer> subList = Arrays.asList(3, 4);
         assertEquals(2, CommonUtil.indexOfSubList(list, subList));
+        assertEquals(0, Strings.indexOf("", ""));
+        assertEquals(0, "".indexOf(""));
+        assertEquals(0, Collections.indexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(0, CommonUtil.indexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(0, Index.ofSubList(N.emptyList(), N.emptyList()).orElseThrow());
+        assertEquals(0, Index.ofSubList(N.emptyList(), 0, N.emptyList()).orElseThrow());
+        assertEquals(Collections.indexOfSubList(N.emptyList(), N.emptyList()), CommonUtil.indexOfSubList(N.emptyList(), N.emptyList()));
     }
 
     @Test
@@ -4067,6 +4074,14 @@ public class CommonUtil2025Test extends TestBase {
         List<Integer> list = Arrays.asList(1, 2, 3, 2, 3, 4);
         List<Integer> subList = Arrays.asList(2, 3);
         assertEquals(3, CommonUtil.lastIndexOfSubList(list, subList));
+
+        assertEquals(0, Strings.lastIndexOf("", ""));
+        assertEquals(0, "".lastIndexOf(""));
+        assertEquals(0, Collections.lastIndexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(0, CommonUtil.lastIndexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(0, Index.lastOfSubList(N.emptyList(), N.emptyList()).orElseThrow());
+        assertEquals(0, Index.lastOfSubList(N.emptyList(), 0, N.emptyList()).orElseThrow());
+        assertEquals(Collections.lastIndexOfSubList(N.emptyList(), N.emptyList()), CommonUtil.lastIndexOfSubList(N.emptyList(), N.emptyList()));
     }
 
     @Test

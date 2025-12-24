@@ -2409,7 +2409,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                             // ignore.
                         } else {
-                            propValue = readValue(jr, readNullToEmpty, propInfo, propInfo.jsonXmlType);
+                            propValue = readValue(jr, readNullToEmpty, propInfo, propType == null ? propInfo.jsonXmlType : propType);
                             setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
                         }
                     }
@@ -2461,7 +2461,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
                             } else {
-                                propValue = readValue(jr, readNullToEmpty, propInfo, propInfo.jsonXmlType);
+                                propValue = readValue(jr, readNullToEmpty, propInfo, propType == null ? propInfo.jsonXmlType : propType);
                                 setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
                             }
                         }
@@ -2586,7 +2586,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
                             } else {
-                                propValue = readValue(jr, readNullToEmpty, propInfo, propInfo.jsonXmlType);
+                                propValue = readValue(jr, readNullToEmpty, propInfo, propType == null ? propInfo.jsonXmlType : propType);
                                 setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
                             }
                         }

@@ -690,8 +690,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
-        return Tuple.of((a.right()[0] == 0 ? 0.0D : (double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1],
-                a.right()[2] == 0 ? 0.0D : ((double) a.left()[2]) / a.right()[2]);
+        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
+                a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
     };
 
     private static final Supplier<long[]> AveragingLong_Supplier = () -> new long[2];
@@ -739,12 +739,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0D : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1]);
+        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
     };
 
     private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0D : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0D : ((double) a.left()[1]) / a.right()[1],
-                a.right()[2] == 0 ? 0.0D : ((double) a.left()[2]) / a.right()[2]);
+        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
+                a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
     };
 
     private static final Supplier<KahanSummation> AveragingDouble_Supplier = KahanSummation::new;
@@ -781,12 +781,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     private static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> {
-        return Tuple.of(a[0].count() == 0 ? 0.0D : a[0].average().get(), a[1].count() == 0 ? 0.0D : a[1].average().get());
+        return Tuple.of(a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get());
     };
 
     private static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> {
-        return Tuple.of(a[0].count() == 0 ? 0.0D : a[0].average().get(), a[1].count() == 0 ? 0.0D : a[1].average().get(),
-                a[2].count() == 0 ? 0.0D : a[2].average().get());
+        return Tuple.of(a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get(),
+                a[2].count() == 0 ? 0.0d : a[2].average().get());
     };
 
     private static final Supplier<Pair<BigInteger, long[]>> AveragingBigInteger_Supplier = () -> Pair.of(BigInteger.ZERO, new long[1]);

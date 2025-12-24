@@ -337,6 +337,9 @@ class JSONStreamReader extends JSONStringReader {
     protected char readEscapeCharacter() {
         if (strBeginIndex >= strEndIndex) {
             refill();
+            if (strBeginIndex >= strEndIndex) {
+                throw new ParseException("Incomplete escape sequence at end of input");
+            }
         }
 
         final int escaped = strValue[strBeginIndex++];
@@ -351,6 +354,9 @@ class JSONStreamReader extends JSONStringReader {
                 for (int i = 0, c = 0; i < 4; i++) {
                     if (strBeginIndex >= strEndIndex) {
                         refill();
+                        if (strBeginIndex >= strEndIndex) {
+                            throw new ParseException("Incomplete unicode escape sequence: expected 4 hex digits");
+                        }
                     }
 
                     c = strValue[strBeginIndex++];

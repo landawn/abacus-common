@@ -16,16 +16,16 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of one short-valued argument.
- * This is the short-consuming primitive type specialization of {@link java.util.function.Predicate}.
+ * Represents a predicate (boolean-valued function) of one {@code short}-valued argument.
+ * This is the {@code short}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(short)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
  * @see ShortBiPredicate
  * @see ShortTriPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> { //NOSONAR

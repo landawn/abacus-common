@@ -105,7 +105,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return OffsetDateTime.now();
         }
 

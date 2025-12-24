@@ -137,7 +137,12 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      */
     @Override
     public LongList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : LongList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final long[] array = arrayType.valueOf(str);
+        return array == null ? null : LongList.of(array);
     }
 
     /**

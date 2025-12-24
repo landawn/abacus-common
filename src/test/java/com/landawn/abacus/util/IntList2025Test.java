@@ -77,7 +77,7 @@ public class IntList2025Test extends TestBase {
     public void test_constructor_withArrayAndSize_invalidSize() {
         int[] arr = { 1, 2, 3 };
         assertThrows(IndexOutOfBoundsException.class, () -> new IntList(arr, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> new IntList(arr, -1));
+        assertThrows(IllegalArgumentException.class, () -> new IntList(arr, -1));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class IntList2025Test extends TestBase {
     public void test_of_arrayWithSize_invalidSize() {
         int[] arr = { 1, 2, 3 };
         assertThrows(IndexOutOfBoundsException.class, () -> IntList.of(arr, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> IntList.of(arr, -1));
+        assertThrows(IllegalArgumentException.class, () -> IntList.of(arr, -1));
     }
 
     @Test

@@ -2563,7 +2563,9 @@ public final class Strings {
                 return padStr + padStr + padStr + str;
 
             default: {
-                final StringBuilder sb = Objectory.createStringBuilder(str.length() + (padStr.length() * delta));
+                final long bufferSizeLong = str.length() + (long) padStr.length() * delta;
+                final int bufferSize = bufferSizeLong > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) bufferSizeLong;
+                final StringBuilder sb = Objectory.createStringBuilder(bufferSize);
 
                 try {
                     //noinspection StringRepeatCanBeUsed
@@ -2686,7 +2688,9 @@ public final class Strings {
                 return str + padStr + padStr + padStr;
 
             default: {
-                final StringBuilder sb = Objectory.createStringBuilder(str.length() + (padStr.length() * delta));
+                final long bufferSizeLong = str.length() + (long) padStr.length() * delta;
+                final int bufferSize = bufferSizeLong > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) bufferSizeLong;
+                final StringBuilder sb = Objectory.createStringBuilder(bufferSize);
 
                 try {
                     sb.append(str);
@@ -11657,7 +11661,7 @@ public final class Strings {
         final String sourceText = str.toLowerCase();
 
         for (final String searchStr : searchStrs) {
-            if (equals(sourceText, searchStr.toLowerCase())) {
+            if (searchStr != null && equals(sourceText, searchStr.toLowerCase())) {
                 return true;
             }
         }

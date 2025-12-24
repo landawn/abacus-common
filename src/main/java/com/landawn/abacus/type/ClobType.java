@@ -69,7 +69,11 @@ public class ClobType extends AbstractType<Clob> {
         }
 
         try {
-            return x.getSubString(1, (int) x.length());
+            final long len = x.length();
+            if (len > Integer.MAX_VALUE) {
+                throw new UnsupportedOperationException("Clob too large to convert to String: " + len + " characters");
+            }
+            return x.getSubString(1, (int) len);
         } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {

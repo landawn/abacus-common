@@ -18161,6 +18161,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list containing the smallest elements in the iterator. If the iterator is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> minAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
+        if (iter == null || !iter.hasNext()) {
+            return new ArrayList<>();
+        }
+
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
 
         final List<T> result = new ArrayList<>();
@@ -23342,7 +23346,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNegative(n, cs.n);
         checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (isEmpty(c) || n == 0) {
+        if (isEmpty(c) || n == 0 || fromIndex == toIndex) {
             return new ArrayList<>();
         } else if (n >= toIndex - fromIndex) {
             if (fromIndex == 0 && toIndex == c.size()) {
@@ -23934,7 +23938,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedArray[(int) (len * p.doubleValue())]);
+            int index = (int) (len * p.doubleValue());
+
+            if (index >= len) {
+                index = len - 1;
+            }
+
+            m.put(p, sortedArray[index]);
         }
 
         return m;
@@ -23972,7 +23982,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedArray[(int) (len * p.doubleValue())]);
+            int index = (int) (len * p.doubleValue());
+
+            if (index >= len) {
+                index = len - 1;
+            }
+
+            m.put(p, sortedArray[index]);
         }
 
         return m;
@@ -24015,7 +24031,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedArray[(int) (len * p.doubleValue())]);
+            int index = (int) (len * p.doubleValue());
+
+            if (index >= len) {
+                index = len - 1;
+            }
+
+            m.put(p, sortedArray[index]);
         }
 
         return m;
@@ -24060,7 +24082,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedArray[(int) (len * p.doubleValue())]);
+            int index = (int) (len * p.doubleValue());
+
+            if (index >= len) {
+                index = len - 1;
+            }
+
+            m.put(p, sortedArray[index]);
         }
 
         return m;
@@ -24107,7 +24135,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedArray[(int) (len * p.doubleValue())]);
+            int index = (int) (len * p.doubleValue());
+
+            if (index >= len) {
+                index = len - 1;
+            }
+
+            m.put(p, sortedArray[index]);
         }
 
         return m;
@@ -24157,7 +24191,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
         for (final Percentage p : Percentage.values()) {
-            m.put(p, sortedList.get((int) (size * p.doubleValue())));
+            int index = (int) (size * p.doubleValue());
+
+            if (index >= size) {
+                index = size - 1;
+            }
+
+            m.put(p, sortedList.get(index));
         }
 
         return m;
@@ -31046,6 +31086,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final M ret = mapSupplier.get();
         K key = null;
         List<T> val = null;
+
+        if (c == null || fromIndex == toIndex) {
+            return ret;
+        }
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
@@ -39223,6 +39267,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static RuntimeException toRuntimeException(final Exception e) {
         return ExceptionUtil.toRuntimeException(e);
+    }
+
+    /**
+     * Converts the specified Exception to a RuntimeException with option to call Thread.interrupt().
+     * Useful when handling InterruptedException to preserve interrupted status.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try {
+     *     Thread.sleep(1000);
+     * } catch (InterruptedException e) {
+     *     throw N.toRuntimeException(e, true);
+     *     // Converts to UncheckedInterruptedException and calls Thread.interrupt()
+     * }
+     * }</pre>
+     *
+     * @param e the exception to be converted to a runtime exception.
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
+     * @return a RuntimeException that represents the provided exception.
+     * @see ExceptionUtil#toRuntimeException(Exception)
+     * @see ExceptionUtil#toRuntimeException(Exception, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean, boolean)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
+        return ExceptionUtil.toRuntimeException(e, callInterrupt);
     }
 
     /**

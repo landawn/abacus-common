@@ -114,7 +114,12 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      */
     @Override
     public ByteList valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : ByteList.of(arrayType.valueOf(str));
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final byte[] array = arrayType.valueOf(str);
+        return array == null ? null : ByteList.of(array);
     }
 
     /**

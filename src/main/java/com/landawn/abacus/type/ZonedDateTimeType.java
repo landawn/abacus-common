@@ -186,7 +186,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
             return null; // NOSONAR
         }
 
-        if (N.equals(str, SYS_TIME)) {
+        if (isSysTime(str)) {
             return ZonedDateTime.now();
         }
 

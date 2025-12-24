@@ -17,16 +17,16 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of one float-valued argument.
- * This is a functional interface whose functional method is {@link #test(float)}.
+ * Represents a predicate (boolean-valued function) of one {@code float}-valued argument.
+ * This is the {@code float}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
- * <p>This is a primitive type specialization of {@link java.util.function.Predicate} for {@code float}.</p>
+ * <p>This is a functional interface whose functional method is {@link #test(float)}.
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
  * @see FloatBiPredicate
  * @see FloatTriPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR

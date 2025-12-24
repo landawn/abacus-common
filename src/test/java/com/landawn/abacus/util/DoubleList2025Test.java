@@ -104,7 +104,7 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testConstructorWithArrayAndNegativeSize() {
         double[] array = { 1.1, 2.2, 3.3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> new DoubleList(array, -1));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleList(array, -1));
     }
 
     @Test

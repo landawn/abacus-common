@@ -133,9 +133,9 @@ public class EventBus {
 
     private final Map<String, List<SubIdentifier>> listOfEventIdSubMap = new ConcurrentHashMap<>();
 
-    private List<List<SubIdentifier>> listOfSubEventSubs = null;
+    private volatile List<List<SubIdentifier>> listOfSubEventSubs = null;
 
-    private Map<Object, String> mapOfStickyEvent = null;
+    private volatile Map<Object, String> mapOfStickyEvent = null;
 
     private static final EventBus INSTANCE = new EventBus("default");
 
@@ -380,6 +380,16 @@ public class EventBus {
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
         if (!isSupportedThreadMode(threadMode)) {
             throw new RuntimeException("Unsupported thread mode: " + threadMode);
+        }
+
+        boolean alreadyRegistered = false;
+
+        synchronized (registeredSubMap) {
+            alreadyRegistered = registeredSubMap.containsKey(subscriber);
+        }
+
+        if (alreadyRegistered) {
+            unregister(subscriber);
         }
 
         if (logger.isDebugEnabled()) {

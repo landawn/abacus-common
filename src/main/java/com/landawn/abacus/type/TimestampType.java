@@ -120,7 +120,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     @Override
     public Timestamp valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
     }
 
     /**
@@ -177,7 +177,18 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
-     * Retrieves a Timestamp value from the specified column in the ResultSet.
+     * Retrieves a Timestamp value from the specified column in the ResultSet using the column label.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Timestamp updatedAt = type.get(rs, "updated_at");
+     *         System.out.println("Updated at: " + updatedAt);
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label/name
@@ -214,6 +225,16 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      * Sets a named Timestamp parameter in the CallableStatement.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * Timestamp now = new Timestamp(System.currentTimeMillis());
+     * try (CallableStatement stmt = conn.prepareCall("{call logEvent(?)}")) {
+     *     type.set(stmt, "eventTime", now);
+     *     stmt.execute();
+     * }
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter

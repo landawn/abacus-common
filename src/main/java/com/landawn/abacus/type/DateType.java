@@ -130,7 +130,7 @@ public class DateType extends AbstractDateType<Date> {
      */
     @Override
     public Date valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentDate() : Dates.parseDate(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentDate() : Dates.parseDate(str));
     }
 
     /**

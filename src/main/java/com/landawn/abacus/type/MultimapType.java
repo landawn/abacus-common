@@ -229,6 +229,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
+        if (map == null) {
+            return null; // NOSONAR
+        }
+
         // Determine the value collection type: use parameterTypes[2] if available, otherwise parameterTypes[1]
         final Type<?> valueCollectionType = parameterTypes.length > 2 ? parameterTypes[2] : parameterTypes[1];
 

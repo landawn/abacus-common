@@ -216,9 +216,9 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Keyed.of("abc", 123).toString()      =abc, val=123}"
-     * Keyed.of(null, "value").toString()   =null, val=value}"
-     * Keyed.of("key", null).toString()     =key, val=null}"
+     * Keyed.of("abc", 123).toString();      // "{key=abc, val=123}"
+     * Keyed.of(null, "value").toString();   // "{key=null, val=value}"
+     * Keyed.of("key", null).toString();     // "{key=key, val=null}"
      * }</pre>
      *
      * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}".

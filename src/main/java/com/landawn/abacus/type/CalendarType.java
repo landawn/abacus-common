@@ -100,7 +100,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      */
     @Override
     public Calendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentCalendar() : Dates.parseCalendar(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentCalendar() : Dates.parseCalendar(str));
     }
 
     /**

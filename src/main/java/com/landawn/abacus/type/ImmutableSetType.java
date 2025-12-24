@@ -198,7 +198,9 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      */
     @Override
     public ImmutableSet<E> valueOf(final String str) {
-        return ImmutableSet.wrap(setType.valueOf(str));
+        final Set<E> set = setType.valueOf(str);
+
+        return set == null ? null : ImmutableSet.wrap(set);
     }
 
     /**

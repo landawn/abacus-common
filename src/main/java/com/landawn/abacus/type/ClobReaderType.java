@@ -29,8 +29,25 @@ import java.sql.SQLException;
  */
 public class ClobReaderType extends ReaderType {
 
+    /**
+     * The type name constant for CLOB Reader type identification.
+     */
     public static final String CLOB_READER = "ClobReader";
 
+    /**
+     * Package-private constructor for ClobReaderType.
+     * This constructor is called by the TypeFactory to create ClobReader type instances.
+     * ClobReaderType specializes in converting between SQL CLOB objects and character Readers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<Reader> type = TypeFactory.getType("ClobReader");
+     * ResultSet rs = ...;
+     * Reader clobReader = type.get(rs, "document");
+     * String content = IOUtil.readAllToString(clobReader);
+     * }</pre>
+     */
     ClobReaderType() {
         super(CLOB_READER);
     }

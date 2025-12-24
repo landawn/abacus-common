@@ -121,10 +121,18 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
-        return ((cbuf == null) || (len == 0)) ? defaultValue()
-                : (((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
-                        && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) ? Boolean.TRUE
-                                : Boolean.FALSE);
+        if ((cbuf == null) || (len == 0)) {
+            return defaultValue();
+        }
+
+        if (len == 1) {
+            final char ch = cbuf[offset];
+            return ch == 'Y' || ch == 'y' || ch == '1';
+        }
+
+        return ((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
+                && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) ? Boolean.TRUE
+                        : Boolean.FALSE;
     }
 
     /**

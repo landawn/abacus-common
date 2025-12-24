@@ -180,7 +180,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+            stmt.setNull(columnIndex, java.sql.Types.VARCHAR);
         } else {
             stmt.setString(columnIndex, x ? Y : N);
         }
@@ -199,7 +199,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+            stmt.setNull(parameterName, java.sql.Types.VARCHAR);
         } else {
             stmt.setString(parameterName, x ? Y : N);
         }

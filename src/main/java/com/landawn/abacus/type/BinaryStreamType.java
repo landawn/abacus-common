@@ -27,6 +27,19 @@ public class BinaryStreamType extends InputStreamType {
      */
     public static final String BINARY_STREAM = "BinaryStream";
 
+    /**
+     * Package-private constructor for BinaryStreamType.
+     * This constructor is called by the TypeFactory to create BinaryStream type instances.
+     * BinaryStreamType is used for handling binary data streams from database Binary columns.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<InputStream> type = TypeFactory.getType("BinaryStream");
+     * ResultSet rs = ...;
+     * InputStream stream = type.get(rs, "binary_data");
+     * }</pre>
+     */
     BinaryStreamType() {
         super(BINARY_STREAM);
     }

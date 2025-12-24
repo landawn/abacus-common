@@ -138,6 +138,6 @@ public final class BeanType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
+        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, Type.of(javaType));
     }
 }

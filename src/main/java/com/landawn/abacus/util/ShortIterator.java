@@ -671,7 +671,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param action the action to perform on each element
      * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E {//NOSONAR 
+    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E {//NOSONAR
+        N.checkArgNotNull(action);
+
         while (hasNext()) {
             action.accept(nextShort());
         }
@@ -703,7 +705,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             if (idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
-            action.accept(idx++, nextShort());
+
+            action.accept(idx, nextShort());
+
+            idx++;
         }
     }
 }

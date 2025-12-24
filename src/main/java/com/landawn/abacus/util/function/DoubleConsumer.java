@@ -16,8 +16,8 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation that accepts a single double-valued argument and returns no result.
- * This is the primitive type specialization of {@link java.util.function.Consumer} for double.
+ * Represents an operation that accepts a single {@code double}-valued argument and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code double}.
  * Unlike most other functional interfaces, {@code DoubleConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(double)}.

@@ -8127,13 +8127,15 @@ public final class IOUtil {
                 if (!file.createNewFile()) {
                     // Too wide. It works with: File invalidFile = new File("/invalid/path/test.json");
                     // if (file.getParentFile().mkdirs()) {
-                    if (file.getParentFile().mkdir()) {
+                    final File parent = file.getParentFile();
+                    if (parent != null && parent.mkdir()) {
                         return file.createNewFile();
                     }
                 }
             } catch (final IOException e) {
                 // if (!file.exists() && file.getParentFile().mkdirs()) {
-                if (!file.exists() && file.getParentFile().mkdir()) {
+                final File parent = file.getParentFile();
+                if (!file.exists() && parent != null && parent.mkdir()) {
                     return file.createNewFile();
                 }
 

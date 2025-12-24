@@ -702,10 +702,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         int idx = 0;
 
         while (hasNext()) {
-            action.accept(idx, nextBoolean());
-            if (++idx < 0) {
+            if (idx < 0) {
                 throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
             }
+
+            action.accept(idx, nextBoolean());
+
+            idx++;
         }
     }
 }

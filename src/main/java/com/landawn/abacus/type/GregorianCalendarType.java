@@ -32,8 +32,23 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
+    /**
+     * The type name constant for GregorianCalendar type identification.
+     */
     public static final String GREGORIAN_CALENDAR = GregorianCalendar.class.getSimpleName();
 
+    /**
+     * Package-private constructor for GregorianCalendarType.
+     * This constructor is called by the TypeFactory to create GregorianCalendar type instances.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * GregorianCalendar now = type.valueOf("sysTime");
+     * String isoDate = type.stringOf(now);
+     * }</pre>
+     */
     GregorianCalendarType() {
         super(GREGORIAN_CALENDAR);
     }
@@ -117,7 +132,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      */
     @Override
     public GregorianCalendar valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentGregorianCalendar() : Dates.parseGregorianCalendar(str));
+        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentGregorianCalendar() : Dates.parseGregorianCalendar(str));
     }
 
     /**

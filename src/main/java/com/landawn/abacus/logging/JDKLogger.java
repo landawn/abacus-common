@@ -339,11 +339,13 @@ class JDKLogger extends AbstractLogger {
         }
 
         int found = -1;
-        for (int i = selfIndex + 1; i < steArray.length; i++) {
-            final String className = steArray[i].getClassName();
-            if (!(className.equals(callerFQCN) || className.equals(SUPER))) {
-                found = i;
-                break;
+        if (selfIndex >= 0) {
+            for (int i = selfIndex + 1; i < steArray.length; i++) {
+                final String className = steArray[i].getClassName();
+                if (!(className.equals(callerFQCN) || className.equals(SUPER))) {
+                    found = i;
+                    break;
+                }
             }
         }
 

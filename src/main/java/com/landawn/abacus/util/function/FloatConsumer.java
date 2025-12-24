@@ -16,21 +16,15 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation that accepts a single float-valued argument and returns no result.
+ * Represents an operation that accepts a single {@code float}-valued argument and returns no result.
  * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code float}.
  * Unlike most other functional interfaces, {@code FloatConsumer} is expected to operate via side-effects.
  *
- * <p>This is a functional interface whose functional method is {@link #accept(float)}.</p>
- *
- * <p>This interface extends {@link Throwables.FloatConsumer} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
- * @see java.util.function.Consumer
- * @see java.util.function.DoubleConsumer
- * @see java.util.function.IntConsumer
- * @see java.util.function.LongConsumer
+ * <p>This is a functional interface whose functional method is {@link #accept(float)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Consumer
  */
 @FunctionalInterface
 public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> { //NOSONAR

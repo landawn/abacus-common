@@ -16,25 +16,16 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts a float-valued argument and produces a result.
+ * Represents a function that accepts a {@code float}-valued argument and produces a result.
  * This is the {@code float}-consuming primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This is a functional interface whose functional method is {@link #apply(float)}.</p>
+ * <p>This is a functional interface whose functional method is {@link #apply(float)}.
  *
- * <p>This interface extends {@link Throwables.FloatFunction} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
- * <p>The interface provides a {@code BOX} constant that converts primitive float values to their
- * {@link Float} wrapper object equivalent.</p>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
  *
  * @see java.util.function.Function
- * @see java.util.function.DoubleFunction
- * @see java.util.function.IntFunction
- * @see java.util.function.LongFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeException> { //NOSONAR

@@ -435,8 +435,13 @@ public final class Fnn {
                     result = resultMap.get(t);
 
                     if (result == null) {
-                        result = func.apply(t);
-                        resultMap.put(t, result == null ? none : result);
+                        synchronized (resultMap) {
+                            result = resultMap.get(t);
+                            if (result == null) {
+                                result = func.apply(t);
+                                resultMap.put(t, result == null ? none : result);
+                            }
+                        }
                     }
                 }
 

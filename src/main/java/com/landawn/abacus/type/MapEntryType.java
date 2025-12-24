@@ -232,7 +232,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
                     bw.write(WD._BRACE_L);
 
                     keyType.appendTo(bw, x.getKey());
-                    writer.append(WD._COLON);
+                    bw.write(WD._COLON);
                     valueType.appendTo(bw, x.getValue());
 
                     bw.write(WD._BRACE_R);

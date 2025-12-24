@@ -1308,10 +1308,10 @@ public final class Beans {
 
         return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
                 || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
-                || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
+                || (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(SET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(IS) && inputPropName.length() > 2 && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(HAS) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
     }
 
     private static boolean isSetMethod(final Method method) {
@@ -2090,8 +2090,12 @@ public final class Beans {
      * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception.
      */
     public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
+        final Class<?>[] paramTypes = propSetMethod.getParameterTypes();
+
         if (propValue == null) {
-            propValue = N.defaultValueOf(propSetMethod.getParameterTypes()[0]);
+            if (paramTypes.length > 0) {
+                propValue = N.defaultValueOf(paramTypes[0]);
+            }
 
             try {
                 propSetMethod.invoke(bean, propValue);
@@ -2109,11 +2113,17 @@ public final class Beans {
                             propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
                 }
 
-                propValue = N.convert(propValue, ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(propSetMethod.getName()).jsonXmlType);
+                final PropInfo propInfo = ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(propSetMethod.getName());
 
-                try {
-                    propSetMethod.invoke(bean, propValue);
-                } catch (IllegalAccessException | InvocationTargetException e2) {
+                if (propInfo != null) {
+                    propValue = N.convert(propValue, propInfo.jsonXmlType);
+
+                    try {
+                        propSetMethod.invoke(bean, propValue);
+                    } catch (IllegalAccessException | InvocationTargetException e2) {
+                        throw ExceptionUtil.toRuntimeException(e, true);
+                    }
+                } else {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             }

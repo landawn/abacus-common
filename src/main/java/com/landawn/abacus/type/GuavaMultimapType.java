@@ -314,7 +314,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
                 constructor = ClassUtil.getDeclaredConstructor(typeClass, int.class, int.class);
 
                 if (constructor != null) {
-                    return ClassUtil.invokeConstructor(constructor, keySize);
+                    return ClassUtil.invokeConstructor(constructor, keySize, avgValueSize);
                 } else {
                     Method method = ClassUtil.getDeclaredMethod(typeClass, "create");
 
@@ -326,7 +326,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
                         if (method != null && Modifier.isStatic(method.getModifiers()) && Modifier.isPublic(method.getModifiers())
                                 && typeClass.isAssignableFrom(method.getReturnType())) {
-                            return ClassUtil.invokeMethod(method, keySize);
+                            return ClassUtil.invokeMethod(method, keySize, avgValueSize);
                         }
                     }
                 }

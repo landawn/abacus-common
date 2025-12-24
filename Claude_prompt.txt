@@ -5,7 +5,15 @@ Use multiple agents to fix all javadoc issues reported by running: mvn javadoc:j
 
 -- ==========================================================
 
-Use multiple agents to review all classes under folder: ./src/main/java/ line by line carefully to find bugs and fix them.
+1, Use multiple agents to perform a line-by-line review of all classes under ./src/main/java/ to find bugs and fix them in original class source file.
+
+2, Immediately after completing the review and fixes for a class, generate a detailed report for that class documenting:
+
+	1, Identified issues
+	2, Applied fixes
+	3, Any remaining risks or assumptions
+	
+3, Verify fixes compile correctly
 
 
 -- ==========================================================
