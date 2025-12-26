@@ -1167,13 +1167,13 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_getEnumMap() {
-        final List<Status> statusList = CommonUtil.enumListOf(Status.class);
+        final List<UnifiedStatus> statusList = CommonUtil.enumListOf(UnifiedStatus.class);
         N.println(statusList);
 
-        final Set<Status> statusSet = CommonUtil.enumSetOf(Status.class);
+        final Set<UnifiedStatus> statusSet = CommonUtil.enumSetOf(UnifiedStatus.class);
         N.println(statusSet);
 
-        final Map<Status, String> statusMap = CommonUtil.enumMapOf(Status.class);
+        final Map<UnifiedStatus, String> statusMap = CommonUtil.enumMapOf(UnifiedStatus.class);
         N.println(statusMap);
     }
 
@@ -1793,7 +1793,7 @@ public class NTest extends AbstractParserTest {
         final java.util.Date[] dateTimes = CommonUtil.asArray(Dates.currentDate(), Dates.currentTime());
         N.println(dateTimes);
 
-        final Status[] status = CommonUtil.asArray(Status.ACTIVE, Status.CANCELED);
+        final UnifiedStatus[] status = CommonUtil.asArray(UnifiedStatus.ACTIVE, UnifiedStatus.CANCELED);
         N.println(status);
 
         N.println(ClassUtil.getCanonicalClassName(int.class));

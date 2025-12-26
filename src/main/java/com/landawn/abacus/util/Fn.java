@@ -25,12 +25,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -354,7 +354,21 @@ public final class Fn {
 
     static final Object NONE = ClassUtil.createNullMask();
 
-    private static final Timer timer = new Timer();
+    //    private static final Timer timer = new Timer("Fn-Timer", true);
+    //
+    //    static {
+    //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+    //            timer.cancel();
+    //            timer.purge();
+    //        }, "Fn-Timer-Shutdown"));
+    //    }
+
+    private static final ScheduledExecutorService SCHEDULER;
+
+    static {
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
+        SCHEDULER = MoreExecutors.getExitingScheduledExecutorService(executor);
+    }
 
     static final Runnable EMPTY_ACTION = () -> {
     };
@@ -4186,14 +4200,18 @@ public final class Fn {
 
         final java.util.concurrent.atomic.AtomicBoolean ongoing = new java.util.concurrent.atomic.AtomicBoolean(true);
 
-        final TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                ongoing.set(false);
-            }
-        };
+        //    final TimerTask task = new TimerTask() {
+        //        @Override
+        //        public void run() {
+        //            ongoing.set(false);
+        //        }
+        //    };
+        //
+        //    timer.schedule(task, timeInMillis);
 
-        timer.schedule(task, timeInMillis);
+        final Runnable task = () -> ongoing.set(false);
+
+        SCHEDULER.schedule(task, timeInMillis, TimeUnit.MILLISECONDS);
 
         return t -> ongoing.get();
     }

@@ -98,7 +98,7 @@ public @interface Id {
      * public class Employee { }
      * }</pre>
      * 
-     * @return an array of column names forming the primary key, empty array uses field name as default
+     * @return an array of column names forming the primary key; empty array uses the field name for field-level usage
      */
     String[] value() default {};
 }

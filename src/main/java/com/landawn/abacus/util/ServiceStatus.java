@@ -31,11 +31,11 @@ package com.landawn.abacus.util;
  * 
  * // Convert from stored integer
  * int storedValue = 2;
- * ServiceStatus restoredStatus = ServiceStatus.valueOf(storedValue);   // SUSPENDED
+ * ServiceStatus restoredStatus = ServiceStatus.fromCode(storedValue);   // SUSPENDED
  * }</pre>
  * 
  * @see AccountStatus
- * @see Status
+ * @see UnifiedStatus
  * @see WeekDay
  * @see Color
  */
@@ -44,7 +44,7 @@ public enum ServiceStatus {
      * Default initial state of a service (value: 0).
      * Typically represents a newly created or uninitialized service.
      */
-    DEFAULT(0),
+    BLANK(0),
 
     /**
      * Service is currently active and operational (value: 1).
@@ -88,10 +88,10 @@ public enum ServiceStatus {
      */
     CANCELLED(7);
 
-    private final int intValue;
+    private final int code;
 
-    ServiceStatus(final int intValue) {
-        this.intValue = intValue;
+    ServiceStatus(final int code) {
+        this.code = code;
     }
 
     /**
@@ -103,15 +103,15 @@ public enum ServiceStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ServiceStatus status = ServiceStatus.ACTIVE;
-     * int value = status.intValue();   // returns 1
+     * int value = status.code();   // returns 1
      * // Store in database
      * database.saveStatus(serviceId, value);
      * }</pre>
      * 
      * @return the integer value of this status
      */
-    public int intValue() {
-        return intValue;
+    public int code() {
+        return code;
     }
 
     /**
@@ -125,21 +125,21 @@ public enum ServiceStatus {
      * <pre>{@code
      * // Retrieve from database
      * int storedValue = database.getStatus(serviceId);
-     * ServiceStatus status = ServiceStatus.valueOf(storedValue);
+     * ServiceStatus status = ServiceStatus.fromCode(storedValue);
      * 
      * if (status == ServiceStatus.ACTIVE) {
      *     // Handle active service
      * }
      * }</pre>
      *
-     * @param intValue the integer value to convert to ServiceStatus
+     * @param code the integer value to convert to ServiceStatus
      * @return the ServiceStatus corresponding to the given integer value
      * @throws IllegalArgumentException if no ServiceStatus exists for the given integer value
      */
-    public static ServiceStatus valueOf(final int intValue) {
-        switch (intValue) {
+    public static ServiceStatus fromCode(final int code) {
+        switch (code) {
             case 0:
-                return DEFAULT;
+                return BLANK;
 
             case 1:
                 return ACTIVE;
@@ -163,7 +163,7 @@ public enum ServiceStatus {
                 return CANCELLED;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+                throw new IllegalArgumentException("No mapping instance found by code: " + code);
         }
     }
 }

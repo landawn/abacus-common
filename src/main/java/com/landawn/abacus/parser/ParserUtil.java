@@ -59,7 +59,6 @@ import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
-import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -71,6 +70,7 @@ import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dates;
+import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
@@ -340,22 +340,22 @@ public final class ParserUtil {
      * <ol>
      *   <li>{@code @JsonXmlField(enumerated=...)}</li>
      *   <li>Global enumeration setting from {@code JsonXmlConfig}</li>
-     *   <li>Default to {@code EnumBy.NAME}</li>
+     *   <li>Default to {@code EnumType.NAME}</li>
      * </ol>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field statusField = MyBean.class.getDeclaredField("status");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
-     * EnumBy enumBy = ParserUtil.getEnumerated(statusField, config);
-     * // Returns EnumBy.ORDINAL if specified in annotations
+     * EnumType enumType = ParserUtil.getEnumerated(statusField, config);
+     * // Returns EnumType.ORDINAL if specified in annotations
      * }</pre>
      * 
      * @param field the field to check for enumeration annotations
      * @param jsonXmlConfig the configuration that may contain a default enumeration setting
-     * @return the enumeration strategy, never {@code null} (defaults to {@code EnumBy.NAME})
+     * @return the enumeration strategy, never {@code null} (defaults to {@code EnumType.NAME})
      */
-    static EnumBy getEnumerated(final Field field, final JsonXmlConfig jsonXmlConfig) {
+    static EnumType getEnumerated(final Field field, final JsonXmlConfig jsonXmlConfig) {
         if ((field != null) && (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).enumerated() != null)) {
             return field.getAnnotation(JsonXmlField.class).enumerated();
         }
@@ -364,7 +364,7 @@ public final class ParserUtil {
             return jsonXmlConfig.enumerated();
         }
 
-        return EnumBy.NAME;
+        return EnumType.NAME;
     }
 
     /**
@@ -3018,12 +3018,12 @@ public final class ParserUtil {
                 if (Strings.isNotEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + getEnumerated(field, jsonXmlConfig).name() + ")";
                 }
             }
 
             if (jsonXmlConfig != null && propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + getEnumerated(field, jsonXmlConfig).name() + ")";
             }
 
             return null;
@@ -3045,12 +3045,12 @@ public final class ParserUtil {
                 if (Strings.isNotEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + getEnumerated(field, jsonXmlConfig).name() + ")";
                 }
             }
 
             if (jsonXmlConfig != null && propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + getEnumerated(field, jsonXmlConfig).name() + ")";
             }
 
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
@@ -3140,7 +3140,8 @@ public final class ParserUtil {
             } else if (typeName.isPresent()) {
                 return typeName.get();
             } else if (propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + (typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + (typeAnno.enumerated() == null ? EnumType.NAME.name() : typeAnno.enumerated().name())
+                        + ")";
             }
 
             return null;

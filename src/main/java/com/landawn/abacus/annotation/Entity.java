@@ -71,10 +71,10 @@ import java.lang.annotation.Target;
 public @interface Entity {
 
     /**
-     * Use {@code name} to specify attribute explicitly
+     * Deprecated alias for {@link #name()}.
      *
-     * @return the entity name value (deprecated)
-     * @deprecated use {@code name} to specify attribute explicitly.
+     * @return the entity name value
+     * @deprecated use {@link #name()} to specify the entity name explicitly.
      */
     @Deprecated
     String value() default "";

@@ -1861,7 +1861,7 @@ public final class PropertiesUtil {
         private List<String> excludedServers;
 
         /** The status. */
-        private Status status;
+        private UnifiedStatus unifiedStatus;
 
         /** The description. */
         private String description;
@@ -1967,17 +1967,17 @@ public final class PropertiesUtil {
          *
          * @return the status, or {@code null} if not set
          */
-        public Status getStatus() {
-            return status;
+        public UnifiedStatus getStatus() {
+            return unifiedStatus;
         }
 
         /**
          * Sets the status.
          *
-         * @param status the new status
+         * @param unifiedStatus the new status
          */
-        public void setStatus(final Status status) {
-            this.status = status;
+        public void setStatus(final UnifiedStatus unifiedStatus) {
+            this.unifiedStatus = unifiedStatus;
         }
 
         /**
@@ -2036,7 +2036,7 @@ public final class PropertiesUtil {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, name, content, includedServers, excludedServers, status, description, lastUpdateTime, createdTime);
+            return Objects.hash(id, name, content, includedServers, excludedServers, unifiedStatus, description, lastUpdateTime, createdTime);
         }
 
         @SuppressFBWarnings
@@ -2049,8 +2049,8 @@ public final class PropertiesUtil {
             if (obj instanceof ConfigBean other) {
                 return N.equals(other.id, id) && N.equals(other.name, name) && N.equals(other.content, content)
                         && N.equals(other.includedServers, includedServers) && N.equals(other.excludedServers, excludedServers)
-                        && N.equals(other.status, status) && N.equals(other.description, description) && N.equals(other.lastUpdateTime, lastUpdateTime)
-                        && N.equals(other.createdTime, createdTime);
+                        && N.equals(other.unifiedStatus, unifiedStatus) && N.equals(other.description, description)
+                        && N.equals(other.lastUpdateTime, lastUpdateTime) && N.equals(other.createdTime, createdTime);
 
             }
 
@@ -2060,7 +2060,8 @@ public final class PropertiesUtil {
         @Override
         public String toString() {
             return "{id=" + id + ", name=" + name + ", content=" + content + ", includedServers=" + includedServers + ", excludedServers=" + excludedServers
-                    + ", status=" + status + ", description=" + description + ", lastUpdateTime=" + lastUpdateTime + ", createdTime=" + createdTime + "}";
+                    + ", status=" + unifiedStatus + ", description=" + description + ", lastUpdateTime=" + lastUpdateTime + ", createdTime=" + createdTime
+                    + "}";
         }
 
     }

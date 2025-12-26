@@ -14,97 +14,97 @@ public class ServiceStatus2025Test extends TestBase {
 
     @Test
     public void testIntValue_DEFAULT() {
-        assertEquals(0, ServiceStatus.DEFAULT.intValue());
+        assertEquals(0, ServiceStatus.BLANK.code());
     }
 
     @Test
     public void testIntValue_ACTIVE() {
-        assertEquals(1, ServiceStatus.ACTIVE.intValue());
+        assertEquals(1, ServiceStatus.ACTIVE.code());
     }
 
     @Test
     public void testIntValue_SUSPENDED() {
-        assertEquals(2, ServiceStatus.SUSPENDED.intValue());
+        assertEquals(2, ServiceStatus.SUSPENDED.code());
     }
 
     @Test
     public void testIntValue_EXPIRED() {
-        assertEquals(3, ServiceStatus.EXPIRED.intValue());
+        assertEquals(3, ServiceStatus.EXPIRED.code());
     }
 
     @Test
     public void testIntValue_CONCLUDED() {
-        assertEquals(4, ServiceStatus.CONCLUDED.intValue());
+        assertEquals(4, ServiceStatus.CONCLUDED.code());
     }
 
     @Test
     public void testIntValue_REVOKED() {
-        assertEquals(5, ServiceStatus.REVOKED.intValue());
+        assertEquals(5, ServiceStatus.REVOKED.code());
     }
 
     @Test
     public void testIntValue_REFUNDED() {
-        assertEquals(6, ServiceStatus.REFUNDED.intValue());
+        assertEquals(6, ServiceStatus.REFUNDED.code());
     }
 
     @Test
     public void testIntValue_CANCELLED() {
-        assertEquals(7, ServiceStatus.CANCELLED.intValue());
+        assertEquals(7, ServiceStatus.CANCELLED.code());
     }
 
     @Test
     public void testValueOf_0() {
-        assertEquals(ServiceStatus.DEFAULT, ServiceStatus.valueOf(0));
+        assertEquals(ServiceStatus.BLANK, ServiceStatus.fromCode(0));
     }
 
     @Test
     public void testValueOf_1() {
-        assertEquals(ServiceStatus.ACTIVE, ServiceStatus.valueOf(1));
+        assertEquals(ServiceStatus.ACTIVE, ServiceStatus.fromCode(1));
     }
 
     @Test
     public void testValueOf_2() {
-        assertEquals(ServiceStatus.SUSPENDED, ServiceStatus.valueOf(2));
+        assertEquals(ServiceStatus.SUSPENDED, ServiceStatus.fromCode(2));
     }
 
     @Test
     public void testValueOf_3() {
-        assertEquals(ServiceStatus.EXPIRED, ServiceStatus.valueOf(3));
+        assertEquals(ServiceStatus.EXPIRED, ServiceStatus.fromCode(3));
     }
 
     @Test
     public void testValueOf_4() {
-        assertEquals(ServiceStatus.CONCLUDED, ServiceStatus.valueOf(4));
+        assertEquals(ServiceStatus.CONCLUDED, ServiceStatus.fromCode(4));
     }
 
     @Test
     public void testValueOf_5() {
-        assertEquals(ServiceStatus.REVOKED, ServiceStatus.valueOf(5));
+        assertEquals(ServiceStatus.REVOKED, ServiceStatus.fromCode(5));
     }
 
     @Test
     public void testValueOf_6() {
-        assertEquals(ServiceStatus.REFUNDED, ServiceStatus.valueOf(6));
+        assertEquals(ServiceStatus.REFUNDED, ServiceStatus.fromCode(6));
     }
 
     @Test
     public void testValueOf_7() {
-        assertEquals(ServiceStatus.CANCELLED, ServiceStatus.valueOf(7));
+        assertEquals(ServiceStatus.CANCELLED, ServiceStatus.fromCode(7));
     }
 
     @Test
     public void testValueOf_invalid() {
-        assertThrows(IllegalArgumentException.class, () -> ServiceStatus.valueOf(10));
+        assertThrows(IllegalArgumentException.class, () -> ServiceStatus.fromCode(10));
     }
 
     @Test
     public void testValueOf_negative() {
-        assertThrows(IllegalArgumentException.class, () -> ServiceStatus.valueOf(-1));
+        assertThrows(IllegalArgumentException.class, () -> ServiceStatus.fromCode(-1));
     }
 
     @Test
     public void testValueOf_byName_DEFAULT() {
-        assertEquals(ServiceStatus.DEFAULT, ServiceStatus.valueOf("DEFAULT"));
+        assertEquals(ServiceStatus.BLANK, ServiceStatus.valueOf("BLANK"));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ServiceStatus2025Test extends TestBase {
     @Test
     public void testValues_order() {
         ServiceStatus[] statuses = ServiceStatus.values();
-        assertEquals(ServiceStatus.DEFAULT, statuses[0]);
+        assertEquals(ServiceStatus.BLANK, statuses[0]);
         assertEquals(ServiceStatus.ACTIVE, statuses[1]);
         assertEquals(ServiceStatus.SUSPENDED, statuses[2]);
         assertEquals(ServiceStatus.EXPIRED, statuses[3]);
@@ -141,7 +141,7 @@ public class ServiceStatus2025Test extends TestBase {
     public void testIntValue_sequential() {
         ServiceStatus[] statuses = ServiceStatus.values();
         for (int i = 0; i < statuses.length; i++) {
-            assertEquals(i, statuses[i].intValue());
+            assertEquals(i, statuses[i].code());
         }
     }
 
@@ -150,7 +150,7 @@ public class ServiceStatus2025Test extends TestBase {
         ServiceStatus[] statuses = ServiceStatus.values();
         for (int i = 0; i < statuses.length; i++) {
             for (int j = i + 1; j < statuses.length; j++) {
-                if (statuses[i].intValue() == statuses[j].intValue()) {
+                if (statuses[i].code() == statuses[j].code()) {
                     throw new AssertionError("Duplicate int value: " + statuses[i] + " and " + statuses[j]);
                 }
             }
@@ -161,7 +161,7 @@ public class ServiceStatus2025Test extends TestBase {
     public void testSwitchStatement() {
         ServiceStatus status = ServiceStatus.ACTIVE;
         String result = switch (status) {
-            case DEFAULT -> "default";
+            case BLANK -> "default";
             case ACTIVE -> "active";
             case SUSPENDED -> "suspended";
             default -> "other";
@@ -173,8 +173,8 @@ public class ServiceStatus2025Test extends TestBase {
     public void testIntegration_allStatusesRoundTrip() {
         ServiceStatus[] statuses = ServiceStatus.values();
         for (ServiceStatus status : statuses) {
-            int value = status.intValue();
-            ServiceStatus decoded = ServiceStatus.valueOf(value);
+            int value = status.code();
+            ServiceStatus decoded = ServiceStatus.fromCode(value);
             assertEquals(status, decoded);
         }
     }

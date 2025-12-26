@@ -73,10 +73,10 @@ import java.lang.annotation.Target;
 public @interface Table {
 
     /**
-     * Use {@code name} to specify attribute explicitly
+     * Deprecated alias for {@link #name()}.
      *
-     * @return the table name value (deprecated)
-     * @deprecated use {@code name} to specify attribute explicitly.
+     * @return the table name value
+     * @deprecated use {@link #name()} to specify the table name explicitly.
      */
     @Deprecated
     String value() default "";

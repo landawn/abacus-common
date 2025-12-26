@@ -66,10 +66,10 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * Use {@code name} to specify attribute explicitly
+     * Deprecated alias for {@link #name()}.
      *
-     * @return the column name value (deprecated)
-     * @deprecated use {@code name} to specify attribute explicitly.
+     * @return the column name value
+     * @deprecated use {@link #name()} to specify the column name explicitly.
      */
     @Deprecated
     String value() default "";

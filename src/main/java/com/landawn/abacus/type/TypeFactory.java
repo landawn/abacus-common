@@ -651,7 +651,7 @@ public final class TypeFactory {
                     if (parameters.length == 0) {
                         type = new EnumType(clsName);
                     } else if (parameters.length == 1) {
-                        type = new EnumType(clsName, Boolean.parseBoolean(parameters[0]));
+                        type = new EnumType(clsName, com.landawn.abacus.util.EnumType.valueOf(parameters[0]));
                     } else {
                         throw new IllegalArgumentException("Not supported parameters " + typeName + " for EnumType.");
                     }

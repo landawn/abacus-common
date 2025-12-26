@@ -11,19 +11,19 @@ import com.landawn.abacus.TestBase;
 public class Status2025Test extends TestBase {
     @Test
     public void testEnumName() {
-        assertEquals("BLANK", Status.BLANK.name());
-        assertEquals("ACTIVE", Status.ACTIVE.name());
-        assertEquals("PROCESSING", Status.PROCESSING.name());
-        assertEquals("READ_ONLY", Status.READ_ONLY.name());
-        assertEquals("DESTROYED", Status.DESTROYED.name());
+        assertEquals("BLANK", UnifiedStatus.BLANK.name());
+        assertEquals("ACTIVE", UnifiedStatus.ACTIVE.name());
+        assertEquals("PROCESSING", UnifiedStatus.PROCESSING.name());
+        assertEquals("READ_ONLY", UnifiedStatus.READ_ONLY.name());
+        assertEquals("DESTROYED", UnifiedStatus.DESTROYED.name());
     }
 
     @Test
     public void testEnumToString() {
-        assertEquals("BLANK", Status.BLANK.toString());
-        assertEquals("ACTIVE", Status.ACTIVE.toString());
-        assertEquals("PROCESSING", Status.PROCESSING.toString());
-        assertEquals("READ_ONLY", Status.READ_ONLY.toString());
-        assertEquals("DESTROYED", Status.DESTROYED.toString());
+        assertEquals("BLANK", UnifiedStatus.BLANK.toString());
+        assertEquals("ACTIVE", UnifiedStatus.ACTIVE.toString());
+        assertEquals("PROCESSING", UnifiedStatus.PROCESSING.toString());
+        assertEquals("READ_ONLY", UnifiedStatus.READ_ONLY.toString());
+        assertEquals("DESTROYED", UnifiedStatus.DESTROYED.toString());
     }
 }

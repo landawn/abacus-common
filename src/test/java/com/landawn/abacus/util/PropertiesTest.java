@@ -33,7 +33,7 @@ public class PropertiesTest extends AbstractTest {
         final ConfigBean bean = new ConfigBean();
         bean.setName("myTestConfig");
         bean.setContent("abc123");
-        bean.setStatus(Status.ACTIVE);
+        bean.setStatus(UnifiedStatus.ACTIVE);
         bean.setLastUpdateTime(Dates.currentTimestamp());
         bean.setCreatedTime(Dates.currentTimestamp());
 

@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -52,14 +51,14 @@ public class EnumType100Test extends TestBase {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         enumTypeByName = (EnumType<TestEnum>) createType(TestEnum.class.getName());
-        enumTypeByOrdinal = (EnumType<TestEnum>) createType(TestEnum.class.getName() + "(true)");
+        enumTypeByOrdinal = (EnumType<TestEnum>) createType(TestEnum.class.getName() + "(ORDINAL)");
         characterWriter = createCharacterWriter();
     }
 
     @Test
     public void testEnumerated() {
-        assertEquals(EnumBy.NAME, enumTypeByName.enumerated());
-        assertEquals(EnumBy.ORDINAL, enumTypeByOrdinal.enumerated());
+        assertEquals(com.landawn.abacus.util.EnumType.NAME, enumTypeByName.enumerated());
+        assertEquals(com.landawn.abacus.util.EnumType.ORDINAL, enumTypeByOrdinal.enumerated());
     }
 
     @Test

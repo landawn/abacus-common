@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * }</pre>
  *
  * @see Color
- * @see Status
+ * @see UnifiedStatus
  * @see ServiceStatus
  * @see AccountStatus
  */

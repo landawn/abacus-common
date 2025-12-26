@@ -32,10 +32,10 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * AccountStatus status = AccountStatus.ACTIVE;
- * int statusCode = status.intValue();   // Returns 1
+ * int statusCode = status.code();   // Returns 1
  * 
  * // Convert from int to enum
- * AccountStatus restored = AccountStatus.valueOf(1);   // Returns ACTIVE
+ * AccountStatus restored = AccountStatus.fromCode(1);   // Returns ACTIVE
  * 
  * // Use in switch statements
  * switch (status) {
@@ -51,14 +51,14 @@ package com.landawn.abacus.util;
  * }</pre>
  * 
  * @see ServiceStatus
- * @see Status
+ * @see UnifiedStatus
  * @see WeekDay
  * @see Color
  */
 public enum AccountStatus {
 
     /** Default initial state of an account (value: 0) */
-    DEFAULT(0),
+    BLANK(0),
 
     /** Account is active and fully functional (value: 1) */
     ACTIVE(1),
@@ -75,10 +75,10 @@ public enum AccountStatus {
     /** Account has been deleted from the system (value: 5) */
     DELETED(5);
 
-    private final int intValue;
+    private final int code;
 
-    AccountStatus(final int intValue) {
-        this.intValue = intValue;
+    AccountStatus(final int code) {
+        this.code = code;
     }
 
     /**
@@ -89,13 +89,13 @@ public enum AccountStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.SUSPENDED;
-     * int code = status.intValue();   // Returns 2
+     * int code = status.code();   // Returns 2
      * }</pre>
      *
      * @return the integer value of this status
      */
-    public int intValue() {
-        return intValue;
+    public int code() {
+        return code;
     }
 
     /**
@@ -104,18 +104,18 @@ public enum AccountStatus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AccountStatus status = AccountStatus.valueOf(1);      // Returns ACTIVE
-     * AccountStatus suspended = AccountStatus.valueOf(2);   // Returns SUSPENDED
+     * AccountStatus status = AccountStatus.fromCode(1);      // Returns ACTIVE
+     * AccountStatus suspended = AccountStatus.fromCode(2);   // Returns SUSPENDED
      * }</pre>
      *
-     * @param intValue the integer value to convert
+     * @param code the integer value to convert
      * @return the corresponding AccountStatus
      * @throws IllegalArgumentException if no AccountStatus exists with the specified integer value
      */
-    public static AccountStatus valueOf(final int intValue) {
-        switch (intValue) {
+    public static AccountStatus fromCode(final int code) {
+        switch (code) {
             case 0:
-                return DEFAULT;
+                return BLANK;
 
             case 1:
                 return ACTIVE;
@@ -133,7 +133,7 @@ public enum AccountStatus {
                 return DELETED;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+                throw new IllegalArgumentException("No mapping instance found by int value: " + code);
         }
     }
 }

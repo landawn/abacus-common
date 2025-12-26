@@ -7,8 +7,8 @@ import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Type;
-import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.util.Color;
+import com.landawn.abacus.util.EnumType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class EntityA {
     @JsonXmlField(name = "xxx")
     private String stringType;
     private int intType;
-    @Type(enumerated = EnumBy.ORDINAL)
+    @Type(enumerated = EnumType.ORDINAL)
     private Color longType;
 
     private Map<Timestamp, Float> timestampHashMapType;

@@ -15,7 +15,7 @@ import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Transient;
-import com.landawn.abacus.annotation.Type.EnumBy;
+import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.NamingPolicy;
 
 @Tag("new-test")
@@ -87,7 +87,7 @@ public class ParserUtil101Test extends TestBase {
         @JsonXmlField(numberFormat = "#,##0.00")
         private Double numberField;
 
-        @JsonXmlField(enumerated = EnumBy.ORDINAL)
+        @JsonXmlField(enumerated = EnumType.ORDINAL)
         private TestEnum enumField;
 
         @ReadOnlyId

@@ -1,3 +1,7 @@
+### 7.1.0
+
+* Improves javadoc, unit tests and bug fixes
+
 ### 7.0.2
 
 * Improves javadoc, unit tests and bug fixes

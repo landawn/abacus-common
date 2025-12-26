@@ -20,8 +20,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 
-import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.Exclusion;
+import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.NamingPolicy;
 
 /**
@@ -142,21 +142,22 @@ public @interface JsonXmlConfig {
     String numberFormat() default "";
 
     /**
-     * Specifies how enum values should be serialized.
-     * Controls whether enums are represented by their name or ordinal value in JSON/XML.
+     * Specifies how enum values are serialized and deserialized.
+     * Controls whether enums are represented by their name, ordinal, or predefined code in JSON/XML.
      *
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>EnumBy.NAME (default): Uses the enum constant name (e.g., "ACTIVE")</li>
-     *   <li>EnumBy.ORDINAL: Uses the enum's ordinal position (e.g., 0, 1, 2)</li>
+     *   <li>EnumType.NAME (default): Uses the enum constant name (e.g., "ACTIVE")</li>
+     *   <li>EnumType.ORDINAL: Uses the enum's ordinal position (e.g., 0, 1, 2)</li>
+     *   <li>EnumType.CODE: Uses an integer code defined by the enum (for example, via {@code public int code()})</li>
      * </ul>
      *
-     * <p><b>Recommendation:</b> EnumBy.NAME is more readable and resilient to enum
-     * reordering, while EnumBy.ORDINAL is more compact but fragile.</p>
+     * <p><b>Recommendation:</b> EnumType.NAME is more readable and resilient to enum
+     * reordering; EnumType.ORDINAL and EnumType.CODE are compact but require stable ordering or codes.</p>
      *
      * @return the enum serialization strategy
      */
-    EnumBy enumerated() default EnumBy.NAME;
+    EnumType enumerated() default EnumType.NAME;
 
     /**
      * Specifies the exclusion policy for field serialization.

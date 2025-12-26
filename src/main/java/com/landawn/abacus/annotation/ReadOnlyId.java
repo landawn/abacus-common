@@ -80,8 +80,8 @@ public @interface ReadOnlyId {
 
     /**
      * Specifies the column names that form the read-only primary key.
-     * For simple primary keys on fields, this can be left empty.
-     * For composite keys on types, list all the column names that comprise the key.
+     * For field-level usage, this can be left empty to use the field name.
+     * For type-level usage, list all the column names that comprise the composite key.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -92,7 +92,7 @@ public @interface ReadOnlyId {
      * public class OrderLine { }
      * }</pre>
      * 
-     * @return array of column names forming the read-only identifier, empty array for field-level usage
+     * @return an array of column names forming the read-only identifier; empty array uses the field name for field-level usage
      */
     String[] value() default {};
 

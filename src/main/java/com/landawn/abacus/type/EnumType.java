@@ -16,6 +16,8 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +30,6 @@ import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.CharacterWriter;
@@ -77,28 +78,55 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     private final BiMap<Number, T> numberEnum = new BiMap<>();
     private final Map<T, String> enumJsonXmlNameMap;
     private final Map<String, T> jsonXmlNameEnumMap;
-    private final EnumBy enumBy;
+    private final com.landawn.abacus.util.EnumType enumRepresentation;
 
     private boolean hasNull = false;
 
     EnumType(final String enumClassName) {
-        this(enumClassName, false);
+        this(enumClassName, com.landawn.abacus.util.EnumType.NAME);
     }
 
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    EnumType(final String className, final boolean ordinal) {
-        super(ordinal ? className + "(true)" : className, (Class<T>) getEnumClass(ClassUtil.forClass(className)));
+    EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
+        super(enumRepresentation == null ? className + "(NAME)" : className + "(" + enumRepresentation.name() + ")",
+                (Class<T>) getEnumClass(ClassUtil.forClass(className)));
 
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
         jsonXmlNameEnumMap = new HashMap<>();
 
-        for (final T enumConstant : typeClass.getEnumConstants()) {
-            numberEnum.put(enumConstant.ordinal(), enumConstant);
+        if (enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
+            final Method getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "code");
 
-            final String jsonXmlName = getJsonXmlName(enumConstant);
-            enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
-            jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
-            jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
+            if (getCodeMethod == null || !Modifier.isPublic(getCodeMethod.getModifiers()) || !int.class.equals(getCodeMethod.getReturnType())) {
+                throw new RuntimeException("No method: public int code() found in enum class: " + ClassUtil.getCanonicalClassName(typeClass));
+            }
+
+            //    final Method fromCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "fromCode", int.class);
+            //
+            //    if (fromCodeMethod == null || !Modifier.isPublic(fromCodeMethod.getModifiers()) || !Modifier.isStatic(fromCodeMethod.getModifiers())
+            //            || !typeClass.equals(fromCodeMethod.getReturnType())) {
+            //        throw new RuntimeException("No method: public static " + typeClass.getSimpleName() + " fromCode(int) found in enum class: "
+            //                + ClassUtil.getCanonicalClassName(typeClass));
+            //    }
+
+            for (final T enumConstant : typeClass.getEnumConstants()) {
+                int code = ClassUtil.invokeMethod(enumConstant, getCodeMethod);
+                numberEnum.put(code, enumConstant);
+
+                final String jsonXmlName = getJsonXmlName(enumConstant);
+                enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
+                jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
+                jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
+            }
+        } else {
+            for (final T enumConstant : typeClass.getEnumConstants()) {
+                numberEnum.put(enumConstant.ordinal(), enumConstant);
+
+                final String jsonXmlName = getJsonXmlName(enumConstant);
+                enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
+                jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
+                jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
+            }
         }
 
         try {
@@ -108,17 +136,17 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             // ignore;
         }
 
-        enumBy = ordinal ? EnumBy.ORDINAL : EnumBy.NAME;
+        this.enumRepresentation = enumRepresentation == null ? com.landawn.abacus.util.EnumType.NAME : enumRepresentation;
     }
 
     /**
      * Returns the enumeration strategy used by this type handler.
-     * Indicates whether enums are stored by ordinal (numeric) or name (string).
+     * Indicates whether enums are stored by ordinal (numeric), name (string), or code (numeric).
      *
-     * @return EnumBy.ORDINAL if using numeric representation, EnumBy.NAME if using string representation
+     * @return the configured enum representation
      */
-    public EnumBy enumerated() {
-        return enumBy;
+    public com.landawn.abacus.util.EnumType enumerated() {
+        return enumRepresentation;
     }
 
     /**
@@ -146,10 +174,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     /**
      * Converts an enum value to its string representation.
      * If a custom JSON value type is defined, uses the parent class implementation.
-     * Otherwise, returns the enum's name.
+     * Otherwise, returns the enum constant name.
      *
-     * @param x the enum value to convert. Can be {@code null}.
-     * @return The string representation of the enum, or {@code null} if input is null
+     * @param x the enum value to convert; may be {@code null}
+     * @return the enum constant name, or {@code null} if input is null
      */
     @Override
     public String stringOf(final T x) {
@@ -158,15 +186,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Converts a string representation back to an enum value.
-     * Supports multiple formats:
-     * - Enum name (exact match)
-     * - Custom JSON/XML field names from annotations
-     * - Numeric strings (interpreted as ordinals)
-     * - Empty/null strings return null
-     * - Special handling for "null" string if no enum constant named "null" exists
+     * Supports enum names, JSON/XML field names from annotations, and numeric strings.
+     * Numeric strings are interpreted as ordinals (or codes when CODE is configured) unless the
+     * same string is defined as a JSON/XML name.
+     * Empty strings return {@code null}. The literal string {@code "null"} returns {@code null}
+     * when the enum does not define a constant named {@code "null"}.
      *
-     * @param str the string to convert. Can be {@code null} or empty.
-     * @return The enum value corresponding to the string, or {@code null} if input is null/empty
+     * @param str the string to convert; may be {@code null} or empty
+     * @return the enum value corresponding to the string, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the string doesn't match any enum value
      */
     @Override
@@ -189,12 +216,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Converts an integer ordinal value to its corresponding enum constant.
-     * Zero is treated as {@code null} unless there's an enum with ordinal 0.
+     * Converts an integer ordinal or code value to its corresponding enum constant.
+     * For CODE representation, the value is matched against the {@code code()} values; otherwise,
+     * it is matched against ordinal values. A value of 0 returns {@code null} when no constant
+     * is mapped to 0.
      *
-     * @param value the ordinal value of the enum
-     * @return The enum constant with the specified ordinal, or {@code null} if value is 0 and no enum has ordinal 0
-     * @throws IllegalArgumentException if no enum constant exists with the given ordinal (except for 0)
+     * @param value the ordinal or code value
+     * @return the enum constant for the specified value, or {@code null} if value is 0 and no constant maps to 0
+     * @throws IllegalArgumentException if no enum constant exists with the given value (except for 0)
      */
     public T valueOf(final int value) {
         final T result = numberEnum.get(value);
@@ -208,21 +237,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Retrieves an enum value from a ResultSet at the specified column index.
-     * The retrieval method depends on the enumBy setting:
-     * - ORDINAL: reads as integer
+     * The retrieval method depends on the enumRepresentation setting:
+     * - ORDINAL or CODE: reads as integer
      * - NAME: reads as string
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the enum value
-     * @return The enum value at the specified column, or {@code null} if the column value is SQL NULL
+     * @return the enum value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
-            if (enumBy == EnumBy.ORDINAL) {
-                final Object ordinal = rs.getObject(columnIndex);
-                return ordinal == null ? null : valueOf(Numbers.toInt(ordinal));
+            if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
+                final Object intValue = rs.getObject(columnIndex);
+                return intValue == null ? null : valueOf(Numbers.toInt(intValue));
             } else {
                 return valueOf(rs.getString(columnIndex));
             }
@@ -233,21 +262,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Retrieves an enum value from a ResultSet using the specified column label.
-     * The retrieval method depends on the enumBy setting:
-     * - ORDINAL: reads as integer
+     * The retrieval method depends on the enumRepresentation setting:
+     * - ORDINAL or CODE: reads as integer
      * - NAME: reads as string
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the enum value
-     * @return The enum value in the specified column, or {@code null} if the column value is SQL NULL
+     * @return the enum value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
-            if (enumBy == EnumBy.ORDINAL) {
-                final int ordinal = rs.getInt(columnLabel);
-                return rs.wasNull() ? null : valueOf(ordinal);
+            if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
+                final int intValue = rs.getInt(columnLabel);
+                return rs.wasNull() ? null : valueOf(intValue);
             } else {
                 return valueOf(rs.getString(columnLabel));
             }
@@ -258,19 +287,19 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Sets an enum value as a parameter in a PreparedStatement.
-     * The storage method depends on the enumBy setting:
-     * - ORDINAL: stores as integer (ordinal value)
+     * The storage method depends on the enumRepresentation setting:
+     * - ORDINAL or CODE: stores as integer (ordinal or code value)
      * - NAME: stores as string (enum name)
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the enum value to set. Can be {@code null}.
+     * @param x the enum value to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
         if (jsonValueType == null) {
-            if (enumBy == EnumBy.ORDINAL) {
+            if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
                     stmt.setNull(columnIndex, Types.INTEGER);
                 } else {
@@ -286,19 +315,19 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Sets an enum value as a named parameter in a CallableStatement.
-     * The storage method depends on the enumBy setting:
-     * - ORDINAL: stores as integer (ordinal value)
+     * The storage method depends on the enumRepresentation setting:
+     * - ORDINAL or CODE: stores as integer (ordinal or code value)
      * - NAME: stores as string (enum name)
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the enum value to set. Can be {@code null}.
+     * @param x the enum value to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
         if (jsonValueType == null) {
-            if (enumBy == EnumBy.ORDINAL) {
+            if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
                     stmt.setNull(parameterName, Types.INTEGER);
                 } else {
@@ -314,12 +343,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Writes an enum value to a CharacterWriter with the specified serialization configuration.
-     * The output format depends on the enumBy setting:
-     * - ORDINAL: writes the ordinal value as an integer
+     * The output format depends on the enumRepresentation setting:
+     * - ORDINAL or CODE: writes the ordinal or code value as an integer
      * - NAME: writes the JSON/XML field name (possibly quoted based on config)
      *
      * @param writer the CharacterWriter to write to
-     * @param x the enum value to write. Can be {@code null}.
+     * @param x the enum value to write; may be {@code null}
      * @param config the serialization configuration for quotation settings
      * @throws IOException if an I/O error occurs during writing
      */
@@ -329,8 +358,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if (jsonValueType == null) {
-                if (enumBy == EnumBy.ORDINAL) {
-                    writer.writeInt(x.ordinal());
+                if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
+                    writer.writeInt(numberEnum.getByValue(x).intValue());
                 } else {
                     final char ch = config == null ? 0 : config.getStringQuotation();
 

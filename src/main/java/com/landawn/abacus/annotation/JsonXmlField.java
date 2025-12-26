@@ -20,7 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 
-import com.landawn.abacus.annotation.Type.EnumBy;
+import com.landawn.abacus.util.EnumType;
 
 /**
  * Configures JSON and XML serialization/deserialization behavior for individual fields.
@@ -109,24 +109,24 @@ public @interface JsonXmlField {
     String type() default "";
 
     /**
-     * Specifies how enum values should be serialized for this field.
+     * Specifies how enum values are serialized and deserialized for this field.
      * 
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>NAME - Use the enum constant name (default)</li>
-     *   <li>ORDINAL - Use the enum ordinal value</li>
-     *   <li>TO_STRING - Use the enum's toString() method</li>
+     *   <li>EnumType.NAME (default) - Use the enum constant name</li>
+     *   <li>EnumType.ORDINAL - Use the enum ordinal value</li>
+     *   <li>EnumType.CODE - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
      * </ul>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @JsonXmlField(enumerated = EnumBy.ORDINAL)
+     * @JsonXmlField(enumerated = EnumType.ORDINAL)
      * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
      * }</pre>
      * 
      * @return the enum serialization strategy
      */
-    EnumBy enumerated() default EnumBy.NAME;
+    EnumType enumerated() default EnumType.NAME;
 
     /**
      * Specifies the date format pattern for date/time field serialization.

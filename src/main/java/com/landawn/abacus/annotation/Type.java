@@ -22,6 +22,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import com.landawn.abacus.util.EnumType;
+
 /**
  * Specifies custom type handling for fields or methods during serialization and persistence operations.
  * This powerful annotation provides fine-grained control over how values are converted between
@@ -32,7 +34,7 @@ import java.lang.annotation.Target;
  * <ul>
  *   <li>Override default type conversion behavior</li>
  *   <li>Specify custom type converters for complex transformations</li>
- *   <li>Control enum representation (name vs ordinal)</li>
+ *   <li>Control enum representation (name, ordinal, or code)</li>
  *   <li>Scope type handling to specific contexts (serialization, persistence, or both)</li>
  * </ul>
  * 
@@ -52,7 +54,7 @@ import java.lang.annotation.Target;
  *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
  *     private String password;  // Encrypted when saved to DB
  *
- *     @Type(enumerated = EnumBy.ORDINAL)
+ *     @Type(enumerated = EnumType.ORDINAL)
  *     private Status status;  // Stored as integer in DB
  *
  *     @Type(clazz = CustomDateType.class)
@@ -72,10 +74,10 @@ import java.lang.annotation.Target;
 public @interface Type {
 
     /**
-     * Use {@code name} to specify attribute explicitly
+     * Deprecated alias for {@link #name()}.
      *
      * @return the type name value, or empty string if not specified
-     * @deprecated use {@code name} to specify attribute explicitly.
+     * @deprecated use {@link #name()} to specify the type name explicitly.
      */
     @Deprecated
     String value() default "";
@@ -145,7 +147,7 @@ public @interface Type {
      * Specifies how enum values should be represented during conversion.
      * This affects both serialization and persistence operations.
      *
-     * <p><b>EnumBy.NAME (default):</b></p>
+     * <p><b>EnumType.NAME (default):</b></p>
      * <ul>
      *   <li>Uses the enum constant name as a string</li>
      *   <li>More readable and maintainable</li>
@@ -153,7 +155,7 @@ public @interface Type {
      *   <li>Larger storage size</li>
      * </ul>
      *
-     * <p><b>EnumBy.ORDINAL:</b></p>
+     * <p><b>EnumType.ORDINAL:</b></p>
      * <ul>
      *   <li>Uses the enum ordinal position as an integer</li>
      *   <li>Smaller storage size</li>
@@ -161,22 +163,29 @@ public @interface Type {
      *   <li>Less readable in raw data</li>
      * </ul>
      *
+     * <p><b>EnumType.CODE:</b></p>
+     * <ul>
+     *   <li>Uses a predefined integer code from the enum (for example, via {@code public int code()})</li>
+     *   <li>Compact representation with stable code values</li>
+     *   <li>Requires the enum to expose consistent code values</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public enum Priority { LOW, MEDIUM, HIGH, URGENT }
      *
      * // Using NAME (default) - stored as "LOW", "MEDIUM", etc.
-     * @Type(enumerated = EnumBy.NAME)
+     * @Type(enumerated = EnumType.NAME)
      * private Priority priority;
      *
      * // Using ORDINAL - stored as 0, 1, 2, 3
-     * @Type(enumerated = EnumBy.ORDINAL)
+     * @Type(enumerated = EnumType.ORDINAL)
      * private Priority priority;
      * }</pre>
      *
-     * @return the enum representation strategy, defaults to EnumBy.NAME
+     * @return the enum representation strategy, defaults to EnumType.NAME
      */
-    EnumBy enumerated() default EnumBy.NAME;
+    EnumType enumerated() default EnumType.NAME;
 
     /**
      * Specifies the scope where this type conversion should apply.
@@ -209,67 +218,6 @@ public @interface Type {
      * @return the scope of type conversion, defaults to Scope.ALL
      */
     Scope scope() default Scope.ALL;
-
-    /**
-     * Defines strategies for representing enum values during type conversion.
-     * The choice between NAME and ORDINAL affects data portability, storage size,
-     * and resilience to code changes.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * public enum Status { PENDING, ACTIVE, SUSPENDED, CLOSED }
-     *
-     * // Using NAME - stored as "ACTIVE", "SUSPENDED", etc.
-     * @Type(enumerated = EnumBy.NAME)
-     * private Status accountStatus;
-     *
-     * // Using ORDINAL - stored as 0, 1, 2, 3
-     * @Type(enumerated = EnumBy.ORDINAL)
-     * private Status orderStatus;
-     * }</pre>
-     */
-    enum EnumBy {
-        /**
-         * Persist enumerated type property or field as an integer using its ordinal position.
-         *
-         * <p><b>Warning:</b> This representation is fragile as it depends on the declaration order
-         * of enum constants. Adding, removing, or reordering enum values will break
-         * compatibility with existing persisted data.</p>
-         *
-         * <p><b>Example:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
-         * values are stored as 0, 1, 2 respectively. If you later change it to
-         * {@code Status { ACTIVE, PENDING, CLOSED }}, all existing data will be incorrect.</p>
-         *
-         * <p><b>Use when:</b></p>
-         * <ul>
-         *   <li>Storage space is critical</li>
-         *   <li>The enum is guaranteed to never change order</li>
-         *   <li>Performance is a priority and enum order is stable</li>
-         * </ul>
-         */
-        ORDINAL,
-
-        /**
-         * Persist enumerated type property or field as a string using its constant name.
-         *
-         * <p>This is the recommended approach as it's readable, maintainable, and resilient
-         * to enum reordering. The only concern is renaming enum constants, which would
-         * require data migration.</p>
-         *
-         * <p><b>Example:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
-         * values are stored as "PENDING", "ACTIVE", "CLOSED". You can safely reorder
-         * or add new values without breaking existing data.</p>
-         *
-         * <p><b>Benefits:</b></p>
-         * <ul>
-         *   <li>Human-readable data in storage</li>
-         *   <li>Resilient to enum reordering</li>
-         *   <li>Easier debugging and data inspection</li>
-         *   <li>Safe to add new enum values</li>
-         * </ul>
-         */
-        NAME
-    }
 
     /**
      * Defines the operational contexts where custom type conversion should be applied.

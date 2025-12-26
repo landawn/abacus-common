@@ -58,8 +58,8 @@ import com.landawn.abacus.util.Profiler;
 import com.landawn.abacus.util.ServiceStatus;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.ShortList;
-import com.landawn.abacus.util.Status;
 import com.landawn.abacus.util.StringWriter;
+import com.landawn.abacus.util.UnifiedStatus;
 
 import lombok.Builder;
 import lombok.Data;
@@ -148,7 +148,7 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_type2() {
-        TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(false)>");
+        TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(NAME)>");
     }
 
     @Test
@@ -257,16 +257,16 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_status() throws IOException {
-        for (Status status : Status.values()) {
-            assertEquals(status, Status.valueOf(status.name()));
+        for (UnifiedStatus unifiedStatus : UnifiedStatus.values()) {
+            assertEquals(unifiedStatus, UnifiedStatus.valueOf(unifiedStatus.name()));
         }
 
         for (AccountStatus status : AccountStatus.values()) {
-            assertEquals(status, AccountStatus.valueOf(status.intValue()));
+            assertEquals(status, AccountStatus.fromCode(status.code()));
         }
 
         for (ServiceStatus status : ServiceStatus.values()) {
-            assertEquals(status, ServiceStatus.valueOf(status.intValue()));
+            assertEquals(status, ServiceStatus.fromCode(status.code()));
         }
 
         for (Gender gender : Gender.values()) {
@@ -1168,8 +1168,8 @@ public class TypeTest extends AbstractTest {
         TypeFactory.getType("XML<List>");
 
         TypeFactory.getType(MyConstant.class);
-        TypeFactory.getType(Status.class);
-        TypeFactory.getType(Status.class);
+        TypeFactory.getType(UnifiedStatus.class);
+        TypeFactory.getType(UnifiedStatus.class);
         TypeFactory.getType("Status(true)");
     }
 

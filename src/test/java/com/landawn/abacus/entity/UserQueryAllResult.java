@@ -10,7 +10,7 @@ import com.landawn.abacus.annotation.NonUpdatable;
 import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Type;
-import com.landawn.abacus.annotation.Type.EnumBy;
+import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.NamingPolicy;
 
 import jakarta.persistence.Column;
@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @JsonXmlConfig(namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, ignoredFields = { "id",
-        "create_time" }, dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'", timeZone = "PDT", numberFormat = "#.###", enumerated = EnumBy.ORDINAL)
+        "create_time" }, dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'", timeZone = "PDT", numberFormat = "#.###", enumerated = EnumType.ORDINAL)
 @Table("UserQueryAllResult")
 public class UserQueryAllResult {
 
