@@ -17,6 +17,8 @@ package com.landawn.abacus.util;
  * @Type(enumerated = EnumType.ORDINAL)
  * private Status orderStatus;
  * }</pre>
+ * 
+ * @see UnifiedStatus
  */
 public enum EnumType {
 
@@ -64,6 +66,7 @@ public enum EnumType {
     /**
      * Persist enumerated type property or field as an int using a predefined code,
      * typically supplied by a public {@code int code()} method.
+     * @see UnifiedStatus#code()
      */
     CODE
 }

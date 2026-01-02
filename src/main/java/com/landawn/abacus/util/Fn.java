@@ -661,6 +661,7 @@ public final class Fn {
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.Supplier);
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Supplier<>() {
@@ -2506,7 +2507,7 @@ public final class Fn {
     public static Predicate<CharSequence> matches(final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern);
 
-        return value -> pattern.matcher(value).find();
+        return value -> value != null && pattern.matcher(value).find();
     }
 
     /**
@@ -4665,9 +4666,10 @@ public final class Fn {
         return f -> {
             try {
                 return f.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                // throw ExceptionUtil.toRuntimeException(e, true);
+                return defaultValue;
+            } catch (ExecutionException e) {
                 return defaultValue;
             }
         };
@@ -7176,7 +7178,8 @@ public final class Fn {
 
                 @Override
                 public boolean test(final T value) {
-                    return map.put(value, NONE) == null;
+                    final Object key = value == null ? NONE : value;
+                    return map.putIfAbsent(key, NONE) == null;
                 }
             };
         }
@@ -7198,7 +7201,8 @@ public final class Fn {
 
                 @Override
                 public boolean test(final T value) {
-                    return map.put(mapper.apply(value), NONE) == null;
+                    final Object key = mapper.apply(value);
+                    return map.putIfAbsent(key == null ? NONE : key, NONE) == null;
                 }
             };
         }

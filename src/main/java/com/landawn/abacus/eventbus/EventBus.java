@@ -505,14 +505,23 @@ public class EventBus {
                 }
 
                 if (Subscriber.class.isAssignableFrom(subscriberClass)) {
+                    Method subscriberMethod = null;
+
                     for (final Method method : subscriberClass.getDeclaredMethods()) {
-                        if (method.getName().equals("on") && method.getParameterTypes().length == 1) {
-                            if (addedMethods.add(method)) {
-                                subscriberMethods.add(new SubIdentifier(method));
+                        if (method.getName().equals("on") && method.getParameterTypes().length == 1 && !Modifier.isStatic(method.getModifiers())) {
+                            if (!method.isBridge() && !method.isSynthetic()) {
+                                subscriberMethod = method;
+                                break;
                             }
 
-                            break;
+                            if (subscriberMethod == null) {
+                                subscriberMethod = method;
+                            }
                         }
+                    }
+
+                    if (subscriberMethod != null && addedMethods.add(subscriberMethod)) {
+                        subscriberMethods.add(new SubIdentifier(subscriberMethod));
                     }
                 }
 

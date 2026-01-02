@@ -1523,7 +1523,11 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 try {
                     final Document doc = docBuilder.parse(new InputSource(source));
-                    final Node node = doc.getFirstChild();
+                    final Node node = doc.getDocumentElement();
+
+                    if (node == null) {
+                        throw new ParseException("No root element found in XML document");
+                    }
 
                     if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = XmlUtil.getAttribute(node, XMLConstants.NAME);

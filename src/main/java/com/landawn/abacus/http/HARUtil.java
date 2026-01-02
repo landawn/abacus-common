@@ -178,6 +178,7 @@ public final class HARUtil {
      * @see #logRequestCurlForHARRequest(boolean, char)
      */
     public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
+        N.checkArgNotNull(logHandler, "logHandler");
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
 
@@ -546,6 +547,10 @@ public final class HARUtil {
         final List<Map<String, String>> headers = (List<Map<String, String>>) requestEntry.get("headers");
         String headerName = null;
         String headerValue = null;
+
+        if (N.isEmpty(headers)) {
+            return httpHeaders;
+        }
 
         for (final Map<String, String> m : headers) {
             headerName = m.get("name");

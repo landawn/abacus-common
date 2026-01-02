@@ -73,9 +73,17 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
+        if (count < 0) {
+            throw new IllegalArgumentException("count must be non-negative");
+        }
+
+        if (N.compare(min, max) > 0) {
+            throw new IllegalArgumentException("minimum is greater than maximum");
+        }
+
         this.count = count;
         this.sum = sum;
         this.min = min;

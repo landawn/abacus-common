@@ -411,12 +411,34 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         } else {
             if (nextChar >= strLength) {
                 return null;
-            } else {
-                final String line = str.substring(nextChar);
-                nextChar = strLength;
-
-                return line;
             }
+
+            final int start = nextChar;
+            int i = nextChar;
+            char c = 0;
+
+            while (i < strLength) {
+                c = strValue[i];
+
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+
+                i++;
+            }
+
+            final String line = str.substring(start, i);
+            nextChar = i;
+
+            if (nextChar < strLength) {
+                nextChar++;
+
+                if (c == '\r' && nextChar < strLength && strValue[nextChar] == '\n') {
+                    nextChar++;
+                }
+            }
+
+            return line;
         }
     }
 
@@ -599,6 +621,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         str = st;
         strValue = InternalUtil.getCharsForReadOnly(str);
         strLength = st.length();
+        nextChar = 0;
+        nChars = 0;
+        skipLF = false;
         lock = str;
     }
 
@@ -624,7 +649,13 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     void reinit(final Reader reader) {
         isClosed = false;
+        str = null;
+        strValue = null;
+        strLength = 0;
         in = reader;
+        nextChar = 0;
+        nChars = 0;
+        skipLF = false;
         lock = reader;
     }
 

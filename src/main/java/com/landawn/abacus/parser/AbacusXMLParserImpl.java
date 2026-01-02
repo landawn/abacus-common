@@ -1394,7 +1394,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
-        return (T) readByDOMParser(source, config, nodeTypes.get(source.getNodeName()));
+        String nodeName = XmlUtil.getAttribute(source, XMLConstants.NAME);
+
+        if (Strings.isEmpty(nodeName)) {
+            nodeName = source.getNodeName();
+        }
+
+        final Type<?> targetType = nodeTypes.get(nodeName);
+
+        if (targetType == null) {
+            throw new ParseException("No target class is specified");
+        }
+
+        return (T) readByDOMParser(source, config, targetType);
     }
 
     @SuppressWarnings("unchecked")

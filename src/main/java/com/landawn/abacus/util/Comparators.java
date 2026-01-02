@@ -322,8 +322,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -342,8 +348,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -362,8 +374,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -382,8 +400,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -402,8 +426,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<int[]> INT_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -422,8 +452,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
             if (a[i] != b[i]) {
@@ -442,8 +478,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
         int result = 0;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
@@ -465,8 +507,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
         int result = 0;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
@@ -488,8 +536,14 @@ public final class Comparators {
      * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<Object[]> OBJECT_ARRAY_COMPARATOR = (a, b) -> {
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
+            return 1;
+        }
+
+        final int lenA = a.length;
+        final int lenB = b.length;
         int result = 0;
 
         for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
@@ -512,9 +566,9 @@ public final class Comparators {
      */
     @SuppressWarnings("rawtypes")
     public static final Comparator<Collection> COLLECTION_COMPARATOR = (a, b) -> {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? 0 : -1;
-        } else if (N.isEmpty(b)) {
+        if (a == null) {
+            return b == null ? 0 : -1;
+        } else if (b == null) {
             return 1;
         }
 

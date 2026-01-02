@@ -954,7 +954,7 @@ public class Array200Test extends TestBase {
     @Test
     public void testTranspose_allRowsNull_consistentLengthZero() {
         int[][] matrixAllNull = { null, null, null };
-        assertThrows(NullPointerException.class, () -> Array.transpose(matrixAllNull));
+        assertThrows(IllegalArgumentException.class, () -> Array.transpose(matrixAllNull));
     }
 
     @Test

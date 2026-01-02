@@ -50,6 +50,7 @@ package com.landawn.abacus.util;
  * @see AccountStatus
  * @see WeekDay
  * @see Color
+ * @see EnumType
  */
 public enum UnifiedStatus {
 
@@ -364,7 +365,7 @@ public enum UnifiedStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Status status = Status.ACTIVE;
-     * int code = status.code();   // Returns 2
+     * int code = status.code();   // Returns 1
      * }</pre>
      *
      * @return the numeric code for this status
@@ -377,8 +378,12 @@ public enum UnifiedStatus {
     private static final UnifiedStatus[] cache = new UnifiedStatus[MAX_CODE];
 
     static {
-        for (UnifiedStatus unifiedStatus : UnifiedStatus.values()) {
-            cache[unifiedStatus.code] = unifiedStatus;
+        for (UnifiedStatus v : UnifiedStatus.values()) {
+            if (cache[v.code] != null) {
+                throw new RuntimeException("Duplicate code: " + v.code + " found with values: " + cache[v.code] + ", " + v);
+            }
+
+            cache[v.code] = v;
         }
     }
 

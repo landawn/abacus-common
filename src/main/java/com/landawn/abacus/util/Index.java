@@ -2068,7 +2068,7 @@ public final class Index {
 
             return toOptionalInt(N.INDEX_NOT_FOUND);
         } else {
-            return ofSubArray(sourceList.subList(fromIndex, sourceList.size()).toArray(), 0,
+            return ofSubArray(sourceList.subList(N.max(fromIndex, 0), sourceList.size()).toArray(), 0,
                     subListToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray(), 0, sizeToMatch);
         }
     }

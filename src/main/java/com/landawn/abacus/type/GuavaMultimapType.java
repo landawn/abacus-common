@@ -226,6 +226,11 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         }
 
         final Map<K, Collection<V>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
+
+        if (map == null) {
+            return null;
+        }
+
         final int avgValueSize = (int) map.values().stream().mapToInt(Collection::size).average().orElse(0);
 
         final T multimap = newInstance(map.size(), avgValueSize);

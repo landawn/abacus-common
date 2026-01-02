@@ -594,7 +594,7 @@ public final class WebUtil {
             }
 
             if (Strings.isNotEmpty(body)) {
-                final String contentType = N.isEmpty(headers) ? null : HttpUtil.readHttpHeadValue(headers.get(HttpHeaders.Names.CONTENT_TYPE));
+                final String contentType = N.isEmpty(headers) ? null : HttpUtil.getContentType(headers);
 
                 if (Strings.isEmpty(contentType) && Strings.isNotEmpty(bodyType)) {
                     sb.append(" -H ")

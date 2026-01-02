@@ -1090,6 +1090,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final int[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

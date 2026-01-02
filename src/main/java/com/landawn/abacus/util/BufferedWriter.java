@@ -700,7 +700,14 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     void reinit() {
         isClosed = false;
+        Objectory.recycle(_cbuf);
+        _cbuf = null;
+        nextChar = 0;
+
+        Objectory.recycle(value);
         value = Objectory.createCharArrayBuffer();
+        count = 0;
+        out = null;
         lock = value;
     }
 
@@ -722,6 +729,10 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     void reinit(final Writer writer) {
         isClosed = false;
+        Objectory.recycle(value);
+        value = null;
+        count = 0;
+        nextChar = 0;
         out = writer;
         lock = writer;
     }

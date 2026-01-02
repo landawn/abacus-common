@@ -965,6 +965,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final float[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

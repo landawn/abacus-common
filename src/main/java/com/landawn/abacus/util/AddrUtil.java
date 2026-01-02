@@ -153,8 +153,12 @@ public final class AddrUtil {
                 throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
             }
 
-            final String hostPart = addressString.substring(0, lastColonIndex);
+            String hostPart = addressString.substring(0, lastColonIndex);
             final String portNum = addressString.substring(lastColonIndex + 1);
+
+            if (hostPart.startsWith("[") && hostPart.endsWith("]")) {
+                hostPart = hostPart.substring(1, hostPart.length() - 1);
+            }
 
             if (hostPart.isEmpty() || portNum.isEmpty()) {
                 throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
@@ -217,8 +221,12 @@ public final class AddrUtil {
                 throw new IllegalArgumentException("Invalid server '" + url + "' in list:  " + servers);
             }
 
-            final String hostPart = url.substring(0, lastColonIndex);
+            String hostPart = url.substring(0, lastColonIndex);
             final String portNum = url.substring(lastColonIndex + 1);
+
+            if (hostPart.startsWith("[") && hostPart.endsWith("]")) {
+                hostPart = hostPart.substring(1, hostPart.length() - 1);
+            }
 
             if (hostPart.isEmpty() || portNum.isEmpty()) {
                 throw new IllegalArgumentException("Invalid server '" + url + "' in list:  " + servers);

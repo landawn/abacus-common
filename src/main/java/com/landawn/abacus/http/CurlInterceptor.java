@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 import okhttp3.Headers;
@@ -72,7 +73,7 @@ class CurlInterceptor implements Interceptor {
      *                   This is typically used to log or store the command. Must not be {@code null}.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) {
-        this.logHandler = logHandler;
+        this.logHandler = N.checkArgNotNull(logHandler, "logHandler");
         this.quoteChar = quoteChar;
     }
 

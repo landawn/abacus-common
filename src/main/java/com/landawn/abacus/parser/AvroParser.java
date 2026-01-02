@@ -207,6 +207,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     @SuppressFBWarnings
     @Override
     public void serialize(final Object obj, final AvroSerializationConfig config, final OutputStream output) {
+        if (obj == null) {
+            return;
+        }
+
         final Type<Object> type = Type.of(obj.getClass());
 
         if (obj instanceof SpecificRecord specificRecord) {

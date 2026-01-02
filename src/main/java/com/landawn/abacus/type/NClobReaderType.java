@@ -227,7 +227,6 @@ public class NClobReaderType extends ReaderType {
 
         if (clob != null) {
             reader = clob.getCharacterStream();
-            clob.free();
         }
 
         return reader;

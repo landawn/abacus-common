@@ -1076,6 +1076,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final char[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

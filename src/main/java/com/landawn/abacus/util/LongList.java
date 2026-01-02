@@ -1091,6 +1091,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final long[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

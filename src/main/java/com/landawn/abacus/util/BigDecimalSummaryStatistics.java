@@ -96,8 +96,17 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of values
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
      */
     public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
+        if (count < 0) {
+            throw new IllegalArgumentException("count must be non-negative");
+        }
+
+        if (N.compare(min, max) > 0) {
+            throw new IllegalArgumentException("minimum is greater than maximum");
+        }
+
         this.count = count;
         this.sum = sum;
         this.min = min;

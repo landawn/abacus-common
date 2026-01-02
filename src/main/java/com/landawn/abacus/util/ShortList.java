@@ -1024,6 +1024,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final short[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

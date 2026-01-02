@@ -571,8 +571,9 @@ public class Fn103Test extends TestBase {
             assertFalse(predicate.test("a"));
             assertTrue(predicate.test("c"));
             assertFalse(predicate.test("b"));
+            assertTrue(predicate.test(null));
 
-            assertThrows(NullPointerException.class, () -> predicate.test(null));
+            // assertThrows(NullPointerException.class, () -> predicate.test(null));
         }
 
         @Test

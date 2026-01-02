@@ -980,6 +980,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final double[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

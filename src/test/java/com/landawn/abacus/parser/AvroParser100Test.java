@@ -1,7 +1,5 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Reader;
@@ -53,7 +51,8 @@ public class AvroParser100Test extends TestBase {
 
     @Test
     public void testSerializeToStringWithNull() {
-        assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerializationConfig) null));
+        // assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerializationConfig) null));
+        Assertions.assertEquals("", parser.serialize(null, (AvroSerializationConfig) null));
     }
 
     @Test

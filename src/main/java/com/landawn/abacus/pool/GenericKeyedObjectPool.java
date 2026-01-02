@@ -244,6 +244,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            // Make sure the old value is removed regardless if the new value will put successfully or not.
+            E oldValue = remove(key);
+
+            if (oldValue != null) {
+                destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+            }
+
             if (pool.size() >= capacity) {
                 if (autoBalance) {
                     vacate();
@@ -259,22 +266,37 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 return false;
             }
 
-            if (memoryMeasure != null && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
-                if (autoBalance) {
-                    vacate();
+            if (memoryMeasure != null) {
+                if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                    if (autoBalance) {
+                        vacate();
+
+                        if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                            // ignore.
+                            return false;
+                        }
+                    } else {
+                        // ignore.
+                        return false;
+                    }
                 }
 
-                // ignore.
-                return false;
-            } else {
-                final E oldValue = pool.put(key, element);
+                oldValue = pool.put(key, element);
 
                 if (oldValue != null) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
 
-                if (memoryMeasure != null) {
-                    totalDataSize.addAndGet(keyValueMemorySize);
+                totalDataSize.addAndGet(keyValueMemorySize);
+
+                notEmpty.signal();
+
+                return true;
+            } else {
+                oldValue = pool.put(key, element);
+
+                if (oldValue != null) {
+                    destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
 
                 notEmpty.signal();

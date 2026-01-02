@@ -601,18 +601,18 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Repositions a contiguous block of rows within the {@code Dataset} to a new index.  
      * <br />
-     * The block is defined by the range {@code fromRowIndex} through {@code toRowIndex}, inclusive,  
+     * The block is defined by the range {@code fromRowIndex} through {@code toRowIndex},  
      * and the relative order of rows within the block is preserved.  
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
      * dataset.moveRows(0, 2, 1);
-     * // Rows originally at indices [0, 1, 2] are moved to start at index 1
+     * // Rows originally at indices [0, 1] are moved to start at index 1
      * }</pre>
      *
      * @param fromRowIndex the zero-based index of the first row in the block to move (inclusive).
-     * @param toRowIndex the zero-based index of the last row in the block to move (inclusive).
+     * @param toRowIndex the zero-based index of the last row in the block to move (exclusive).
      * @param newPosition the zero-based index where the block of rows should begin.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex}, {@code toRowIndex}, or {@code newPosition} is outside the valid range of row indices.
      */

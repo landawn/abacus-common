@@ -330,6 +330,7 @@ public final class Fnn {
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
             final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.Supplier);
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Throwables.Supplier<>() {

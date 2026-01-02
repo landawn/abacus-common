@@ -232,6 +232,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
         final Map<E, Integer> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
+        if (map == null) {
+            return null;
+        }
+
         final T multiset = newInstance(map.size());
 
         for (final Map.Entry<E, Integer> entry : map.entrySet()) {

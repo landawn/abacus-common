@@ -6286,9 +6286,17 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return;
         }
 
+        if (a[0] == null) {
+            throw new IllegalArgumentException("Sub arrays must not be null");
+        }
+
         final int cols = getLength(a[0]);
 
         for (int i = 1, len = a.length; i < len; i++) {
+            if (a[i] == null) {
+                throw new IllegalArgumentException("Sub arrays must not be null");
+            }
+
             if (getLength(a[i]) != cols) {
                 throw new IllegalArgumentException("The length of sub arrays must be same");
             }

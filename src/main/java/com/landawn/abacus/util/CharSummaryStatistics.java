@@ -77,8 +77,17 @@ public class CharSummaryStatistics implements CharConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
      */
     public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
+        if (count < 0) {
+            throw new IllegalArgumentException("count must be non-negative");
+        }
+
+        if (N.compare(min, max) > 0) {
+            throw new IllegalArgumentException("minimum is greater than maximum");
+        }
+
         this.count = count;
         this.sum = sum;
         this.min = min;

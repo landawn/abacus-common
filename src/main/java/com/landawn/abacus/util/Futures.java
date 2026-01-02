@@ -1990,6 +1990,7 @@ public final class Futures {
                     }
 
                     if (System.currentTimeMillis() - startTime >= totalTimeoutForAllInMillis) {
+                        activeFutures.clear();
                         return resultHandler.apply(Result.of(null, new TimeoutException()));
                     }
 

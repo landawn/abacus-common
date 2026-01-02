@@ -1034,6 +1034,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return;
         }
 
+        for (final int index : indices) {
+            N.checkElementIndex(index, size);
+        }
+
         final byte[] tmp = N.deleteAllByIndices(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);

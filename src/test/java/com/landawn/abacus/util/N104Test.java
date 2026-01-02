@@ -2062,6 +2062,9 @@ public class N104Test extends TestBase {
             list.add(i);
         }
 
+        // initializing first
+        N.forEach(List.of(1), Fn.println(), 10);
+
         AtomicInteger sum = new AtomicInteger(0);
         long start = System.currentTimeMillis();
 
@@ -2071,6 +2074,7 @@ public class N104Test extends TestBase {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            // N.println(System.currentTimeMillis() + "::" + Thread.currentThread().getName() + "::" + i);
             sum.addAndGet(i);
         }, 10);
 

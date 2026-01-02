@@ -79,9 +79,17 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
+        if (count < 0) {
+            throw new IllegalArgumentException("count must be non-negative");
+        }
+
+        if (N.compare(min, max) > 0) {
+            throw new IllegalArgumentException("minimum is greater than maximum");
+        }
+
         summation.combine(count, sum);
 
         this.min = min;

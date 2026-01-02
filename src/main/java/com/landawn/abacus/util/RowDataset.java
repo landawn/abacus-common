@@ -664,8 +664,9 @@ public final class RowDataset implements Dataset, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final int size = size();
+        final int rowCountToMove = toRowIndex - fromRowIndex;
 
-        if (newPosition < 0 || newPosition > size - (toRowIndex - fromRowIndex)) {
+        if (newPosition < 0 || newPosition > size - rowCountToMove) {
             throw new IndexOutOfBoundsException("The new row position must be >= 0 and <= " + (size - (toRowIndex - fromRowIndex)));
         }
 

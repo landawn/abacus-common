@@ -269,13 +269,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                         if (autoBalance) {
                             vacate();
-                        }
 
-                        // ignore.
-                        return false;
+                            if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                                // ignore.
+                                return false;
+                            }
+                        } else {
+                            // ignore.
+                            return false;
+                        }
                     }
 
                     pool.push(element);
+
                     totalDataSize.addAndGet(elementMemorySize); //NOSONAR
                 } catch (final Exception ex) {
                     logger.warn("Error measuring memory size of element", ex);
@@ -364,6 +370,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         putCount.incrementAndGet();
 
         long nanos = unit.toNanos(timeout);
+
         lock.lock();
 
         try {
@@ -372,6 +379,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             int maxSpins = 10000;
+
             while (maxSpins-- > 0) {
                 if (pool.size() < capacity) {
                     if (memoryMeasure != null) {
@@ -385,13 +393,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                             if (autoBalance) {
                                 vacate();
-                            }
 
-                            // ignore. 
-                            return false;
+                                if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                                    // ignore. 
+                                    return false;
+                                }
+                            } else {
+                                // ignore. 
+                                return false;
+                            }
                         }
 
                         pool.push(element);
+
                         totalDataSize.addAndGet(elementMemorySize); //NOSONAR
                     } else {
                         pool.push(element);

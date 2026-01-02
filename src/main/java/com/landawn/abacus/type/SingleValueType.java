@@ -154,7 +154,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 throw new RuntimeException("The 'JsonCreator' method: " + localJsonCreatorMethod + " is not static in class: " + typeClass);
             }
 
-            if (N.len(localJsonCreatorMethod.getParameterTypes()) != 1 && localJsonCreatorMethod.getParameterTypes()[0].isAssignableFrom(localJsonValueType)) {
+            if (N.len(localJsonCreatorMethod.getParameterTypes()) != 1 || !localJsonCreatorMethod.getParameterTypes()[0].isAssignableFrom(localJsonValueType)) {
                 throw new RuntimeException("The parameter type of 'JsonCreator' method: " + localJsonCreatorMethod
                         + " is not assigned from the return type of 'JsonValue' in class " + typeClass);
             }

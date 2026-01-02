@@ -2785,6 +2785,7 @@ public final class CSVUtil {
                     firstRow = false;
                 }
 
+                N.fill(rowData, null);
                 lineParser.accept(line, rowData);
 
                 bw.write("{");
