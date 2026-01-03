@@ -41,7 +41,7 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
      * A supplier that returns a random {@code boolean} value.
      * Each invocation has approximately equal probability of returning {@code true} or {@code false}.
      */
-    BooleanSupplier RANDOM = () -> Util.RAND_BOOLEAN.nextBoolean();
+    BooleanSupplier RANDOM = Util.RAND_BOOLEAN::nextBoolean;
 
     /**
      * Gets a result.

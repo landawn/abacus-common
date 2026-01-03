@@ -5777,7 +5777,7 @@ public final class IOUtil {
         // put it back together
         String result = Strings.join(path, "/");
 
-        if (pathname.length() > 0 && pathname.charAt(0) == '/') {
+        if (!pathname.isEmpty() && pathname.charAt(0) == '/') {
             result = "/" + result;
         }
 

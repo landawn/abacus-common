@@ -1083,6 +1083,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         }
 
         /**
+         * Checks whether the specified value is included by this endpoint.
          *
          * @param value the value to check for inclusion
          * @return {@code true} if this endpoint includes the specified value, {@code false} otherwise
@@ -1133,7 +1134,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * <p>
          * Compares this range to another object to test if they are equal.
          * </p>
-         * .
          *
          * <p>
          * To be equal, the minimum and maximum values must be equal, which ignores any differences in the comparator.

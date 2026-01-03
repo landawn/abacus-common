@@ -6332,16 +6332,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            if (this.format.equals(LOCAL_DATE_FORMAT)) {
-                return LocalDate.parse(text, dateTimeFormatter);
-            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
-                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDate();
-            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
-                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDate();
-            } else {
-                // return LocalDate.from(parseToTemporalAccessor(text));;
-                final Calendar cal = parseToCalendar(text);
-                return LocalDate.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            switch (this.format) {
+                case LOCAL_DATE_FORMAT -> {
+                    return LocalDate.parse(text, dateTimeFormatter);
+                }
+                case ISO_ZONED_DATE_TIME_FORMAT -> {
+                    return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDate();
+                }
+                case ISO_OFFSET_DATE_TIME_FORMAT -> {
+                    return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDate();
+                }
+                default -> {
+                    // return LocalDate.from(parseToTemporalAccessor(text));;
+                    final Calendar cal = parseToCalendar(text);
+                    return LocalDate.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                }
             }
         }
 
@@ -6382,16 +6387,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            if (this.format.equals(LOCAL_TIME_FORMAT)) {
-                return LocalTime.parse(text, dateTimeFormatter);
-            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
-                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalTime();
-            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
-                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalTime();
-            } else {
-                // return LocalTime.from(parseToTemporalAccessor(text));
-                final Calendar cal = parseToCalendar(text);
-                return LocalTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            switch (this.format) {
+                case LOCAL_TIME_FORMAT -> {
+                    return LocalTime.parse(text, dateTimeFormatter);
+                }
+                case ISO_ZONED_DATE_TIME_FORMAT -> {
+                    return ZonedDateTime.parse(text, dateTimeFormatter).toLocalTime();
+                }
+                case ISO_OFFSET_DATE_TIME_FORMAT -> {
+                    return OffsetDateTime.parse(text, dateTimeFormatter).toLocalTime();
+                }
+                default -> {
+                    // return LocalTime.from(parseToTemporalAccessor(text));
+                    final Calendar cal = parseToCalendar(text);
+                    return LocalTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                }
             }
         }
 
@@ -6432,16 +6442,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 }
             }
 
-            if (this.format.equals(LOCAL_DATE_TIME_FORMAT)) {
-                return LocalDateTime.parse(text, dateTimeFormatter);
-            } else if (this.format.equals(ISO_ZONED_DATE_TIME_FORMAT)) {
-                return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
-            } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
-                return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
-            } else {
-                // return LocalDateTime.from(parseToTemporalAccessor(text));
-                final Calendar cal = parseToCalendar(text);
-                return LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+            switch (this.format) {
+                case LOCAL_DATE_TIME_FORMAT -> {
+                    return LocalDateTime.parse(text, dateTimeFormatter);
+                }
+                case ISO_ZONED_DATE_TIME_FORMAT -> {
+                    return ZonedDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
+                }
+                case ISO_OFFSET_DATE_TIME_FORMAT -> {
+                    return OffsetDateTime.parse(text, dateTimeFormatter).toLocalDateTime();
+                }
+                default -> {
+                    // return LocalDateTime.from(parseToTemporalAccessor(text));
+                    final Calendar cal = parseToCalendar(text);
+                    return LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                }
             }
         }
 

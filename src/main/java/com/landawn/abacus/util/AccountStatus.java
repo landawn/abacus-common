@@ -21,7 +21,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The account statuses follow a typical lifecycle progression:</p>
  * <ul>
- *   <li>DEFAULT (0) - Initial state of an account</li>
+ *   <li>BLANK (0) - Initial state of an account</li>
  *   <li>ACTIVE (1) - Account is active and fully functional</li>
  *   <li>SUSPENDED (2) - Account is temporarily disabled</li>
  *   <li>RETIRED (3) - Account is no longer in active use but retained</li>

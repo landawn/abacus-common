@@ -6282,12 +6282,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     private static void checkIfMatrixArray(final Object[] a) {
-        if (a == null || a.length <= 1) {
+        if (a == null || a.length == 0) {
             return;
         }
 
         if (a[0] == null) {
             throw new IllegalArgumentException("Sub arrays must not be null");
+        }
+
+        if (a.length == 1) {
+            return;
         }
 
         final int cols = getLength(a[0]);

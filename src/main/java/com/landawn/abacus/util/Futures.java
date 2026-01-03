@@ -507,11 +507,11 @@ public final class Futures {
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
      *                         Receives both Future objects. Must not be {@code null}.
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 with.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 containing:
      *                              (_1: future1, _2: future2, _3: timeout value, _4: TimeUnit)
      *                              Must not be {@code null}.
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
      * @see #compose(Future, Future, Throwables.BiFunction)
      * @see Tuple4
@@ -705,11 +705,11 @@ public final class Futures {
      * @param cf3 the third future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
      *                         Receives all three Future objects. Must not be {@code null}.
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 with.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 containing:
      *                              (_1: future1, _2: future2, _3: future3, _4: timeout value, _5: TimeUnit)
      *                              Must not be {@code null}.
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
      * @see #compose(Future, Future, Future, Throwables.TriFunction)
      * @see Tuple5
@@ -959,11 +959,11 @@ public final class Futures {
      * @param cfs the collection of input futures, must not be {@code null} or empty.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
      *                         Receives the collection of Future objects. Must not be {@code null}.
-     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 with.
+     * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 containing:
      *                              (_1: futures collection, _2: timeout value, _3: TimeUnit). Must not be {@code null}.
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
      * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is null.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,.
+     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
      * @see #compose(Collection, Throwables.Function)
      * @see Tuple3

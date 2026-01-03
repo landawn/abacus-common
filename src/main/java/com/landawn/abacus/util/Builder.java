@@ -265,8 +265,8 @@ public class Builder<T> {
      * }</pre>
      *
      * @param val the BooleanList to wrap in a builder.
-     * @return a new BooleanListBuilder instance..
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}..
+     * @return a new BooleanListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static BooleanListBuilder of(final BooleanList val) throws IllegalArgumentException {
         return new BooleanListBuilder(val);
@@ -287,8 +287,8 @@ public class Builder<T> {
      * }</pre>
      *
      * @param val the CharList to wrap in a builder.
-     * @return a new CharListBuilder instance..
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}..
+     * @return a new CharListBuilder instance.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static CharListBuilder of(final CharList val) throws IllegalArgumentException {
         return new CharListBuilder(val);

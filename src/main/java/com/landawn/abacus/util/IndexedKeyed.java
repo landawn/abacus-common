@@ -161,10 +161,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
             return true;
         }
 
-        if (obj instanceof IndexedKeyed) {
-            @SuppressWarnings("rawtypes")
-            final IndexedKeyed another = (IndexedKeyed) obj;
-
+        if (obj instanceof IndexedKeyed another) {
             return N.equals(another.index, index) && N.equals(another.key, key);
         }
 

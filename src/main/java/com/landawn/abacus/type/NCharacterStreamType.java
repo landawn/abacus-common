@@ -106,7 +106,7 @@ public class NCharacterStreamType extends ReaderType {
      *     "INSERT INTO documents (id, content) VALUES (?, ?)");
      *
      * // Setting Unicode text to NCLOB column
-     * String unicodeText = "Unicode content: \u4E2D\u6587";
+     * String unicodeText = "Unicode content: 中文";
      * Reader reader = new StringReader(unicodeText);
      * type.set(stmt, 2, reader);
      * stmt.executeUpdate();
@@ -132,7 +132,7 @@ public class NCharacterStreamType extends ReaderType {
      * CallableStatement stmt = connection.prepareCall("{call update_document(?, ?)}");
      *
      * // Setting Unicode text to named parameter
-     * String unicodeText = "Content: \u65E5\u672C\u8A9E";
+     * String unicodeText = "Content: 日本語";
      * Reader reader = new StringReader(unicodeText);
      * type.set(stmt, "p_content", reader);
      * stmt.execute();

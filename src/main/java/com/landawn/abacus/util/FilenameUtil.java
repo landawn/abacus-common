@@ -401,7 +401,7 @@ public final class FilenameUtil {
             return false;
         }
 
-        if (canonicalParent.length() == 0) {
+        if (canonicalParent.isEmpty()) {
             return true;
         }
 

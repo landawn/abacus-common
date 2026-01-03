@@ -1213,16 +1213,26 @@ public final class HttpUtil {
 
     /**
      * Turns off certificate validation for HTTPS connections.
-     * This method disables all certificate and hostname verification.
-     * 
+     * This method disables all certificate and hostname verification by installing
+     * a trust-all {@link TrustManager} and a permissive {@link HostnameVerifier}.
+     *
      * <b>WARNING: This is extremely insecure and should NEVER be used in production code.</b>
      * It makes the application vulnerable to man-in-the-middle attacks.
-     * This method is provided for testing purposes only.
-     * 
+     * This method is provided for testing purposes only and affects the default
+     * {@link HttpsURLConnection} behavior globally in the current JVM.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Test-only setup for self-signed certificates
+     * HttpUtil.turnOffCertificateValidation();
+     * HttpsURLConnection conn = (HttpsURLConnection) new URL("https://localhost:8443").openConnection();
+     * }</pre>
+     *
+     * <p>Copied from: <a href="https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/">disable-certificate-validation-in-java-ssl-connections</a></p>
+     *
      * @deprecated For test only. Don't use it in production.
      * @throws RuntimeException if SSL context initialization fails
      */
-    // copied from: https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
     @Deprecated
     public static void turnOffCertificateValidation() {
         // Create a trust manager that does not validate certificate chains

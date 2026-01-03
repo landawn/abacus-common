@@ -1304,7 +1304,7 @@ public final class CSVUtil {
 
             final List<String> columnNameList = new ArrayList<>(selectColumnCount);
             final List<List<Object>> columnList = new ArrayList<>(selectColumnCount);
-            final boolean[] isColumnSelected = noSelectColumnNamesSpecified ? null : new boolean[columnCount];
+            // final boolean[] isColumnSelected = noSelectColumnNamesSpecified ? null : new boolean[columnCount];
             final Type<?>[] columnTypes = new Type<?>[columnCount];
             final Map<String, Type<?>> columnTypeMapToUse = columnTypeMap == null ? N.emptyMap() : (Map<String, Type<?>>) columnTypeMap;
 
@@ -1320,7 +1320,7 @@ public final class CSVUtil {
                     if (selectPropNameSet.remove(titles[i])) {
                         columnNameList.add(titles[i]);
                         columnTypes[i] = columnTypeMapToUse.getOrDefault(titles[i], strType);
-                        isColumnSelected[i] = true;
+                        // isColumnSelected[i] = true;
                         columnList.add(new ArrayList<>());
                     }
                 }
@@ -2941,18 +2941,18 @@ public final class CSVUtil {
 
     private static long json2csv(final Reader jsonReader, final Collection<String> selectCsvHeaders, long offset, long count, final Writer csvWriter)
             throws UncheckedIOException {
-        try (final Stream<Map<String, Object>> strem = jsonParser.stream(jsonReader, false, Type.ofMap(String.class, Object.class))
+        try (final Stream<Map<String, Object>> stream = jsonParser.stream(jsonReader, false, Type.ofMap(String.class, Object.class))
                 .skip(offset < 0 ? 0 : offset)
                 .limit(count <= 0 ? 0 : count); //
              final BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(csvWriter)) {
-            final List<Object> headers = N.newArrayList(selectCsvHeaders);
+            final List<String> headers = N.newArrayList(selectCsvHeaders);
 
             final char separator = WD._COMMA;
             Map<String, Object> row = null;
             long cnt = 0;
 
             @SuppressWarnings({ "deprecation" })
-            final Iterator<Map<String, Object>> iter = strem.iterator();
+            final Iterator<Map<String, Object>> iter = stream.iterator();
 
             if (iter.hasNext()) {
                 cnt++;

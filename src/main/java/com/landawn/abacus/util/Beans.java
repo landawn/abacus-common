@@ -1260,7 +1260,7 @@ public final class Beans {
                 .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
 
         return propName.equalsIgnoreCase(fieldName)
-                || (fieldName.length() > 0 && fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
+                || (!fieldName.isEmpty() && fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
 
     private static boolean isGetMethod(final Method method) {

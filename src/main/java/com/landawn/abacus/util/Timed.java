@@ -158,7 +158,7 @@ public final class Timed<T> implements Immutable {
      */
     @Override
     public int hashCode() {
-        int result = (int) (timeInMillis ^ (timeInMillis >>> 32));
+        int result = Long.hashCode(timeInMillis);
         result = 31 * result + (value == null ? 0 : value.hashCode());
         return result;
     }

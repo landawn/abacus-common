@@ -685,14 +685,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return ((double) a[0]) / a[1];
     };
 
-    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingInt_Finisher_2 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
-    };
+    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingInt_Finisher_2 = a -> Tuple
+            .of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
 
-    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
-                a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
-    };
+    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> Tuple.of(
+            a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
+            a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
 
     private static final Supplier<long[]> AveragingLong_Supplier = () -> new long[2];
     private static final Supplier<Pair<long[], long[]>> AveragingLong_Supplier_2 = () -> Pair.of(new long[2], new long[2]);
@@ -738,14 +736,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return ((double) a[0]) / a[1];
     };
 
-    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
-    };
+    private static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> Tuple
+            .of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1]);
 
-    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
-                a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
-    };
+    private static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> Tuple.of(
+            a.right()[0] == 0 ? 0.0d : ((double) a.left()[0]) / a.right()[0], a.right()[1] == 0 ? 0.0d : ((double) a.left()[1]) / a.right()[1],
+            a.right()[2] == 0 ? 0.0d : ((double) a.left()[2]) / a.right()[2]);
 
     private static final Supplier<KahanSummation> AveragingDouble_Supplier = KahanSummation::new;
     private static final Supplier<KahanSummation[]> AveragingDouble_Supplier_2 = () -> new KahanSummation[] { new KahanSummation(), new KahanSummation() };
@@ -780,14 +776,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a.average().get();
     };
 
-    private static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> {
-        return Tuple.of(a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get());
-    };
+    private static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> Tuple
+            .of(a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get());
 
-    private static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> {
-        return Tuple.of(a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get(),
-                a[2].count() == 0 ? 0.0d : a[2].average().get());
-    };
+    private static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> Tuple.of(
+            a[0].count() == 0 ? 0.0d : a[0].average().get(), a[1].count() == 0 ? 0.0d : a[1].average().get(), a[2].count() == 0 ? 0.0d : a[2].average().get());
 
     private static final Supplier<Pair<BigInteger, long[]>> AveragingBigInteger_Supplier = () -> Pair.of(BigInteger.ZERO, new long[1]);
 
@@ -822,9 +815,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> {
-        return a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]));
-    };
+    private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> a.right()[0] == 0 ? BigDecimal.ZERO
+            : new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]));
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger, long[]>, Optional<BigDecimal>> AveragingBigInteger_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
@@ -840,17 +832,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
-                a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])));
-    };
+    private static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> Tuple.of(
+            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
+            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])));
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
-                a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])),
-                a.right()[2] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2])));
-    };
+    private static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> Tuple.of(
+            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
+            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])),
+            a.right()[2] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2])));
 
     private static final Supplier<Pair<BigDecimal, long[]>> AveragingBigDecimal_Supplier = () -> Pair.of(BigDecimal.ZERO, new long[1]);
 
@@ -885,9 +875,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> {
-        return a.right()[0] == 0 ? BigDecimal.ZERO : a.left().divide(new BigDecimal(a.right()[0]));
-    };
+    private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> a.right()[0] == 0 ? BigDecimal.ZERO
+            : a.left().divide(new BigDecimal(a.right()[0]));
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal, long[]>, Optional<BigDecimal>> AveragingBigDecimal_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
@@ -903,17 +892,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
-                a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])));
-    };
+    private static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> Tuple.of(
+            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
+            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])));
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> {
-        return Tuple.of(a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
-                a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])),
-                a.right()[2] == 0 ? BigDecimal.ZERO : a.left()[2].divide(new BigDecimal(a.right()[2])));
-    };
+    private static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> Tuple.of(
+            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
+            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])),
+            a.right()[2] == 0 ? BigDecimal.ZERO : a.left()[2].divide(new BigDecimal(a.right()[2])));
 
     private static final Supplier<CharSummaryStatistics> SummarizingChar_Supplier = CharSummaryStatistics::new;
 

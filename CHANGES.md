@@ -1,5 +1,7 @@
-### 7.1.1
+### 7.1.2
+* Improvements and bug fixes
 
+### 7.1.1
 * Improvements and bug fixes
 
 ### 7.1.0

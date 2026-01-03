@@ -2348,12 +2348,12 @@ public class ContinuableFuture<T> implements Future<T> {
         }, null, executor) {
             @Override
             public boolean cancelAll(final boolean mayInterruptIfRunning) { //NOSONAR
-                return ContinuableFuture.this.cancelAll(mayInterruptIfRunning);
+                return super.cancelAll(mayInterruptIfRunning);
             }
 
             @Override
             public boolean isAllCancelled() { //NOSONAR
-                return ContinuableFuture.this.isAllCancelled();
+                return super.isAllCancelled();
             }
         };
     }

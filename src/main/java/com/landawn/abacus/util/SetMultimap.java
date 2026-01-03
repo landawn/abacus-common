@@ -13,12 +13,7 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -767,7 +762,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
-        N.checkArgument(map.values().stream().allMatch(v -> v != null), "The specified map contains null value: %s", map);
+        N.checkArgument(map.values().stream().allMatch(Objects::nonNull), "The specified map contains null value: %s", map);
 
         final Class<? extends Set> valueType = map.isEmpty() ? HashSet.class : map.values().iterator().next().getClass();
 

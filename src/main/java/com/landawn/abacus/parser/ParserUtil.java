@@ -93,7 +93,7 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * <p>This class is marked as {@code @Internal} and is not intended for direct use
  * by application code. It provides low-level utilities for the parser framework.</p>
- * * <p><b>Usage Examples:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get bean metadata
  * BeanInfo beanInfo = ParserUtil.getBeanInfo(MyBean.class);
@@ -3415,6 +3415,21 @@ public final class ParserUtil {
         final char[] quotedNameWithColon;
         final char[] quotedNameNull;
 
+        /**
+         * Creates a JSON name tag and precomputes common JSON field name variants.
+         *
+         * <p>This constructor prepares raw and quoted forms of the name, including
+         * variants with a trailing colon and {@code null} literal suffixes for fast
+         * JSON output formatting.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ParserUtil.JsonNameTag tag = new ParserUtil.JsonNameTag("id");
+         * char[] quoted = tag.quotedName; // "\"id\""
+         * }</pre>
+         *
+         * @param name the property name to prepare tag variants for
+         */
         public JsonNameTag(final String name) {
             this.name = name.toCharArray();
             nameWithColon = (name + ": ").toCharArray();
@@ -3453,6 +3468,24 @@ public final class ParserUtil {
         final char[] namedNull;
         final char[] namedNullWithType;
 
+        /**
+         * Creates an XML name tag and precomputes common XML fragments for the given name.
+         *
+         * <p>When {@code isBean} is {@code true}, this tag uses {@code <bean name="...">}
+         * elements. Otherwise it uses {@code <property name="...">} elements. If a
+         * non-empty {@code typeName} is provided, {@code type="..."} attributes are
+         * included in the generated fragments.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ParserUtil.XmlNameTag tag = new ParserUtil.XmlNameTag("age", "int", false);
+         * char[] start = tag.namedStart; // "<age>"
+         * }</pre>
+         *
+         * @param name the element/property name to encode
+         * @param typeName the type name to include in {@code type} attributes
+         * @param isBean whether to use bean-style tags instead of property-style tags
+         */
         public XmlNameTag(final String name, final String typeName, final boolean isBean) {
             this.name = name.toCharArray();
 

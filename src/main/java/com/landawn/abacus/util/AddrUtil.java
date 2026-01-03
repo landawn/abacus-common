@@ -79,9 +79,9 @@ public final class AddrUtil {
      * // Returns: ["server1:8080", "server2:8080"]
      * }</pre>
      *
-     * @param servers the string containing server addresses separated by whitespace or commas; must not be {@code null} or result in empty list after splitting
+     * @param servers the string containing server addresses separated by whitespace or commas; must not be {@code null}
      * @return a non-empty list of trimmed server address strings
-     * @throws IllegalArgumentException if the servers string is {@code null}, or results in an empty list after splitting and trimming
+     * @throws IllegalArgumentException if the servers string results in an empty list after splitting and trimming
      * @throws NullPointerException if {@code servers} is {@code null}
      */
     public static List<String> getServerList(final String servers) {
@@ -124,7 +124,6 @@ public final class AddrUtil {
      * @param servers the string containing server addresses to parse; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the parsed addresses
      * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535)
-     * @throws NullPointerException if {@code servers} is {@code null}
      * @see #getAddressList(Collection)
      * @see #getServerList(String)
      */
@@ -199,11 +198,11 @@ public final class AddrUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> serverStrings = Arrays.asList("server1:8080", "server2:8080");
+     * List<String> serverStrings = Arrays.asList("127.0.0.1:8080", "192.168.1.1:8080");
      * List<InetSocketAddress> addresses = AddrUtil.getAddressList(serverStrings);
      * }</pre>
      *
-     * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null} or empty
+     * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null}
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
      * @throws IllegalArgumentException if any server address is invalid (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535) or if the collection results in an empty address list
      * @throws NullPointerException if {@code servers} is {@code null}
@@ -261,9 +260,9 @@ public final class AddrUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL url = new URL("http://example.com:8080/path");
+     * URL url = new URL("http://localhost:8080/path");
      * InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
-     * // Returns InetSocketAddress with host="example.com" and port=8080
+     * // Returns InetSocketAddress with host="localhost" and port=8080
      * }</pre>
      *
      * @param url a {@link URL} from which the host and port are to be extracted; must not be {@code null}
@@ -290,8 +289,8 @@ public final class AddrUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<URL> urls = Arrays.asList(
-     *     new URL("http://server1.com:8080"),
-     *     new URL("http://server2.com:9090")
+     *     new URL("http://localhost:8080"),
+     *     new URL("http://127.0.0.1:9090")
      * );
      * List<InetSocketAddress> addresses = AddrUtil.getAddressListFromURL(urls);
      * // Returns a list with two InetSocketAddress instances

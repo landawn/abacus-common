@@ -72,7 +72,7 @@ public class NStringType extends AbstractStringType {
      *
      * // Reading Unicode text by column name
      * String description = type.get(rs, "description");
-     * // Returns: "\u4E2D\u6587" (Chinese text) or other Unicode content
+     * // Returns: "中文" (Chinese text) or other Unicode content
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -96,7 +96,7 @@ public class NStringType extends AbstractStringType {
      *     "INSERT INTO products (id, name) VALUES (?, ?)");
      *
      * // Setting Unicode text to NVARCHAR column
-     * String productName = "\u4EA7\u54C1\u540D\u79F0";  // Chinese: "Product Name"
+     * String productName = "产品名称";  // Chinese: "Product Name"
      * type.set(stmt, 2, productName);
      * stmt.executeUpdate();
      * }</pre>
@@ -121,7 +121,7 @@ public class NStringType extends AbstractStringType {
      * CallableStatement stmt = connection.prepareCall("{call update_product(?, ?)}");
      *
      * // Setting Unicode text using named parameter
-     * String description = "\u65E5\u672C\u8A9E\u306E\u8AAC\u660E";  // Japanese: "Japanese description"
+     * String description = "日本語の説明";  // Japanese: "Japanese description"
      * type.set(stmt, "p_description", description);
      * stmt.execute();
      * }</pre>

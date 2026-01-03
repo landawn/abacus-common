@@ -37,7 +37,7 @@ import com.landawn.abacus.util.Objectory;
 /**
  * A generic implementation of KeyedObjectPool that manages poolable objects by keys.
  * This implementation uses a HashMap internally to store key-value mappings.
- * 
+ *
  * <p>Features:
  * <ul>
  *   <li>Thread-safe operations using ReentrantLock</li>
@@ -46,29 +46,29 @@ import com.landawn.abacus.util.Objectory;
  *   <li>Auto-balancing to maintain optimal pool size</li>
  *   <li>Per-key storage and retrieval of poolable objects</li>
  * </ul>
- * 
+ *
  * <p>The pool can be configured with different eviction policies:
  * <ul>
  *   <li>LAST_ACCESS_TIME - Evicts least recently accessed entries</li>
  *   <li>ACCESS_COUNT - Evicts least frequently accessed entries</li>
  *   <li>EXPIRATION_TIME - Evicts entries closest to expiration</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a keyed pool for database connections by schema
  * GenericKeyedObjectPool<String, DBConnection> pool = new GenericKeyedObjectPool<>(
  *     100, 300000, EvictionPolicy.LAST_ACCESS_TIME
  * );
- * 
+ *
  * // Store connections
  * pool.put("schema1", new DBConnection("schema1"));
  * pool.put("schema2", new DBConnection("schema2"));
- * 
+ *
  * // Retrieve connections
  * DBConnection conn = pool.get("schema1");
  * }</pre>
- * 
+ *
  * @param <K> the type of keys maintained by this pool
  * @param <E> the type of pooled values, must implement Poolable
  * @see KeyedObjectPool
@@ -262,7 +262,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             final long keyValueMemorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, element);
 
             if (memoryMeasure != null && keyValueMemorySize < 0) {
-                logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
                 return false;
             }
 
@@ -649,7 +649,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes a portion of mappings from the pool based on the configured balance factor.
      * Entries are selected for removal according to the eviction policy.
-     * 
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -669,7 +669,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Returns the current number of key-value mappings in the pool.
-     * 
+     *
      * @return the number of mappings currently in the pool
      */
     @Override
@@ -682,7 +682,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Returns the hash code value for this pool.
      * The hash code is based on the internal pool map.
-     * 
+     *
      * @return a hash code value for this pool
      */
     @Override
@@ -693,7 +693,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Compares this pool to the specified object for equality.
      * Two pools are equal if they contain the same key-value mappings.
-     * 
+     *
      * @param obj the object to compare with
      * @return {@code true} if the pools are equal, {@code false} otherwise
      */
@@ -706,7 +706,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Returns a string representation of this pool.
      * The string representation consists of the string representation of the internal pool map.
-     * 
+     *
      * @return a string representation of this pool
      */
     @Override
@@ -863,7 +863,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Serializes this pool to an ObjectOutputStream.
      * The pool is locked during serialization to ensure consistency.
-     * 
+     *
      * @param os the output stream
      * @throws IOException if an I/O error occurs
      */
@@ -881,7 +881,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Deserializes this pool from an ObjectInputStream.
      * The pool is locked during deserialization to ensure consistency.
-     * 
+     *
      * @param is the input stream
      * @throws IOException if an I/O error occurs
      * @throws ClassNotFoundException if the class of a serialized object cannot be found

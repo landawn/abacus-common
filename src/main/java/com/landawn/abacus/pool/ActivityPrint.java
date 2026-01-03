@@ -328,10 +328,10 @@ public final class ActivityPrint implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         int result = 7;
-        result = 31 * result + (int) (createdTime ^ (createdTime >>> 32));
-        result = 31 * result + (int) (liveTime ^ (liveTime >>> 32));
-        result = 31 * result + (int) (maxIdleTime ^ (maxIdleTime >>> 32));
-        result = 31 * result + (int) (lastAccessTime ^ (lastAccessTime >>> 32));
+        result = 31 * result + Long.hashCode(createdTime);
+        result = 31 * result + Long.hashCode(liveTime);
+        result = 31 * result + Long.hashCode(maxIdleTime);
+        result = 31 * result + Long.hashCode(lastAccessTime);
         result = 31 * result + accessCount;
 
         return result;

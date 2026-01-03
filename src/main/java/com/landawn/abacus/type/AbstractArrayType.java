@@ -140,7 +140,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
         if (len > 0) {
             final int lastIndex = len - 1;
 
-            if (elements[0].length() > 0 && elements[lastIndex].length() > 0 && (elements[0].charAt(0) == WD._BRACKET_L)
+            if (!elements[0].isEmpty() && !elements[lastIndex].isEmpty() && (elements[0].charAt(0) == WD._BRACKET_L)
                     && (elements[lastIndex].charAt(elements[lastIndex].length() - 1) == WD._BRACKET_R)) {
                 elements[0] = elements[0].substring(1);
 
