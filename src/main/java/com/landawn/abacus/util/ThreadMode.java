@@ -16,7 +16,7 @@ package com.landawn.abacus.util;
 
 /**
  * Enumeration representing different threading modes for concurrent operations.
- * This enum is used to specify how operations should be executed in a multi-threaded context.
+ * This enum is used to specify how operations should be executed in a multithreaded context.
  * 
  * <p>The threading mode determines whether operations run in the default thread context
  * or are submitted to a thread pool for concurrent execution.

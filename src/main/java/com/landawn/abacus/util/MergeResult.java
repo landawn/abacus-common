@@ -41,7 +41,7 @@ import com.landawn.abacus.util.function.BiFunction;
  * Stream<Integer> stream2 = Stream.of(2, 4, 6);
  * 
  * // Merge taking the minimum value
- * Stream<Integer> merged = stream1.merge(stream2, MergeResult::minFirst);
+ * Stream<Integer> merged = Stream.merge(stream1, stream2, MergeResult::minFirst);
  * 
  * // Using with custom comparator
  * BiFunction<Person, Person, MergeResult> elderFirst = 
@@ -87,7 +87,7 @@ public enum MergeResult {
      * @param <T> the type of the values being compared (must be Comparable)
      * @param a the first value to compare
      * @param b the second value to compare
-     * @return {@link #TAKE_FIRST} if a ≤ b, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T extends Comparable<? super T>> MergeResult minFirst(final T a, final T b) {
         return N.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -112,7 +112,7 @@ public enum MergeResult {
      * @param a the first value to compare
      * @param b the second value to compare
      * @param cmp the comparator to use for comparison
-     * @return {@link #TAKE_FIRST} if cmp.compare(a, b) ≤ 0, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> cmp) {
         return cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -135,7 +135,7 @@ public enum MergeResult {
      * @param <T> the type of the values being compared (must be Comparable)
      * @param a the first value to compare
      * @param b the second value to compare
-     * @return {@link #TAKE_FIRST} if a ≥ b, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T extends Comparable<? super T>> MergeResult maxFirst(final T a, final T b) {
         return N.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -160,7 +160,7 @@ public enum MergeResult {
      * @param a the first value to compare
      * @param b the second value to compare
      * @param cmp the comparator to use for comparison
-     * @return {@link #TAKE_FIRST} if cmp.compare(a, b) ≥ 0, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) {
         return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -180,11 +180,11 @@ public enum MergeResult {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
-     * Stream<Integer> merged = stream1.merge(stream2, minMerger);
+     * Stream<Integer> merged = Stream.merge(stream1, stream2, minMerger);
      * }</pre>
      * 
      * @param <T> the type of the values (must extend Comparable)
-     * @return a BiFunction that returns {@link #TAKE_FIRST} if first ≤ second,
+     * @return a BiFunction that returns {@link #TAKE_FIRST} if first is less than or equal to second,
      *         {@link #TAKE_SECOND} otherwise
      */
     @SuppressWarnings("rawtypes")
@@ -203,7 +203,7 @@ public enum MergeResult {
      * <pre>{@code
      * BiFunction<Person, Person, MergeResult> youngerFirst = 
      *     MergeResult.minFirst(Comparator.comparing(Person::getAge));
-     * Stream<Person> merged = stream1.merge(stream2, youngerFirst);
+     * Stream<Person> merged = Stream.merge(stream1, stream2, youngerFirst);
      * }</pre>
      * 
      * @param <T> the type of the values being compared
@@ -231,11 +231,11 @@ public enum MergeResult {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Integer, Integer, MergeResult> maxMerger = MergeResult.maxFirst();
-     * Stream<Integer> merged = stream1.merge(stream2, maxMerger);
+     * Stream<Integer> merged = Stream.merge(stream1, stream2, maxMerger);
      * }</pre>
      * 
      * @param <T> the type of the values (must extend Comparable)
-     * @return a BiFunction that returns {@link #TAKE_FIRST} if first ≥ second,
+     * @return a BiFunction that returns {@link #TAKE_FIRST} if first is greater than or equal to second,
      *         {@link #TAKE_SECOND} otherwise
      */
     @SuppressWarnings("rawtypes")
@@ -254,7 +254,7 @@ public enum MergeResult {
      * <pre>{@code
      * BiFunction<Person, Person, MergeResult> elderFirst = 
      *     MergeResult.maxFirst(Comparator.comparing(Person::getAge));
-     * Stream<Person> merged = stream1.merge(stream2, elderFirst);
+     * Stream<Person> merged = Stream.merge(stream1, stream2, elderFirst);
      * }</pre>
      * 
      * @param <T> the type of the values being compared

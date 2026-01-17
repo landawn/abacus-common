@@ -288,21 +288,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 totalDataSize.addAndGet(keyValueMemorySize);
-
-                notEmpty.signal();
-
-                return true;
             } else {
                 oldValue = pool.put(key, element);
 
                 if (oldValue != null) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
-
-                notEmpty.signal();
-
-                return true;
             }
+
+            notEmpty.signal();
+
+            return true;
         } finally {
             lock.unlock();
         }

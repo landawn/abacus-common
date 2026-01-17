@@ -1321,4 +1321,193 @@ public class IntStream2025Test extends TestBase {
         int[] result = stream.toArray();
         assertEquals(3, result.length);
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        stream = IntStream.of(1, 2, 3, 4, 5)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertArrayEquals(new int[] { 1, 2, 3 }, result);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        stream = IntStream.of(1, 2, 3, 4, 5)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+        assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        stream = IntStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        stream = IntStream.of(42)
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100));
+        int[] result = stream.toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(42, result[0]);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        stream = IntStream.of(1, 2, 3, 4, 5)
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(1, result[0]);
+    }
+
+    @Test
+    public void testDebounce_WindowResetAfterDuration() throws InterruptedException {
+        // Use a short duration to test window reset
+        AtomicInteger count = new AtomicInteger(0);
+        IntList elements = new IntList();
+
+        // Generate elements with delays to span multiple windows
+        IntStream.of(1, 2, 3, 4, 5, 6)
+                .onEach(e -> {
+                    if (count.incrementAndGet() == 3) {
+                        // Sleep after 3rd element to allow window to reset
+                        try {
+                            Thread.sleep(150);
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                })
+                .debounce(2, com.landawn.abacus.util.Duration.ofMillis(100))
+                .forEach(elements::add);
+
+        // First window: 1, 2 pass
+        // After sleep, window resets
+        assertTrue(elements.size() >= 2);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntStream.of(1, 2, 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntStream.of(1, 2, 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntStream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntStream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        int[] input = new int[1000];
+        for (int i = 0; i < 1000; i++) {
+            input[i] = i;
+        }
+
+        stream = IntStream.of(input)
+                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10));
+        int[] result = stream.toArray();
+
+        assertEquals(500, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        stream = IntStream.of(10, 20, 30, 40, 50)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        assertArrayEquals(new int[] { 10, 20, 30 }, result);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        stream = IntStream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
+                .map(n -> n * 10);  // 20, 40, 60
+        int[] result = stream.toArray();
+
+        assertEquals(3, result.length);
+        assertArrayEquals(new int[] { 20, 40, 60 }, result);
+    }
+
+    @Test
+    public void testDebounce_WithLongDuration() {
+        // Test with a very long duration to ensure all elements within limit pass
+        stream = IntStream.of(1, 2, 3, 4, 5)
+                .debounce(3, com.landawn.abacus.util.Duration.ofHours(1));
+        int[] result = stream.toArray();
+
+        assertEquals(3, result.length);
+        assertArrayEquals(new int[] { 1, 2, 3 }, result);
+    }
+
+    @Test
+    public void testDebounce_WithRange() {
+        stream = IntStream.range(0, 100)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1));
+        int[] result = stream.toArray();
+
+        assertEquals(10, result.length);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, result[i]);
+        }
+    }
+
+    @Test
+    public void testDebounce_ParallelStream() {
+        // Test debounce on a parallel stream
+        int[] input = new int[100];
+        for (int i = 0; i < 100; i++) {
+            input[i] = i;
+        }
+
+        int[] result = IntStream.of(input)
+                .parallel()
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        // Should limit to maxWindowSize elements
+        assertEquals(10, result.length);
+    }
+
+    @Test
+    public void testDebounce_ParallelStreamEmpty() {
+        int[] result = IntStream.empty()
+                .parallel()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
 }

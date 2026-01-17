@@ -111,9 +111,11 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
+        return result == null ? OptionalDouble.empty()
+                : OptionalDouble
+                        .of(result instanceof Double num ? num : (result instanceof Number num ? num.doubleValue() : Numbers.toDouble(result.toString())));
     }
 
     /**
@@ -128,9 +130,11 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
+        return result == null ? OptionalDouble.empty()
+                : OptionalDouble
+                        .of(result instanceof Double num ? num : (result instanceof Number num ? num.doubleValue() : Numbers.toDouble(result.toString())));
     }
 
     /**

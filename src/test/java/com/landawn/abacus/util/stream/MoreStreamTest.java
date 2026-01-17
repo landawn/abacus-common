@@ -353,7 +353,7 @@ public class MoreStreamTest {
     }
 
     @Test
-    public void test_sliding() {
+    public void test_slide() {
 
         N.println(Stream.of(1, 2, 3, 5).slidingMap((i, j) -> i <= j).allMatch(e -> e));
         N.println(Stream.of(1, 2, 5, 3).slidingMap((i, j) -> i <= j).allMatch(e -> e));
@@ -365,13 +365,13 @@ public class MoreStreamTest {
         IntStream.range(1, 10).boxed().split(i -> i % 3 == 0, Suppliers.ofList()).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, IntFunctions.ofQueue()).forEach(Fn.println());
+        IntStream.range(1, 10).boxed().slide(3, IntFunctions.ofQueue()).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, 3, IntFunctions.ofQueue()).forEach(Fn.println());
+        IntStream.range(1, 10).boxed().slide(3, 3, IntFunctions.ofQueue()).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, 4, IntFunctions.ofQueue()).forEach(Fn.println());
+        IntStream.range(1, 10).boxed().slide(3, 4, IntFunctions.ofQueue()).forEach(Fn.println());
     }
 
     @Test
@@ -379,82 +379,82 @@ public class MoreStreamTest {
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).skip(11).println();
     }
 
     @Test
     public void test_sliding_4() {
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(3).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(3).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+        IntStream.range(0, 10).boxed().slide(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
     }
 
     @Test

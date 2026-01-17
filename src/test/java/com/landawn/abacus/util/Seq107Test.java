@@ -677,15 +677,15 @@ public class Seq107Test extends TestBase {
 
     @Test
     public void testSlidingIntWithSkipCountAndToArray() throws Exception {
-        assertEquals(4, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).count());
-        assertEquals(2, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).skip(2).count());
+        assertEquals(4, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2).count());
+        assertEquals(2, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2).skip(2).count());
 
-        List<List<String>> result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).toList();
+        List<List<String>> result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2).toList();
         assertEquals(4, result.size());
         assertEquals(Arrays.asList("a", "b"), result.get(0));
         assertEquals(Arrays.asList("b", "c"), result.get(1));
 
-        result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).skip(2).toList();
+        result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2).skip(2).toList();
         assertEquals(2, result.size());
         assertEquals(Arrays.asList("c", "d"), result.get(0));
         assertEquals(Arrays.asList("d", "e"), result.get(1));
@@ -693,16 +693,16 @@ public class Seq107Test extends TestBase {
 
     @Test
     public void testSlidingIntIntWithSkipCountAndToArray() throws Exception {
-        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2, 2).count());
-        assertEquals(1, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2, 2).skip(2).count());
+        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2, 2).count());
+        assertEquals(1, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2, 2).skip(2).count());
 
-        List<List<String>> result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2, 2).toList();
+        List<List<String>> result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2, 2).toList();
         assertEquals(3, result.size());
         assertEquals(Arrays.asList("a", "b"), result.get(0));
         assertEquals(Arrays.asList("c", "d"), result.get(1));
         assertEquals(Arrays.asList("e"), result.get(2));
 
-        result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2, 2).skip(2).toList();
+        result = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").slide(2, 2).skip(2).toList();
         assertEquals(1, result.size());
         assertEquals(Arrays.asList("e"), result.get(0));
     }

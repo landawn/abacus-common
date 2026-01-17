@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -968,8 +969,8 @@ public class Stream2025Test extends TestBase {
     }
 
     @Test
-    public void testSliding() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(3);
+    public void testslide() {
+        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).slide(3);
         List<List<Integer>> result = stream.toList();
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
@@ -978,7 +979,7 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testSlidingWithIncrement() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(2, 2);
+        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).slide(2, 2);
         List<List<Integer>> result = stream.toList();
         assertEquals(Arrays.asList(1, 2), result.get(0));
         assertEquals(Arrays.asList(3, 4), result.get(1));
@@ -3043,5 +3044,171 @@ public class Stream2025Test extends TestBase {
     public void testSpsMapEmptyStream() {
         Stream<String> mapped = Stream.<Integer> empty().spsMap(String::valueOf);
         assertTrue(mapped.toList().isEmpty());
+    }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.size());
+        assertEquals(Arrays.asList(1, 2, 3), result);
+
+        result = Stream.range(0, 20).delay(Duration.ofMillis(100)).debounce(2, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertEquals(Arrays.asList(0, 1, 10, 11, 19), result);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        // All elements should pass
+        assertEquals(5, result.size());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        List<Integer> result = Stream.<Integer> empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        List<String> result = Stream.of("hello").debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toList();
+
+        assertEquals(1, result.size());
+        assertEquals("hello", result.get(0));
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertEquals(1, result.size());
+        assertEquals(Integer.valueOf(1), result.get(0));
+    }
+
+    @Test
+    public void testDebounce_WindowResetAfterDuration() throws InterruptedException {
+        // Use a short duration to test window reset
+        AtomicInteger count = new AtomicInteger(0);
+        List<Integer> elements = new ArrayList<>();
+
+        // Generate elements with delays to span multiple windows
+        Stream.of(1, 2, 3, 4, 5, 6).onEach(e -> {
+            if (count.incrementAndGet() == 3) {
+                // Sleep after 3rd element to allow window to reset
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }).debounce(2, com.landawn.abacus.util.Duration.ofMillis(100)).forEach(elements::add);
+
+        // First window: 1, 2 pass (3 is after window reset)
+        // After sleep, window resets: 4, 5 pass
+        assertTrue(elements.size() >= 2);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toList();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        List<Integer> input = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            input.add(i);
+        }
+
+        List<Integer> result = Stream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toList();
+
+        assertEquals(500, result.size());
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        List<String> result = Stream.of("a", "b", "c", "d", "e").debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertEquals(Arrays.asList("a", "b", "c"), result);
+    }
+
+    @Test
+    public void testDebounce_WithNullElements() {
+        List<String> result = Stream.of("a", null, "c", null, "e").debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertEquals(3, result.size());
+        assertEquals("a", result.get(0));
+        assertEquals(null, result.get(1));
+        assertEquals("c", result.get(2));
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
+                .map(n -> n * 10) // 20, 40, 60
+                .toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Arrays.asList(20, 40, 60), result);
+    }
+
+    @Test
+    public void testDebounce_WithLongDuration() {
+        // Test with a very long duration to ensure all elements within limit pass
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(3, com.landawn.abacus.util.Duration.ofHours(1)).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testDebounce_ParallelStream() {
+        // Test debounce on a parallel stream - the method handles parallel specially
+        List<Integer> input = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            input.add(i);
+        }
+
+        List<Integer> result = Stream.of(input).parallel().debounce(10, com.landawn.abacus.util.Duration.ofSeconds(10)).toList();
+
+        // Should limit to maxWindowSize elements
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    public void testDebounce_ParallelStreamEmpty() {
+        List<Integer> result = Stream.<Integer> empty().parallel().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+
+        assertTrue(result.isEmpty());
     }
 }

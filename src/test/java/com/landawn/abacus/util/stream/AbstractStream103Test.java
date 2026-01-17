@@ -533,9 +533,9 @@ public class AbstractStream103Test extends TestBase {
     }
 
     @Test
-    public void testSliding() {
+    public void testslide() {
         stream = createStream(1, 2, 3, 4, 5);
-        Stream<List<Integer>> result = stream.sliding(3);
+        Stream<List<Integer>> result = stream.slide(3);
         List<List<Integer>> lists = result.toList();
         assertEquals(3, lists.size());
         assertEquals(Arrays.asList(1, 2, 3), lists.get(0));
@@ -545,7 +545,7 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testSlidingWithIncrement() {
         stream = createStream(1, 2, 3, 4, 5, 6);
-        Stream<List<Integer>> result = stream.sliding(3, 2);
+        Stream<List<Integer>> result = stream.slide(3, 2);
         List<List<Integer>> lists = result.toList();
         assertEquals(3, lists.size());
         assertEquals(Arrays.asList(1, 2, 3), lists.get(0));
@@ -556,14 +556,14 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testSlidingWithCollectionSupplier() {
         stream = createStream(1, 2, 3, 4);
-        Stream<Set<Integer>> result = stream.sliding(2, i -> new HashSet<>());
+        Stream<Set<Integer>> result = stream.slide(2, i -> new HashSet<>());
         assertEquals(3, result.toList().size());
     }
 
     @Test
     public void testSlidingWithCollector() {
         stream = createStream(1, 2, 3, 4);
-        Stream<String> result = stream.sliding(2, Collectors.mapping(Object::toString, Collectors.joining(",")));
+        Stream<String> result = stream.slide(2, Collectors.mapping(Object::toString, Collectors.joining(",")));
         assertEquals(Arrays.asList("1,2", "2,3", "3,4"), result.toList());
     }
 

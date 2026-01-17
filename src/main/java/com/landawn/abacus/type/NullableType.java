@@ -139,15 +139,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a {@code Nullable} containing the retrieved value, or empty {@code Nullable} if the value is SQL NULL
+     * @return a non-empty {@code Nullable} containing the retrieved value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final T obj = getColumnValue(rs, columnIndex, elementType.clazz());
+        final T result = getColumnValue(rs, columnIndex, elementType.clazz());
 
-        return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
+        return result == null ? Nullable.of((T) null)
+                : Nullable.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**
@@ -156,15 +156,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
-     * @return a {@code Nullable} containing the retrieved value, or empty {@code Nullable} if the value is SQL NULL
+     * @return a non-empty {@code Nullable} containing the retrieved value
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final T obj = getColumnValue(rs, columnLabel, elementType.clazz());
+        final T result = getColumnValue(rs, columnLabel, elementType.clazz());
 
-        return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? obj : N.convert(obj, elementType));
+        return result == null ? Nullable.of((T) null)
+                : Nullable.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**

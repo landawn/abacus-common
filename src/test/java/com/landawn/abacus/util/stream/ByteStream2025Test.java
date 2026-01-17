@@ -1430,4 +1430,134 @@ public class ByteStream2025Test extends TestBase {
         ByteStream stream = ByteStream.zip(s1, s2, s3, (byte) 0, (byte) 0, (byte) 0, (a, b, c) -> (byte) (a + b + c));
         assertEquals(3, stream.count());
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertEquals((byte) 1, result[0]);
+        assertEquals((byte) 2, result[1]);
+        assertEquals((byte) 3, result[2]);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        byte[] result = ByteStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        byte[] result = ByteStream.of((byte) 42)
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals((byte) 42, result[0]);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals((byte) 1, result[0]);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        byte[] input = new byte[100];
+        for (int i = 0; i < 100; i++) {
+            input[i] = (byte) i;
+        }
+
+        byte[] result = ByteStream.of(input)
+                .debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        assertEquals(50, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        byte[] result = ByteStream.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals((byte) 10, result[0]);
+        assertEquals((byte) 20, result[1]);
+        assertEquals((byte) 30, result[2]);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9, (byte) 10)
+                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
+                .map(n -> (byte) (n * 10))  // 20, 40, 60
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals((byte) 20, result[0]);
+        assertEquals((byte) 40, result[1]);
+        assertEquals((byte) 60, result[2]);
+    }
+
+    @Test
+    public void testDebounce_WithMinMaxValues() {
+        byte[] result = ByteStream.of(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE, (byte) 1, (byte) 2)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals(Byte.MIN_VALUE, result[0]);
+        assertEquals((byte) 0, result[1]);
+        assertEquals(Byte.MAX_VALUE, result[2]);
+    }
 }

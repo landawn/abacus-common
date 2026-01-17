@@ -166,9 +166,10 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
+        return result == null ? OptionalInt.empty()
+                : OptionalInt.of(result instanceof Integer num ? num : (result instanceof Number num ? num.intValue() : Numbers.toInt(result.toString())));
     }
 
     /**
@@ -196,9 +197,10 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
+        return result == null ? OptionalInt.empty()
+                : OptionalInt.of(result instanceof Integer num ? num : (result instanceof Number num ? num.intValue() : Numbers.toInt(result.toString())));
     }
 
     /**

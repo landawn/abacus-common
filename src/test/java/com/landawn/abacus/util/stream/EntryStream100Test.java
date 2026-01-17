@@ -464,8 +464,8 @@ public class EntryStream100Test extends TestBase {
     }
 
     @Test
-    public void testSliding() {
-        List<List<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).sliding(2).toList();
+    public void testslide() {
+        List<List<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).slide(2).toList();
 
         assertEquals(3, windows.size());
         assertEquals(2, windows.get(0).size());

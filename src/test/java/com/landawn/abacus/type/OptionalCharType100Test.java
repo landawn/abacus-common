@@ -110,7 +110,7 @@ public class OptionalCharType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithCharacter() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn('Z');
+        when(rs.getString(1)).thenReturn("Z");
 
         OptionalChar result = optionalCharType.get(rs, 1);
         assertNotNull(result);
@@ -121,7 +121,7 @@ public class OptionalCharType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithInteger() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn(97);
+        when(rs.getString(1)).thenReturn("a");
 
         OptionalChar result = optionalCharType.get(rs, 1);
         assertNotNull(result);
@@ -132,7 +132,7 @@ public class OptionalCharType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByIndexWithString() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject(1)).thenReturn("B");
+        when(rs.getString(1)).thenReturn("B");
 
         OptionalChar result = optionalCharType.get(rs, 1);
         assertNotNull(result);
@@ -143,7 +143,7 @@ public class OptionalCharType100Test extends TestBase {
     @Test
     public void testGetFromResultSetByLabel() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject("column")).thenReturn('Q');
+        when(rs.getString("column")).thenReturn("Q");
 
         OptionalChar result = optionalCharType.get(rs, "column");
         assertNotNull(result);
@@ -155,7 +155,7 @@ public class OptionalCharType100Test extends TestBase {
     public void testSetPreparedStatementWithNull() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         optionalCharType.set(stmt, 1, null);
-        verify(stmt).setNull(1, java.sql.Types.CHAR);
+        verify(stmt).setNull(1, java.sql.Types.VARCHAR);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class OptionalCharType100Test extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         OptionalChar empty = OptionalChar.empty();
         optionalCharType.set(stmt, 1, empty);
-        verify(stmt).setNull(1, java.sql.Types.CHAR);
+        verify(stmt).setNull(1, java.sql.Types.VARCHAR);
     }
 
     @Test
@@ -171,14 +171,14 @@ public class OptionalCharType100Test extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         OptionalChar opt = OptionalChar.of('M');
         optionalCharType.set(stmt, 1, opt);
-        verify(stmt).setInt(1, 'M');
+        verify(stmt).setString(1, "M");
     }
 
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
         optionalCharType.set(stmt, "param", null);
-        verify(stmt).setNull("param", java.sql.Types.CHAR);
+        verify(stmt).setNull("param", java.sql.Types.VARCHAR);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class OptionalCharType100Test extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         OptionalChar empty = OptionalChar.empty();
         optionalCharType.set(stmt, "param", empty);
-        verify(stmt).setNull("param", java.sql.Types.CHAR);
+        verify(stmt).setNull("param", java.sql.Types.VARCHAR);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class OptionalCharType100Test extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         OptionalChar opt = OptionalChar.of('K');
         optionalCharType.set(stmt, "param", opt);
-        verify(stmt).setInt("param", 'K');
+        verify(stmt).setString("param", "K");
     }
 
     @Test

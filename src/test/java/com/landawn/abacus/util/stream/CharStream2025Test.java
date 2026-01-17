@@ -1808,4 +1808,141 @@ public class CharStream2025Test extends TestBase {
         CharStream stream = CharStream.zip(s1, s2, s3, '0', '9', '#', (a, b, c) -> c);
         assertEquals(3, stream.count());
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e')
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertEquals('a', result[0]);
+        assertEquals('b', result[1]);
+        assertEquals('c', result[2]);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e')
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        char[] result = CharStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        char[] result = CharStream.of('z')
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals('z', result[0]);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e')
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals('a', result[0]);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            CharStream.of('a', 'b', 'c').debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            CharStream.of('a', 'b', 'c').debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            CharStream.of('a', 'b', 'c').debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            CharStream.of('a', 'b', 'c').debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        char[] input = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+
+        char[] result = CharStream.of(input)
+                .debounce(26, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        assertEquals(26, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        char[] result = CharStream.of('x', 'y', 'z', 'a', 'b')
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals('x', result[0]);
+        assertEquals('y', result[1]);
+        assertEquals('z', result[2]);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
+                .filter(c -> c >= 'b' && c <= 'f')  // b, c, d, e, f
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // b, c, d
+                .map(c -> Character.toUpperCase(c))  // B, C, D
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals('B', result[0]);
+        assertEquals('C', result[1]);
+        assertEquals('D', result[2]);
+    }
+
+    @Test
+    public void testDebounce_WithSpecialCharacters() {
+        char[] result = CharStream.of('\n', '\t', ' ', 'a', 'b')
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals('\n', result[0]);
+        assertEquals('\t', result[1]);
+        assertEquals(' ', result[2]);
+    }
+
+    @Test
+    public void testDebounce_FromString() {
+        char[] result = CharStream.of("Hello World!")
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(5, result.length);
+        assertEquals("Hello", new String(result));
+    }
 }

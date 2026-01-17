@@ -161,9 +161,10 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public OptionalByte get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj));
+        return result == null ? OptionalByte.empty()
+                : OptionalByte.of(result instanceof Byte num ? num : (result instanceof Number num ? num.byteValue() : Numbers.toByte(result.toString())));
     }
 
     /**
@@ -177,9 +178,10 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public OptionalByte get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj));
+        return result == null ? OptionalByte.empty()
+                : OptionalByte.of(result instanceof Byte num ? num : (result instanceof Number num ? num.byteValue() : Numbers.toByte(result.toString())));
     }
 
     /**

@@ -858,7 +858,7 @@ public final class Triple<L, M, R> implements Mutable {
      * }</pre>
      *
      * @param obj the object to compare with this Triple for equality.
-     * @return {@code true} if the specified object is a Triple with equal elements,.
+     * @return {@code true} if the specified object is a Triple with equal elements,
      *         {@code false} otherwise
      */
     @Override

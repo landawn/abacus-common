@@ -923,7 +923,7 @@ public class EntryStream103Test extends TestBase {
     }
 
     @Test
-    public void testSliding() {
+    public void testslide() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2);
@@ -931,7 +931,7 @@ public class EntryStream103Test extends TestBase {
         map.put("d", 4);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<List<Map.Entry<String, Integer>>> windows = stream.sliding(3).toList();
+        List<List<Map.Entry<String, Integer>>> windows = stream.slide(3).toList();
         assertEquals(2, windows.size());
         assertEquals(3, windows.get(0).size());
         assertEquals(3, windows.get(1).size());
@@ -948,7 +948,7 @@ public class EntryStream103Test extends TestBase {
         map.put("d", 4);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<LinkedList<Map.Entry<String, Integer>>> windows = stream.sliding(3, IntFunctions.ofLinkedList()).toList();
+        List<LinkedList<Map.Entry<String, Integer>>> windows = stream.slide(3, IntFunctions.ofLinkedList()).toList();
         assertEquals(2, windows.size());
         assertTrue(windows.get(0) instanceof LinkedList);
     }
@@ -963,7 +963,7 @@ public class EntryStream103Test extends TestBase {
         map.put("e", 5);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<List<Map.Entry<String, Integer>>> windows = stream.sliding(3, 2).toList();
+        List<List<Map.Entry<String, Integer>>> windows = stream.slide(3, 2).toList();
         assertEquals(2, windows.size());
         assertEquals(3, windows.get(0).size());
         assertEquals(3, windows.get(1).size());
@@ -981,7 +981,7 @@ public class EntryStream103Test extends TestBase {
         map.put("e", 5);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        List<LinkedList<Map.Entry<String, Integer>>> windows = stream.sliding(3, 2, IntFunctions.ofLinkedList()).toList();
+        List<LinkedList<Map.Entry<String, Integer>>> windows = stream.slide(3, 2, IntFunctions.ofLinkedList()).toList();
         assertEquals(2, windows.size());
         assertTrue(windows.get(0) instanceof LinkedList);
     }

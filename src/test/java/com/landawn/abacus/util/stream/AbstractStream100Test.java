@@ -408,11 +408,11 @@ public class AbstractStream100Test extends TestBase {
     }
 
     @Test
-    public void testSliding() {
+    public void testslide() {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
         Stream<Integer> stream = createStream(input);
 
-        List<List<Integer>> result = stream.sliding(3).toList();
+        List<List<Integer>> result = stream.slide(3).toList();
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
@@ -424,7 +424,7 @@ public class AbstractStream100Test extends TestBase {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6);
         Stream<Integer> stream = createStream(input);
 
-        List<List<Integer>> result = stream.sliding(3, 2).toList();
+        List<List<Integer>> result = stream.slide(3, 2).toList();
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(3, 4, 5), result.get(1));

@@ -166,9 +166,10 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public OptionalFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
+        return result == null ? OptionalFloat.empty()
+                : OptionalFloat.of(result instanceof Float num ? num : (result instanceof Number num ? num.floatValue() : Numbers.toFloat(result.toString())));
     }
 
     /**
@@ -196,9 +197,10 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public OptionalFloat get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
+        return result == null ? OptionalFloat.empty()
+                : OptionalFloat.of(result instanceof Float num ? num : (result instanceof Number num ? num.floatValue() : Numbers.toFloat(result.toString())));
     }
 
     /**

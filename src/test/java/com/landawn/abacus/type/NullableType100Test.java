@@ -132,7 +132,8 @@ public class NullableType100Test extends TestBase {
 
         Nullable<String> result = nullableStringType.get(rs, 1);
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.isNull());
+        assertFalse(result.isEmpty());
     }
 
     @Test
@@ -153,7 +154,8 @@ public class NullableType100Test extends TestBase {
 
         Nullable<String> result = nullableStringType.get(rs, "column");
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.isNull());
+        assertFalse(result.isEmpty());
     }
 
     @Test

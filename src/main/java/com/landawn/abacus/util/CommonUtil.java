@@ -4690,6 +4690,96 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two collections for equality while preserving element order.
+     * <p>
+     * Two collections are considered equal in order if:
+     * <ul>
+     *     <li>they reference the same object, or</li>
+     *     <li>they are both effectively empty (i.e., {@code null} or containing no elements), or</li>
+     *     <li>they have the same size and, when iterated in parallel, each pair of corresponding
+     *         elements is equal according to {@link #equals(Object, Object)}.</li>
+     * </ul>
+     * <p>
+     * This method performs a sequential comparison using the iteration order defined by each
+     * collection's {@link Iterator}. As a result, the method is sensitive to element order and
+     * differs from {@link Collection#equals(Object)}, which may or may not consider order depending
+     * on the specific collection implementation.
+     *
+     * @param a the first collection to compare; may be {@code null}
+     * @param b the second collection to compare; may be {@code null}
+     * @return {@code true} if the two collections have the same size and their elements match in the
+     *         same iteration order (or both are effectively empty); {@code false} otherwise
+     */
+    public static boolean equalsInOrder(final Collection<?> a, final Collection<?> b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        if (size(a) != size(b)) {
+            return false;
+        }
+
+        final Iterator<?> iterA = a.iterator();
+        final Iterator<?> iterB = b.iterator();
+
+        while (iterA.hasNext()) {
+            if (!equals(iterA.next(), iterB.next())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares two maps for equality while preserving the iteration order of their entries.
+     * <p>
+     * Two maps are considered equal in order if:
+     * <ul>
+     *     <li>they reference the same object, or</li>
+     *     <li>they are both effectively empty (i.e., {@code null} or containing no entries), or</li>
+     *     <li>they have the same size and, when iterated in parallel through their
+     *         {@link Map#entrySet()} views, each corresponding entry has an equal key and equal
+     *         value.</li>
+     * </ul>
+     * <p>
+     * This comparison differs from {@link Map#equals(Object)}, which considers maps equal based solely
+     * on key/value content regardless of iteration order. This method is order-sensitive and should
+     * be used when the sequence of entries matters—for example, when comparing instances of
+     * {@link java.util.LinkedHashMap} or other ordered map implementations.
+     *
+     * @param a the first map to compare; may be {@code null}
+     * @param b the second map to compare; may be {@code null}
+     * @return {@code true} if the two maps contain the same entries in the same iteration order
+     *         (or both are effectively empty); {@code false} otherwise
+     */
+    public static boolean equalsInOrder(final Map<?, ?> a, final Map<?, ?> b) {
+        if (a == b || (isEmpty(a) && isEmpty(b))) {
+            return true;
+        }
+
+        if (size(a) != size(b)) {
+            return false;
+        }
+
+        final Iterator<? extends Map.Entry<?, ?>> iterA = a.entrySet().iterator();
+        final Iterator<? extends Map.Entry<?, ?>> iterB = b.entrySet().iterator();
+        Map.Entry<?, ?> entryA = null;
+        Map.Entry<?, ?> entryB = null;
+
+        while (iterA.hasNext()) {
+            entryA = iterA.next();
+            entryB = iterB.next();
+
+            if (!(equals(entryA.getKey(), entryB.getKey()) && equals(entryA.getValue(), entryB.getValue()))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Compares two maps for equality based on the specified keys.
      *
      * @param <K> the type of keys in the maps

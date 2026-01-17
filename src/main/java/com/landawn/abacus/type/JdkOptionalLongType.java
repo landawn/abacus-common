@@ -111,9 +111,10 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public OptionalLong get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj));
+        return result == null ? OptionalLong.empty()
+                : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));
     }
 
     /**
@@ -128,9 +129,10 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public OptionalLong get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj));
+        return result == null ? OptionalLong.empty()
+                : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));
     }
 
     /**

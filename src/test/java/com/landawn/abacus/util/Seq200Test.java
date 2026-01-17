@@ -2452,16 +2452,16 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_sliding_withCollector() throws Exception {
-        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, Collectors.mapping(String::valueOf, Collectors.joining(",")));
+        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).slide(3, Collectors.mapping(String::valueOf, Collectors.joining(",")));
         assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), drainWithException(seq));
     }
 
     @Test
     public void test_sliding_withCollector_andIncrement() throws Exception {
-        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).sliding(3, 2, Collectors.counting());
+        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).slide(3, 2, Collectors.counting());
         assertEquals(Arrays.asList(3L, 3L, 3L), drainWithException(seq));
 
-        Seq<Long, Exception> smallSeq = Seq.of(1, 2).sliding(3, 1, Collectors.counting());
+        Seq<Long, Exception> smallSeq = Seq.of(1, 2).slide(3, 1, Collectors.counting());
         assertEquals(Collections.singletonList(2L), drainWithException(smallSeq));
     }
 

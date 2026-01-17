@@ -6601,7 +6601,10 @@ public class u { // NOSONAR
         /** Represents {@code Boolean.FALSE}. */
         public static final Nullable<Boolean> FALSE = new Nullable<>(Boolean.FALSE);
 
-        private static final Nullable<String> NULL_STRING = new Nullable<>(null);
+        @SuppressWarnings("rawtypes")
+        private static final Nullable NULL_VALUE = new Nullable<>(null);
+
+        private static final Nullable<String> NULL_STRING = NULL_VALUE;
 
         private static final Nullable<String> EMPTY_STRING = new Nullable<>(Strings.EMPTY);
 
@@ -6681,6 +6684,10 @@ public class u { // NOSONAR
          * @return a {@code Nullable} containing the value
          */
         public static <T> Nullable<T> of(final T value) {
+            if (value == null) {
+                return NULL_VALUE;
+            }
+
             return new Nullable<>(value);
         }
 

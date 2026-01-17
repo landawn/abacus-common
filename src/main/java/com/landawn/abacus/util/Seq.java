@@ -1815,6 +1815,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             };
         } else {
             iter = new Throwables.Iterator<>() {
+
                 private int cnt = 0;
                 private int cursor = 0;
 
@@ -1847,6 +1848,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 public long count() {
                     return count - cnt;
                 }
+
             };
         }
 
@@ -7005,7 +7007,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<List<Integer>> windows = seq.sliding(3);
+     * Seq<List<Integer>> windows = seq.slide(3);
      * // windows contains: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
      * }</pre>
      *
@@ -7015,8 +7017,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero
      */
     @IntermediateOp
-    public Seq<List<T>, E> sliding(final int windowSize) throws IllegalStateException {
-        return sliding(windowSize, 1);
+    public Seq<List<T>, E> slide(final int windowSize) throws IllegalStateException {
+        return slide(windowSize, 1);
     }
 
     /**
@@ -7029,7 +7031,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
-     * Seq<Set<String>> windows = seq.sliding(2, HashSet::new);
+     * Seq<Set<String>> windows = seq.slide(2, HashSet::new);
      * // windows contains: [{"a", "b"}, {"b", "c"}, {"c", "d"}]
      * }</pre>
      *
@@ -7041,9 +7043,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero or collectionSupplier is null
      */
     @IntermediateOp
-    public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier)
+    public <C extends Collection<T>> Seq<C, E> slide(final int windowSize, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
-        return sliding(windowSize, 1, collectionSupplier);
+        return slide(windowSize, 1, collectionSupplier);
     }
 
     /**
@@ -7056,7 +7058,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<String> windows = seq.sliding(3, Collectors.joining(","));
+     * Seq<String> windows = seq.slide(3, Collectors.joining(","));
      * // windows contains: ["1,2,3", "2,3,4", "3,4,5"]
      * }</pre>
      *
@@ -7068,16 +7070,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero or collector is null
      */
     @IntermediateOp
-    public <R> Seq<R, E> sliding(final int windowSize, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
-        return sliding(windowSize, 1, collector);
+    public <R> Seq<R, E> slide(final int windowSize, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
+        return slide(windowSize, 1, collector);
     }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size and increment.
      * Each window is a list containing a subset of elements from the sequence.
      * 
-     * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
-     * <p>And {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
+     * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).slide(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
+     * <p>And {@code Seq.of(1, 2, 3, 4, 5).slide(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -7086,11 +7088,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is a list representing a sliding window of the original sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero
-     * @see #sliding(int, int, IntFunction)
+     * @see #slide(int, int, IntFunction)
      */
     @IntermediateOp
-    public Seq<List<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
-        return sliding(windowSize, increment, IntFunctions.ofList());
+    public Seq<List<T>, E> slide(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
+        return slide(windowSize, increment, IntFunctions.ofList());
     }
 
     /**
@@ -7110,11 +7112,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is a collection representing a sliding window of the original sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero, or if collectionSupplier is null
-     * @see #sliding(int, int)
-     * @see #sliding(int, int, Collector)
+     * @see #slide(int, int)
+     * @see #slide(int, int, Collector)
      */
     @IntermediateOp
-    public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
+    public <C extends Collection<T>> Seq<C, E> slide(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -7136,8 +7138,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
+                // Seq.of(1, 2, 3).slide(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).slide(2, 1) will return [[1]], not []
                 // Why? we need to check if the queue is not empty?
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
@@ -7264,11 +7266,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is the result of collecting the elements of a sliding window
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero, or if collector is null
-     * @see #sliding(int, int)
+     * @see #slide(int, int)
      * @see Collectors
      */
     @IntermediateOp
-    public <R> Seq<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, ?, R> collector)
+    public <R> Seq<R, E> slide(final int windowSize, final int increment, final Collector<? super T, ?, R> collector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -7294,8 +7296,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
+                // Seq.of(1, 2, 3).slide(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).slide(2, 1) will return [[1]], not []
                 // Why? we need to check if the queue is not empty?
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
@@ -7611,6 +7613,64 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
 
         }, sorted, cmp, closeHandlers);
+    }
+
+    /**
+     * Returns a new {@code Seq} consisting of elements from this sequence, starting after skipping
+     * the first {@code offset} elements and containing at most {@code maxSize} elements.
+     *
+     * <p>This is a convenience method equivalent to calling {@code skip(offset).limit(maxSize)},
+     * but optimized for common cases:
+     * <ul>
+     *   <li>If {@code offset} is 0, delegates directly to {@link #limit(long)}</li>
+     *   <li>If {@code maxSize} is {@code Long.MAX_VALUE}, delegates directly to {@link #skip(long)}</li>
+     * </ul>
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * // Get elements 3, 4, 5 from a sequence of 1-10
+     * Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+     *    .limit(2, 3)
+     *    .toList();   // Returns [3, 4, 5]
+     *
+     * // Pagination: get page 3 with page size 10 (elements 21-30)
+     * Seq.rangeClosed(1, 100)
+     *    .limit(20, 10)
+     *    .toList();   // Returns [21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+     *
+     * // If offset exceeds sequence size, returns empty sequence
+     * Seq.of(1, 2, 3)
+     *    .limit(5, 10)
+     *    .toList();   // Returns []
+     *
+     * // If fewer elements available than maxSize, returns remaining elements
+     * Seq.of(1, 2, 3, 4, 5)
+     *    .limit(3, 10)
+     *    .toList();   // Returns [4, 5]
+     * }</pre>
+     *
+     * <br />
+     * This is an intermediate operation and will not close the sequence.
+     *
+     * @param offset the number of leading elements to skip before starting to include elements
+     * @param maxSize the maximum number of elements to include in the new sequence
+     * @return a new {@code Seq} consisting of at most {@code maxSize} elements after skipping
+     *         the first {@code offset} elements from this sequence
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative
+     * @see #skip(long)
+     * @see #limit(long)
+     * @see #step(long)
+     */
+    @IntermediateOp
+    public Seq<T, E> limit(final long offset, final long maxSize) throws IllegalStateException, IllegalArgumentException {
+        if (offset == 0) {
+            return maxSize == Long.MAX_VALUE ? this : limit(maxSize);
+        } else if (maxSize == Long.MAX_VALUE) {
+            return skip(offset);
+        } else {
+            return skip(offset).limit(maxSize);
+        }
     }
 
     /**
@@ -8629,6 +8689,104 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> delay(final java.time.Duration duration) throws IllegalStateException, IllegalArgumentException {
         return delay(Duration.ofMillis(duration.toMillis()));
+    }
+
+    /**
+     * Returns a new {@code Seq} that limits elements to at most {@code maxWindowSize} within each
+     * time window of the specified {@code duration}. Elements exceeding the limit within a window
+     * are filtered out (dropped) until the window advances.
+     *
+     * <p>The returned sequence will allow at most {@code maxWindowSize} elements to pass through within
+     * each time window of the specified {@code duration}. Once the limit is reached for the current window,
+     * subsequent elements are filtered out until the time window advances. When the elapsed time exceeds
+     * the duration, the window slides forward and the element counter resets, allowing a new burst of elements.
+     *
+     * <p>This differs from {@link #rateLimited(double)} which spreads permits evenly over time. The {@code debounce}
+     * method allows bursting at the start of each window, making it suitable for scenarios where you want to
+     * limit the total number of operations within a time period rather than enforcing a steady rate.
+     *
+     * <br />
+     * This is an intermediate operation and will not close the sequence.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Allow at most 5 elements per second
+     * Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+     *     .debounce(5, Duration.ofSeconds(1))
+     *     .forEach(Fn.println());   // Only first 5 elements pass through immediately
+     *
+     * // Throttle log messages to at most 10 per minute
+     * Seq.of(logMessages)
+     *     .debounce(10, Duration.ofMinutes(1))
+     *     .forEach(msg -> logger.info(msg));
+     *
+     * // Limit API requests to 100 per hour
+     * Seq.of(requests)
+     *     .debounce(100, Duration.ofHours(1))
+     *     .forEach(this::processRequest);
+     * }</pre>
+     *
+     * <p><b>Behavior Details:</b></p>
+     * <ul>
+     *   <li>The time window starts when the first element is processed</li>
+     *   <li>Elements within the limit are emitted immediately without delay</li>
+     *   <li>Elements exceeding the limit within the window are silently dropped (filtered out)</li>
+     *   <li>When the current time exceeds the window duration, the window advances and the counter resets</li>
+     *   <li>The implementation uses {@link System#currentTimeMillis()} for time tracking</li>
+     * </ul>
+     *
+     * <p><b>Comparison with {@code rateLimited}:</b></p>
+     * <pre>{@code
+     * // debounce: allows bursting, then blocks until next window
+     * // Timeline: [e1,e2,e3,e4,e5]----gap----[e6,e7,e8,e9,e10]...
+     * seq.debounce(5, Duration.ofSeconds(1));
+     *
+     * // rateLimited: spreads elements evenly over time
+     * // Timeline: e1--e2--e3--e4--e5--e6--e7--e8--e9--e10...
+     * seq.rateLimited(5.0);  // 5 per second = one every 200ms
+     * }</pre>
+     *
+     * @param maxWindowSize the maximum number of elements to allow within each time window. Must be positive.
+     * @param duration the length of each time window. Must not be {@code null} and must have a positive
+     *                 millisecond value.
+     * @return a new {@code Seq} that limits elements to {@code maxWindowSize} per {@code duration} window
+     * @throws IllegalArgumentException if {@code maxWindowSize} is not positive, or if {@code duration}
+     *         has a non-positive millisecond value
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #filter(Throwables.Predicate)
+     */
+    @IntermediateOp
+    public Seq<T, E> debounce(final int maxWindowSize, final Duration duration) {
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
+        checkArgPositive(duration.toMillis(), cs.duration);
+
+        final Throwables.Predicate<T, E> p = new Throwables.Predicate<>() {
+            private final long durationMillis = duration.toMillis();
+            private long cnt = 0;
+            private long startTime = 0;
+
+            @Override
+            public boolean test(final T e) {
+                final long now = System.currentTimeMillis();
+
+                if (startTime == 0) {
+                    startTime = now;
+                } else if (now - startTime > durationMillis) {
+                    startTime = startTime + (now - startTime) / durationMillis * durationMillis;
+                    cnt = 0;
+                }
+
+                if (cnt++ < maxWindowSize) {
+                    return true;
+                }
+
+                return false;
+            }
+        };
+
+        return filter(p);
     }
 
     /**
@@ -13773,6 +13931,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             };
         } else {
             iter = new Throwables.Iterator<>() {
+
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
@@ -13836,6 +13995,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         iter = stream.iterator();
                     }
                 }
+
             };
         }
 

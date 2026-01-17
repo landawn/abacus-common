@@ -139,6 +139,26 @@ public abstract class AbstractByteType extends NumberType<Number> {
     }
 
     /**
+     * Checks if this type represents a byte type.
+     * This method always returns {@code true} for byte types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * if (type.isByte()) {
+     *     // Handle byte type specific logic
+     *     System.out.println("This is a byte type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a byte type
+     */
+    @Override
+    public boolean isByte() {
+        return true;
+    }
+
+    /**
      * Retrieves a byte value from a ResultSet at the specified column index.
      * This method uses rs.getByte() which returns 0 for SQL NULL values.
      * Subclasses may override this to return {@code null} for SQL NULL values.
@@ -162,26 +182,6 @@ public abstract class AbstractByteType extends NumberType<Number> {
     @Override
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getByte(columnIndex);
-    }
-
-    /**
-     * Checks if this type represents a byte type.
-     * This method always returns {@code true} for byte types.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AbstractByteType type = TypeFactory.getType(Byte.class);
-     * if (type.isByte()) {
-     *     // Handle byte type specific logic
-     *     System.out.println("This is a byte type");
-     * }
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a byte type
-     */
-    @Override
-    public boolean isByte() {
-        return true;
     }
 
     /**

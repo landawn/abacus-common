@@ -16,6 +16,10 @@ package com.landawn.abacus.parser;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.VarHandle;
+import java.lang.invoke.VarHandle.AccessMode;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -854,6 +858,50 @@ public final class ParserUtil {
         synchronized (beanInfoPool) {
             beanInfoPool.remove(beanType);
         }
+    }
+
+    //    static MethodHandle unreflect(final Class<?> entityClass, final Method method) {
+    //        if (method == null) {
+    //            return null;
+    //        }
+    //
+    //        final Lookup lookup = MethodHandles.lookup();
+    //
+    //        try {
+    //            return lookup.unreflect(method);
+    //        } catch (IllegalAccessException e) {
+    //            try {
+    //                final Lookup privateLookup = MethodHandles.privateLookupIn(entityClass, lookup);
+    //
+    //                return privateLookup.unreflect(method);
+    //            } catch (IllegalAccessException e2) {
+    //                logger.debug("Faield to unreflect method: {}, error: {}", method, e);
+    //            }
+    //        }
+    //
+    //        return null;
+    //    }
+
+    static VarHandle unreflect(final Class<?> entityClass, final Field field) {
+        if (field == null) {
+            return null;
+        }
+
+        final Lookup lookup = MethodHandles.lookup();
+
+        try {
+            return lookup.unreflectVarHandle(field);
+        } catch (IllegalAccessException e) {
+            try {
+                final Lookup privateLookup = MethodHandles.privateLookupIn(entityClass, lookup);
+
+                return privateLookup.unreflectVarHandle(field);
+            } catch (IllegalAccessException e2) {
+                logger.debug("Faield to unreflect field: {}, error: {}", field, e);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -2026,6 +2074,12 @@ public final class ParserUtil {
         public final Class<Object> clazz;
 
         /**
+         * Immutable map of all annotations present on this property.
+         * Includes annotations from the field, getter, and setter.
+         */
+        public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
+
+        /**
          * The Field object for direct field access, or {@code null} if property is only accessible via methods.
          */
         public final Field field;
@@ -2040,11 +2094,28 @@ public final class ParserUtil {
          */
         public final Method setMethod;
 
+        final VarHandle fieldHandle;
+
+        //    final MethodHandle getMethodHandle; 
+        //    final MethodHandle setMethodHandle;
+
         /**
-         * Immutable map of all annotations present on this property.
-         * Includes annotations from the field, getter, and setter.
+         * Indicates whether the field is accessible for direct read access.
+         * True if the field exists, is accessible, and not marked for method-only access.
          */
-        public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
+        final boolean isFieldGettable;
+
+        /**
+         * Indicates whether the field is settable directly.
+         * True if the field is accessible and not final (and not in a builder pattern).
+         */
+        final boolean isFieldSettable;
+
+        final boolean isFieldHandleGettable;
+        final boolean isFieldHandleSettable;
+
+        //    final boolean isMethodHandleGettable;
+        //    final boolean isMethodHandleSettable;
 
         /**
          * Array of JSON name tags for custom JSON field naming.
@@ -2055,18 +2126,6 @@ public final class ParserUtil {
          * Array of XML name tags for custom XML element/attribute naming.
          */
         final XmlNameTag[] xmlNameTags;
-
-        /**
-         * Indicates whether the field is accessible for direct read access.
-         * True if the field exists, is accessible, and not marked for method-only access.
-         */
-        final boolean isFieldAccessible;
-
-        /**
-         * Indicates whether the field is settable directly.
-         * True if the field is accessible and not final (and not in a builder pattern).
-         */
-        final boolean isFieldSettable;
 
         /**
          * The date format pattern for formatting/parsing date values.
@@ -2229,11 +2288,29 @@ public final class ParserUtil {
             // Constructor implementation remains the same...
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
-            name = propName;
-            aliases = ImmutableList.of(getAliases(field));
+            this.name = propName;
+            this.aliases = ImmutableList.of(getAliases(field));
+
             this.getMethod = getMethod;
             this.setMethod = setMethod;
             annotations = ImmutableMap.wrap(getAnnotations());
+
+            this.fieldHandle = unreflect(declaringClass, field);
+            //    this.getMethodHandle = unreflect(declaringClass, getMethod);
+            //    this.setMethodHandle = unreflect(declaringClass, setMethod);
+
+            final boolean isAccessFieldByMethod = annotations.containsKey(AccessFieldByMethod.class) || classAnnotations.containsKey(AccessFieldByMethod.class);
+
+            if (field != null && !isAccessFieldByMethod) {
+                ClassUtil.setAccessibleQuietly(field, true);
+            }
+
+            this.isFieldGettable = field != null && !isAccessFieldByMethod && field.isAccessible();
+            this.isFieldSettable = field != null && isFieldGettable && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
+
+            this.isFieldHandleGettable = fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.GET);
+            this.isFieldHandleSettable = fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.SET);
+
             isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
                     || (field != null && Modifier.isTransient(field.getModifiers()));
 
@@ -2250,15 +2327,6 @@ public final class ParserUtil {
 
             jsonNameTags = getJsonNameTags(propName, field);
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
-
-            final boolean isAccessFieldByMethod = annotations.containsKey(AccessFieldByMethod.class) || classAnnotations.containsKey(AccessFieldByMethod.class);
-
-            if (field != null && !isAccessFieldByMethod) {
-                ClassUtil.setAccessibleQuietly(field, true);
-            }
-
-            isFieldAccessible = field != null && !isAccessFieldByMethod && field.isAccessible();
-            isFieldSettable = isFieldAccessible && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
 
             final String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
             final String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
@@ -2401,7 +2469,11 @@ public final class ParserUtil {
             }
 
             try {
-                return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
+                if (isFieldHandleGettable) {
+                    return (T) fieldHandle.get(obj);
+                } else {
+                    return (T) (isFieldGettable ? field.get(obj) : getMethod.invoke(obj));
+                }
             } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2456,7 +2528,9 @@ public final class ParserUtil {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 try {
-                    if (isFieldSettable) {
+                    if (isFieldHandleSettable) {
+                        fieldHandle.set(obj, propValue);
+                    } else if (isFieldSettable) {
                         field.set(obj, propValue);
                     } else if (setMethod != null) {
                         setMethod.invoke(obj, propValue);
@@ -3313,7 +3387,7 @@ public final class ParserUtil {
 
             getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
             setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
-            fieldAccessIndex = (field == null || !isFieldAccessible || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
+            fieldAccessIndex = (field == null || !isFieldGettable || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
                     : fieldAccess.getIndex(field.getName());
         }
 

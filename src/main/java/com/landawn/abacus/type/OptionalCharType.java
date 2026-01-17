@@ -9,6 +9,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -131,7 +132,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     /**
      * Retrieves a character value from a ResultSet at the specified column index and wraps it in an {@link OptionalChar}.
-     * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -154,20 +154,28 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        //    final Object result = rs.getObject(columnIndex);
+        //
+        //    if (result instanceof Character) {
+        //        return OptionalChar.of((Character) result);
+        //    } else if (result instanceof Integer) {
+        //        return OptionalChar.of((char) ((Integer) result).intValue());
+        //    } else {
+        //        final String str = result == null ? null : result.toString();
+        //        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
+        //    }
 
-        if (obj instanceof Character) {
-            return OptionalChar.of((Character) obj);
-        } else if (obj instanceof Integer) {
-            return OptionalChar.of((char) ((Integer) obj).intValue());
+        final String result = rs.getString(columnIndex);
+
+        if (result == null || result.isEmpty()) {
+            return OptionalChar.empty();
         } else {
-            return obj == null ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(obj.toString()));
+            return OptionalChar.of(result.charAt(0));
         }
     }
 
     /**
-     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}.
-     * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
+     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}. 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -190,21 +198,29 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public OptionalChar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        //    final Object result = rs.getObject(columnLabel);
+        //
+        //    if (result instanceof Character) {
+        //        return OptionalChar.of((Character) result);
+        //    } else if (result instanceof Integer) {
+        //        return OptionalChar.of((char) ((Integer) result).intValue());
+        //    } else {
+        //        final String str = result == null ? null : result.toString();
+        //        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
+        //    }
 
-        if (obj instanceof Character) {
-            return OptionalChar.of((Character) obj);
-        } else if (obj instanceof Integer) {
-            return OptionalChar.of((char) ((Integer) obj).intValue());
+        final String result = rs.getString(columnLabel);
+
+        if (result == null || result.isEmpty()) {
+            return OptionalChar.empty();
         } else {
-            return obj == null ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(obj.toString()));
+            return OptionalChar.of(result.charAt(0));
         }
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalChar}.
-     * Characters are stored as integers in the database. If the OptionalChar is {@code null} or empty,
-     * sets the parameter to SQL NULL.
+     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalChar}. 
+     * If the OptionalChar is {@code null} or empty, sets the parameter to SQL NULL.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -228,17 +244,22 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws SQLException {
+        //    if (x == null || x.isEmpty()) {
+        //        stmt.setNull(columnIndex, java.sql.Types.CHAR);
+        //    } else {
+        //        stmt.setInt(columnIndex, x.get());
+        //    }
+
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, java.sql.Types.CHAR);
+            stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setInt(columnIndex, x.get());
+            stmt.setString(columnIndex, String.valueOf(x.get()));
         }
     }
 
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalChar}.
-     * Characters are stored as integers in the database. If the OptionalChar is {@code null} or empty,
-     * sets the parameter to SQL NULL.
+     * If the OptionalChar is {@code null} or empty, sets the parameter to SQL NULL.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -261,10 +282,16 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws SQLException {
+        //    if (x == null || x.isEmpty()) {
+        //        stmt.setNull(parameterName, java.sql.Types.CHAR);
+        //    } else {
+        //        stmt.setInt(parameterName, x.get());
+        //    }
+
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, java.sql.Types.CHAR);
+            stmt.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setInt(parameterName, x.get());
+            stmt.setString(parameterName, String.valueOf(x.get()));
         }
     }
 

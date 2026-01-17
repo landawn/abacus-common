@@ -888,8 +888,8 @@ public class Seq2025Test extends TestBase {
     }
 
     @Test
-    public void testSliding() throws Exception {
-        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5).sliding(3).toList();
+    public void testslide() throws Exception {
+        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5).slide(3).toList();
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(1, 2, 3), windows.get(0));
         assertEquals(Arrays.asList(2, 3, 4), windows.get(1));
@@ -898,7 +898,7 @@ public class Seq2025Test extends TestBase {
 
     @Test
     public void testSlidingWithIncrement() throws Exception {
-        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5, 6).sliding(2, 2).toList();
+        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5, 6).slide(2, 2).toList();
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(1, 2), windows.get(0));
         assertEquals(Arrays.asList(3, 4), windows.get(1));
@@ -1511,5 +1511,292 @@ public class Seq2025Test extends TestBase {
     public void testToDataset() throws Exception {
         Dataset ds = Seq.of(1, 2, 3).toDataset(Arrays.asList("value"));
         assertNotNull(ds);
+    }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() throws Exception {
+        // All elements should pass through when within limit
+        List<Integer> result = Seq.of(1, 2, 3)
+                .debounce(5, Duration.ofSeconds(1))
+                .toList();
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testDebounce_ExceedsWindowLimit() throws Exception {
+        // Only first 3 elements should pass through when limit is 3
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .debounce(3, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testDebounce_ExactlyAtLimit() throws Exception {
+        // Exactly maxWindowSize elements should pass through
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5)
+                .debounce(5, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testDebounce_SingleElementLimit() throws Exception {
+        // Only first element should pass through when limit is 1
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5)
+                .debounce(1, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(Arrays.asList(1), result);
+    }
+
+    @Test
+    public void testDebounce_EmptySeq() throws Exception {
+        // Empty sequence should remain empty
+        List<Integer> result = Seq.<Integer, RuntimeException>empty()
+                .debounce(5, Duration.ofSeconds(1))
+                .toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testDebounce_SingleElement() throws Exception {
+        // Single element within limit should pass through
+        List<Integer> result = Seq.of(42)
+                .debounce(5, Duration.ofSeconds(1))
+                .toList();
+        assertEquals(Arrays.asList(42), result);
+    }
+
+    @Test
+    public void testDebounce_InvalidMaxWindowSize_Zero() throws Exception {
+        // Zero maxWindowSize should throw IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> {
+            Seq.of(1, 2, 3).debounce(0, Duration.ofSeconds(1)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_InvalidMaxWindowSize_Negative() throws Exception {
+        // Negative maxWindowSize should throw IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> {
+            Seq.of(1, 2, 3).debounce(-1, Duration.ofSeconds(1)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_InvalidDuration_Zero() throws Exception {
+        // Zero duration should throw IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> {
+            Seq.of(1, 2, 3).debounce(5, Duration.ofMillis(0)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_InvalidDuration_Negative() throws Exception {
+        // Negative duration should throw IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> {
+            Seq.of(1, 2, 3).debounce(5, Duration.ofMillis(-100)).toList();
+        });
+    }
+
+    @Test
+    public void testDebounce_WindowResetsAfterDuration() throws Exception {
+        // After duration elapses, the window should reset and allow more elements
+        List<Integer> result = new ArrayList<>();
+        Seq.of(1, 2, 3, 4, 5, 6)
+                .debounce(2, Duration.ofMillis(50))
+                .onEach(x -> {
+                    result.add(x);
+                    if (result.size() == 2) {
+                        // Sleep to allow window to reset
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                })
+                .toList();
+
+        // First 2 pass, then window resets after sleep, allowing more to pass
+        assertTrue(result.size() >= 2);
+        assertEquals(Integer.valueOf(1), result.get(0));
+        assertEquals(Integer.valueOf(2), result.get(1));
+    }
+
+    @Test
+    public void testDebounce_MultipleWindowResets() throws Exception {
+        // Test multiple window resets over time
+        AtomicInteger counter = new AtomicInteger(0);
+        List<Integer> passedElements = new ArrayList<>();
+
+        Seq.range(1, 10)
+                .debounce(2, Duration.ofMillis(30))
+                .onEach(x -> {
+                    passedElements.add(x);
+                    counter.incrementAndGet();
+                    // Add small delay between elements to simulate processing
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                })
+                .toList();
+
+        // Due to window resets, more than 2 elements should pass
+        assertTrue(passedElements.size() >= 2);
+    }
+
+    @Test
+    public void testDebounce_LargeWindowSize() throws Exception {
+        // When window size is larger than elements, all should pass
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5)
+                .debounce(1000, Duration.ofSeconds(1))
+                .toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testDebounce_WithNullElements() throws Exception {
+        // Null elements should be handled (passed through if within limit)
+        List<String> result = Seq.of("a", null, "b", null, "c")
+                .debounce(3, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(3, result.size());
+        assertEquals("a", result.get(0));
+        assertNull(result.get(1));
+        assertEquals("b", result.get(2));
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() throws Exception {
+        // Test debounce chained with filter and map
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .filter(x -> x % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, Duration.ofSeconds(10)) // 2, 4, 6
+                .map(x -> x * 10)
+                .toList();
+        assertEquals(Arrays.asList(20, 40, 60), result);
+    }
+
+    @Test
+    public void testDebounce_ShortDuration() throws Exception {
+        // Test with very short duration (1ms)
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5)
+                .debounce(2, Duration.ofMillis(1))
+                .toList();
+        // First 2 should definitely pass, possibly more if windows reset
+        assertTrue(result.size() >= 2);
+        assertEquals(Integer.valueOf(1), result.get(0));
+        assertEquals(Integer.valueOf(2), result.get(1));
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() throws Exception {
+        // Verify that element order is preserved
+        List<Integer> result = Seq.of(5, 3, 1, 4, 2)
+                .debounce(3, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(Arrays.asList(5, 3, 1), result);
+    }
+
+    @Test
+    public void testDebounce_WithStrings() throws Exception {
+        // Test with String elements
+        List<String> result = Seq.of("apple", "banana", "cherry", "date", "elderberry")
+                .debounce(3, Duration.ofSeconds(10))
+                .toList();
+        assertEquals(Arrays.asList("apple", "banana", "cherry"), result);
+    }
+
+    @Test
+    public void testDebounce_IntermediateOperation() throws Exception {
+        // Verify debounce is an intermediate operation (lazy evaluation)
+        AtomicInteger counterBefore = new AtomicInteger(0);
+        AtomicInteger counterAfter = new AtomicInteger(0);
+        var seq = Seq.of(1, 2, 3, 4, 5)
+                .peek(x -> counterBefore.incrementAndGet())
+                .debounce(2, Duration.ofSeconds(10))
+                .peek(x -> counterAfter.incrementAndGet());
+
+        // No elements should be processed yet (lazy evaluation)
+        assertEquals(0, counterBefore.get());
+        assertEquals(0, counterAfter.get());
+
+        // Now trigger terminal operation
+        seq.toList();
+        // All 5 elements pass through the first peek (before debounce)
+        assertEquals(5, counterBefore.get());
+        // Only 2 elements pass through the second peek (after debounce)
+        assertEquals(2, counterAfter.get());
+    }
+
+    @Test
+    public void testDebounce_LongDuration() throws Exception {
+        // Test with long duration (elements should all be in same window)
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .debounce(5, Duration.ofHours(1))
+                .toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testDebounce_CountTerminalOperation() throws Exception {
+        // Test with count() terminal operation
+        long count = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .debounce(4, Duration.ofSeconds(10))
+                .count();
+        assertEquals(4, count);
+    }
+
+    @Test
+    public void testDebounce_ForEachTerminalOperation() throws Exception {
+        // Test with forEach() terminal operation
+        List<Integer> collected = new ArrayList<>();
+        Seq.of(1, 2, 3, 4, 5)
+                .debounce(3, Duration.ofSeconds(10))
+                .forEach(collected::add);
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
+
+    @Test
+    public void testDebounce_FirstTerminalOperation() throws Exception {
+        // Test with first() terminal operation
+        Optional<Integer> first = Seq.of(1, 2, 3, 4, 5)
+                .debounce(3, Duration.ofSeconds(10))
+                .first();
+        assertTrue(first.isPresent());
+        assertEquals(Integer.valueOf(1), first.get());
+    }
+
+    @Test
+    public void testDebounce_ReduceTerminalOperation() throws Exception {
+        // Test with reduce() terminal operation
+        Optional<Integer> sum = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .debounce(4, Duration.ofSeconds(10))
+                .reduce(Integer::sum);
+        assertTrue(sum.isPresent());
+        assertEquals(Integer.valueOf(10), sum.get()); // 1 + 2 + 3 + 4
+    }
+
+    @Test
+    public void testDebounce_AnyMatchTerminalOperation() throws Exception {
+        // Test with anyMatch() terminal operation
+        boolean result = Seq.of(1, 2, 3, 4, 5)
+                .debounce(3, Duration.ofSeconds(10))
+                .anyMatch(x -> x == 2);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testDebounce_AllMatchTerminalOperation() throws Exception {
+        // Test with allMatch() terminal operation
+        boolean result = Seq.of(2, 4, 6, 8, 10)
+                .debounce(3, Duration.ofSeconds(10))
+                .allMatch(x -> x % 2 == 0);
+        assertTrue(result); // 2, 4, 6 all even
     }
 }

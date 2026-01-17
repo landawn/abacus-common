@@ -1748,4 +1748,129 @@ public class LongStream2025Test extends TestBase {
         LongStream stream = s1.zipWith(s2, s3, 0L, 0L, 0L, (x, y, z) -> x + y + z);
         assertArrayEquals(new long[] { 111L, 22, 30L }, stream.toArray());
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        long[] result = LongStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        long[] result = LongStream.of(42L)
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(42L, result[0]);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L)
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(1L, result[0]);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            LongStream.of(1L, 2L, 3L).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            LongStream.of(1L, 2L, 3L).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            LongStream.of(1L, 2L, 3L).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            LongStream.of(1L, 2L, 3L).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        long[] input = new long[1000];
+        for (int i = 0; i < 1000; i++) {
+            input[i] = i;
+        }
+
+        long[] result = LongStream.of(input)
+                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        assertEquals(500, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        long[] result = LongStream.of(10L, 20L, 30L, 40L, 50L)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertArrayEquals(new long[] { 10L, 20L, 30L }, result);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
+                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
+                .map(n -> n * 10)  // 20, 40, 60
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertArrayEquals(new long[] { 20L, 40L, 60L }, result);
+    }
+
+    @Test
+    public void testDebounce_WithRange() {
+        long[] result = LongStream.range(0, 100)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(10, result.length);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, result[i]);
+        }
+    }
 }

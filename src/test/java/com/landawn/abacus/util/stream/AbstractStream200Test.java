@@ -398,14 +398,14 @@ public class AbstractStream200Test extends TestBase {
     }
 
     @Test
-    public void test_sliding() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).sliding(3).toList();
+    public void test_slide() {
+        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).slide(3).toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)), result);
     }
 
     @Test
     public void test_sliding_withIncrement() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).sliding(3, 2).toList();
+        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).slide(3, 2).toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), result);
     }
 

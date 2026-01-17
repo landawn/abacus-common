@@ -127,7 +127,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         final String result = rs.getString(columnIndex);
 
         if (result == null || result.isEmpty()) {
-            return (char) 0;
+            return defaultValue();
         } else {
             return result.charAt(0);
         }
@@ -148,7 +148,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         final String result = rs.getString(columnLabel);
 
         if (result == null || result.isEmpty()) {
-            return (char) 0;
+            return defaultValue();
         } else {
             return result.charAt(0);
         }

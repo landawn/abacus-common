@@ -1,3 +1,8 @@
+### 7.2.0
+* Rename Stream.sliding to Stream.slide
+* Add Stream.debounce
+* Improvements and bug fixes
+
 ### 7.1.2
 * Improvements and bug fixes
 

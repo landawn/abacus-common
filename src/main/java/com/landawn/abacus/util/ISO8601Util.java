@@ -66,10 +66,9 @@ final class ISO8601Util {
         // singleton
     }
 
-    /*
-    /**********************************************************
-    /* Formatting
-    
+    // -------------------------------------------------------------------------
+    // Formatting
+
     /**
      * Formats a date into ISO8601 format using default settings.
      * 
@@ -164,10 +163,9 @@ final class ISO8601Util {
         return sb.toString();
     }
 
-    /*
-    /**********************************************************
-    /* Parsing
-    
+    // -------------------------------------------------------------------------
+    // Parsing
+
     /**
      * Parses a date from an ISO8601 formatted string.
      * 

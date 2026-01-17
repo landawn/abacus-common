@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.parser.entity.XBean;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Profiler;
 
 @Tag("new-test")
 public class ASMUtil100Test extends TestBase {
@@ -24,5 +29,33 @@ public class ASMUtil100Test extends TestBase {
 
         Assertions.assertEquals(firstCall, secondCall);
         Assertions.assertEquals(secondCall, thirdCall);
+    }
+
+    @Test
+    public void test_performance() {
+        XBean xbean = N.fill(XBean.class);
+
+        {
+            BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);
+
+            Profiler.run(1, 100000, 3, "jdk", () -> {
+
+                for (PropInfo propInfo : beanInfo.propInfoList) {
+                    propInfo.getPropValue(xbean);
+                }
+            }).printResult();
+        }
+
+        {
+            BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, true);
+
+            Profiler.run(1, 100000, 3, "asm", () -> {
+
+                for (PropInfo propInfo : beanInfo.propInfoList) {
+                    propInfo.getPropValue(xbean);
+                }
+            }).printResult();
+        }
+
     }
 }

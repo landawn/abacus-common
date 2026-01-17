@@ -1378,4 +1378,134 @@ public class ShortStream2025Test extends TestBase {
         ShortStream stream = s1.zipWith(s2, s3, (short) 0, (short) 0, (short) 0, (x, y, z) -> (short) (x + y + z));
         assertArrayEquals(new short[] { 111, 22, 30 }, stream.toArray());
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertEquals((short) 1, result[0]);
+        assertEquals((short) 2, result[1]);
+        assertEquals((short) 3, result[2]);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        short[] result = ShortStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        short[] result = ShortStream.of((short) 42)
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals((short) 42, result[0]);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals((short) 1, result[0]);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        short[] input = new short[1000];
+        for (int i = 0; i < 1000; i++) {
+            input[i] = (short) i;
+        }
+
+        short[] result = ShortStream.of(input)
+                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        assertEquals(500, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        short[] result = ShortStream.of((short) 10, (short) 20, (short) 30, (short) 40, (short) 50)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals((short) 10, result[0]);
+        assertEquals((short) 20, result[1]);
+        assertEquals((short) 30, result[2]);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 10)
+                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
+                .map(n -> (short) (n * 10))  // 20, 40, 60
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals((short) 20, result[0]);
+        assertEquals((short) 40, result[1]);
+        assertEquals((short) 60, result[2]);
+    }
+
+    @Test
+    public void testDebounce_WithMinMaxValues() {
+        short[] result = ShortStream.of(Short.MIN_VALUE, (short) 0, Short.MAX_VALUE, (short) 1, (short) 2)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertEquals(Short.MIN_VALUE, result[0]);
+        assertEquals((short) 0, result[1]);
+        assertEquals(Short.MAX_VALUE, result[2]);
+    }
 }

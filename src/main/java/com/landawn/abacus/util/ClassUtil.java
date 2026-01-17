@@ -2307,7 +2307,15 @@ public final class ClassUtil {
         try {
             accessibleObject.setAccessible(flag);
         } catch (final Exception e) {
-            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + e.getMessage());
+            final String msg = e.getMessage();
+            final String errorMsg = "Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + msg;
+
+            if (Strings.containsIgnoreCase(msg, "module java.base")) {
+                logger.debug(errorMsg);
+            } else {
+                logger.info(errorMsg);
+            }
+
             return false;
         }
 

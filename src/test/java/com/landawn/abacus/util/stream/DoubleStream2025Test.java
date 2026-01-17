@@ -1319,4 +1319,129 @@ public class DoubleStream2025Test extends TestBase {
         double[] result = stream.toArray();
         assertEquals(3, result.length);
     }
+
+    // ==================== debounce tests ====================
+
+    @Test
+    public void testDebounce_BasicFunctionality() {
+        // Allow 3 elements per 1 second window
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // Only first 3 elements should pass through within the window
+        assertEquals(3, result.length);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_AllElementsPassWhenWithinLimit() {
+        // Allow 10 elements per window, but only 5 elements in stream
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
+                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        // All elements should pass
+        assertEquals(5, result.length);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        double[] result = DoubleStream.empty()
+                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        double[] result = DoubleStream.of(42.5)
+                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(42.5, result[0], 0.001);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
+                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(1.0, result[0], 0.001);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        double[] input = new double[1000];
+        for (int i = 0; i < 1000; i++) {
+            input[i] = i;
+        }
+
+        double[] result = DoubleStream.of(input)
+                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
+                .toArray();
+
+        assertEquals(500, result.length);
+    }
+
+    @Test
+    public void testDebounce_PreservesOrder() {
+        double[] result = DoubleStream.of(10.0, 20.0, 30.0, 40.0, 50.0)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertArrayEquals(new double[] { 10.0, 20.0, 30.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_ChainedWithOtherOperations() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
+                .map(n -> n * 10)  // 20, 40, 60
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertArrayEquals(new double[] { 20.0, 40.0, 60.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_WithSpecialValues() {
+        double[] result = DoubleStream.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 1.0, 2.0)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertTrue(Double.isNaN(result[0]));
+        assertEquals(Double.POSITIVE_INFINITY, result[1], 0.001);
+        assertEquals(Double.NEGATIVE_INFINITY, result[2], 0.001);
+    }
 }

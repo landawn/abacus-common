@@ -166,9 +166,10 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public OptionalShort get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object obj = rs.getObject(columnIndex);
+        final Object result = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
+        return result == null ? OptionalShort.empty()
+                : OptionalShort.of(result instanceof Short num ? num : (result instanceof Number num ? num.shortValue() : Numbers.toShort(result.toString())));
     }
 
     /**
@@ -196,9 +197,10 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public OptionalShort get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object obj = rs.getObject(columnLabel);
+        final Object result = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
+        return result == null ? OptionalShort.empty()
+                : OptionalShort.of(result instanceof Short num ? num : (result instanceof Number num ? num.shortValue() : Numbers.toShort(result.toString())));
     }
 
     /**
