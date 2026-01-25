@@ -1165,7 +1165,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture} with the transformed result.
      */
     @Beta
-    <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
+    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<U>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             @Override

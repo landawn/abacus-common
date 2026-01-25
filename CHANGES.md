@@ -1,1369 +1,1373 @@
-### 7.2.1
+## 7.2.2
 * Naming convention improvements
 * Improvements and bug fixes
 
-### 7.2.0
+## 7.2.1
+* Naming convention improvements
+* Improvements and bug fixes
+
+## 7.2.0
 * Rename Stream.sliding to Stream.slide
 * Add Stream.debounce
 * Improvements and bug fixes
 
-### 7.1.2
+## 7.1.2
 * Improvements and bug fixes
 
-### 7.1.1
+## 7.1.1
 * Improvements and bug fixes
 
-### 7.1.0
+## 7.1.0
 
 * Improves javadoc, unit tests and bug fixes
 
-### 7.0.2
+## 7.0.2
 
 * Improves javadoc, unit tests and bug fixes
 
-### 7.0.1
+## 7.0.1
 
 * Improves javadoc, unit tests and bug fixes
 
-### 7.0.0
+## 7.0.0
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.7
+## 6.26.7
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.6
+## 6.26.6
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.5
+## 6.26.5
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.4
+## 6.26.4
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.3
+## 6.26.3
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.26.2
+## 6.26.2
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.25.12
+## 6.25.12
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.25.11
+## 6.25.11
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.25.10
+## 6.25.10
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.25.3
-
-* Improves javadoc, unit tests and bug fixes
-
-
-### 6.25.2
+## 6.25.3
 
 * Improves javadoc, unit tests and bug fixes
 
 
-### 6.25.1
+## 6.25.2
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.25.0
+
+## 6.25.1
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.3.16
+## 6.25.0
 
 * Improves javadoc, unit tests and bug fixes
 
-### 6.3.15
+## 6.3.16
+
+* Improves javadoc, unit tests and bug fixes
+
+## 6.3.15
 
 * Improves javadoc and unit tests
 
-### 6.3.14
+## 6.3.14
 
 * Improves javadoc and unit tests
 
-### 6.3.13
+## 6.3.13
 
 * Improves javadoc and unit tests
 
-### 6.3.12
+## 6.3.12
 
 * Improves javadoc and unit tests
 
-### 6.3.10
+## 6.3.10
 
 * Improves javadoc and unit tests
 
-### 6.3.9
+## 6.3.9
 
 * Improves javadoc and unit tests
 
-### 6.3.8
+## 6.3.8
 
 * Improves javadoc and unit tests
 
-### 6.3.7
+## 6.3.7
 
 * Improves javadoc and unit tests
 
-### 6.3.6
+## 6.3.6
 
 * Improves javadoc and unit tests
 
-### 6.3.5
+## 6.3.5
 
 * Improves unit tests
 
-### 6.3.4
+## 6.3.4
 
 * Javadoc Improvements and bug fixes.
 
-### 6.3.3
+## 6.3.3
 
 * Javadoc Improvements and bug fixes.
 
-### 6.3.2
+## 6.3.2
 
 * Javadoc Improvements and bug fixes.
 
-### 6.3.0
+## 6.3.0
 
 * Javadoc Improvements and bug fixes.
 
-### 6.2
+## 6.2
 
 * Javadoc Improvements and bug fixes.
 
-### 6.1
+## 6.1
 
 * Javadoc Improvements and bug fixes.
 
-### 6.0
+## 6.0
 
 * Javadoc Improvements and bug fixes.
 
-### 5.8.9
+## 5.8.9
 
 * Javadoc Improvements and bug fixes.
 
-### 5.8.8
+## 5.8.8
 
 * Improvements and bug fixes.
 
-### 5.8.7
+## 5.8.7
 
 * Improvements and bug fixes.
 
-### 5.8.6
+## 5.8.6
 
 * Improvements and bug fixes.
 
-### 5.8.5
+## 5.8.5
 
 * Improvements and bug fixes.
 
-### 5.8.4
+## 5.8.4
 
 * Improvements and bug fixes.
 
-### 5.8.3
+## 5.8.3
 
 * Improvements and bug fixes.
 
-### 5.8.2
+## 5.8.2
 
 * Improvements and bug fixes.
 
-### 5.8.1
+## 5.8.1
 
 * Add `ExcelUtil.java`.
 * Improvements and bug fixes.
 
-### 5.8.0
+## 5.8.0
 
 * Improvements and bug fixes.
 
-### 5.7.13
+## 5.7.13
 
 * Rename `DateUtil` to `Dates`.
 * Improvements and bug fixes.
 
-### 5.7.12
+## 5.7.12
 
 * Improvements and bug fixes.
 
-### 5.7.11
+## 5.7.11
 
 * Improvements and bug fixes.
 
-### 5.7.10
+## 5.7.10
 
 * Improvements and bug fixes.
 
-### 5.7.9
+## 5.7.9
 
 * Improvements and bug fixes.
 
-### 5.7.8
+## 5.7.8
 
 * Add `RegExUtil.remove/replaceAll/First/Last/matchResults/matchIndices`.
 * Improvements and bug fixes.
 
-### 5.7.7
+## 5.7.7
 
 * Add `Strings.replaceAll/First/LastByPattern`.
 * Improvements and bug fixes.
 
-### 5.7.6
+## 5.7.6
 
 * Improvements and bug fixes.
 
-### 5.7.5
+## 5.7.5
 
 * Improvements and bug fixes.
 
-### 5.7.4
+## 5.7.4
 
 * Improvements and bug fixes.
 
-### 5.7.3
+## 5.7.3
 
 * Add `PoolStats` to `Pool`
 * Improvements and bug fixes.
 
-### 5.7.2
+## 5.7.2
 
 * Rename `IOUtil.parse` to `IOUtil.forLines`
 * Improvements and bug fixes.
 
-### 5.7.1
+## 5.7.1
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.7.0
+## 5.7.0
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.12
+## 5.6.12
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.11
+## 5.6.11
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.10
+## 5.6.10
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.9
+## 5.6.9
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.8
+## 5.6.8
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.7
-### 5.6.6
+## 5.6.7
+## 5.6.6
 
 * Improve javaDoc by `Intellij`
 * Improvements and bug fixes by `Intellij`
 
-### 5.6.5
+## 5.6.5
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
 
-### 5.6.4
+## 5.6.4
 
 * Improve javaDoc
 * Refactoring `Stream.parallelZip` methods.
 * Refactoring `Stream.parallelMerge` methods.
 
-### 5.6.3
+## 5.6.3
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.2
+## 5.6.2
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.1
+## 5.6.1
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.6.0
+## 5.6.0
 
 * Add/improve javaDoc
 * Rename `CheckedStream` to `Seq`
 * Clean up stream APIs
 * Improvements and bug fixes.
 
-### 5.3.30
+## 5.3.30
 
 * Improve javaDoc
 * Improvements and bug fixes.
 
-### 5.3.29
+## 5.3.29
 
 * Improvements and bug fixes.
 
-### 5.3.28
+## 5.3.28
 
 * Improvements and bug fixes.
 
-### 5.3.27
+## 5.3.27
 
 * Improvements and bug fixes.
 
-### 5.3.26
+## 5.3.26
 
 * Improvements and bug fixes.
 
-### 5.3.25
+## 5.3.25
 
 * Improvements and bug fixes.
 
-### 5.3.24
+## 5.3.24
 
 * Add `splitByChunkCount`.
 * Improvements and bug fixes.
 
-### 5.3.23
+## 5.3.23
 
 * Improvements Javadoc.
 * Improvements and bug fixes.
 
-### 5.3.22
+## 5.3.22
 
 * Improvements Javadoc.
 * Improvements and bug fixes.
 
-### 5.3.21
+## 5.3.21
 
 * Improvements Javadoc.
 * Improvements and bug fixes.
 
-### 5.3.20
+## 5.3.20
 
 * Improvements Javadoc.
 * Improvements and bug fixes.
 
-### 5.3.19
+## 5.3.19
 
 * Improvements Javadoc.
 * Improvements and bug fixes.
 
-### 5.3.18
+## 5.3.18
 
 * Improvements and bug fixes.
 
-### 5.3.17
+## 5.3.17
 
 * Refactoring `Dataset` and `Sheet`.
 * Improvements and bug fixes.
 
-### 5.3.16
+## 5.3.16
 
 * Improvements and bug fixes.
 
-### 5.3.15
+## 5.3.15
 
 * Improvements and bug fixes.
 
-### 5.3.14
+## 5.3.14
 
 * Improvements and bug fixes.
 
-### 5.3.13
+## 5.3.13
 
 * Improvements and bug fixes.
 
-### 5.3.12
+## 5.3.12
 
 * Improvements and bug fixes.
 
-### 5.3.11
+## 5.3.11
 
 * Improvements and bug fixes.
 
-### 5.3.10
+## 5.3.10
 
 * Improvements and bug fixes.
 
-### 5.3.9
+## 5.3.9
 
 * Improvements and bug fixes.
 
-### 5.3.8
+## 5.3.8
 
 * Improvements and bug fixes.
 
-### 5.3.7
+## 5.3.7
 
 * Improvements and bug fixes.
 
-### 5.3.6
+## 5.3.6
 
 * Improvements and bug fixes.
 
-### 5.3.5
+## 5.3.5
 
 * Improvements and bug fixes.
 
-### 5.3.4
+## 5.3.4
 
 * Improvements and bug fixes.
 
-### 5.3.3
+## 5.3.3
 
 * Improvements and bug fixes.
 
-### 5.3.2
+## 5.3.2
 
 * Improvements and bug fixes.
 
-### 5.3.1
+## 5.3.1
 
 * Improvements and bug fixes.
 
-### 5.3.0
+## 5.3.0
 
 * Improvements and bug fixes.
 
-### 5.2.4
+## 5.2.4
 
 * Improvements and bug fixes.
 
-### 5.2.3
+## 5.2.3
 
 * Improvements and bug fixes.
 
-### 5.2.2
+## 5.2.2
 
 * Improvements and bug fixes.
 
-### 5.2.1
+## 5.2.1
 
 * Improvements and bug fixes.
 
-### 5.2.0
+## 5.2.0
 
 * Improvements and bug fixes.
 
-### 5.1.1
+## 5.1.1
 
 * Improvements and bug fixes.
 
-### 5.1.0
+## 5.1.0
 
 * Improvements and bug fixes.
 
-### 5.0.0
+## 5.0.0
 
 * Rename `toJSON/XML, fromJSON/XML` to `toJson/Xml, fromJson/Xml`.
 * Improvements and bug fixes.
 
-### 3.12.14
+## 3.12.14
 
 * Improvements and bug fixes.
 
-### 3.12.13
+## 3.12.13
 
 * Improvements and bug fixes.
 
-### 3.12.12
+## 3.12.12
 
 * Improvements and bug fixes.
 
-### 3.12.11
+## 3.12.11
 
 * Improvements and bug fixes.
 
-### 3.12.10
+## 3.12.10
 
 * Improvements and bug fixes.
 
-### 3.12.9
+## 3.12.9
 
 * Improvements and bug fixes.
 
-### 3.12.8
+## 3.12.8
 
 * Improvements and bug fixes.
 
-### 3.12.7
+## 3.12.7
 
 * Improvements and bug fixes.
 
-### 3.12.6
+## 3.12.6
 
 * Improvements and bug fixes.
 
-### 3.12.5
+## 3.12.5
 
 * Improvements and bug fixes.
 
-### 3.12.4
+## 3.12.4
 
 * Improvements and bug fixes.
 
-### 3.12.3
+## 3.12.3
 
 * Improvements and bug fixes.
 
-### 3.12.2
+## 3.12.2
 
 * Improvements and bug fixes.
 
-### 3.12.1
+## 3.12.1
 
 * Improvements and bug fixes.
 
-### 3.12.0
+## 3.12.0
 
 * Change the position of parameter `targetType`, `targetClass` and `output`.
 
-### 3.11.7
+## 3.11.7
 
 * Improvements and bug fixes.
 
-### 3.11.6
+## 3.11.6
 
 * Improvements and bug fixes.
 
-### 3.11.5
+## 3.11.5
 
 * Improvements and bug fixes.
 
-### 3.11.4
+## 3.11.4
 
 * Improvements and bug fixes.
 
-### 3.11.3
+## 3.11.3
 
 * Improvements and bug fixes.
 
-### 3.11.2
+## 3.11.2
 
 * Improvements and bug fixes.
 
-### 3.11.1
+## 3.11.1
 
 * Improvements and bug fixes.
 
-### 3.11.0
+## 3.11.0
 
 * Refactoring: `DateUtil.format(Writer...)` to `DateUtil.formatTo(Appendable...)`.
 * Refactoring: `Type.write(Writer...)` to `DateUtil.appendTo(Appendable...)`.
 
-### 3.10.23
+## 3.10.23
 
 * Improvements and bug fixes.
 
-### 3.10.22
+## 3.10.22
 
 * Improvements and bug fixes.
 
-### 3.10.21
+## 3.10.21
 
 * Improvements and bug fixes.
 
-### 3.10.20
+## 3.10.20
 
 * Improvements and bug fixes.
 
-### 3.10.19
+## 3.10.19
 
 * Improvements and bug fixes.
 
-### 3.10.18
+## 3.10.18
 
 * Improvements and bug fixes.
 
-### 3.10.17
+## 3.10.17
 
 * Improvements and bug fixes.
 
-### 3.10.16
+## 3.10.16
 
 * Improvements and bug fixes.
 
-### 3.10.15
+## 3.10.15
 
 * Support joins.
 
-### 3.10.14
+## 3.10.14
 
 * Improvements and bug fix.
 
-### 3.10.13
+## 3.10.13
 
 * Improvements and bug fix.
 
-### 3.10.12
+## 3.10.12
 
 * Improvements and bug fix.
 
-### 3.10.11
+## 3.10.11
 
 * Improvements and bug fix.
 
-### 3.10.10
+## 3.10.10
 
 * Improvements and bug fix.
 
-### 3.10.9
+## 3.10.9
 
 * Improvements and bug fix.
 
-### 3.10.8
+## 3.10.8
 
 * Improvements and bug fix.
 
-### 3.10.7
+## 3.10.7
 
 * Improvements and bug fix.
 
-### 3.10.6
+## 3.10.6
 
 * Improvements and bug fix.
 
-### 3.10.5
+## 3.10.5
 
 * Improvements and bug fix.
 
-### 3.10.4
+## 3.10.4
 
 * Improvements and bug fix.
 
-### 3.10.3
+## 3.10.3
 
 * Improvements and bug fix.
 
-### 3.10.2
+## 3.10.2
 
 * Improvements and bug fix.
 
-### 3.10.1
-
-* Improvements and bug fix.
-
-
-### 3.10.0
+## 3.10.1
 
 * Improvements and bug fix.
 
 
-### 3.9.11
-
-* Improvements and bug fix.
-
-### 3.9.10
+## 3.10.0
 
 * Improvements and bug fix.
 
 
-### 3.9.9
+## 3.9.11
+
+* Improvements and bug fix.
+
+## 3.9.10
 
 * Improvements and bug fix.
 
 
-### 3.9.8
+## 3.9.9
 
 * Improvements and bug fix.
 
 
-### 3.9.7
+## 3.9.8
 
 * Improvements and bug fix.
 
 
-### 3.9.6
+## 3.9.7
 
 * Improvements and bug fix.
 
 
-### 3.9.5
+## 3.9.6
 
 * Improvements and bug fix.
 
 
-### 3.9.4
+## 3.9.5
 
 * Improvements and bug fix.
 
 
-### 3.9.3
+## 3.9.4
 
 * Improvements and bug fix.
 
 
-### 3.9.2
+## 3.9.3
 
 * Improvements and bug fix.
 
 
-### 3.9.1
+## 3.9.2
 
 * Improvements and bug fix.
 
 
-### 3.9.0
+## 3.9.1
 
 * Improvements and bug fix.
 
 
-### 3.8.3
+## 3.9.0
 
 * Improvements and bug fix.
 
 
-### 3.8.2
+## 3.8.3
 
 * Improvements and bug fix.
 
 
-### 3.8.1
+## 3.8.2
 
 * Improvements and bug fix.
 
 
-### 3.8.0
+## 3.8.1
 
 * Improvements and bug fix.
 
 
-### 3.7.12
+## 3.8.0
 
 * Improvements and bug fix.
 
 
-### 3.7.11
+## 3.7.12
+
+* Improvements and bug fix.
+
+
+## 3.7.11
 
 * Add `Stream.saveEach`.
 * Improvements and bug fix.
 
 
-### 3.7.10
+## 3.7.10
 
 * Improvements and bug fix.
 
 
-### 3.7.9
+## 3.7.9
 
 * Improvements and bug fix.
 
 
-### 3.7.8
+## 3.7.8
 
 * Improvements and bug fix.
 
 
-### 3.7.7
+## 3.7.7
 
 * Improvements and bug fix.
 
 
-### 3.7.6
+## 3.7.6
 
 * Improvements and bug fix.
 
 
-### 3.7.5
+## 3.7.5
 
 * Improvements and bug fix.
 
 
-### 3.7.4
+## 3.7.4
 
 * Improvements and bug fix.
 
 
-### 3.7.3
+## 3.7.3
 
 * Improvements and bug fix.
 
 
-### 3.7.2
+## 3.7.2
 
 * Improvements and bug fix.
 
 
-### 3.7.1
+## 3.7.1
 
 * Rename `from` to `create`.
 * Improvements and bug fix.
 
 
-### 3.7.0
+## 3.7.0
 
 * Rename `from` to `create`.
 * Improvements and bug fix.
 
 
-### 3.6.32
+## 3.6.32
 
 * Improvements and bug fix.
 
 
-### 3.6.31
+## 3.6.31
 
 * Improvements and bug fix.
 
 
-### 3.6.30
+## 3.6.30
 
 * Improvements and bug fix.
 
 
-### 3.6.29
+## 3.6.29
 
 * Improvements and bug fix.
 
 
-### 3.6.28
+## 3.6.28
 
 * Improvements and bug fix.
 
 
-### 3.6.27
+## 3.6.27
 
 * Improvements and bug fix.
 
 
-### 3.6.26
+## 3.6.26
 
 * Improvements and bug fix.
 
 
-### 3.6.25
+## 3.6.25
 
 * Improvements and bug fix.
 
 
-### 3.6.24
+## 3.6.24
 
 * Improvements and bug fix.
 
 
-### 3.6.23
+## 3.6.23
 
 * Improvements and bug fix.
 
 
-### 3.6.22
+## 3.6.22
 
 * Add `Dataset.pivot`, `Sheet.sortByRow/sortByColumn`.
 * Improvements and bug fix.
 
 
-### 3.6.21
+## 3.6.21
 
 * Improvements and bug fix.
 
 
-### 3.6.20
+## 3.6.20
 
 * Improvements and bug fix.
 
 
-### 3.6.19
+## 3.6.19
 
 * Improvements and bug fix.
 
 
-### 3.6.18
+## 3.6.18
 
 * Improvements and bug fix.
 
 
-### 3.6.17
+## 3.6.17
 
 * Improvements and bug fix.
 
 
-### 3.6.16
+## 3.6.16
 
 * Improvements and bug fix.
 
 
-### 3.6.15
+## 3.6.15
 
 * Improvements and bug fix.
 
 
-### 3.6.14
+## 3.6.14
 
 * Improvements and bug fix.
 
 
-### 3.6.13
+## 3.6.13
 
 * Improvements and bug fix.
 
 
-### 3.6.12
+## 3.6.12
 
 * Improvements and bug fixes.
 * Improvements and bug fix.
 
 
-### 3.6.11
+## 3.6.11
 
 * Improvements and bug fix.
 
 
-### 3.6.10
+## 3.6.10
 
 * Fix violation reported SonarLint
 * Improvements and bug fix.
 
 
-### 3.6.9
+## 3.6.9
 
 * Improvements and bug fix.
 
 
-### 3.6.8
+## 3.6.8
 
 * Improvements and bug fix.
 
 
-### 3.6.7
+## 3.6.7
 
 * Improvements and bug fix.
 
 
-### 3.6.6
+## 3.6.6
 
 * Improvements and bug fix.
 
 
-### 3.6.5
+## 3.6.5
 
 * Improvements and bug fix.
 
 
-### 3.6.4
+## 3.6.4
 
 * Improvements and bug fix.
 
 
-### 3.6.3
+## 3.6.3
 
 * Improvements and bug fix.
 
 
-### 3.6.2
+## 3.6.2
 
 * Replace name "entity" with "bean".
 
 
-### 3.6.1
+## 3.6.1
 
 * Improvements and bug fix.
 
 
-### 3.6.0
+## 3.6.0
 
 * Improvements and bug fix.
 
 
-### 3.5.26
+## 3.5.26
 
 * Improvements and bug fix.
 
 
-### 3.5.25
+## 3.5.25
 
 * Improvements and bug fix.
 
 
-### 3.5.24
+## 3.5.24
 
 * Improvements and bug fix.
 
 
-### 3.5.23
+## 3.5.23
 
 * Improvements and bug fix.
 
 
-### 3.5.22
+## 3.5.22
 
 * Improvements and bug fix.
 
 
-### 3.5.21
+## 3.5.21
 
 * Improvements and bug fix.
 
 
-### 3.5.20
+## 3.5.20
 
 * Improvements and bug fix.
 
 
-### 3.5.19
+## 3.5.19
 
 * Improvements and bug fix.
 
 
-### 3.5.18
+## 3.5.18
 
 * Improvements and bug fix.
 
 
-### 3.5.17
+## 3.5.17
 
 * Improvements and bug fix.
 
 
-### 3.5.16
+## 3.5.16
 
 * Improvements and bug fix.
 
 
-### 3.5.15
+## 3.5.15
 
 * Improvements and bug fix.
 
 
-### 3.5.14
+## 3.5.14
 
 * Improvements and bug fix.
 
 
-### 3.5.13
+## 3.5.13
 
 * Improvements and bug fix.
 
 
-### 3.5.12
+## 3.5.12
 
 * Improvements and bug fix.
 
 
-### 3.5.11
+## 3.5.11
 
 * Improvements and bug fix.
 
 
-### 3.5.10
+## 3.5.10
 
 * Improvements and bug fix.
 
 
-### 3.5.9
+## 3.5.9
 
 * Improvements and bug fix.
 
 
-### 3.5.8
+## 3.5.8
 
 * Improvements and bug fix.
 
 
-### 3.5.7
+## 3.5.7
 
 * Improvements and bug fix.
 
 
-### 3.5.6
+## 3.5.6
 
 * Improvements and bug fix.
 
 
-### 3.5.5
+## 3.5.5
 
 * Improvements and bug fix.
 
 
-### 3.5.4
+## 3.5.4
 
 * Improvements and bug fix.
 
 
-### 3.5.3
+## 3.5.3
 
 * Improvements and bug fix.
 
 
-### 3.5.2
+## 3.5.2
 
 * Improvements and bug fix.
 
 
-### 3.5.1
+## 3.5.1
 
 * Improvements and bug fix.
 
 
-### 3.5.0
+## 3.5.0
 
 * Improvements and bug fix.
 
 
-### 3.4.3
+## 3.4.3
 
 * Improvements and bug fix.
 
 
-### 3.4.2
+## 3.4.2
 
 * Improvements and bug fix.
 
 
-### 3.4.1
+## 3.4.1
 
 * Improvements and bug fix.
 
 
-### 3.4.0
+## 3.4.0
 
 * Improvements and bug fix.
 
 
-### 3.3.10
+## 3.3.10
 
 * Improvements and bug fix.
 
 
-### 3.3.9
+## 3.3.9
 
 * Improvements and bug fix.
 
 
-### 3.3.8
+## 3.3.8
 
 * Improve the performance of JSON parser.
 * Improvements and bug fix.
 
 
-### 3.3.7
+## 3.3.7
 
 * Improvements and bug fix.
 
 
-### 3.3.6
+## 3.3.6
 
 * Improvements and bug fix.
 
 
-### 3.3.5
+## 3.3.5
 
 * Improvements and bug fix.
 
 
-### 3.3.4
+## 3.3.4
 
 * Improvements and bug fix.
 
 
-### 3.3.3
+## 3.3.3
 
 * Improvements and bug fix.
 
 
-### 3.3.2
+## 3.3.2
 
 * Improvements and bug fix.
 
 
-### 3.3.1
+## 3.3.1
 
 * Improvements and bug fix.
 
 
-### 3.3.0
+## 3.3.0
 
 * Improvements and bug fix.
 
 
-### 3.2.12
+## 3.2.12
 
 * Improvements and bug fix.
 
 
-### 3.2.11
+## 3.2.11
 
 * Improvements and bug fix.
 
 
-### 3.2.10
+## 3.2.10
 
 * Improvements and bug fix.
 
 
-### 3.2.9
+## 3.2.9
 
 * Improvements and bug fix.
 
 
-### 3.2.8
+## 3.2.8
 
 * Improvements and bug fix.
 
 
-### 3.2.7
+## 3.2.7
 
 * Improvements and bug fix.
 
 
-### 3.2.6
+## 3.2.6
 
 * Improvements and bug fix.
 
 
-### 3.2.5
+## 3.2.5
 
 * Improvements and bug fix.
 
 
-### 3.2.4
+## 3.2.4
 
 * Improvements and bug fix.
 
 
-### 3.2.3
+## 3.2.3
 
 * Improvements and bug fix.
 
 
-### 3.2.2
+## 3.2.2
 
 * Improvements and bug fix.
 
 
-### 3.2.1
+## 3.2.1
 
 * Improvements and bug fix.
 
 
-### 3.1.9
+## 3.1.9
 
 * Rename `StringUtli` to `Strings` to Keep consistent with `Numbers`, `Iterators` and `Iterables`.
 * Improvements and bug fix.
 
 
-### 3.1.9
+## 3.1.9
 
 * Improvements and bug fix.
 
 
-### 3.1.7
+## 3.1.7
 
 * Improvements and bug fix.
 
 
-### 3.1.1
+## 3.1.1
 
 * Improvements and bug fix.
 
 
-### 2.3.17
+## 2.3.17
 
 * Improvements and bug fix.
 
 
-### 2.3.16
+## 2.3.16
 
 * Improvements and bug fix.
 
 
-### 2.3.15
+## 2.3.15
 
 * Improvements and bug fix.
 
 
-### 2.3.14
+## 2.3.14
 
 * Improvements and bug fix.
 
 
-### 2.3.13
+## 2.3.13
 
 * Improvements and bug fix.
 
 
-### 2.3.12
+## 2.3.12
 
 * Improvements and bug fix.
 
 
-### 2.3.11
+## 2.3.11
 
 * Improvements and bug fix.
 
 
-### 2.3.10
+## 2.3.10
 
 * Improvements and bug fix.
 
 
-### 2.3.9
+## 2.3.9
 
 * Improvements and bug fix.
 
 
-### 2.3.8
+## 2.3.8
 
 * Improvements and bug fix.
 
 
-### 2.3.7
+## 2.3.7
 
 * Improvements and bug fix.
 
 
-### 2.3.6
+## 2.3.6
 
 * Support `Record`.
 * Improvements and bug fix.
 
 
-### 2.3.5
+## 2.3.5
 
 * Improvements and bug fix.
 
 
-### 2.3.4
+## 2.3.4
 
 * Improvements and bug fix.
 
 
-### 2.3.3
+## 2.3.3
 
 * Improvements and bug fix.
 
 
-### 2.3.2
+## 2.3.2
 
 * Create `abacus-cache`.
 * Create `abacus-web`.
@@ -1371,456 +1375,456 @@
 * Improvements and bug fix.
 
 
-### 2.3.1
+## 2.3.1
 
 * Improvements and bug fix.
 
 
-### 2.3.0
+## 2.3.0
 
 * Improvements and bug fix.
 
 
-### 2.2.22
+## 2.2.22
 
 * Improvements and bug fix.
 
 
-### 2.2.21
+## 2.2.21
 
 * Improvements and bug fix.
 
 
-### 2.2.20
+## 2.2.20
 
 * Improvements and bug fix.
 
 
-### 2.2.19
+## 2.2.19
 
 * Improvements and bug fix.
 
 
-### 2.2.18
+## 2.2.18
 
 * Improvements and bug fix.
 
 
-### 2.2.17
+## 2.2.17
 
 * Improvements and bug fix.
 
 
-### 2.2.16
+## 2.2.16
 
 * Improvements and bug fix.
 
 
-### 2.2.15
+## 2.2.15
 
 * Improvements and bug fix.
 
 
-### 2.2.14
+## 2.2.14
 
 * Improvements and bug fix.
 
 
-### 2.2.13
+## 2.2.13
 
 * Improvements and bug fix.
 
 
-### 2.2.12
+## 2.2.12
 
 * Improvements and bug fix.
 
 
-### 2.2.11
+## 2.2.11
 
 * Improvements and bug fix.
 
 
-### 2.2.10
+## 2.2.10
 
 * Improvements and bug fix.
 
 
-### 2.2.9
+## 2.2.9
 
 * Improvements and bug fix.
 
 
-### 2.2.8
+## 2.2.8
 
 * Improvements and bug fix.
 
 
-### 2.2.7
+## 2.2.7
 
 * Improvements and bug fix.
 
 
-### 2.2.6
+## 2.2.6
 
 * Improvements and bug fix.
 
 
-### 2.2.5
+## 2.2.5
 
 * Improvements and bug fix.
 
 
-### 2.2.4
+## 2.2.4
 
 * Improvements and bug fix.
 
 
-### 2.2.3
+## 2.2.3
 
 * Improvements and bug fix.
 
 
-### 2.2.2
+## 2.2.2
 
 * Improvements and bug fix.
 
 
-### 2.2.1
+## 2.2.1
 
 * Improvements and bug fix.
 
 
-### 2.2.0
+## 2.2.0
 
 * Rename to abacus-common
 
 
-### 2.1.12
+## 2.1.12
 
 * Improvements and bug fix.
 
 
-### 2.1.11
+## 2.1.11
 
 * Improvements and bug fix.
 
 
-### 2.1.10
+## 2.1.10
 
 * Improvements and bug fix.
 
 
-### 2.1.9
+## 2.1.9
 
 * Add `CSVParser` and `CSVUtil`.
 * Improvements and bug fix.
 
 
-### 2.1.8
+## 2.1.8
 
 * Improvements and bug fix.
 
 
-### 2.1.7
+## 2.1.7
 
 * Add `MoreStringUtil`
 * Improvements and bug fix.
 
 
-### 2.1.6
+## 2.1.6
 
 * Improvements and bug fix.
 
 
-### 2.1.5
+## 2.1.5
 
 * Improvements and bug fix.
 
 
-### 2.1.4
+## 2.1.4
 
 * Improvements and bug fix.
 
 
-### 2.1.3
+## 2.1.3
 
 * Improvements and bug fix.
 
 
-### 2.1.2
+## 2.1.2
 
 * Improvements and bug fix.
 
 
-### 2.1.1
+## 2.1.1
 
 * Improvements and bug fix.
 
 
-### 2.1.0
+## 2.1.0
 
 * A new release.
 
 
-### 2.0.3
+## 2.0.3
 
 * Improvements and bug fix.
 
 
-### 2.0.2
+## 2.0.2
 
 * Improvements and bug fix.
 
 
-### 2.0.1
+## 2.0.1
 
 * Improvements and bug fix.
 
 
-### 2.0
+## 2.0
 
 * A new release.
 
 
-### 1.22.3
+## 1.22.3
 
 * Improvements and bug fix.
 
 
-### 1.22.2
+## 1.22.2
 
 * Improvements and bug fix.
 
 
-### 1.22.1
+## 1.22.1
 
 * Improvements and bug fix.
 
 
-### 1.22.0
+## 1.22.0
 
 * Improvements and bug fix.
 
 
-### 1.21.13
+## 1.21.13
 
 * Improvements and bug fix.
 
 
-### 1.21.12
+## 1.21.12
 
 * Improvements and bug fix.
 
 
-### 1.21.11
+## 1.21.11
 
 * Improvements and bug fix.
 
 
-### 1.21.10
+## 1.21.10
 
 * Improvements and bug fix.
 
 
-### 1.21.9
+## 1.21.9
 
 * Improvements and bug fix.
 
 
-### 1.21.8
+## 1.21.8
 
 * Improvements and bug fix.
 
 
-### 1.21.7
+## 1.21.7
 
 * Improvements and bug fix.
 
 
-### 1.21.6
+## 1.21.6
 
 * Improvements and bug fix.
 
 
-### 1.21.5
+## 1.21.5
 
 * Improvements and bug fix.
 
 
-### 1.21.4
+## 1.21.4
 
 * Improvements and bug fix.
 
 
-### 1.21.3
+## 1.21.3
 
 * Improvements and bug fix.
 
 
-### 1.21.2
+## 1.21.2
 
 * Improvements and bug fix.
 
 
-### 1.21.1
+## 1.21.1
 
 * Improvements and bug fix.
 
 
-### 1.21.0
+## 1.21.0
 
 * Add `JsonXmlValue` and `JsonXmlCreator`.
 * Improvements and bug fix.
 
 
-### 1.20.39
+## 1.20.39
 
 * Refactoring `SQLBuilder`.
 * Improvements and bug fix.
 
 
-### 1.20.38
+## 1.20.38
 
 * Remove primitive pairs/triples.
 * Improvements and bug fix.
 
 
-### 1.20.37
+## 1.20.37
 
 * Improvements and bug fix.
 
 
-### 1.20.36
+## 1.20.36
 
 * Improvements and bug fix.
 
 
-### 1.20.35
+## 1.20.35
 
 * Improvements and bug fix.
 
 
-### 1.20.34
+## 1.20.34
 
 * Improvements and bug fix.
 
 
-### 1.20.33
+## 1.20.33
 
 * Remove `OKHttpClient` and `OKHttpRequest`.
 * Improvements and bug fix.
 
 
-### 1.20.32
+## 1.20.32
 
 * Replace `Stream.splitBy` with `Stream.splitAt`.
 * Improvements and bug fix.
 
 
-### 1.20.31
+## 1.20.31
 
 * Move `CSVUtil` to `abacus-jdbc`.
 * Move `ExceptionalStream.rows(...)` to `JdbcUtil.stream(...)` in `abacus-common`.
 * Improvements and bug fix.
 
 
-### 1.20.30
+## 1.20.30
 
 * Rename `Stream.carry` to `Stream.onEach`.
 * Improvements and bug fix.
 
 
-### 1.20.29
+## 1.20.29
 
 * Add `Stream.from(Supplier<Stream<T>> supplier)`.
 * Improvements and bug fix.
 
 
-### 1.20.28
+## 1.20.28
 
 * Add `Optional/Nullable/OptionalBoolean/OptionalInt/...OptionalDouble.mapToNonNull`.
 * Add `N.merge(Dataset...)`.
 * Improvements and bug fix.
 
 
-### 1.20.27
+## 1.20.27
 
 * Remove `DatasetUtil`.
 * Improvements and bug fix.
 
 
-### 1.20.26
+## 1.20.26
 
 * Add `Dataset.toMergedEntities`.
 * Improvements and bug fix.
 
 
-### 1.20.25
+## 1.20.25
 
 * Improvements and bug fix.
 
 
-### 1.20.24
+## 1.20.24
 
 * Improvements and bug fix.
 
 
-### 1.20.23
+## 1.20.23
 
 * Replace `Functions/Consumers.convert` with `Fn/Fnn.c2f/f2c`.
 * Improvements and bug fix.
 
 
-### 1.20.22
+## 1.20.22
 
 * Improvements and bug fix.
 
 
-### 1.20.21
+## 1.20.21
 
 * Improvements and bug fix.
 
 
-### 1.20.20
+## 1.20.20
 
 * Improvements and bug fix.
 
 
-### 1.20.19
+## 1.20.19
 
 * Improvements and bug fix.
 
 
-### 1.20.18
+## 1.20.18
 
 * Add `SQLBuilder.append(Condition)`.
 * Improvements and bug fix.
 
 
-### 1.20.17
+## 1.20.17
 
 * Move `Primitives.box/unbox` to `Array.box/unbox`.
 * Improvements and bug fix.
 
 
-### 1.20.16
+## 1.20.16
 
 * Improvements and bug fix.
 
 
-### 1.20.15
+## 1.20.15
 
 * Add `JSONHttpMessageConverter`.
 * Improvements and bug fix.
 
 
-### 1.20.14
+## 1.20.14
 
 * Improvements and bug fix.
 
 
-### 1.20.13
+## 1.20.13
 
 * Add `JSONParser.stream`.
 * Refactoring: change `Multimap.removeAll(Map<? extends K, ? extends E>)` to `Multimap.removeAll(Map<?, ? Collection<?>>)`.
@@ -1828,95 +1832,95 @@
 * Improvements and bug fix.
 
 
-### 1.20.12
+## 1.20.12
 
 * Improve `Index`.
 * Improvements and bug fix.
 
 
-### 1.20.11
+## 1.20.11
 
 * Improvements and bug fix.
 
 
-### 1.20.10
+## 1.20.10
 
 * Add `N.moveRange/replaceRange`.
 * Improvements and bug fix.
 
 
-### 1.20.9
+## 1.20.9
 
 * Add `JsonXmlConfig`.
 * Improvements and bug fix.
 
 
-### 1.20.8
+## 1.20.8
 
 * Improvements and bug fix.
 
 
-### 1.20.7
+## 1.20.7
 
 * Add `@Stateful`.
 * Improvements and bug fix.
 
 
-### 1.20.6
+## 1.20.6
 
 * Improvements and bug fix.
 
 
-### 1.20.5
+## 1.20.5
 
 * Improvements and bug fix.
 
 
-### 1.20.4
+## 1.20.4
 
 * Rename `Stream.flat` to `Stream.flattern`.
 * Rename `Nth` to `MergeResult`.
 * Improvements and bug fix.
 
 
-### 1.20.3
+## 1.20.3
 
 * Improvements and bug fix.
 
 
-### 1.20.2
+## 1.20.2
 
 * Improvements and bug fix.
 
 
-### 1.20.1
+## 1.20.1
 
 * Rename `NamedSQL` to `ParsedSql`.
 * Improvements and bug fix.
 
 
-### 1.20
+## 1.20
 
 * Improvements and bug fix.
 
 
-### 1.10.13
+## 1.10.13
 
 * Improvements and bug fix.
 
 
-### 1.10.12
+## 1.10.12
 
 * Improvements and bug fix.
 
 
-### 1.10.11
+## 1.10.11
 
 * Rename `forEach(Throwables.IndexedConsumer...)` to `forEachIndexed(Throwables.IndexedConsumer...)`. 
 * Improvements and bug fix.
 
 
-### 1.10.10
+## 1.10.10
 
 * Remove `N/Iterables.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`, replaced by `Stream.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`.
 * Add `Stream.crossJoin/innerJoin/.../groupJoin(Stream<U>...)`.
@@ -1924,26 +1928,26 @@
 * Improvements and bug fix.
 
 
-### 1.10.9
+## 1.10.9
 
 * Remove `extends EE.XXX` due to error: `overridden method does not throw java.lang.Throwable`.
 * Improvements and bug fix.
 
 
-### 1.10.8
+## 1.10.8
 
 * Rename `Tuple/Pair/Triple.reversed to reverse`.
 * Add `N.lazyInit/lazyInitialize`.
 * Improvements and bug fix.
 
 
-### 1.10.7
+## 1.10.7
 
 * Add `Stream.skipUntil/groupJoin/rollup`.
 * Improvements and bug fix.
 
 
-### 1.10.6
+## 1.10.6
 
 * Remove `Iterables.iterator/N.iterate(T[] ...a)/N.iterate(Collection<T> ...a)`.
 * Rename `Iterators.limit(offset, count)` to `Iterators.skipAndLimit`.
@@ -1953,13 +1957,13 @@
 * Improvements and bug fix.
 
 
-### 1.10.5
+## 1.10.5
 
 * Add `N.topp` to `N.top`.
 * Improvements and bug fix.
 
 
-### 1.10.4
+## 1.10.4
 
 * Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.
 * Add `ExceptionalStream.toMultimap`.
@@ -1969,288 +1973,288 @@
 * Improvements and bug fix.
 
 
-### 1.10.3
+## 1.10.3
 
 * Move functional interfaces from `Try` to `Throwables`.
 * Improvements and bug fix.
 
 
-### 1.10.1
+## 1.10.1
 
 * Improvements and bug fix.
 
 
-### 1.10.0
+## 1.10.0
 
 * Remove `AbacusException`.
 * Improvements and bug fix.
 
 
-### 1.10
+## 1.10
 
 * Replace `Collectors.summing/averagingIntt/longg/doubble` with `Collectors.summing/averagingInt/long/doubleForNonEmpty`.
 
 * Improvements and bug fix.
 
 
-### 1.9.23
+## 1.9.23
 
 * Improvements and bug fix.
 
 
-### 1.9.22
+## 1.9.22
 
 * Improvements and bug fix.
 
 
-### 1.9.21
+## 1.9.21
 
 * Improvements and bug fix.
 
 
-### 1.9.20
+## 1.9.20
 
 * Improvements and bug fix.
 
 
-### 1.9.19
+## 1.9.19
 
 * Add `AccessFieldByMethod`.
 * Improvements and bug fix.
 
 
-### 1.9.18
+## 1.9.18
 
 * Improvements and bug fix.
 
 
-### 1.9.17
+## 1.9.17
 
 * Improvements and bug fix.
 
 
-### 1.9.16
+## 1.9.16
 
 * Rename `ClassUtil.getPropGetMethodList/getPropSetMethodList` to `ClassUtil.getPropGetMethods/getPropSetMethods`.
 
 * Improvements and bug fix.
 
 
-### 1.9.15
+## 1.9.15
 
 * Improvements and bug fix.
 
 
-### 1.9.14
+## 1.9.14
 
 * Improvements and bug fix.
 
 
-### 1.9.13
+## 1.9.13
 
 * Improvements and bug fix.
 
 
-### 1.9.12
+## 1.9.12
 
 * Improvements and bug fix.
 
 
-### 1.9.11
+## 1.9.11
 
 * add `Stream/ExceptionalStream.containsAll/Any`.
 * Improvements and bug fix.
 
 
-### 1.9.10
+## 1.9.10
 
 * add `ExceptionalStream.toDataset`.
 * Improvements and bug fix.
 
 
-### 1.9.9
+## 1.9.9
 
 * add `ExceptionalStream.zip/innerJoin/fullJoin/...`.
 * Improvements and bug fix.
 
 
-### 1.9.8
+## 1.9.8
 
 * Remove `Seq`, replaced by `ExceptionalStream` and `Iterables`.
 * Improvements and bug fix.
 
 
-### 1.9.7
+## 1.9.7
 
 * Rename `Stream.rangeMapp` to `rangeMapToObj`.
 * Improvements and bug fix.
 
 
-### 1.9.6
+## 1.9.6
 
 * Remove `Stream.prepend/appendAlll`.
 * Add `Bastream.appendIfEmpty, apply/acceptIfNotEmpty`.
 * Improvements and bug fix.
 
 
-### 1.9.5
+## 1.9.5
 
 * Rename `EnumType.STRING` to `EnumBy.NAME`.
 * Improvements and bug fix.
 
 
-### 1.9.4
+## 1.9.4
 
 * Improvements and bug fix.
 
 
-### 1.9.3
+## 1.9.3
 
 * Improvements and bug fix.
 
 
-### 1.9.2
+## 1.9.2
 
 * Improvements and bug fix.
 
 
-### 1.9.1
+## 1.9.1
 
 * Move `JdbcUtil/Dao/SQLExecutor/Mapper/SQLBuilder/... ` to a new project: https://github.com/landawn/abacus-jdbc
 
 
-### 1.9.0
+## 1.9.0
 
 * Move `JdbcUtil/Dao/SQLExecutor/Mapper/SQLBuilder/... ` to a new project: https://github.com/landawn/abacus-jdbc
 
 
-### 1.8.22
+## 1.8.22
 
 * Improvements and bug fix.
 
 
-### 1.8.21
+## 1.8.21
 
 * Improvements and bug fix.
 
 
-### 1.8.20
+## 1.8.20
 
 * Improvements and bug fix.
 
 
-### 1.8.19
+## 1.8.19
 
 * Improvements and bug fix.
 
 
-### 1.8.18
+## 1.8.18
 
 * Improvements and bug fix.
 
 
-### 1.8.17
+## 1.8.17
 
 * Improvements and bug fix.
 
 
-### 1.8.16
+## 1.8.16
 
 * Rename `Collectors.max/minBy(Comparator)` to `Collectors.max/min(Comparator)`.
 * Refactoring `Fn`.
 * Improvements and bug fix.
 
 
-### 1.8.15
+## 1.8.15
 
 * Improvements and bug fix.
 
 
-### 1.8.14
+## 1.8.14
 
 * Move `Fn.ep/ef/ec` to `Fn.p/f/c`.
 * Improvements and bug fix.
 
 
-### 1.8.13
+## 1.8.13
 
 * Improve Java Docs.
 * Improvements and bug fix.
 
 
-### 1.8.12
+## 1.8.12
 
 * Improve `JdbcUtil.Dao`.
 * Improvements and bug fix.
 
 
-### 1.8.11
+## 1.8.11
 
 * Improve `JdbcUtil.Dao`.
 * Improvements and bug fix.
 
 
-### 1.8.10
+## 1.8.10
 
 * Fix issue #26.
 * Improvements and bug fix.
 
 
-### 1.8.9
+## 1.8.9
 
 * Refactoring `EntityId`.
 * Improvements and bug fix.
 
 
-### 1.8.8
+## 1.8.8
 
 * Improve Java Docs.
 * Improvements and bug fix.
 
 
-### 1.8.7
+## 1.8.7
 
 * Upgrade to Maven project.
 * Improvements and bug fix.
 
 
-### 1.8.6
+## 1.8.6
 
 * Improvements and bug fix.
 
 
-### 1.8.5
+## 1.8.5
 
 * Improvements and bug fix.
 
 
-### 1.8.4
+## 1.8.4
 
 * Improvements and bug fix.
 
 
-### 1.8.3
+## 1.8.3
 
 * Move `f/Points` to `abacus-da`.
 
 * Improvements and bug fix.
 
 
-### 1.8.2
+## 1.8.2
 
 * Remove `Primitives.unboxOrDefault`, replaced by `N.defaultIfNull`.
 
 * Improvements and bug fix.
 
 
-### 1.8.1
+## 1.8.1
 
 * Move Sheet/Matrix/RemoteExecutor to `abacus-da`: https://github.com/landawn/abacus-da.
 
 * Improvements and bug fix.
 
 
-### 1.8.0
+## 1.8.0
 
 * Move `...util.Traverser` to `...guava.Traverser`.
 
@@ -2263,14 +2267,14 @@
 * Improvements and bug fix.
 
 
-### 1.7.12
+## 1.7.12
 
 * Refactoring: change `Mapper.update(id, props)` to `Mapper.update(props, id)`.
 
 * Improvements and bug fix.
 
 
-### 1.7.11
+## 1.7.11
 
 * Remove `SQLExecutor.prepareQuery`.
 
@@ -2279,7 +2283,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.10
+## 1.7.10
 
 * Refactoring `JdbcUtil.Mapper.delete/batchDelete(...)` and add `JdbcUtil.Mapper.deleteById/batchDeleteByIds(...)`
 
@@ -2290,7 +2294,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.9
+## 1.7.9
 
 * Add `JdbcUtil.NamedQuery`.
 
@@ -2301,7 +2305,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.8
+## 1.7.8
 
 * Fix issue #21
 
@@ -2316,12 +2320,12 @@
 * Improvements and bug fix.
 
 
-### 1.7.7
+## 1.7.7
 
 * Improvements and bug fix.
 
 
-### 1.7.6
+## 1.7.6
 
 * Support `JsonXmlField`.
 
@@ -2330,14 +2334,14 @@
 * Improvements and bug fix.
 
 
-### 1.7.5
+## 1.7.5
 
 * Change quotation char for column alias from ' to " in `SQLBuilder`.
 
 * Improvements and bug fix.
 
 
-### 1.7.4
+## 1.7.4
 
 * Add `Stream.reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner)`.
 
@@ -2346,7 +2350,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.3
+## 1.7.3
 
 * Add `ContinuableFuture.map`.
 
@@ -2357,7 +2361,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.2
+## 1.7.2
 
 * Add `Jdbc.Dao`.
 
@@ -2366,7 +2370,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.1
+## 1.7.1
 
 * Add `StringUtil.first/lastChar/firstChars/lastChars`. 
 
@@ -2379,7 +2383,7 @@
 * Improvements and bug fix.
 
 
-### 1.7.0
+## 1.7.0
 
 * Add `Dataset.map/flatMap`.
 
@@ -2394,7 +2398,7 @@
 * Improvements and bug fix.
 
 
-### 1.6.3
+## 1.6.3
 
 * Add `Matrix/IntMatrix/.../f.flatOp`.
 
@@ -2407,7 +2411,7 @@
 * Improvements and bug fix.
 
 
-### 1.6.2
+## 1.6.2
 
 * Add `Stream.applyIfNotEmpty/map/acceptIfNotEmpty`.
 
@@ -2416,21 +2420,21 @@
 * Improvements and bug fix.
 
 
-### 1.6.1
+## 1.6.1
 
 * Add `Iterators.filter/map/flatMap`.
 
 * Improvements and bug fix.
 
 
-### 1.6.0
+## 1.6.0
 
 * Remove `Collectors.collapsing/dominators/distinct/distinctBy` because they won't work.
 
 * Improvements and bug fix.
 
 
-### 1.5.12
+## 1.5.12
 
 * Add `Fn.applyIfNotNullOrDefault/applyIfNotNullOrGet`.
 
@@ -2441,7 +2445,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.11
+## 1.5.11
 
 * Add `Stream/Fn.window(maxWindowSize, maxDuration, ...)`.
 
@@ -2462,7 +2466,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.10
+## 1.5.10
  
 * Improve `Dataset/Sheet.println()`.
 
@@ -2479,7 +2483,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.9
+## 1.5.9
  
 * Add `Splitter.splitToStream`.
 
@@ -2490,7 +2494,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.8
+## 1.5.8
  
 * Close Streams when `IllegalArgumentException` happens.
 
@@ -2507,7 +2511,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.7
+## 1.5.7
  
 * Add `Stream.split/splitAt/splitBy/sliding(..., Collector<? super T, A, R> collector)`.
 
@@ -2520,7 +2524,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.6
+## 1.5.6
  
 * Move `f.copy(Class<T[][]>, Object[][]` to `N`.
 
@@ -2531,7 +2535,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.5
+## 1.5.5
  
 * Add `Multimap.forEachKey/forEachValue/flatForEachValue`.
 
@@ -2544,7 +2548,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.4
+## 1.5.4
 
 * Rename `Stream/ByteStream/.../DoubleStream.of(T[][]/byte[][]/.../double[][])` to `Stream/ByteStream/.../DoubleStream.flat(T[][]/byte[][]/.../double[][])`.
 
@@ -2565,7 +2569,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.3
+## 1.5.3
 
 * Rename `Joiner.append(key, value)` to `Joiner.appendEntry(key, value)`.
 
@@ -2574,7 +2578,7 @@
 * Improvements and bug fix.
 
 
-### 1.5.2
+## 1.5.2
  
 * Change the stream implementation: Streams will be automatically closed after execution(any terminal method is executed).
 
@@ -2587,7 +2591,7 @@
 * Improvements and bug fix.
 
 
-### 1.3.33
+## 1.3.33
  
 * Refactoring `HttpClient/HttpRequest/OKHttpClient/HttpSettings/HttpHeaders`.
 
@@ -2598,7 +2602,7 @@
 * Improvements and bug fix.
 
 
-### 1.3.32
+## 1.3.32
  
 * Remove `Result.__()`.
 
@@ -2615,7 +2619,7 @@
 * Improvements and bug fix.
 
 
-### 1.3.31
+## 1.3.31
 
 * Move `box/unbox/unboxOrDefault/unboxOrGet` from `Array` to `Primitives`.
 
@@ -2626,7 +2630,7 @@
 * Improvements and bug fix.
 
 
-### 1.3.30
+## 1.3.30
 
 * Rename `ContinuableFuture.delayed(...)` to `ContinuableFuture.thenDelay(...)`.
 
@@ -2643,7 +2647,7 @@
 * Improvements and bug fix.
 
 
-### 1.3.29
+## 1.3.29
 
 * Add `Result<T, Throwable>`.
 
@@ -2658,14 +2662,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.28
+## 1.3.28
 
 * Remove `HttpClient.request`.
 
 * Improvements and bug fix.
 
 
-### 1.3.27
+## 1.3.27
 
 * Rename `PreparedQuery/PreparedCallableQuery.applyAsync/acceptAsync` to `PreparedQuery/PreparedCallableQuery.asyncApply/asyncAccept`.
 
@@ -2676,14 +2680,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.26
+## 1.3.26
 
 * Refactoring `Dataset`.
 
 * Improvements and bug fix.
 
 
-### 1.3.25
+## 1.3.25
 
 * Add `ExceptionalStream`.
 
@@ -2694,26 +2698,26 @@
 * Improvements and bug fix.
 
 
-### 1.3.24
+## 1.3.24
 
 * Refactoring: `JdbcUtil` and `SQLExecutor`.
 
 * Improvements and bug fix.
 
 
-### 1.3.23
+## 1.3.23
 
 * Improvements and bug fix.
 
 
-### 1.3.22
+## 1.3.22
 
 * Improvements and bug fix.
 
 * Rename `EntryStream.flatMap/flattMap/flatMapp`.
 
 
-### 1.3.21
+## 1.3.21
 
 * Refactoring: `DateUtil`.
 
@@ -2722,22 +2726,22 @@
 * Improvements and bug fix.
 
 
-### 1.3.20
+## 1.3.20
 
 * Improvements and bug fix.
 
 
-### 1.3.19
+## 1.3.19
 
 * Improvements and bug fix.
 
 
-### 1.3.18
+## 1.3.18
 
 * Improvements and bug fix.
 
 
-### 1.3.17
+## 1.3.17
 
 * Rename `DateUtil.asXXX` to `DateUtil.parseXXX`.
 
@@ -2748,24 +2752,24 @@
 * Improvements and bug fix.
 
 
-### 1.3.16
+## 1.3.16
 
 * Improvements and bug fix.
 
 
-### 1.3.15
+## 1.3.15
 
 * Improvements and bug fix.
 
 
-### 1.3.14
+## 1.3.14
 
 * Remove `SQLExcutor.queryForSingleResult(..., resultGet...)`.
 
 * Improvements and bug fix.
 
 
-### 1.3.13
+## 1.3.13
 
 * Add `SQLExecutor.list`.
 
@@ -2774,12 +2778,12 @@
 * Improvements and bug fix.
 
 
-### 1.3.12
+## 1.3.12
 
 * Improvements and bug fix.
 
 
-### 1.3.11
+## 1.3.11
 
 * Refactoring: `PreparedQuery`.
 
@@ -2788,14 +2792,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.10
+## 1.3.10
 
 * Add `PreparedQuery`.
 
 * Improvements and bug fix.
 
 
-### 1.3.9
+## 1.3.9
 
 * Refactoring: `Iterators.skip`.
 
@@ -2806,17 +2810,17 @@
 * Improvements and bug fix.
 
 
-### 1.3.8
+## 1.3.8
 
 * Improvements and bug fix.
 
 
-### 1.3.7
+## 1.3.7
 
 * Improvements and bug fix.
 
 
-### 1.3.6
+## 1.3.6
 
 * Add `N.toBooleanArray/N.toCharArray/N.toByteArray/N.toShortArray/N.toIntArray/.../N.toDoubleArray`.
 
@@ -2829,14 +2833,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.5
+## 1.3.5
 
 * Refactoring `Stream.zip`, `SQLBuilder` and `SQLExecutor.Mapper`.
 
 * Improvements and bug fix.
 
 
-### 1.3.4
+## 1.3.4
 
 * Add `Stream.split/sliding(...collectionSupplier)`.
 
@@ -2845,14 +2849,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.3
+## 1.3.3
 
 * Refactoring `SQLExecutor.beginTransaction`.
 
 * Improvements and bug fix.
 
 
-### 1.3.2
+## 1.3.2
 
 * Rename `Multimap.totalCountOfValue` to `Multimap.totalCountOfValues`.
 
@@ -2863,14 +2867,14 @@
 * Improvements and bug fix.
 
 
-### 1.3.1
+## 1.3.1
 
 * Refactoring `MongoDBExecutor`.
 
 * Improvements and bug fix.
 
 
-### 1.3
+## 1.3
 
 * Rename `CompletableFuture` to `ContinuableFuture`.
 
@@ -2881,7 +2885,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.20
+## 1.2.20
 
 * Add `SQLExecutor.Mapper.add(...Collection<String> insertPropNames)`.
 
@@ -2895,7 +2899,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.19
+## 1.2.19
 
 * Add `N.first/last`, `Seq.firstNonNull/lastNonNull`.
 
@@ -2914,7 +2918,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.18
+## 1.2.18
 
 * Add `Seq/IntList/ByteLits/.../DoubleList/Multiset/LongMultiset.ifNotEmpty`.
 
@@ -2933,7 +2937,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.17
+## 1.2.17
 
 * Add `Stream.countBy/countByToEntry`.
 
@@ -2946,14 +2950,14 @@
 * Improvements and bug fix.
 
 
-### 1.2.16
+## 1.2.16
 
 * Support @Transient for `SQLExecutor.Mapper`.
 
 * Improvements and bug fix.
 
 
-### 1.2.15
+## 1.2.15
 
 * Refactoring: replace `Nullable` with `Optional` in `Collectors` and `Stream` related operations.
 
@@ -2964,7 +2968,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.14
+## 1.2.14
 
 * Add `Stream.ofKeys/ofValues(Map)`.
 
@@ -2977,7 +2981,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.13
+## 1.2.13
 
 * Add `N.swap(Pair/Triple)` and `N.swapIf(Pair/Triple, Predicate)`.
 
@@ -2990,7 +2994,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.12
+## 1.2.12
 
 * Rename `Dataset.join` to `Dataset.innerJoin`.
 
@@ -3001,7 +3005,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.11
+## 1.2.11
 
 * Rename `Dataset.updateColumn(Collection...)/updateRow(int[]...)` to `updateColumnAll/updateRowAll`.
 
@@ -3018,7 +3022,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.10
+## 1.2.10
 
 * Add `Functions.pairToList/pairToSet/tripleToList/tripleToSet`.
 
@@ -3043,7 +3047,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.9
+## 1.2.9
 
 * Refactoring: change the return type of `Opitonal.map` from `Optional<U>` to `Nullable<U>`.
 
@@ -3052,7 +3056,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.8
+## 1.2.8
  
 * Add `ByteStream/.../DoubleStream/.flattMapToObj`.
 
@@ -3065,7 +3069,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.7
+## 1.2.7
  
 * Add `Optional/OptionalInt.orElseThrow()`.
 
@@ -3084,7 +3088,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.6
+## 1.2.6
  
 * Add `Comparators.comparingIgnoreCase(final Function<? super T, String> keyExtractor)`.
 
@@ -3101,7 +3105,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.5
+## 1.2.5
 
 * Remove `Seq.iterate`.
 
@@ -3122,7 +3126,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.4
+## 1.2.4
 
 * Remove `Fn.limited`.
 
@@ -3145,7 +3149,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.3
+## 1.2.3
 
 * Add `queryForDate`.
 
@@ -3154,7 +3158,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.2
+## 1.2.2
 
 * Rename `JdbcUtil.absolute` to `JdbcUtil.skip`.
 
@@ -3169,7 +3173,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.1
+## 1.2.1
 
 * Remove `Mapper/AsyncMapper.stream(Connection...)`.
 
@@ -3194,7 +3198,7 @@
 * Improvements and bug fix.
 
 
-### 1.2.0
+## 1.2.0
 
 * Rename `flatCollection/flatArray` to `flattMap/flatMapp`.
 
@@ -3209,7 +3213,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.9
+## 1.1.9
 
 * Rename `Mapper.WriteOnly/registerWriteOnlyProps` to `Mapper.NonUpdatable/registerNonUpdatableProps`.
 
@@ -3220,14 +3224,14 @@
 * Improvements and bug fix.
 
 
-### 1.1.8
+## 1.1.8
 
 * Add `JdbcUtil.stream/executeBatchUpdate/absolute(...)`.
 
 * Improvements and bug fix.
 
 
-### 1.1.7
+## 1.1.7
 
 * Add `DatasetUtil`.
 
@@ -3246,7 +3250,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.6
+## 1.1.6
 
 * Add `Dataset.groupBy(..., func)/getOrDefault(columnName)`.
 
@@ -3259,7 +3263,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.5
+## 1.1.5
 
 * Remove `Maps.diff`.
 
@@ -3288,7 +3292,7 @@
 * Add `Matrix/IntMatrix.extend(...)`.
 
 
-### 1.1.4
+## 1.1.4
 
 * Add `Multiset/LongMultiset.toImmutableMap`.
 
@@ -3307,7 +3311,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.3
+## 1.1.3
 
 * Add `N.sumInt/sumLong/sumDouble/averageInt/averageLong/averageDouble` for `Number` type.
 
@@ -3320,7 +3324,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.2
+## 1.1.2
 
 * Replace `Predicate/Consumer/Function` in `Iterators` with `Try.Predicate/Consumer/Function`.
 
@@ -3349,7 +3353,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.1
+## 1.1.1
 
 * Replace `Predicate/Consumer/Function` in `Multiset/LongMultiset/Multimap/Matrix/IntMatrix/.../f` with `Try.Predicate/Consumer/Function`.
 
@@ -3380,7 +3384,7 @@
 * Improvements and bug fix.
 
 
-### 1.1.0
+## 1.1.0
 
 * `Clazz.of(Class<?>)` is marked to ‘Deprecated’ and will be removed in version 1.2.0 because it doesn’t work as expected.
 
@@ -3398,5 +3402,5 @@
 
 
 
-### Prior 1.1.0
+## Prior 1.1.0
 * Refer to: [CHANGES.txt](https://github.com/landawn/abacus-common/blob/master/CHANGES.txt)

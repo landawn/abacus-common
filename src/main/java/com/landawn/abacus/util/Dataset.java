@@ -3654,7 +3654,7 @@ public sealed interface Dataset permits RowDataset {
      * # | 200 | Alice | 3    | Android | aaa223         |
      * # +-----+-------+------+---------+----------------+
      * 
-     * dataset.toMergedEntities(List.of("id"), dataset.columnNameList(), Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
+     * dataset.toMergedEntities(List.of("id"), dataset.columnNames(), Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
      * 
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}, {"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
