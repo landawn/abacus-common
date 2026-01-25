@@ -23,10 +23,10 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -84,7 +84,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     private final boolean isSet;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     CollectionType(final Class<T> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
@@ -250,7 +250,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         }
 
         if (this.isSerializable()) {
-            final BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
 
             try {
                 bw.write(WD._BRACKET_L);
@@ -378,7 +378,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

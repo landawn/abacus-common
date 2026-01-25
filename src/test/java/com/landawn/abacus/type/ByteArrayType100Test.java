@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -254,7 +254,7 @@ public class ByteArrayType100Test extends TestBase {
     public void testWriteCharacter_MultipleElements() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Byte[] array = new Byte[] { (byte) 1, null, (byte) -1 };
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         type.writeCharacter(mockWriter, array, config);
 

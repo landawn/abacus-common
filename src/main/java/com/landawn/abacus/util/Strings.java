@@ -83,7 +83,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Validation:</b> isEmpty, isBlank, isEmail, isJavaIdentifier, isBase64</li>
  *   <li><b>Transformation:</b> reverse, abbreviate, capitalize, uncapitalize, swapCase</li>
- *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toPascalCase</li>
+ *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toUpperCamelCase</li>
  *   <li><b>Padding:</b> leftPad, rightPad, center with character or string padding</li>
  *   <li><b>Trimming:</b> trim, strip, trimToNull, stripToNull with whitespace handling</li>
  *   <li><b>Searching:</b> indexOf, lastIndexOf, contains, startsWith, endsWith</li>
@@ -175,7 +175,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Basic Case:</b> {@code Strings.upperCase()}, {@code Strings.lowerCase()}, {@code Strings.swapCase()}</li>
  *   <li><b>Word Case:</b> {@code Strings.capitalize()}, {@code Strings.uncapitalize()}, {@code Strings.capitalizeWords()}</li>
- *   <li><b>Naming Conventions:</b> {@code Strings.toCamelCase()}, {@code Strings.toSnakeCase()}, {@code Strings.toPascalCase()}</li>
+ *   <li><b>Naming Conventions:</b> {@code Strings.toCamelCase()}, {@code Strings.toSnakeCase()}, {@code Strings.toUpperCamelCase()}</li>
  *   <li><b>Locale Support:</b> Locale-aware case conversion operations</li>
  * </ul>
  *
@@ -461,7 +461,7 @@ public final class Strings {
      * }</pre>
      *
      * @return a new UUID string in the standard format (8-4-4-4-12).
-     * @see #guid()
+     * @see #uuid32()
      * @see UUID#randomUUID()
      */
     public static String uuid() {
@@ -469,7 +469,7 @@ public final class Strings {
     }
 
     /**
-     * Generates a new globally unique identifier (GUID) string without hyphens.
+     * Generates a new universally unique identifier (UUID) string without hyphens.
      *
      * <p>This method creates a UUID using {@link UUID#randomUUID()} and removes all hyphen characters
      * to produce a continuous string of 32 hexadecimal characters.</p>
@@ -482,15 +482,15 @@ public final class Strings {
      * String guid = guid();   // returns something like "550e8400e29b41d4a716446655440000"
      * 
      * // Common use cases
-     * String sessionId = "SESSION_" + guid();        // returns "SESSION_550e8400e29b41d4a716446655440000"
-     * String fileName = "temp_" + guid() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
+     * String sessionId = "SESSION_" + uuid32();        // returns "SESSION_550e8400e29b41d4a716446655440000"
+     * String fileName = "temp_" + uuid32() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
      * }</pre>
      *
      * @return a new UUID string without hyphens, consisting of 32 hexadecimal characters.
      * @see #uuid()
      * @see UUID#randomUUID()
      */
-    public static String guid() {
+    public static String uuid32() {
         return uuid().replace("-", "");
     }
 
@@ -1929,7 +1929,7 @@ public final class Strings {
      *
      * @param strs the input string array to be checked. Each {@code null} element in the array will be converted to an empty string, may be {@code null} or empty
      * @see N#nullToEmpty(String[])
-     * @see N#nullToEmptyForEach(String[])
+     * @see N#nullElementsToEmpty(String[])
      */
     public static void nullToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -3093,61 +3093,6 @@ public final class Strings {
     }
 
     /**
-     * Converts the given string to lower case with underscores.
-     * If the input string is {@code null} or empty, it returns the input string.
-     *
-     * <p>This method converts uppercase letters to lowercase and inserts underscores
-     * before uppercase letters that are preceded by lowercase letters or followed by lowercase letters.
-     * This is useful for converting camelCase or PascalCase strings to snake_case.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Strings.toLowerCaseWithUnderscore("helloWorld");      // returns "hello_world"
-     * Strings.toLowerCaseWithUnderscore("HelloWorld");      // returns "hello_world"
-     * Strings.toLowerCaseWithUnderscore("helloWorldAPI");   // returns "hello_world_api"
-     * Strings.toLowerCaseWithUnderscore("IOError");         // returns "io_error"
-     * Strings.toLowerCaseWithUnderscore(null);              // returns null
-     * Strings.toLowerCaseWithUnderscore("");                // returns ""
-     * }</pre>
-     *
-     * @param str the input string to be converted
-     * @return the converted string in lower case with underscores
-     * @see #toUpperCaseWithUnderscore(String)
-     * @see #toCamelCase(String)
-     * @see #toPascalCase(String)
-     */
-    public static String toLowerCaseWithUnderscore(final String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-
-        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
-        char ch = 0;
-
-        try {
-            for (int i = 0, len = str.length(); i < len; i++) {
-                ch = str.charAt(i);
-
-                if (Character.isUpperCase(ch)) {
-                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
-                            sb.append(WD._UNDERSCORE);
-                        }
-                    }
-
-                    sb.append(Character.toLowerCase(ch));
-                } else {
-                    sb.append(ch);
-                }
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    /**
      * Converts a character to uppercase.
      *
      * <p>This method converts the specified character to its uppercase equivalent
@@ -3239,69 +3184,6 @@ public final class Strings {
     // -----------------------------------------------------------------------
 
     /**
-     * Converts the given string to upper case with underscores.
-     *
-     * <p>This method converts the input string to uppercase and inserts underscores before uppercase letters 
-     * that are preceded by lowercase letters or followed by lowercase letters. This is useful for converting 
-     * camelCase or PascalCase strings to UPPER_CASE_WITH_UNDERSCORES format.</p>
-     *
-     * <p>The method returns the original string if it is {@code null} or empty.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Strings.toUpperCaseWithUnderscore(null);              // returns null
-     * Strings.toUpperCaseWithUnderscore("");                // returns ""
-     * Strings.toUpperCaseWithUnderscore("helloWorld");      // returns "HELLO_WORLD"
-     * Strings.toUpperCaseWithUnderscore("HelloWorld");      // returns "HELLO_WORLD"
-     * Strings.toUpperCaseWithUnderscore("helloWorldAPI");   // returns "HELLO_WORLD_API"
-     * Strings.toUpperCaseWithUnderscore("XMLParser");       // returns "XML_PARSER"
-     * Strings.toUpperCaseWithUnderscore("IOError");         // returns "IO_ERROR"
-     * }</pre>
-     *
-     * @param str the input string to be converted, may be {@code null} or empty
-     * @return the converted string in upper case with underscores, or the original string if it is {@code null} or empty.
-     * @see #toLowerCaseWithUnderscore(String)
-     * @see #toCamelCase(String)
-     * @see #toPascalCase(String)
-     */
-    public static String toUpperCaseWithUnderscore(final String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-
-        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
-        char ch = 0;
-
-        try {
-            for (int i = 0, len = str.length(); i < len; i++) {
-                ch = str.charAt(i);
-
-                if (Character.isUpperCase(ch)) {
-                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
-                            sb.append(WD._UNDERSCORE);
-                        }
-                    }
-
-                    sb.append(ch);
-                } else {
-                    //    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
-                    //        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
-                    //            sb.append(WD._UNDERSCORE);
-                    //        }
-                    //    }
-
-                    sb.append(Character.toUpperCase(ch));
-                }
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    /**
      * Converts the specified string to camel case.
      *
      * <p>This method converts a string with underscores or hyphens to camel case format. 
@@ -3309,7 +3191,7 @@ public final class Strings {
      * All other letters are lowercase. The delimiters (underscores or hyphens) are removed.</p>
      *
      * <p>If the input string contains no delimiters but has uppercase letters, it intelligently converts 
-     * from PascalCase or UPPER_CASE to camelCase.</p>
+     * from UpperCamelCase or UPPER_CASE to camelCase.</p>
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
@@ -3328,8 +3210,8 @@ public final class Strings {
      * @param str the input string to be converted, may be {@code null} or empty
      * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      * @see #toCamelCase(String, char)
-     * @see #toPascalCase(String)
-     * @see #toLowerCaseWithUnderscore(String)
+     * @see #toUpperCamelCase(String)
+     * @see #toSnakeCase(String)
      */
     public static String toCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3362,8 +3244,8 @@ public final class Strings {
      * @param splitChar the character used to split the input string.
      * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
      * @see #toCamelCase(String)
-     * @see #toPascalCase(String, char)
-     * @see #toLowerCaseWithUnderscore(String)
+     * @see #toUpperCamelCase(String, char)
+     * @see #toSnakeCase(String)
      */
     public static String toCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
@@ -3418,9 +3300,9 @@ public final class Strings {
     }
 
     /**
-     * Converts the specified string to Pascal case.
+     * Converts the specified string to upper camel case.
      *
-     * <p>This method converts a string with underscores to Pascal case format (also known as UpperCamelCase). 
+     * <p>This method converts a string with underscores to upper camel case format (also known as UpperCamelCase). 
      * Each word starts with an uppercase letter, and all other letters are lowercase. 
      * The underscores are removed.</p>
      *
@@ -3428,33 +3310,33 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.toPascalCase(null);           // returns null
-     * Strings.toPascalCase("");             // returns ""
-     * Strings.toPascalCase("first_name");   // returns "FirstName"
-     * Strings.toPascalCase("FIRST_NAME");   // returns "FirstName"
-     * Strings.toPascalCase("firstName");    // returns "FirstName"
-     * Strings.toPascalCase("FirstName");    // returns "FirstName"
-     * Strings.toPascalCase("first");        // returns "First"
+     * Strings.toUpperCamelCase(null);           // returns null
+     * Strings.toUpperCamelCase("");             // returns ""
+     * Strings.toUpperCamelCase("first_name");   // returns "FirstName"
+     * Strings.toUpperCamelCase("FIRST_NAME");   // returns "FirstName"
+     * Strings.toUpperCamelCase("firstName");    // returns "FirstName"
+     * Strings.toUpperCamelCase("FirstName");    // returns "FirstName"
+     * Strings.toUpperCamelCase("first");        // returns "First"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
-     * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
-     * @see #toPascalCase(String, char)
+     * @return a upper camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toUpperCamelCase(String, char)
      * @see #toCamelCase(String)
-     * @see #toUpperCaseWithUnderscore(String)
+     * @see #toScreamingSnakeCase(String)
      */
-    public static String toPascalCase(final String str) {
+    public static String toUpperCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
 
-        return toPascalCase(str, RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR));
+        return toUpperCamelCase(str, RegExUtil.split(str, RegExUtil.CAMEL_CASE_SEPARATOR));
     }
 
     /**
-     * Converts the specified string to Pascal case using a custom split character.
+     * Converts the specified string to upper camel case using a custom split character.
      *
-     * <p>This method converts a string with a specified delimiter character to Pascal case format (also known as UpperCamelCase). 
+     * <p>This method converts a string with a specified delimiter character to upper camel case format (also known as UpperCamelCase). 
      * Each word starts with an uppercase letter, and all other letters are lowercase. 
      * The delimiter characters are removed.</p>
      *
@@ -3464,31 +3346,31 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.toPascalCase(null, '.');           // returns null
-     * Strings.toPascalCase("", '.');             // returns ""
-     * Strings.toPascalCase("first.name", '.');   // returns "FirstName"
-     * Strings.toPascalCase("FIRST.NAME", '.');   // returns "FirstName"
-     * Strings.toPascalCase("first-name", '-');   // returns "FirstName"
-     * Strings.toPascalCase("firstName", '.');    // returns "FirstName"
-     * Strings.toPascalCase("firstname", '.');    // returns "Firstname"
+     * Strings.toUpperCamelCase(null, '.');           // returns null
+     * Strings.toUpperCamelCase("", '.');             // returns ""
+     * Strings.toUpperCamelCase("first.name", '.');   // returns "FirstName"
+     * Strings.toUpperCamelCase("FIRST.NAME", '.');   // returns "FirstName"
+     * Strings.toUpperCamelCase("first-name", '-');   // returns "FirstName"
+     * Strings.toUpperCamelCase("firstName", '.');    // returns "FirstName"
+     * Strings.toUpperCamelCase("firstname", '.');    // returns "Firstname"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
      * @param splitChar the character used to split the input string.
-     * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
-     * @see #toPascalCase(String)
+     * @return a upper camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toUpperCamelCase(String)
      * @see #toCamelCase(String, char)
-     * @see #toUpperCaseWithUnderscore(String)
+     * @see #toScreamingSnakeCase(String)
      */
-    public static String toPascalCase(final String str, final char splitChar) {
+    public static String toUpperCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
         }
 
-        return toPascalCase(str, Strings.split(str, splitChar));
+        return toUpperCamelCase(str, Strings.split(str, splitChar));
     }
 
-    private static String toPascalCase(final String str, final String[] substrs) {
+    private static String toUpperCamelCase(final String str, final String[] substrs) {
         final int firstSplitorIndex = N.len(substrs) == 1 ? -1 : substrs[0].length() + 1;
 
         if (firstSplitorIndex >= 0) {
@@ -3509,6 +3391,241 @@ public final class Strings {
             }
         } else {
             return Character.isLowerCase(str.charAt(0)) ? str.substring(0, 1).toUpperCase() + str.substring(1) : str;
+        }
+    }
+
+    /**
+     * Converts the specified string to upper camel case.
+     *
+     * <p>This method converts a string with underscores to upper camel case format (also known as UpperCamelCase). 
+     * Each word starts with an uppercase letter, and all other letters are lowercase. 
+     * The underscores are removed.</p>
+     *
+     * <p>The method returns the original string if it is {@code null} or empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.toPascalCase(null);           // returns null
+     * Strings.toPascalCase("");             // returns ""
+     * Strings.toPascalCase("first_name");   // returns "FirstName"
+     * Strings.toPascalCase("FIRST_NAME");   // returns "FirstName"
+     * Strings.toPascalCase("firstName");    // returns "FirstName"
+     * Strings.toPascalCase("FirstName");    // returns "FirstName"
+     * Strings.toPascalCase("first");        // returns "First"
+     * }</pre>
+     *
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return a upper camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toUpperCamelCase(String)
+     * @see #toUpperCamelCase(String, char)
+     * @deprecated use {@link #toUpperCamelCase(String)} instead.
+     */
+    @Deprecated
+    public static String toPascalCase(final String str) {
+        return toUpperCamelCase(str);
+    }
+
+    /**
+     * Converts the specified string to upper camel case using a custom split character.
+     *
+     * <p>This method converts a string with a specified delimiter character to upper camel case format (also known as UpperCamelCase). 
+     * Each word starts with an uppercase letter, and all other letters are lowercase. 
+     * The delimiter characters are removed.</p>
+     *
+     * <p>If the string contains no delimiter characters, only the first character is converted to uppercase.</p>
+     *
+     * <p>The method returns the original string if it is {@code null} or empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.toPascalCase(null, '.');           // returns null
+     * Strings.toPascalCase("", '.');             // returns ""
+     * Strings.toPascalCase("first.name", '.');   // returns "FirstName"
+     * Strings.toPascalCase("FIRST.NAME", '.');   // returns "FirstName"
+     * Strings.toPascalCase("first-name", '-');   // returns "FirstName"
+     * Strings.toPascalCase("firstName", '.');    // returns "FirstName"
+     * Strings.toPascalCase("firstname", '.');    // returns "Firstname"
+     * }</pre>
+     *
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @param splitChar the character used to split the input string.
+     * @return a upper camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toUpperCamelCase(String)
+     * @see #toUpperCamelCase(String, char)
+     * @deprecated use {@link #toUpperCamelCase(String, char)} instead.
+     */
+    @Deprecated
+    public static String toPascalCase(final String str, final char splitChar) {
+        return toUpperCamelCase(str, splitChar);
+    }
+
+    /**
+     * Converts the given string to lower case with underscores.
+     * If the input string is {@code null} or empty, it returns the input string.
+     *
+     * <p>This method converts uppercase letters to lowercase and inserts underscores
+     * before uppercase letters that are preceded by lowercase letters or followed by lowercase letters.
+     * This is useful for converting camelCase or UpperCamelCase strings to snake_case.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.toSnakeCase("helloWorld");      // returns "hello_world"
+     * Strings.toSnakeCase("HelloWorld");      // returns "hello_world"
+     * Strings.toSnakeCase("helloWorldAPI");   // returns "hello_world_api"
+     * Strings.toSnakeCase("IOError");         // returns "io_error"
+     * Strings.toSnakeCase(null);              // returns null
+     * Strings.toSnakeCase("");                // returns ""
+     * }</pre>
+     *
+     * @param str the input string to be converted
+     * @return the converted string in lower case with underscores
+     * @see #toScreamingSnakeCase(String)
+     * @see #toCamelCase(String)
+     * @see #toUpperCamelCase(String)
+     */
+    public static String toSnakeCase(final String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
+        char ch = 0;
+
+        try {
+            for (int i = 0, len = str.length(); i < len; i++) {
+                ch = str.charAt(i);
+
+                if (Character.isUpperCase(ch)) {
+                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
+                            sb.append(WD._UNDERSCORE);
+                        }
+                    }
+
+                    sb.append(Character.toLowerCase(ch));
+                } else {
+                    sb.append(ch);
+                }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    /**
+     * Converts the given string to upper case with underscores.
+     *
+     * <p>This method converts the input string to uppercase and inserts underscores before uppercase letters 
+     * that are preceded by lowercase letters or followed by lowercase letters. This is useful for converting 
+     * camelCase or UpperCamelCase strings to SCREAMING_SNAKE_CASES format.</p>
+     *
+     * <p>The method returns the original string if it is {@code null} or empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.toScreamingSnakeCase(null);              // returns null
+     * Strings.toScreamingSnakeCase("");                // returns ""
+     * Strings.toScreamingSnakeCase("helloWorld");      // returns "HELLO_WORLD"
+     * Strings.toScreamingSnakeCase("HelloWorld");      // returns "HELLO_WORLD"
+     * Strings.toScreamingSnakeCase("helloWorldAPI");   // returns "HELLO_WORLD_API"
+     * Strings.toScreamingSnakeCase("XmlParser");       // returns "XML_PARSER"
+     * Strings.toScreamingSnakeCase("IOError");         // returns "IO_ERROR"
+     * }</pre>
+     *
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return the converted string in upper case with underscores, or the original string if it is {@code null} or empty.
+     * @see #toSnakeCase(String)
+     * @see #toCamelCase(String)
+     * @see #toUpperCamelCase(String)
+     */
+    public static String toScreamingSnakeCase(final String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
+        char ch = 0;
+
+        try {
+            for (int i = 0, len = str.length(); i < len; i++) {
+                ch = str.charAt(i);
+
+                if (Character.isUpperCase(ch)) {
+                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
+                            sb.append(WD._UNDERSCORE);
+                        }
+                    }
+
+                    sb.append(ch);
+                } else {
+                    //    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
+                    //        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
+                    //            sb.append(WD._UNDERSCORE);
+                    //        }
+                    //    }
+
+                    sb.append(Character.toUpperCase(ch));
+                }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    /**
+     * Converts the given string to lower case with hyphens.
+     * If the input string is {@code null} or empty, it returns the input string.
+     *
+     * <p>This method converts uppercase letters to lowercase and inserts hyphens
+     * before uppercase letters that are preceded by lowercase letters or followed by lowercase letters.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.toKebabCase("helloWorld");      // returns "hello-world"
+     * Strings.toKebabCase("HelloWorld");      // returns "hello-world"
+     * Strings.toKebabCase("helloWorldAPI");   // returns "hello-world-api"
+     * Strings.toKebabCase("IOError");         // returns "io-error"
+     * Strings.toKebabCase(null);              // returns null
+     * Strings.toKebabCase("");                // returns ""
+     * }</pre>
+     *
+     * @param str the input string to be converted
+     * @return the converted string in lower case with hyphens
+     * @see #toSnakeCase(String)
+     */
+    public static String toKebabCase(final String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
+        char ch = 0;
+
+        try {
+            for (int i = 0, len = str.length(); i < len; i++) {
+                ch = str.charAt(i);
+
+                if (Character.isUpperCase(ch)) {
+                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._HYPHEN) {//NOSONAR
+                            sb.append(WD._HYPHEN);
+                        }
+                    }
+
+                    sb.append(Character.toLowerCase(ch));
+                } else {
+                    sb.append(ch);
+                }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
     }
 
@@ -7987,7 +8104,7 @@ public final class Strings {
      * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII numeric characters and is non-null/non-empty, {@code false} otherwise.
      * @see #isNumeric(CharSequence)
-     * @see #isAsciiDigitalNumber(String)
+     * @see #isAsciiNumber(String)
      */
     public static boolean isAsciiNumeric(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -8370,11 +8487,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.isNumber("123");    // returns true
-     * Strings.isNumber("12.3");   // returns true
-     * Strings.isNumber("-123");   // returns true
-     * Strings.isNumber(null);     // returns false
-     * Strings.isNumber("abc");    // returns false
+     * Strings.isNumber("123")       = true
+     * Strings.isNumber("-123")      = true
+     * Strings.isNumber("123.45")    = true
+     * Strings.isNumber("1.23e10")   = true
+     * Strings.isNumber("0xFF")      = true
+     * Strings.isNumber("abc")       = false
+     * Strings.isNumber(null)        = false
+     * Strings.isNumber("")          = false
      * }</pre>
      *
      * @param str the {@code String} to check
@@ -8403,31 +8523,31 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid ASCII digital numbers
-     * Strings.isAsciiDigitalNumber("0");          // returns true
-     * Strings.isAsciiDigitalNumber("123");        // returns true
-     * Strings.isAsciiDigitalNumber("-456");       // returns true
-     * Strings.isAsciiDigitalNumber("+789");       // returns true
-     * Strings.isAsciiDigitalNumber("12.34");      // returns true
-     * Strings.isAsciiDigitalNumber("2e10");       // returns true
-     * Strings.isAsciiDigitalNumber("2E-10");      // returns true
-     * Strings.isAsciiDigitalNumber("-3.14e+5");   // returns true
+     * Strings.isAsciiNumber("0");          // returns true
+     * Strings.isAsciiNumber("123");        // returns true
+     * Strings.isAsciiNumber("-456");       // returns true
+     * Strings.isAsciiNumber("+789");       // returns true
+     * Strings.isAsciiNumber("12.34");      // returns true
+     * Strings.isAsciiNumber("2e10");       // returns true
+     * Strings.isAsciiNumber("2E-10");      // returns true
+     * Strings.isAsciiNumber("-3.14e+5");   // returns true
      * 
      * // Invalid strings
-     * Strings.isAsciiDigitalNumber(null);         // returns false
-     * Strings.isAsciiDigitalNumber("");           // returns false
-     * Strings.isAsciiDigitalNumber(" 0.1 ");      // returns {@code false} (contains spaces)
-     * Strings.isAsciiDigitalNumber("abc");        // returns {@code false} (contains letters)
-     * Strings.isAsciiDigitalNumber("1 a");        // returns {@code false} (contains space and letter)
-     * Strings.isAsciiDigitalNumber("1.2.3");      // returns {@code false} (multiple decimal points)
-     * Strings.isAsciiDigitalNumber("e10");        // returns {@code false} (no digits before 'e')
+     * Strings.isAsciiNumber(null);         // returns false
+     * Strings.isAsciiNumber("");           // returns false
+     * Strings.isAsciiNumber(" 0.1 ");      // returns {@code false} (contains spaces)
+     * Strings.isAsciiNumber("abc");        // returns {@code false} (contains letters)
+     * Strings.isAsciiNumber("1 a");        // returns {@code false} (contains space and letter)
+     * Strings.isAsciiNumber("1.2.3");      // returns {@code false} (multiple decimal points)
+     * Strings.isAsciiNumber("e10");        // returns {@code false} (no digits before 'e')
      * }</pre>
      *
      * @param str the string to check, may be {@code null}
      * @return {@code true} if the string represents a valid ASCII digital number, {@code false} otherwise.
-     * @see #isAsciiDigitalInteger(String)
+     * @see #isAsciiInteger(String)
      * @see #isNumber(String)
      */
-    public static boolean isAsciiDigitalNumber(final String str) {
+    public static boolean isAsciiNumber(final String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -8520,30 +8640,30 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid ASCII digital integers
-     * Strings.isAsciiDigitalInteger("0");       // returns true
-     * Strings.isAsciiDigitalInteger("123");     // returns true
-     * Strings.isAsciiDigitalInteger("-123");    // returns true
-     * Strings.isAsciiDigitalInteger("+123");    // returns true
-     * Strings.isAsciiDigitalInteger("+0");      // returns true
-     * Strings.isAsciiDigitalInteger("-0");      // returns true
+     * Strings.isAsciiInteger("0");       // returns true
+     * Strings.isAsciiInteger("123");     // returns true
+     * Strings.isAsciiInteger("-123");    // returns true
+     * Strings.isAsciiInteger("+123");    // returns true
+     * Strings.isAsciiInteger("+0");      // returns true
+     * Strings.isAsciiInteger("-0");      // returns true
      * 
      * // Invalid strings
-     * Strings.isAsciiDigitalInteger(null);      // returns false
-     * Strings.isAsciiDigitalInteger("");        // returns false
-     * Strings.isAsciiDigitalInteger(" 0.1 ");   // returns {@code false} (contains spaces and decimal)
-     * Strings.isAsciiDigitalInteger("12.34");   // returns {@code false} (contains decimal point)
-     * Strings.isAsciiDigitalInteger("abc");     // returns {@code false} (contains letters)
-     * Strings.isAsciiDigitalInteger("1 a");     // returns {@code false} (contains space and letter)
-     * Strings.isAsciiDigitalInteger("2e10");    // returns {@code false} (contains exponential notation)
-     * Strings.isAsciiDigitalInteger("+");       // returns {@code false} (only sign, no digits)
+     * Strings.isAsciiInteger(null);      // returns false
+     * Strings.isAsciiInteger("");        // returns false
+     * Strings.isAsciiInteger(" 0.1 ");   // returns {@code false} (contains spaces and decimal)
+     * Strings.isAsciiInteger("12.34");   // returns {@code false} (contains decimal point)
+     * Strings.isAsciiInteger("abc");     // returns {@code false} (contains letters)
+     * Strings.isAsciiInteger("1 a");     // returns {@code false} (contains space and letter)
+     * Strings.isAsciiInteger("2e10");    // returns {@code false} (contains exponential notation)
+     * Strings.isAsciiInteger("+");       // returns {@code false} (only sign, no digits)
      * }</pre>
      *
      * @param str the string to check, may be {@code null}
      * @return {@code true} if the string represents a valid ASCII digital integer, {@code false} otherwise.
-     * @see #isAsciiDigitalNumber(String)
+     * @see #isAsciiNumber(String)
      * @see #isAsciiNumeric(CharSequence)
      */
-    public static boolean isAsciiDigitalInteger(final String str) {
+    public static boolean isAsciiInteger(final String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -9793,10 +9913,10 @@ public final class Strings {
      * @return the index of the last occurrence of any character in the character sequence represented by this object,
      *         or -1 if none of the characters occur or if the string or character array is {@code null} or empty.
      * @throws IllegalArgumentException if any char in {@code valuesToFind} contains low-surrogate or high-surrogate code unit.
-     * @see #smallestLastIndexOfAll(String, String[])
-     * @see #smallestLastIndexOfAll(String, int, String[])
-     * @see #largestLastIndexOfAll(String, String[])
-     * @see #largestLastIndexOfAll(String, int, String[])
+     * @see #minLastIndexOfAll(String, String[])
+     * @see #minLastIndexOfAll(String, int, String[])
+     * @see #maxLastIndexOfAll(String, String[])
+     * @see #maxLastIndexOfAll(String, int, String[])
      */
     public static int lastIndexOfAny(final String str, final char... valuesToFind) throws IllegalArgumentException {
         checkInputChars(valuesToFind, cs.valuesToFind, true);
@@ -9900,10 +10020,10 @@ public final class Strings {
      * @param valuesToFind the array of substrings to be found, may be {@code null} or empty.
      * @return the index of the last occurrence of any substring in the character sequence represented by this object,
      *         or -1 if none of the substrings occur or if the string or substring array is {@code null} or empty.
-     * @see #smallestLastIndexOfAll(String, String[])
-     * @see #smallestLastIndexOfAll(String, int, String[])
-     * @see #largestLastIndexOfAll(String, String[])
-     * @see #largestLastIndexOfAll(String, int, String[])
+     * @see #minLastIndexOfAll(String, String[])
+     * @see #minLastIndexOfAll(String, int, String[])
+     * @see #maxLastIndexOfAll(String, String[])
+     * @see #maxLastIndexOfAll(String, int, String[])
      */
     public static int lastIndexOfAny(final String str, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
@@ -10010,10 +10130,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.smallestIndexOfAll("Hello World", "World", "o");       // returns 4
-     * Strings.smallestIndexOfAll("Hello World", "xyz", "abc");       // returns -1
-     * Strings.smallestIndexOfAll("test string", "string", "test");   // returns 0
-     * Strings.smallestIndexOfAll(null, "test");                      // returns -1
+     * Strings.minIndexOfAll("Hello World", "World", "o");       // returns 4
+     * Strings.minIndexOfAll("Hello World", "xyz", "abc");       // returns -1
+     * Strings.minIndexOfAll("test string", "string", "test");   // returns 0
+     * Strings.minIndexOfAll(null, "test");                      // returns -1
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty.
@@ -10022,8 +10142,8 @@ public final class Strings {
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestIndexOfAll(final String str, final String... valuesToFind) {
-        return smallestIndexOfAll(str, 0, valuesToFind);
+    public static int minIndexOfAll(final String str, final String... valuesToFind) {
+        return minIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -10039,10 +10159,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.smallestIndexOfAll("Hello World", 0, "World", "o");   // returns 4
-     * Strings.smallestIndexOfAll("Hello World", 5, "World", "o");   // returns 6
-     * Strings.smallestIndexOfAll("Hello World", 8, "World", "o");   // returns -1
-     * Strings.smallestIndexOfAll("test", -5, "test");               // returns 0
+     * Strings.minIndexOfAll("Hello World", 0, "World", "o");   // returns 4
+     * Strings.minIndexOfAll("Hello World", 5, "World", "o");   // returns 6
+     * Strings.minIndexOfAll("Hello World", 8, "World", "o");   // returns -1
+     * Strings.minIndexOfAll("test", -5, "test");               // returns 0
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty.
@@ -10052,7 +10172,7 @@ public final class Strings {
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestIndexOfAll(final String str, int fromIndex, final String... valuesToFind) {
+    public static int minIndexOfAll(final String str, int fromIndex, final String... valuesToFind) {
         if (str == null || fromIndex > str.length() || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -10092,10 +10212,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.largestIndexOfAll("Hello World", "o", "World");   // returns 6
-     * Strings.largestIndexOfAll("Hello World", "H", "d");       // returns 10
-     * Strings.largestIndexOfAll("Hello World", "xyz", "abc");   // returns -1
-     * Strings.largestIndexOfAll(null, "test");                  // returns -1
+     * Strings.maxIndexOfAll("Hello World", "o", "World");   // returns 6
+     * Strings.maxIndexOfAll("Hello World", "H", "d");       // returns 10
+     * Strings.maxIndexOfAll("Hello World", "xyz", "abc");   // returns -1
+     * Strings.maxIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty.
@@ -10104,8 +10224,8 @@ public final class Strings {
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
-    public static int largestIndexOfAll(final String str, final String... valuesToFind) {
-        return largestIndexOfAll(str, 0, valuesToFind);
+    public static int maxIndexOfAll(final String str, final String... valuesToFind) {
+        return maxIndexOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -10122,10 +10242,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.largestIndexOfAll("Hello World", 0, "o", "World");   // returns 6
-     * Strings.largestIndexOfAll("Hello World", 5, "o", "H");       // returns 7
-     * Strings.largestIndexOfAll("Hello World", 8, "o", "World");   // returns -1
-     * Strings.largestIndexOfAll("test", -5, "test", "t");          // returns 3
+     * Strings.maxIndexOfAll("Hello World", 0, "o", "World");   // returns 6
+     * Strings.maxIndexOfAll("Hello World", 5, "o", "H");       // returns 7
+     * Strings.maxIndexOfAll("Hello World", 8, "o", "World");   // returns -1
+     * Strings.maxIndexOfAll("test", -5, "test", "t");          // returns 3
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty.
@@ -10135,7 +10255,7 @@ public final class Strings {
      * @see #indexOfAny(String, String[])
      * @see #indexOfAny(String, int, String[])
      */
-    public static int largestIndexOfAll(final String str, final int fromIndex, final String... valuesToFind) {
+    public static int maxIndexOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || fromIndex > str.length() || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -10177,10 +10297,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.smallestLastIndexOfAll("Hello World", "o", "World");   // returns 6
-     * Strings.smallestLastIndexOfAll("Hello Hello", "Hello", "o");   // returns 7
-     * Strings.smallestLastIndexOfAll("test", "xyz", "abc");          // returns -1
-     * Strings.smallestLastIndexOfAll(null, "test");                  // returns -1
+     * Strings.minLastIndexOfAll("Hello World", "o", "World");   // returns 6
+     * Strings.minLastIndexOfAll("Hello Hello", "Hello", "o");   // returns 7
+     * Strings.minLastIndexOfAll("test", "xyz", "abc");          // returns -1
+     * Strings.minLastIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
      * @param str the string to search within, may be {@code null}.
@@ -10189,8 +10309,8 @@ public final class Strings {
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
-    public static int smallestLastIndexOfAll(final String str, final String... valuesToFind) {
-        return smallestLastIndexOfAll(str, N.len(str), valuesToFind);
+    public static int minLastIndexOfAll(final String str, final String... valuesToFind) {
+        return minLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -10206,10 +10326,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.smallestLastIndexOfAll("Hello World", 10, "o", "World");   // returns 6
-     * Strings.smallestLastIndexOfAll("Hello World", 5, "o", "World");    // returns 4
-     * Strings.smallestLastIndexOfAll("Hello World", 3, "o", "World");    // returns -1
-     * Strings.smallestLastIndexOfAll("test", -1, "test");                // returns -1
+     * Strings.minLastIndexOfAll("Hello World", 10, "o", "World");   // returns 6
+     * Strings.minLastIndexOfAll("Hello World", 5, "o", "World");    // returns 4
+     * Strings.minLastIndexOfAll("Hello World", 3, "o", "World");    // returns -1
+     * Strings.minLastIndexOfAll("test", -1, "test");                // returns -1
      * }</pre>
      *
      * @param str the string to search within, may be {@code null}.
@@ -10220,7 +10340,7 @@ public final class Strings {
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
-    public static int smallestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
+    public static int minLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
         if (str == null || startIndexFromBack < 0 || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -10259,10 +10379,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.largestLastIndexOfAll("Hello World", "o", "World");   // returns 7
-     * Strings.largestLastIndexOfAll("Hello Hello", "Hello", "e");   // returns 8
-     * Strings.largestLastIndexOfAll("test", "xyz", "abc");          // returns -1
-     * Strings.largestLastIndexOfAll(null, "test");                  // returns -1
+     * Strings.maxLastIndexOfAll("Hello World", "o", "World");   // returns 7
+     * Strings.maxLastIndexOfAll("Hello Hello", "Hello", "e");   // returns 8
+     * Strings.maxLastIndexOfAll("test", "xyz", "abc");          // returns -1
+     * Strings.maxLastIndexOfAll(null, "test");                  // returns -1
      * }</pre>
      *
      * @param str the string to search within, may be {@code null}.
@@ -10271,8 +10391,8 @@ public final class Strings {
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
-    public static int largestLastIndexOfAll(final String str, final String... valuesToFind) {
-        return largestLastIndexOfAll(str, N.len(str), valuesToFind);
+    public static int maxLastIndexOfAll(final String str, final String... valuesToFind) {
+        return maxLastIndexOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -10288,10 +10408,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.largestLastIndexOfAll("Hello World", 10, "o", "World");   // returns 7
-     * Strings.largestLastIndexOfAll("Hello World", 6, "o", "World");    // returns 6
-     * Strings.largestLastIndexOfAll("Hello World", 3, "o", "H");        // returns 0
-     * Strings.largestLastIndexOfAll("test", -1, "test");                // returns -1
+     * Strings.maxLastIndexOfAll("Hello World", 10, "o", "World");   // returns 7
+     * Strings.maxLastIndexOfAll("Hello World", 6, "o", "World");    // returns 6
+     * Strings.maxLastIndexOfAll("Hello World", 3, "o", "H");        // returns 0
+     * Strings.maxLastIndexOfAll("test", -1, "test");                // returns -1
      * }</pre>
      *
      * @param str the string to search within, may be {@code null}.
@@ -10302,7 +10422,7 @@ public final class Strings {
      * @see #lastIndexOfAny(String, String[])
      * @see #lastIndexOfAny(String, char[])
      */
-    public static int largestLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
+    public static int maxLastIndexOfAll(final String str, int startIndexFromBack, final String... valuesToFind) {
         if (str == null || startIndexFromBack < 0 || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -14032,13 +14152,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringBetweenIgnoreCaes("#CONTENT#", "#");             // returns "CONTENT"
-     * Strings.substringBetweenIgnoreCaes("<TAG>value<TAG>", "<tag>");   // returns "value"
-     * Strings.substringBetweenIgnoreCaes("@@Text@@", "@@");             // returns "Text"
-     * Strings.substringBetweenIgnoreCaes("no-match", "[[");             // returns null (delimiter not found)
-     * Strings.substringBetweenIgnoreCaes("[[only-one", "[[");           // returns null (second delimiter not found)
-     * Strings.substringBetweenIgnoreCaes(null, "[[");                   // returns null
-     * Strings.substringBetweenIgnoreCaes("test", null);                 // returns null
+     * Strings.substringBetweenIgnoreCase("#CONTENT#", "#");             // returns "CONTENT"
+     * Strings.substringBetweenIgnoreCase("<TAG>value<TAG>", "<tag>");   // returns "value"
+     * Strings.substringBetweenIgnoreCase("@@Text@@", "@@");             // returns "Text"
+     * Strings.substringBetweenIgnoreCase("no-match", "[[");             // returns null (delimiter not found)
+     * Strings.substringBetweenIgnoreCase("[[only-one", "[[");           // returns null (second delimiter not found)
+     * Strings.substringBetweenIgnoreCase(null, "[[");                   // returns null
+     * Strings.substringBetweenIgnoreCase("test", null);                 // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14047,8 +14167,8 @@ public final class Strings {
      */
     @Beta
     @MayReturnNull
-    public static String substringBetweenIgnoreCaes(final String str, final String delimiter) {
-        return substringBetweenIgnoreCaes(str, delimiter, delimiter);
+    public static String substringBetweenIgnoreCase(final String str, final String delimiter) {
+        return substringBetweenIgnoreCase(str, delimiter, delimiter);
     }
 
     /**
@@ -14064,14 +14184,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");            // returns "content"
-     * Strings.substringBetweenIgnoreCaes("[[START]]middle[[END]]", "[[start]]", "[[end]]");   // returns "middle"
-     * Strings.substringBetweenIgnoreCaes("Hello [WORLD]!", "[", "]");                         // returns "WORLD"
-     * Strings.substringBetweenIgnoreCaes("no-match", "[[", "]]");                             // returns null (begin delimiter not found)
-     * Strings.substringBetweenIgnoreCaes("[[no-end", "[[", "]]");                             // returns null (end delimiter not found)
-     * Strings.substringBetweenIgnoreCaes(null, "[[", "]]");                                   // returns null
-     * Strings.substringBetweenIgnoreCaes("test", null, "]]");                                 // returns null
-     * Strings.substringBetweenIgnoreCaes("test", "[[", null);                                 // returns null
+     * Strings.substringBetweenIgnoreCase("<TAG>content</TAG>", "<tag>", "</tag>");            // returns "content"
+     * Strings.substringBetweenIgnoreCase("[[START]]middle[[END]]", "[[start]]", "[[end]]");   // returns "middle"
+     * Strings.substringBetweenIgnoreCase("Hello [WORLD]!", "[", "]");                         // returns "WORLD"
+     * Strings.substringBetweenIgnoreCase("no-match", "[[", "]]");                             // returns null (begin delimiter not found)
+     * Strings.substringBetweenIgnoreCase("[[no-end", "[[", "]]");                             // returns null (end delimiter not found)
+     * Strings.substringBetweenIgnoreCase(null, "[[", "]]");                                   // returns null
+     * Strings.substringBetweenIgnoreCase("test", null, "]]");                                 // returns null
+     * Strings.substringBetweenIgnoreCase("test", "[[", null);                                 // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14081,8 +14201,8 @@ public final class Strings {
      */
     @Beta
     @MayReturnNull
-    public static String substringBetweenIgnoreCaes(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
-        return substringBetweenIgnoreCaes(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    public static String substringBetweenIgnoreCase(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
+        return substringBetweenIgnoreCase(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
     }
 
     /**
@@ -14100,14 +14220,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringBetweenIgnoreCaes("<A>text1</A><A>text2</A>", 5, "<a>", "</a>");   // returns "text2"
-     * Strings.substringBetweenIgnoreCaes("{{X}}{{Y}}", 3, "{{", "}}");                    // returns "Y"
-     * Strings.substringBetweenIgnoreCaes("HELLO world", 0, "hello", "WORLD");             // returns " "
-     * Strings.substringBetweenIgnoreCaes("test", 10, "t", "t");                           // returns null (fromIndex > length)
-     * Strings.substringBetweenIgnoreCaes("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
-     * Strings.substringBetweenIgnoreCaes(null, 0, "{{", "}}");                            // returns null
-     * Strings.substringBetweenIgnoreCaes("test", 0, null, "}}");                          // returns null
-     * Strings.substringBetweenIgnoreCaes("test", 0, "{{", null);                          // returns null
+     * Strings.substringBetweenIgnoreCase("<A>text1</A><A>text2</A>", 5, "<a>", "</a>");   // returns "text2"
+     * Strings.substringBetweenIgnoreCase("{{X}}{{Y}}", 3, "{{", "}}");                    // returns "Y"
+     * Strings.substringBetweenIgnoreCase("HELLO world", 0, "hello", "WORLD");             // returns " "
+     * Strings.substringBetweenIgnoreCase("test", 10, "t", "t");                           // returns null (fromIndex > length)
+     * Strings.substringBetweenIgnoreCase("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
+     * Strings.substringBetweenIgnoreCase(null, 0, "{{", "}}");                            // returns null
+     * Strings.substringBetweenIgnoreCase("test", 0, null, "}}");                          // returns null
+     * Strings.substringBetweenIgnoreCase("test", 0, "{{", null);                          // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14118,7 +14238,7 @@ public final class Strings {
      */
     @Beta
     @MayReturnNull
-    public static String substringBetweenIgnoreCaes(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+    public static String substringBetweenIgnoreCase(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex > str.length()) {
             return null;
@@ -20340,11 +20460,176 @@ public final class Strings {
     }
 
     /**
-     * A utility class providing additional string manipulation methods.
-     * This class contains helper methods for string operations that complement
-     * the main Strings class functionality.
+     * A specialized utility class providing null-safe and {@link Optional}-wrapped string manipulation methods.
      *
-     * <p>This class cannot be instantiated.
+     * <p>{@code StrUtil} serves as a companion to the parent {@link Strings} class, offering two key design patterns:</p>
+     *
+     * <ol>
+     *   <li><b>Optional-wrapped returns</b>: Methods return {@link Optional} (or its primitive variants like
+     *       {@link u.OptionalInt}) instead of {@code null}, enabling fluent functional programming and
+     *       eliminating explicit null checks.</li>
+     *   <li><b>Fallback returns</b>: Methods with {@code OrElse} or {@code OrElseItself} suffixes return
+     *       a default value or the original input string when extraction fails.</li>
+     * </ol>
+     *
+     * <h2>Method Naming Conventions</h2>
+     *
+     * <p>Methods follow a consistent naming pattern that indicates their behavior:</p>
+     *
+     * <table border="1">
+     *   <caption>Method Naming Patterns</caption>
+     *   <tr>
+     *     <th>Pattern</th>
+     *     <th>Return Type</th>
+     *     <th>Behavior on Failure</th>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code substringXxx(...)}</td>
+     *     <td>{@code Optional<String>}</td>
+     *     <td>Returns empty Optional</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code substringXxxOrElse(..., defaultStr)}</td>
+     *     <td>{@code String}</td>
+     *     <td>Returns the provided default string</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code substringXxxOrElseItself(...)}</td>
+     *     <td>{@code String}</td>
+     *     <td>Returns the original input string</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code createXxx(...)}</td>
+     *     <td>{@code OptionalInt/Long/Float/Double/Optional<T>}</td>
+     *     <td>Returns empty Optional</td>
+     *   </tr>
+     * </table>
+     *
+     * <h2>Method Categories</h2>
+     *
+     * <h3>1. Substring Extraction with Optional Returns</h3>
+     * <p>These methods wrap the corresponding {@link Strings} methods and return {@link Optional}:</p>
+     * <ul>
+     *   <li>{@link #substring(String, int)} - Extract from index to end</li>
+     *   <li>{@link #substring(String, int, int)} - Extract between indices</li>
+     *   <li>{@link #substringAfter(String, char)} - Extract after first occurrence of delimiter</li>
+     *   <li>{@link #substringAfterLast(String, String)} - Extract after last occurrence of delimiter</li>
+     *   <li>{@link #substringBefore(String, String)} - Extract before first occurrence of delimiter</li>
+     *   <li>{@link #substringBeforeLast(String, String)} - Extract before last occurrence of delimiter</li>
+     *   <li>{@link #substringBetween(String, String, String)} - Extract between two delimiters</li>
+     *   <li>{@link #substringAfterAny(String, char...)} - Extract after any of the delimiters</li>
+     *   <li>{@link #substringBeforeAny(String, String...)} - Extract before any of the delimiters</li>
+     *   <li>{@link #substringBetweenFirstAndLast(String, String)} - Extract between first and last occurrences</li>
+     * </ul>
+     *
+     * <h3>2. Substring Extraction with Default Fallback</h3>
+     * <p>Methods with {@code OrElse} suffix return a specified default when extraction fails:</p>
+     * <ul>
+     *   <li>{@link #substringOrElse(String, int, String)} - Returns default if index invalid</li>
+     *   <li>{@link #substringAfterOrElse(String, String, String)} - Returns default if delimiter not found</li>
+     *   <li>{@link #substringAfterLastOrElse(String, String, String)} - Returns default if delimiter not found</li>
+     *   <li>{@link #substringBeforeOrElse(String, String, String)} - Returns default if delimiter not found</li>
+     *   <li>{@link #substringBeforeLastOrElse(String, String, String)} - Returns default if delimiter not found</li>
+     * </ul>
+     *
+     * <h3>3. Substring Extraction with Original String Fallback</h3>
+     * <p>Methods with {@code OrElseItself} suffix return the original string when extraction fails:</p>
+     * <ul>
+     *   <li>{@link #substringOrElseItself(String, int)} - Returns original string if index invalid</li>
+     *   <li>{@link #substringAfterOrElseItself(String, char)} - Returns original if delimiter not found</li>
+     *   <li>{@link #substringAfterLastOrElseItself(String, String)} - Returns original if delimiter not found</li>
+     *   <li>{@link #substringBeforeOrElseItself(String, char)} - Returns original if delimiter not found</li>
+     *   <li>{@link #substringBeforeLastOrElseItself(String, String)} - Returns original if delimiter not found</li>
+     * </ul>
+     *
+     * <h3>4. Safe Number Parsing</h3>
+     * <p>Methods for parsing strings to numbers, returning empty Optional on parse failure:</p>
+     * <ul>
+     *   <li>{@link #createInteger(String)} - Parse to {@link u.OptionalInt}</li>
+     *   <li>{@link #createLong(String)} - Parse to {@link u.OptionalLong}</li>
+     *   <li>{@link #createFloat(String)} - Parse to {@link u.OptionalFloat}</li>
+     *   <li>{@link #createDouble(String)} - Parse to {@link u.OptionalDouble}</li>
+     *   <li>{@link #createBigInteger(String)} - Parse to {@link u.Optional}{@code <BigInteger>}</li>
+     *   <li>{@link #createBigDecimal(String)} - Parse to {@link u.Optional}{@code <BigDecimal>}</li>
+     *   <li>{@link #createNumber(String)} - Parse to appropriate number type</li>
+     * </ul>
+     *
+     * <h2>Usage Examples</h2>
+     *
+     * <h3>Fluent Optional Chaining</h3>
+     * <pre>{@code
+     * // Extract domain from email, returning "unknown" if extraction fails
+     * String domain = StrUtil.substringAfter("user@example.com", "@")
+     *     .orElse("unknown");  // returns "example.com"
+     *
+     * // Extract file extension with fallback
+     * String ext = StrUtil.substringAfterLast("document.backup.pdf", ".")
+     *     .map(String::toLowerCase)
+     *     .orElse("txt");  // returns "pdf"
+     *
+     * // Safe number parsing with default
+     * int port = StrUtil.createInteger(System.getenv("PORT"))
+     *     .orElse(8080);
+     * }</pre>
+     *
+     * <h3>OrElseItself Pattern</h3>
+     * <pre>{@code
+     * // Remove file extension if present, keep original otherwise
+     * String filename = StrUtil.substringBeforeOrElseItself("myfile.txt", '.');
+     * // returns "myfile"
+     *
+     * String noExtension = StrUtil.substringBeforeOrElseItself("myfile", '.');
+     * // returns "myfile" (original string)
+     * }</pre>
+     *
+     * <h3>Between Extraction</h3>
+     * <pre>{@code
+     * // Extract content between XML tags
+     * Optional<String> content = StrUtil.substringBetween("<name>John</name>", "<name>", "</name>");
+     * // returns Optional.of("John")
+     *
+     * // Extract between same delimiter
+     * Optional<String> quoted = StrUtil.substringBetween("He said \"hello\" loudly", "\"");
+     * // returns Optional.of("hello")
+     * }</pre>
+     *
+     * <h2>Design Rationale</h2>
+     *
+     * <p>This class exists to provide a cleaner API for common string extraction patterns where:</p>
+     * <ul>
+     *   <li>Null/not-found results are expected and should be handled gracefully</li>
+     *   <li>Functional composition with {@link Optional#map}, {@link Optional#filter}, etc. is desired</li>
+     *   <li>A sensible default or fallback behavior simplifies client code</li>
+     * </ul>
+     *
+     * <h2>Relationship to Strings Class</h2>
+     *
+     * <p>All methods in {@code StrUtil} delegate to corresponding methods in {@link Strings}.
+     * The key difference is in return types and null handling:</p>
+     *
+     * <ul>
+     *   <li>{@code Strings.substringAfter("hello", ".")} returns {@code null} if delimiter not found</li>
+     *   <li>{@code StrUtil.substringAfter("hello", ".")} returns {@code Optional.empty()} if delimiter not found</li>
+     *   <li>{@code StrUtil.substringAfterOrElse("hello", ".", "default")} returns {@code "default"} if delimiter not found</li>
+     *   <li>{@code StrUtil.substringAfterOrElseItself("hello", ".")} returns {@code "hello"} if delimiter not found</li>
+     * </ul>
+     *
+     * <h2>Thread Safety</h2>
+     * <p>All methods are stateless and thread-safe. This class contains only static methods.</p>
+     *
+     * <h2>Null Handling</h2>
+     * <p>All methods handle {@code null} input gracefully:</p>
+     * <ul>
+     *   <li>Methods returning {@link Optional} return empty Optional for null input</li>
+     *   <li>{@code OrElse} methods return the default value for null input</li>
+     *   <li>{@code OrElseItself} methods return {@code null} for null input (preserving the original)</li>
+     * </ul>
+     *
+     * @see Strings
+     * @see Optional
+     * @see u.OptionalInt
+     * @see u.OptionalLong
+     * @see u.OptionalDouble
      */
     public static final class StrUtil {
         private StrUtil() {

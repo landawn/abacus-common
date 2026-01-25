@@ -434,7 +434,7 @@ public class BiMap2025Test extends TestBase {
     @Test
     public void testInversed() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inversed();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         assertNotNull(inverse);
         assertEquals(2, inverse.size());
@@ -447,7 +447,7 @@ public class BiMap2025Test extends TestBase {
     @Test
     public void testInversedBackedBySameData() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse = biMap.inversed();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         biMap.put("two", 2);
         assertEquals(2, inverse.size());
@@ -461,8 +461,8 @@ public class BiMap2025Test extends TestBase {
     @Test
     public void testInversedReturnsSameInstance() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse1 = biMap.inversed();
-        BiMap<Integer, String> inverse2 = biMap.inversed();
+        BiMap<Integer, String> inverse1 = biMap.inverse();
+        BiMap<Integer, String> inverse2 = biMap.inverse();
 
         assertSame(inverse1, inverse2);
     }
@@ -702,7 +702,7 @@ public class BiMap2025Test extends TestBase {
     @Test
     public void testInverseOperations() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inversed();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         inverse.put(3, "three");
         assertEquals(3, biMap.size());

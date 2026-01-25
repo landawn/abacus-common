@@ -537,7 +537,7 @@ public class ParallelArrayStream101Test extends TestBase {
 
             Multimap<String, Integer, List<Integer>> result = stream.limit(6).toMultimap(keyMapper, valueMapper, Suppliers.ofListMultimap());
 
-            assertEquals(2, result.size());
+            assertEquals(6, result.totalValueCount());
             assertEquals(3, result.get("even").size());
             assertEquals(3, result.get("odd").size());
         }
@@ -1220,7 +1220,7 @@ public class ParallelArrayStream101Test extends TestBase {
 
             assertEquals(2, result.size());
 
-            if (N.haveSameElements(N.asList("1", "2", "3"), result.get(0))) {
+            if (N.containsSameElements(N.asList("1", "2", "3"), result.get(0))) {
                 assertHaveSameElements(N.asList("4", "5", "6"), result.get(1));
             } else {
                 assertHaveSameElements(N.asList("1", "2", "3"), result.get(1));
@@ -1234,13 +1234,13 @@ public class ParallelArrayStream101Test extends TestBase {
     public class SlidingWindowOperationsTest {
 
         @Test
-        @DisplayName("slide() with collection supplier should create sliding windows")
+        @DisplayName("sliding() with collection supplier should create sliding windows")
         public void testSlidingWithCollectionSupplier() {
             int windowSize = 3;
             int increment = 1;
             IntFunction<List<Integer>> supplier = ArrayList::new;
 
-            List<List<Integer>> result = stream.limit(5).slide(windowSize, increment, supplier).toList();
+            List<List<Integer>> result = stream.limit(5).sliding(windowSize, increment, supplier).toList();
 
             assertEquals(3, result.size());
             assertEquals(Arrays.asList(1, 2, 3), result.get(0));
@@ -1249,13 +1249,13 @@ public class ParallelArrayStream101Test extends TestBase {
         }
 
         @Test
-        @DisplayName("slide() with collector should collect sliding windows")
+        @DisplayName("sliding() with collector should collect sliding windows")
         public void testSlidingWithCollector() {
             int windowSize = 2;
             int increment = 1;
             Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
 
-            List<Integer> result = stream.limit(4).slide(windowSize, increment, sumCollector).toList();
+            List<Integer> result = stream.limit(4).sliding(windowSize, increment, sumCollector).toList();
 
             assertEquals(3, result.size());
             assertEquals(Integer.valueOf(3), result.get(0));
@@ -1264,13 +1264,13 @@ public class ParallelArrayStream101Test extends TestBase {
         }
 
         @Test
-        @DisplayName("slide() should handle window larger than stream")
+        @DisplayName("sliding() should handle window larger than stream")
         public void testSlidingLargeWindow() {
             int windowSize = 20;
             int increment = 1;
             IntFunction<List<Integer>> supplier = ArrayList::new;
 
-            List<List<Integer>> result = stream.slide(windowSize, increment, supplier).toList();
+            List<List<Integer>> result = stream.sliding(windowSize, increment, supplier).toList();
 
             assertEquals(1, result.size());
             assertEquals(10, result.get(0).size());

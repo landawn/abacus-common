@@ -123,7 +123,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "1";
         });
 
-        ContinuableFuture<String> future2 = future1.thenCall(() -> {
+        ContinuableFuture<String> future2 = future1.thenCallAsync(() -> {
             Thread.sleep(100);
             return "2";
         });
@@ -140,7 +140,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "1";
         });
 
-        ContinuableFuture<String> future2 = future1.thenCall(() -> "2");
+        ContinuableFuture<String> future2 = future1.thenCallAsync(() -> "2");
 
         assertFalse(future2.isAllCancelled());
         future2.cancelAll(true);
@@ -302,7 +302,7 @@ public class ContinuableFuture100Test extends TestBase {
         AtomicBoolean executed = new AtomicBoolean(false);
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
 
-        ContinuableFuture<Void> nextFuture = future.thenRun(() -> executed.set(true));
+        ContinuableFuture<Void> nextFuture = future.thenRunAsync(() -> executed.set(true));
         nextFuture.get();
 
         assertTrue(executed.get());
@@ -313,7 +313,7 @@ public class ContinuableFuture100Test extends TestBase {
         AtomicReference<String> ref = new AtomicReference<>();
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
 
-        ContinuableFuture<Void> nextFuture = future.thenRun(s -> ref.set(s));
+        ContinuableFuture<Void> nextFuture = future.thenRunAsync(s -> ref.set(s));
         nextFuture.get();
 
         assertEquals("test", ref.get());
@@ -324,7 +324,7 @@ public class ContinuableFuture100Test extends TestBase {
         AtomicReference<String> ref = new AtomicReference<>();
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
 
-        ContinuableFuture<Void> nextFuture = future.thenRun((value, exception) -> {
+        ContinuableFuture<Void> nextFuture = future.thenRunAsync((value, exception) -> {
             ref.set(exception == null ? value : "error");
         });
         nextFuture.get();
@@ -335,7 +335,7 @@ public class ContinuableFuture100Test extends TestBase {
     @Test
     public void testThenCallWithCallable() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.completed("first");
-        ContinuableFuture<String> nextFuture = future.thenCall(() -> "second");
+        ContinuableFuture<String> nextFuture = future.thenCallAsync(() -> "second");
 
         assertEquals("second", nextFuture.get());
     }
@@ -343,7 +343,7 @@ public class ContinuableFuture100Test extends TestBase {
     @Test
     public void testThenCallWithFunction() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
-        ContinuableFuture<String> nextFuture = future.thenCall(s -> s.toUpperCase());
+        ContinuableFuture<String> nextFuture = future.thenCallAsync(s -> s.toUpperCase());
 
         assertEquals("TEST", nextFuture.get());
     }
@@ -351,7 +351,7 @@ public class ContinuableFuture100Test extends TestBase {
     @Test
     public void testThenCallWithBiFunction() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
-        ContinuableFuture<String> nextFuture = future.thenCall((value, exception) -> {
+        ContinuableFuture<String> nextFuture = future.thenCallAsync((value, exception) -> {
             return exception == null ? value.toUpperCase() : "ERROR";
         });
 
@@ -364,7 +364,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("1");
         ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
 
-        ContinuableFuture<Void> combined = future1.runAfterBoth(future2, () -> executed.set(true));
+        ContinuableFuture<Void> combined = future1.runAsyncAfterBoth(future2, () -> executed.set(true));
         combined.get();
 
         assertTrue(executed.get());
@@ -376,7 +376,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("Hello");
         ContinuableFuture<String> future2 = ContinuableFuture.completed("World");
 
-        ContinuableFuture<Void> combined = future1.runAfterBoth(future2, (v1, v2) -> {
+        ContinuableFuture<Void> combined = future1.runAsyncAfterBoth(future2, (v1, v2) -> {
             ref.set(v1 + " " + v2);
         });
         combined.get();
@@ -390,7 +390,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("success");
         ContinuableFuture<Integer> future2 = ContinuableFuture.completed(42);
 
-        ContinuableFuture<Void> combined = future1.runAfterBoth(future2, tuple -> ref.set(tuple._1 + ":" + tuple._3));
+        ContinuableFuture<Void> combined = future1.runAsyncAfterBoth(future2, tuple -> ref.set(tuple._1 + ":" + tuple._3));
         combined.get();
 
         assertEquals("success:42", ref.get());
@@ -402,7 +402,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("success");
         ContinuableFuture<Integer> future2 = ContinuableFuture.completed(42);
 
-        ContinuableFuture<Void> combined = future1.runAfterBoth(future2, (v1, e1, v2, e2) -> {
+        ContinuableFuture<Void> combined = future1.runAsyncAfterBoth(future2, (v1, e1, v2, e2) -> {
             ref.set(v1 + ":" + v2);
         });
         combined.get();
@@ -415,7 +415,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("1");
         ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
 
-        ContinuableFuture<String> combined = future1.callAfterBoth(future2, () -> "combined");
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, () -> "combined");
         assertEquals("combined", combined.get());
     }
 
@@ -424,7 +424,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("Hello");
         ContinuableFuture<String> future2 = ContinuableFuture.completed("World");
 
-        ContinuableFuture<String> combined = future1.callAfterBoth(future2, (v1, v2) -> v1 + " " + v2);
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + " " + v2);
         assertEquals("Hello World", combined.get());
     }
 
@@ -433,7 +433,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
         ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
 
-        ContinuableFuture<String> combined = future1.callAfterBoth(future2, tuple -> tuple._1 + tuple._3);
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, tuple -> tuple._1 + tuple._3);
         assertEquals("A1", combined.get());
     }
 
@@ -442,7 +442,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
         ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
 
-        ContinuableFuture<String> combined = future1.callAfterBoth(future2, (v1, e1, v2, e2) -> v1 + v2);
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, e1, v2, e2) -> v1 + v2);
         assertEquals("A1", combined.get());
     }
 
@@ -455,7 +455,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
 
-        ContinuableFuture<Void> either = future1.runAfterEither(future2, () -> executed.set(true));
+        ContinuableFuture<Void> either = future1.runAsyncAfterEither(future2, () -> executed.set(true));
         either.get();
 
         assertTrue(executed.get());
@@ -470,7 +470,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("fast");
 
-        ContinuableFuture<Void> either = future1.runAfterEither(future2, v -> ref.set(v));
+        ContinuableFuture<Void> either = future1.runAsyncAfterEither(future2, v -> ref.set(v));
         either.get();
 
         assertEquals("fast", ref.get());
@@ -485,7 +485,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "slow";
         });
 
-        ContinuableFuture<Void> either = future1.runAfterEither(future2, (value, exception) -> {
+        ContinuableFuture<Void> either = future1.runAsyncAfterEither(future2, (value, exception) -> {
             ref.set(exception == null ? value : "error");
         });
         either.get();
@@ -501,7 +501,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
 
-        ContinuableFuture<String> either = future1.callAfterEither(future2, () -> "either completed");
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "either completed");
         assertEquals("either completed", either.get());
     }
 
@@ -513,7 +513,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("fast");
 
-        ContinuableFuture<String> either = future1.callAfterEither(future2, s -> s.toUpperCase());
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, s -> s.toUpperCase());
         assertEquals("FAST", either.get());
     }
 
@@ -525,42 +525,42 @@ public class ContinuableFuture100Test extends TestBase {
             return "slow";
         });
 
-        ContinuableFuture<String> either = future1.callAfterEither(future2, (value, exception) -> {
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, (value, exception) -> {
             return exception == null ? value.toUpperCase() : "ERROR";
         });
         assertEquals("SUCCESS", either.get());
     }
 
     @Test
-    public void testRunAfterFirstSucceedWithRunnable() throws Exception {
+    public void testRunAfterFirstSuccessWithRunnable() throws Exception {
         AtomicBoolean executed = new AtomicBoolean(false);
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
 
-        ContinuableFuture<Void> result = future1.runAfterFirstSucceed(future2, () -> executed.set(true));
+        ContinuableFuture<Void> result = future1.runAsyncAfterFirstSuccess(future2, () -> executed.set(true));
         result.get();
 
         assertTrue(executed.get());
     }
 
     @Test
-    public void testRunAfterFirstSucceedWithConsumer() throws Exception {
+    public void testRunAfterFirstSuccessWithConsumer() throws Exception {
         AtomicReference<String> ref = new AtomicReference<>();
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
 
-        ContinuableFuture<Void> result = future1.runAfterFirstSucceed(future2, v -> ref.set(v));
+        ContinuableFuture<Void> result = future1.runAsyncAfterFirstSuccess(future2, v -> ref.set(v));
         result.get();
 
         assertEquals("success", ref.get());
     }
 
     @Test
-    public void testRunAfterFirstSucceedWithBiConsumer() throws Exception {
+    public void testRunAfterFirstSuccessWithBiConsumer() throws Exception {
         AtomicReference<String> ref = new AtomicReference<>();
         ContinuableFuture<String> future1 = ContinuableFuture.completed("first");
         ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
@@ -568,7 +568,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "second";
         });
 
-        ContinuableFuture<Void> result = future1.runAfterFirstSucceed(future2, (value, exception) -> {
+        ContinuableFuture<Void> result = future1.runAsyncAfterFirstSuccess(future2, (value, exception) -> {
             ref.set(value != null ? value : "error");
         });
         result.get();
@@ -577,36 +577,36 @@ public class ContinuableFuture100Test extends TestBase {
     }
 
     @Test
-    public void testCallAfterFirstSucceedWithCallable() throws Exception {
+    public void testCallAfterFirstSuccessWithCallable() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
 
-        ContinuableFuture<String> result = future1.callAfterFirstSucceed(future2, () -> "succeeded");
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, () -> "succeeded");
         assertEquals("succeeded", result.get());
     }
 
     @Test
-    public void testCallAfterFirstSucceedWithFunction() throws Exception {
+    public void testCallAfterFirstSuccessWithFunction() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
 
-        ContinuableFuture<String> result = future1.callAfterFirstSucceed(future2, s -> s.toUpperCase());
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
         assertEquals("SUCCESS", result.get());
     }
 
     @Test
-    public void testCallAfterFirstSucceedWithBiFunction() throws Exception {
+    public void testCallAfterFirstSuccessWithBiFunction() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("first");
         ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
             N.sleep(20);
             return "second";
         });
 
-        ContinuableFuture<String> result = future1.callAfterFirstSucceed(future2, (value, exception) -> {
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, (value, exception) -> {
             return value != null ? value.toUpperCase() : "ERROR";
         });
         assertEquals("FIRST", result.get());
@@ -642,7 +642,7 @@ public class ContinuableFuture100Test extends TestBase {
         Executor customExecutor = Executors.newSingleThreadExecutor();
         AtomicReference<Thread> threadRef = new AtomicReference<>();
 
-        ContinuableFuture<String> future = ContinuableFuture.completed("test").thenUse(customExecutor).thenCall(() -> {
+        ContinuableFuture<String> future = ContinuableFuture.completed("test").thenUse(customExecutor).thenCallAsync(() -> {
             threadRef.set(Thread.currentThread());
             return "executed";
         });
@@ -695,10 +695,10 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
             counter.incrementAndGet();
             return "1";
-        }).thenCall(s -> {
+        }).thenCallAsync(s -> {
             counter.incrementAndGet();
             return s + "2";
-        }).thenDelay(50, TimeUnit.MILLISECONDS).thenCall(s -> {
+        }).thenDelay(50, TimeUnit.MILLISECONDS).thenCallAsync(s -> {
             counter.incrementAndGet();
             return s + "3";
         });
@@ -716,7 +716,7 @@ public class ContinuableFuture100Test extends TestBase {
             throw new RuntimeException("fail2");
         });
 
-        ContinuableFuture<Void> result = future1.runAfterFirstSucceed(future2, () -> {
+        ContinuableFuture<Void> result = future1.runAsyncAfterFirstSuccess(future2, () -> {
         });
 
         assertThrows(ExecutionException.class, () -> result.get());
@@ -754,7 +754,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "2";
         });
 
-        ContinuableFuture<String> combined = future1.callAfterBoth(future2, (v1, v2) -> v1 + v2);
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + v2);
 
         if (combined.cancelAll(true)) {
             assertTrue(future1.isCancelled());
@@ -774,7 +774,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "1";
         });
 
-        ContinuableFuture<String> future2 = future1.thenCall(s -> s + "2");
+        ContinuableFuture<String> future2 = future1.thenCallAsync(s -> s + "2");
 
         future2.cancel(true);
 
@@ -789,7 +789,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
 
         AtomicReference<String> ref = new AtomicReference<>();
-        ContinuableFuture<Void> combined = future1.runAfterBoth(future2, (v1, e1, v2, e2) -> {
+        ContinuableFuture<Void> combined = future1.runAsyncAfterBoth(future2, (v1, e1, v2, e2) -> {
             ref.set((e1 == null ? v1 : "error1") + ":" + (e2 == null ? v2 : "error2"));
         });
 
@@ -808,7 +808,7 @@ public class ContinuableFuture100Test extends TestBase {
             throw new RuntimeException("fail2");
         });
 
-        ContinuableFuture<String> either = future1.callAfterEither(future2, () -> "either completed");
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "either completed");
 
         assertEquals("either completed", either.get());
     }
@@ -841,12 +841,12 @@ public class ContinuableFuture100Test extends TestBase {
     public void testComplexChainWithErrors() throws Exception {
         AtomicReference<String> ref = new AtomicReference<>();
 
-        ContinuableFuture<Void> future = ContinuableFuture.call(() -> "start").thenCall(s -> {
+        ContinuableFuture<Void> future = ContinuableFuture.call(() -> "start").thenCallAsync(s -> {
             if (s.equals("start")) {
                 throw new RuntimeException("intentional error");
             }
             return s;
-        }).thenRun((value, exception) -> {
+        }).thenRunAsync((value, exception) -> {
             if (exception != null) {
                 ref.set("caught: " + exception.getMessage());
             } else {
@@ -859,7 +859,7 @@ public class ContinuableFuture100Test extends TestBase {
     }
 
     @Test
-    public void testRunAfterFirstSucceedAllFail() {
+    public void testRunAfterFirstSuccessAllFail() {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail1");
         });
@@ -868,7 +868,7 @@ public class ContinuableFuture100Test extends TestBase {
             throw new RuntimeException("fail2");
         });
 
-        ContinuableFuture<Void> result = future1.runAfterFirstSucceed(future2, () -> {
+        ContinuableFuture<Void> result = future1.runAsyncAfterFirstSuccess(future2, () -> {
         });
 
         ExecutionException ex = assertThrows(ExecutionException.class, () -> result.get());
@@ -876,7 +876,7 @@ public class ContinuableFuture100Test extends TestBase {
     }
 
     @Test
-    public void testCallAfterFirstSucceedSecondSucceeds() throws Exception {
+    public void testCallAfterFirstSuccessSecondSucceeds() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail1");
         });
@@ -885,7 +885,7 @@ public class ContinuableFuture100Test extends TestBase {
             return "success2";
         });
 
-        ContinuableFuture<String> result = future1.callAfterFirstSucceed(future2, s -> s.toUpperCase());
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
         assertEquals("SUCCESS2", result.get());
     }
 
@@ -914,7 +914,7 @@ public class ContinuableFuture100Test extends TestBase {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
             Thread.sleep(200);
             return "slow";
-        }).thenCall(s -> s + "-processed");
+        }).thenCallAsync(s -> s + "-processed");
 
         assertThrows(TimeoutException.class, () -> future.get(100, TimeUnit.MILLISECONDS));
     }

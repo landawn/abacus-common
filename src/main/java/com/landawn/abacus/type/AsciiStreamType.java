@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -180,7 +180,7 @@ public class AsciiStreamType extends InputStreamType {
      * @throws UncheckedIOException wraps any IOException that occurs during stream reading
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

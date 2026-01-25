@@ -676,16 +676,16 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(5, 10);
-     * range.compareTo(3);    // returns 1 (range is after 3)
-     * range.compareTo(7);    // returns 0 (7 is within range)
-     * range.compareTo(12);   // returns -1 (range is before 12)
+     * range.positionOf(3);    // returns 1 (range is after 3)
+     * range.positionOf(7);    // returns 0 (7 is within range)
+     * range.positionOf(12);   // returns -1 (range is before 12)
      * }</pre>
      *
      * @param element the element to compare against this range, must not be null
      * @return -1, 0, or 1 depending on the element's position relative to this range
      * @throws IllegalArgumentException if element is null
      */
-    public int compareTo(final T element) throws IllegalArgumentException {
+    public int positionOf(final T element) throws IllegalArgumentException {
         if (element == null) {
             // Comparable API says throw NPE on null
             throw new IllegalArgumentException("Element is null");

@@ -694,11 +694,11 @@ public class IntFunctions100Test extends TestBase {
 
         ListMultimap<String, Integer> multimap1 = func.apply(10);
         Assertions.assertNotNull(multimap1);
-        Assertions.assertEquals(0, multimap1.size());
+        Assertions.assertEquals(0, multimap1.totalValueCount());
 
         ListMultimap<String, Integer> multimap2 = func.apply(0);
         Assertions.assertNotNull(multimap2);
-        Assertions.assertEquals(0, multimap2.size());
+        Assertions.assertEquals(0, multimap2.totalValueCount());
     }
 
     @Test
@@ -708,11 +708,11 @@ public class IntFunctions100Test extends TestBase {
 
         SetMultimap<String, Integer> multimap1 = func.apply(10);
         Assertions.assertNotNull(multimap1);
-        Assertions.assertEquals(0, multimap1.size());
+        Assertions.assertEquals(0, multimap1.totalValueCount());
 
         SetMultimap<String, Integer> multimap2 = func.apply(0);
         Assertions.assertNotNull(multimap2);
-        Assertions.assertEquals(0, multimap2.size());
+        Assertions.assertEquals(0, multimap2.totalValueCount());
     }
 
     @Test

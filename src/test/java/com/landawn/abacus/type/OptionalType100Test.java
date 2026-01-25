@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.Optional;
 
@@ -30,14 +30,14 @@ public class OptionalType100Test extends TestBase {
     private OptionalType<String> optionalStringType;
     private OptionalType<Integer> optionalIntType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalStringType = (OptionalType<String>) createType("Optional<String>");
         optionalIntType = (OptionalType<Integer>) createType("Optional<Integer>");
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test

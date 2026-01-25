@@ -347,10 +347,10 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        UnaryOperator<String> toLowerCaseWithUnderscore = Fn.toLowerCaseWithUnderscore();
-        assertEquals("hello_world", toLowerCaseWithUnderscore.apply("helloWorld"));
-        assertEquals("hello_world", toLowerCaseWithUnderscore.apply("HelloWorld"));
+    public void testToSnakeCase() {
+        UnaryOperator<String> toSnakeCase = Fn.toSnakeCase();
+        assertEquals("hello_world", toSnakeCase.apply("helloWorld"));
+        assertEquals("hello_world", toSnakeCase.apply("HelloWorld"));
     }
 
     @Test
@@ -361,10 +361,10 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        UnaryOperator<String> toUpperCaseWithUnderscore = Fn.toUpperCaseWithUnderscore();
-        assertEquals("HELLO_WORLD", toUpperCaseWithUnderscore.apply("helloWorld"));
-        assertEquals("HELLO_WORLD", toUpperCaseWithUnderscore.apply("HelloWorld"));
+    public void testToScreamingSnakeCase() {
+        UnaryOperator<String> toScreamingSnakeCase = Fn.toScreamingSnakeCase();
+        assertEquals("HELLO_WORLD", toScreamingSnakeCase.apply("helloWorld"));
+        assertEquals("HELLO_WORLD", toScreamingSnakeCase.apply("HelloWorld"));
     }
 
     @Test

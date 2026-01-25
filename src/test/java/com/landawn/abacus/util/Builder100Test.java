@@ -82,25 +82,25 @@ public class Builder100Test extends TestBase {
         assertEquals(value, builder.val());
     }
 
-    @Test
-    public void testBuilderMap() {
-        Builder<String> builder = Builder.of("test");
-        Builder<Integer> mapped = builder.map(String::length);
-
-        assertEquals(Integer.valueOf(4), mapped.val());
-    }
-
-    @Test
-    public void testBuilderFilter() {
-        Builder<String> builder = Builder.of("test");
-
-        u.Optional<String> present = builder.filter(s -> s.length() > 3);
-        assertTrue(present.isPresent());
-        assertEquals("test", present.get());
-
-        u.Optional<String> absent = builder.filter(s -> s.length() > 10);
-        assertFalse(absent.isPresent());
-    }
+    //    @Test
+    //    public void testBuilderMap() {
+    //        Builder<String> builder = Builder.of("test");
+    //        Builder<Integer> mapped = builder.map(String::length);
+    //
+    //        assertEquals(Integer.valueOf(4), mapped.val());
+    //    }
+    //
+    //    @Test
+    //    public void testBuilderFilter() {
+    //        Builder<String> builder = Builder.of("test");
+    //
+    //        u.Optional<String> present = builder.filter(s -> s.length() > 3);
+    //        assertTrue(present.isPresent());
+    //        assertEquals("test", present.get());
+    //
+    //        u.Optional<String> absent = builder.filter(s -> s.length() > 10);
+    //        assertFalse(absent.isPresent());
+    //    }
 
     @Test
     public void testBuilderAccept() {

@@ -51,8 +51,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.Exclusion;
-import com.landawn.abacus.parser.XMLSerializationConfig;
-import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerializationConfig;
+import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
 /**
@@ -138,7 +138,7 @@ public final class PropertiesUtil {
 
     private static final String TYPE = "type";
 
-    private static final XMLSerializationConfig xsc = XSC.create()
+    private static final XmlSerializationConfig xsc = XSC.create()
             .tagByPropertyName(true)
             .writeTypeInfo(false)
             .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
@@ -263,7 +263,7 @@ public final class PropertiesUtil {
     }
 
     private static File getCurrentSourceCodeLocation() {
-        File dir = new File(ClassUtil.getSourceCodeLocation(PropertiesUtil.class));
+        File dir = new File(ClassUtil.getClassLocation(PropertiesUtil.class));
 
         if (dir.isFile() && dir.getParentFile().exists()) {
             dir = dir.getParentFile();
@@ -994,7 +994,7 @@ public final class PropertiesUtil {
             newKeySet.add(propName);
 
             typeAttr = XmlUtil.getAttribute(propNode, TYPE);
-            propSetMethod = Beans.getPropSetMethod(targetClass, propName);
+            propSetMethod = Beans.getPropSetter(targetClass, propName);
 
             if (XmlUtil.isTextElement(propNode)) {
                 if (Strings.isEmpty(typeAttr)) {
@@ -1242,7 +1242,7 @@ public final class PropertiesUtil {
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final boolean isFirstCall,
             final Writer output) throws UncheckedIOException {
-        final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
 
         try {
             if (isFirstCall) {
@@ -1355,7 +1355,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<config><database><url>jdbc:mysql://localhost</url></database></config>";
-     * PropertiesUtil.xml2Java(xml, "src/main/java", "com.example", "Config", false);
+     * PropertiesUtil.xmlToJava(xml, "src/main/java", "com.example", "Config", false);
      * // Generates Config.java with typed getters/setters
      * }</pre>
      *
@@ -1366,8 +1366,8 @@ public final class PropertiesUtil {
      * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
-    public static void xml2Java(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        xml2Java(IOUtil.string2InputStream(xml), srcPath, packageName, className, isPublicField);
+    public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
+        xmlToJava(IOUtil.stringToInputStream(xml), srcPath, packageName, className, isPublicField);
     }
 
     /**
@@ -1386,7 +1386,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File xmlFile = new File("config.xml");
-     * PropertiesUtil.xml2Java(xmlFile, "src/main/java", "com.example", "AppConfig", false);
+     * PropertiesUtil.xmlToJava(xmlFile, "src/main/java", "com.example", "AppConfig", false);
      * }</pre>
      *
      * @param xml the XML file from which to generate Java code.
@@ -1396,13 +1396,13 @@ public final class PropertiesUtil {
      * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
-    public static void xml2Java(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
+    public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         Reader reader = null;
 
         try {
             reader = IOUtil.newFileReader(xml);
 
-            xml2Java(reader, srcPath, packageName, className, isPublicField);
+            xmlToJava(reader, srcPath, packageName, className, isPublicField);
         } finally {
             IOUtil.close(reader);
         }
@@ -1424,7 +1424,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("schema.xml")) {
-     *     PropertiesUtil.xml2Java(is, "src/main/java", "com.example", "Schema", false);
+     *     PropertiesUtil.xmlToJava(is, "src/main/java", "com.example", "Schema", false);
      * }
      * }</pre>
      *
@@ -1435,8 +1435,8 @@ public final class PropertiesUtil {
      * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
-    public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        xml2Java(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);
+    public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
+        xmlToJava(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);
     }
 
     /**
@@ -1455,7 +1455,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("schema.xml")) {
-     *     PropertiesUtil.xml2Java(reader, "src/main/java", "com.example.config", null, false);
+     *     PropertiesUtil.xmlToJava(reader, "src/main/java", "com.example.config", null, false);
      *     // Generates a Java class using the XML root element name
      * }
      * }</pre>
@@ -1468,7 +1468,7 @@ public final class PropertiesUtil {
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    public static void xml2Java(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
+    public static void xmlToJava(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
         Writer writer = null;
 
@@ -1516,7 +1516,7 @@ public final class PropertiesUtil {
             writer.write("import " + Properties.class.getCanonicalName() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
             writer.write(IOUtil.LINE_SEPARATOR_UNIX);
 
-            xmlProperties2Java(root, className, isPublicField, "", true, writer);
+            xmlPropertiesToJava(root, className, isPublicField, "", true, writer);
 
             writer.flush();
         } catch (final Exception e) {
@@ -1526,7 +1526,7 @@ public final class PropertiesUtil {
         }
     }
 
-    private static void xmlProperties2Java(final Node xmlNode, String className, final boolean isPublicField, final String spaces, final boolean isRoot,
+    private static void xmlPropertiesToJava(final Node xmlNode, String className, final boolean isPublicField, final String spaces, final boolean isRoot,
             final Writer output) throws IOException {
         if (className == null) {
             className = Strings.capitalize(xmlNode.getNodeName());
@@ -1653,7 +1653,7 @@ public final class PropertiesUtil {
                 propNameSet.add(propName);
 
                 if (childNode.getChildNodes().getLength() > 1) {
-                    xmlProperties2Java(childNode, null, isPublicField, spaces + "    ", false, output);
+                    xmlPropertiesToJava(childNode, null, isPublicField, spaces + "    ", false, output);
                 }
             }
         }

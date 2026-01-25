@@ -114,10 +114,10 @@ public class Dates100Test extends TestBase {
     }
 
     @Test
-    public void testCurrentTimeRolled() {
+    public void testCurrentTimePlus() {
         long amount = 5;
         TimeUnit unit = TimeUnit.HOURS;
-        Time result = Dates.currentTimeRolled(amount, unit);
+        Time result = Dates.currentTimePlus(amount, unit);
         assertNotNull(result);
 
         long diff = result.getTime() - System.currentTimeMillis();
@@ -125,10 +125,10 @@ public class Dates100Test extends TestBase {
     }
 
     @Test
-    public void testCurrentDateRolled() {
+    public void testCurrentDatePlus() {
         long amount = 2;
         TimeUnit unit = TimeUnit.DAYS;
-        Date result = Dates.currentDateRolled(amount, unit);
+        Date result = Dates.currentDatePlus(amount, unit);
         assertNotNull(result);
 
         long diff = result.getTime() - System.currentTimeMillis();
@@ -136,10 +136,10 @@ public class Dates100Test extends TestBase {
     }
 
     @Test
-    public void testCurrentTimestampRolled() {
+    public void testCurrentTimestampPlus() {
         long amount = -3;
         TimeUnit unit = TimeUnit.MINUTES;
-        Timestamp result = Dates.currentTimestampRolled(amount, unit);
+        Timestamp result = Dates.currentTimestampPlus(amount, unit);
         assertNotNull(result);
 
         long diff = result.getTime() - System.currentTimeMillis();
@@ -147,10 +147,10 @@ public class Dates100Test extends TestBase {
     }
 
     @Test
-    public void testCurrentJUDateRolled() {
+    public void testCurrentJUDatePlus() {
         long amount = 1;
         TimeUnit unit = TimeUnit.SECONDS;
-        java.util.Date result = Dates.currentJUDateRolled(amount, unit);
+        java.util.Date result = Dates.currentJUDatePlus(amount, unit);
         assertNotNull(result);
 
         long diff = result.getTime() - System.currentTimeMillis();
@@ -158,10 +158,10 @@ public class Dates100Test extends TestBase {
     }
 
     @Test
-    public void testCurrentCalendarRolled() {
+    public void testCurrentCalendarPlus() {
         long amount = 10;
         TimeUnit unit = TimeUnit.MILLISECONDS;
-        Calendar result = Dates.currentCalendarRolled(amount, unit);
+        Calendar result = Dates.currentCalendarPlus(amount, unit);
         assertNotNull(result);
 
         long diff = result.getTimeInMillis() - System.currentTimeMillis();
@@ -1419,23 +1419,23 @@ public class Dates100Test extends TestBase {
     public void testGetLastDateOfMonth() {
         Calendar cal = Calendar.getInstance();
         cal.set(2022, Calendar.FEBRUARY, 15);
-        assertEquals(28, Dates.getLastDateOfMonth(cal.getTime()));
+        assertEquals(28, Dates.getLastDayOfMonth(cal.getTime()));
 
         cal.set(2020, Calendar.FEBRUARY, 15);
-        assertEquals(29, Dates.getLastDateOfMonth(cal.getTime()));
+        assertEquals(29, Dates.getLastDayOfMonth(cal.getTime()));
 
         cal.set(2022, Calendar.JANUARY, 1);
-        assertEquals(31, Dates.getLastDateOfMonth(cal.getTime()));
+        assertEquals(31, Dates.getLastDayOfMonth(cal.getTime()));
     }
 
     @Test
     public void testGetLastDateOfYear() {
         Calendar cal = Calendar.getInstance();
         cal.set(2022, Calendar.JUNE, 15);
-        assertEquals(365, Dates.getLastDateOfYear(cal.getTime()));
+        assertEquals(365, Dates.getLastDayOfYear(cal.getTime()));
 
         cal.set(2020, Calendar.JUNE, 15);
-        assertEquals(366, Dates.getLastDateOfYear(cal.getTime()));
+        assertEquals(366, Dates.getLastDayOfYear(cal.getTime()));
     }
 
     @Test
@@ -1445,23 +1445,23 @@ public class Dates100Test extends TestBase {
         java.util.Date start2 = new java.util.Date(3000);
         java.util.Date end2 = new java.util.Date(7000);
 
-        assertTrue(Dates.isOverlap(start1, end1, start2, end2));
+        assertTrue(Dates.isOverlapping(start1, end1, start2, end2));
 
         java.util.Date start3 = new java.util.Date(6000);
         java.util.Date end3 = new java.util.Date(8000);
-        assertFalse(Dates.isOverlap(start1, end1, start3, end3));
+        assertFalse(Dates.isOverlapping(start1, end1, start3, end3));
     }
 
     @Test
     public void testIsOverlapNullDate() {
-        assertThrows(IllegalArgumentException.class, () -> Dates.isOverlap(null, new java.util.Date(), new java.util.Date(), new java.util.Date()));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isOverlapping(null, new java.util.Date(), new java.util.Date(), new java.util.Date()));
     }
 
     @Test
     public void testIsOverlapInvalidRange() {
         java.util.Date start = new java.util.Date(5000);
         java.util.Date end = new java.util.Date(1000);
-        assertThrows(IllegalArgumentException.class, () -> Dates.isOverlap(start, end, new java.util.Date(), new java.util.Date()));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isOverlapping(start, end, new java.util.Date(), new java.util.Date()));
     }
 
     @Test

@@ -117,7 +117,7 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testSerializeToString() {
         Person person = new Person("John", 30);
-        String xml = parser.serialize(person, (XMLSerializationConfig) null);
+        String xml = parser.serialize(person, (XmlSerializationConfig) null);
 
         assertNotNull(xml);
         assertTrue(xml.contains("<name>John</name>"));
@@ -126,7 +126,7 @@ public class JAXBParser100Test extends TestBase {
 
     @Test
     public void testSerializeNull() {
-        String result = parser.serialize(null, (XMLSerializationConfig) null);
+        String result = parser.serialize(null, (XmlSerializationConfig) null);
         assertEquals("", result);
     }
 
@@ -220,7 +220,7 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testRoundTrip() {
         Person original = new Person("Henry", 33);
-        String xml = parser.serialize(original, (XMLSerializationConfig) null);
+        String xml = parser.serialize(original, (XmlSerializationConfig) null);
         Person deserialized = parser.deserialize(xml, null, Person.class);
 
         assertEquals(original, deserialized);
@@ -232,7 +232,7 @@ public class JAXBParser100Test extends TestBase {
         book.setTitle("Java Programming");
         book.setIsbn("123-456-789");
 
-        String xml = parser.serialize(book, (XMLSerializationConfig) null);
+        String xml = parser.serialize(book, (XmlSerializationConfig) null);
 
         assertTrue(xml.contains("isbn=\"123-456-789\""));
         assertTrue(xml.contains("<title>Java Programming</title>"));
@@ -241,7 +241,7 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testSerializeWithIgnoredPropNames() {
         Person person = new Person("Test", 100);
-        XMLSerializationConfig config = new XMLSerializationConfig();
+        XmlSerializationConfig config = new XmlSerializationConfig();
         Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
         ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
         config.setIgnoredPropNames(ignoredProps);
@@ -252,7 +252,7 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testDeserializeWithIgnoredPropNames() {
         String xml = "<person><name>Test</name><age>100</age></person>";
-        XMLDeserializationConfig config = new XMLDeserializationConfig();
+        XmlDeserializationConfig config = new XmlDeserializationConfig();
         Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
         ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
         config.setIgnoredPropNames(ignoredProps);
@@ -315,14 +315,14 @@ public class JAXBParser100Test extends TestBase {
 
     @Test
     public void testConstructorWithConfigs() {
-        XMLSerializationConfig xsc = new XMLSerializationConfig();
-        XMLDeserializationConfig xdc = new XMLDeserializationConfig();
+        XmlSerializationConfig xsc = new XmlSerializationConfig();
+        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
 
         JAXBParser parserWithConfig = new JAXBParser(xsc, xdc);
         assertNotNull(parserWithConfig);
 
         Person person = new Person("Test", 30);
-        String xml = parserWithConfig.serialize(person, (XMLSerializationConfig) null);
+        String xml = parserWithConfig.serialize(person, (XmlSerializationConfig) null);
         Person deserialized = parserWithConfig.deserialize(xml, null, Person.class);
         assertEquals(person, deserialized);
     }

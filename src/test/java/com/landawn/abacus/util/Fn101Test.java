@@ -1242,21 +1242,21 @@ public class Fn101Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        UnaryOperator<String> toLowerWithUnderscore = Fn.toLowerCaseWithUnderscore();
+    public void testToSnakeCase() {
+        UnaryOperator<String> toSnakeCase = Fn.toSnakeCase();
 
-        assertEquals("hello_world", toLowerWithUnderscore.apply("HelloWorld"));
-        assertEquals("hello_world", toLowerWithUnderscore.apply("helloWorld"));
-        assertEquals("hello_world", toLowerWithUnderscore.apply("HELLO_WORLD"));
+        assertEquals("hello_world", toSnakeCase.apply("HelloWorld"));
+        assertEquals("hello_world", toSnakeCase.apply("helloWorld"));
+        assertEquals("hello_world", toSnakeCase.apply("HELLO_WORLD"));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        UnaryOperator<String> toUpperWithUnderscore = Fn.toUpperCaseWithUnderscore();
+    public void testToScreamingSnakeCase() {
+        UnaryOperator<String> toScreamingSnakeCase = Fn.toScreamingSnakeCase();
 
-        assertEquals("HELLO_WORLD", toUpperWithUnderscore.apply("HelloWorld"));
-        assertEquals("HELLO_WORLD", toUpperWithUnderscore.apply("helloWorld"));
-        assertEquals("HELLO_WORLD", toUpperWithUnderscore.apply("hello_world"));
+        assertEquals("HELLO_WORLD", toScreamingSnakeCase.apply("HelloWorld"));
+        assertEquals("HELLO_WORLD", toScreamingSnakeCase.apply("helloWorld"));
+        assertEquals("HELLO_WORLD", toScreamingSnakeCase.apply("hello_world"));
     }
 
     @Test

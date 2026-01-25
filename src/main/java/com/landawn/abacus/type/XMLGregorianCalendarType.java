@@ -23,7 +23,7 @@ import java.sql.Timestamp;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -321,7 +321,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
+     * JsonXmlSerializationConfig<?> config = JsonXmlSerializationConfig.of();
      * type.writeCharacter(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
      * }</pre>
      *
@@ -332,7 +332,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final XMLGregorianCalendar x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final XMLGregorianCalendar x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

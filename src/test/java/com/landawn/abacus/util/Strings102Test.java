@@ -28,7 +28,7 @@ public class Strings102Test extends TestBase {
 
     @Test
     public void testGuid() {
-        String guid = Strings.guid();
+        String guid = Strings.uuid32();
         assertNotNull(guid);
         assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));
@@ -375,23 +375,23 @@ public class Strings102Test extends TestBase {
     }
 
     @Test
-    public void testToPascalCase() {
-        assertEquals("FirstName", Strings.toPascalCase("first_name"));
-        assertEquals("MyVariable", Strings.toPascalCase("my_variable"));
-        assertEquals("", Strings.toPascalCase(""));
-        assertNull(Strings.toPascalCase(null));
+    public void testToUpperCamelCase() {
+        assertEquals("FirstName", Strings.toUpperCamelCase("first_name"));
+        assertEquals("MyVariable", Strings.toUpperCamelCase("my_variable"));
+        assertEquals("", Strings.toUpperCamelCase(""));
+        assertNull(Strings.toUpperCamelCase(null));
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("my_variable", Strings.toLowerCaseWithUnderscore("MyVariable"));
-        assertEquals("test_string", Strings.toLowerCaseWithUnderscore("TestString"));
+    public void testToSnakeCase() {
+        assertEquals("my_variable", Strings.toSnakeCase("MyVariable"));
+        assertEquals("test_string", Strings.toSnakeCase("TestString"));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("MY_VARIABLE", Strings.toUpperCaseWithUnderscore("MyVariable"));
-        assertEquals("TEST_STRING", Strings.toUpperCaseWithUnderscore("TestString"));
+    public void testToScreamingSnakeCase() {
+        assertEquals("MY_VARIABLE", Strings.toScreamingSnakeCase("MyVariable"));
+        assertEquals("TEST_STRING", Strings.toScreamingSnakeCase("TestString"));
     }
 
     @Test
@@ -556,24 +556,24 @@ public class Strings102Test extends TestBase {
     }
 
     @Test
-    public void testIsAsciiDigitalNumber() {
-        assertTrue(Strings.isAsciiDigitalNumber("123"));
-        assertTrue(Strings.isAsciiDigitalNumber("123.45"));
-        assertTrue(Strings.isAsciiDigitalNumber("-123"));
-        assertTrue(Strings.isAsciiDigitalNumber("1.23e10"));
-        assertFalse(Strings.isAsciiDigitalNumber("abc"));
-        assertFalse(Strings.isAsciiDigitalNumber(""));
-        assertFalse(Strings.isAsciiDigitalNumber(null));
+    public void testisAsciiNumber() {
+        assertTrue(Strings.isAsciiNumber("123"));
+        assertTrue(Strings.isAsciiNumber("123.45"));
+        assertTrue(Strings.isAsciiNumber("-123"));
+        assertTrue(Strings.isAsciiNumber("1.23e10"));
+        assertFalse(Strings.isAsciiNumber("abc"));
+        assertFalse(Strings.isAsciiNumber(""));
+        assertFalse(Strings.isAsciiNumber(null));
     }
 
     @Test
-    public void testIsAsciiDigitalInteger() {
-        assertTrue(Strings.isAsciiDigitalInteger("123"));
-        assertTrue(Strings.isAsciiDigitalInteger("-123"));
-        assertFalse(Strings.isAsciiDigitalInteger("123.45"));
-        assertFalse(Strings.isAsciiDigitalInteger("abc"));
-        assertFalse(Strings.isAsciiDigitalInteger(""));
-        assertFalse(Strings.isAsciiDigitalInteger(null));
+    public void testisAsciiInteger() {
+        assertTrue(Strings.isAsciiInteger("123"));
+        assertTrue(Strings.isAsciiInteger("-123"));
+        assertFalse(Strings.isAsciiInteger("123.45"));
+        assertFalse(Strings.isAsciiInteger("abc"));
+        assertFalse(Strings.isAsciiInteger(""));
+        assertFalse(Strings.isAsciiInteger(null));
     }
 
     @Test

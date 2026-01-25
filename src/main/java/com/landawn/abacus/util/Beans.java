@@ -82,7 +82,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Bean Validation:</b> {@link #isBeanClass(Class)}, {@link #isRecordClass(Class)} for type checking</li>
  *   <li><b>Property Discovery:</b> {@link #getPropNameList(Class)}, {@link #getPropNames(Object, boolean)} for introspection</li>
  *   <li><b>Property Access:</b> {@link #getPropValue(Object, String)}, {@link #setPropValue(Object, Method, Object)} with type-safe operations</li>
- *   <li><b>Object Conversion:</b> {@link #bean2Map(Object)}, {@link #map2Bean(Map, Class)} with deep and shallow conversion options</li>
+ *   <li><b>Object Conversion:</b> {@link #beanToMap(Object)}, {@link #mapToBean(Map, Class)} with deep and shallow conversion options</li>
  *   <li><b>Object Lifecycle:</b> {@link #newBean(Class)}, {@link #copy(Object, Class)}, {@link #clone(Object)}, {@link #merge(Object, Object)} for object management</li>
  *   <li><b>Comparison Operations:</b> {@link #equalsByProps(Object, Object, Collection)}, {@link #compareByProps(Object, Object, Collection)} with configurable properties</li>
  *   <li><b>Transformation:</b> {@link #fill(Object)} for object manipulation</li>
@@ -117,14 +117,14 @@ import com.landawn.abacus.util.stream.Stream;
  * User cloned = Beans.clone(user);              // Deep clone existing object
  *
  * // Bean to Map conversion (various formats)
- * Map<String, Object> flatMap = Beans.bean2Map(user);       // Map conversion
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);   // Deep map conversion
- * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email"));   // Selected properties
+ * Map<String, Object> flatMap = Beans.beanToMap(user);       // Map conversion
+ * Map<String, Object> deepMap = Beans.deepBeanToMap(user);   // Deep map conversion
+ * Map<String, Object> selectedMap = Beans.beanToMap(user, Arrays.asList("name", "email"));   // Selected properties
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
- * User userFromMap = Beans.map2Bean(userData, User.class);                             // Convert map to bean
- * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class);   // Ignore unknown properties
+ * User userFromMap = Beans.mapToBean(userData, User.class);                             // Convert map to bean
+ * User userFromMapIgnoreUnknown = Beans.mapToBean(userData, false, true, User.class);   // Ignore unknown properties
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
@@ -136,16 +136,16 @@ import com.landawn.abacus.util.stream.Stream;
  * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // Equality check by props
  *
  * // Null-safe operations
- * Map<String, Object> nullSafeMap = Beans.bean2Map(null);   // Returns empty map
- * User nullSafeUser = Beans.map2Bean(null, User.class);     // Returns null
+ * Map<String, Object> nullSafeMap = Beans.beanToMap(null);   // Returns empty map
+ * User nullSafeUser = Beans.mapToBean(null, User.class);     // Returns null
  * boolean nullClassCheck = Beans.isBeanClass(null);         // Returns false
  * }</pre>
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
  * <ul>
- *   <li><b>Flat Conversion:</b> {@code bean2FlatMap()} - Flat map representation with dot notation</li>
- *   <li><b>Deep Conversion:</b> {@code deepBean2Map(bean)} - Recursive nested object conversion</li>
- *   <li><b>Selected Conversion:</b> {@code bean2Map(bean, selectPropNames)} - Specific property selection</li>
+ *   <li><b>Flat Conversion:</b> {@code beanToFlatMap()} - Flat map representation with dot notation</li>
+ *   <li><b>Deep Conversion:</b> {@code deepBeanToMap(bean)} - Recursive nested object conversion</li>
+ *   <li><b>Selected Conversion:</b> {@code beanToMap(bean, selectPropNames)} - Specific property selection</li>
  * </ul>
  *
  * <p><b>Map-to-Bean Conversion Features:</b>
@@ -236,7 +236,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Bean Validation:</b> {@code if (Beans.isBeanClass(clazz)) { ... }}</li>
  *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getPropValue(bean, propName);}</li>
  *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copy(entity, DTO.class);}</li>
- *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.map2Bean(properties, Config.class);}</li>
+ *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.mapToBean(properties, Config.class);}</li>
  * </ul>
  *
  * <p><b>Related Utility Classes:</b>
@@ -274,9 +274,9 @@ import com.landawn.abacus.util.stream.Stream;
  * List<String> allProps = Beans.getPropNameList(User.class);   // [name, age, address, roles]
  *
  * // Complex conversion operations
- * Map<String, Object> deepMap = Beans.deepBean2Map(user);      // Deep nested conversion
- * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));       // Flatten address properties
- * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age"));   // Only name and age
+ * Map<String, Object> deepMap = Beans.deepBeanToMap(user);      // Deep nested conversion
+ * Map<String, Object> flatMap = Beans.beanToFlatMap(user, Arrays.asList("address"));       // Flatten address properties
+ * Map<String, Object> filteredMap = Beans.beanToMap(user, Arrays.asList("name", "age"));   // Only name and age
  *
  * // Advanced copying with transformations
  * UserDTO dto = Beans.copy(user, UserDTO.class);   // Convert to DTO
@@ -318,7 +318,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     ));
  *
  * Map<String, Object> properties = loadPropertiesFile("database.properties");
- * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig());   // Get defaults
+ * Map<String, Object> defaults = Beans.beanToMap(new DatabaseConfig());   // Get defaults
  *
  * // Merge configurations with precedence: env vars > properties > defaults
  * Map<String, Object> finalConfig = new HashMap<>(defaults);
@@ -326,7 +326,7 @@ import com.landawn.abacus.util.stream.Stream;
  * finalConfig.putAll(envVars);
  *
  * // Convert to configuration bean
- * DatabaseConfig config = Beans.map2Bean(finalConfig, DatabaseConfig.class);
+ * DatabaseConfig config = Beans.mapToBean(finalConfig, DatabaseConfig.class);
  *
  * // Validate configuration
  * boolean isValidBean = Beans.isBeanClass(DatabaseConfig.class);
@@ -335,7 +335,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     .allMatch(prop -> Beans.getPropValue(config, prop) != null);
  *
  * // Generate configuration summary
- * Map<String, Object> summary = Beans.bean2Map(config, Arrays.asList("host", "port", "database", "ssl"));
+ * Map<String, Object> summary = Beans.beanToMap(config, Arrays.asList("host", "port", "database", "ssl"));
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -384,11 +384,11 @@ public final class Beans {
 
     private static final Map<String, String> camelCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    private static final Map<String, String> lowerCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> snakeCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    private static final Map<String, String> upperCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> screamingSnakeCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    private static final Map<Class<?>, Boolean> registeredXMLBindingClassList = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Boolean> registeredXmlBindingClassList = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
@@ -732,7 +732,7 @@ public final class Beans {
         registeredNonBeanClass.put(cls, cls);
 
         synchronized (beanDeclaredPropGetMethodPool) {
-            registeredXMLBindingClassList.put(cls, false);
+            registeredXmlBindingClassList.put(cls, false);
 
             if (beanDeclaredPropGetMethodPool.containsKey(cls)) {
                 beanDeclaredPropGetMethodPool.remove(cls);
@@ -754,7 +754,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Exclude 'getInternal' from being treated as a property getter
-     * Beans.registerNonPropGetSetMethod(MyClass.class, "internal");
+     * Beans.registerNonPropertyAccessor(MyClass.class, "internal");
      * // Now MyClass.getInternal() won't be considered a property getter
      * }</pre>
      *
@@ -762,7 +762,7 @@ public final class Beans {
      * @param propName the name of the property to be registered as a non-property get/set method.
      */
     @SuppressWarnings("deprecation")
-    public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
+    public static void registerNonPropertyAccessor(final Class<?> cls, final String propName) {
         synchronized (registeredNonPropGetSetMethodPool) {
             Set<String> set = registeredNonPropGetSetMethodPool.computeIfAbsent(cls, k -> N.newHashSet());
 
@@ -780,7 +780,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method customGetter = MyClass.class.getMethod("fetchName");
-     * Beans.registerPropGetSetMethod("name", customGetter);
+     * Beans.registerPropertyAccessor("name", customGetter);
      * // Now fetchName() is recognized as the getter for property "name"
      * }</pre>
      *
@@ -790,7 +790,7 @@ public final class Beans {
      *         or if the property is already registered with a different method.
      */
     @SuppressWarnings("deprecation")
-    public static void registerPropGetSetMethod(final String propName, final Method method) {
+    public static void registerPropertyAccessor(final String propName, final Method method) {
         final Class<?> cls = method.getDeclaringClass();
 
         synchronized (beanDeclaredPropGetMethodPool) {
@@ -845,20 +845,20 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register JAXB-generated class
-     * Beans.registerXMLBindingClass(JAXBGeneratedClass.class);
+     * Beans.registerXmlBindingClass(JAXBGeneratedClass.class);
      * // Now collection properties with only getters are recognized
      * }</pre>
      *
      * @param cls the class to be registered for XML binding.
      */
     @SuppressWarnings("deprecation")
-    public static void registerXMLBindingClass(final Class<?> cls) {
-        if (registeredXMLBindingClassList.containsKey(cls)) {
+    public static void registerXmlBindingClass(final Class<?> cls) {
+        if (registeredXmlBindingClassList.containsKey(cls)) {
             return;
         }
 
         synchronized (beanDeclaredPropGetMethodPool) {
-            registeredXMLBindingClassList.put(cls, true);
+            registeredXmlBindingClassList.put(cls, true);
 
             if (beanDeclaredPropGetMethodPool.containsKey(cls)) {
                 beanDeclaredPropGetMethodPool.remove(cls);
@@ -877,7 +877,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (Beans.isRegisteredXMLBindingClass(MyClass.class)) {
+     * if (Beans.isRegisteredXmlBindingClass(MyClass.class)) {
      *     // Handle XML binding specific logic
      * }
      * }</pre>
@@ -885,8 +885,8 @@ public final class Beans {
      * @param cls the class to check.
      * @return {@code true} if the class is registered for XML binding, {@code false} otherwise.
      */
-    public static boolean isRegisteredXMLBindingClass(final Class<?> cls) {
-        return registeredXMLBindingClassList.containsKey(cls);
+    public static boolean isRegisteredXmlBindingClass(final Class<?> cls) {
+        return registeredXmlBindingClassList.containsKey(cls);
     }
 
     /**
@@ -1277,7 +1277,7 @@ public final class Beans {
     private static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
             return (instance != null)
-                    && ((registeredXMLBindingClassList.getOrDefault(cls, false) || N.anyMatch(cls.getAnnotations(), Beans::isXmlTypeAnno))
+                    && ((registeredXmlBindingClassList.getOrDefault(cls, false) || N.anyMatch(cls.getAnnotations(), Beans::isXmlTypeAnno))
                             || (N.anyMatch(method.getAnnotations(), Beans::isXmlElementAnno)
                                     || (field != null && N.anyMatch(field.getAnnotations(), Beans::isXmlElementAnno))))
                     && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
@@ -1349,8 +1349,8 @@ public final class Beans {
                         }
                     }
 
-                    if (registeredXMLBindingClassList.containsKey(cls)) {
-                        registeredXMLBindingClassList.put(cls, false);
+                    if (registeredXmlBindingClassList.containsKey(cls)) {
+                        registeredXmlBindingClassList.put(cls, false);
                     }
                 }
             }
@@ -1698,7 +1698,7 @@ public final class Beans {
             }
 
             synchronized (beanDeclaredPropGetMethodPool) {
-                final Map<String, Method> getterMethodList = getPropGetMethods(cls);
+                final Map<String, Method> getterMethodList = getPropGetters(cls);
 
                 for (final String key : getterMethodList.keySet()) {
                     if (Beans.isPropName(cls, propName, key)) {
@@ -1714,7 +1714,7 @@ public final class Beans {
 
                 // set method mask to avoid a query next time.
                 if (field == null) {
-                    field = ClassUtil.FIELD_MASK;
+                    field = ClassUtil.SENTINEL_FIELD;
                 }
 
                 //    } else {
@@ -1725,7 +1725,7 @@ public final class Beans {
             }
         }
 
-        return (field == ClassUtil.FIELD_MASK) ? null : field;
+        return (field == ClassUtil.SENTINEL_FIELD) ? null : field;
     }
 
     /**
@@ -1765,7 +1765,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method getter = Beans.getPropGetMethod(User.class, "name");
+     * Method getter = Beans.getPropGetter(User.class, "name");
      * // Returns the getName() method
      *
      * Object value = getter.invoke(userInstance);
@@ -1777,7 +1777,7 @@ public final class Beans {
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
-    public static Method getPropGetMethod(final Class<?> cls, final String propName) {
+    public static Method getPropGetter(final Class<?> cls, final String propName) {
         Map<String, Method> propGetMethodMap = beanPropGetMethodPool.get(cls);
 
         if (propGetMethodMap == null) {
@@ -1789,7 +1789,7 @@ public final class Beans {
 
         if (method == null) {
             synchronized (beanDeclaredPropGetMethodPool) {
-                final Map<String, Method> getterMethodList = getPropGetMethods(cls);
+                final Map<String, Method> getterMethodList = getPropGetters(cls);
 
                 for (final Map.Entry<String, Method> entry : getterMethodList.entrySet()) { //NOSONAR
                     if (Beans.isPropName(cls, propName, entry.getKey())) {
@@ -1800,19 +1800,19 @@ public final class Beans {
                 }
 
                 if ((method == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                    method = getPropGetMethod(cls, Beans.formalizePropName(propName));
+                    method = getPropGetter(cls, Beans.formalizePropName(propName));
                 }
 
                 // set method mask to avoid query next time.
                 if (method == null) {
-                    method = ClassUtil.METHOD_MASK;
+                    method = ClassUtil.SENTINEL_METHOD;
                 }
 
                 propGetMethodMap.put(propName, method);
             }
         }
 
-        return (method == ClassUtil.METHOD_MASK) ? null : method;
+        return (method == ClassUtil.SENTINEL_METHOD) ? null : method;
     }
 
     /**
@@ -1823,14 +1823,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableMap<String, Method> getters = Beans.getPropGetMethods(User.class);
+     * ImmutableMap<String, Method> getters = Beans.getPropGetters(User.class);
      * // Map: {"name" -> getName(), "age" -> getAge(), ...}
      * }</pre>
      *
      * @param cls the class from which the property get methods are to be retrieved.
      * @return an immutable map of property getter methods for the specified class.
      */
-    public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
+    public static ImmutableMap<String, Method> getPropGetters(final Class<?> cls) {
         ImmutableMap<String, Method> getterMethodList = beanDeclaredPropGetMethodPool.get(cls);
 
         if (getterMethodList == null) {
@@ -1851,7 +1851,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method setter = Beans.getPropSetMethod(User.class, "name");
+     * Method setter = Beans.getPropSetter(User.class, "name");
      * // Returns the setName(String) method
      *
      * setter.invoke(userInstance, "John");
@@ -1863,7 +1863,7 @@ public final class Beans {
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
-    public static Method getPropSetMethod(final Class<?> cls, final String propName) {
+    public static Method getPropSetter(final Class<?> cls, final String propName) {
         Map<String, Method> propSetMethodMap = beanPropSetMethodPool.get(cls);
 
         if (propSetMethodMap == null) {
@@ -1875,7 +1875,7 @@ public final class Beans {
 
         if (method == null) {
             synchronized (beanDeclaredPropGetMethodPool) {
-                final Map<String, Method> setterMethodList = getPropSetMethods(cls);
+                final Map<String, Method> setterMethodList = getPropSetters(cls);
 
                 for (final String key : setterMethodList.keySet()) {
                     if (Beans.isPropName(cls, propName, key)) {
@@ -1886,19 +1886,19 @@ public final class Beans {
                 }
 
                 if ((method == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                    method = getPropSetMethod(cls, Beans.formalizePropName(propName));
+                    method = getPropSetter(cls, Beans.formalizePropName(propName));
                 }
 
                 // set method mask to avoid a query next time.
                 if (method == null) {
-                    method = ClassUtil.METHOD_MASK;
+                    method = ClassUtil.SENTINEL_METHOD;
                 }
 
                 propSetMethodMap.put(propName, method);
             }
         }
 
-        return (method == ClassUtil.METHOD_MASK) ? null : method;
+        return (method == ClassUtil.SENTINEL_METHOD) ? null : method;
     }
 
     /**
@@ -1909,14 +1909,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableMap<String, Method> setters = Beans.getPropSetMethods(User.class);
+     * ImmutableMap<String, Method> setters = Beans.getPropSetters(User.class);
      * // Map: {"name" -> setName(String), "age" -> setAge(int), ...}
      * }</pre>
      *
      * @param cls the class from which the property set methods are to be retrieved.
      * @return an immutable map of property set methods for the specified class.
      */
-    public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
+    public static ImmutableMap<String, Method> getPropSetters(final Class<?> cls) {
         ImmutableMap<String, Method> setterMethodList = beanDeclaredPropSetMethodPool.get(cls);
 
         if (setterMethodList == null) {
@@ -2029,7 +2029,7 @@ public final class Beans {
                 Class<?> targetClass = cls;
 
                 for (final String str : strs) {
-                    final Method method = getPropGetMethod(targetClass, str);
+                    final Method method = getPropGetter(targetClass, str);
 
                     if (method == null) {
                         inlinePropGetMethodQueue.clear();
@@ -2203,7 +2203,7 @@ public final class Beans {
      * // For a JAXB bean with: List<String> getTags() { return tags; }
      * Method getTags = bean.getClass().getMethod("getTags");
      * List<String> newTags = Arrays.asList("tag1", "tag2");
-     * Beans.setPropValueByGet(bean, getTags, newTags);
+     * Beans.setPropValueByGetter(bean, getTags, newTags);
      * // The bean's tags list is cleared and populated with newTags
      * }</pre>
      *
@@ -2213,7 +2213,7 @@ public final class Beans {
      * @throws IllegalArgumentException if the getter doesn't return a Collection or Map.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static void setPropValueByGet(final Object bean, final Method propGetMethod, final Object propValue) {
+    public static void setPropValueByGetter(final Object bean, final Method propGetMethod, final Object propValue) {
         if (propValue == null) {
             return;
         }
@@ -2311,24 +2311,24 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String snake = Beans.toLowerCaseWithUnderscore("userName");     // Returns "user_name"
-     * String snake2 = Beans.toLowerCaseWithUnderscore("FirstName");   // Returns "first_name"
-     * String snake3 = Beans.toLowerCaseWithUnderscore("userID");      // Returns "user_id"
+     * String snake = Beans.toSnakeCase("userName");     // Returns "user_name"
+     * String snake2 = Beans.toSnakeCase("FirstName");   // Returns "first_name"
+     * String snake3 = Beans.toSnakeCase("userID");      // Returns "user_id"
      * }</pre>
      *
      * @param str the string to be converted.
      * @return the lower case version of the string with underscores.
      */
-    public static String toLowerCaseWithUnderscore(final String str) {
+    public static String toSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
         }
 
-        String result = lowerCaseWithUnderscorePropNamePool.get(str);
+        String result = snakeCasePropNamePool.get(str);
 
         if (result == null) {
-            result = Strings.toLowerCaseWithUnderscore(str);
-            lowerCaseWithUnderscorePropNamePool.put(str, result);
+            result = Strings.toSnakeCase(str);
+            snakeCasePropNamePool.put(str, result);
         }
 
         return result;
@@ -2339,24 +2339,24 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String upper = Beans.toUpperCaseWithUnderscore("userName");     // Returns "USER_NAME"
-     * String upper2 = Beans.toUpperCaseWithUnderscore("firstName");   // Returns "FIRST_NAME"
-     * String upper3 = Beans.toUpperCaseWithUnderscore("userID");      // Returns "USER_ID"
+     * String upper = Beans.toScreamingSnakeCase("userName");     // Returns "USER_NAME"
+     * String upper2 = Beans.toScreamingSnakeCase("firstName");   // Returns "FIRST_NAME"
+     * String upper3 = Beans.toScreamingSnakeCase("userID");      // Returns "USER_ID"
      * }</pre>
      *
      * @param str the string to be converted.
      * @return the upper case version of the string with underscores.
      */
-    public static String toUpperCaseWithUnderscore(final String str) {
+    public static String toScreamingSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
         }
 
-        String result = upperCaseWithUnderscorePropNamePool.get(str);
+        String result = screamingSnakeCasePropNamePool.get(str);
 
         if (result == null) {
-            result = Strings.toUpperCaseWithUnderscore(str);
-            upperCaseWithUnderscorePropNamePool.put(str, result);
+            result = Strings.toScreamingSnakeCase(str);
+            screamingSnakeCasePropNamePool.put(str, result);
         }
 
         return result;
@@ -2372,14 +2372,14 @@ public final class Beans {
      * map.put("user_name", "John");
      * map.put("first_name", "Jane");
      *
-     * Beans.toCamelCase(map);
+     * Beans.toCamelCaseKeys(map);
      * // map now contains: {"userName": "John", "firstName": "Jane"}
      * }</pre>
      *
      * @param props the map whose keys are to be converted to camel case.
      */
     @SuppressWarnings("deprecation")
-    public static void toCamelCase(final Map<String, Object> props) {
+    public static void toCamelCaseKeys(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
         for (final Map.Entry<String, Object> entry : props.entrySet()) {
@@ -2402,18 +2402,18 @@ public final class Beans {
      * map.put("userName", "John");
      * map.put("firstName", "Jane");
      *
-     * Beans.toLowerCaseWithUnderscore(map);
+     * Beans.toSnakeCase(map);
      * // map now contains: {"user_name": "John", "first_name": "Jane"}
      * }</pre>
      *
      * @param props the map whose keys are to be converted to lower case with underscores.
      */
     @SuppressWarnings("deprecation")
-    public static void toLowerCaseWithUnderscore(final Map<String, Object> props) {
+    public static void toSnakeCaseKeys(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
         for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(Beans.toLowerCaseWithUnderscore(entry.getKey()), entry.getValue());
+            tmp.put(Beans.toSnakeCase(entry.getKey()), entry.getValue());
         }
 
         props.clear();
@@ -2432,18 +2432,18 @@ public final class Beans {
      * map.put("userName", "John");
      * map.put("firstName", "Jane");
      *
-     * Beans.toUpperCaseWithUnderscore(map);
+     * Beans.toScreamingSnakeCase(map);
      * // map now contains: {"USER_NAME": "John", "FIRST_NAME": "Jane"}
      * }</pre>
      *
      * @param props the map whose keys are to be converted to upper case with underscores.
      */
     @SuppressWarnings("deprecation")
-    public static void toUpperCaseWithUnderscore(final Map<String, Object> props) {
+    public static void toScreamingSnakeCaseKeys(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
         for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(Beans.toUpperCaseWithUnderscore(entry.getKey()), entry.getValue());
+            tmp.put(Beans.toScreamingSnakeCase(entry.getKey()), entry.getValue());
         }
 
         props.clear();
@@ -2467,7 +2467,7 @@ public final class Beans {
      * userMap.put("age", 25);
      * userMap.put("email", "john@example.com");
      *
-     * User user = Beans.map2Bean(userMap, User.class);
+     * User user = Beans.mapToBean(userMap, User.class);
      * // user.getName() returns "John"
      * // user.getAge() returns 25
      * // user.getEmail() returns "john@example.com"
@@ -2478,11 +2478,11 @@ public final class Beans {
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
-     * @see #map2Bean(Map, boolean, boolean, Class)
-     * @see #map2Bean(Map, Collection, Class)
+     * @see #mapToBean(Map, boolean, boolean, Class)
+     * @see #mapToBean(Map, Collection, Class)
      */
-    public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetType) {
-        return map2Bean(m, false, true, targetType);
+    public static <T> T mapToBean(final Map<String, Object> m, final Class<? extends T> targetType) {
+        return mapToBean(m, false, true, targetType);
     }
 
     /**
@@ -2501,13 +2501,13 @@ public final class Beans {
      * userMap.put("unknownField", "value");   // This field doesn't exist in User class
      *
      * // Ignore null properties and unmatched properties
-     * User user = Beans.map2Bean(userMap, true, true, User.class);
+     * User user = Beans.mapToBean(userMap, true, true, User.class);
      * // user.getName() returns "John"
      * // user.getAge() remains unchanged (not set to null)
      * // unknownField is ignored
      *
      * // Don't ignore null, but throw exception for unmatched properties
-     * User user2 = Beans.map2Bean(userMap, false, false, User.class);
+     * User user2 = Beans.mapToBean(userMap, false, false, User.class);
      * // This would throw an exception due to "unknownField"
      * }</pre>
      *
@@ -2518,11 +2518,11 @@ public final class Beans {
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is encountered
-     * @see #map2Bean(Map, Collection, Class)
+     * @see #mapToBean(Map, Collection, Class)
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public static <T> T map2Bean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
+    public static <T> T mapToBean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
@@ -2551,7 +2551,7 @@ public final class Beans {
                 beanInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
                 if (propValue != null && propInfo.type.isBean() && Type.of(propValue.getClass()).isMap()) {
-                    propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
+                    propInfo.setPropValue(result, mapToBean((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -2578,7 +2578,7 @@ public final class Beans {
      *
      * // Only include name and email
      * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * User user = Beans.map2Bean(userMap, selectedProps, User.class);
+     * User user = Beans.mapToBean(userMap, selectedProps, User.class);
      * // user.getName() returns "John"
      * // user.getEmail() returns "john@example.com"
      * // user.getAge() and user.getPassword() remain unset
@@ -2592,7 +2592,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      */
     @MayReturnNull
-    public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
+    public static <T> T mapToBean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
         if (m == null) {
@@ -2613,7 +2613,7 @@ public final class Beans {
                 beanInfo.setPropValue(result, propName, propValue, false);
             } else {
                 if (propValue != null && propInfo.type.isBean() && Type.of(propValue.getClass()).isMap()) {
-                    propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, propInfo.clazz));
+                    propInfo.setPropValue(result, mapToBean((Map<String, Object>) propValue, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -2644,7 +2644,7 @@ public final class Beans {
      * user2.put("age", 30);
      * userMaps.add(user2);
      *
-     * List<User> users = Beans.map2Bean(userMaps, User.class);
+     * List<User> users = Beans.mapToBean(userMaps, User.class);
      * // users.get(0).getName() returns "John"
      * // users.get(1).getName() returns "Jane"
      * }</pre>
@@ -2654,10 +2654,10 @@ public final class Beans {
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
-     * @see #map2Bean(Collection, Collection, Class)
+     * @see #mapToBean(Collection, Collection, Class)
      */
-    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final Class<? extends T> targetType) {
-        return map2Bean(mList, false, true, targetType);
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final Class<? extends T> targetType) {
+        return mapToBean(mList, false, true, targetType);
     }
 
     /**
@@ -2680,7 +2680,7 @@ public final class Beans {
      * userMaps.add(user1);
      *
      * // Ignore null values and unmatched properties
-     * List<User> users = Beans.map2Bean(userMaps, true, true, User.class);
+     * List<User> users = Beans.mapToBean(userMaps, true, true, User.class);
      * // users.get(0).getName() returns "John"
      * // users.get(0).getAge() remains unchanged (not set to null)
      * // unknownField is ignored
@@ -2693,14 +2693,14 @@ public final class Beans {
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final boolean ignoreNullProperty,
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final boolean ignoreNullProperty,
             final boolean ignoreUnmatchedProperty, final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
         for (final Map<String, Object> m : mList) {
-            beanList.add(map2Bean(m, ignoreNullProperty, ignoreUnmatchedProperty, targetType));
+            beanList.add(mapToBean(m, ignoreNullProperty, ignoreUnmatchedProperty, targetType));
         }
 
         return beanList;
@@ -2726,7 +2726,7 @@ public final class Beans {
      *
      * // Only include name and email
      * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * List<User> users = Beans.map2Bean(userMaps, selectedProps, User.class);
+     * List<User> users = Beans.mapToBean(userMaps, selectedProps, User.class);
      * // users.get(0).getName() returns "John"
      * // users.get(0).getEmail() returns "john@example.com"
      * // age and password remain unset
@@ -2738,14 +2738,14 @@ public final class Beans {
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final Collection<String> selectPropNames,
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final Collection<String> selectPropNames,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
         for (final Map<String, Object> m : mList) {
-            beanList.add(map2Bean(m, selectPropNames, targetType));
+            beanList.add(mapToBean(m, selectPropNames, targetType));
         }
 
         return beanList;
@@ -2764,15 +2764,15 @@ public final class Beans {
      * user.setAge(25);
      * user.setEmail("john@example.com");
      *
-     * Map<String, Object> userMap = Beans.bean2Map(user);
+     * Map<String, Object> userMap = Beans.beanToMap(user);
      * // userMap: {name=John, age=25, email=john@example.com}
      * }</pre>
      *
      * @param bean the bean object to be converted into a map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static Map<String, Object> bean2Map(final Object bean) {
-        return bean2Map(bean, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> beanToMap(final Object bean) {
+        return beanToMap(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -2788,11 +2788,11 @@ public final class Beans {
      * user.setAge(25);
      *
      * // Using TreeMap to get sorted properties
-     * TreeMap<String, Object> sortedMap = Beans.bean2Map(user, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, TreeMap::new);
      * // sortedMap: {age=25, name=John} (sorted by key)
      *
      * // Using HashMap for better performance
-     * HashMap<String, Object> hashMap = Beans.bean2Map(user, HashMap::new);
+     * HashMap<String, Object> hashMap = Beans.beanToMap(user, HashMap::new);
      * // hashMap: {name=John, age=25} (order not guaranteed)
      * }</pre>
      *
@@ -2801,8 +2801,8 @@ public final class Beans {
      * @param mapSupplier a function that generates a new Map instance.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
-        return bean2Map(bean, null, mapSupplier);
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return beanToMap(bean, null, mapSupplier);
     }
 
     /**
@@ -2822,7 +2822,7 @@ public final class Beans {
      *
      * // Only include name and email
      * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * Map<String, Object> userMap = Beans.bean2Map(user, selectedProps);
+     * Map<String, Object> userMap = Beans.beanToMap(user, selectedProps);
      * // userMap: {name=John, email=john@example.com}
      * // age and password are not included
      * }</pre>
@@ -2831,8 +2831,8 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
      * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static Map<String, Object> bean2Map(final Object bean, final Collection<String> selectPropNames) {
-        return bean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> beanToMap(final Object bean, final Collection<String> selectPropNames) {
+        return beanToMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -2851,7 +2851,7 @@ public final class Beans {
      *
      * // Only include name and age, using TreeMap
      * Collection<String> selectedProps = Arrays.asList("name", "age");
-     * TreeMap<String, Object> sortedMap = Beans.bean2Map(user, selectedProps, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, selectedProps, TreeMap::new);
      * // sortedMap: {age=25, name=John} (sorted by key)
      * }</pre>
      *
@@ -2861,9 +2861,9 @@ public final class Beans {
      * @param mapSupplier a function that generates a new Map instance.
      * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return beanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -2880,11 +2880,11 @@ public final class Beans {
      *
      * // Convert to snake_case
      * Collection<String> props = Arrays.asList("firstName", "lastName");
-     * Map<String, Object> snakeMap = Beans.bean2Map(user, props, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, HashMap::new);
+     * Map<String, Object> snakeMap = Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, HashMap::new);
      * // snakeMap: {first_name=John, last_name=Doe}
      *
      * // Convert to UPPER_CASE
-     * Map<String, Object> upperMap = Beans.bean2Map(user, props, NamingPolicy.UPPER_CASE, HashMap::new);
+     * Map<String, Object> upperMap = Beans.beanToMap(user, props, NamingPolicy.UPPER_CASE, HashMap::new);
      * // upperMap: {FIRSTNAME=John, LASTNAME=Doe}
      * }</pre>
      *
@@ -2895,7 +2895,7 @@ public final class Beans {
      * @param mapSupplier the supplier function to create a new instance of the map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -2903,7 +2903,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        bean2Map(bean, selectPropNames, keyNamingPolicy, output);
+        beanToMap(bean, selectPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -2923,7 +2923,7 @@ public final class Beans {
      * Map<String, Object> existingMap = new HashMap<>();
      * existingMap.put("id", 123);
      *
-     * Beans.bean2Map(user, existingMap);
+     * Beans.beanToMap(user, existingMap);
      * // existingMap: {id=123, name=John, age=25}
      * }</pre>
      *
@@ -2931,8 +2931,8 @@ public final class Beans {
      * @param bean the bean object to be converted into a map.
      * @param output the map into which the bean's properties will be put.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final M output) {
-        bean2Map(bean, null, output);
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final M output) {
+        beanToMap(bean, null, output);
     }
 
     /**
@@ -2952,7 +2952,7 @@ public final class Beans {
      * existingMap.put("id", 123);
      *
      * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * Beans.bean2Map(user, selectedProps, existingMap);
+     * Beans.beanToMap(user, selectedProps, existingMap);
      * // existingMap: {id=123, name=John, email=john@example.com}
      * // age is not included
      * }</pre>
@@ -2962,8 +2962,8 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
      * @param output the map into which the bean's properties will be put.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
-        bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
+        beanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -2983,7 +2983,7 @@ public final class Beans {
      * Collection<String> props = Arrays.asList("firstName", "lastName");
      *
      * // Convert property names to snake_case
-     * Beans.bean2Map(user, props, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, outputMap);
      * // outputMap: {first_name=John, last_name=Doe}
      * }</pre>
      *
@@ -2993,19 +2993,19 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to be used for the keys in the map.
      * @param output the map into which the bean's properties will be put.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
         if (bean == null) {
             return;
         }
 
-        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.CAMEL_CASE : keyNamingPolicy;
+        final boolean isCamelCaseOrNoChange = NamingPolicy.CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            bean2Map(bean, true, null, keyNamingPolicy, output);
+            beanToMap(bean, true, null, keyNamingPolicy, output);
         } else {
             ParserUtil.PropInfo propInfo = null;
             Object propValue = null;
@@ -3019,7 +3019,7 @@ public final class Beans {
 
                 propValue = propInfo.getPropValue(bean);
 
-                if (isLowerCamelCaseOrNoChange) {
+                if (isCamelCaseOrNoChange) {
                     output.put(propName, propValue);
                 } else {
                     output.put(keyNamingPolicy.convert(propName), propValue);
@@ -3042,11 +3042,11 @@ public final class Beans {
      * user.setEmail("john@example.com");
      *
      * // Include null properties
-     * Map<String, Object> mapWithNulls = Beans.bean2Map(user, false);
+     * Map<String, Object> mapWithNulls = Beans.beanToMap(user, false);
      * // mapWithNulls: {name=John, age=null, email=john@example.com}
      *
      * // Ignore null properties
-     * Map<String, Object> mapWithoutNulls = Beans.bean2Map(user, true);
+     * Map<String, Object> mapWithoutNulls = Beans.beanToMap(user, true);
      * // mapWithoutNulls: {name=John, email=john@example.com}
      * }</pre>
      *
@@ -3054,8 +3054,8 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty) {
-        return bean2Map(bean, ignoreNullProperty, (Set<String>) null);
+    public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty) {
+        return beanToMap(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -3076,7 +3076,7 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Ignore null properties and password field
-     * Map<String, Object> filteredMap = Beans.bean2Map(user, true, ignoredProps);
+     * Map<String, Object> filteredMap = Beans.beanToMap(user, true, ignoredProps);
      * // filteredMap: {name=John, email=john@example.com}
      * // age (null) and password (ignored) are not included
      * }</pre>
@@ -3086,8 +3086,8 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE);
     }
 
     /**
@@ -3108,7 +3108,7 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Create TreeMap ignoring null properties
-     * TreeMap<String, Object> sortedMap = Beans.bean2Map(user, true, ignoredProps, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, true, ignoredProps, TreeMap::new);
      * // sortedMap: {email=john@example.com, name=John} (sorted by key)
      * }</pre>
      *
@@ -3119,9 +3119,9 @@ public final class Beans {
      * @param mapSupplier a function that returns a new map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -3142,8 +3142,8 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>();
      *
      * // Convert to snake_case, ignoring null properties
-     * Map<String, Object> snakeMap = Beans.bean2Map(user, true, ignoredProps,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     * Map<String, Object> snakeMap = Beans.beanToMap(user, true, ignoredProps,
+     *     NamingPolicy.SNAKE_CASE);
      * // snakeMap: {first_name=John, last_name=Doe}
      * // age is not included because it's null
      * }</pre>
@@ -3154,9 +3154,9 @@ public final class Beans {
      * @param keyNamingPolicy the policy used to name the keys in the map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return beanToMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -3176,8 +3176,8 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Create custom map with snake_case keys, ignoring nulls and password
-     * TreeMap<String, Object> customMap = Beans.bean2Map(user, true, ignoredProps,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, TreeMap::new);
+     * TreeMap<String, Object> customMap = Beans.beanToMap(user, true, ignoredProps,
+     *     NamingPolicy.SNAKE_CASE, TreeMap::new);
      * // customMap: {first_name=John, last_name=Doe}
      * }</pre>
      *
@@ -3189,7 +3189,7 @@ public final class Beans {
      * @param mapSupplier the supplier function to create a new instance of the map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -3200,7 +3200,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(initCapacity);
 
-        bean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
+        beanToMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -3223,7 +3223,7 @@ public final class Beans {
      * existingMap.put("id", 123);
      *
      * // Add properties to existing map, ignoring nulls
-     * Beans.bean2Map(user, true, existingMap);
+     * Beans.beanToMap(user, true, existingMap);
      * // existingMap: {id=123, name=John, email=john@example.com}
      * // age is not included because it's null
      * }</pre>
@@ -3233,8 +3233,8 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * @param output the map where the result should be stored.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
-        bean2Map(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final M output) {
+        beanToMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
@@ -3255,7 +3255,7 @@ public final class Beans {
      * Map<String, Object> existingMap = new HashMap<>();
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
-     * Beans.bean2Map(user, true, ignoredProps, existingMap);
+     * Beans.beanToMap(user, true, ignoredProps, existingMap);
      * // existingMap: {name=John, email=john@example.com}
      * // age (null) and password (ignored) are not included
      * }</pre>
@@ -3266,9 +3266,9 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
      * @param output the map where the result should be stored.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -3290,8 +3290,8 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Fill output map with snake_case keys, ignoring nulls and password
-     * Beans.bean2Map(user, true, ignoredProps,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * Beans.beanToMap(user, true, ignoredProps,
+     *     NamingPolicy.SNAKE_CASE, outputMap);
      * // outputMap: {first_name=John, last_name=Doe}
      * }</pre>
      *
@@ -3302,14 +3302,14 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to be used for the keys in the map.
      * @param output the map to be filled with the bean's properties.
      */
-    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             NamingPolicy keyNamingPolicy, final M output) {
         if (bean == null) {
             return;
         }
 
-        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.CAMEL_CASE : keyNamingPolicy;
+        final boolean isCamelCaseOrNoChange = NamingPolicy.CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
@@ -3330,7 +3330,7 @@ public final class Beans {
                 continue;
             }
 
-            if (isLowerCamelCaseOrNoChange) {
+            if (isCamelCaseOrNoChange) {
                 output.put(propName, propValue);
             } else {
                 output.put(keyNamingPolicy.convert(propName), propValue);
@@ -3353,7 +3353,7 @@ public final class Beans {
      * address.setZipCode("10001");
      * user.setAddress(address);
      *
-     * Map<String, Object> deepMap = Beans.deepBean2Map(user);
+     * Map<String, Object> deepMap = Beans.deepBeanToMap(user);
      * // deepMap: {
      * //   name=John,
      * //   address={city=New York, zipCode=10001}
@@ -3363,10 +3363,10 @@ public final class Beans {
      *
      * @param bean the bean to be converted into a Map.
      * @return a Map representation of the provided bean.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> deepBean2Map(final Object bean) {
-        return deepBean2Map(bean, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> deepBeanToMap(final Object bean) {
+        return deepBeanToMap(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -3384,7 +3384,7 @@ public final class Beans {
      * user.setAddress(address);
      *
      * // Using TreeMap for sorted keys
-     * TreeMap<String, Object> sortedDeepMap = Beans.deepBean2Map(user, TreeMap::new);
+     * TreeMap<String, Object> sortedDeepMap = Beans.deepBeanToMap(user, TreeMap::new);
      * // sortedDeepMap: {
      * //   address={city=New York},
      * //   name=John
@@ -3395,10 +3395,10 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map representation of the provided bean.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
-        return deepBean2Map(bean, null, mapSupplier);
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return deepBeanToMap(bean, null, mapSupplier);
     }
 
     /**
@@ -3417,7 +3417,7 @@ public final class Beans {
      * user.setAddress(address);
      *
      * Collection<String> props = Arrays.asList("name", "address");
-     * Map<String, Object> selectedDeepMap = Beans.deepBean2Map(user, props);
+     * Map<String, Object> selectedDeepMap = Beans.deepBeanToMap(user, props);
      * // selectedDeepMap: {
      * //   name=John,
      * //   address={city=New York}
@@ -3428,10 +3428,10 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @return a Map representation of the provided bean.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> deepBean2Map(final Object bean, final Collection<String> selectPropNames) {
-        return deepBean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> deepBeanToMap(final Object bean, final Collection<String> selectPropNames) {
+        return deepBeanToMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -3450,7 +3450,7 @@ public final class Beans {
      * user.setAddress(address);
      *
      * Collection<String> props = Arrays.asList("name", "address");
-     * HashMap<String, Object> customDeepMap = Beans.deepBean2Map(user, props, HashMap::new);
+     * HashMap<String, Object> customDeepMap = Beans.deepBeanToMap(user, props, HashMap::new);
      * // customDeepMap: {
      * //   name=John,
      * //   address={city=New York, zipCode=10001}
@@ -3462,11 +3462,11 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map representation of the provided bean.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return deepBeanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -3484,8 +3484,8 @@ public final class Beans {
      * user.setHomeAddress(address);
      *
      * Collection<String> props = Arrays.asList("firstName", "homeAddress");
-     * Map<String, Object> snakeMap = Beans.deepBean2Map(user, props,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, HashMap::new);
+     * Map<String, Object> snakeMap = Beans.deepBeanToMap(user, props,
+     *     NamingPolicy.SNAKE_CASE, HashMap::new);
      * // snakeMap: {
      * //   first_name=John,
      * //   home_address={street_name=Main St}
@@ -3500,7 +3500,7 @@ public final class Beans {
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
      * @return a Map representation of the provided bean.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -3508,7 +3508,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        deepBean2Map(bean, selectPropNames, keyNamingPolicy, output);
+        deepBeanToMap(bean, selectPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -3530,7 +3530,7 @@ public final class Beans {
      * Map<String, Object> existingMap = new HashMap<>();
      * existingMap.put("id", 123);
      *
-     * Beans.deepBean2Map(user, existingMap);
+     * Beans.deepBeanToMap(user, existingMap);
      * // existingMap: {
      * //   id=123,
      * //   name=John,
@@ -3541,10 +3541,10 @@ public final class Beans {
      * @param <M> the type of the output map.
      * @param bean the bean to be converted into a Map.
      * @param output the map into which the bean's properties will be put.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final M output) {
-        deepBean2Map(bean, null, output);
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final M output) {
+        deepBeanToMap(bean, null, output);
     }
 
     /**
@@ -3565,7 +3565,7 @@ public final class Beans {
      * Map<String, Object> outputMap = new LinkedHashMap<>();
      * Collection<String> props = Arrays.asList("name", "address");
      *
-     * Beans.deepBean2Map(user, props, outputMap);
+     * Beans.deepBeanToMap(user, props, outputMap);
      * // outputMap: {
      * //   name=John,
      * //   address={city=New York}
@@ -3576,10 +3576,10 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param output the map into which the bean's properties will be put.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
-        deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
+        deepBeanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -3599,8 +3599,8 @@ public final class Beans {
      * Map<String, Object> outputMap = new LinkedHashMap<>();
      * Collection<String> props = Arrays.asList("firstName", "homeAddress");
      *
-     * Beans.deepBean2Map(user, props,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, outputMap);
+     * Beans.deepBeanToMap(user, props,
+     *     NamingPolicy.SNAKE_CASE, outputMap);
      * // outputMap: {
      * //   first_name=John,
      * //   home_address={street_name=Main St}
@@ -3612,22 +3612,22 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
      * @param output the map into which the bean's properties will be put.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
         if (bean == null) {
             return;
         }
 
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+        final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            deepBean2Map(bean, true, null, keyNamingPolicy, output);
+            deepBeanToMap(bean, true, null, keyNamingPolicy, output);
         } else {
             ParserUtil.PropInfo propInfo = null;
             Object propValue = null;
@@ -3642,16 +3642,16 @@ public final class Beans {
                 propValue = propInfo.getPropValue(bean);
 
                 if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
-                    if (isLowerCamelCaseOrNoChange) {
+                    if (isCamelCaseOrNoChange) {
                         output.put(propName, propValue);
                     } else {
                         output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    if (isLowerCamelCaseOrNoChange) {
-                        output.put(propName, deepBean2Map(propValue, true, null, keyNamingPolicy));
+                    if (isCamelCaseOrNoChange) {
+                        output.put(propName, deepBeanToMap(propValue, true, null, keyNamingPolicy));
                     } else {
-                        output.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, true, null, keyNamingPolicy));
+                        output.put(keyNamingPolicy.convert(propName), deepBeanToMap(propValue, true, null, keyNamingPolicy));
                     }
                 }
             }
@@ -3667,22 +3667,22 @@ public final class Beans {
      * <pre>{@code
      * // Given a User bean with nested Address
      * User user = new User("John", 25, new Address("NYC", "10001"));
-     * Map<String, Object> result = deepBean2Map(user, false);
+     * Map<String, Object> result = deepBeanToMap(user, false);
      * // result: {name=John, age=25, address={city=NYC, zipCode=10001}}
      *
      * // With ignoreNullProperty=true
      * User userWithNull = new User("Jane", null, null);
-     * Map<String, Object> filtered = deepBean2Map(userWithNull, true);
+     * Map<String, Object> filtered = deepBeanToMap(userWithNull, true);
      * // filtered: {name=Jane} (null properties excluded)
      * }</pre>
      *
      * @param bean the bean object to be converted into a Map. Can be any Java object with getter/setter methods.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @return a Map representation of the bean where nested beans are recursively converted to Maps.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty) {
-        return deepBean2Map(bean, ignoreNullProperty, (Set<String>) null);
+    public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty) {
+        return deepBeanToMap(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -3695,7 +3695,7 @@ public final class Beans {
      * // Given a User bean with multiple properties
      * User user = new User("John", 25, "john@example.com", new Address("NYC"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("email", "age"));
-     * Map<String, Object> result = deepBean2Map(user, false, ignored);
+     * Map<String, Object> result = deepBeanToMap(user, false, ignored);
      * // result: {name=John, address={city=NYC}} (email and age excluded)
      * }</pre>
      *
@@ -3703,10 +3703,10 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process. Can be {@code null}.
      * @return a Map representation of the bean with specified properties excluded.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE);
     }
 
     /**
@@ -3718,7 +3718,7 @@ public final class Beans {
      * <pre>{@code
      * // Create a TreeMap instead of default LinkedHashMap
      * User user = new User("John", 25, new Address("NYC"));
-     * TreeMap<String, Object> result = deepBean2Map(user, false, null,
+     * TreeMap<String, Object> result = deepBeanToMap(user, false, null,
      *     size -> new TreeMap<>());
      * // result: TreeMap with {address={city=NYC}, age=25, name=John} (sorted keys)
      * }</pre>
@@ -3729,11 +3729,11 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a Map of the specified type containing the bean properties.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -3748,11 +3748,11 @@ public final class Beans {
      * user.setFirstName("John");
      * user.setLastName("Doe");
      *
-     * Map<String, Object> snakeCase = deepBean2Map(user, false, null,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+     * Map<String, Object> snakeCase = deepBeanToMap(user, false, null,
+     *     NamingPolicy.SNAKE_CASES);
      * // snakeCase: {first_name=John, last_name=Doe}
      *
-     * Map<String, Object> upperCase = deepBean2Map(user, false, null,
+     * Map<String, Object> upperCase = deepBeanToMap(user, false, null,
      *     NamingPolicy.UPPER_CASE);
      * // upperCase: {FIRSTNAME=John, LASTNAME=Doe}
      * }</pre>
@@ -3760,13 +3760,13 @@ public final class Beans {
      * @param bean the bean object to be converted into a Map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to LOWER_CAMEL_CASE.
+     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to CAMEL_CASE.
      * @return a Map representation of the bean with keys transformed according to the naming policy.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -3780,8 +3780,8 @@ public final class Beans {
      * User user = new User("John", null, new Address("NYC"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
      *
-     * LinkedHashMap<String, Object> result = deepBean2Map(user, true, ignored,
-     *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES,
+     * LinkedHashMap<String, Object> result = deepBeanToMap(user, true, ignored,
+     *     NamingPolicy.SCREAMING_SNAKE_CASES,
      *     size -> new LinkedHashMap<>(size));
      * // result: {NAME=John, ADDRESS={CITY=NYC}} (ordered, uppercase with underscores)
      * }</pre>
@@ -3793,9 +3793,9 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a Map of the specified type with full customization applied.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -3806,7 +3806,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(initCapacity);
 
-        deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
+        deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -3823,7 +3823,7 @@ public final class Beans {
      * existingMap.put("timestamp", System.currentTimeMillis());
      *
      * User user = new User("John", 25);
-     * deepBean2Map(user, false, existingMap);
+     * deepBeanToMap(user, false, existingMap);
      * // existingMap now contains: {timestamp=..., name=John, age=25}
      * }</pre>
      *
@@ -3831,10 +3831,10 @@ public final class Beans {
      * @param bean the bean object to be converted into a Map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output Map.
      * @param output the Map instance into which the bean properties will be put. Existing entries are preserved.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
-        deepBean2Map(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final M output) {
+        deepBeanToMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
@@ -3849,7 +3849,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("password", "ssn"));
      *
      * User user = new User("John", "pass123", "123-45-6789");
-     * deepBean2Map(user, false, ignored, output);
+     * deepBeanToMap(user, false, ignored, output);
      * // output: {name=John} (sensitive fields excluded)
      * }</pre>
      *
@@ -3858,11 +3858,11 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      * @param output the Map instance into which the bean properties will be put.
-     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
+     * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -3877,7 +3877,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
      *
      * Product product = new Product("Widget", 29.99, new Category("Electronics"));
-     * deepBean2Map(product, true, ignored, NamingPolicy.UPPER_CASE, output);
+     * deepBeanToMap(product, true, ignored, NamingPolicy.UPPER_CASE, output);
      * // output: {CATEGORY={NAME=Electronics}, NAME=Widget, PRICE=29.99} (sorted)
      * }</pre>
      *
@@ -3888,13 +3888,13 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to apply to the keys in the output Map.
      * @param output the Map instance into which the bean properties will be put.
      */
-    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
         if (bean == null) {
             return;
         }
 
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+        final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
@@ -3918,16 +3918,16 @@ public final class Beans {
             }
 
             if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
-                if (isLowerCamelCaseOrNoChange) {
+                if (isCamelCaseOrNoChange) {
                     output.put(propName, propValue);
                 } else {
                     output.put(keyNamingPolicy.convert(propName), propValue);
                 }
             } else {
-                if (isLowerCamelCaseOrNoChange) {
-                    output.put(propName, deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                if (isCamelCaseOrNoChange) {
+                    output.put(propName, deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 } else {
-                    output.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    output.put(keyNamingPolicy.convert(propName), deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 }
             }
         }
@@ -3942,13 +3942,13 @@ public final class Beans {
      * <pre>{@code
      * // Given nested beans
      * User user = new User("John", new Address("NYC", "10001"));
-     * Map<String, Object> flat = bean2FlatMap(user);
+     * Map<String, Object> flat = beanToFlatMap(user);
      * // flat: {name=John, address.city=NYC, address.zipCode=10001}
      *
      * // Deep nesting
      * Company company = new Company("TechCorp",
      *     new Address("NYC", new Location(40.7128, -74.0060)));
-     * Map<String, Object> result = bean2FlatMap(company);
+     * Map<String, Object> result = beanToFlatMap(company);
      * // result: {name=TechCorp, address.city=NYC,
      * //          address.location.latitude=40.7128,
      * //          address.location.longitude=-74.0060}
@@ -3956,10 +3956,10 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a flat map.
      * @return a map representing the bean object with nested properties flattened using dot notation.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> bean2FlatMap(final Object bean) {
-        return bean2FlatMap(bean, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> beanToFlatMap(final Object bean) {
+        return beanToFlatMap(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -3971,7 +3971,7 @@ public final class Beans {
      * <pre>{@code
      * // Create a sorted flat map
      * User user = new User("John", new Address("NYC", "10001"));
-     * TreeMap<String, Object> sortedFlat = bean2FlatMap(user,
+     * TreeMap<String, Object> sortedFlat = beanToFlatMap(user,
      *     size -> new TreeMap<>());
      * // sortedFlat: {address.city=NYC, address.zipCode=10001, name=John} (sorted)
      * }</pre>
@@ -3980,10 +3980,10 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with nested properties flattened.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
-        return bean2FlatMap(bean, null, mapSupplier);
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return beanToFlatMap(bean, null, mapSupplier);
     }
 
     /**
@@ -3996,12 +3996,12 @@ public final class Beans {
      * // Select specific properties including nested ones
      * User user = new User("John", 25, new Address("NYC", "10001"));
      * Collection<String> select = Arrays.asList("name", "address");
-     * Map<String, Object> result = bean2FlatMap(user, select);
+     * Map<String, Object> result = beanToFlatMap(user, select);
      * // result: {name=John, address.city=NYC, address.zipCode=10001}
      *
      * // Select only top-level properties
      * Collection<String> topLevel = Arrays.asList("name", "age");
-     * Map<String, Object> flat = bean2FlatMap(user, topLevel);
+     * Map<String, Object> flat = beanToFlatMap(user, topLevel);
      * // flat: {name=John, age=25} (address excluded)
      * }</pre>
      *
@@ -4009,8 +4009,8 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the resulting map. Nested properties of selected beans are automatically included.
      * @return a map with only the selected properties flattened.
      */
-    public static Map<String, Object> bean2FlatMap(final Object bean, final Collection<String> selectPropNames) {
-        return bean2FlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> beanToFlatMap(final Object bean, final Collection<String> selectPropNames) {
+        return beanToFlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -4024,7 +4024,7 @@ public final class Beans {
      * Employee emp = new Employee("John", "IT", new Manager("Jane"));
      * Collection<String> select = Arrays.asList("name", "manager");
      *
-     * LinkedHashMap<String, Object> result = bean2FlatMap(emp, select,
+     * LinkedHashMap<String, Object> result = beanToFlatMap(emp, select,
      *     size -> new LinkedHashMap<>(size));
      * // result: {name=John, manager.name=Jane} (ordered, dept excluded)
      * }</pre>
@@ -4034,11 +4034,11 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the resulting map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with selected properties flattened.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return beanToFlatMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -4054,8 +4054,8 @@ public final class Beans {
      * user.setHomeAddress(new Address("NYC"));
      *
      * Collection<String> select = Arrays.asList("firstName", "homeAddress");
-     * Map<String, Object> snakeCase = bean2FlatMap(user, select,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES,
+     * Map<String, Object> snakeCase = beanToFlatMap(user, select,
+     *     NamingPolicy.SNAKE_CASES,
      *     size -> new HashMap<>(size));
      * // snakeCase: {first_name=John, home_address.city=NYC}
      * }</pre>
@@ -4067,7 +4067,7 @@ public final class Beans {
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -4075,7 +4075,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        bean2FlatMap(bean, selectPropNames, keyNamingPolicy, output);
+        beanToFlatMap(bean, selectPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -4092,17 +4092,17 @@ public final class Beans {
      * output.put("version", "1.0");
      *
      * User user = new User("John", new Address("NYC"));
-     * bean2FlatMap(user, output);
+     * beanToFlatMap(user, output);
      * // output: {version=1.0, name=John, address.city=NYC}
      * }</pre>
      *
      * @param <M> the type of Map to populate.
      * @param bean the bean object to be converted into a flat map.
      * @param output the Map instance into which the flattened bean properties will be put. Existing entries are preserved.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final M output) {
-        bean2FlatMap(bean, null, output);
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final M output) {
+        beanToFlatMap(bean, null, output);
     }
 
     /**
@@ -4118,7 +4118,7 @@ public final class Beans {
      *
      * Customer customer = new Customer("John", "123-456",
      *     new Contact("john@email.com", "555-1234"));
-     * bean2FlatMap(customer, select, output);
+     * beanToFlatMap(customer, select, output);
      * // output: {name=John, contact.email=john@email.com, contact.phone=555-1234}
      * // (customerId excluded)
      * }</pre>
@@ -4127,10 +4127,10 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param selectPropNames a collection of property names to be included in the output map.
      * @param output the Map instance into which the flattened bean properties will be put.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
-        bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
+        beanToFlatMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -4146,7 +4146,7 @@ public final class Beans {
      *
      * Product product = new Product("WidgetPro",
      *     new Category("Electronics", "Gadgets"));
-     * bean2FlatMap(product, select, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, output);
+     * beanToFlatMap(product, select, NamingPolicy.SCREAMING_SNAKE_CASE, output);
      * // output: {CATEGORY.NAME=Electronics, CATEGORY.SUBCATEGORY=Gadgets,
      * //          PRODUCT_NAME=WidgetPro} (sorted, uppercase)
      * }</pre>
@@ -4156,21 +4156,21 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the output map.
      * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
      * @param output the Map instance into which the flattened bean properties will be put.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
         if (bean == null) {
             return;
         }
 
-        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.CAMEL_CASE : keyNamingPolicy;
+        final boolean isCamelCaseOrNoChange = NamingPolicy.CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            bean2FlatMap(bean, true, null, keyNamingPolicy, output);
+            beanToFlatMap(bean, true, null, keyNamingPolicy, output);
         } else {
             ParserUtil.PropInfo propInfo = null;
             Object propValue = null;
@@ -4185,13 +4185,13 @@ public final class Beans {
                 propValue = propInfo.getPropValue(bean);
 
                 if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
-                    if (isLowerCamelCaseOrNoChange) {
+                    if (isCamelCaseOrNoChange) {
                         output.put(propName, propValue);
                     } else {
                         output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    bean2FlatMap(propValue, true, null, keyNamingPolicy, isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), output);
+                    beanToFlatMap(propValue, true, null, keyNamingPolicy, isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), output);
                 }
             }
         }
@@ -4206,21 +4206,21 @@ public final class Beans {
      * <pre>{@code
      * // Include null properties
      * User user = new User("John", null, new Address("NYC", null));
-     * Map<String, Object> withNulls = bean2FlatMap(user, false);
+     * Map<String, Object> withNulls = beanToFlatMap(user, false);
      * // withNulls: {name=John, age=null, address.city=NYC, address.zipCode=null}
      *
      * // Exclude null properties
-     * Map<String, Object> noNulls = bean2FlatMap(user, true);
+     * Map<String, Object> noNulls = beanToFlatMap(user, true);
      * // noNulls: {name=John, address.city=NYC}
      * }</pre>
      *
      * @param bean the bean object to be converted into a flat map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting map.
      * @return a flat map representation of the bean with {@code null} handling as specified.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
-        return bean2FlatMap(bean, ignoreNullProperty, (Set<String>) null);
+    public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty) {
+        return beanToFlatMap(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -4234,7 +4234,7 @@ public final class Beans {
      * User user = new User("John", null, "secret123", new Address("NYC"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("password"));
      *
-     * Map<String, Object> result = bean2FlatMap(user, true, ignored);
+     * Map<String, Object> result = beanToFlatMap(user, true, ignored);
      * // result: {name=John, address.city=NYC}
      * // (age is null so excluded, password is in ignored set)
      * }</pre>
@@ -4243,10 +4243,10 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting map.
      * @param ignoredPropNames a set of property names to be excluded from the resulting map.
      * @return a flat map with specified filtering applied.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE);
     }
 
     /**
@@ -4260,7 +4260,7 @@ public final class Beans {
      * Employee emp = new Employee("John", null, "IT", new Office("Building A"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("department"));
      *
-     * TreeMap<String, Object> result = bean2FlatMap(emp, true, ignored,
+     * TreeMap<String, Object> result = beanToFlatMap(emp, true, ignored,
      *     size -> new TreeMap<>());
      * // result: {name=John, office.building=Building A}
      * // (sorted, salary null excluded, department ignored)
@@ -4272,11 +4272,11 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the resulting map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with filtering applied.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -4293,8 +4293,8 @@ public final class Beans {
      * profile.setHomeAddress(new Address("NYC"));
      *
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
-     * Map<String, Object> result = bean2FlatMap(profile, true, ignored,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+     * Map<String, Object> result = beanToFlatMap(profile, true, ignored,
+     *     NamingPolicy.SNAKE_CASES);
      * // result: {first_name=John, home_address.city=NYC}
      * // (last_login null excluded, internal_id ignored, snake_case keys)
      * }</pre>
@@ -4304,11 +4304,11 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the resulting map.
      * @param keyNamingPolicy the naming policy to apply to the keys in the resulting map.
      * @return a flat map with comprehensive customization applied.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
@@ -4323,8 +4323,8 @@ public final class Beans {
      *     new Customer("John", new Address("NYC", "10001")));
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalNotes"));
      *
-     * LinkedHashMap<String, Object> result = bean2FlatMap(order, true, ignored,
-     *     NamingPolicy.UPPER_CASE_WITH_UNDERSCORES,
+     * LinkedHashMap<String, Object> result = beanToFlatMap(order, true, ignored,
+     *     NamingPolicy.SCREAMING_SNAKE_CASES,
      *     size -> new LinkedHashMap<>(size * 2));   // larger initial capacity
      * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John,
      * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
@@ -4338,9 +4338,9 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to apply to the keys in the resulting map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a fully customized flat map representation of the bean.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (bean == null) {
             return mapSupplier.apply(0);
@@ -4351,7 +4351,7 @@ public final class Beans {
 
         final M output = mapSupplier.apply(initCapacity);
 
-        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
+        beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
         return output;
     }
@@ -4368,7 +4368,7 @@ public final class Beans {
      * output.put("timestamp", new Date());
      *
      * User user = new User("John", null, new Address("NYC"));
-     * bean2FlatMap(user, true, output);
+     * beanToFlatMap(user, true, output);
      * // output: {timestamp=..., name=John, address.city=NYC}
      * // (age null is excluded)
      * }</pre>
@@ -4377,10 +4377,10 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
      * @param output the map into which the flattened bean properties will be put.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
-        bean2FlatMap(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
+        beanToFlatMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
@@ -4395,7 +4395,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("password", "ssn"));
      *
      * Account account = new Account("john123", "pass", null, "123-45-6789");
-     * bean2FlatMap(account, true, ignored, output);
+     * beanToFlatMap(account, true, ignored, output);
      * // output: {username=john123}
      * // (password and ssn ignored, balance null excluded)
      * }</pre>
@@ -4405,11 +4405,11 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
      * @param ignoredPropNames a set of property names to be excluded from the output map.
      * @param output the map into which the flattened bean properties will be put.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -4425,8 +4425,8 @@ public final class Beans {
      *
      * Document doc = new Document("Report", null,
      *     new Author("John", new Department("Research")));
-     * bean2FlatMap(doc, true, ignored,
-     *     NamingPolicy.LOWER_CASE_WITH_UNDERSCORES, output);
+     * beanToFlatMap(doc, true, ignored,
+     *     NamingPolicy.SNAKE_CASES, output);
      * // output: {author.department.name=research, author.name=john, title=report}
      * // (sorted keys, snake_case, version null excluded, metadata ignored)
      * }</pre>
@@ -4437,20 +4437,20 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the output map.
      * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
      * @param output the map into which the flattened bean properties will be put.
-     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
+     * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
-        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
+        beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
     }
 
-    private static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty,
+    private static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
         if (bean == null) {
             return;
         }
 
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+        final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
@@ -4475,13 +4475,13 @@ public final class Beans {
 
             if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                 if (isNullParentPropName) {
-                    if (isLowerCamelCaseOrNoChange) {
+                    if (isCamelCaseOrNoChange) {
                         output.put(propName, propValue);
                     } else {
                         output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    if (isLowerCamelCaseOrNoChange) {
+                    if (isCamelCaseOrNoChange) {
                         output.put(parentPropName + WD.PERIOD + propName, propValue);
                     } else {
                         output.put(parentPropName + WD.PERIOD + keyNamingPolicy.convert(propName), propValue);
@@ -4489,11 +4489,11 @@ public final class Beans {
                 }
             } else {
                 if (isNullParentPropName) {
-                    bean2FlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), output);
+                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy, isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName),
+                            output);
                 } else {
-                    bean2FlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            parentPropName + WD.PERIOD + (isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
+                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            parentPropName + WD.PERIOD + (isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
                 }
             }
         }
@@ -4618,8 +4618,8 @@ public final class Beans {
         }
 
         if (copy == null) {
-            final String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
-            copy = Utils.abacusXMLParser.deserialize(xml, targetType);
+            final String xml = Utils.abacusXmlParser.serialize(obj, Utils.xscForClone);
+            copy = Utils.abacusXmlParser.deserialize(xml, targetType);
         }
 
         return (T) copy;
@@ -6170,7 +6170,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
-     * Beans.properties(user)
+     * Beans.propertyEntries(user)
      *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
      * // Outputs: name: John, age: 25, email: john@example.com
      * }</pre>
@@ -6179,7 +6179,7 @@ public final class Beans {
      * @return a stream of Map.Entry objects containing property names and values
      * @throws IllegalArgumentException if bean is null
      */
-    public static Stream<Map.Entry<String, Object>> properties(final Object bean) {
+    public static Stream<Map.Entry<String, Object>> propertyEntries(final Object bean) {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -6190,14 +6190,14 @@ public final class Beans {
     /**
      * Creates a filtered stream of property name-value pairs from the specified bean.
      *
-     * <p>This method is similar to {@link #properties(Object)} but allows filtering
+     * <p>This method is similar to {@link #propertyEntries(Object)} but allows filtering
      * of properties based on a predicate. Only properties that match the predicate
      * criteria are included in the returned stream.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, null);
-     * Beans.properties(user, (name, value) -> value != null)
+     * Beans.propertyEntries(user, (name, value) -> value != null)
      *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
      * // Only outputs non-null properties: name: John, age: 25
      * }</pre>
@@ -6207,7 +6207,7 @@ public final class Beans {
      * @return a stream of Map.Entry objects containing filtered property names and values
      * @throws IllegalArgumentException if bean is null
      */
-    public static Stream<Map.Entry<String, Object>> properties(final Object bean, final BiPredicate<String, Object> propFilter) {
+    public static Stream<Map.Entry<String, Object>> propertyEntries(final Object bean, final BiPredicate<String, Object> propFilter) {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());

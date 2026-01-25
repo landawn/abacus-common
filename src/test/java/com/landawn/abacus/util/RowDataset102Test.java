@@ -81,23 +81,23 @@ public class RowDataset102Test extends TestBase {
         assertTrue(result.containsColumn("city"));
         assertTrue(result.containsColumn("salary"));
 
-        assertEquals(2, (Integer) result.absolute(0).get("id"));
-        assertEquals("Bob", result.absolute(0).get("name"));
-        assertEquals(30, (Integer) result.absolute(0).get("age"));
-        assertEquals("New York", result.absolute(0).get("city"));
-        assertEquals(50000, (Integer) result.absolute(0).get("salary"));
+        assertEquals(2, (Integer) result.moveToRow(0).get("id"));
+        assertEquals("Bob", result.moveToRow(0).get("name"));
+        assertEquals(30, (Integer) result.moveToRow(0).get("age"));
+        assertEquals("New York", result.moveToRow(0).get("city"));
+        assertEquals(50000, (Integer) result.moveToRow(0).get("salary"));
 
-        assertEquals(3, (Integer) result.absolute(1).get("id"));
-        assertEquals("Charlie", result.absolute(1).get("name"));
-        assertEquals(35, (Integer) result.absolute(1).get("age"));
-        assertEquals("London", result.absolute(1).get("city"));
-        assertEquals(60000, (Integer) result.absolute(1).get("salary"));
+        assertEquals(3, (Integer) result.moveToRow(1).get("id"));
+        assertEquals("Charlie", result.moveToRow(1).get("name"));
+        assertEquals(35, (Integer) result.moveToRow(1).get("age"));
+        assertEquals("London", result.moveToRow(1).get("city"));
+        assertEquals(60000, (Integer) result.moveToRow(1).get("salary"));
 
-        assertNull(result.absolute(2).get("id"));
-        assertNull(result.absolute(2).get("name"));
-        assertNull(result.absolute(2).get("age"));
-        assertEquals("Tokyo", result.absolute(2).get("city"));
-        assertEquals(70000, (Integer) result.absolute(2).get("salary"));
+        assertNull(result.moveToRow(2).get("id"));
+        assertNull(result.moveToRow(2).get("name"));
+        assertNull(result.moveToRow(2).get("age"));
+        assertEquals("Tokyo", result.moveToRow(2).get("city"));
+        assertEquals(70000, (Integer) result.moveToRow(2).get("salary"));
     }
 
     @Test
@@ -112,23 +112,23 @@ public class RowDataset102Test extends TestBase {
         assertTrue(result.containsColumn("city"));
         assertTrue(result.containsColumn("salary"));
 
-        assertEquals(1, (Integer) result.absolute(0).get("id"));
-        assertEquals("Alice", result.absolute(0).get("name"));
-        assertEquals(25, (Integer) result.absolute(0).get("age"));
-        assertNull(result.absolute(0).get("city"));
-        assertNull(result.absolute(0).get("salary"));
+        assertEquals(1, (Integer) result.moveToRow(0).get("id"));
+        assertEquals("Alice", result.moveToRow(0).get("name"));
+        assertEquals(25, (Integer) result.moveToRow(0).get("age"));
+        assertNull(result.moveToRow(0).get("city"));
+        assertNull(result.moveToRow(0).get("salary"));
 
-        assertEquals(2, (Integer) result.absolute(1).get("id"));
-        assertEquals("Bob", result.absolute(1).get("name"));
-        assertEquals(30, (Integer) result.absolute(1).get("age"));
-        assertEquals("New York", result.absolute(1).get("city"));
-        assertEquals(50000, (Integer) result.absolute(1).get("salary"));
+        assertEquals(2, (Integer) result.moveToRow(1).get("id"));
+        assertEquals("Bob", result.moveToRow(1).get("name"));
+        assertEquals(30, (Integer) result.moveToRow(1).get("age"));
+        assertEquals("New York", result.moveToRow(1).get("city"));
+        assertEquals(50000, (Integer) result.moveToRow(1).get("salary"));
 
-        assertEquals(3, (Integer) result.absolute(2).get("id"));
-        assertEquals("Charlie", result.absolute(2).get("name"));
-        assertEquals(35, (Integer) result.absolute(2).get("age"));
-        assertEquals("London", result.absolute(2).get("city"));
-        assertEquals(60000, (Integer) result.absolute(2).get("salary"));
+        assertEquals(3, (Integer) result.moveToRow(2).get("id"));
+        assertEquals("Charlie", result.moveToRow(2).get("name"));
+        assertEquals(35, (Integer) result.moveToRow(2).get("age"));
+        assertEquals("London", result.moveToRow(2).get("city"));
+        assertEquals(60000, (Integer) result.moveToRow(2).get("salary"));
     }
 
     @Test
@@ -141,9 +141,9 @@ public class RowDataset102Test extends TestBase {
         assertNotNull(result);
         assertEquals(3, result.size());
 
-        assertEquals(2, (Integer) result.absolute(0).get("id"));
-        assertEquals("Bob", result.absolute(0).get("name"));
-        assertEquals(30, (Integer) result.absolute(0).get("age"));
+        assertEquals(2, (Integer) result.moveToRow(0).get("id"));
+        assertEquals("Bob", result.moveToRow(0).get("name"));
+        assertEquals(30, (Integer) result.moveToRow(0).get("age"));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class RowDataset102Test extends TestBase {
         assertEquals(3, result.size());
         assertTrue(result.containsColumn("rightData"));
 
-        Map<String, Object> firstRightData = (Map<String, Object>) result.absolute(2).get("rightData");
+        Map<String, Object> firstRightData = (Map<String, Object>) result.moveToRow(2).get("rightData");
         assertNotNull(firstRightData);
     }
 
@@ -225,11 +225,11 @@ public class RowDataset102Test extends TestBase {
         assertTrue(result.containsColumn("city"));
         assertTrue(result.containsColumn("salary"));
 
-        assertEquals(1, (Integer) result.absolute(0).get("id"));
-        assertEquals("Alice", result.absolute(0).get("name"));
-        assertEquals(25, (Integer) result.absolute(0).get("age"));
-        assertNull(result.absolute(0).get("city"));
-        assertNull(result.absolute(0).get("salary"));
+        assertEquals(1, (Integer) result.moveToRow(0).get("id"));
+        assertEquals("Alice", result.moveToRow(0).get("name"));
+        assertEquals(25, (Integer) result.moveToRow(0).get("age"));
+        assertNull(result.moveToRow(0).get("city"));
+        assertNull(result.moveToRow(0).get("salary"));
     }
 
     @Test
@@ -343,7 +343,7 @@ public class RowDataset102Test extends TestBase {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(1, (Integer) result.absolute(0).get("id"));
+        assertEquals(1, (Integer) result.moveToRow(0).get("id"));
     }
 
     @Test
@@ -365,7 +365,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testIntersection() {
-        Dataset result = ds1.intersection(ds2);
+        Dataset result = N.intersection(ds1, ds2);
 
         assertNotNull(result);
         assertTrue(result.size() <= Math.min(ds1.size(), ds2.size()));
@@ -373,7 +373,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testDifference() {
-        Dataset result = ds1.difference(ds2);
+        Dataset result = N.difference(ds1, ds2);
 
         assertNotNull(result);
         assertTrue(result.size() <= ds1.size());
@@ -381,7 +381,7 @@ public class RowDataset102Test extends TestBase {
 
     @Test
     public void testSymmetricDifference() {
-        Dataset result = ds1.symmetricDifference(ds2);
+        Dataset result = N.symmetricDifference(ds1, ds2);
 
         assertNotNull(result);
         assertTrue(result.size() >= 0);
@@ -660,7 +660,7 @@ public class RowDataset102Test extends TestBase {
         List<String> names = new ArrayList<>();
         ds1.accept(ds -> {
             for (int i = 0; i < ds.size(); i++) {
-                names.add((String) ds.absolute(i).get("name"));
+                names.add((String) ds.moveToRow(i).get("name"));
             }
         });
 
@@ -848,7 +848,7 @@ public class RowDataset102Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> emptyDs.union(ds1));
         assertThrows(IllegalArgumentException.class, () -> emptyDs.intersect(ds1));
 
-        Dataset emptyDataset = CommonUtil.newEmptyDataset(ds1.columnNameList());
+        Dataset emptyDataset = CommonUtil.newEmptyDataset(ds1.columnNames());
         Dataset result3 = emptyDataset.union(ds1);
         assertTrue(result3.size() >= 0);
         Dataset result4 = emptyDataset.intersect(ds1);

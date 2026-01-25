@@ -244,26 +244,26 @@ public class CommonUtil203Test extends TestBase {
 
         @Test
         public void testNullToEmptyForEach_StringArray() {
-            assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, CommonUtil.nullToEmptyForEach(null));
+            assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, CommonUtil.nullElementsToEmpty(null));
             String[] arr = { "a", "b" };
-            String[] result = CommonUtil.nullToEmptyForEach(arr);
+            String[] result = CommonUtil.nullElementsToEmpty(arr);
             assertSame(arr, result);
             assertArrayEquals(new String[] { "a", "b" }, result);
 
             String[] arrWithNulls = { "a", null, "c", null };
             String[] expected = { "a", EMPTY_STR, "c", EMPTY_STR };
-            result = CommonUtil.nullToEmptyForEach(arrWithNulls);
+            result = CommonUtil.nullElementsToEmpty(arrWithNulls);
             assertSame(arrWithNulls, result);
             assertArrayEquals(expected, result);
 
             String[] allNulls = { null, null };
             String[] expectedAllEmpty = { EMPTY_STR, EMPTY_STR };
-            result = CommonUtil.nullToEmptyForEach(allNulls);
+            result = CommonUtil.nullElementsToEmpty(allNulls);
             assertSame(allNulls, result);
             assertArrayEquals(expectedAllEmpty, result);
 
             String[] emptyArr = CommonUtil.EMPTY_STRING_ARRAY;
-            result = CommonUtil.nullToEmptyForEach(emptyArr);
+            result = CommonUtil.nullElementsToEmpty(emptyArr);
             assertSame(emptyArr, result);
             assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, result);
         }

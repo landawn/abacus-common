@@ -454,54 +454,54 @@ public class Strings103Test extends TestBase {
     }
 
     @Test
-    public void testSmallestLastIndexOfAll() {
-        Assertions.assertEquals(6, Strings.smallestLastIndexOfAll("Hello World", "o", "World"));
-        Assertions.assertEquals(6, Strings.smallestLastIndexOfAll("Hello World", 10, "o", "World"));
-        Assertions.assertEquals(6, Strings.smallestLastIndexOfAll("Hello Hello", "Hello", "o"));
+    public void testminLastIndexOfAll() {
+        Assertions.assertEquals(6, Strings.minLastIndexOfAll("Hello World", "o", "World"));
+        Assertions.assertEquals(6, Strings.minLastIndexOfAll("Hello World", 10, "o", "World"));
+        Assertions.assertEquals(6, Strings.minLastIndexOfAll("Hello Hello", "Hello", "o"));
 
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll("test", "xyz", "abc"));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll("test", "xyz", "abc"));
 
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll(null, "test"));
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll("test", (String[]) null));
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll("test", new String[0]));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll(null, "test"));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll("test", (String[]) null));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll("test", new String[0]));
 
-        Assertions.assertEquals(1, Strings.smallestLastIndexOfAll("test", null, "es", null));
+        Assertions.assertEquals(1, Strings.minLastIndexOfAll("test", null, "es", null));
     }
 
     @Test
-    public void testSmallestLastIndexOfAllWithIndex() {
-        Assertions.assertEquals(6, Strings.smallestLastIndexOfAll("Hello World", 10, "o", "World"));
-        Assertions.assertEquals(4, Strings.smallestLastIndexOfAll("Hello World", 5, "o", "World"));
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll("Hello World", 3, "o", "World"));
+    public void testminLastIndexOfAllWithIndex() {
+        Assertions.assertEquals(6, Strings.minLastIndexOfAll("Hello World", 10, "o", "World"));
+        Assertions.assertEquals(4, Strings.minLastIndexOfAll("Hello World", 5, "o", "World"));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll("Hello World", 3, "o", "World"));
 
-        Assertions.assertEquals(-1, Strings.smallestLastIndexOfAll("test", -1, "test"));
+        Assertions.assertEquals(-1, Strings.minLastIndexOfAll("test", -1, "test"));
 
-        Assertions.assertEquals(0, Strings.smallestLastIndexOfAll("test", 100, "test"));
+        Assertions.assertEquals(0, Strings.minLastIndexOfAll("test", 100, "test"));
     }
 
     @Test
-    public void testLargestLastIndexOfAll() {
-        Assertions.assertEquals(7, Strings.largestLastIndexOfAll("Hello World", "o", "World"));
-        Assertions.assertEquals(7, Strings.largestLastIndexOfAll("Hello World", 10, "o", "World"));
-        Assertions.assertEquals(6, Strings.largestLastIndexOfAll("Hello World", 6, "o", "World"));
-        Assertions.assertEquals(7, Strings.largestLastIndexOfAll("Hello Hello", "Hello", "e"));
+    public void testmaxLastIndexOfAll() {
+        Assertions.assertEquals(7, Strings.maxLastIndexOfAll("Hello World", "o", "World"));
+        Assertions.assertEquals(7, Strings.maxLastIndexOfAll("Hello World", 10, "o", "World"));
+        Assertions.assertEquals(6, Strings.maxLastIndexOfAll("Hello World", 6, "o", "World"));
+        Assertions.assertEquals(7, Strings.maxLastIndexOfAll("Hello Hello", "Hello", "e"));
 
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll("test", "xyz", "abc"));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll("test", "xyz", "abc"));
 
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll(null, "test"));
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll("test", (String[]) null));
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll("test", new String[0]));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll(null, "test"));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll("test", (String[]) null));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll("test", new String[0]));
     }
 
     @Test
-    public void testLargestLastIndexOfAllWithIndex() {
-        Assertions.assertEquals(7, Strings.largestLastIndexOfAll("Hello World", 10, "o", "World"));
-        Assertions.assertEquals(6, Strings.largestLastIndexOfAll("Hello World", 6, "o", "World"));
-        Assertions.assertEquals(0, Strings.largestLastIndexOfAll("Hello World", 3, "o", "H"));
+    public void testmaxLastIndexOfAllWithIndex() {
+        Assertions.assertEquals(7, Strings.maxLastIndexOfAll("Hello World", 10, "o", "World"));
+        Assertions.assertEquals(6, Strings.maxLastIndexOfAll("Hello World", 6, "o", "World"));
+        Assertions.assertEquals(0, Strings.maxLastIndexOfAll("Hello World", 3, "o", "H"));
 
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll("test", -1, "test"));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll("test", -1, "test"));
 
-        Assertions.assertEquals(0, Strings.largestLastIndexOfAll("test", 100, "test"));
+        Assertions.assertEquals(0, Strings.maxLastIndexOfAll("test", 100, "test"));
     }
 
     @Test
@@ -1053,10 +1053,10 @@ public class Strings103Test extends TestBase {
     @Test
     public void testLastIndexOfAllWithOverlappingPatterns() {
         String text = "ababababab";
-        Assertions.assertEquals(8, Strings.largestLastIndexOfAll(text, "ab", "ba"));
-        Assertions.assertEquals(7, Strings.smallestLastIndexOfAll(text, "ab", "ba"));
+        Assertions.assertEquals(8, Strings.maxLastIndexOfAll(text, "ab", "ba"));
+        Assertions.assertEquals(7, Strings.minLastIndexOfAll(text, "ab", "ba"));
 
-        Assertions.assertEquals(-1, Strings.largestLastIndexOfAll(text, "xyz", "qrs"));
+        Assertions.assertEquals(-1, Strings.maxLastIndexOfAll(text, "xyz", "qrs"));
     }
 
     @Test

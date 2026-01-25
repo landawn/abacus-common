@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -186,15 +186,15 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     * BufferedJSONWriter writer = new BufferedJSONWriter();
-     * JSONXMLSerializationConfig<?> config = null;
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * JsonXmlSerializationConfig<?> config = null;
      *
      * Long[] array = {100L, 200L, 300L};
      * type.writeCharacter(writer, array, config);
      * String result = writer.toString();
      * // result: "[100, 200, 300]"
      *
-     * BufferedJSONWriter writer2 = new BufferedJSONWriter();
+     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
      * type.writeCharacter(writer2, null, config);
      * String result2 = writer2.toString();
      * // result2: "null"
@@ -206,7 +206,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Long[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Long[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

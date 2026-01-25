@@ -284,50 +284,50 @@ public class URLEncodedUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_parameters2Bean() {
+    public void test_decodeToBean() {
         Map<String, String[]> params = new HashMap<>();
         params.put("name", new String[] { "Alice" });
         params.put("age", new String[] { "25" });
 
-        User user = URLEncodedUtil.parameters2Bean(params, User.class);
+        User user = URLEncodedUtil.decodeToBean(params, User.class);
         assertNotNull(user);
         assertEquals("Alice", user.getName());
         assertEquals(25, user.getAge());
     }
 
     @Test
-    public void test_parameters2Bean_multipleValues() {
+    public void test_decodeToBean_multipleValues() {
         Map<String, String[]> params = new HashMap<>();
         params.put("name", new String[] { "Bob", "Bobby" });
         params.put("age", new String[] { "30" });
 
-        User user = URLEncodedUtil.parameters2Bean(params, User.class);
+        User user = URLEncodedUtil.decodeToBean(params, User.class);
         assertNotNull(user);
         assertEquals("Bob, Bobby", user.getName());
         assertEquals(30, user.getAge());
     }
 
     @Test
-    public void test_parameters2Bean_emptyValue() {
+    public void test_decodeToBean_emptyValue() {
         Map<String, String[]> params = new HashMap<>();
         params.put("name", new String[] { "" });
         params.put("age", new String[] { "35" });
 
-        User user = URLEncodedUtil.parameters2Bean(params, User.class);
+        User user = URLEncodedUtil.decodeToBean(params, User.class);
         assertNotNull(user);
         assertNull(user.getName());
         assertEquals(35, user.getAge());
     }
 
     @Test
-    public void test_parameters2Bean_nullMap() {
-        User user = URLEncodedUtil.parameters2Bean(null, User.class);
+    public void test_decodeToBean_nullMap() {
+        User user = URLEncodedUtil.decodeToBean(null, User.class);
         assertNotNull(user);
     }
 
     @Test
-    public void test_parameters2Bean_emptyMap() {
-        User user = URLEncodedUtil.parameters2Bean(new HashMap<>(), User.class);
+    public void test_decodeToBean_emptyMap() {
+        User user = URLEncodedUtil.decodeToBean(new HashMap<>(), User.class);
         assertNotNull(user);
     }
 
@@ -409,7 +409,7 @@ public class URLEncodedUtil2025Test extends TestBase {
     @Test
     public void test_encode_object_charset_namingPolicy() {
         Product product = new Product("Laptop", 999.99);
-        String result = URLEncodedUtil.encode(product, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        String result = URLEncodedUtil.encode(product, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
         assertNotNull(result);
         assertTrue(result.contains("product_name=Laptop"));
         assertTrue(result.contains("price=999.99"));
@@ -473,14 +473,14 @@ public class URLEncodedUtil2025Test extends TestBase {
     @Test
     public void test_encode_url_object_charset_namingPolicy() {
         User user = new User("John", 30);
-        String result = URLEncodedUtil.encode("http://api.com/users", user, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        String result = URLEncodedUtil.encode("http://api.com/users", user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
         assertTrue(result.startsWith("http://api.com/users?"));
         assertTrue(result.contains("name=John") || result.contains("age=30"));
     }
 
     @Test
     public void test_encode_url_object_charset_namingPolicy_null() {
-        String result = URLEncodedUtil.encode("http://example.com", null, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE);
+        String result = URLEncodedUtil.encode("http://example.com", null, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE);
         assertEquals("http://example.com", result);
     }
 
@@ -535,7 +535,7 @@ public class URLEncodedUtil2025Test extends TestBase {
     public void test_encode_object_charset_namingPolicy_appendable() throws IOException {
         User user = new User("John", 30);
         StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, sb);
+        URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE, sb);
 
         String result = sb.toString();
         assertNotNull(result);
@@ -545,14 +545,14 @@ public class URLEncodedUtil2025Test extends TestBase {
     @Test
     public void test_encode_object_charset_namingPolicy_appendable_null() throws IOException {
         StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE, sb);
+        URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         assertEquals("", sb.toString());
     }
 
     @Test
     public void test_encode_object_charset_namingPolicy_appendable_emptyMap() throws IOException {
         StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode(new HashMap<>(), StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE, sb);
+        URLEncodedUtil.encode(new HashMap<>(), StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         assertEquals("", sb.toString());
     }
 
@@ -561,7 +561,7 @@ public class URLEncodedUtil2025Test extends TestBase {
         Object[] params = new Object[] { "name", "John", "age" };
         StringBuilder sb = new StringBuilder();
         assertThrows(IllegalArgumentException.class, () -> {
-            URLEncodedUtil.encode(params, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE, sb);
+            URLEncodedUtil.encode(params, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         });
     }
 

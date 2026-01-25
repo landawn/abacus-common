@@ -358,22 +358,22 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testRegisterNonPropGetSetMethod() {
-        Beans.registerNonPropGetSetMethod(SimpleBean.class, "internal");
+        Beans.registerNonPropertyAccessor(SimpleBean.class, "internal");
     }
 
     @Test
     public void testRegisterPropGetSetMethod() throws Exception {
         Method method = SimpleBean.class.getMethod("getName");
-        Beans.registerPropGetSetMethod("name", method);
+        Beans.registerPropertyAccessor("name", method);
 
         Method invalidMethod = Object.class.getMethod("toString");
-        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropGetSetMethod("invalid", invalidMethod));
+        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropertyAccessor("invalid", invalidMethod));
     }
 
     @Test
     public void testRegisterXMLBindingClass() {
-        Beans.registerXMLBindingClass(SimpleBean.class);
-        assertTrue(Beans.isRegisteredXMLBindingClass(SimpleBean.class));
+        Beans.registerXmlBindingClass(SimpleBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(SimpleBean.class));
     }
 
     @Test
@@ -465,19 +465,19 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testGetPropGetMethod() {
-        Method method = Beans.getPropGetMethod(SimpleBean.class, "name");
+        Method method = Beans.getPropGetter(SimpleBean.class, "name");
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        method = Beans.getPropGetMethod(SimpleBean.class, "NAME");
+        method = Beans.getPropGetter(SimpleBean.class, "NAME");
         assertNotNull(method);
 
-        assertNull(Beans.getPropGetMethod(SimpleBean.class, "nonExistent"));
+        assertNull(Beans.getPropGetter(SimpleBean.class, "nonExistent"));
     }
 
     @Test
     public void testGetPropGetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropGetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropGetters(SimpleBean.class);
         assertNotNull(methods);
         assertFalse(methods.isEmpty());
         assertNotNull(methods.get("name"));
@@ -486,16 +486,16 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testGetPropSetMethod() {
-        Method method = Beans.getPropSetMethod(SimpleBean.class, "name");
+        Method method = Beans.getPropSetter(SimpleBean.class, "name");
         assertNotNull(method);
         assertEquals("setName", method.getName());
 
-        assertNull(Beans.getPropSetMethod(SimpleBean.class, "nonExistent"));
+        assertNull(Beans.getPropSetter(SimpleBean.class, "nonExistent"));
     }
 
     @Test
     public void testGetPropSetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropSetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropSetters(SimpleBean.class);
         assertNotNull(methods);
         assertFalse(methods.isEmpty());
         assertNotNull(methods.get("name"));
@@ -555,13 +555,13 @@ public class Beans100Test extends TestBase {
         Method getItems = BeanWithList.class.getMethod("getItems");
 
         List<String> newList = Arrays.asList("new1", "new2");
-        Beans.setPropValueByGet(bean, getItems, newList);
+        Beans.setPropValueByGetter(bean, getItems, newList);
 
         assertEquals(2, bean.getItems().size());
         assertEquals("new1", bean.getItems().get(0));
         assertEquals("new2", bean.getItems().get(1));
 
-        Beans.setPropValueByGet(bean, getItems, null);
+        Beans.setPropValueByGetter(bean, getItems, null);
         assertEquals(2, bean.getItems().size());
     }
 
@@ -581,21 +581,21 @@ public class Beans100Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("user_name", Beans.toLowerCaseWithUnderscore("userName"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("FirstName"));
-        assertEquals("user_id", Beans.toLowerCaseWithUnderscore("userID"));
-        assertEquals("", Beans.toLowerCaseWithUnderscore(""));
-        assertNull(Beans.toLowerCaseWithUnderscore((String) null));
+    public void testToSnakeCase() {
+        assertEquals("user_name", Beans.toSnakeCase("userName"));
+        assertEquals("first_name", Beans.toSnakeCase("FirstName"));
+        assertEquals("user_id", Beans.toSnakeCase("userID"));
+        assertEquals("", Beans.toSnakeCase(""));
+        assertNull(Beans.toSnakeCase((String) null));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("USER_NAME", Beans.toUpperCaseWithUnderscore("userName"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("firstName"));
-        assertEquals("USER_ID", Beans.toUpperCaseWithUnderscore("userID"));
-        assertEquals("", Beans.toUpperCaseWithUnderscore(""));
-        assertNull(Beans.toUpperCaseWithUnderscore((String) null));
+    public void testToScreamingSnakeCase() {
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("USER_ID", Beans.toScreamingSnakeCase("userID"));
+        assertEquals("", Beans.toScreamingSnakeCase(""));
+        assertNull(Beans.toScreamingSnakeCase((String) null));
     }
 
     @Test
@@ -604,7 +604,7 @@ public class Beans100Test extends TestBase {
         map.put("user_name", "John");
         map.put("first_name", "Jane");
 
-        Beans.toCamelCase(map);
+        Beans.toCamelCaseKeys(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -613,12 +613,12 @@ public class Beans100Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscoreMap() {
+    public void testToSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toLowerCaseWithUnderscore(map);
+        Beans.toSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -626,12 +626,12 @@ public class Beans100Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscoreMap() {
+    public void testToScreamingSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toUpperCaseWithUnderscore(map);
+        Beans.toScreamingSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -645,18 +645,18 @@ public class Beans100Test extends TestBase {
         map.put("age", 30);
         map.put("active", false);
 
-        SimpleBean bean = Beans.map2Bean(map, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
         assertEquals(false, bean.getActive());
 
-        assertNull(Beans.map2Bean((Map<String, Object>) null, SimpleBean.class));
+        assertNull(Beans.mapToBean((Map<String, Object>) null, SimpleBean.class));
 
         map.put("active", null);
-        bean = Beans.map2Bean(map, true, true, SimpleBean.class);
+        bean = Beans.mapToBean(map, true, true, SimpleBean.class);
         assertNotNull(bean);
 
-        bean = Beans.map2Bean(map, Arrays.asList("name", "age"), SimpleBean.class);
+        bean = Beans.mapToBean(map, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
     }
@@ -675,12 +675,12 @@ public class Beans100Test extends TestBase {
         map2.put("age", 30);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.map2Bean(mapList, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapToBean(mapList, SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals("Jane", beans.get(1).getName());
 
-        beans = Beans.map2Bean(mapList, Arrays.asList("name"), SimpleBean.class);
+        beans = Beans.mapToBean(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -688,19 +688,19 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testBean2Map() {
-        Map<String, Object> map = Beans.bean2Map(simpleBean);
+        Map<String, Object> map = Beans.beanToMap(simpleBean);
         assertEquals("John", map.get("name"));
         assertEquals(25, map.get("age"));
         assertEquals(true, map.get("active"));
 
-        TreeMap<String, Object> treeMap = Beans.bean2Map(simpleBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.beanToMap(simpleBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
 
-        map = Beans.bean2Map(simpleBean, Arrays.asList("name", "age"));
+        map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("active"));
 
-        map = Beans.bean2Map(simpleBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.beanToMap(simpleBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
     }
@@ -709,16 +709,16 @@ public class Beans100Test extends TestBase {
     public void testBean2MapWithFiltering() {
         simpleBean.setActive(null);
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, true);
+        Map<String, Object> map = Beans.beanToMap(simpleBean, true);
         assertFalse(map.containsKey("active"));
 
-        map = Beans.bean2Map(simpleBean, false);
+        map = Beans.beanToMap(simpleBean, false);
         assertTrue(map.containsKey("active"));
         assertNull(map.get("active"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
-        map = Beans.bean2Map(simpleBean, true, ignored);
+        map = Beans.beanToMap(simpleBean, true, ignored);
         assertFalse(map.containsKey("age"));
         assertFalse(map.containsKey("active"));
         assertTrue(map.containsKey("name"));
@@ -726,7 +726,7 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testDeepBean2Map() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertTrue(map.get("simpleBean") instanceof Map);
         assertTrue(map.get("address") instanceof Map);
@@ -734,7 +734,7 @@ public class Beans100Test extends TestBase {
         Map<String, Object> simpleBeanMap = (Map<String, Object>) map.get("simpleBean");
         assertEquals("John", simpleBeanMap.get("name"));
 
-        map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"));
+        map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("simpleBean"));
 
@@ -742,7 +742,7 @@ public class Beans100Test extends TestBase {
         snakeBean.setFirstName("John");
         snakeBean.setLastName("Doe");
 
-        map = Beans.deepBean2Map(snakeBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.deepBeanToMap(snakeBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("first_name"));
         assertTrue(map.containsKey("last_name"));
     }
@@ -751,31 +751,31 @@ public class Beans100Test extends TestBase {
     public void testDeepBean2MapWithFiltering() {
         nestedBean.setSimpleBean(null);
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true);
         assertFalse(map.containsKey("simpleBean"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
-        map = Beans.deepBean2Map(nestedBean, true, ignored);
+        map = Beans.deepBeanToMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
     }
 
     @Test
     public void testBean2FlatMap() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertEquals("John", map.get("simpleBean.name"));
         assertEquals(25, map.get("simpleBean.age"));
         assertEquals("New York", map.get("address.city"));
         assertEquals("5th Avenue", map.get("address.street"));
 
-        map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"));
+        map = Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals("123", map.get("id"));
         assertTrue(map.containsKey("address.city"));
         assertFalse(map.containsKey("simpleBean.name"));
 
-        map = Beans.bean2FlatMap(nestedBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.beanToFlatMap(nestedBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean.name"));
     }
@@ -784,12 +784,12 @@ public class Beans100Test extends TestBase {
     public void testBean2FlatMapWithFiltering() {
         nestedBean.getAddress().setZipCode(null);
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true);
         assertFalse(map.containsKey("address.zipCode"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
-        map = Beans.bean2FlatMap(nestedBean, true, ignored);
+        map = Beans.beanToFlatMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simpleBean.name"));
     }
@@ -1098,17 +1098,17 @@ public class Beans100Test extends TestBase {
 
     @Test
     public void testProperties() {
-        List<Map.Entry<String, Object>> props = Beans.properties(simpleBean).toList();
+        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean).toList();
 
         assertFalse(props.isEmpty());
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey()) && "John".equals(e.getValue())));
         assertTrue(props.stream().anyMatch(e -> "age".equals(e.getKey()) && Integer.valueOf(25).equals(e.getValue())));
 
         simpleBean.setActive(null);
-        props = Beans.properties(simpleBean, (name, value) -> value != null).toList();
+        props = Beans.propertyEntries(simpleBean, (name, value) -> value != null).toList();
 
         assertFalse(props.stream().anyMatch(e -> "active".equals(e.getKey())));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.properties(null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.propertyEntries(null));
     }
 }

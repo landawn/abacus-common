@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
@@ -776,57 +776,57 @@ public class TypeInterface100Test extends TestBase {
     @DisplayName("Test writeCharacter()")
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = null;
+        JsonXmlSerializationConfig<?> config = null;
 
         stringType.writeCharacter(writer, "test", config);
 
         stringType.writeCharacter(writer, null, config);
 
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
         stringType.writeCharacter(writer, "test", config);
     }
 
     @Test
-    @DisplayName("Test collection2Array()")
+    @DisplayName("Test collectionToArray()")
     public void testCollection2Array() {
         Type<String[]> arrayType = createType(String[].class);
         Collection<String> collection = Arrays.asList("a", "b", "c");
-        String[] array = arrayType.collection2Array(collection);
+        String[] array = arrayType.collectionToArray(collection);
         assertNotNull(array);
         assertEquals(3, array.length);
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.collection2Array(collection);
+            stringType.collectionToArray(collection);
         });
     }
 
     @Test
-    @DisplayName("Test array2Collection(T, Class)")
+    @DisplayName("Test arrayToCollection(T, Class)")
     public void testArray2CollectionWithClass() {
         Type<String[]> arrayType = createType(String[].class);
         String[] array = { "a", "b", "c" };
-        Collection<String> collection = arrayType.array2Collection(array, ArrayList.class);
+        Collection<String> collection = arrayType.arrayToCollection(array, ArrayList.class);
         assertNotNull(collection);
         assertEquals(3, collection.size());
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.array2Collection("test", ArrayList.class);
+            stringType.arrayToCollection("test", ArrayList.class);
         });
     }
 
     @Test
-    @DisplayName("Test array2Collection(T, Collection)")
+    @DisplayName("Test arrayToCollection(T, Collection)")
     public void testArray2CollectionWithOutput() {
         Type<String[]> arrayType = createType(String[].class);
         String[] array = { "a", "b", "c" };
         List<String> output = new ArrayList<>();
-        arrayType.array2Collection(array, output);
+        arrayType.arrayToCollection(array, output);
         assertEquals(3, output.size());
 
         assertThrows(UnsupportedOperationException.class, () -> {
             List<String> out = new ArrayList<>();
-            stringType.array2Collection("test", out);
+            stringType.arrayToCollection("test", out);
         });
     }
 

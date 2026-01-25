@@ -336,7 +336,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  */
 public final class Maps {
 
-    private static final Object NONE = ClassUtil.createNullMask();
+    private static final Object NONE = ClassUtil.newNullSentinel();
 
     private Maps() {
         // Utility class.
@@ -1919,15 +1919,15 @@ public final class Maps {
      * <pre>{@code
      * Map<String, List<String>> map = new HashMap<>();
      * 
-     * List<String> list1 = Maps.getAndPutIfAbsent(map, "key1", () -> new ArrayList<>());
+     * List<String> list1 = Maps.getOrPutIfAbsent(map, "key1", () -> new ArrayList<>());
      * list1.add("value1");
      * // map now contains: {"key1"=["value1"]}
      * 
-     * List<String> list2 = Maps.getAndPutIfAbsent(map, "key1", () -> new ArrayList<>());
+     * List<String> list2 = Maps.getOrPutIfAbsent(map, "key1", () -> new ArrayList<>());
      * // list2 is the same instance as list1, supplier not called
      * 
      * map.put("key2", null);
-     * List<String> list3 = Maps.getAndPutIfAbsent(map, "key2", () -> new ArrayList<>());
+     * List<String> list3 = Maps.getOrPutIfAbsent(map, "key2", () -> new ArrayList<>());
      * // New list created because value was null
      * }</pre>
      *
@@ -1938,7 +1938,7 @@ public final class Maps {
      * @param defaultValueSupplier the supplier to provide a default value if the key is absent, may be {@code null}.
      * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent.
      */
-    public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
+    public static <K, V> V getOrPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
 
         // if (val != null || map.containsKey(key)) {
@@ -1960,12 +1960,12 @@ public final class Maps {
      * <pre>{@code
      * Map<String, List<Integer>> map = new HashMap<>();
      * 
-     * List<Integer> list1 = Maps.getAndPutListIfAbsent(map, "numbers");
+     * List<Integer> list1 = Maps.getOrPutListIfAbsent(map, "numbers");
      * list1.add(1);
      * list1.add(2);
      * // map now contains: {"numbers"=[1, 2]}
      * 
-     * List<Integer> list2 = Maps.getAndPutListIfAbsent(map, "numbers");
+     * List<Integer> list2 = Maps.getOrPutListIfAbsent(map, "numbers");
      * // list2 is the same instance as list1
      * // list2 contains [1, 2]
      * }</pre>
@@ -1976,7 +1976,7 @@ public final class Maps {
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code List} if the key is absent.
      */
-    public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
+    public static <K, E> List<E> getOrPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
 
         if (v == null) {
@@ -1997,12 +1997,12 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
      * 
-     * Set<String> set1 = Maps.getAndPutSetIfAbsent(map, "tags");
+     * Set<String> set1 = Maps.getOrPutSetIfAbsent(map, "tags");
      * set1.add("java");
      * set1.add("spring");
      * // map now contains: {"tags"=["java", "spring"]}
      * 
-     * Set<String> set2 = Maps.getAndPutSetIfAbsent(map, "tags");
+     * Set<String> set2 = Maps.getOrPutSetIfAbsent(map, "tags");
      * // set2 is the same instance as set1
      * }</pre>
      *
@@ -2012,7 +2012,7 @@ public final class Maps {
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code Set} if the key is absent.
      */
-    public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getOrPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -2033,7 +2033,7 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
      * 
-     * Set<String> set = Maps.getAndPutLinkedHashSetIfAbsent(map, "orderedTags");
+     * Set<String> set = Maps.getOrPutLinkedHashSetIfAbsent(map, "orderedTags");
      * set.add("first");
      * set.add("second");
      * set.add("third");
@@ -2046,7 +2046,7 @@ public final class Maps {
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent.
      */
-    public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getOrPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -2067,12 +2067,12 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Map<String, Integer>> map = new HashMap<>();
      * 
-     * Map<String, Integer> innerMap = Maps.getAndPutMapIfAbsent(map, "scores");
+     * Map<String, Integer> innerMap = Maps.getOrPutMapIfAbsent(map, "scores");
      * innerMap.put("math", 95);
      * innerMap.put("english", 88);
      * // map now contains: {"scores"={"math"=95, "english"=88}}
      * 
-     * Map<String, Integer> sameMap = Maps.getAndPutMapIfAbsent(map, "scores");
+     * Map<String, Integer> sameMap = Maps.getOrPutMapIfAbsent(map, "scores");
      * // sameMap is the same instance as innerMap
      * }</pre>
      *
@@ -2083,7 +2083,7 @@ public final class Maps {
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code Map} if the key is absent.
      */
-    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getOrPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
 
         if (v == null) {
@@ -2104,7 +2104,7 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Map<String, String>> map = new HashMap<>();
      * 
-     * Map<String, String> innerMap = Maps.getAndPutLinkedHashMapIfAbsent(map, "config");
+     * Map<String, String> innerMap = Maps.getOrPutLinkedHashMapIfAbsent(map, "config");
      * innerMap.put("first", "1");
      * innerMap.put("second", "2");
      * innerMap.put("third", "3");
@@ -2118,7 +2118,7 @@ public final class Maps {
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent.
      */
-    public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getOrPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
 
         if (v == null) {
@@ -2141,7 +2141,7 @@ public final class Maps {
      * map.put("c", null);
      *
      * List<String> keys = Arrays.asList("a", "b", "c", "d");
-     * List<Integer> values = Maps.getIfPresentForEach(map, keys);
+     * List<Integer> values = Maps.getValuesIfPresent(map, keys);
      * // values = [1, 2] (null value for "c" and missing "d" are not included)
      * }</pre>
      *
@@ -2152,7 +2152,7 @@ public final class Maps {
      * @return a list of values corresponding to the keys found in the map.
      * @throws IllegalArgumentException if any input validation fails.
      */
-    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
+    public static <K, V> List<V> getValuesIfPresent(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
             return new ArrayList<>();
         }
@@ -2183,7 +2183,7 @@ public final class Maps {
      * map.put("c", null);
      * 
      * List<String> keys = Arrays.asList("a", "b", "c", "d");
-     * List<Integer> values = Maps.getOrDefaultIfAbsentForEach(map, keys, -1);
+     * List<Integer> values = Maps.getValuesOrDefault(map, keys, -1);
      * // values = [1, 2, -1, -1] ("c" has null value, "d" is missing)
      * }</pre>
      *
@@ -2195,8 +2195,7 @@ public final class Maps {
      * @return a list of values corresponding to the keys, using defaultValue when absent.
      * @throws IllegalArgumentException if keys is null.
      */
-    public static <K, V> List<V> getOrDefaultIfAbsentForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue)
-            throws IllegalArgumentException {
+    public static <K, V> List<V> getValuesOrDefault(final Map<K, V> map, final Collection<?> keys, final V defaultValue) throws IllegalArgumentException {
         // N.checkArgNotNull(defaultValue, "defaultValue");   // NOSONAR
 
         if (N.isEmpty(keys)) {
@@ -2490,10 +2489,10 @@ public final class Maps {
      * Map.Entry<String, Integer> entry1 = new AbstractMap.SimpleEntry<>("a", 1);
      * Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("a", 2);
      * 
-     * boolean contains1 = Maps.contains(map, entry1);
+     * boolean contains1 = Maps.containsEntry(map, entry1);
      * // contains1 = true
      * 
-     * boolean contains2 = Maps.contains(map, entry2);
+     * boolean contains2 = Maps.containsEntry(map, entry2);
      * // contains2 = false (value doesn't match)
      * }</pre>
      *
@@ -2501,11 +2500,11 @@ public final class Maps {
      * @param entry the entry to check for, may be {@code null}.
      * @return {@code true} if the map contains the specified entry, {@code false} otherwise.
      */
-    public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
+    public static boolean containsEntry(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
         if (entry == null) {
             return false;
         }
-        return contains(map, entry.getKey(), entry.getValue());
+        return containsEntry(map, entry.getKey(), entry.getValue());
     }
 
     /**
@@ -2517,16 +2516,16 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", null);
      * 
-     * boolean contains1 = Maps.contains(map, "a", 1);
+     * boolean contains1 = Maps.containsEntry(map, "a", 1);
      * // contains1 = true
      * 
-     * boolean contains2 = Maps.contains(map, "a", 2);
+     * boolean contains2 = Maps.containsEntry(map, "a", 2);
      * // contains2 = false
      * 
-     * boolean contains3 = Maps.contains(map, "b", null);
+     * boolean contains3 = Maps.containsEntry(map, "b", null);
      * // contains3 = true
      * 
-     * boolean contains4 = Maps.contains(map, "c", null);
+     * boolean contains4 = Maps.containsEntry(map, "c", null);
      * // contains4 = false (key not present)
      * }</pre>
      *
@@ -2535,7 +2534,7 @@ public final class Maps {
      * @param value the value whose presence in the map is to be tested.
      * @return {@code true} if the map contains the specified key-value pair, {@code false} otherwise.
      */
-    public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
+    public static boolean containsEntry(final Map<?, ?> map, final Object key, final Object value) {
         if (N.isEmpty(map)) {
             return false;
         }
@@ -2857,13 +2856,13 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param map the target map to which entries will be added.
+     * @param targetMap the target map to which entries will be added.
      * @param sourceMap the source map from which entries will be taken.
      * @param filter a predicate that filters keys to be added to the target map.
      * @return {@code true} if any entries were added, {@code false} otherwise.
      */
     @Beta
-    public static <K, V> boolean putIf(final Map<K, V> map, final Map<? extends K, ? extends V> sourceMap, Predicate<? super K> filter) {
+    public static <K, V> boolean putIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap, Predicate<? super K> filter) {
         if (N.isEmpty(sourceMap)) {
             return false;
         }
@@ -2872,7 +2871,7 @@ public final class Maps {
 
         for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
             if (filter.test(entry.getKey())) {
-                map.put(entry.getKey(), entry.getValue());
+                targetMap.put(entry.getKey(), entry.getValue());
                 changed = true;
             }
         }
@@ -2902,13 +2901,13 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param map the target map to which entries will be added.
+     * @param targetMap the target map to which entries will be added.
      * @param sourceMap the source map from which entries will be taken.
      * @param filter a predicate that filters keys and values to be added to the target map.
      * @return {@code true} if any entries were added, {@code false} otherwise.
      */
     @Beta
-    public static <K, V> boolean putIf(final Map<K, V> map, final Map<? extends K, ? extends V> sourceMap, BiPredicate<? super K, ? super V> filter) {
+    public static <K, V> boolean putIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap, BiPredicate<? super K, ? super V> filter) {
         if (N.isEmpty(sourceMap)) {
             return false;
         }
@@ -2917,7 +2916,7 @@ public final class Maps {
 
         for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
-                map.put(entry.getKey(), entry.getValue());
+                targetMap.put(entry.getKey(), entry.getValue());
                 changed = true;
             }
         }
@@ -2934,7 +2933,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * Map.Entry<String, Integer> entry = N.newEntry("a", 1);
-     * boolean removed = Maps.remove(map, entry);   // true, entry removed
+     * boolean removed = Maps.removeEntry(map, entry);   // true, entry removed
      * // map: {b=2}
      * }</pre>
      *
@@ -2945,8 +2944,8 @@ public final class Maps {
      * @return {@code true} if the entry was removed, {@code false} otherwise.
      * @see Map#remove(Object, Object)
      */
-    public static <K, V> boolean remove(final Map<K, V> map, final Map.Entry<?, ?> entry) {
-        return remove(map, entry.getKey(), entry.getValue());
+    public static <K, V> boolean removeEntry(final Map<K, V> map, final Map.Entry<?, ?> entry) {
+        return removeEntry(map, entry.getKey(), entry.getValue());
     }
 
     /**
@@ -2960,8 +2959,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * 
-     * boolean removed1 = Maps.remove(map, "a", 1);   // true, entry removed
-     * boolean removed2 = Maps.remove(map, "b", 3);   // false, value doesn't match
+     * boolean removed1 = Maps.removeEntry(map, "a", 1);   // true, entry removed
+     * boolean removed2 = Maps.removeEntry(map, "b", 3);   // false, value doesn't match
      * // map: {b=2}
      * }</pre>
      *
@@ -2973,7 +2972,7 @@ public final class Maps {
      * @return {@code true} if the entry was removed, {@code false} otherwise.
      * @see Map#remove(Object, Object)
      */
-    public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
+    public static <K, V> boolean removeEntry(final Map<K, V> map, final Object key, final Object value) {
         if (N.isEmpty(map)) {
             return false;
         }

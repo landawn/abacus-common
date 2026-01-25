@@ -67,9 +67,9 @@ import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPN
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XMLSerializationConfig;
-import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
+import com.landawn.abacus.parser.XmlSerializationConfig;
+import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.types.JAXBean;
@@ -202,7 +202,7 @@ public class NTest extends AbstractParserTest {
 
         final File file = new File("./a.json");
 
-        Stream.of(list).persistToJSON(new File("./a.json"));
+        Stream.of(list).persistToJson(new File("./a.json"));
 
         final String json = IOUtil.readAllToString(file);
 
@@ -212,7 +212,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_asynCall() {
+    public void test_asyncCall() {
 
         {
 
@@ -229,7 +229,7 @@ public class NTest extends AbstractParserTest {
                 });
             }
 
-            final List<Integer> result = N.asynCall(commands).toList();
+            final List<Integer> result = N.asyncCall(commands).toList();
 
             N.println(result);
 
@@ -258,7 +258,7 @@ public class NTest extends AbstractParserTest {
                 });
             }
 
-            final List<Integer> result = N.asynCall(commands).limit(2).toList();
+            final List<Integer> result = N.asyncCall(commands).limit(2).toList();
 
             N.println(result);
 
@@ -1079,20 +1079,20 @@ public class NTest extends AbstractParserTest {
 
         final List<Map<String, Object>> mapLsit = new ArrayList<>(beanList.size());
         for (final Account account : beanList) {
-            mapLsit.add(Beans.bean2Map(account));
+            mapLsit.add(Beans.beanToMap(account));
         }
 
-        Dataset rs2 = CommonUtil.newDataset(rs1.columnNameList(), mapLsit);
+        Dataset rs2 = CommonUtil.newDataset(rs1.columnNames(), mapLsit);
         rs2.println();
         assertEquals(rs1, rs2);
 
         rs2 = CommonUtil.newDataset(rs1.toList(Map.class));
         rs2.println();
 
-        final Dataset rs3 = CommonUtil.newDataset(rs1.columnNameList(), rs1.toList(Object[].class));
+        final Dataset rs3 = CommonUtil.newDataset(rs1.columnNames(), rs1.toList(Object[].class));
         rs3.println();
 
-        final Dataset rs4 = CommonUtil.newDataset(rs1.columnNameList(), rs1.toList(List.class));
+        final Dataset rs4 = CommonUtil.newDataset(rs1.columnNames(), rs1.toList(List.class));
         rs4.println();
 
     }
@@ -1506,17 +1506,17 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_isNumeric() {
-        assertFalse(Strings.isAsciiDigitalNumber(null));
-        assertFalse(Strings.isAsciiDigitalNumber(""));
-        assertFalse(Strings.isAsciiDigitalNumber("  "));
-        assertTrue(Strings.isAsciiDigitalNumber("123"));
-        assertTrue(Strings.isAsciiDigitalNumber("-123"));
-        assertTrue(Strings.isAsciiDigitalNumber("12.3"));
-        assertTrue(Strings.isAsciiDigitalNumber("-12.3"));
-        assertFalse(Strings.isAsciiDigitalNumber("12..3"));
-        assertFalse(Strings.isAsciiDigitalNumber("12ae"));
-        assertFalse(Strings.isAsciiDigitalNumber("123l"));
-        assertFalse(Strings.isAsciiDigitalNumber("123f"));
+        assertFalse(Strings.isAsciiNumber(null));
+        assertFalse(Strings.isAsciiNumber(""));
+        assertFalse(Strings.isAsciiNumber("  "));
+        assertTrue(Strings.isAsciiNumber("123"));
+        assertTrue(Strings.isAsciiNumber("-123"));
+        assertTrue(Strings.isAsciiNumber("12.3"));
+        assertTrue(Strings.isAsciiNumber("-12.3"));
+        assertFalse(Strings.isAsciiNumber("12..3"));
+        assertFalse(Strings.isAsciiNumber("12ae"));
+        assertFalse(Strings.isAsciiNumber("123l"));
+        assertFalse(Strings.isAsciiNumber("123f"));
     }
 
     @Test
@@ -1877,10 +1877,10 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_isPrimaryType() {
 
-        assertTrue(Strings.isAsciiDigitalNumber("123"));
-        assertTrue(Strings.isAsciiDigitalNumber("-123"));
-        assertTrue(Strings.isAsciiDigitalNumber("90239.0329"));
-        assertFalse(Strings.isAsciiDigitalNumber("90239.0329f"));
+        assertTrue(Strings.isAsciiNumber("123"));
+        assertTrue(Strings.isAsciiNumber("-123"));
+        assertTrue(Strings.isAsciiNumber("90239.0329"));
+        assertFalse(Strings.isAsciiNumber("90239.0329f"));
     }
 
     @Test
@@ -2304,18 +2304,18 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_xml2Json() {
+    public void test_xmlToJson() {
         final Account account = new Account();
         account.setFirstName("firstName1");
         account.setLastName("lastName1");
 
-        final String xml = abacusXMLParser.serialize(account);
+        final String xml = abacusXmlParser.serialize(account);
         final String json = jsonParser.serialize(account);
 
-        final String xml2 = N.json2Xml(json, Account.class);
+        final String xml2 = N.jsonToXml(json, Account.class);
         N.println(xml2);
 
-        final String json2 = N.xml2Json(xml, Account.class);
+        final String json2 = N.xmlToJson(xml, Account.class);
         N.println(json2);
     }
 
@@ -2328,26 +2328,26 @@ public class NTest extends AbstractParserTest {
         final String xml = abacusXMLDOMParser.serialize(account);
         final String json = jsonParser.serialize(account);
 
-        final String xml2 = N.json2Xml(json, Account.class);
+        final String xml2 = N.jsonToXml(json, Account.class);
         N.println(xml2);
 
-        final String json2 = N.xml2Json(xml, Account.class);
+        final String json2 = N.xmlToJson(xml, Account.class);
         N.println(json2);
 
-        final String xml3 = N.json2Xml(json);
+        final String xml3 = N.jsonToXml(json);
         N.println(xml3);
 
-        final String json3 = N.xml2Json(xml);
+        final String json3 = N.xmlToJson(xml);
         N.println(json3);
     }
 
     @Test
-    public void test_bean2Map_2() {
+    public void test_beanToMap_2() {
         final Map<String, Object> props = new HashMap<>();
         props.put("Account.firstName", "firstName1");
         props.put("Account.lastName", "lastName1");
 
-        final Account account = Beans.map2Bean(props, Account.class);
+        final Account account = Beans.mapToBean(props, Account.class);
         assertEquals("firstName1", account.getFirstName());
         assertEquals("lastName1", account.getLastName());
     }
@@ -2473,15 +2473,15 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_registerPropGetSetMethod() {
-        Beans.registerPropGetSetMethod("a", ClassUtil.getDeclaredMethod(Account.class, "getFirstName"));
+    public void test_registerPropertyAccessor() {
+        Beans.registerPropertyAccessor("a", ClassUtil.getDeclaredMethod(Account.class, "getFirstName"));
 
-        Method method = Beans.getPropGetMethod(Account.class, "a");
+        Method method = Beans.getPropGetter(Account.class, "a");
         N.println(method);
         assertEquals(ClassUtil.getDeclaredMethod(Account.class, "getFirstName"), method);
 
-        Beans.registerPropGetSetMethod("b", ClassUtil.getDeclaredMethod(Account.class, "setFirstName", String.class));
-        method = Beans.getPropSetMethod(Account.class, "b");
+        Beans.registerPropertyAccessor("b", ClassUtil.getDeclaredMethod(Account.class, "setFirstName", String.class));
+        method = Beans.getPropSetter(Account.class, "b");
         N.println(method);
         assertEquals(ClassUtil.getDeclaredMethod(Account.class, "setFirstName", String.class), method);
     }
@@ -2586,14 +2586,14 @@ public class NTest extends AbstractParserTest {
     public void test_Bean2Map() {
         final Account account = createAccountWithContact(Account.class);
 
-        Map<String, Object> m = Beans.bean2FlatMap(account);
+        Map<String, Object> m = Beans.beanToFlatMap(account);
         N.println(CommonUtil.stringOf(m));
 
         final XBean xBean = createBigXBean(1);
-        m = Beans.bean2Map(xBean);
+        m = Beans.beanToMap(xBean);
         N.println(CommonUtil.stringOf(m));
 
-        m = Beans.bean2FlatMap(xBean);
+        m = Beans.beanToFlatMap(xBean);
         N.println(CommonUtil.stringOf(m));
     }
 
@@ -2601,13 +2601,13 @@ public class NTest extends AbstractParserTest {
     public void test_Bean2Map_2() {
         final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
 
-        Map<String, Object> m = Beans.bean2Map(account);
+        Map<String, Object> m = Beans.beanToMap(account);
         N.println(CommonUtil.stringOf(m));
 
-        m = Beans.deepBean2Map(account);
+        m = Beans.deepBeanToMap(account);
         N.println(CommonUtil.stringOf(m));
 
-        m = Beans.bean2FlatMap(account);
+        m = Beans.beanToFlatMap(account);
         N.println(CommonUtil.stringOf(m));
     }
 
@@ -2644,19 +2644,19 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_jaxb_1() throws Exception {
-        Beans.registerXMLBindingClass(JaxbBean.class);
+        Beans.registerXmlBindingClass(JaxbBean.class);
 
         final JaxbBean jb = new JaxbBean();
         jb.setString("string1");
         jb.getList().add("list_e_1");
         jb.getMap().put("map_key_1", "map_value_1");
-        N.println(abacusXMLParser.serialize(jb));
-        N.println(CommonUtil.stringOf(abacusXMLParser.deserialize(abacusXMLParser.serialize(jb), JaxbBean.class)));
+        N.println(abacusXmlParser.serialize(jb));
+        N.println(CommonUtil.stringOf(abacusXmlParser.deserialize(abacusXmlParser.serialize(jb), JaxbBean.class)));
     }
 
     @Test
     public void test_jaxb_2() throws Exception {
-        Beans.registerXMLBindingClass(JaxbBean.class);
+        Beans.registerXmlBindingClass(JaxbBean.class);
 
         final JaxbBean jb = new JaxbBean();
         jb.setString("string1");
@@ -2683,29 +2683,29 @@ public class NTest extends AbstractParserTest {
         final AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
 
-        abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class);
+        abacusXmlParser.deserialize(abacusXmlParser.serialize(account), Account.class);
 
     }
 
     @Test
     public void test_valueOf_1() throws Exception {
         final Bean_1 bean = new Bean_1();
-        assertEquals(bean, abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean_1.class));
+        assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
         bean.setStrList(CommonUtil.asList("abc", "123"));
-        assertEquals(bean, abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean_1.class));
+        assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
         bean.setShortList(CommonUtil.asList((short) 1, (short) 2, (short) 3));
-        assertEquals(bean, abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean_1.class));
+        assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
         bean.setIntList(CommonUtil.asList(1, 2, 3));
-        assertFalse(bean.equals(abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean_1.class)));
+        assertFalse(bean.equals(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class)));
 
         final GregorianCalendar c = new GregorianCalendar();
         bean.setXmlGregorianCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-        N.println(abacusXMLParser.serialize(bean));
+        N.println(abacusXmlParser.serialize(bean));
 
-        assertFalse(bean.equals(abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean_1.class)));
+        assertFalse(bean.equals(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class)));
     }
 
     @Test
@@ -2759,10 +2759,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testValueOf() {
-        N.println(abacusXMLParser.deserialize("<array><e>" + CommonUtil.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
-        N.println(abacusXMLParser.deserialize("<array>a, b, c</array>", char[].class));
-        N.println(abacusXMLParser.deserialize("<array>1, 2, 3</array>", byte[].class));
-        N.println(abacusXMLParser.deserialize("<array>1, 2, 3</array>", int[].class));
+        N.println(abacusXmlParser.deserialize("<array><e>" + CommonUtil.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
+        N.println(abacusXmlParser.deserialize("<array>a, b, c</array>", char[].class));
+        N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", byte[].class));
+        N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", int[].class));
     }
 
     @Test
@@ -2778,55 +2778,55 @@ public class NTest extends AbstractParserTest {
         N.println(int.class.getSimpleName());
         N.println(int.class.getCanonicalName());
 
-        assertEquals(int.class, ClassUtil.forClass("int"));
-        assertEquals(char.class, ClassUtil.forClass("char"));
-        assertEquals(boolean.class, ClassUtil.forClass("boolean"));
-        assertEquals(String.class, ClassUtil.forClass("String"));
-        assertEquals(String.class, ClassUtil.forClass(String.class.getName()));
-        assertEquals(Object.class, ClassUtil.forClass("Object"));
-        assertEquals(java.lang.Math.class, ClassUtil.forClass("Math"));
-        assertEquals(java.util.Date.class, ClassUtil.forClass("java.util.Date"));
+        assertEquals(int.class, ClassUtil.forName("int"));
+        assertEquals(char.class, ClassUtil.forName("char"));
+        assertEquals(boolean.class, ClassUtil.forName("boolean"));
+        assertEquals(String.class, ClassUtil.forName("String"));
+        assertEquals(String.class, ClassUtil.forName(String.class.getName()));
+        assertEquals(Object.class, ClassUtil.forName("Object"));
+        assertEquals(java.lang.Math.class, ClassUtil.forName("Math"));
+        assertEquals(java.util.Date.class, ClassUtil.forName("java.util.Date"));
 
-        assertEquals(int[].class, ClassUtil.forClass("int[]"));
-        assertEquals(char[].class, ClassUtil.forClass("char[]"));
-        assertEquals(boolean[].class, ClassUtil.forClass("boolean[]"));
-        assertEquals(String[].class, ClassUtil.forClass("String[]"));
-        assertEquals(String[].class, ClassUtil.forClass(String[].class.getName()));
-        assertEquals(Object[].class, ClassUtil.forClass("Object[]"));
-        assertEquals(java.util.Date[].class, ClassUtil.forClass("java.util.Date[]"));
+        assertEquals(int[].class, ClassUtil.forName("int[]"));
+        assertEquals(char[].class, ClassUtil.forName("char[]"));
+        assertEquals(boolean[].class, ClassUtil.forName("boolean[]"));
+        assertEquals(String[].class, ClassUtil.forName("String[]"));
+        assertEquals(String[].class, ClassUtil.forName(String[].class.getName()));
+        assertEquals(Object[].class, ClassUtil.forName("Object[]"));
+        assertEquals(java.util.Date[].class, ClassUtil.forName("java.util.Date[]"));
 
-        assertEquals(int[][].class, ClassUtil.forClass("int[][]"));
-        assertEquals(char[][].class, ClassUtil.forClass("char[][]"));
-        assertEquals(boolean[][].class, ClassUtil.forClass("boolean[][]"));
-        assertEquals(String[][].class, ClassUtil.forClass("String[][]"));
-        assertEquals(String[][].class, ClassUtil.forClass(String[][].class.getName()));
-        assertEquals(Object[][].class, ClassUtil.forClass("Object[][]"));
-        assertEquals(java.util.Date[][].class, ClassUtil.forClass("java.util.Date[][]"));
+        assertEquals(int[][].class, ClassUtil.forName("int[][]"));
+        assertEquals(char[][].class, ClassUtil.forName("char[][]"));
+        assertEquals(boolean[][].class, ClassUtil.forName("boolean[][]"));
+        assertEquals(String[][].class, ClassUtil.forName("String[][]"));
+        assertEquals(String[][].class, ClassUtil.forName(String[][].class.getName()));
+        assertEquals(Object[][].class, ClassUtil.forName("Object[][]"));
+        assertEquals(java.util.Date[][].class, ClassUtil.forName("java.util.Date[][]"));
 
         N.println(int[][][].class.getName());
         N.println(int.class.getName());
 
-        assertEquals(int[][][].class, ClassUtil.forClass("int[][][]"));
-        assertEquals(char[][][].class, ClassUtil.forClass("char[][][]"));
-        assertEquals(boolean[][][].class, ClassUtil.forClass("boolean[][][]"));
-        assertEquals(String[][][].class, ClassUtil.forClass("String[][][]"));
-        assertEquals(Object[][][].class, ClassUtil.forClass("Object[][][]"));
-        assertEquals(java.util.Date[][][].class, ClassUtil.forClass("java.util.Date[][][]"));
+        assertEquals(int[][][].class, ClassUtil.forName("int[][][]"));
+        assertEquals(char[][][].class, ClassUtil.forName("char[][][]"));
+        assertEquals(boolean[][][].class, ClassUtil.forName("boolean[][][]"));
+        assertEquals(String[][][].class, ClassUtil.forName("String[][][]"));
+        assertEquals(Object[][][].class, ClassUtil.forName("Object[][][]"));
+        assertEquals(java.util.Date[][][].class, ClassUtil.forName("java.util.Date[][][]"));
 
         try {
-            ClassUtil.forClass("string");
+            ClassUtil.forName("string");
             fail("should throw RuntimeException");
         } catch (final IllegalArgumentException e) {
         }
 
         try {
-            ClassUtil.forClass("object[]");
+            ClassUtil.forName("object[]");
             fail("should throw RuntimeException");
         } catch (final IllegalArgumentException e) {
         }
 
         try {
-            ClassUtil.forClass("int[];[]");
+            ClassUtil.forName("int[];[]");
             fail("should throw RuntimeException");
         } catch (final IllegalArgumentException e) {
         }
@@ -2926,15 +2926,15 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testGetPropName() {
-        assertEquals("gui", Beans.getPropNameByMethod(Beans.getPropGetMethod(Account.class, "GUI")));
-        assertEquals("birthDate", Beans.getPropNameByMethod(Beans.getPropGetMethod(Account.class, "birthDate")));
+        assertEquals("gui", Beans.getPropNameByMethod(Beans.getPropGetter(Account.class, "GUI")));
+        assertEquals("birthDate", Beans.getPropNameByMethod(Beans.getPropGetter(Account.class, "birthDate")));
     }
 
     @Test
     public void testGetGetterSetterMethodList() {
-        assertEquals(Beans.getPropGetMethods(Account.class).size(), Beans.getPropSetMethods(Account.class).size());
+        assertEquals(Beans.getPropGetters(Account.class).size(), Beans.getPropSetters(Account.class).size());
 
-        assertEquals(Beans.getPropGetMethods(XBean.class).size(), Beans.getPropSetMethods(XBean.class).size());
+        assertEquals(Beans.getPropGetters(XBean.class).size(), Beans.getPropSetters(XBean.class).size());
     }
 
     @Test
@@ -2944,29 +2944,29 @@ public class NTest extends AbstractParserTest {
         account.setMiddleName("mn");
         account.setLastName("ln");
 
-        println(Beans.getPropGetMethod(Account.class, "firstName"));
-        println(Beans.getPropSetMethod(Account.class, "id"));
+        println(Beans.getPropGetter(Account.class, "firstName"));
+        println(Beans.getPropSetter(Account.class, "id"));
     }
 
     @Test
     public void testPropGetSetValue() {
         final Account account = new Account();
 
-        Method getMethod = Beans.getPropGetMethod(Account.class, "firstName");
-        Method setMethod = Beans.getPropSetMethod(Account.class, "firstName");
+        Method getMethod = Beans.getPropGetter(Account.class, "firstName");
+        Method setMethod = Beans.getPropSetter(Account.class, "firstName");
         Beans.setPropValue(account, setMethod, "fn");
         assertEquals("fn", Beans.getPropValue(account, getMethod));
         println(account);
 
-        getMethod = Beans.getPropGetMethod(Account.class, AccountPNL.ID);
-        setMethod = Beans.getPropSetMethod(Account.class, AccountPNL.ID);
+        getMethod = Beans.getPropGetter(Account.class, AccountPNL.ID);
+        setMethod = Beans.getPropSetter(Account.class, AccountPNL.ID);
         Beans.setPropValue(account, setMethod, -1);
         Beans.setPropValue(account, setMethod, Integer.valueOf(-2));
         assertEquals(Long.valueOf(-2), Beans.getPropValue(account, getMethod));
         println(account);
 
-        getMethod = Beans.getPropGetMethod(Account.class, AccountPNL.BIRTH_DATE);
-        setMethod = Beans.getPropSetMethod(Account.class, AccountPNL.BIRTH_DATE);
+        getMethod = Beans.getPropGetter(Account.class, AccountPNL.BIRTH_DATE);
+        setMethod = Beans.getPropSetter(Account.class, AccountPNL.BIRTH_DATE);
 
         final Date date = Dates.currentDate();
         Beans.setPropValue(account, setMethod, date);
@@ -3378,7 +3378,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testBean2Map() {
         final Account account = createAccount(Account.class);
-        println(Beans.bean2Map(account));
+        println(Beans.beanToMap(account));
     }
 
     @Test
@@ -3434,8 +3434,8 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testUUID() {
-        N.println(Strings.guid());
-        N.println(Strings.guid().length());
+        N.println(Strings.uuid32());
+        N.println(Strings.uuid32().length());
         N.println(Strings.uuid());
         N.println(Strings.uuid().length());
 
@@ -3470,17 +3470,17 @@ public class NTest extends AbstractParserTest {
         final AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
 
-        println(abacusXMLParser.serialize(account));
-        println(abacusXMLParser.serialize(account));
+        println(abacusXmlParser.serialize(account));
+        println(abacusXmlParser.serialize(account));
 
         final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.asSet("lastUpdateTime"));
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.setIgnoredPropNames(ignoredPropNames);
-        println(abacusXMLParser.serialize(account, config));
+        println(abacusXmlParser.serialize(account, config));
 
-        println(abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class));
+        println(abacusXmlParser.deserialize(abacusXmlParser.serialize(account), Account.class));
 
-        assertEquals(CommonUtil.stringOf(account), CommonUtil.stringOf(abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class)));
+        assertEquals(CommonUtil.stringOf(account), CommonUtil.stringOf(abacusXmlParser.deserialize(abacusXmlParser.serialize(account), Account.class)));
     }
 
     @Test
@@ -3493,7 +3493,7 @@ public class NTest extends AbstractParserTest {
         println(abacusXMLDOMParser.serialize(account));
 
         final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.asSet("lastUpdateTime"));
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.setIgnoredPropNames(ignoredPropNames);
         println(abacusXMLDOMParser.serialize(account, config));
 
@@ -3513,7 +3513,7 @@ public class NTest extends AbstractParserTest {
         final Account account = createAccount(Account.class);
         final AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
-        abacusXMLParser.deserialize(abacusXMLParser.serialize(account), Account.class);
+        abacusXmlParser.deserialize(abacusXmlParser.serialize(account), Account.class);
 
     }
 
@@ -3523,39 +3523,39 @@ public class NTest extends AbstractParserTest {
         final AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
 
-        String xml = abacusXMLParser.serialize(account);
+        String xml = abacusXmlParser.serialize(account);
         N.println(xml);
 
-        Account xmlBean = abacusXMLParser.deserialize(xml, Account.class);
+        Account xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         N.println(account);
         N.println(xmlBean);
-        N.println(abacusXMLParser.serialize(account));
-        N.println(abacusXMLParser.serialize(xmlBean));
+        N.println(abacusXmlParser.serialize(account));
+        N.println(abacusXmlParser.serialize(xmlBean));
         N.println(CommonUtil.stringOf(account));
         N.println(CommonUtil.stringOf(xmlBean));
         assertEquals(CommonUtil.stringOf(account), CommonUtil.stringOf(xmlBean));
-        assertEquals(abacusXMLParser.serialize(account), abacusXMLParser.serialize(xmlBean));
+        assertEquals(abacusXmlParser.serialize(account), abacusXmlParser.serialize(xmlBean));
         assertEquals(CommonUtil.stringOf(account), CommonUtil.stringOf(xmlBean));
 
-        xml = abacusXMLParser.serialize(account);
+        xml = abacusXmlParser.serialize(account);
         N.println(xml);
 
-        xmlBean = abacusXMLParser.deserialize(xml, Account.class);
+        xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.tagByPropertyName(false);
-        xml = abacusXMLParser.serialize(account, config);
+        xml = abacusXmlParser.serialize(account, config);
         N.println(xml);
 
-        xmlBean = abacusXMLParser.deserialize(xml, Account.class);
+        xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
         config.writeTypeInfo(true);
-        xml = abacusXMLParser.serialize(account, config);
+        xml = abacusXmlParser.serialize(account, config);
         N.println(xml);
 
-        xmlBean = abacusXMLParser.deserialize(xml, Account.class);
+        xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
     }
 
@@ -3585,7 +3585,7 @@ public class NTest extends AbstractParserTest {
         xmlBean = abacusXMLDOMParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.tagByPropertyName(false);
         xml = abacusXMLDOMParser.serialize(account, config);
         N.println(xml);
@@ -3615,15 +3615,15 @@ public class NTest extends AbstractParserTest {
         bean.setStrings(new String[] { "aa", "bb", "<>>" });
         bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
 
-        final String xml = abacusXMLParser.serialize(bean);
+        final String xml = abacusXmlParser.serialize(bean);
         println(xml);
 
-        final Bean xmlBean = abacusXMLParser.deserialize(xml, Bean.class);
-        N.println(abacusXMLParser.serialize(bean));
-        N.println(abacusXMLParser.serialize(xmlBean));
+        final Bean xmlBean = abacusXmlParser.deserialize(xml, Bean.class);
+        N.println(abacusXmlParser.serialize(bean));
+        N.println(abacusXmlParser.serialize(xmlBean));
 
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), Bean.class));
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(xmlBean), Bean.class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean.class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), Bean.class));
     }
 
     @Test
@@ -3689,32 +3689,32 @@ public class NTest extends AbstractParserTest {
 
         xBean.setWeekDay(WeekDay.THURSDAY);
 
-        final String xml = abacusXMLParser.serialize(xBean, XSC.create().writeTypeInfo(true));
+        final String xml = abacusXmlParser.serialize(xBean, XSC.create().writeTypeInfo(true));
         println(xml);
 
         final String st = CommonUtil.stringOf(xBean);
         println(st);
 
-        final XBean xmlBean = abacusXMLParser.deserialize(xml, XBean.class);
+        final XBean xmlBean = abacusXmlParser.deserialize(xml, XBean.class);
         N.println(xmlBean.getTypeList().get(1).getClass());
         N.println(xBean);
         N.println(xmlBean);
-        N.println(abacusXMLParser.serialize(xBean));
-        N.println(abacusXMLParser.serialize(xmlBean));
+        N.println(abacusXmlParser.serialize(xBean));
+        N.println(abacusXmlParser.serialize(xmlBean));
         N.println(CommonUtil.stringOf(xBean));
         N.println(CommonUtil.stringOf(xmlBean));
         assertEquals(CommonUtil.stringOf(xBean), CommonUtil.stringOf(xmlBean));
-        assertEquals(abacusXMLParser.deserialize(abacusXMLParser.serialize(xBean), XBean.class),
-                abacusXMLParser.deserialize(abacusXMLParser.serialize(xmlBean), XBean.class));
+        assertEquals(abacusXmlParser.deserialize(abacusXmlParser.serialize(xBean), XBean.class),
+                abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), XBean.class));
 
-        assertEquals(abacusXMLParser.serialize(xBean), abacusXMLParser.serialize(xmlBean));
+        assertEquals(abacusXmlParser.serialize(xBean), abacusXmlParser.serialize(xmlBean));
         assertEquals(CommonUtil.stringOf(xBean), CommonUtil.stringOf(xmlBean));
 
-        N.println(abacusXMLParser.serialize(xBean));
-        N.println(abacusXMLParser.serialize(xmlBean));
+        N.println(abacusXmlParser.serialize(xBean));
+        N.println(abacusXmlParser.serialize(xmlBean));
 
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(xBean), XBean.class));
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(xmlBean), XBean.class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(xBean), XBean.class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), XBean.class));
     }
 
     @Test
@@ -3786,16 +3786,16 @@ public class NTest extends AbstractParserTest {
         final Account account = createAccount(Account.class);
         account.setId(100);
 
-        String st = abacusXMLParser.serialize(account);
+        String st = abacusXmlParser.serialize(account);
         println(st);
 
-        println(abacusXMLParser.deserialize(st, Account.class));
+        println(abacusXmlParser.deserialize(st, Account.class));
 
-        st = abacusXMLParser.serialize(account);
+        st = abacusXmlParser.serialize(account);
         println(st);
 
-        println(abacusXMLParser.deserialize(st, Account.class));
-        assertEquals(account, abacusXMLParser.deserialize(st, Account.class));
+        println(abacusXmlParser.deserialize(st, Account.class));
+        assertEquals(account, abacusXmlParser.deserialize(st, Account.class));
     }
 
     @Test
@@ -3826,13 +3826,13 @@ public class NTest extends AbstractParserTest {
                 CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
         xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
 
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.writeTypeInfo(true);
 
-        final String xml = abacusXMLParser.serialize(xBean, config);
+        final String xml = abacusXmlParser.serialize(xBean, config);
         println(xml);
 
-        assertEquals(xBean, abacusXMLParser.deserialize(xml, XBean.class));
+        assertEquals(xBean, abacusXmlParser.deserialize(xml, XBean.class));
     }
 
     @Test
@@ -3846,7 +3846,7 @@ public class NTest extends AbstractParserTest {
                 CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
         xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
 
-        final XMLSerializationConfig config = new XMLSerializationConfig();
+        final XmlSerializationConfig config = new XmlSerializationConfig();
         config.writeTypeInfo(true);
 
         final String xml = abacusXMLDOMParser.serialize(xBean, config);
@@ -3860,7 +3860,7 @@ public class NTest extends AbstractParserTest {
     }
 
     void executeBigBean() {
-        abacusXMLParser.deserialize(abacusXMLParser.serialize(createBigXBean(10000)), XBean.class);
+        abacusXmlParser.deserialize(abacusXmlParser.serialize(createBigXBean(10000)), XBean.class);
     }
 
     public static XBean createBigXBean(final int size) {
@@ -4007,13 +4007,13 @@ public class NTest extends AbstractParserTest {
         typeGenericMap4.put("aaabbbccc", "");
         xBean.setTypeGenericMap4(typeGenericMap4);
 
-        final String xml = abacusXMLParser.serialize(xBean);
+        final String xml = abacusXmlParser.serialize(xBean);
         println(xml);
 
         final String st = CommonUtil.stringOf(xBean);
         println(st);
 
-        final XBean xmlBean = abacusXMLParser.deserialize(xml, XBean.class);
+        final XBean xmlBean = abacusXmlParser.deserialize(xml, XBean.class);
         assertEquals(CommonUtil.stringOf(xBean), CommonUtil.stringOf(xmlBean));
     }
 
@@ -4057,10 +4057,10 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSerialize5() {
         final List<Account> accounts = createAccountWithContact(Account.class, 100);
-        final String xml = abacusXMLParser.serialize(accounts);
+        final String xml = abacusXmlParser.serialize(accounts);
         println(xml);
 
-        final List<Account> xmlAccounts = abacusXMLParser.deserialize(xml, XDC.of(Account.class, true, null), List.class);
+        final List<Account> xmlAccounts = abacusXmlParser.deserialize(xml, XDC.of(Account.class, true, null), List.class);
 
         N.println(CommonUtil.stringOf(accounts));
         N.println(CommonUtil.stringOf(xmlAccounts));
@@ -4083,10 +4083,10 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSerialize6() {
         final Account account = createAccountWithContact(Account.class);
-        final String xml = abacusXMLParser.serialize(account);
+        final String xml = abacusXmlParser.serialize(account);
         println(xml);
 
-        final com.landawn.abacus.entity.extendDirty.basic.Account xmlBean = abacusXMLParser.deserialize(xml,
+        final com.landawn.abacus.entity.extendDirty.basic.Account xmlBean = abacusXmlParser.deserialize(xml,
                 com.landawn.abacus.entity.extendDirty.basic.Account.class);
         assertEquals(CommonUtil.stringOf(account), CommonUtil.stringOf(xmlBean));
     }
@@ -4105,7 +4105,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSerialize7() throws Exception {
         final InputStream is = new FileInputStream("./src/test/resources/XBean.xml");
-        final XBean xmlBean = abacusXMLParser.deserialize(is, XBean.class);
+        final XBean xmlBean = abacusXmlParser.deserialize(is, XBean.class);
         is.close();
 
         N.println(CommonUtil.stringOf(xmlBean));
@@ -4130,19 +4130,19 @@ public class NTest extends AbstractParserTest {
         bean.setWeekDay(WeekDay.FRIDAY);
         bean.setTypeChar('0');
 
-        final String xml = abacusXMLParser.serialize(bean);
+        final String xml = abacusXmlParser.serialize(bean);
         println(xml);
 
-        final XBean xmlBean = abacusXMLParser.deserialize(xml, XBean.class);
+        final XBean xmlBean = abacusXmlParser.deserialize(xml, XBean.class);
         N.println(bean);
         N.println(xmlBean);
-        N.println(abacusXMLParser.serialize(bean));
-        N.println(abacusXMLParser.serialize(xmlBean));
+        N.println(abacusXmlParser.serialize(bean));
+        N.println(abacusXmlParser.serialize(xmlBean));
         N.println(CommonUtil.stringOf(bean));
         N.println(CommonUtil.stringOf(xmlBean));
         assertEquals(bean, xmlBean);
-        assertEquals(abacusXMLParser.deserialize(abacusXMLParser.serialize(bean), XBean.class),
-                abacusXMLParser.deserialize(abacusXMLParser.serialize(xmlBean), XBean.class));
+        assertEquals(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), XBean.class),
+                abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), XBean.class));
 
     }
 

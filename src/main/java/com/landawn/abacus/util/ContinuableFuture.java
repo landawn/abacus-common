@@ -71,8 +71,8 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *
  * <p><b>Core Composition Methods:</b>
  * <ul>
- *   <li><b>{@code thenRun()}:</b> Execute a Runnable action after completion</li>
- *   <li><b>{@code thenCall()}:</b> Execute a Callable function returning a new result</li>
+ *   <li><b>{@code thenRunAsync()}:</b> Execute a Runnable action after completion</li>
+ *   <li><b>{@code thenCallAsync()}:</b> Execute a Callable function returning a new result</li>
  *   <li><b>{@code map()}:</b> Transform the result using a Function</li>
  *   <li><b>{@code flatMap()}:</b> Transform the result into another ContinuableFuture</li>
  *   <li><b>{@code thenDelay()}:</b> Add time delays between operations</li>
@@ -81,9 +81,9 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *
  * <p><b>Combination and Coordination Patterns:</b>
  * <ul>
- *   <li><b>Both Completion:</b> {@code runAfterBoth()}, {@code callAfterBoth()} - Wait for both futures</li>
- *   <li><b>Either Completion:</b> {@code runAfterEither()}, {@code callAfterEither()} - React to first completion</li>
- *   <li><b>First Success:</b> {@code runAfterFirstSucceed()}, {@code callAfterFirstSucceed()} - Wait for first successful completion</li>
+ *   <li><b>Both Completion:</b> {@code runAsyncAfterBoth()}, {@code callAsyncAfterBoth()} - Wait for both futures</li>
+ *   <li><b>Either Completion:</b> {@code runAsyncAfterEither()}, {@code callAsyncAfterEither()} - React to first completion</li>
+ *   <li><b>First Success:</b> {@code runAsyncAfterFirstSuccess()}, {@code callAsyncAfterFirstSuccess()} - Wait for first successful completion</li>
  *   <li><b>All Success:</b> {@code runAfterAllSucceed()}, {@code callAfterAllSucceed()} - Require all successful completions</li>
  * </ul>
  *
@@ -102,14 +102,14 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     .call(() -> downloadData())
  *     .map(data -> processData(data))
  *     .thenDelay(1, TimeUnit.SECONDS)
- *     .thenCall(() -> saveToDatabase());
+ *     .thenCallAsync(() -> saveToDatabase());
  *
  * // Parallel execution with combination
  * ContinuableFuture<String> userFuture = ContinuableFuture.call(() -> fetchUser(userId));
  * ContinuableFuture<List<Order>> ordersFuture = ContinuableFuture.call(() -> fetchOrders(userId));
  *
  * ContinuableFuture<UserProfile> profileFuture = userFuture
- *     .callAfterBoth(ordersFuture, (user, orders) -> new UserProfile(user, orders));
+ *     .callAsyncAfterBoth(ordersFuture, (user, orders) -> new UserProfile(user, orders));
  *
  * // Error handling and recovery
  * ContinuableFuture<String> robustFuture = ContinuableFuture
@@ -125,7 +125,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * ContinuableFuture<String> customExecutorFuture = ContinuableFuture
  *     .call(() -> cpuIntensiveTask())
  *     .thenUse(Executors.newCachedThreadPool())
- *     .thenCall(() -> ioIntensiveTask());
+ *     .thenCallAsync(() -> ioIntensiveTask());
  * }</pre>
  *
  * <p><b>Advanced Composition Examples:</b>
@@ -133,7 +133,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * // Complex workflow with multiple decision points
  * ContinuableFuture<String> workflowFuture = ContinuableFuture
  *     .call(() -> authenticateUser(credentials))
- *     .thenCall(user -> {
+ *     .thenCallAsync(user -> {
  *         if (user.hasPermission("READ")) {
  *             return loadUserData(user.getId());
  *         } else {
@@ -148,7 +148,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * ContinuableFuture<String> backupService = ContinuableFuture.call(() -> callBackupAPI());
  *
  * ContinuableFuture<String> fastestResponse = primaryService
- *     .callAfterFirstSucceed(backupService, (result) -> result);
+ *     .callAsyncAfterFirstSuccess(backupService, (result) -> result);
  *
  * // Timeout handling with graceful degradation
  * ContinuableFuture<String> timeoutFuture = ContinuableFuture
@@ -218,7 +218,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <p><b>Best Practices and Recommendations:</b>
  * <ul>
  *   <li>Use method chaining to build readable asynchronous workflows</li>
- *   <li>Prefer {@code map()} over {@code thenCall()} for simple transformations</li>
+ *   <li>Prefer {@code map()} over {@code thenCallAsync()} for simple transformations</li>
  *   <li>Use {@code cancelAll()} to ensure complete resource cleanup</li>
  *   <li>Specify appropriate executors for CPU-bound vs I/O-bound operations</li>
  *   <li>Use {@code gett()} methods for non-blocking result retrieval with error handling</li>
@@ -260,14 +260,14 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *             .call(() -> inventoryService.checkAvailability(request.getItems()));
  *
  *         // Process after both validations complete
- *         return userFuture.callAfterBoth(inventoryFuture, (user, available) -> {
+ *         return userFuture.callAsyncAfterBoth(inventoryFuture, (user, available) -> {
  *             if (!available) {
  *                 throw new OutOfStockException("Items not available");
  *             }
  *             return request;
  *         })
- *         .thenCall(validatedRequest -> paymentService.processPayment(validatedRequest))
- *         .thenCall(payment -> fulfillmentService.createShipment(payment))
+ *         .thenCallAsync(validatedRequest -> paymentService.processPayment(validatedRequest))
+ *         .thenCallAsync(payment -> fulfillmentService.createShipment(payment))
  *         .map(shipment -> new OrderResult(shipment.getId(), "SUCCESS"))
  *         .handle((result, ex) -> {
  *             if (ex != null) {
@@ -517,8 +517,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<String> continuable = ContinuableFuture.wrap(standardFuture);
      * 
      * // Now can use chaining methods
-     * continuable.thenRun(result -> System.out.println("Got: " + result))
-     *            .thenCall(() -> processNextStep());
+     * continuable.thenRunAsync(result -> System.out.println("Got: " + result))
+     *            .thenCallAsync(() -> processNextStep());
      * }</pre>
      *
      * @param <T> the type of the value returned by the future.
@@ -599,8 +599,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future1 = ContinuableFuture.call(() -> fetchData());
-     * ContinuableFuture<String> future2 = future1.thenCall(data -> processData(data));
-     * ContinuableFuture<Void> future3 = future2.thenRun(result -> saveResult(result));
+     * ContinuableFuture<String> future2 = future1.thenCallAsync(data -> processData(data));
+     * ContinuableFuture<Void> future3 = future2.thenRunAsync(result -> saveResult(result));
      * 
      * // This cancels future3, future2, and future1
      * boolean allCancelled = future3.cancelAll(true);
@@ -636,7 +636,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future1 = ContinuableFuture.call(() -> step1());
-     * ContinuableFuture<String> future2 = future1.thenCall(data -> step2(data));
+     * ContinuableFuture<String> future2 = future1.thenCallAsync(data -> step2(data));
      * 
      * future2.cancelAll(true);
      * 
@@ -1165,7 +1165,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture} with the transformed result.
      */
     @Beta
-    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
+    <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<U>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             @Override
@@ -1228,17 +1228,17 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> downloadFile())
-     *     .thenRun(() -> {
+     *     .thenRunAsync(() -> {
      *         System.out.println("Download complete!");
      *         notifyUser();
      *     })
-     *     .thenRun(() -> cleanupTempFiles());
+     *     .thenRunAsync(() -> cleanupTempFiles());
      * }</pre>
      *
      * @param action the action to execute after this future completes.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
-    public ContinuableFuture<Void> thenRun(final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
             get();
             action.run();
@@ -1258,17 +1258,17 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> fetchUserData(userId))
-     *     .thenRun(userData -> {
+     *     .thenRunAsync(userData -> {
      *         updateUI(userData);
      *         saveToCache(userData);
      *     })
-     *     .thenRun(() -> logCompletion());
+     *     .thenRunAsync(() -> logCompletion());
      * }</pre>
      *
      * @param action the consumer to execute with the result.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
-    public ContinuableFuture<Void> thenRun(final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
             action.accept(get());
             return null;
@@ -1289,7 +1289,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> riskyOperation())
-     *     .thenRun((result, exception) -> {
+     *     .thenRunAsync((result, exception) -> {
      *         if (exception != null) {
      *             logger.error("Operation failed", exception);
      *             sendAlert(exception);
@@ -1298,14 +1298,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *             processResult(result);
      *         }
      *     })
-     *     .thenRun(() -> cleanup());
+     *     .thenRunAsync(() -> cleanup());
      * }</pre>
      *
      * @param action the bi-consumer to execute with the result and exception.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
-    public ContinuableFuture<Void> thenRun(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
             action.accept(result.orElseIfFailure(null), result.getException());
@@ -1325,18 +1325,18 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> authenticate())
-     *     .thenCall(() -> {
+     *     .thenCallAsync(() -> {
      *         // This runs after authentication succeeds
      *         return fetchSecureData();
      *     })
-     *     .thenCall(() -> processData());
+     *     .thenCallAsync(() -> processData());
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable.
      * @param action the callable to execute after this future completes.
      * @return a new {@code ContinuableFuture<R>} with the result of the callable.
      */
-    public <R> ContinuableFuture<R> thenCall(final Callable<R> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Callable<R> action) {
         return execute(() -> {
             get();
             return action.call();
@@ -1357,18 +1357,18 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(id))
-     *     .thenCall(user -> {
+     *     .thenCallAsync(user -> {
      *         // Transform User to UserProfile
      *         return buildProfile(user);
      *     })
-     *     .thenCall(profile -> enrichWithSocialData(profile));
+     *     .thenCallAsync(profile -> enrichWithSocialData(profile));
      * }</pre>
      *
      * @param <R> the type of the result returned by the function.
      * @param action the function to apply to the result.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
      */
-    public <R> ContinuableFuture<R> thenCall(final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> action.apply(get()));
     }
 
@@ -1386,7 +1386,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> future = ContinuableFuture.call(() -> fetchFromPrimary())
-     *     .thenCall((data, exception) -> {
+     *     .thenCallAsync((data, exception) -> {
      *         if (exception != null) {
      *             logger.warn("Primary failed, using fallback", exception);
      *             return fetchFromSecondary();   // Recovery
@@ -1400,7 +1400,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
      * @see #gett()
      */
-    public <R> ContinuableFuture<R> thenCall(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
             return action.apply(result.orElseIfFailure(null), result.getException());
@@ -1419,7 +1419,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<File> download1 = ContinuableFuture.call(() -> downloadFile1());
      * ContinuableFuture<File> download2 = ContinuableFuture.call(() -> downloadFile2());
      * 
-     * download1.runAfterBoth(download2, () -> {
+     * download1.runAsyncAfterBoth(download2, () -> {
      *     System.out.println("Both downloads complete!");
      *     mergeFiles();
      * });
@@ -1429,7 +1429,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the action to execute after both futures complete.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
-    public ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
             get();
             other.get();
@@ -1451,7 +1451,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(id));
      * ContinuableFuture<Profile> profileFuture = ContinuableFuture.call(() -> fetchProfile(id));
      * 
-     * userFuture.runAfterBoth(profileFuture, (user, profile) -> {
+     * userFuture.runAsyncAfterBoth(profileFuture, (user, profile) -> {
      *     mergeUserAndProfile(user, profile);
      *     updateCache(user, profile);
      * });
@@ -1462,7 +1462,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-consumer to execute with both results.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      */
-    public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
+    public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) {
         return execute(() -> {
             action.accept(get(), other.get());
@@ -1488,7 +1488,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Data> primary = ContinuableFuture.call(() -> fetchPrimary());
      * ContinuableFuture<Data> backup = ContinuableFuture.call(() -> fetchBackup());
      * 
-     * primary.runAfterBoth(backup, tuple -> {
+     * primary.runAsyncAfterBoth(backup, tuple -> {
      *     if (tuple._2 == null) {  // primary succeeded
      *         processData(tuple._1);
      *     } else if (tuple._4 == null) {  // backup succeeded
@@ -1505,7 +1505,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
-    public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
+    public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
@@ -1522,7 +1522,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * is executed regardless of whether the futures completed successfully.
      * 
      * <p>This method provides the same functionality as
-     * {@link #runAfterBoth(ContinuableFuture, Throwables.Consumer)} but with individual parameters
+     * {@link #runAsyncAfterBoth(ContinuableFuture, Throwables.Consumer)} but with individual parameters
      * instead of a tuple.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -1530,7 +1530,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Order> orderFuture = ContinuableFuture.call(() -> createOrder());
      * ContinuableFuture<Payment> paymentFuture = ContinuableFuture.call(() -> processPayment());
      * 
-     * orderFuture.runAfterBoth(paymentFuture, (order, orderEx, payment, paymentEx) -> {
+     * orderFuture.runAsyncAfterBoth(paymentFuture, (order, orderEx, payment, paymentEx) -> {
      *     if (orderEx != null || paymentEx != null) {
      *         rollbackTransaction(order, payment, orderEx, paymentEx);
      *     } else {
@@ -1545,7 +1545,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @see #gett()
      */
-    public <U> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
+    public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadConsumer<? super T, ? super Exception, ? super U, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
@@ -1569,7 +1569,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Config> configFuture = ContinuableFuture.call(() -> loadConfig());
      * ContinuableFuture<Database> dbFuture = ContinuableFuture.call(() -> connectDB());
      *
-     * ContinuableFuture<Service> serviceFuture = configFuture.callAfterBoth(dbFuture, () -> {
+     * ContinuableFuture<Service> serviceFuture = configFuture.callAsyncAfterBoth(dbFuture, () -> {
      *     // Both config and database are ready
      *     return initializeService();
      * });
@@ -1580,7 +1580,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the callable to execute after both futures complete; must not be null.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
      */
-    public <R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {
             get();
             other.get();
@@ -1603,7 +1603,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(userId));
      * ContinuableFuture<Settings> settingsFuture = ContinuableFuture.call(() -> fetchSettings());
      *
-     * ContinuableFuture<Profile> profileFuture = userFuture.callAfterBoth(settingsFuture,
+     * ContinuableFuture<Profile> profileFuture = userFuture.callAsyncAfterBoth(settingsFuture,
      *     (user, settings) -> createProfile(user, settings));
      * }</pre>
      *
@@ -1613,7 +1613,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to execute with both results; must not be null.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function.
      */
-    public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
+    public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) {
         return execute(() -> action.apply(get(), other.get()), other);
     }
@@ -1636,7 +1636,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Data> primaryFuture = ContinuableFuture.call(() -> fetchPrimaryData());
      * ContinuableFuture<Data> backupFuture = ContinuableFuture.call(() -> fetchBackupData());
      *
-     * ContinuableFuture<Data> result = primaryFuture.callAfterBoth(backupFuture, tuple -> {
+     * ContinuableFuture<Data> result = primaryFuture.callAsyncAfterBoth(backupFuture, tuple -> {
      *     Data primary = tuple._1;
      *     Exception primaryError = tuple._2;
      *     Data backup = tuple._3;
@@ -1655,7 +1655,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
      * @see #gett()
      */
-    public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
+    public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
@@ -1678,7 +1678,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Response> apiFuture = ContinuableFuture.call(() -> callAPI());
      * ContinuableFuture<Cache> cacheFuture = ContinuableFuture.call(() -> loadCache());
      * 
-     * ContinuableFuture<Result> combined = apiFuture.callAfterBoth(cacheFuture,
+     * ContinuableFuture<Result> combined = apiFuture.callAsyncAfterBoth(cacheFuture,
      *     (apiResponse, apiError, cacheData, cacheError) -> {
      *         if (apiError == null && apiResponse.isValid()) {
      *             return Result.fromApi(apiResponse);
@@ -1696,7 +1696,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the QuadFunction that processes both results and exceptions; must not be null.
      * @return a new ContinuableFuture that completes with the result of the QuadFunction.
      */
-    public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
+    public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
@@ -1718,7 +1718,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Data> primarySource = ContinuableFuture.call(() -> fetchFromPrimary());
      * ContinuableFuture<Data> secondarySource = ContinuableFuture.call(() -> fetchFromSecondary());
      * 
-     * primarySource.runAfterEither(secondarySource, () -> {
+     * primarySource.runAsyncAfterEither(secondarySource, () -> {
      *     System.out.println("At least one data source has responded");
      *     notifyDataAvailable();
      * });
@@ -1728,7 +1728,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Runnable to execute after either future completes; must not be null.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
-    public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
             Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -1750,7 +1750,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> localWeather = ContinuableFuture.call(() -> getLocalWeather());
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      * 
-     * localWeather.runAfterEither(remoteWeather, weather -> {
+     * localWeather.runAsyncAfterEither(remoteWeather, weather -> {
      *     displayWeather(weather);   // weather may be null if the first future failed
      *     logSource(weather.getSource());
      * });
@@ -1760,7 +1760,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Consumer to execute with the first available result; must not be null.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
-    public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
+    public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
@@ -1783,7 +1783,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Config> localConfig = ContinuableFuture.call(() -> loadLocalConfig());
      * ContinuableFuture<Config> remoteConfig = ContinuableFuture.call(() -> loadRemoteConfig());
      * 
-     * localConfig.runAfterEither(remoteConfig, (config, error) -> {
+     * localConfig.runAsyncAfterEither(remoteConfig, (config, error) -> {
      *     if (error != null) {
      *         logger.warn("Config loading failed: " + error.getMessage());
      *         useDefaultConfig();
@@ -1798,7 +1798,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      * @see #gett()
      */
-    public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
+    public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
@@ -1820,7 +1820,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Connection> primary = ContinuableFuture.call(() -> connectToPrimary());
      * ContinuableFuture<Connection> backup = ContinuableFuture.call(() -> connectToBackup());
      * 
-     * ContinuableFuture<Session> session = primary.callAfterEither(backup, () -> {
+     * ContinuableFuture<Session> session = primary.callAsyncAfterEither(backup, () -> {
      *     // Create session as soon as any connection is established
      *     return createNewSession();
      * });
@@ -1831,7 +1831,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Callable to execute after either future completes; must not be null.
      * @return a new ContinuableFuture that completes with the result of the callable.
      */
-    public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
             Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -1852,7 +1852,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Price> vendorA = ContinuableFuture.call(() -> getPriceFromVendorA());
      * ContinuableFuture<Price> vendorB = ContinuableFuture.call(() -> getPriceFromVendorB());
      * 
-     * ContinuableFuture<Order> order = vendorA.callAfterEither(vendorB, price -> {
+     * ContinuableFuture<Order> order = vendorA.callAsyncAfterEither(vendorB, price -> {
      *     // Process the first available price
      *     return createOrder(price);   // price may be null if the first future failed
      * });
@@ -1863,7 +1863,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the function to transform the first available result; must not be null.
      * @return a new ContinuableFuture that completes with the transformed result.
      */
-    public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
+    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
@@ -1885,7 +1885,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Data> fastSource = ContinuableFuture.call(() -> fetchFromFastSource());
      * ContinuableFuture<Data> slowSource = ContinuableFuture.call(() -> fetchFromSlowSource());
      * 
-     * ContinuableFuture<ProcessedData> result = fastSource.callAfterEither(slowSource, 
+     * ContinuableFuture<ProcessedData> result = fastSource.callAsyncAfterEither(slowSource, 
      *     (data, error) -> {
      *         if (error != null) {
      *             return ProcessedData.empty();
@@ -1900,7 +1900,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture that completes with the transformed result.
      * @see #gett()
      */
-    public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
+    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
@@ -1922,7 +1922,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Void> saveToDatabase = ContinuableFuture.run(() -> saveToDb());
      * ContinuableFuture<Void> saveToCache = ContinuableFuture.run(() -> saveToCache());
      * 
-     * saveToDatabase.runAfterFirstSucceed(saveToCache, () -> {
+     * saveToDatabase.runAsyncAfterFirstSuccess(saveToCache, () -> {
      *     // Execute only after at least one save operation succeeds
      *     notifySaveComplete();
      * });
@@ -1932,7 +1932,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Runnable to execute after the first successful completion; must not be null.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
-    public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
@@ -1962,7 +1962,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<User> dbUser = ContinuableFuture.call(() -> loadUserFromDatabase(id));
      * ContinuableFuture<User> cacheUser = ContinuableFuture.call(() -> loadUserFromCache(id));
      * 
-     * dbUser.runAfterFirstSucceed(cacheUser, user -> {
+     * dbUser.runAsyncAfterFirstSuccess(cacheUser, user -> {
      *     // Process the first successfully loaded user
      *     updateLastAccessed(user);
      *     notifyUserLoaded(user);
@@ -1973,7 +1973,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Consumer to execute with the first successful result; must not be null.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
-    public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+    public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
@@ -2020,7 +2020,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Config> primaryConfig = ContinuableFuture.call(() -> loadPrimaryConfig());
      * ContinuableFuture<Config> fallbackConfig = ContinuableFuture.call(() -> loadFallbackConfig());
      *
-     * primaryConfig.runAfterFirstSucceed(fallbackConfig, (config, error) -> {
+     * primaryConfig.runAsyncAfterFirstSuccess(fallbackConfig, (config, error) -> {
      *     if (config != null) {
      *         applyConfig(config);
      *     } else {
@@ -2035,7 +2035,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     @Beta
-    public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+    public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
@@ -2072,7 +2072,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Auth> oauth = ContinuableFuture.call(() -> authenticateOAuth());
      * ContinuableFuture<Auth> apiKey = ContinuableFuture.call(() -> authenticateApiKey());
      * 
-     * ContinuableFuture<Session> session = oauth.callAfterFirstSucceed(apiKey, () -> {
+     * ContinuableFuture<Session> session = oauth.callAsyncAfterFirstSuccess(apiKey, () -> {
      *     // Create session only after successful authentication
      *     return createUserSession();
      * });
@@ -2083,7 +2083,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the Callable to execute after the first successful completion; must not be null.
      * @return a new ContinuableFuture that completes with the result of the callable.
      */
-    public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<?> other, final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
@@ -2112,7 +2112,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<RawData> primarySource = ContinuableFuture.call(() -> fetchFromPrimary());
      * ContinuableFuture<RawData> backupSource = ContinuableFuture.call(() -> fetchFromBackup());
      * 
-     * ContinuableFuture<ProcessedData> processed = primarySource.callAfterFirstSucceed(backupSource, 
+     * ContinuableFuture<ProcessedData> processed = primarySource.callAsyncAfterFirstSuccess(backupSource, 
      *     rawData -> {
      *         // Transform the first successfully fetched data
      *         return processAndValidate(rawData);
@@ -2124,7 +2124,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the function to transform the first successful result; must not be null.
      * @return a new ContinuableFuture that completes with the transformed result.
      */
-    public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+    public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
@@ -2160,7 +2160,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Price> vendorPrice = ContinuableFuture.call(() -> getVendorPrice());
      * ContinuableFuture<Price> marketPrice = ContinuableFuture.call(() -> getMarketPrice());
      * 
-     * ContinuableFuture<Quote> quote = vendorPrice.callAfterFirstSucceed(marketPrice,
+     * ContinuableFuture<Quote> quote = vendorPrice.callAsyncAfterFirstSuccess(marketPrice,
      *     (price, error) -> {
      *         if (price != null) {
      *             return Quote.withPrice(price);
@@ -2177,7 +2177,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture that completes with the transformed result.
      * @see #gett()
      */
-    public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+    public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
@@ -2229,9 +2229,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * <pre>{@code
      * ContinuableFuture.call(() -> sendRequest())
      *     .thenDelay(2, TimeUnit.SECONDS)  // Wait 2 seconds after request completes
-     *     .thenCall(() -> checkResponse())
+     *     .thenCallAsync(() -> checkResponse())
      *     .thenDelay(1, TimeUnit.SECONDS)  // Wait 1 second before final action
-     *     .thenRun(() -> processResults());
+     *     .thenRunAsync(() -> processResults());
      * }</pre>
      *
      * @param delay the delay duration before the next action is executed; must be non-negative.
@@ -2262,9 +2262,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * ContinuableFuture.call(() -> readFromFile())          // Runs on default executor
      *     .thenUse(cpuExecutor)                             // Switch to CPU executor
-     *     .thenCall(() -> processData())                    // CPU-intensive processing
+     *     .thenCallAsync(() -> processData())                    // CPU-intensive processing
      *     .thenUse(ioExecutor)                              // Switch to I/O executor
-     *     .thenRun(result -> writeToFile(result));   // I/O operation
+     *     .thenRunAsync(result -> writeToFile(result));   // I/O operation
      * }</pre>
      *
      * @param executor the executor to use for subsequent actions in the chain; must not be null.

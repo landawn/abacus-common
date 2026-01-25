@@ -109,7 +109,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
         final SetMultimap<K, E> multiMap = N.newLinkedSetMultimap(map.size());
 
         for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-            multiMap.putMany(entry.getKey(), entry.getValue());
+            multiMap.putValues(entry.getKey(), entry.getValue());
         }
 
         return multiMap;

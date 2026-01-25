@@ -301,6 +301,302 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
+     * Creates a new successful Result instance containing the specified value with no exception.
+     * This is the primary factory method for creating Result instances that represent successful operations.
+     * The resulting Result will have {@code isSuccess() == true} and {@code isFailure() == false}.
+     *
+     * <p>This method is semantically equivalent to calling {@code Result.of(value, null)}, but provides
+     * a more expressive and self-documenting API that clearly communicates the intent to create a
+     * success case. It follows the factory method pattern commonly used in functional programming
+     * for creating discriminated union types.</p>
+     *
+     * <p><b>State Guarantees:</b></p>
+     * <ul>
+     *   <li>The returned Result will always have {@code exception == null}</li>
+     *   <li>{@code isSuccess()} will always return {@code true}</li>
+     *   <li>{@code isFailure()} will always return {@code false}</li>
+     *   <li>{@code orElseThrow()} will return the value without throwing</li>
+     *   <li>{@code getException()} will return {@code null}</li>
+     * </ul>
+     *
+     * <p><b>Null Value Handling:</b></p>
+     * <ul>
+     *   <li>A {@code null} value is permitted and represents a successful operation that returned {@code null}</li>
+     *   <li>To distinguish between "success with null" and "failure", use {@code isSuccess()} or {@code isFailure()}</li>
+     *   <li>Example: A database query that successfully executes but finds no matching record might return {@code Result.success(null)}</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Creating a success result with a non-null value
+     * Result<String, IOException> result = Result.success("Hello World");
+     * assert result.isSuccess();                    // true
+     * assert result.orElseThrow().equals("Hello World");  // "Hello World"
+     *
+     * // Creating a success result with a null value (valid use case)
+     * Result<User, SQLException> nullResult = Result.success(null);
+     * assert nullResult.isSuccess();                // true - operation succeeded
+     * assert nullResult.orElseThrow() == null;      // null - but that's the actual result
+     *
+     * // Using with different value types
+     * Result<Integer, ArithmeticException> intResult = Result.success(42);
+     * Result<List<String>, Exception> listResult = Result.success(Arrays.asList("a", "b", "c"));
+     * Result<Optional<String>, RuntimeException> optionalResult = Result.success(Optional.of("value"));
+     *
+     * // Typical pattern in service methods
+     * public Result<User, DatabaseException> findUserById(long id) {
+     *     try {
+     *         User user = userRepository.findById(id);
+     *         return Result.success(user);  // user may be null if not found
+     *     } catch (DatabaseException e) {
+     *         return Result.failure(e);
+     *     }
+     * }
+     *
+     * // Chaining with conditional execution
+     * Result.success(computeValue())
+     *     .ifSuccess(value -> log.info("Computed: {}", value))
+     *     .ifFailure(ex -> log.error("Should never happen", ex));
+     * }</pre>
+     *
+     * <p><b>Thread Safety:</b></p>
+     * <ul>
+     *   <li>This method is thread-safe and can be called concurrently from multiple threads</li>
+     *   <li>The returned Result instance is immutable and safe for concurrent access</li>
+     *   <li>No synchronization is required when sharing Result instances between threads</li>
+     * </ul>
+     *
+     * <p><b>Performance Characteristics:</b></p>
+     * <ul>
+     *   <li><b>Time Complexity:</b> O(1) - constant time object allocation</li>
+     *   <li><b>Space Complexity:</b> O(1) - single object with two reference fields</li>
+     *   <li><b>Memory Allocation:</b> Creates exactly one new Result object per invocation</li>
+     *   <li><b>No Caching:</b> Each call creates a new instance; no interning or caching is performed</li>
+     * </ul>
+     *
+     * <p><b>Comparison with Alternative Approaches:</b></p>
+     * <ul>
+     *   <li><b>vs. {@code Result.of(value, null)}:</b> Semantically identical, but {@code success()} is more expressive</li>
+     *   <li><b>vs. {@code Optional.of(value)}:</b> Result distinguishes success-with-null from failure; Optional cannot</li>
+     *   <li><b>vs. returning value directly:</b> Result provides explicit error handling without exceptions</li>
+     *   <li><b>vs. returning null for errors:</b> Result distinguishes null success values from error conditions</li>
+     * </ul>
+     *
+     * <p><b>Best Practices:</b></p>
+     * <ul>
+     *   <li>Prefer {@code Result.success()} over {@code Result.of(value, null)} for clarity</li>
+     *   <li>Document whether null values are valid success cases in your API</li>
+     *   <li>Consider using {@code Optional<T>} as the value type if null has special meaning</li>
+     *   <li>Use meaningful exception types in the generic parameter for better type safety</li>
+     * </ul>
+     *
+     * @param <T> the type of the successful result value; can be any type including wrapper types for primitives
+     * @param <E> the type of exception that could occur in failure cases; must extend {@code Throwable}.
+     *            This parameter is inferred from context and does not affect the success case,
+     *            but ensures type compatibility when combining with failure Results.
+     * @param value the successful result value to wrap; may be {@code null} to represent a successful
+     *              operation that returned no value (e.g., a void operation or a query with no results)
+     * @return a new {@code Result} instance representing a successful operation containing the specified value;
+     *         never returns {@code null}
+     * @see #failure(Throwable)
+     * @see #of(Object, Throwable)
+     * @see #isSuccess()
+     * @see #orElseThrow()
+     */
+    public static <T, E extends Throwable> Result<T, E> success(final T value) {
+        return of(value, null);
+    }
+
+    /**
+     * Creates a new failure Result instance containing the specified exception with no value.
+     * This is the primary factory method for creating Result instances that represent failed operations.
+     * The resulting Result will have {@code isFailure() == true} and {@code isSuccess() == false}.
+     *
+     * <p>This method is semantically equivalent to calling {@code Result.of(null, exception)}, but provides
+     * a more expressive and self-documenting API that clearly communicates the intent to create a
+     * failure case. It follows the factory method pattern commonly used in functional programming
+     * for creating discriminated union types representing error states.</p>
+     *
+     * <p><b>State Guarantees:</b></p>
+     * <ul>
+     *   <li>The returned Result will always have {@code value == null} (internal state)</li>
+     *   <li>{@code isFailure()} will always return {@code true}</li>
+     *   <li>{@code isSuccess()} will always return {@code false}</li>
+     *   <li>{@code orElseThrow()} will throw the contained exception</li>
+     *   <li>{@code getException()} will return the provided exception</li>
+     *   <li>{@code orElseIfFailure(defaultValue)} will return the default value</li>
+     * </ul>
+     *
+     * <p><b>Null Exception Handling:</b></p>
+     * <ul>
+     *   <li>Passing a {@code null} exception is technically permitted but <b>strongly discouraged</b></li>
+     *   <li>A {@code null} exception creates an ambiguous state: {@code isFailure()} returns {@code false}</li>
+     *   <li>If you need to represent "no error", use {@code Result.success(null)} instead</li>
+     *   <li>Consider using {@code Objects.requireNonNull(exception)} before calling this method if null is unexpected</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Creating a failure result with a specific exception
+     * Result<String, IOException> result = Result.failure(new IOException("File not found"));
+     * assert result.isFailure();                    // true
+     * assert result.getException().getMessage().equals("File not found");
+     *
+     * // Attempting to get value throws the exception
+     * try {
+     *     String value = result.orElseThrow();      // throws IOException
+     * } catch (IOException e) {
+     *     System.out.println("Caught: " + e.getMessage());
+     * }
+     *
+     * // Using with different exception types
+     * Result<Integer, ArithmeticException> mathError = Result.failure(new ArithmeticException("Division by zero"));
+     * Result<User, SQLException> dbError = Result.failure(new SQLException("Connection timeout"));
+     * Result<Config, IllegalStateException> configError = Result.failure(new IllegalStateException("Invalid config"));
+     *
+     * // Typical pattern in service methods
+     * public Result<User, ValidationException> validateUser(UserInput input) {
+     *     if (input.getEmail() == null) {
+     *         return Result.failure(new ValidationException("Email is required"));
+     *     }
+     *     if (!isValidEmail(input.getEmail())) {
+     *         return Result.failure(new ValidationException("Invalid email format"));
+     *     }
+     *     return Result.success(createUser(input));
+     * }
+     *
+     * // Wrapping checked exceptions from external APIs
+     * public Result<String, IOException> readFile(Path path) {
+     *     try {
+     *         return Result.success(Files.readString(path));
+     *     } catch (IOException e) {
+     *         return Result.failure(e);
+     *     }
+     * }
+     *
+     * // Chaining with conditional execution
+     * Result.<String, RuntimeException>failure(new IllegalArgumentException("Invalid input"))
+     *     .ifSuccess(value -> log.info("Should never execute"))
+     *     .ifFailure(ex -> log.error("Error occurred: {}", ex.getMessage()));
+     *
+     * // Transforming and re-throwing exceptions
+     * Result<Data, SQLException> dbResult = fetchFromDatabase();
+     * Data data = dbResult.orElseThrow(sqlEx -> new ServiceException("Database error", sqlEx));
+     *
+     * // Providing fallback values for failures
+     * String content = Result.<String, IOException>failure(new IOException("Read error"))
+     *     .orElseIfFailure("default content");
+     * assert content.equals("default content");
+     *
+     * // Lazy fallback computation
+     * String lazyContent = result.orElseGetIfFailure(() -> loadFromBackupSource());
+     * }</pre>
+     *
+     * <p><b>Exception Preservation:</b></p>
+     * <ul>
+     *   <li>The exception instance is stored by reference, not copied</li>
+     *   <li>Stack trace and all exception properties are preserved</li>
+     *   <li>Chained exceptions (cause chain) remain intact</li>
+     *   <li>The exact exception type is preserved through generics</li>
+     * </ul>
+     *
+     * <p><b>Thread Safety:</b></p>
+     * <ul>
+     *   <li>This method is thread-safe and can be called concurrently from multiple threads</li>
+     *   <li>The returned Result instance is immutable and safe for concurrent access</li>
+     *   <li>The contained exception should ideally be immutable for full thread safety</li>
+     *   <li>No synchronization is required when sharing Result instances between threads</li>
+     * </ul>
+     *
+     * <p><b>Performance Characteristics:</b></p>
+     * <ul>
+     *   <li><b>Time Complexity:</b> O(1) - constant time object allocation</li>
+     *   <li><b>Space Complexity:</b> O(1) - single object with two reference fields</li>
+     *   <li><b>Memory Allocation:</b> Creates exactly one new Result object per invocation</li>
+     *   <li><b>Exception Cost:</b> The exception should already be created; this method adds minimal overhead</li>
+     *   <li><b>No Stack Trace Creation:</b> This method does not create or modify stack traces</li>
+     * </ul>
+     *
+     * <p><b>Comparison with Alternative Approaches:</b></p>
+     * <ul>
+     *   <li><b>vs. {@code Result.of(null, exception)}:</b> Semantically identical, but {@code failure()} is more expressive</li>
+     *   <li><b>vs. throwing exceptions:</b> Result allows deferred handling and functional composition</li>
+     *   <li><b>vs. returning null:</b> Result provides type-safe error information with the exception</li>
+     *   <li><b>vs. error codes:</b> Result preserves full exception context including stack trace and cause chain</li>
+     *   <li><b>vs. {@code Optional.empty()}:</b> Result carries error details; Optional only indicates absence</li>
+     * </ul>
+     *
+     * <p><b>Best Practices:</b></p>
+     * <ul>
+     *   <li>Prefer {@code Result.failure()} over {@code Result.of(null, exception)} for clarity</li>
+     *   <li>Use specific exception types rather than generic {@code Exception} for better type safety</li>
+     *   <li>Include meaningful error messages in the exception for debugging</li>
+     *   <li>Preserve the original exception as the cause when wrapping exceptions</li>
+     *   <li>Document which exception types your methods can return in their Result</li>
+     *   <li>Avoid passing {@code null} as the exception parameter</li>
+     * </ul>
+     *
+     * <p><b>Common Patterns:</b></p>
+     * <pre>{@code
+     * // Pattern 1: Converting try-catch to Result
+     * public Result<Data, ServiceException> fetchData(String id) {
+     *     try {
+     *         Data data = externalService.fetch(id);
+     *         return Result.success(data);
+     *     } catch (NetworkException | TimeoutException e) {
+     *         return Result.failure(new ServiceException("Failed to fetch data", e));
+     *     }
+     * }
+     *
+     * // Pattern 2: Validation with early return
+     * public Result<Order, ValidationException> createOrder(OrderRequest request) {
+     *     if (request.getItems().isEmpty()) {
+     *         return Result.failure(new ValidationException("Order must have at least one item"));
+     *     }
+     *     if (request.getCustomerId() == null) {
+     *         return Result.failure(new ValidationException("Customer ID is required"));
+     *     }
+     *     // ... more validations
+     *     return Result.success(orderService.create(request));
+     * }
+     *
+     * // Pattern 3: Combining multiple Results
+     * Result<User, DbException> userResult = userRepo.findById(userId);
+     * Result<Account, DbException> accountResult = accountRepo.findByUserId(userId);
+     *
+     * if (userResult.isFailure()) {
+     *     return Result.failure(userResult.getException());
+     * }
+     * if (accountResult.isFailure()) {
+     *     return Result.failure(accountResult.getException());
+     * }
+     * return Result.success(new UserProfile(userResult.orElseThrow(), accountResult.orElseThrow()));
+     * }</pre>
+     *
+     * @param <T> the type of the successful result value; this parameter is inferred from context
+     *            and does not affect the failure case, but ensures type compatibility when
+     *            combining with success Results
+     * @param <E> the type of exception contained in this failure Result; must extend {@code Throwable}.
+     *            Using specific exception types (e.g., {@code IOException}, {@code SQLException})
+     *            rather than generic {@code Exception} provides better type safety and documentation.
+     * @param exception the exception representing the failure cause; should not be {@code null}
+     *                  (passing {@code null} creates a Result where {@code isFailure()} returns {@code false},
+     *                  which is likely not the intended behavior)
+     * @return a new {@code Result} instance representing a failed operation containing the specified exception;
+     *         never returns {@code null}
+     * @see #success(Object)
+     * @see #of(Object, Throwable)
+     * @see #isFailure()
+     * @see #getException()
+     * @see #orElseThrow()
+     * @see #orElseIfFailure(Object)
+     * @see #orElseGetIfFailure(Supplier)
+     */
+    public static <T, E extends Throwable> Result<T, E> failure(final E exception) {
+        return of(null, exception);
+    }
+
+    /**
      * Creates a new Result instance with the specified value and exception.
      * Either value or exception can be present, but typically only one should be {@code non-null}.
      * If both are {@code null}, it represents a successful operation with a {@code null} result.

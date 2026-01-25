@@ -66,7 +66,7 @@ public final class DataSourceUtil {
     static {
         try {
             //noinspection ConstantValue
-            isInSpring = ClassUtil.forClass("org.springframework.datasource.DataSourceUtils") != null;
+            isInSpring = ClassUtil.forName("org.springframework.datasource.DataSourceUtils") != null;
         } catch (final Throwable e) {
             isInSpring = false;
         }

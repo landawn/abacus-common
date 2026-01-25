@@ -82,38 +82,50 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>API Data Processing:</b> Processing JSON/XML responses in structured format</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Creating datasets
- * Dataset empty = Dataset.empty();
- * Dataset fromMap = N.newDataset(Map.of("name", List.of("Alice", "Bob"), "age", List.of(25, 30)));
- * Dataset fromCsv = Dataset.from(csvFile);
- *
- * // Basic operations
- * Dataset filtered = dataset.filter("age", age -> (Integer) age > 25);
- * Dataset sorted = dataset.copy().sortBy("name");
- * Dataset projected = dataset.slice(Arrays.asList("name", "email"));
- *
- * // Aggregation and grouping
- * Dataset grouped = dataset.groupBy("department", "salary", "avgSalary", Collectors.averagingDouble(Double::valueOf));
- * Dataset pivot = dataset.pivot("year", "department", "revenue", Collectors.summingDouble(Double::valueOf));
- *
- * // Joins and set operations
- * Dataset joined = leftDataset.innerJoin(rightDataset, "id", "userId");
- * Dataset union = dataset1.union(dataset2);
- * Dataset intersection = dataset1.intersect(dataset2, Arrays.asList("key1", "key2"));
+* <p><b>Usage Examples:</b></p>
+* <pre>{@code
+* // Creating datasets
+ * Dataset dataset = Dataset.rows(
+ *     Arrays.asList("name", "age", "department", "salary", "year", "revenue"),
+ *     new Object[][] {
+ *         {"Alice", 30, "Engineering", 80000.0, 2024, 120000.0},
+ *         {"Bob", 40, "Sales", 90000.0, 2024, 150000.0},
+ *         {"Carol", 28, "Engineering", 85000.0, 2025, 130000.0}
+ *     }
+ * );
+* Dataset empty = Dataset.empty();
+* Dataset fromMap = N.newDataset(Map.of("name", List.of("Alice", "Bob"), "age", List.of(25, 30)));
+* Dataset fromCsv = CsvUtil.load(csvFile);
+*
+* // Basic operations
+* Dataset filtered = dataset.filter("age", age -> (Integer) age > 25);
+ * Dataset sorted = dataset.copy();
+ * sorted.sortBy("name");
+ * Dataset projected = dataset.slice(Arrays.asList("name", "department"));
+*
+* // Aggregation and grouping
+ * Dataset grouped = dataset.groupBy("department", "salary", "avgSalary",
+ *     Collectors.averagingDouble(val -> ((Number) val).doubleValue()));
+ * Sheet<Integer, String, Double> pivot = dataset.pivot(
+ *     "year", "department", "revenue",
+ *     Collectors.summingDouble(val -> ((Number) val).doubleValue()));
+*
+* // Joins and set operations
+* Dataset joined = leftDataset.innerJoin(rightDataset, "id", "userId");
+ * Dataset union = dataset.union(dataset.copy());
+ * Dataset intersection = dataset.intersect(dataset.copy(), Arrays.asList("name", "age"));
  *
  * // Export operations
  * String json = dataset.toJson();
  * dataset.toCsv(outputFile);
- * dataset.toXml("record", xmlWriter);
- *
- * // Stream integration
- * List<Person> people = dataset.stream(Person.class).collect(Collectors.toList());
- * Map<String, Integer> nameToAge = dataset.stream("name", "age", (name, age) -> 
- *     Pair.of((String) name, (Integer) age))
- *     .collect(Collectors.toMap(Pair::left, Pair::right));
- * }</pre>
+* dataset.toXml("record", xmlWriter);
+*
+* // Stream integration
+ * List<Person> people = dataset.stream(Arrays.asList("name", "age"), Person.class).collect(Collectors.toList());
+* Map<String, Integer> nameToAge = dataset.stream(Tuple.of("name", "age"), (name, age) -> 
+*     Pair.of((String) name, (Integer) age))
+*     .collect(Collectors.toMap(pair -> pair.left(), pair -> pair.right()));
+* }</pre>
  *
  * <p><b>Data Types and Columns:</b>
  * <ul>
@@ -162,7 +174,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>{@link Builder.DatasetBuilder}:</b> Fluent API for constructing datasets</li>
  *   <li><b>{@link Sheet}:</b> 2D grid operations and pivot table functionality</li>
- *   <li><b>{@link CSVUtil}:</b> CSV import/export utilities</li>
+ *   <li><b>{@link CsvUtil}:</b> CSV import/export utilities</li>
  *   <li><b>{@link Stream}:</b> Functional programming operations</li>
  *   <li><b>{@link Multimap}/{@link Multiset}:</b> Collection-based aggregation results</li>
  * </ul>
@@ -184,7 +196,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.N#newDataset(String, String, Map)
  * @see Builder.DatasetBuilder
  * @see Sheet
- * @see CSVUtil
+ * @see CsvUtil
  * @see Stream
  * @see EntryStream
  */
@@ -250,8 +262,8 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset with the specified column names and rows.
      * <br />
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>rows</i> parameter is a collection of collections where each sub-collection represents a row in the Dataset.
+     * Each item in the {@code columnNames} collection represents a column in the Dataset.
+     * The {@code rows} parameter is a collection of collections where each sub-collection represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
      * <p><b>Usage Examples:</b></p>
@@ -262,10 +274,10 @@ public sealed interface Dataset permits RowDataset {
      * );
      * }</pre>
      *
-     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a collection of collections representing the data in the Dataset. Each sub-collection is a row. If there is no row, it can be {@code null} or empty array.
-     * @return a new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException if the provided columnNames and rows do not align properly.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset
+     * @param rows a collection of collections representing the data in the Dataset. Each sub-collection is a row. Can be {@code null} or empty if no rows
+     * @return a new Dataset with the specified column names and rows
+     * @throws IllegalArgumentException if any row has a length different from {@code columnNames} size
      * @see N#newDataset(Collection, Collection)
      */
     static Dataset rows(final Collection<String> columnNames, final Collection<? extends Collection<?>> rows) throws IllegalArgumentException {
@@ -276,8 +288,8 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset with the specified column names and columns.
      * <br />
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>columns</i> parameter is a two-dimensional array where each subarray represents a column in the Dataset.
+     * Each item in the {@code columnNames} collection represents a column in the Dataset.
+     * The {@code columns} parameter is a two-dimensional array where each subarray represents a column in the Dataset.
      * The order of elements in each column should correspond to the order of column names.
      *
      * <p><b>Usage Examples:</b></p>
@@ -288,10 +300,10 @@ public sealed interface Dataset permits RowDataset {
      * );
      * }</pre>
      *
-     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param columns a two-dimensional array representing the data in the Dataset. Each subarray is a column. If there is no column, it can be {@code null} or empty array.
-     * @return a new Dataset with the specified column names and columns.
-     * @throws IllegalArgumentException if the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset
+     * @param columns a two-dimensional array representing the data in the Dataset. Each subarray is a column. Can be {@code null} or empty if no columns
+     * @return a new Dataset with the specified column names and columns
+     * @throws IllegalArgumentException if {@code columnNames} length differs from {@code columns} length, or any column has a length different from the first column
      */
     static Dataset columns(final Collection<String> columnNames, final Object[][] columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.len(columns)) {
@@ -320,8 +332,8 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset with the specified column names and columns.
      * <br />
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>columns</i> parameter is a collection of collections where each sub-collection represents a column in the Dataset.
+     * Each item in the {@code columnNames} collection represents a column in the Dataset.
+     * The {@code columns} parameter is a collection of collections where each sub-collection represents a column in the Dataset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -331,10 +343,10 @@ public sealed interface Dataset permits RowDataset {
      * );
      * }</pre>
      *
-     * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param columns a collection of collections representing the data in the Dataset. Each sub-collection is a column. If there is no column, it can be {@code null} or empty array.
-     * @return a new Dataset with the specified column names and columns.
-     * @throws IllegalArgumentException if the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
+     * @param columnNames a collection of strings representing the names of the columns in the Dataset
+     * @param columns a collection of collections representing the data in the Dataset. Each sub-collection is a column. Can be {@code null} or empty if no columns
+     * @return a new Dataset with the specified column names and columns
+     * @throws IllegalArgumentException if {@code columnNames} length differs from {@code columns} length, or any column has a length different from the first column
      */
     static Dataset columns(final Collection<String> columnNames, final Collection<? extends Collection<?>> columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.size(columns)) {
@@ -366,13 +378,13 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * ImmutableList<String> columns = dataset.columnNameList();
+     * ImmutableList<String> columns = dataset.columnNames();
      * // columns contains ["id", "name", "age"]
      * }</pre>
      *
      * @return an ImmutableList of column names
      */
-    ImmutableList<String> columnNameList();
+    ImmutableList<String> columnNames();
 
     /**
      * Returns the number of columns in this Dataset.
@@ -1788,7 +1800,7 @@ public sealed interface Dataset permits RowDataset {
      *  System.out.println(ds.columnCount());   // 2
      * System.out.println(ds.columnNameList());   // [firstName, lastName]
      *  
-     *  ds.print();
+     *  ds.println();
      *  // +-----------+----------+
      *  // | firstName | lastName |
      *  // +-----------+----------+
@@ -2050,14 +2062,14 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * dataset.removeRows(new int[] {0, 2});
+     * dataset.removeRowsAt(0, 2);
      * }</pre>
      *
      * @param rowIndexesToRemove an array of indices of the rows to be removed.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void removeMultiRows(int... rowIndexesToRemove) throws IllegalStateException, IndexOutOfBoundsException;
+    void removeRowsAt(int... rowIndexesToRemove) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Removes a range of rows from the Dataset.
@@ -2067,7 +2079,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * dataset.removeRowRange(0, 1);
+     * dataset.removeRows(0, 1);
      * }</pre>
      *
      * @param inclusiveFromRowIndex the start index of the range. It should be a valid index within the current row range. The row at this index is included in the removal.
@@ -2554,13 +2566,13 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}});
-     * int pointer = dataset.currentRowNum();
+     * int pointer = dataset.currentRowIndex();
      * // pointer is 0 initially
      * }</pre>
      *
      * @return the current row number as an integer. The first row is number 0.
      */
-    int currentRowNum();
+    int currentRowIndex();
 
     /**
      * Moves the cursor to the row in this Dataset object specified by the given index.
@@ -2570,14 +2582,14 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}, {2, "Bob"}});
-     * String name = dataset.absolute(1).get("name");
+     * String name = dataset.moveToRow(1).get("name");
      * }</pre>
      *
      * @param rowIndex the index of the row to move to. The first row is 0, the second is 1, and so on.
      * @return the Dataset object itself with the cursor moved to the specified row.
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
-    Dataset absolute(int rowIndex);
+    Dataset moveToRow(int rowIndex);
 
     /**
      * Retrieves a row from the Dataset as an array of Objects.
@@ -3005,7 +3017,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * List<Map<String, Object>> maps = dataset.toList(Map.class);   // Convert to List of Maps
+     * List<Map> maps = dataset.toList(Map.class);   // Convert to List of Maps
      * }</pre>
      *
      * @param <T> the target type of the row.
@@ -3146,7 +3158,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "salary"), data);
-     * List<TreeMap> subsetMaps = dataset.toList(Arrays.asList("name", "salary"), size -> new HashMap<>());
+     * List<Map> subsetMaps = dataset.toList(Arrays.asList("name", "salary"), size -> new HashMap<>());
      * }</pre>
      *
      * @param <T> the target type of the row.
@@ -3169,7 +3181,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "salary"), data);
-     * List<TreeMap> subsetMaps = dataset.toList(0, 10, Arrays.asList("name", "salary"), size -> new HashMap<>());
+     * List<Map> subsetMaps = dataset.toList(0, 10, Arrays.asList("name", "salary"), size -> new HashMap<>());
      * }</pre>
      *
      * @param <T> the target type of the row.
@@ -4006,7 +4018,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4030,7 +4042,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name", ListMultimap::new);
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name", size -> N.newListMultimap(size));
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4085,7 +4097,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4140,7 +4152,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4168,7 +4180,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4197,7 +4209,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4229,7 +4241,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4255,7 +4267,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4283,7 +4295,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4312,7 +4324,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * Multimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -5183,9 +5195,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * @return a CSV string representing the entire Dataset.
      * @see #toCsv(int, int, Collection)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv();
 
@@ -5218,9 +5230,9 @@ public sealed interface Dataset permits RowDataset {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
      * @see #toCsv(int, int, Collection)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -5249,9 +5261,9 @@ public sealed interface Dataset permits RowDataset {
      * @param output the File where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, File)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(File output) throws UncheckedIOException;
 
@@ -5285,9 +5297,9 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, File)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -5317,9 +5329,9 @@ public sealed interface Dataset permits RowDataset {
      * @param output the OutputStream where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, OutputStream)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(OutputStream output) throws UncheckedIOException;
 
@@ -5353,9 +5365,9 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, OutputStream)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -5385,9 +5397,9 @@ public sealed interface Dataset permits RowDataset {
      * @param output the Writer where the CSV string will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, Writer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(Writer output) throws UncheckedIOException;
 
@@ -5421,9 +5433,9 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #toCsv(int, int, Collection, Writer)
-     * @see CSVUtil#setEscapeCharToBackSlashForWrite()
-     * @see CSVUtil#resetEscapeCharForWrite()
-     * @see CSVUtil#writeField(BufferedCSVWriter, com.landawn.abacus.type.Type, Object)
+     * @see CsvUtil#setEscapeCharToBackSlashForWrite()
+     * @see CsvUtil#resetEscapeCharForWrite()
+     * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
@@ -5580,7 +5592,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "salary"), new Object[][] {{"IT", 100}});
-     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, "salary", "total_salary", Collectors.summingInt(Integer.class::cast));
+     * Dataset grouped = dataset.groupBy("dept", dept -> ((String) dept).toUpperCase(),
+     *     "salary", "total_salary", Collectors.summingInt(val -> ((Number) val).intValue()));
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5607,7 +5620,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
-     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, Arrays.asList("employee", "salary"), "employees", Object[].class);
+     * Dataset grouped = dataset.groupBy("dept", dept -> ((String) dept).toUpperCase(),
+     *     Arrays.asList("employee", "salary"), "employees", Object[].class);
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5634,7 +5648,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("dept", "employee", "salary"), new Object[][] {{"IT", "Alice", 100}});
-     * Dataset grouped = dataset.groupBy("dept", String::toUpperCase, Arrays.asList("employee", "salary"), "data", Collectors.toList());
+     * Dataset grouped = dataset.groupBy("dept", dept -> ((String) dept).toUpperCase(),
+     *     Arrays.asList("employee", "salary"), "data", Collectors.toList());
      * }</pre>
      *
      * @param keyColumnName the name of the column to group by.
@@ -5681,11 +5696,11 @@ public sealed interface Dataset permits RowDataset {
      * 
      * Dataset result = dataset.groupBy(
      *     "department",                           // group by department
-     *     String::toLowerCase,                    // normalize to lowercase
+     *     dept -> ((String) dept).toLowerCase(),  // normalize to lowercase
      *     Arrays.asList("salary", "bonus"),      // aggregate on salary and bonus
      *     "total_compensation",                   // result column name
      *     row -> ((Integer) row.get(0)) + ((Integer) row.get(1)), // sum salary + bonus
-     *     Collectors.summingInt(Integer.class::cast));   // sum the results
+     *     Collectors.summingInt(val -> ((Number) val).intValue()));   // sum the results
      *
      * // Result Dataset:
      * // +------------+--------------------+
@@ -8290,7 +8305,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified column copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset map(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper) throws IllegalArgumentException;
+    Dataset mapColumn(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper) throws IllegalArgumentException;
 
     /**
      * Transforms the Dataset by applying a mapping function to the specified column and creating a new column with the results.
@@ -8305,7 +8320,8 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper) throws IllegalArgumentException;
+    Dataset mapColumn(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper)
+            throws IllegalArgumentException;
 
     /**
      * Transforms the Dataset by applying a mapping function to the specified pair of columns and creating a new column with the results.
@@ -8320,7 +8336,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper)
+    Dataset mapColumns(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper)
             throws IllegalArgumentException;
 
     /**
@@ -8336,8 +8352,8 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, TriFunction<?, ?, ?, ?> mapper)
-            throws IllegalArgumentException;
+    Dataset mapColumns(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            TriFunction<?, ?, ?, ?> mapper) throws IllegalArgumentException;
 
     /**
      * Transforms the Dataset by applying a mapping function to the specified columns and creating a new column with the results.
@@ -8352,8 +8368,8 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
      */
-    Dataset map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, Function<? super DisposableObjArray, ?> mapper)
-            throws IllegalArgumentException;
+    Dataset mapColumns(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Function<? super DisposableObjArray, ?> mapper) throws IllegalArgumentException;
 
     /**
      * Transforms the Dataset by applying a mapping function to the specified column and creating new rows with the results.
@@ -8368,7 +8384,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new rows added and the specified column copied.
      * @throws IllegalArgumentException if the specified column name is not found in the Dataset.
      */
-    Dataset flatMap(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ? extends Collection<?>> mapper)
+    Dataset flatMapColumn(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ? extends Collection<?>> mapper)
             throws IllegalArgumentException;
 
     /**
@@ -8384,7 +8400,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new rows added and the specified columns copied.
      * @throws IllegalArgumentException if the specified column name is not found in the Dataset.
      */
-    Dataset flatMap(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ? extends Collection<?>> mapper)
+    Dataset flatMapColumn(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ? extends Collection<?>> mapper)
             throws IllegalArgumentException;
 
     /**
@@ -8400,7 +8416,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new rows added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset flatMap(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+    Dataset flatMapColumns(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             BiFunction<?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
@@ -8416,7 +8432,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new rows added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset.
      */
-    Dataset flatMap(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+    Dataset flatMapColumns(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             TriFunction<?, ?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
@@ -8432,7 +8448,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the new column added and the specified columns copied.
      * @throws IllegalArgumentException if any of the specified column names are not found in the Dataset or {@code fromColumnNames} is empty.
      */
-    Dataset flatMap(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+    Dataset flatMapColumns(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             Function<? super DisposableObjArray, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
@@ -8601,8 +8617,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
      * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
-     * Dataset joined = right.rightJoin(Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}}), Arrays.asList("id"));
+     * Dataset joined = left.rightJoin(right, "id", "id");
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -8692,7 +8709,8 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset left = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * Dataset joined = left.fullJoin(Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}}), Arrays.asList("id"));
+     * Dataset right = Dataset.rows(Arrays.asList("id", "score"), new Object[][] {{1, 95}});
+     * Dataset joined = left.fullJoin(right, "id", "id");
      * }</pre>
      *
      * @param right the other Dataset to join with.
@@ -9731,530 +9749,531 @@ public sealed interface Dataset permits RowDataset {
      */
     Dataset exceptAll(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
-    /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
-     * <br />
-     * The intersection contains rows that exist in both Datasets based on matching column values.
-     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
-     *     new Object[][] {
-     *          {1, "Alice"},
-     *          {2, "Bob"},
-     *          {2, "Bob"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
-     *     new Object[][] {
-     *          {1, "Alice"},
-     *          {2, "Bob"},
-     *          {3, "Charlie"},
-     *          {2, "Bob"},  // duplicate row
-     *          {2, "Bob"}   // another duplicate
-     *     });
-     *
-     * Dataset result = dataset1.intersection(dataset2);
-     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
-     * }</pre>
-     *
-     * @param other the Dataset to find common rows with. Must not be {@code null}.
-     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have the same columns.
-     * @see #intersection(Dataset, boolean)
-     * @see #intersection(Dataset, Collection)
-     * @see #intersection(Dataset, Collection, boolean)
-     * @see #intersect(Dataset)
-     * @see #intersectAll(Dataset)
-     * @see #union(Dataset)
-     * @see #except(Dataset)
-     */
-    Dataset intersection(Dataset other) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
-     * <br />
-     * The intersection contains rows that exist in both Datasets based on matching column values.
-     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
-     *     new Object[][] {
-     *          {1, "Alice"},
-     *          {2, "Bob"},
-     *          {2, "Bob"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
-     *     new Object[][] {
-     *          {1, "Alice"},
-     *          {2, "Bob"},
-     *          {3, "Charlie"},
-     *          {2, "Bob"},  // duplicate row
-     *          {2, "Bob"}   // another duplicate
-     *     });
-     *
-     * Dataset result = dataset1.intersection(dataset2, true);
-     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
-     * }</pre>
-     *
-     * @param other the Dataset to find common rows with. Must not be {@code null}.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns, or if the two Datasets don't have common columns when {@code requiresSameColumns} is {@code false}.
-     * @see #intersection(Dataset)
-     * @see #intersection(Dataset, Collection)
-     * @see #intersection(Dataset, Collection, boolean)
-     * @see #intersect(Dataset)
-     * @see #intersectAll(Dataset)
-     * @see #union(Dataset)
-     * @see #except(Dataset)
-     */
-    Dataset intersection(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
-     * <br />
-     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
-     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 75000},
-     *          {2, "Bob", 75000},
-     *          {3, "Charlie", 65000},
-     *          {4, "Dave", 70000},
-     *          {2, "Bob", 80000}  // different salary but same keys
-     *     });
-     *
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.intersection(dataset2, keyColumns);
-     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
-     * // with column structure matching dataset1
-     * }</pre>
-     *
-     * @param other the Dataset to find common rows with. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
-     * @see #intersection(Dataset)
-     * @see #intersection(Dataset, boolean)
-     * @see #intersection(Dataset, Collection, boolean)
-     * @see #intersect(Dataset, Collection)
-     * @see #intersectAll(Dataset, Collection)
-     */
-    Dataset intersection(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
-     * <br />
-     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
-     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
-     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 75000},
-     *          {2, "Bob", 75000},
-     *          {3, "Charlie", 65000},
-     *          {4, "Dave", 70000},
-     *          {2, "Bob", 80000}  // different salary but same keys
-     *     });
-     * 
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.intersection(dataset2, keyColumns, false);
-     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
-     * // with column structure matching dataset1
-     * }</pre>
-     *
-     * @param other the Dataset to find common rows with. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
-     * @see #intersection(Dataset)
-     * @see #intersection(Dataset, boolean)
-     * @see #intersection(Dataset, Collection)
-     * @see #intersect(Dataset, Collection)
-     * @see #intersectAll(Dataset, Collection)
-     */
-    Dataset intersection(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
-     * <br />
-     * The comparison is performed on common columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {3, "Charlie", "Marketing"},
-     *          {3, "Charlie", "Marketing"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 50000},
-     *          {4, "Dave", 60000},
-     *          {3, "Charlie", 55000}
-     *     });
-     *
-     * Dataset result = dataset1.difference(dataset2);
-     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
-     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have common columns.
-     * @see #difference(Dataset, boolean)
-     * @see #difference(Dataset, Collection)
-     * @see #difference(Dataset, Collection, boolean)
-     * @see #symmetricDifference(Dataset)
-     * @see #intersection(Dataset)
-     */
-    Dataset difference(Dataset other) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
-     * <br />
-     * The comparison is performed on common columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {3, "Charlie", "Marketing"},
-     *          {3, "Charlie", "Marketing"}  // duplicate row
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 50000},
-     *          {4, "Dave", 60000},
-     *          {3, "Charlie", 55000}
-     *     });
-     *
-     * Dataset result = dataset1.difference(dataset2, false);
-     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
-     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
-     * @see #difference(Dataset)
-     * @see #difference(Dataset, Collection)
-     * @see #difference(Dataset, Collection, boolean)
-     * @see #symmetricDifference(Dataset)
-     * @see #intersection(Dataset)
-     */
-    Dataset difference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
-     * <br />
-     * The comparison is performed on the specified key columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {3, "Charlie", "Marketing"},
-     *          {3, "Charlie", "Finance"}  // duplicate key values
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 50000},
-     *          {3, "Charlie", 60000}
-     *     });
-     *
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.difference(dataset2, keyColumns);
-     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
-     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
-     * @see #difference(Dataset)
-     * @see #difference(Dataset, boolean)
-     * @see #difference(Dataset, Collection, boolean)
-     * @see #symmetricDifference(Dataset)
-     * @see #intersection(Dataset, Collection)
-     */
-    Dataset difference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
-     * <br />
-     * The comparison is performed on the specified key columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will have the same column structure as this Dataset.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {3, "Charlie", "Marketing"},
-     *          {3, "Charlie", "Finance"}  // duplicate key values
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {1, "Alice", 50000},
-     *          {3, "Charlie", 60000}
-     *     });
-     *
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.difference(dataset2, keyColumns, false);
-     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
-     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
-     * @see #difference(Dataset)
-     * @see #difference(Dataset, boolean)
-     * @see #difference(Dataset, Collection)
-     * @see #symmetricDifference(Dataset)
-     * @see #intersection(Dataset, Collection, boolean)
-     */
-    Dataset difference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * <br />
-     * but not in both. This is the set-theoretic symmetric difference operation.
-     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
-     * after removing the minimum number of shared occurrences from both sources.
-     * The comparison is performed on the common columns between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"},  // duplicate row
-     *          {3, "Charlie", "Marketing"}
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {2, "Bob", 50000},
-     *          {3, "Charlie", 55000},
-     *          {4, "Dave", 60000}
-     *     });
-     *
-     * Dataset result = dataset1.symmetricDifference(dataset2);
-     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
-     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null} or if the two Datasets don't have the same columns.
-     * @see #symmetricDifference(Dataset, boolean)
-     * @see #symmetricDifference(Dataset, Collection)
-     * @see #symmetricDifference(Dataset, Collection, boolean)
-     * @see #difference(Dataset)
-     * @see #intersection(Dataset)
-     */
-    Dataset symmetricDifference(Dataset other) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * <br />
-     * but not in both. This is the set-theoretic symmetric difference operation.
-     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
-     * after removing the minimum number of shared occurrences from both sources.
-     * The comparison is performed on the common columns between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"},  // duplicate row
-     *          {3, "Charlie", "Marketing"}
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {2, "Bob", 50000},
-     *          {3, "Charlie", 55000},
-     *          {4, "Dave", 60000}
-     *     });
-     *
-     * Dataset result = dataset1.symmetricDifference(dataset2, false);
-     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
-     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
-     * @see #symmetricDifference(Dataset)
-     * @see #symmetricDifference(Dataset, Collection)
-     * @see #symmetricDifference(Dataset, Collection, boolean)
-     * @see #difference(Dataset, boolean)
-     * @see #intersection(Dataset, boolean)
-     */
-    Dataset symmetricDifference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * <br />
-     * but not in both. This is the set-theoretic symmetric difference operation.
-     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
-     * after removing the minimum number of shared occurrences from both sources.
-     * The comparison is performed on the specified key columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"},  // duplicate row
-     *          {3, "Charlie", "Marketing"}
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {2, "Bob", 50000},
-     *          {3, "Charlie", 55000},
-     *          {4, "Dave", 60000}
-     *     });
-     *
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns);
-     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
-     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets.
-     * @see #symmetricDifference(Dataset)
-     * @see #symmetricDifference(Dataset, boolean)
-     * @see #symmetricDifference(Dataset, Collection, boolean)
-     * @see #difference(Dataset, Collection)
-     * @see #intersection(Dataset, Collection)
-     */
-    Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
-
-    /**
-     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
-     * <br />
-     * but not in both. This is the set-theoretic symmetric difference operation.
-     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
-     * after removing the minimum number of shared occurrences from both sources.
-     * The comparison is performed on the specified key columns only between the two Datasets.
-     * Duplicated rows in the returned Dataset will NOT be eliminated.
-     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-     * <br />
-     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
-     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
-     *     new Object[][] {
-     *          {1, "Alice", "HR"},
-     *          {2, "Bob", "Engineering"},
-     *          {2, "Bob", "Engineering"},  // duplicate row
-     *          {3, "Charlie", "Marketing"}
-     *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
-     *     new Object[][] {
-     *          {2, "Bob", 50000},
-     *          {3, "Charlie", 55000},
-     *          {4, "Dave", 60000}
-     *     });
-     *
-     * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns, false);
-     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
-     * // and {4, "Dave", null, 60000}
-     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
-     * }</pre>
-     *
-     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
-     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
-     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
-     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
-     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns.
-     * @see #symmetricDifference(Dataset)
-     * @see #symmetricDifference(Dataset, boolean)
-     * @see #symmetricDifference(Dataset, Collection)
-     * @see #difference(Dataset, Collection, boolean)
-     * @see #intersection(Dataset, Collection, boolean)
-     */
-    Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+    // Confusion with intersect/intersectAll/except/exceptAll, below methods are move to class: N
+    //    /**
+    //     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+    //     * <br />
+    //     * The intersection contains rows that exist in both Datasets based on matching column values.
+    //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+    //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"},
+    //     *          {2, "Bob"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"},
+    //     *          {3, "Charlie"},
+    //     *          {2, "Bob"},  // duplicate row
+    //     *          {2, "Bob"}   // another duplicate
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.intersection(dataset2);
+    //     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find common rows with. Must not be {@code null}.
+    //     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have the same columns.
+    //     * @see #intersection(Dataset, boolean)
+    //     * @see #intersection(Dataset, Collection)
+    //     * @see #intersection(Dataset, Collection, boolean)
+    //     * @see #intersect(Dataset)
+    //     * @see #intersectAll(Dataset)
+    //     * @see #union(Dataset)
+    //     * @see #except(Dataset)
+    //     */
+    //    Dataset intersection(Dataset other) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+    //     * <br />
+    //     * The intersection contains rows that exist in both Datasets based on matching column values.
+    //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+    //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"},
+    //     *          {2, "Bob"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice"},
+    //     *          {2, "Bob"},
+    //     *          {3, "Charlie"},
+    //     *          {2, "Bob"},  // duplicate row
+    //     *          {2, "Bob"}   // another duplicate
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.intersection(dataset2, true);
+    //     * // Returns contains {1, "Alice"} once and {2, "Bob"} twice (minimum of 2 and 3 occurrences)
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find common rows with. Must not be {@code null}.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing rows present in both Datasets, with duplicates handled based on minimum occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns, or if the two Datasets don't have common columns when {@code requiresSameColumns} is {@code false}.
+    //     * @see #intersection(Dataset)
+    //     * @see #intersection(Dataset, Collection)
+    //     * @see #intersection(Dataset, Collection, boolean)
+    //     * @see #intersect(Dataset)
+    //     * @see #intersectAll(Dataset)
+    //     * @see #union(Dataset)
+    //     * @see #except(Dataset)
+    //     */
+    //    Dataset intersection(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+    //     * <br />
+    //     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
+    //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+    //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 75000},
+    //     *          {2, "Bob", 75000},
+    //     *          {3, "Charlie", 65000},
+    //     *          {4, "Dave", 70000},
+    //     *          {2, "Bob", 80000}  // different salary but same keys
+    //     *     });
+    //     *
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.intersection(dataset2, keyColumns);
+    //     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
+    //     * // with column structure matching dataset1
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find common rows with. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
+    //     * @see #intersection(Dataset)
+    //     * @see #intersection(Dataset, boolean)
+    //     * @see #intersection(Dataset, Collection, boolean)
+    //     * @see #intersect(Dataset, Collection)
+    //     * @see #intersectAll(Dataset, Collection)
+    //     */
+    //    Dataset intersection(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that appear in both this Dataset and the specified Dataset.
+    //     * <br />
+    //     * The intersection contains rows that exist in both Datasets based on the values in the specified key columns.
+    //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
+    //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 75000},
+    //     *          {2, "Bob", 75000},
+    //     *          {3, "Charlie", 65000},
+    //     *          {4, "Dave", 70000},
+    //     *          {2, "Bob", 80000}  // different salary but same keys
+    //     *     });
+    //     * 
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.intersection(dataset2, keyColumns, false);
+    //     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
+    //     * // with column structure matching dataset1
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find common rows with. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled based on minimum occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
+    //     * @see #intersection(Dataset)
+    //     * @see #intersection(Dataset, boolean)
+    //     * @see #intersection(Dataset, Collection)
+    //     * @see #intersect(Dataset, Collection)
+    //     * @see #intersectAll(Dataset, Collection)
+    //     */
+    //    Dataset intersection(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+    //     * <br />
+    //     * The comparison is performed on common columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {3, "Charlie", "Marketing"},
+    //     *          {3, "Charlie", "Marketing"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 50000},
+    //     *          {4, "Dave", 60000},
+    //     *          {3, "Charlie", 55000}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.difference(dataset2);
+    //     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+    //     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
+    //     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if the two Datasets don't have common columns.
+    //     * @see #difference(Dataset, boolean)
+    //     * @see #difference(Dataset, Collection)
+    //     * @see #difference(Dataset, Collection, boolean)
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #intersection(Dataset)
+    //     */
+    //    Dataset difference(Dataset other) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+    //     * <br />
+    //     * The comparison is performed on common columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {3, "Charlie", "Marketing"},
+    //     *          {3, "Charlie", "Marketing"}  // duplicate row
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 50000},
+    //     *          {4, "Dave", 60000},
+    //     *          {3, "Charlie", 55000}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.difference(dataset2, false);
+    //     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+    //     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+    //     * @see #difference(Dataset)
+    //     * @see #difference(Dataset, Collection)
+    //     * @see #difference(Dataset, Collection, boolean)
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #intersection(Dataset)
+    //     */
+    //    Dataset difference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+    //     * <br />
+    //     * The comparison is performed on the specified key columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {3, "Charlie", "Marketing"},
+    //     *          {3, "Charlie", "Finance"}  // duplicate key values
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 50000},
+    //     *          {3, "Charlie", 60000}
+    //     *     });
+    //     *
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.difference(dataset2, keyColumns);
+    //     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+    //     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
+    //     * @see #difference(Dataset)
+    //     * @see #difference(Dataset, boolean)
+    //     * @see #difference(Dataset, Collection, boolean)
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #intersection(Dataset, Collection)
+    //     */
+    //    Dataset difference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset with the rows in this Dataset but not in the specified Dataset {@code other}, considering the number of occurrences of each row.
+    //     * <br />
+    //     * The comparison is performed on the specified key columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will have the same column structure as this Dataset.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {3, "Charlie", "Marketing"},
+    //     *          {3, "Charlie", "Finance"}  // duplicate key values
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", 50000},
+    //     *          {3, "Charlie", 60000}
+    //     *     });
+    //     *
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.difference(dataset2, keyColumns, false);
+    //     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+    //     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to compare against this Dataset. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing the rows that are present in this Dataset but not in the specified Dataset, based on the specified key columns and considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+    //     * @see #difference(Dataset)
+    //     * @see #difference(Dataset, boolean)
+    //     * @see #difference(Dataset, Collection)
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #intersection(Dataset, Collection, boolean)
+    //     */
+    //    Dataset difference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
+    //     * <br />
+    //     * but not in both. This is the set-theoretic symmetric difference operation.
+    //     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+    //     * after removing the minimum number of shared occurrences from both sources.
+    //     * The comparison is performed on the common columns between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"},  // duplicate row
+    //     *          {3, "Charlie", "Marketing"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {2, "Bob", 50000},
+    //     *          {3, "Charlie", 55000},
+    //     *          {4, "Dave", 60000}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.symmetricDifference(dataset2);
+    //     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+    //     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+    //     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null} or if the two Datasets don't have the same columns.
+    //     * @see #symmetricDifference(Dataset, boolean)
+    //     * @see #symmetricDifference(Dataset, Collection)
+    //     * @see #symmetricDifference(Dataset, Collection, boolean)
+    //     * @see #difference(Dataset)
+    //     * @see #intersection(Dataset)
+    //     */
+    //    Dataset symmetricDifference(Dataset other) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
+    //     * <br />
+    //     * but not in both. This is the set-theoretic symmetric difference operation.
+    //     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+    //     * after removing the minimum number of shared occurrences from both sources.
+    //     * The comparison is performed on the common columns between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as they share at least one common column.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"},  // duplicate row
+    //     *          {3, "Charlie", "Marketing"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {2, "Bob", 50000},
+    //     *          {3, "Charlie", 55000},
+    //     *          {4, "Dave", 60000}
+    //     *     });
+    //     *
+    //     * Dataset result = dataset1.symmetricDifference(dataset2, false);
+    //     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+    //     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #symmetricDifference(Dataset, Collection)
+    //     * @see #symmetricDifference(Dataset, Collection, boolean)
+    //     * @see #difference(Dataset, boolean)
+    //     * @see #intersection(Dataset, boolean)
+    //     */
+    //    Dataset symmetricDifference(Dataset other, boolean requiresSameColumns) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
+    //     * <br />
+    //     * but not in both. This is the set-theoretic symmetric difference operation.
+    //     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+    //     * after removing the minimum number of shared occurrences from both sources.
+    //     * The comparison is performed on the specified key columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"},  // duplicate row
+    //     *          {3, "Charlie", "Marketing"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {2, "Bob", 50000},
+    //     *          {3, "Charlie", 55000},
+    //     *          {4, "Dave", 60000}
+    //     *     });
+    //     *
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns);
+    //     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+    //     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets.
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #symmetricDifference(Dataset, boolean)
+    //     * @see #symmetricDifference(Dataset, Collection, boolean)
+    //     * @see #difference(Dataset, Collection)
+    //     * @see #intersection(Dataset, Collection)
+    //     */
+    //    Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+    //
+    //    /**
+    //     * Returns a new Dataset containing rows that are present in either this Dataset or the specified Dataset,
+    //     * <br />
+    //     * but not in both. This is the set-theoretic symmetric difference operation.
+    //     * For rows that appear multiple times, the symmetric difference contains occurrences that remain
+    //     * after removing the minimum number of shared occurrences from both sources.
+    //     * The comparison is performed on the specified key columns only between the two Datasets.
+    //     * Duplicated rows in the returned Dataset will NOT be eliminated.
+    //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
+    //     * <br />
+    //     * If {@code requiresSameColumns} is {@code true}, both Datasets must have the same columns, otherwise an {@code IllegalArgumentException} will be thrown.
+    //     * If {@code requiresSameColumns} is {@code false}, the Datasets can have different columns as long as the specified key columns exist in both.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+    //     *     new Object[][] {
+    //     *          {1, "Alice", "HR"},
+    //     *          {2, "Bob", "Engineering"},
+    //     *          {2, "Bob", "Engineering"},  // duplicate row
+    //     *          {3, "Charlie", "Marketing"}
+    //     *     });
+    //     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+    //     *     new Object[][] {
+    //     *          {2, "Bob", 50000},
+    //     *          {3, "Charlie", 55000},
+    //     *          {4, "Dave", 60000}
+    //     *     });
+    //     *
+    //     * Collection<String> keyColumns = Arrays.asList("id", "name");
+    //     * Dataset result = dataset1.symmetricDifference(dataset2, keyColumns, false);
+    //     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
+    //     * // and {4, "Dave", null, 60000}
+    //     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+    //     * }</pre>
+    //     *
+    //     * @param other the Dataset to find symmetric difference with this Dataset. Must not be {@code null}.
+    //     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+    //     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+    //     * @return a new Dataset containing rows that are present in either this Dataset or the specified Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+    //     * @throws IllegalArgumentException if the {@code other} Dataset is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns.
+    //     * @see #symmetricDifference(Dataset)
+    //     * @see #symmetricDifference(Dataset, boolean)
+    //     * @see #symmetricDifference(Dataset, Collection)
+    //     * @see #difference(Dataset, Collection, boolean)
+    //     * @see #intersection(Dataset, Collection, boolean)
+    //     */
+    //    Dataset symmetricDifference(Dataset other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
      * Performs a cartesian product operation with this Dataset and another Dataset.
@@ -10305,7 +10324,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}, {2}, {3}});
-     * Dataset[] parts = dataset.split(2);
+     * Stream<Dataset> parts = dataset.split(2);
      * }</pre>
      *
      * @param chunkSize the maximum number of rows each split Dataset should contain.
@@ -11331,7 +11350,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}});
-     * Map<String, Object> props = dataset.properties();
+     * Map<String, Object> props = dataset.getProperties();
      * }</pre>
      *
      * @return a Map containing the properties of the Dataset.

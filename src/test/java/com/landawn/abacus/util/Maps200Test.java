@@ -330,14 +330,14 @@ public class Maps200Test extends TestBase {
         map.put("a", "apple");
         Supplier<String> supplier = () -> "banana";
 
-        assertEquals("apple", Maps.getAndPutIfAbsent(map, "a", supplier));
+        assertEquals("apple", Maps.getOrPutIfAbsent(map, "a", supplier));
         assertEquals("apple", map.get("a"));
 
-        assertNotNull(Maps.getAndPutIfAbsent(map, "b", supplier));
+        assertNotNull(Maps.getOrPutIfAbsent(map, "b", supplier));
         assertEquals("banana", map.get("b"));
 
         map.put("c", null);
-        assertNotNull(Maps.getAndPutIfAbsent(map, "c", supplier));
+        assertNotNull(Maps.getOrPutIfAbsent(map, "c", supplier));
         assertEquals("banana", map.get("c"));
     }
 
@@ -347,16 +347,16 @@ public class Maps200Test extends TestBase {
         List<Integer> listA = new ArrayList<>(Arrays.asList(1));
         map.put("a", listA);
 
-        assertSame(listA, Maps.getAndPutListIfAbsent(map, "a"));
+        assertSame(listA, Maps.getOrPutListIfAbsent(map, "a"));
         assertEquals(Arrays.asList(1), map.get("a"));
 
-        List<Integer> listB = Maps.getAndPutListIfAbsent(map, "b");
+        List<Integer> listB = Maps.getOrPutListIfAbsent(map, "b");
         assertNotNull(listB);
         assertNotNull(map.get("b"));
         assertTrue(map.get("b").isEmpty());
 
         map.put("c", null);
-        List<Integer> listC = Maps.getAndPutListIfAbsent(map, "c");
+        List<Integer> listC = Maps.getOrPutListIfAbsent(map, "c");
         assertNotNull(listC);
         assertNotNull(map.get("c"));
         assertTrue(map.get("c").isEmpty());
@@ -368,7 +368,7 @@ public class Maps200Test extends TestBase {
         map = new HashMap<>(map);
         map.put("e", null);
         List<String> keys = Arrays.asList("a", "c", "d", "e");
-        List<Integer> result = Maps.getIfPresentForEach(map, keys);
+        List<Integer> result = Maps.getValuesIfPresent(map, keys);
         assertEquals(Arrays.asList(1, 4), result);
     }
 
@@ -379,7 +379,7 @@ public class Maps200Test extends TestBase {
         map.put("b", null);
         List<String> keys = Arrays.asList("a", "b", "c");
         Integer defaultVal = 99;
-        List<Integer> result = Maps.getOrDefaultIfAbsentForEach(map, keys, defaultVal);
+        List<Integer> result = Maps.getValuesOrDefault(map, keys, defaultVal);
         assertEquals(Arrays.asList(1, defaultVal, defaultVal), result);
     }
 
@@ -440,10 +440,10 @@ public class Maps200Test extends TestBase {
         Map<String, Integer> map = Map.of("a", 1, "b", 2);
         map = new HashMap<>(map);
         map.put("c", null);
-        assertTrue(Maps.contains(map, CommonUtil.newEntry("a", 1)));
-        assertFalse(Maps.contains(map, CommonUtil.newEntry("a", 2)));
-        assertTrue(Maps.contains(map, CommonUtil.newEntry("c", null)));
-        assertFalse(Maps.contains(map, CommonUtil.newEntry("d", null)));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newEntry("a", 1)));
+        assertFalse(Maps.containsEntry(map, CommonUtil.newEntry("a", 2)));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newEntry("c", null)));
+        assertFalse(Maps.containsEntry(map, CommonUtil.newEntry("d", null)));
     }
 
     @Test
@@ -451,10 +451,10 @@ public class Maps200Test extends TestBase {
         Map<String, Integer> map = Map.of("a", 1, "b", 2);
         map = new HashMap<>(map);
         map.put("c", null);
-        assertTrue(Maps.contains(map, "a", 1));
-        assertFalse(Maps.contains(map, "a", 2));
-        assertTrue(Maps.contains(map, "c", null));
-        assertFalse(Maps.contains(map, "d", null));
+        assertTrue(Maps.containsEntry(map, "a", 1));
+        assertFalse(Maps.containsEntry(map, "a", 2));
+        assertTrue(Maps.containsEntry(map, "c", null));
+        assertFalse(Maps.containsEntry(map, "d", null));
     }
 
     @Test
@@ -544,17 +544,17 @@ public class Maps200Test extends TestBase {
     @Test
     public void testRemove_entry() {
         Map<String, Integer> map = new HashMap<>(Map.of("a", 1, "b", 2));
-        assertTrue(Maps.remove(map, CommonUtil.newEntry("a", 1)));
+        assertTrue(Maps.removeEntry(map, CommonUtil.newEntry("a", 1)));
         assertEquals(1, map.size());
-        assertFalse(Maps.remove(map, CommonUtil.newEntry("b", 3)));
+        assertFalse(Maps.removeEntry(map, CommonUtil.newEntry("b", 3)));
     }
 
     @Test
     public void testRemove_keyValue() {
         Map<String, Integer> map = new HashMap<>(Map.of("a", 1, "b", 2));
-        assertTrue(Maps.remove(map, "a", 1));
-        assertFalse(Maps.remove(map, "b", 3));
-        assertFalse(Maps.remove(map, "c", 2));
+        assertTrue(Maps.removeEntry(map, "a", 1));
+        assertFalse(Maps.removeEntry(map, "b", 3));
+        assertFalse(Maps.removeEntry(map, "c", 2));
     }
 
     @Test
@@ -732,19 +732,19 @@ public class Maps200Test extends TestBase {
     @Test
     public void testBean2Map_simple() {
         SimpleBean bean = new SimpleBean(1, "test");
-        Map<String, Object> map = Beans.bean2Map(bean);
+        Map<String, Object> map = Beans.beanToMap(bean);
         assertEquals(Map.of("id", 1, "value", "test"), map);
     }
 
     @Test
     public void testMap2Bean_simple() {
         Map<String, Object> map = Map.of("id", 10, "value", "hello", "extra", "ignored");
-        SimpleBean bean = Beans.map2Bean(map, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, SimpleBean.class);
         assertEquals(10, bean.id);
         assertEquals("hello", bean.value);
 
         Map<String, Object> mapNoMatch = Map.of("id", 20, "value", "world", "extraField", "data");
-        assertThrows(IllegalArgumentException.class, () -> Beans.map2Bean(mapNoMatch, false, false, SimpleBean.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(mapNoMatch, false, false, SimpleBean.class));
 
     }
 
@@ -752,7 +752,7 @@ public class Maps200Test extends TestBase {
     public void testDeepBean2Map() {
         Address address = new Address("NY", "10001");
         Person person = new Person("John", 30, address);
-        Map<String, Object> map = Beans.deepBean2Map(person);
+        Map<String, Object> map = Beans.deepBeanToMap(person);
 
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
@@ -766,7 +766,7 @@ public class Maps200Test extends TestBase {
     public void testBean2FlatMap() {
         Address address = new Address("LA", "90001");
         Person person = new Person("Jane", 25, address);
-        Map<String, Object> flatMap = Beans.bean2FlatMap(person);
+        Map<String, Object> flatMap = Beans.beanToFlatMap(person);
 
         assertEquals("Jane", flatMap.get("name"));
         assertEquals(25, flatMap.get("age"));

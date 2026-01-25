@@ -598,7 +598,7 @@ public class Array200Test extends TestBase {
     public void testConcatt_generic_2D() {
         String[][] a = { { "a" }, { "b", "c" } };
         String[][] b = { { "d" } };
-        String[][] res = Array.concatt(a, b);
+        String[][] res = Array.concat2D(a, b);
 
         assertEquals(2, res.length);
         assertArrayEquals(new String[] { "a", "d" }, res[0]);
@@ -606,13 +606,13 @@ public class Array200Test extends TestBase {
 
         String[][] c = null;
         String[][] d = { { "x" } };
-        String[][] res2 = Array.concatt(c, d);
+        String[][] res2 = Array.concat2D(c, d);
         assertNotNull(res2);
         assertEquals(1, res2.length);
         assertArrayEquals(new String[] { "x" }, res2[0]);
         assertNotSame(d, res2);
 
-        String[][] res3 = Array.concatt(d, c);
+        String[][] res3 = Array.concat2D(d, c);
         assertNotNull(res3);
         assertArrayEquals(new String[] { "x" }, res3[0]);
     }
@@ -814,7 +814,7 @@ public class Array200Test extends TestBase {
     public void testConcatt_String_3D_EmptyAndNulls() {
         String[][][] a = { { { "a" }, null }, { {} } };
         String[][][] b = { { null, { "b" } } };
-        String[][][] result = Array.concatt(a, b);
+        String[][][] result = Array.concat3D(a, b);
 
         assertEquals(2, result.length);
         assertEquals(String[][].class, result.getClass().getComponentType());
@@ -829,7 +829,7 @@ public class Array200Test extends TestBase {
 
         String[][][] c = null;
         String[][][] d = { { { "x" } } };
-        String[][][] resNull = Array.concatt(c, d);
+        String[][][] resNull = Array.concat3D(c, d);
         assertNotNull(resNull);
         assertEquals(1, resNull.length);
         assertArrayEquals(new String[][] { { "x" } }, resNull[0]);

@@ -1184,68 +1184,68 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testMapSingleColumn() {
         Function<Object, String> mapper = name -> ((String) name).toUpperCase();
-        Dataset mapped = dataset.map("name", "NAME", "id", mapper);
+        Dataset mapped = dataset.mapColumn("name", "NAME", "id", mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
         assertTrue(mapped.containsColumn("NAME"));
         assertTrue(mapped.containsColumn("id"));
-        assertEquals("JOHN", mapped.absolute(0).get("NAME"));
+        assertEquals("JOHN", mapped.moveToRow(0).get("NAME"));
     }
 
     @Test
     public void testMapSingleColumnWithMultipleCopying() {
         Function<Object, Integer> mapper = age -> ((Integer) age) * 2;
-        Dataset mapped = dataset.map("age", "doubleAge", N.asList("id", "name"), mapper);
+        Dataset mapped = dataset.mapColumn("age", "doubleAge", N.asList("id", "name"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
         assertTrue(mapped.containsColumn("doubleAge"));
         assertTrue(mapped.containsColumn("id"));
         assertTrue(mapped.containsColumn("name"));
-        assertEquals(50, (Integer) mapped.absolute(0).get("doubleAge"));
+        assertEquals(50, (Integer) mapped.moveToRow(0).get("doubleAge"));
     }
 
     @Test
     public void testMapTuple2() {
         BiFunction<Object, Object, String> mapper = (name, age) -> name + ":" + age;
-        Dataset mapped = dataset.map(Tuple.of("name", "age"), "info", N.asList("id"), mapper);
+        Dataset mapped = dataset.mapColumns(Tuple.of("name", "age"), "info", N.asList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
         assertTrue(mapped.containsColumn("info"));
         assertTrue(mapped.containsColumn("id"));
-        assertEquals("John:25", mapped.absolute(0).get("info"));
+        assertEquals("John:25", mapped.moveToRow(0).get("info"));
     }
 
     @Test
     public void testMapTuple3() {
         TriFunction<Object, Object, Object, String> mapper = (id, name, age) -> id + "-" + name + "-" + age;
-        Dataset mapped = dataset.map(Tuple.of("id", "name", "age"), "combined", N.asList("city"), mapper);
+        Dataset mapped = dataset.mapColumns(Tuple.of("id", "name", "age"), "combined", N.asList("city"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
         assertTrue(mapped.containsColumn("combined"));
         assertTrue(mapped.containsColumn("city"));
-        assertEquals("1-John-25", mapped.absolute(0).get("combined"));
+        assertEquals("1-John-25", mapped.moveToRow(0).get("combined"));
     }
 
     @Test
     public void testMapMultipleColumns() {
         Function<DisposableObjArray, String> mapper = arr -> arr.get(0) + ":" + arr.get(1);
-        Dataset mapped = dataset.map(N.asList("name", "city"), "location", N.asList("id"), mapper);
+        Dataset mapped = dataset.mapColumns(N.asList("name", "city"), "location", N.asList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
         assertTrue(mapped.containsColumn("location"));
         assertTrue(mapped.containsColumn("id"));
-        assertEquals("John:NYC", mapped.absolute(0).get("location"));
+        assertEquals("John:NYC", mapped.moveToRow(0).get("location"));
     }
 
     @Test
     public void testFlatMapSingleColumn() {
         Function<Object, Collection<String>> mapper = name -> N.asList(((String) name).toLowerCase(), ((String) name).toUpperCase());
-        Dataset flatMapped = dataset.flatMap("name", "variations", "id", mapper);
+        Dataset flatMapped = dataset.flatMapColumn("name", "variations", "id", mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1256,7 +1256,7 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testFlatMapSingleColumnWithMultipleCopying() {
         Function<Object, Collection<Integer>> mapper = age -> N.asList((Integer) age, (Integer) age + 10);
-        Dataset flatMapped = dataset.flatMap("age", "ages", N.asList("id", "name"), mapper);
+        Dataset flatMapped = dataset.flatMapColumn("age", "ages", N.asList("id", "name"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1268,7 +1268,7 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testFlatMapTuple2() {
         BiFunction<Object, Object, Collection<String>> mapper = (name, age) -> N.asList(name + "-young", name + "-old");
-        Dataset flatMapped = dataset.flatMap(Tuple.of("name", "age"), "status", N.asList("id"), mapper);
+        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("name", "age"), "status", N.asList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1279,7 +1279,7 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testFlatMapTuple3() {
         TriFunction<Object, Object, Object, Collection<String>> mapper = (id, name, age) -> N.asList("ID" + id, "NAME" + name, "AGE" + age);
-        Dataset flatMapped = dataset.flatMap(Tuple.of("id", "name", "age"), "tags", N.asList("city"), mapper);
+        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("id", "name", "age"), "tags", N.asList("city"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(15, flatMapped.size());
@@ -1290,7 +1290,7 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testFlatMapMultipleColumns() {
         Function<DisposableObjArray, Collection<String>> mapper = arr -> N.asList(arr.get(0).toString(), arr.get(1).toString());
-        Dataset flatMapped = dataset.flatMap(N.asList("name", "city"), "values", N.asList("id"), mapper);
+        Dataset flatMapped = dataset.flatMapColumns(N.asList("name", "city"), "values", N.asList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -1645,7 +1645,7 @@ public class RowDataset101Test extends TestBase {
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataset.map("nonexistent", "new", "id", obj -> obj);
+            dataset.mapColumn("nonexistent", "new", "id", obj -> obj);
         });
     }
 
@@ -1733,12 +1733,12 @@ public class RowDataset101Test extends TestBase {
     @Test
     public void testMapWithDifferentDataTypes() {
         Function<Object, String> toStringMapper = obj -> "ID:" + obj;
-        Dataset stringMapped = dataset.map("id", "stringId", N.asList("name"), toStringMapper);
-        assertEquals("ID:1", stringMapped.absolute(0).get("stringId"));
+        Dataset stringMapped = dataset.mapColumn("id", "stringId", N.asList("name"), toStringMapper);
+        assertEquals("ID:1", stringMapped.moveToRow(0).get("stringId"));
 
         Function<Object, Double> doubleMapper = obj -> ((Integer) obj) * 1.5;
-        Dataset doubleMapped = dataset.map("age", "adjustedAge", N.asList("name"), doubleMapper);
-        assertEquals(37.5, doubleMapped.absolute(0).get("adjustedAge"));
+        Dataset doubleMapped = dataset.mapColumn("age", "adjustedAge", N.asList("name"), doubleMapper);
+        assertEquals(37.5, doubleMapped.moveToRow(0).get("adjustedAge"));
 
         Function<DisposableObjArray, Map<String, Object>> mapMapper = arr -> {
             Map<String, Object> map = new HashMap<>();
@@ -1746,15 +1746,15 @@ public class RowDataset101Test extends TestBase {
             map.put("age", arr.get(1));
             return map;
         };
-        Dataset objectMapped = dataset.map(N.asList("name", "age"), "info", N.asList("id"), mapMapper);
-        assertNotNull(objectMapped.absolute(0).get("info"));
-        assertTrue(objectMapped.absolute(0).get("info") instanceof Map);
+        Dataset objectMapped = dataset.mapColumns(N.asList("name", "age"), "info", N.asList("id"), mapMapper);
+        assertNotNull(objectMapped.moveToRow(0).get("info"));
+        assertTrue(objectMapped.moveToRow(0).get("info") instanceof Map);
     }
 
     @Test
     public void testFlatMapEdgeCases() {
         Function<Object, Collection<String>> emptyMapper = obj -> Collections.emptyList();
-        Dataset emptyFlatMapped = dataset.flatMap("name", "empty", N.asList("id"), emptyMapper);
+        Dataset emptyFlatMapped = dataset.flatMapColumn("name", "empty", N.asList("id"), emptyMapper);
         assertEquals(0, emptyFlatMapped.size());
 
         Function<Object, Collection<Integer>> variableMapper = obj -> {
@@ -1765,11 +1765,11 @@ public class RowDataset101Test extends TestBase {
             }
             return result;
         };
-        Dataset variableFlatMapped = dataset.flatMap("id", "values", N.asList("name"), variableMapper);
+        Dataset variableFlatMapped = dataset.flatMapColumn("id", "values", N.asList("name"), variableMapper);
         assertNotNull(variableFlatMapped);
 
         Function<Object, Collection<String>> nullSafeMapper = obj -> obj == null ? Collections.emptyList() : N.asList(obj.toString());
-        Dataset nullSafeFlatMapped = dataset.flatMap("name", "safe", N.asList("id"), nullSafeMapper);
+        Dataset nullSafeFlatMapped = dataset.flatMapColumn("name", "safe", N.asList("id"), nullSafeMapper);
         assertEquals(5, nullSafeFlatMapped.size());
     }
 
@@ -1848,7 +1848,7 @@ public class RowDataset101Test extends TestBase {
         parCopy.parallelSortBy("value", Comparator.reverseOrder());
 
         for (int i = 0; i < size; i++) {
-            assertEquals((Object) seqCopy.absolute(i).get("value"), (Object) parCopy.absolute(i).get("value"));
+            assertEquals((Object) seqCopy.moveToRow(i).get("value"), (Object) parCopy.moveToRow(i).get("value"));
         }
     }
 

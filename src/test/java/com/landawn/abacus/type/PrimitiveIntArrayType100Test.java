@@ -150,13 +150,13 @@ public class PrimitiveIntArrayType100Test extends TestBase {
 
     @Test
     public void testCollection2ArrayNull() {
-        assertNull(type.collection2Array(null));
+        assertNull(type.collectionToArray(null));
     }
 
     @Test
     public void testCollection2ArrayEmpty() {
         Collection<Integer> collection = new ArrayList<>();
-        int[] result = type.collection2Array(collection);
+        int[] result = type.collectionToArray(collection);
         assertNotNull(result);
         assertEquals(0, result.length);
     }
@@ -164,28 +164,28 @@ public class PrimitiveIntArrayType100Test extends TestBase {
     @Test
     public void testCollection2ArrayNonEmpty() {
         Collection<Integer> collection = Arrays.asList(1, 2, 3);
-        int[] result = type.collection2Array(collection);
+        int[] result = type.collectionToArray(collection);
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
     }
 
     @Test
     public void testArray2CollectionNull() {
         List<Integer> output = new ArrayList<>();
-        type.array2Collection(null, output);
+        type.arrayToCollection(null, output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionEmpty() {
         List<Integer> output = new ArrayList<>();
-        type.array2Collection(new int[0], output);
+        type.arrayToCollection(new int[0], output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionNonEmpty() {
         List<Integer> output = new ArrayList<>();
-        type.array2Collection(new int[] { 1, 2, 3 }, output);
+        type.arrayToCollection(new int[] { 1, 2, 3 }, output);
         assertEquals(3, output.size());
         assertEquals(Integer.valueOf(1), output.get(0));
         assertEquals(Integer.valueOf(2), output.get(1));

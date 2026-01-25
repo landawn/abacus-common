@@ -82,12 +82,12 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
 import com.landawn.abacus.parser.DeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.XMLDeserializationConfig;
-import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XMLSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.XmlDeserializationConfig;
+import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
+import com.landawn.abacus.parser.XmlSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -178,23 +178,25 @@ import com.landawn.abacus.util.stream.Stream;
  * int count = N.occurrencesOf(numbers, 3);     // Returns 2
  * boolean hasThree = N.contains(numbers, 3);   // Returns true
  * int index = N.indexOf(numbers, 3);           // Returns 2
- * int[] sorted = N.sort(numbers);              // Returns sorted copy
- * int[] reversed = N.reverse(numbers);         // Returns reversed copy
+* int[] sorted = numbers.clone();
+* N.sort(sorted);                              // Sorts in place
+* int[] reversed = numbers.clone();
+* N.reverse(reversed);                         // Reverses in place
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
  * Map<String, Integer> freq = N.occurrencesMap(list);     // {apple=2, banana=1, null=1}
  * List<String> unique = N.distinct(list);                 // [apple, banana, null]
- * List<String> filtered = N.filter(list, N::isNotNull);   // [apple, banana, apple]
+* List<String> filtered = N.filter(list, Objects::nonNull);   // [apple, banana, apple]
  *
  * // Null-safe operations - no exceptions thrown
- * String result = N.reverse(null);                  // Returns null
- * List<String> empty = N.filter(null, x -> true);   // Returns empty list
- * boolean isEmpty = N.isEmpty(null);                // Returns true
+* String result = Strings.trim((String) null);      // Returns null
+* List<String> empty = N.filter((Iterable<String>) null, x -> true);   // Returns empty list
+* boolean isEmpty = N.isEmpty((CharSequence) null); // Returns true
  *
  * // Functional operations with exception handling
  * List<String> items = Arrays.asList("file1.txt", "file2.txt");
- * N.forEach(items, N::processFile);                       // Supports checked exceptions
+ * N.forEach(items, System.out::println);                  // Supports checked exceptions
  * List<Integer> lengths = N.map(items, String::length);   // Transform with mapping
  *
  * // Mathematical operations
@@ -203,12 +205,12 @@ import com.landawn.abacus.util.stream.Stream;
  * int median = N.median(numbers);    // Calculate median
  *
  * // Async operations with built-in executor
- * N.sleep(1000);   // Thread sleep utility
- * N.asyncExecute(() -> doBackgroundTask());   // Async execution
+ * N.sleep(1);      // Thread sleep utility (1 ms)
+ * N.asyncExecute(() -> System.out.println("background"));   // Async execution
  *
  * // Type conversions and parsing
  * int parsed = Numbers.toInt("123");      // Parse integer (throws NumberFormatException if invalid)
- * List<Integer> converted = Array.asList(numbers);   // Array to list conversion
+* IntList converted = IntList.of(numbers);          // Array to IntList conversion
  *
  * // String operations
  * boolean isValid = N.notBlank("  text  ");      // String validation
@@ -4686,6 +4688,345 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a new Dataset containing rows present in both datasets.
+     * <br />
+     * Matching uses all common columns between {@code a} and {@code b}.
+     * Duplicate rows are preserved; the result keeps the minimum occurrence count from the two datasets.
+     * The result keeps the column set and column order of {@code a}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {2, "Bob"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {3, "Charlie"},
+     *          {2, "Bob"},  // duplicate row
+     *          {2, "Bob"}   // another duplicate
+     *     });
+     *
+     * Dataset result = N.intersection(dataset1, dataset2);
+     * // Result contains {1, "Alice"} once and {2, "Bob"} twice (min of 2 and 3 occurrences)
+     * }</pre>
+     *
+     * @param a the first Dataset to find common rows with. Must not be {@code null}.
+     * @param b the second Dataset to find common rows with. Must not be {@code null}.
+     * @return a new Dataset containing rows present in both Datasets, with duplicates handled by minimum occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if the two Datasets have no common columns.
+     * @see #intersection(Dataset, Dataset, boolean)
+     * @see #intersection(Dataset, Dataset, Collection)
+     * @see #intersection(Dataset, Dataset, Collection, boolean)
+     * @see Dataset#intersect(Dataset)
+     * @see Dataset#intersectAll(Dataset)
+     * @see Dataset#union(Dataset)
+     * @see Dataset#except(Dataset)
+     */
+    public static Dataset intersection(final Dataset a, final Dataset b) throws IllegalArgumentException {
+        return intersection(a, b, false);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in both datasets.
+     * <br />
+     * Matching uses all common columns between {@code a} and {@code b}.
+     * Duplicate rows are preserved; the result keeps the minimum occurrence count from the two datasets.
+     * The result keeps the column set and column order of {@code a}.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as they share at least one common column.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {2, "Bob"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     *     new Object[][] {
+     *          {1, "Alice"},
+     *          {2, "Bob"},
+     *          {3, "Charlie"},
+     *          {2, "Bob"},  // duplicate row
+     *          {2, "Bob"}   // another duplicate
+     *     });
+     *
+     * Dataset result = N.intersection(dataset1, dataset2, true);
+     * // Result contains {1, "Alice"} once and {2, "Bob"} twice (min of 2 and 3 occurrences)
+     * }</pre>
+     *
+     * @param a the first Dataset to find common rows with. Must not be {@code null}.
+     * @param b the second Dataset to find common rows with. Must not be {@code null}.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows present in both Datasets, with duplicates handled by minimum occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns, or if the two Datasets have no common columns when {@code requiresSameColumns} is {@code false}.
+     * @see #intersection(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset, Collection)
+     * @see #intersection(Dataset, Dataset, Collection, boolean)
+     * @see Dataset#intersect(Dataset)
+     * @see Dataset#intersectAll(Dataset)
+     * @see Dataset#union(Dataset)
+     * @see Dataset#except(Dataset)
+     */
+    public static Dataset intersection(final Dataset a, final Dataset b, final boolean requiresSameColumns) throws IllegalArgumentException {
+        return removeOccurrences(a, b, getKeyColumnNames(a, b), requiresSameColumns, true);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in both datasets.
+     * <br />
+     * Matching uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved; the result keeps the minimum occurrence count from the two datasets.
+     * The result keeps the column set and column order of {@code a}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 75000},
+     *          {2, "Bob", 75000},
+     *          {3, "Charlie", 65000},
+     *          {4, "Dave", 70000},
+     *          {2, "Bob", 80000}  // different salary but same keys
+     *     });
+     *
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.intersection(dataset1, dataset2, keyColumns);
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 3 occurrences)
+     * // with column structure matching dataset1
+     * }</pre>
+     *
+     * @param a the first Dataset to find common rows with. Must not be {@code null}.
+     * @param b the second Dataset to find common rows with. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled by minimum occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
+     * @see #intersection(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset, boolean)
+     * @see #intersection(Dataset, Dataset, Collection, boolean)
+     * @see Dataset#intersect(Dataset, Collection)
+     * @see Dataset#intersectAll(Dataset, Collection)
+     */
+    public static Dataset intersection(final Dataset a, final Dataset b, final Collection<String> keyColumnNames) throws IllegalArgumentException {
+        return removeOccurrences(a, b, keyColumnNames, false, true);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in both datasets.
+     * <br />
+     * Matching uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved; the result keeps the minimum occurrence count from the two datasets.
+     * The result keeps the column set and column order of {@code a}.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as the specified key columns exist in both.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 75000},
+     *          {2, "Bob", 75000},
+     *          {3, "Charlie", 65000},
+     *          {4, "Dave", 70000},
+     *          {2, "Bob", 80000}  // different salary but same keys
+     *     });
+     * 
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.intersection(dataset1, dataset2, keyColumns, false);
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 3 occurrences)
+     * // with column structure matching dataset1
+     * }</pre>
+     *
+     * @param a the first Dataset to find common rows with. Must not be {@code null}.
+     * @param b the second Dataset to find common rows with. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows whose key column values appear in both Datasets, with duplicates handled by minimum occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
+     * @see #intersection(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset, boolean)
+     * @see #intersection(Dataset, Dataset, Collection)
+     * @see Dataset#intersect(Dataset, Collection)
+     * @see Dataset#intersectAll(Dataset, Collection)
+     */
+    public static Dataset intersection(final Dataset a, final Dataset b, final Collection<String> keyColumnNames, final boolean requiresSameColumns)
+            throws IllegalArgumentException {
+        return removeOccurrences(a, b, keyColumnNames, requiresSameColumns, true);
+    }
+
+    private static Dataset removeOccurrences(final Dataset a, final Dataset b, final Collection<String> keyColumnNames, final boolean requiresSameColumns,
+            final boolean retain) {
+        N.checkArgNotNull(a, "The first specified Dataset is null");
+        N.checkArgNotNull(b, "The second specified Dataset is null");
+
+        checkColumnNames(a, b, keyColumnNames, requiresSameColumns);
+
+        final int newColumnCount = a.columnCount();
+
+        final List<List<Object>> columnListA = new ArrayList<>(newColumnCount);
+
+        for (int columnIndex = 0; columnIndex < newColumnCount; columnIndex++) {
+            columnListA.add(a.getColumn(columnIndex));
+        }
+
+        final List<String> newColumnNameList = new ArrayList<>(a.columnNames());
+        final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+        for (int i = 0; i < newColumnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        final int size = a.size();
+
+        if (size == 0) {
+            return new RowDataset(newColumnNameList, newColumnList);
+        }
+
+        final int commonColumnCount = keyColumnNames.size();
+
+        if (commonColumnCount == 1) {
+            final String keyColumnName = N.firstOrNullIfEmpty(keyColumnNames);
+            final int keyColumnIndex = a.getColumnIndex(keyColumnName);
+            final int keyColumnIndexInOther = b.getColumnIndex(keyColumnName);
+
+            final List<Object> keyColumnInOther = b.getColumn(keyColumnIndexInOther);
+            final Multiset<Object> rowKeySet = new Multiset<>();
+
+            for (final Object val : keyColumnInOther) {
+                rowKeySet.add(hashKey(val));
+            }
+
+            final List<Object> keyColumn = columnListA.get(keyColumnIndex);
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                if ((rowKeySet.remove(hashKey(keyColumn.get(rowIndex)), 1) > 0) == retain) {
+                    for (int i = 0; i < newColumnCount; i++) {
+                        newColumnList.get(i).add(columnListA.get(i).get(rowIndex));
+                    }
+                }
+            }
+        } else {
+            final int[] keyColumnIndexes = a.getColumnIndexes(keyColumnNames);
+            final int[] keyColumnIndexesInOther = b.getColumnIndexes(keyColumnNames);
+
+            final List<Object>[] keyColumnsInOther = new List[commonColumnCount];
+
+            for (int i = 0; i < commonColumnCount; i++) {
+                keyColumnsInOther[i] = b.getColumn(keyColumnIndexesInOther[i]);
+            }
+
+            final Multiset<Wrapper<Object[]>> rowKeySet = new Multiset<>();
+            Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
+
+            for (int rowIndex = 0, otherSize = b.size(); rowIndex < otherSize; rowIndex++) {
+                if (row == null) {
+                    row = Objectory.createObjectArray(commonColumnCount);
+                    rowWrapper = Wrapper.of(row);
+                }
+
+                for (int i = 0; i < commonColumnCount; i++) {
+                    row[i] = keyColumnsInOther[i].get(rowIndex);
+                }
+
+                if (rowKeySet.add(rowWrapper, 1) == 0) {
+                    row = null;
+                }
+            }
+
+            if (row != null) {
+                Objectory.recycle(row);
+                row = null;
+            }
+
+            final List<Object>[] keyColumns = new List[commonColumnCount];
+
+            for (int i = 0; i < commonColumnCount; i++) {
+                keyColumns[i] = columnListA.get(keyColumnIndexes[i]);
+            }
+
+            final List<Wrapper<Object[]>> rowKeys = new ArrayList<>(rowKeySet.elementSet());
+
+            row = Objectory.createObjectArray(commonColumnCount);
+            rowWrapper = Wrapper.of(row);
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                for (int i = 0; i < commonColumnCount; i++) {
+                    row[i] = keyColumns[i].get(rowIndex);
+                }
+
+                if ((rowKeySet.remove(rowWrapper, 1) > 0) == retain) {
+                    for (int i = 0; i < newColumnCount; i++) {
+                        newColumnList.get(i).add(columnListA.get(i).get(rowIndex));
+                    }
+                }
+            }
+
+            Objectory.recycle(row);
+            row = null;
+
+            for (final Wrapper<Object[]> rw : rowKeys) {
+                Objectory.recycle(rw.value());
+            }
+        }
+
+        return new RowDataset(newColumnNameList, newColumnList);
+    }
+
+    private static void checkColumnNames(final Dataset a, final Dataset b, final Collection<String> keyColumnNames, final boolean requiresSameColumns)
+            throws IllegalArgumentException {
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
+
+        final List<String> columnNameListA = a.columnNames();
+        final List<String> columnNameListB = b.columnNames();
+
+        N.checkArgument(a.containsAllColumns(keyColumnNames), "A Dataset={} does not contain all keyColumnNames={}", columnNameListA, keyColumnNames);
+
+        N.checkArgument(b.containsAllColumns(keyColumnNames), "B Dataset={} does not contain all keyColumnNames={}", columnNameListB, keyColumnNames);
+
+        if (requiresSameColumns && !(columnNameListA.size() == columnNameListB.size() && columnNameListA.containsAll(columnNameListB))) {
+            throw new IllegalArgumentException("These two Datasets do not have the same column names: " + columnNameListA + ", " + columnNameListB);
+        }
+    }
+
+    private static List<String> getKeyColumnNames(final Dataset a, final Dataset b) {
+        N.checkArgNotNull(a, "The first specified Dataset is null");
+        N.checkArgNotNull(b, "The second specified Dataset is null");
+
+        final List<String> columnNameListA = a.columnNames();
+        final List<String> columnNameListB = b.columnNames();
+
+        final List<String> commonColumnNameList = new ArrayList<>(columnNameListA);
+        commonColumnNameList.retainAll(columnNameListB);
+
+        if (N.isEmpty(commonColumnNameList)) {
+            throw new IllegalArgumentException("These two Datasets do not have any common column names: " + columnNameListA + ", " + columnNameListB);
+        }
+
+        return commonColumnNameList;
+    }
+
+    /**
      * Returns the elements in the first boolean array that are not present in the second boolean array,
      * considering the number of occurrences of each element.
      *
@@ -5116,6 +5457,185 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a new Dataset with rows from {@code a} that do not appear in {@code b}, using multiset semantics.
+     * <br />
+     * The comparison uses all common columns between the two Datasets.
+     * Duplicate rows are preserved; each match in {@code b} removes one occurrence from {@code a}.
+     * The result keeps the column set and column order of {@code a}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Marketing"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {4, "Dave", 60000},
+     *          {3, "Charlie", 55000}
+     *     });
+     *
+     * Dataset result = N.difference(dataset1, dataset2);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to compare. Must not be {@code null}.
+     * @param b the second Dataset to compare. Must not be {@code null}.
+     * @return a new Dataset containing rows present in {@code a} but not in {@code b}, considering occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if the two Datasets don't have common columns.
+     * @see #difference(Dataset, Dataset, boolean)
+     * @see #difference(Dataset, Dataset, Collection)
+     * @see #difference(Dataset, Dataset, Collection, boolean)
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset)
+     */
+    public static Dataset difference(final Dataset a, final Dataset b) throws IllegalArgumentException {
+        return difference(a, b, false);
+    }
+
+    /**
+     * Returns a new Dataset with rows from {@code a} that do not appear in {@code b}, using multiset semantics.
+     * <br />
+     * The comparison uses all common columns between the two Datasets.
+     * Duplicate rows are preserved; each match in {@code b} removes one occurrence from {@code a}.
+     * The result keeps the column set and column order of {@code a}.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as they share at least one common column.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Marketing"}  // duplicate row
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {4, "Dave", 60000},
+     *          {3, "Charlie", 55000}
+     *     });
+     *
+     * Dataset result = N.difference(dataset1, dataset2, false);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Marketing"} once
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to compare. Must not be {@code null}.
+     * @param b the second Dataset to compare. Must not be {@code null}.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows present in {@code a} but not in {@code b}, considering occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+     * @see #difference(Dataset, Dataset)
+     * @see #difference(Dataset, Dataset, Collection)
+     * @see #difference(Dataset, Dataset, Collection, boolean)
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset)
+     */
+    public static Dataset difference(final Dataset a, final Dataset b, boolean requiresSameColumns) throws IllegalArgumentException {
+        return removeOccurrences(a, b, getKeyColumnNames(a, b), requiresSameColumns, false);
+    }
+
+    /**
+     * Returns a new Dataset with rows from {@code a} that do not appear in {@code b}, using multiset semantics.
+     * <br />
+     * The comparison uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved; each match in {@code b} removes one occurrence from {@code a}.
+     * The result keeps the column set and column order of {@code a}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Finance"}  // duplicate key values
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {3, "Charlie", 60000}
+     *     });
+     *
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.difference(dataset1, dataset2, keyColumns);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to compare. Must not be {@code null}.
+     * @param b the second Dataset to compare. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return a new Dataset containing rows present in {@code a} but not in {@code b}, based on the specified key columns and considering occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset.
+     * @see #difference(Dataset, Dataset)
+     * @see #difference(Dataset, Dataset, boolean)
+     * @see #difference(Dataset, Dataset, Collection, boolean)
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset, Collection)
+     */
+    public static Dataset difference(final Dataset a, final Dataset b, Collection<String> keyColumnNames) throws IllegalArgumentException {
+        return difference(a, b, keyColumnNames, false);
+    }
+
+    /**
+     * Returns a new Dataset with rows from {@code a} that do not appear in {@code b}, using multiset semantics.
+     * <br />
+     * The comparison uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved; each match in {@code b} removes one occurrence from {@code a}.
+     * The result keeps the column set and column order of {@code a}.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as the specified key columns exist in both.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {3, "Charlie", "Marketing"},
+     *          {3, "Charlie", "Finance"}  // duplicate key values
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {1, "Alice", 50000},
+     *          {3, "Charlie", 60000}
+     *     });
+     *
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.difference(dataset1, dataset2, keyColumns, false);
+     * // Result contains {2, "Bob", "Engineering"} and {3, "Charlie", "Finance"}
+     * // One Charlie row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to compare. Must not be {@code null}.
+     * @param b the second Dataset to compare. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows present in {@code a} but not in {@code b}, based on the specified key columns and considering occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either Dataset, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+     * @see #difference(Dataset, Dataset)
+     * @see #difference(Dataset, Dataset, boolean)
+     * @see #difference(Dataset, Dataset, Collection)
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset, Collection, boolean)
+     */
+    public static Dataset difference(final Dataset a, final Dataset b, Collection<String> keyColumnNames, boolean requiresSameColumns)
+            throws IllegalArgumentException {
+        return removeOccurrences(a, b, keyColumnNames, requiresSameColumns, false);
+    }
+
+    /**
      * Returns the elements that are present in either the first or second boolean array but not in both,
      * considering the number of occurrences of each element.
      *
@@ -5467,7 +5987,205 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return result;
     }
 
-    //    /**
+    /**
+     * Returns a new Dataset containing rows present in exactly one of the two datasets.
+     * <br />
+     * This is the symmetric difference using multiset semantics: shared rows cancel out by the minimum
+     * occurrence count across the two sources.
+     * The comparison uses all common columns between the two Datasets.
+     * Duplicate rows are preserved.
+     * The result includes the union of columns from both Datasets, with {@code null} for columns missing
+     * in one of the sources.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
+     *
+     * Dataset result = N.symmetricDifference(dataset1, dataset2);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param b the second Dataset to find symmetric difference with. Must not be {@code null}.
+     * @return a new Dataset containing rows that are present in either the first Dataset or the second Dataset, but not in both, considering the number of occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null} or if the two Datasets have no common columns.
+     * @see #symmetricDifference(Dataset, Dataset, boolean)
+     * @see #symmetricDifference(Dataset, Dataset, Collection)
+     * @see #symmetricDifference(Dataset, Dataset, Collection, boolean)
+     * @see #difference(Dataset, Dataset)
+     * @see #intersection(Dataset, Dataset)
+     */
+    public static Dataset symmetricDifference(final Dataset a, final Dataset b) throws IllegalArgumentException {
+        return symmetricDifference(a, b, false);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in exactly one of the two datasets.
+     * <br />
+     * This is the symmetric difference using multiset semantics: shared rows cancel out by the minimum
+     * occurrence count across the two sources.
+     * The comparison uses all common columns between the two Datasets.
+     * Duplicate rows are preserved.
+     * The result includes the union of columns from both Datasets, with {@code null} for columns missing
+     * in one of the sources.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as they share at least one common column.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
+     *
+     * Dataset result = N.symmetricDifference(dataset1, dataset2, false);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param b the second Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows that are present in either the first Dataset or the second Dataset, but not in both, considering the number of occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #symmetricDifference(Dataset, Dataset, Collection)
+     * @see #symmetricDifference(Dataset, Dataset, Collection, boolean)
+     * @see #difference(Dataset, Dataset, boolean)
+     * @see #intersection(Dataset, Dataset, boolean)
+     */
+    public static Dataset symmetricDifference(final Dataset a, final Dataset b, boolean requiresSameColumns) throws IllegalArgumentException {
+        return symmetricDifference(a, b, getKeyColumnNames(a, b), requiresSameColumns);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in exactly one of the two datasets.
+     * <br />
+     * This is the symmetric difference using multiset semantics: shared rows cancel out by the minimum
+     * occurrence count across the two sources.
+     * The comparison uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved.
+     * The result includes the union of columns from both Datasets, with {@code null} for columns missing
+     * in one of the sources.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
+     *
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.symmetricDifference(dataset1, dataset2, keyColumns);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null} and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param b the second Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @return a new Dataset containing rows that are present in either the first Dataset or the second Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets.
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #symmetricDifference(Dataset, Dataset, boolean)
+     * @see #symmetricDifference(Dataset, Dataset, Collection, boolean)
+     * @see #difference(Dataset, Dataset, Collection)
+     * @see #intersection(Dataset, Dataset, Collection)
+     */
+    public static Dataset symmetricDifference(final Dataset a, final Dataset b, Collection<String> keyColumnNames) throws IllegalArgumentException {
+        return symmetricDifference(a, b, keyColumnNames, false);
+    }
+
+    /**
+     * Returns a new Dataset containing rows present in exactly one of the two datasets.
+     * <br />
+     * This is the symmetric difference using multiset semantics: shared rows cancel out by the minimum
+     * occurrence count across the two sources.
+     * The comparison uses only the specified {@code keyColumnNames}.
+     * Duplicate rows are preserved.
+     * The result includes the union of columns from both Datasets, with {@code null} for columns missing
+     * in one of the sources.
+     * <br />
+     * If {@code requiresSameColumns} is {@code true}, both Datasets must have identical column names.
+     * If {@code requiresSameColumns} is {@code false}, the Datasets can differ as long as the specified key columns exist in both.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     *     new Object[][] {
+     *          {1, "Alice", "HR"},
+     *          {2, "Bob", "Engineering"},
+     *          {2, "Bob", "Engineering"},  // duplicate row
+     *          {3, "Charlie", "Marketing"}
+     *     });
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     *     new Object[][] {
+     *          {2, "Bob", 50000},
+     *          {3, "Charlie", 55000},
+     *          {4, "Dave", 60000}
+     *     });
+     *
+     * Collection<String> keyColumns = Arrays.asList("id", "name");
+     * Dataset result = N.symmetricDifference(dataset1, dataset2, keyColumns, false);
+     * // Result contains {1, "Alice", "HR", null}, one occurrence of {2, "Bob", "Engineering", null}
+     * // and {4, "Dave", null, 60000}
+     * // One Bob row remains because dataset1 has two occurrences and dataset2 has one
+     * }</pre>
+     *
+     * @param a the first Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param b the second Dataset to find symmetric difference with. Must not be {@code null}.
+     * @param keyColumnNames the column names to use for matching rows between Datasets. Must not be {@code null} or empty.
+     * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
+     * @return a new Dataset containing rows that are present in either the first Dataset or the second Dataset, but not in both, based on the specified key columns and considering the number of occurrences.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in both Datasets, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns.
+     * @see #symmetricDifference(Dataset, Dataset)
+     * @see #symmetricDifference(Dataset, Dataset, boolean)
+     * @see #symmetricDifference(Dataset, Dataset, Collection)
+     * @see #difference(Dataset, Dataset, Collection, boolean)
+     * @see #intersection(Dataset, Dataset, Collection, boolean)
+     */
+    public static Dataset symmetricDifference(final Dataset a, final Dataset b, Collection<String> keyColumnNames, boolean requiresSameColumns)
+            throws IllegalArgumentException {
+        final Dataset result = difference(a, b, keyColumnNames, requiresSameColumns);
+
+        result.merge(difference(b, a, keyColumnNames, requiresSameColumns));
+
+        result.setProperties(EMPTY_MAP);
+
+        return result;
+    }
 
     /**
      * Returns a set containing the common elements between the specified collections <i>a</i> and <i>b</i>.
@@ -5848,11 +6566,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first collection to compare, may be {@code null}
      * @param b the second collection to compare, may be {@code null}
      * @return {@code true} if both collections contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(Collection, Collection)
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(Collection, Collection)
+     * @see #containsSameElements(int[], int[])
      */
     public static boolean isEqualCollection(final Collection<?> a, final Collection<?> b) {
-        return haveSameElements(a, b);
+        return containsSameElements(a, b);
     }
 
     /**
@@ -14555,7 +15273,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     static Object hashKey(final Object obj) {
-        return obj == null ? NULL_MASK : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
+        return obj == null ? NULL_SENTINEL : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
     }
 
     /**
@@ -30868,8 +31586,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      */
     @Deprecated
-    public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
-        return unzipp(c, unzip, IntFunctions.ofList());
+    public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+        return unzip3(c, unzip, IntFunctions.ofList());
     }
 
     /**
@@ -30892,7 +31610,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      */
     @Deprecated
-    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzipp(
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier) {
         final int len = getSizeOrDefault(c, 0);
 
@@ -31944,7 +32662,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj the object to serialize
      * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
      * @see #toJson(Object, boolean)
-     * @see #toJson(Object, JSONSerializationConfig)
+     * @see #toJson(Object, JsonSerializationConfig)
      * @see #fromJson(String, Class)
      */
     public static String toJson(final Object obj) {
@@ -31965,7 +32683,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat {@code true} for formatted output with indentation
      * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
      * @see #toJson(Object)
-     * @see #toJson(Object, JSONSerializationConfig)
+     * @see #toJson(Object, JsonSerializationConfig)
      */
     public static String toJson(final Object obj, final boolean prettyFormat) {
         return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
@@ -31976,7 +32694,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonSerializationConfig config = new JsonSerializationConfig().setDateFormat("yyyy-MM-dd");
      * String result = N.toJson(person, config);
      * // Returns JSON with custom date formatting
      * }</pre>
@@ -31987,7 +32705,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #toJson(Object)
      * @see #toJson(Object, boolean)
      */
-    public static String toJson(final Object obj, final JSONSerializationConfig config) {
+    public static String toJson(final Object obj, final JsonSerializationConfig config) {
         return Utils.jsonParser.serialize(obj, config);
     }
 
@@ -32004,7 +32722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the file to write to (created if nonexistent, overwritten if exists)
-     * @see #toJson(Object, JSONSerializationConfig, File)
+     * @see #toJson(Object, JsonSerializationConfig, File)
      * @see #fromJson(File, Class)
      */
     public static void toJson(final Object obj, final File output) {
@@ -32016,7 +32734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setPrettyFormat(true);
+     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
      * File outputFile = new File("data.json");
      * N.toJson(person, config, outputFile);
      * // Writes formatted JSON to data.json
@@ -32027,7 +32745,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the file to write to (created if nonexistent, overwritten if exists)
      * @see #toJson(Object, File)
      */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final File output) {
+    public static void toJson(final Object obj, final JsonSerializationConfig config, final File output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32047,7 +32765,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the output stream to write to
-     * @see #toJson(Object, JSONSerializationConfig, OutputStream)
+     * @see #toJson(Object, JsonSerializationConfig, OutputStream)
      */
     public static void toJson(final Object obj, final OutputStream output) {
         Utils.jsonParser.serialize(obj, output);
@@ -32060,7 +32778,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setPrettyFormat(true);
+     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
      * try (OutputStream out = new FileOutputStream("data.json")) {
      *     N.toJson(person, config, out);
      * }
@@ -32072,7 +32790,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the output stream to write to
      * @see #toJson(Object, OutputStream)
      */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
+    public static void toJson(final Object obj, final JsonSerializationConfig config, final OutputStream output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32092,7 +32810,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the writer to write to
-     * @see #toJson(Object, JSONSerializationConfig, Writer)
+     * @see #toJson(Object, JsonSerializationConfig, Writer)
      */
     public static void toJson(final Object obj, final Writer output) {
         Utils.jsonParser.serialize(obj, output);
@@ -32105,7 +32823,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setPrettyFormat(true);
+     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
      * try (Writer writer = new FileWriter("data.json")) {
      *     N.toJson(person, config, writer);
      * }
@@ -32117,7 +32835,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the writer to write to
      * @see #toJson(Object, Writer)
      */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final Writer output) {
+    public static void toJson(final Object obj, final JsonSerializationConfig config, final Writer output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32220,7 +32938,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * Person result = N.fromJson(jsonString, config, Person.class);
      * // Returns Person with custom date parsing
      * }</pre>
@@ -32231,10 +32949,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(String, JSONDeserializationConfig, Type)
+     * @see #fromJson(String, JsonDeserializationConfig, Type)
      * @see #fromJson(String, Class)
      */
-    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -32243,7 +32961,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * List<Person> result = N.fromJson(jsonString, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
      * }</pre>
@@ -32254,10 +32972,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(String, JSONDeserializationConfig, Class)
+     * @see #fromJson(String, JsonDeserializationConfig, Class)
      * @see #fromJson(String, Type)
      */
-    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -32310,7 +33028,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("person.json");
      * Person result = N.fromJson(file, config, Person.class);
      * // Returns Person with custom date parsing
@@ -32322,10 +33040,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if file contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(File, JSONDeserializationConfig, Type)
+     * @see #fromJson(File, JsonDeserializationConfig, Type)
      * @see #fromJson(File, Class)
      */
-    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -32334,7 +33052,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("people.json");
      * List<Person> result = N.fromJson(file, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
@@ -32346,10 +33064,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if file contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(File, JSONDeserializationConfig, Class)
+     * @see #fromJson(File, JsonDeserializationConfig, Class)
      * @see #fromJson(File, Type)
      */
-    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -32410,7 +33128,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * try (InputStream in = new FileInputStream("person.json")) {
      *     Person result = N.fromJson(in, config, Person.class);
      * }
@@ -32423,10 +33141,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if stream contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(InputStream, JSONDeserializationConfig, Type)
+     * @see #fromJson(InputStream, JsonDeserializationConfig, Type)
      * @see #fromJson(InputStream, Class)
      */
-    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -32437,7 +33155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * try (InputStream in = new FileInputStream("people.json")) {
      *     List<Person> result = N.fromJson(in, config, new TypeReference<List<Person>>(){}.type());
      * }
@@ -32450,10 +33168,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if stream contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(InputStream, JSONDeserializationConfig, Class)
+     * @see #fromJson(InputStream, JsonDeserializationConfig, Class)
      * @see #fromJson(InputStream, Type)
      */
-    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -32514,7 +33232,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * try (Reader reader = new FileReader("person.json")) {
      *     Person result = N.fromJson(reader, config, Person.class);
      * }
@@ -32527,10 +33245,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if reader contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(Reader, JSONDeserializationConfig, Type)
+     * @see #fromJson(Reader, JsonDeserializationConfig, Type)
      * @see #fromJson(Reader, Class)
      */
-    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -32541,7 +33259,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * try (Reader reader = new FileReader("people.json")) {
      *     List<Person> result = N.fromJson(reader, config, new TypeReference<List<Person>>(){}.type());
      * }
@@ -32554,10 +33272,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if reader contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(Reader, JSONDeserializationConfig, Class)
+     * @see #fromJson(Reader, JsonDeserializationConfig, Class)
      * @see #fromJson(Reader, Type)
      */
-    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -32618,7 +33336,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * String json = "prefix{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}suffix";
      * Person result = N.fromJson(json, 6, 45, config, Person.class);
      * // Returns Person with custom date parsing
@@ -32633,10 +33351,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if substring is {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
-     * @see #fromJson(String, int, int, JSONDeserializationConfig, Type)
+     * @see #fromJson(String, int, int, JsonDeserializationConfig, Type)
      * @see #fromJson(String, int, int, Class)
      */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
             final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
@@ -32646,7 +33364,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * String json = "prefix[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]suffix";
      * List<Person> result = N.fromJson(json, 6, 49, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
@@ -32661,10 +33379,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if substring is {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
-     * @see #fromJson(String, int, int, JSONDeserializationConfig, Class)
+     * @see #fromJson(String, int, int, JsonDeserializationConfig, Class)
      * @see #fromJson(String, int, int, Type)
      */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
             final Type<? extends T> targetType) throws IndexOutOfBoundsException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType);
     }
@@ -32684,7 +33402,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if string is {@code null} or represents empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(String, JSONDeserializationConfig, Type)
+     * @see #streamJson(String, JsonDeserializationConfig, Type)
      * @see #fromJson(String, Type)
      */
     public static <T> Stream<T> streamJson(final String jsonArray, final Type<? extends T> elementType) {
@@ -32696,7 +33414,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * String json = "[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]";
      * Stream<Person> result = N.streamJson(json, config, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -32710,7 +33428,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(String, Type)
      */
-    public static <T> Stream<T> streamJson(final String jsonArray, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
+    public static <T> Stream<T> streamJson(final String jsonArray, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
@@ -32729,7 +33447,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if file is {@code null}/nonexistent or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(File, JSONDeserializationConfig, Type)
+     * @see #streamJson(File, JsonDeserializationConfig, Type)
      * @see #fromJson(File, Type)
      */
     public static <T> Stream<T> streamJson(final File jsonArray, final Type<? extends T> elementType) {
@@ -32741,7 +33459,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("people.json");
      * Stream<Person> result = N.streamJson(file, config, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -32755,7 +33473,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(File, Type)
      */
-    public static <T> Stream<T> streamJson(final File jsonArray, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
+    public static <T> Stream<T> streamJson(final File jsonArray, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
@@ -32800,7 +33518,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if stream is {@code null} or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(InputStream, JSONDeserializationConfig, boolean, Type)
+     * @see #streamJson(InputStream, JsonDeserializationConfig, boolean, Type)
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
         return streamJson(jsonArray, null, closeInputStreamWhenStreamIsClosed, elementType);
@@ -32811,7 +33529,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * InputStream in = new FileInputStream("people.json");
      * Stream<Person> result = N.streamJson(in, config, true, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -32826,7 +33544,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(InputStream, boolean, Type)
      */
-    public static <T> Stream<T> streamJson(final InputStream jsonArray, final JSONDeserializationConfig config,
+    public static <T> Stream<T> streamJson(final InputStream jsonArray, final JsonDeserializationConfig config,
             final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
@@ -32872,7 +33590,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if reader is {@code null} or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(Reader, JSONDeserializationConfig, boolean, Type)
+     * @see #streamJson(Reader, JsonDeserializationConfig, boolean, Type)
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType) {
         return streamJson(jsonArray, null, closeReaderWhenStreamIsClosed, elementType);
@@ -32883,7 +33601,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONDeserializationConfig config = new JSONDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
      * Reader reader = new FileReader("people.json");
      * Stream<Person> result = N.streamJson(reader, config, true, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -32898,13 +33616,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(Reader, boolean, Type)
      */
-    public static <T> Stream<T> streamJson(final Reader jsonArray, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
+    public static <T> Stream<T> streamJson(final Reader jsonArray, final JsonDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
 
-    private static JSONDeserializationConfig setElementType(final JSONDeserializationConfig config, final Type<?> elementType) {
-        final JSONDeserializationConfig configToReturn = config == null ? JDC.create() : config.copy();
+    private static JsonDeserializationConfig setElementType(final JsonDeserializationConfig config, final Type<?> elementType) {
+        final JsonDeserializationConfig configToReturn = config == null ? JDC.create() : config.copy();
 
         configToReturn.setElementType(elementType);
 
@@ -32947,7 +33665,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to format
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JSONSerializationConfig)
+     * @see #formatJson(String, JsonSerializationConfig)
      * @see #toJson(Object, boolean)
      */
     public static String formatJson(final String json) {
@@ -32999,7 +33717,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setIndentation("  ");
+     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
      * String json = "{\"name\":\"Alice\"}";
      * String result = N.formatJson(json, config);
      * // Returns formatted JSON with custom indentation
@@ -33008,10 +33726,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JSONSerializationConfig, Class)
+     * @see #formatJson(String, JsonSerializationConfig, Class)
      * @see #formatJson(String)
      */
-    public static String formatJson(final String json, final JSONSerializationConfig config) {
+    public static String formatJson(final String json, final JsonSerializationConfig config) {
         return formatJson(json, config, Object.class);
     }
 
@@ -33020,7 +33738,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setIndentation("  ");
+     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
      * String json = "[{\"name\":\"Alice\"}]";
      * String result = N.formatJson(json, config, new TypeReference<List<Map<String, String>>>(){}.type());
      * // Returns formatted JSON with custom indentation
@@ -33030,11 +33748,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JSONSerializationConfig, Class)
+     * @see #formatJson(String, JsonSerializationConfig, Class)
      * @see TypeReference
      */
-    public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
-        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+    public static String formatJson(final String json, final JsonSerializationConfig config, final Type<?> transferType) {
+        final JsonSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
@@ -33045,7 +33763,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig config = new JSONSerializationConfig().setIndentation("  ");
+     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
      * String json = "{\"name\":\"Alice\"}";
      * String result = N.formatJson(json, config, Map.class);
      * // Returns formatted JSON with custom indentation
@@ -33055,11 +33773,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JSONSerializationConfig, Type)
+     * @see #formatJson(String, JsonSerializationConfig, Type)
      * @see #formatJson(String, Class)
      */
-    public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
-        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+    public static String formatJson(final String json, final JsonSerializationConfig config, final Class<?> transferType) {
+        final JsonSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
@@ -33078,7 +33796,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj the object to serialize
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object, boolean)
-     * @see #toXml(Object, XMLSerializationConfig)
+     * @see #toXml(Object, XmlSerializationConfig)
      * @see #fromXml(String, Class)
      */
     public static String toXml(final Object obj) {
@@ -33099,7 +33817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat {@code true} to format with indentation and line breaks
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object)
-     * @see #toXml(Object, XMLSerializationConfig)
+     * @see #toXml(Object, XmlSerializationConfig)
      */
     public static String toXml(final Object obj, final boolean prettyFormat) {
         return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
@@ -33110,7 +33828,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setPrettyFormat(true);
+     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * String result = N.toXml(person, config);
      * // Returns XML formatted according to config
@@ -33120,9 +33838,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object, boolean)
-     * @see #fromXml(String, XMLDeserializationConfig, Class)
+     * @see #fromXml(String, XmlDeserializationConfig, Class)
      */
-    public static String toXml(final Object obj, final XMLSerializationConfig config) {
+    public static String toXml(final Object obj, final XmlSerializationConfig config) {
         return Utils.xmlParser.serialize(obj, config);
     }
 
@@ -33139,7 +33857,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the file to write to (created if nonexistent, overwritten if exists)
-     * @see #toXml(Object, XMLSerializationConfig, File)
+     * @see #toXml(Object, XmlSerializationConfig, File)
      * @see #fromXml(File, Class)
      */
     public static void toXml(final Object obj, final File output) {
@@ -33151,7 +33869,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setPrettyFormat(true);
+     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * File outputFile = new File("person.xml");
      * N.toXml(person, config, outputFile);
@@ -33162,9 +33880,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the file to write to (created if nonexistent, overwritten if exists)
      * @see #toXml(Object, File)
-     * @see #fromXml(File, XMLDeserializationConfig, Class)
+     * @see #fromXml(File, XmlDeserializationConfig, Class)
      */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final File output) {
+    public static void toXml(final Object obj, final XmlSerializationConfig config, final File output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -33184,7 +33902,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the output stream to write to
-     * @see #toXml(Object, XMLSerializationConfig, OutputStream)
+     * @see #toXml(Object, XmlSerializationConfig, OutputStream)
      * @see #fromXml(InputStream, Class)
      */
     public static void toXml(final Object obj, final OutputStream output) {
@@ -33198,7 +33916,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setPrettyFormat(true);
+     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * try (OutputStream out = new FileOutputStream("person.xml")) {
      *     N.toXml(person, config, out);
@@ -33210,9 +33928,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the output stream to write to
      * @see #toXml(Object, OutputStream)
-     * @see #fromXml(InputStream, XMLDeserializationConfig, Class)
+     * @see #fromXml(InputStream, XmlDeserializationConfig, Class)
      */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+    public static void toXml(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -33232,7 +33950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the writer to write to
-     * @see #toXml(Object, XMLSerializationConfig, Writer)
+     * @see #toXml(Object, XmlSerializationConfig, Writer)
      * @see #fromXml(Reader, Class)
      */
     public static void toXml(final Object obj, final Writer output) {
@@ -33246,7 +33964,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setPrettyFormat(true);
+     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * try (Writer writer = new FileWriter("person.xml")) {
      *     N.toXml(person, config, writer);
@@ -33258,9 +33976,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the writer to write to
      * @see #toXml(Object, Writer)
-     * @see #fromXml(Reader, XMLDeserializationConfig, Class)
+     * @see #fromXml(Reader, XmlDeserializationConfig, Class)
      */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final Writer output) {
+    public static void toXml(final Object obj, final XmlSerializationConfig config, final Writer output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -33313,7 +34031,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * String xml = "<Person><name>Alice</name><age>25</age></Person>";
      * Person result = N.fromXml(xml, config, Person.class);
      * // Returns a Person object with deserialization according to config
@@ -33326,9 +34044,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(String, Class)
-     * @see #toXml(Object, XMLSerializationConfig)
+     * @see #toXml(Object, XmlSerializationConfig)
      */
-    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -33337,7 +34055,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * String xml = "<list><item>Alice</item><item>Bob</item></list>";
      * List<String> result = N.fromXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // Returns a List<String> with deserialization according to config
@@ -33352,7 +34070,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(String, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -33405,7 +34123,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * File xmlFile = new File("person.xml");
      * Person result = N.fromXml(xmlFile, config, Person.class);
      * // Returns a Person object with deserialization according to config
@@ -33418,9 +34136,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(File, Class)
-     * @see #toXml(Object, XMLSerializationConfig, File)
+     * @see #toXml(Object, XmlSerializationConfig, File)
      */
-    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -33429,7 +34147,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * File xmlFile = new File("names.xml");
      * List<String> result = N.fromXml(xmlFile, config, new TypeReference<List<String>>(){}.type());
      * // Returns a List<String> with deserialization according to config
@@ -33444,7 +34162,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(File, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -33505,7 +34223,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * try (InputStream in = new FileInputStream("person.xml")) {
      *     Person result = N.fromXml(in, config, Person.class);
      *     // Returns a Person object with deserialization according to config
@@ -33519,9 +34237,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(InputStream, Class)
-     * @see #toXml(Object, XMLSerializationConfig, OutputStream)
+     * @see #toXml(Object, XmlSerializationConfig, OutputStream)
      */
-    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -33532,7 +34250,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * try (InputStream in = new FileInputStream("names.xml")) {
      *     List<String> result = N.fromXml(in, config, new TypeReference<List<String>>(){}.type());
      *     // Returns a List<String> with deserialization according to config
@@ -33548,7 +34266,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(InputStream, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -33609,7 +34327,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * try (Reader reader = new FileReader("person.xml")) {
      *     Person result = N.fromXml(reader, config, Person.class);
      *     // Returns a Person object with deserialization according to config
@@ -33623,9 +34341,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(Reader, Class)
-     * @see #toXml(Object, XMLSerializationConfig, Writer)
+     * @see #toXml(Object, XmlSerializationConfig, Writer)
      */
-    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -33636,7 +34354,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLDeserializationConfig config = new XMLDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
      * try (Reader reader = new FileReader("names.xml")) {
      *     List<String> result = N.fromXml(reader, config, new TypeReference<List<String>>(){}.type());
      *     // Returns a List<String> with deserialization according to config
@@ -33652,7 +34370,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(Reader, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -33720,7 +34438,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setIndentation("  ");
+     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
      * String xml = "<Person><name>Alice</name></Person>";
      * String result = N.formatXml(xml, config);
      * // Returns formatted XML with custom indentation
@@ -33729,10 +34447,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XMLSerializationConfig, Class)
+     * @see #formatXml(String, XmlSerializationConfig, Class)
      * @see #formatXml(String)
      */
-    public static String formatXml(final String xml, final XMLSerializationConfig config) {
+    public static String formatXml(final String xml, final XmlSerializationConfig config) {
         return formatXml(xml, config, MapEntity.class);
     }
 
@@ -33741,7 +34459,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setIndentation("  ");
+     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
      * String xml = "<Person><name>Alice</name></Person>";
      * String result = N.formatXml(xml, config, Person.class);
      * // Returns formatted XML with custom indentation
@@ -33751,11 +34469,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization during formatting
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XMLSerializationConfig, Type)
+     * @see #formatXml(String, XmlSerializationConfig, Type)
      * @see #formatXml(String, Class)
      */
-    public static String formatXml(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
-        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+    public static String formatXml(final String xml, final XmlSerializationConfig config, final Class<?> transferType) {
+        final XmlSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
@@ -33766,7 +34484,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig config = new XMLSerializationConfig().setIndentation("  ");
+     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
      * String xml = "<list><item>Alice</item><item>Bob</item></list>";
      * String result = N.formatXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // Returns formatted XML with custom indentation
@@ -33776,11 +34494,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization during formatting with generic information
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XMLSerializationConfig, Class)
+     * @see #formatXml(String, XmlSerializationConfig, Class)
      * @see TypeReference
      */
-    public static String formatXml(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
-        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+    public static String formatXml(final String xml, final XmlSerializationConfig config, final Type<?> transferType) {
+        final XmlSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
@@ -33792,17 +34510,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<person><name>Alice</name><age>25</age></person>";
-     * String result = N.xml2Json(xml);
+     * String result = N.xmlToJson(xml);
      * // Returns {"name":"Alice","age":25}
      * }</pre>
      *
      * @param xml the XML string to convert
      * @return the JSON string representation ({@code null} if the input is {@code null})
-     * @see #xml2Json(String, Class)
-     * @see #json2Xml(String)
+     * @see #xmlToJson(String, Class)
+     * @see #jsonToXml(String)
      */
-    public static String xml2Json(final String xml) {
-        return xml2Json(xml, Map.class);
+    public static String xmlToJson(final String xml) {
+        return xmlToJson(xml, Map.class);
     }
 
     /**
@@ -33811,17 +34529,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<person><name>Alice</name><age>25</age></person>";
-     * String result = N.xml2Json(xml, Person.class);
+     * String result = N.xmlToJson(xml, Person.class);
      * // Returns JSON representation of Person object
      * }</pre>
      *
      * @param xml the XML string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
      * @return the JSON string representation ({@code null} if the input is {@code null})
-     * @see #xml2Json(String)
-     * @see #json2Xml(String, Class)
+     * @see #xmlToJson(String)
+     * @see #jsonToXml(String, Class)
      */
-    public static String xml2Json(final String xml, final Class<?> transferType) {
+    public static String xmlToJson(final String xml, final Class<?> transferType) {
         return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
     }
 
@@ -33831,17 +34549,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"Alice\",\"age\":25}";
-     * String result = N.json2Xml(json);
+     * String result = N.jsonToXml(json);
      * // Returns <name>Alice</name><age>25</age>
      * }</pre>
      *
      * @param json the JSON string to convert
      * @return the XML string representation ({@code null} if the input is {@code null})
-     * @see #json2Xml(String, Class)
-     * @see #xml2Json(String)
+     * @see #jsonToXml(String, Class)
+     * @see #xmlToJson(String)
      */
-    public static String json2Xml(final String json) {
-        return json2Xml(json, Map.class);
+    public static String jsonToXml(final String json) {
+        return jsonToXml(json, Map.class);
     }
 
     /**
@@ -33850,17 +34568,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"Alice\",\"age\":25}";
-     * String result = N.json2Xml(json, Person.class);
+     * String result = N.jsonToXml(json, Person.class);
      * // Returns XML representation of Person object
      * }</pre>
      *
      * @param json the JSON string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
      * @return the XML string representation ({@code null} if the input is {@code null})
-     * @see #json2Xml(String)
-     * @see #xml2Json(String, Class)
+     * @see #jsonToXml(String)
+     * @see #xmlToJson(String, Class)
      */
-    public static String json2Xml(final String json, final Class<?> transferType) {
+    public static String jsonToXml(final String json, final Class<?> transferType) {
         return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
     }
 
@@ -36398,73 +37116,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the command with retry logic on failure.
-     * Retries up to the specified number of times with the given interval between attempts.
-     * The retry condition determines whether to retry based on the caught exception.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * N.execute(() -> sendRequest(),
-     *     3,
-     *     1000,
-     *     e -> e instanceof IOException);
-     * // Retries up to 3 times with 1 second interval if IOException occurs
-     * }</pre>
-     *
-     * @param cmd the command to execute
-     * @param retryTimes the number of retry attempts if execution fails
-     * @param retryIntervalInMillis the interval in milliseconds between retries
-     * @param retryCondition the condition checked after failure to decide whether to retry
-     * @throws RuntimeException if execution fails and no more retries are allowed
-     * @see #execute(Callable, int, long, BiPredicate)
-     * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
-     * @see Retry#of(int, long, Predicate)
-     */
-    public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
-            final Predicate<? super Exception> retryCondition) {
-        try {
-            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
-        } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-    }
-
-    /**
-     * Executes the command with retry logic on failure and returns the result.
-     * Retries up to the specified number of times with the given interval between attempts.
-     * The retry condition determines whether to retry based on the result and/or caught exception.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = N.execute(() -> fetchData(),
-     *     3,
-     *     1000,
-     *     (r, e) -> r == null || e instanceof IOException);
-     * // Retries up to 3 times with 1 second interval if result is null or IOException occurs
-     * }</pre>
-     *
-     * @param <R> the type of result returned by the command
-     * @param cmd the command to execute
-     * @param retryTimes the number of retry attempts if execution fails
-     * @param retryIntervalInMillis the interval in milliseconds between retries
-     * @param retryCondition the condition checked after each attempt to decide whether to retry
-     * @return the result returned by the callable task
-     * @throws RuntimeException if execution fails and no more retries are allowed
-     * @see #execute(Throwables.Runnable, int, long, Predicate)
-     * @see #asyncExecute(Callable, int, long, BiPredicate)
-     * @see Retry#of(int, long, BiPredicate)
-     */
-    public static <R> R execute(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
-            final BiPredicate<? super R, ? super Exception> retryCondition) {
-        try {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
-            return retry.call(cmd);
-        } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-    }
-
-    /**
      * Executes the command asynchronously using the default executor.
      * Returns immediately with a future that completes when the command finishes.
      *
@@ -36479,7 +37130,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a future representing the pending completion of the task
      * @see #asyncExecute(Throwables.Runnable, Executor)
      * @see #asyncExecute(Callable)
-     * @see #execute(Throwables.Runnable, int, long, Predicate)
+     * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command) {
         return ASYNC_EXECUTOR.execute(command);
@@ -36546,7 +37197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a future representing the pending result
      * @see #asyncExecute(Callable, Executor)
      * @see #asyncExecute(Throwables.Runnable)
-     * @see #execute(Callable, int, long, BiPredicate)
+     * @see #callWithRetry(Callable, int, long, BiPredicate)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command) {
         return ASYNC_EXECUTOR.execute(command);
@@ -36620,7 +37271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryCondition the condition checked after failure to decide whether to retry
      * @return a future representing the pending completion of the task
      * @see #asyncExecute(Throwables.Runnable)
-     * @see #execute(Throwables.Runnable, int, long, Predicate)
+     * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
      * @see #asyncExecute(Callable, int, long, BiPredicate)
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
@@ -36655,7 +37306,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryCondition the condition checked after each attempt to decide whether to retry
      * @return a future representing the pending result
      * @see #asyncExecute(Callable)
-     * @see #execute(Callable, int, long, BiPredicate)
+     * @see #callWithRetry(Callable, int, long, BiPredicate)
      * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
@@ -36805,7 +37456,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> processFile2(),
      *     () -> processFile3()
      * );
-     * ObjIterator<Void> results = N.asynRun(tasks);
+     * ObjIterator<Void> results = N.asyncRun(tasks);
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
      *     results.next();
@@ -36814,12 +37465,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param commands the collection of commands to execute asynchronously
      * @return an iterator yielding results in completion order
-     * @see #asynRun(Collection, Executor)
-     * @see #asynCall(Collection)
+     * @see #asyncRun(Collection, Executor)
+     * @see #asyncCall(Collection)
      * @see #asyncExecute(List)
      */
-    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
-        return asynRun(commands, ASYNC_EXECUTOR.getExecutor());
+    public static ObjIterator<Void> asyncRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+        return asyncRun(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -36836,7 +37487,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> processFile2(),
      *     () -> processFile3()
      * );
-     * ObjIterator<Void> results = N.asynRun(tasks, executor);
+     * ObjIterator<Void> results = N.asyncRun(tasks, executor);
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
      *     results.next();
@@ -36846,10 +37497,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands the collection of commands to execute asynchronously
      * @param executor the executor to use for execution
      * @return an iterator yielding results in completion order
-     * @see #asynRun(Collection)
-     * @see #asynCall(Collection, Executor)
+     * @see #asyncRun(Collection)
+     * @see #asyncCall(Collection, Executor)
      */
-    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+    public static ObjIterator<Void> asyncRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
         if (isEmpty(commands)) {
             return ObjIterator.empty();
         }
@@ -36862,7 +37513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final FutureTask<Object> futureTask = new FutureTask<>(() -> {
                 cmd.run();
 
-                queue.add(NULL_MASK);
+                queue.add(NULL_SENTINEL);
 
                 return null;
             });
@@ -36947,7 +37598,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> fetchData2(),
      *     () -> fetchData3()
      * );
-     * ObjIterator<String> results = N.asynCall(tasks);
+     * ObjIterator<String> results = N.asyncCall(tasks);
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
      *     String result = results.next();
@@ -36958,12 +37609,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by each command
      * @param commands the collection of commands to execute asynchronously
      * @return an iterator yielding results in completion order
-     * @see #asynCall(Collection, Executor)
-     * @see #asynRun(Collection)
+     * @see #asyncCall(Collection, Executor)
+     * @see #asyncRun(Collection)
      * @see #asyncExecute(Collection)
      */
-    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands) {
-        return asynCall(commands, ASYNC_EXECUTOR.getExecutor());
+    public static <R> ObjIterator<R> asyncCall(final Collection<? extends Callable<? extends R>> commands) {
+        return asyncCall(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -36981,7 +37632,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> fetchData2(),
      *     () -> fetchData3()
      * );
-     * ObjIterator<String> results = N.asynCall(tasks, executor);
+     * ObjIterator<String> results = N.asyncCall(tasks, executor);
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
      *     String result = results.next();
@@ -36994,10 +37645,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param executor the executor to use for execution
      * @return an iterator yielding results in completion order
      * @throws IllegalArgumentException if the executor is invalid
-     * @see #asynCall(Collection)
-     * @see #asynRun(Collection, Executor)
+     * @see #asyncCall(Collection)
+     * @see #asyncRun(Collection, Executor)
      */
-    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
+    public static <R> ObjIterator<R> asyncCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
             throws IllegalArgumentException {
         if (isEmpty(commands)) {
             return ObjIterator.empty();
@@ -37006,7 +37657,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int cmdCount = commands.size();
         final List<FutureTask<R>> futures = new LinkedList<>();
         final ArrayBlockingQueue<R> queue = new ArrayBlockingQueue<>(cmdCount);
-        final R none = (R) NULL_MASK;
+        final R none = (R) NULL_SENTINEL;
 
         for (final Callable<? extends R> cmd : commands) {
             final FutureTask<R> futureTask = new FutureTask<>(() -> {
@@ -37086,6 +37737,73 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 return next == none ? null : next;
             }
         };
+    }
+
+    /**
+     * Executes the command with retry logic on failure.
+     * Retries up to the specified number of times with the given interval between attempts.
+     * The retry condition determines whether to retry based on the caught exception.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.runWithRetry(() -> sendRequest(),
+     *     3,
+     *     1000,
+     *     e -> e instanceof IOException);
+     * // Retries up to 3 times with 1 second interval if IOException occurs
+     * }</pre>
+     *
+     * @param cmd the command to execute
+     * @param retryTimes the number of retry attempts if execution fails
+     * @param retryIntervalInMillis the interval in milliseconds between retries
+     * @param retryCondition the condition checked after failure to decide whether to retry
+     * @throws RuntimeException if execution fails and no more retries are allowed
+     * @see #callWithRetry(Callable, int, long, BiPredicate)
+     * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
+     * @see Retry#of(int, long, Predicate)
+     */
+    public static void runWithRetry(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
+            final Predicate<? super Exception> retryCondition) {
+        try {
+            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
+        } catch (final Exception e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+    }
+
+    /**
+     * Executes the command with retry logic on failure and returns the result.
+     * Retries up to the specified number of times with the given interval between attempts.
+     * The retry condition determines whether to retry based on the result and/or caught exception.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = N.callWithRetry(() -> fetchData(),
+     *     3,
+     *     1000,
+     *     (r, e) -> r == null || e instanceof IOException);
+     * // Retries up to 3 times with 1 second interval if result is null or IOException occurs
+     * }</pre>
+     *
+     * @param <R> the type of result returned by the command
+     * @param cmd the command to execute
+     * @param retryTimes the number of retry attempts if execution fails
+     * @param retryIntervalInMillis the interval in milliseconds between retries
+     * @param retryCondition the condition checked after each attempt to decide whether to retry
+     * @return the result returned by the callable task
+     * @throws RuntimeException if execution fails and no more retries are allowed
+     * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
+     * @see #asyncExecute(Callable, int, long, BiPredicate)
+     * @see Retry#of(int, long, BiPredicate)
+     */
+    public static <R> R callWithRetry(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
+            final BiPredicate<? super R, ? super Exception> retryCondition) {
+        try {
+            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
+            return retry.call(cmd);
+        } catch (final Exception e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
     }
 
     /**
@@ -38289,7 +39007,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.runUninterruptibly(() -> {
-     *     Thread.sleep(1000);   // Must complete even if interrupted
+     *     Thread.sleep(1);   // Must complete even if interrupted
      * });
      * // Thread interrupted status is restored after completion
      * }</pre>
@@ -38373,10 +39091,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * CountDownLatch latch = new CountDownLatch(1);
      * N.runUninterruptibly((remainingTime, timeUnit) -> {
-     *     condition.await(remainingTime, timeUnit);
-     * }, 5, TimeUnit.SECONDS);
-     * // Attempts condition await with remaining time on each retry
+     *     latch.await(remainingTime, timeUnit);
+     * }, 1, TimeUnit.MILLISECONDS);
+     * // Attempts latch await with remaining time on each retry
      * }</pre>
      *
      * @param cmd the command to execute with remaining time and unit (nanoseconds)
@@ -38423,7 +39142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = N.callUninterruptibly(() -> {
-     *     Thread.sleep(1000);
+     *     Thread.sleep(1);
      *     return "completed";
      * });
      * // Returns result even if interrupted, interrupted status restored after
@@ -38514,12 +39233,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Future<String> future = CompletableFuture.completedFuture("success");
      * String result = N.callUninterruptibly((remainingTime, timeUnit) -> {
      *     if (future.get(remainingTime, timeUnit) != null) {
      *         return "success";
      *     }
      *     return "timeout";
-     * }, 5, TimeUnit.SECONDS);
+     * }, 1, TimeUnit.MILLISECONDS);
      * // Attempts future get with remaining time on each retry
      * }</pre>
      *
@@ -38655,6 +39375,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the provided default value if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
      *
+     * <p><b>Note:</b> The type bound uses {@code Comparable<? super R>} to avoid ambiguous method resolution with
+     * {@code Comparable<R>}; {@code Comparable} is a common super interface for many types.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = N.tryOrDefaultIfExceptionOccurred(
@@ -38673,7 +39396,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Try#call(Throwables.Function)
      */
     @Beta
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
         try {
             return cmd.call();
@@ -38723,6 +39445,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the provided default value if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
      *
+     * <p><b>Note:</b> The type bound uses {@code Comparable<? super R>} to avoid ambiguous method resolution with
+     * {@code Comparable<R>}; {@code Comparable} is a common super interface for many types.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String url = "http://example.com";
@@ -38745,7 +39470,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Try#call(Throwables.Function)
      */
     @Beta
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <T, R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final T init,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> func, final R defaultIfExceptionOccurred) {
         try {
@@ -38948,7 +39672,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sleep(1000);   // Sleeps for 1 second
+     * N.sleep(1);   // Sleeps for 1 millisecond
      * // Throws RuntimeException if interrupted
      * }</pre>
      *
@@ -38975,8 +39699,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sleep(5, TimeUnit.SECONDS);          // Sleeps for 5 seconds
-     * N.sleep(500, TimeUnit.MILLISECONDS);   // Sleeps for 500 milliseconds
+     * N.sleep(5, TimeUnit.MILLISECONDS);          // Sleeps for 5 milliseconds
+     * N.sleep(500, TimeUnit.MICROSECONDS);        // Sleeps for 500 microseconds
      * // Throws RuntimeException if interrupted
      * }</pre>
      *
@@ -39018,12 +39742,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Rate limiting: ensure minimum delay between operations
-     * N.sleepUninterruptibly(1000);   // Always sleeps for 1 second
+     * N.sleepUninterruptibly(1);   // Always sleeps for 1 millisecond
      * 
      * // Retry with fixed delay - won't be shortened by interrupts
+     * int maxRetries = 2;
+     * long retryDelayMs = 1L;
+     * String result = null;
      * for (int attempt = 0; attempt < maxRetries; attempt++) {
      *     try {
-     *         return performOperation();
+     *         result = "ok";
+     *         break;
      *     } catch (Exception e) {
      *         if (attempt < maxRetries - 1) {
      *             N.sleepUninterruptibly(retryDelayMs);
@@ -39085,14 +39813,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Sleep for 5 seconds regardless of interruptions
-     * N.sleepUninterruptibly(5, TimeUnit.SECONDS);
+     * // Sleep for 5 milliseconds regardless of interruptions
+     * N.sleepUninterruptibly(5, TimeUnit.MILLISECONDS);
      * 
      * // Micro-sleep for precise timing
      * N.sleepUninterruptibly(500, TimeUnit.MICROSECONDS);
      * 
      * // Rate limiting with different time units
-     * N.sleepUninterruptibly(2, TimeUnit.MINUTES);   // 2 minute delay
+     * N.sleepUninterruptibly(2, TimeUnit.MILLISECONDS);   // 2 millisecond delay
      * }</pre>
      *
      * @param timeout the time to sleep. If zero or negative, the method returns immediately without sleeping
@@ -39276,7 +40004,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     Thread.sleep(1000);
+     *     Thread.sleep(1);
      * } catch (InterruptedException e) {
      *     throw N.toRuntimeException(e, true);
      *     // Converts to UncheckedInterruptedException and calls Thread.interrupt()
@@ -39391,13 +40119,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj).toString()); //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseBuffer().appendAll((Collection) obj).toString()); //NOSONAR
         } else if (obj instanceof Object[]) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Object[]) obj).toString()); //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseBuffer().appendAll((Object[]) obj).toString()); //NOSONAR
         } else if (obj instanceof Map) {
             //noinspection resource
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj).toString()); //NOSONAR
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseBuffer().appendEntries((Map) obj).toString()); //NOSONAR
         } else {
             System.out.println(toString(obj)); //NOSONAR
         }

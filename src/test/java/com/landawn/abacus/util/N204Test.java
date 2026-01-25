@@ -50,12 +50,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
-import com.landawn.abacus.parser.XMLSerializationConfig;
-import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.XmlSerializationConfig;
+import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.Supplier;
@@ -194,7 +194,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig() {
         TestBean bean = createSampleBean();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         String json = N.toJson(bean, config);
         assertEquals(getExpectedJsonForSampleBean(true), json);
     }
@@ -213,7 +213,7 @@ public class N204Test extends TestBase {
     public void toJson_object_withConfig_toFile(@TempDir Path tempDir) throws IOException {
         TestBean bean = createSampleBean();
         File outputFile = tempDir.resolve("output_pretty.json").toFile();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         N.toJson(bean, config, outputFile);
         assertTrue(outputFile.exists());
         String fileContent = new String(Files.readAllBytes(outputFile.toPath()));
@@ -231,7 +231,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig_toOutputStream() throws IOException {
         TestBean bean = createSampleBean();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         N.toJson(bean, config, baos);
         assertEquals(getExpectedJsonForSampleBean(true), baos.toString(StandardCharsets.UTF_8.name()));
@@ -248,7 +248,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig_toWriter() throws IOException {
         TestBean bean = createSampleBean();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         StringWriter writer = new StringWriter();
         N.toJson(bean, config, writer);
         assertEquals(getExpectedJsonForSampleBean(true), writer.toString());
@@ -299,7 +299,7 @@ public class N204Test extends TestBase {
     @Test
     public void fromJson_string_withConfig_toClass() {
         String json = getExpectedJsonForSampleBean(false);
-        JSONDeserializationConfig config = JDC.create();
+        JsonDeserializationConfig config = JDC.create();
         TestBean bean = N.fromJson(json, config, TestBean.class);
         assertEquals(createSampleBean(), bean);
     }
@@ -307,7 +307,7 @@ public class N204Test extends TestBase {
     @Test
     public void fromJson_string_withConfig_toType() {
         String json = getExpectedJsonForSampleBean(false);
-        JSONDeserializationConfig config = JDC.create();
+        JsonDeserializationConfig config = JDC.create();
         Type<TestBean> type = new TypeReference<TestBean>() {
         }.type();
         TestBean bean = N.fromJson(json, config, type);
@@ -460,7 +460,7 @@ public class N204Test extends TestBase {
     @Test
     public void toXml_object_withConfig_toWriter() throws IOException {
         TestBean bean = createSampleBean();
-        XMLSerializationConfig config = XSC.create().prettyFormat(true);
+        XmlSerializationConfig config = XSC.create().prettyFormat(true);
         StringWriter writer = new StringWriter();
         N.toXml(bean, config, writer);
         String xml = writer.toString();
@@ -478,9 +478,9 @@ public class N204Test extends TestBase {
     }
 
     @Test
-    public void xml2Json_string() {
+    public void xmlToJson_string() {
         String xml = N.toXml(createSampleBean());
-        String json = N.xml2Json(xml);
+        String json = N.xmlToJson(xml);
 
         Map<String, Object> map = N.fromJson(json, Map.class);
         assertNotNull(map);
@@ -488,9 +488,9 @@ public class N204Test extends TestBase {
     }
 
     @Test
-    public void json2Xml_string() {
+    public void jsonToXml_string() {
         String json = N.toJson(createSampleBean());
-        String xml = N.json2Xml(json);
+        String xml = N.jsonToXml(json);
 
         MapEntity mapEntity = N.fromXml(xml, MapEntity.class);
         assertNotNull(mapEntity);
@@ -795,7 +795,7 @@ public class N204Test extends TestBase {
             }
         };
 
-        N.execute(flakyRunnable, 3, 10, e -> e instanceof IOException);
+        N.runWithRetry(flakyRunnable, 3, 10, e -> e instanceof IOException);
         assertEquals(3, attempts.get());
 
         attempts.set(0);
@@ -803,7 +803,7 @@ public class N204Test extends TestBase {
             attempts.incrementAndGet();
             throw new IOException("Persistent failure");
         };
-        assertThrows(RuntimeException.class, () -> N.execute(failingRunnable, 2, 10, e -> e instanceof IOException));
+        assertThrows(RuntimeException.class, () -> N.runWithRetry(failingRunnable, 2, 10, e -> e instanceof IOException));
         assertEquals(3, attempts.get());
     }
 
@@ -818,7 +818,7 @@ public class N204Test extends TestBase {
             return "Success";
         };
 
-        String result = N.execute(flakyCallable, 3, 10, (res, e) -> e != null && e.getCause() instanceof IOException);
+        String result = N.callWithRetry(flakyCallable, 3, 10, (res, e) -> e != null && e.getCause() instanceof IOException);
         assertEquals("Success", result);
         assertEquals(2, attempts.get());
     }
@@ -874,7 +874,7 @@ public class N204Test extends TestBase {
     }
 
     @Test
-    public void asynRun_collectionOfRunnables() {
+    public void asyncRun_collectionOfRunnables() {
         List<Throwables.Runnable<Exception>> tasks = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
         CountDownLatch latch = new CountDownLatch(2);
@@ -890,7 +890,7 @@ public class N204Test extends TestBase {
             latch.countDown();
         });
 
-        ObjIterator<Void> iter = N.asynRun(tasks, executorService);
+        ObjIterator<Void> iter = N.asyncRun(tasks, executorService);
         while (iter.hasNext())
             iter.next();
 
@@ -903,7 +903,7 @@ public class N204Test extends TestBase {
     }
 
     @Test
-    public void asynCall_collectionOfCallables() {
+    public void asyncCall_collectionOfCallables() {
         List<Callable<Integer>> tasks = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(2);
 
@@ -918,7 +918,7 @@ public class N204Test extends TestBase {
             return 2;
         });
 
-        ObjIterator<Integer> iter = N.asynCall(tasks, executorService);
+        ObjIterator<Integer> iter = N.asyncCall(tasks, executorService);
         List<Integer> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());

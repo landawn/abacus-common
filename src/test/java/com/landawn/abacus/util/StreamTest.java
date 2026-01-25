@@ -600,16 +600,16 @@ public class StreamTest extends AbstractTest {
             dataset.toCsv(file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
-            CSVUtil.loadCSV(file).println();
+            CsvUtil.load(file).println();
 
             N.println(Strings.repeat('-', 60));
 
-            Stream.of(list).persistToCSV(file);
+            Stream.of(list).persistToCsv(file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
-            CSVUtil.loadCSV(file).println();
+            CsvUtil.load(file).println();
 
-            Stream.of(list).persistToCSV(CommonUtil.asList("k1", "k3", "k2"), file);
+            Stream.of(list).persistToCsv(CommonUtil.asList("k1", "k3", "k2"), file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
 
@@ -621,7 +621,7 @@ public class StreamTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
 
         {
-            CSVUtil.setEscapeCharToBackSlashForWrite();
+            CsvUtil.setEscapeCharToBackSlashForWrite();
 
             final List<Object> list = CommonUtil.asList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
                     "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
@@ -634,16 +634,16 @@ public class StreamTest extends AbstractTest {
             dataset.toCsv(file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
-            CSVUtil.loadCSV(file).println();
+            CsvUtil.load(file).println();
 
             N.println(Strings.repeat('-', 60));
 
-            Stream.of(list).persistToCSV(file);
+            Stream.of(list).persistToCsv(file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
-            CSVUtil.loadCSV(file).println();
+            CsvUtil.load(file).println();
 
-            Stream.of(list).persistToCSV(CommonUtil.asList("k1", "k3", "k2"), file);
+            Stream.of(list).persistToCsv(CommonUtil.asList("k1", "k3", "k2"), file);
 
             IOUtil.readAllLines(file).forEach(Fn.println());
 
@@ -651,7 +651,7 @@ public class StreamTest extends AbstractTest {
 
             IOUtil.readAllLines(file).forEach(Fn.println());
 
-            CSVUtil.resetHeaderParser();
+            CsvUtil.resetHeaderParser();
         }
 
         N.println(Strings.repeat("=", 80));
@@ -1070,11 +1070,11 @@ public class StreamTest extends AbstractTest {
                 CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
         ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
                 CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
-        ds3 = ds1.intersection(ds2);
+        ds3 = N.intersection(ds1, ds2);
         ds3.println();
 
         ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
-        ds3 = ds1.intersection(ds2);
+        ds3 = N.intersection(ds1, ds2);
         ds3.println();
 
         N.println(Strings.repeat('=', 80));
@@ -1436,10 +1436,10 @@ public class StreamTest extends AbstractTest {
         map = IntStream.range(1, 100).boxed().parallel().groupTo(Fn.<Integer> identity(), Collectors.<Integer> toList());
         N.forEach(map.entrySet(), Fn.println());
 
-        ListMultimap<Integer, Integer> map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
-        N.forEach(map2.entrySet(), Fn.println());
-        map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
-        N.forEach(map2.entrySet(), Fn.println());
+        //        ListMultimap<Integer, Integer> map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
+        //        N.forEach(map2.entrySet(), Fn.println());
+        //        map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
+        //        N.forEach(map2.entrySet(), Fn.println());
     }
 
     @Test

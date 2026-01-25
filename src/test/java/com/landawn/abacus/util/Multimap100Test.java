@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,15 +21,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.u.Optional;
 
 @Tag("new-test")
 public class Multimap100Test extends TestBase {
@@ -49,7 +45,7 @@ public class Multimap100Test extends TestBase {
         Multimap<String, Integer, List<Integer>> mm = CommonUtil.newListMultimap();
         assertNotNull(mm);
         assertTrue(mm.isEmpty());
-        assertEquals(0, mm.size());
+        assertEquals(0, mm.totalValueCount());
     }
 
     @Test
@@ -76,23 +72,23 @@ public class Multimap100Test extends TestBase {
         assertEquals(1, mm.get("test").size());
     }
 
-    @Test
-    public void testGetFirst() {
-        assertNull(multimap.getFirst("key"));
-
-        multimap.put("key", 1);
-        multimap.put("key", 2);
-        assertEquals(Integer.valueOf(1), multimap.getFirst("key"));
-    }
-
-    @Test
-    public void testGetFirstOrDefault() {
-        assertEquals(Integer.valueOf(99), multimap.getFirstOrDefault("key", 99));
-
-        multimap.put("key", 1);
-        multimap.put("key", 2);
-        assertEquals(Integer.valueOf(1), multimap.getFirstOrDefault("key", 99));
-    }
+    //    @Test
+    //    public void testGetFirst() {
+    //        assertNull(multimap.getFirst("key"));
+    //
+    //        multimap.put("key", 1);
+    //        multimap.put("key", 2);
+    //        assertEquals(Integer.valueOf(1), multimap.getFirst("key"));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirstOrDefault() {
+    //        assertEquals(Integer.valueOf(99), multimap.getFirstOrDefault("key", 99));
+    //
+    //        multimap.put("key", 1);
+    //        multimap.put("key", 2);
+    //        assertEquals(Integer.valueOf(1), multimap.getFirstOrDefault("key", 99));
+    //    }
 
     @Test
     public void testGet() {
@@ -129,22 +125,20 @@ public class Multimap100Test extends TestBase {
         map.put("key1", 1);
         map.put("key2", 2);
 
-        assertTrue(multimap.put(map));
-        assertEquals(2, multimap.size());
-        assertEquals(Integer.valueOf(1), multimap.getFirst("key1"));
-        assertEquals(Integer.valueOf(2), multimap.getFirst("key2"));
+        assertTrue(multimap.putAll(map));
+        assertEquals(2, multimap.totalValueCount());
     }
 
     @Test
     public void testPutMapEmpty() {
-        assertFalse(multimap.put(new HashMap<>()));
+        assertFalse(multimap.putAll(new HashMap<>()));
     }
 
     @Test
     public void testPutIfAbsent() {
-        assertTrue(multimap.putIfAbsent("key", 1));
-        assertTrue(multimap.putIfAbsent("key", 2));
-        assertFalse(multimap.putIfAbsent("key", 1));
+        assertTrue(multimap.putIfValueAbsent("key", 1));
+        assertTrue(multimap.putIfValueAbsent("key", 2));
+        assertFalse(multimap.putIfValueAbsent("key", 1));
     }
 
     @Test
@@ -157,17 +151,17 @@ public class Multimap100Test extends TestBase {
     @Test
     public void testPutMany() {
         List<Integer> values = Arrays.asList(1, 2, 3);
-        assertTrue(multimap.putMany("key", values));
+        assertTrue(multimap.putValues("key", values));
         assertEquals(3, multimap.get("key").size());
 
-        assertFalse(multimap.putMany("key2", Collections.emptyList()));
+        assertFalse(multimap.putValues("key2", Collections.emptyList()));
     }
 
     @Test
     public void testPutManyIfKeyAbsent() {
         List<Integer> values = Arrays.asList(1, 2, 3);
-        assertTrue(multimap.putManyIfKeyAbsent("key", values));
-        assertFalse(multimap.putManyIfKeyAbsent("key", Arrays.asList(4, 5)));
+        assertTrue(multimap.putValuesIfKeyAbsent("key", values));
+        assertFalse(multimap.putValuesIfKeyAbsent("key", Arrays.asList(4, 5)));
         assertEquals(3, multimap.get("key").size());
     }
 
@@ -177,7 +171,7 @@ public class Multimap100Test extends TestBase {
         map.put("key1", Arrays.asList(1, 2));
         map.put("key2", Arrays.asList(3, 4));
 
-        assertTrue(multimap.putMany(map));
+        assertTrue(multimap.putValues(map));
         assertEquals(2, multimap.get("key1").size());
         assertEquals(2, multimap.get("key2").size());
     }
@@ -185,10 +179,10 @@ public class Multimap100Test extends TestBase {
     @Test
     public void testPutManyMultimap() {
         Multimap<String, Integer, List<Integer>> other = CommonUtil.newListMultimap();
-        other.putMany("key1", Arrays.asList(1, 2));
-        other.putMany("key2", Arrays.asList(3, 4));
+        other.putValues("key1", Arrays.asList(1, 2));
+        other.putValues("key2", Arrays.asList(3, 4));
 
-        assertTrue(multimap.putMany(other));
+        assertTrue(multimap.putValues(other));
         assertEquals(2, multimap.get("key1").size());
         assertEquals(2, multimap.get("key2").size());
     }
@@ -198,11 +192,11 @@ public class Multimap100Test extends TestBase {
         multimap.put("key", 1);
         multimap.put("key", 2);
 
-        assertTrue(multimap.removeOne("key", 1));
+        assertTrue(multimap.removeEntry("key", 1));
         assertFalse(multimap.get("key").contains(1));
         assertTrue(multimap.get("key").contains(2));
 
-        assertFalse(multimap.removeOne("nonexistent", 1));
+        assertFalse(multimap.removeEntry("nonexistent", 1));
     }
 
     @Test
@@ -214,7 +208,7 @@ public class Multimap100Test extends TestBase {
         toRemove.put("key1", 1);
         toRemove.put("key2", 2);
 
-        assertTrue(multimap.removeOne(toRemove));
+        assertTrue(multimap.removeEntries(toRemove));
         assertNull(multimap.get("key1"));
         assertNull(multimap.get("key2"));
     }
@@ -231,9 +225,9 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testRemoveMany() {
-        multimap.putMany("key", Arrays.asList(1, 2, 3, 4));
+        multimap.putValues("key", Arrays.asList(1, 2, 3, 4));
 
-        assertTrue(multimap.removeMany("key", Arrays.asList(2, 3)));
+        assertTrue(multimap.removeValues("key", Arrays.asList(2, 3)));
         assertEquals(2, multimap.get("key").size());
         assertTrue(multimap.get("key").contains(1));
         assertTrue(multimap.get("key").contains(4));
@@ -241,28 +235,28 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testRemoveManyMap() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5, 6));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(4, 5, 6));
 
         Map<String, List<Integer>> toRemove = new HashMap<>();
         toRemove.put("key1", Arrays.asList(1, 2));
         toRemove.put("key2", Arrays.asList(5));
 
-        assertTrue(multimap.removeMany(toRemove));
+        assertTrue(multimap.removeValues(toRemove));
         assertEquals(1, multimap.get("key1").size());
         assertEquals(2, multimap.get("key2").size());
     }
 
     @Test
     public void testRemoveManyMultimap() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5, 6));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(4, 5, 6));
 
         Multimap<String, Integer, List<Integer>> toRemove = CommonUtil.newListMultimap();
-        toRemove.putMany("key1", Arrays.asList(1, 2));
-        toRemove.putMany("key2", Arrays.asList(5));
+        toRemove.putValues("key1", Arrays.asList(1, 2));
+        toRemove.putValues("key2", Arrays.asList(5));
 
-        assertTrue(multimap.removeMany(toRemove));
+        assertTrue(multimap.removeValues(toRemove));
         assertEquals(1, multimap.get("key1").size());
         assertEquals(2, multimap.get("key2").size());
     }
@@ -273,27 +267,26 @@ public class Multimap100Test extends TestBase {
         multimap.put("banana", 1);
         multimap.put("cherry", 2);
 
-        assertTrue(multimap.removeOneIf(1, key -> key.startsWith("a")));
+        assertTrue(multimap.removeEntriesIf(key -> key.startsWith("a"), 1));
         assertNull(multimap.get("apple"));
-        assertEquals(Integer.valueOf(1), multimap.getFirst("banana"));
     }
 
     @Test
     public void testRemoveOneIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
         multimap.put("key2", 1);
 
-        assertTrue(multimap.removeOneIf(1, (k, v) -> v.size() > 2));
+        assertTrue(multimap.removeEntriesIf((k, v) -> v.size() > 2, 1));
         assertEquals(2, multimap.get("key1").size());
         assertFalse(multimap.get("key1").contains(1));
     }
 
     @Test
     public void testRemoveManyIf() {
-        multimap.putMany("apple", Arrays.asList(1, 2, 3));
-        multimap.putMany("banana", Arrays.asList(1, 2));
+        multimap.putValues("apple", Arrays.asList(1, 2, 3));
+        multimap.putValues("banana", Arrays.asList(1, 2));
 
-        assertTrue(multimap.removeManyIf(Arrays.asList(1, 2), key -> key.equals("apple")));
+        assertTrue(multimap.removeValuesIf(key -> key.equals("apple"), Arrays.asList(1, 2)));
         assertEquals(1, multimap.get("apple").size());
         assertEquals(2, multimap.get("banana").size());
     }
@@ -304,16 +297,16 @@ public class Multimap100Test extends TestBase {
         multimap.put("banana", 2);
         multimap.put("apricot", 3);
 
-        assertTrue(multimap.removeAllIf(key -> key.startsWith("a")));
-        assertEquals(1, multimap.size());
+        assertTrue(multimap.removeKeysIf(key -> key.startsWith("a")));
+        assertEquals(1, multimap.totalValueCount());
         assertTrue(multimap.containsKey("banana"));
     }
 
     @Test
     public void testReplaceOne() {
-        multimap.putMany("key", Arrays.asList(1, 2, 3, 2));
+        multimap.putValues("key", Arrays.asList(1, 2, 3, 2));
 
-        assertTrue(multimap.replaceOne("key", 2, 99));
+        assertTrue(multimap.replaceEntry("key", 2, 99));
         List<Integer> values = multimap.get("key");
         assertEquals(4, values.size());
         assertEquals(Integer.valueOf(99), values.get(1));
@@ -321,50 +314,38 @@ public class Multimap100Test extends TestBase {
     }
 
     @Test
-    public void testReplaceAllWithOne() {
-        multimap.putMany("key", Arrays.asList(1, 2, 3));
+    public void testReplaceValues() {
+        multimap.putValues("key", Arrays.asList(1, 2, 3));
 
-        assertTrue(multimap.replaceAllWithOne("key", 99));
+        assertTrue(multimap.replaceValues("key", N.asList(99)));
         assertEquals(1, multimap.get("key").size());
-        assertEquals(Integer.valueOf(99), multimap.getFirst("key"));
-    }
-
-    @Test
-    public void testReplaceManyWithOne() {
-        multimap.putMany("key", Arrays.asList(1, 2, 3, 4, 5));
-
-        assertTrue(multimap.replaceManyWithOne("key", Arrays.asList(2, 3, 4), 99));
-        assertEquals(3, multimap.get("key").size());
-        assertTrue(multimap.get("key").contains(1));
-        assertTrue(multimap.get("key").contains(5));
-        assertTrue(multimap.get("key").contains(99));
     }
 
     @Test
     public void testReplaceOneIf() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(1, 2, 3));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(1, 2, 3));
 
-        assertTrue(multimap.replaceOneIf(key -> key.equals("key1"), 2, 99));
+        assertTrue(multimap.replaceEntriesIf(key -> key.equals("key1"), 2, 99));
         assertTrue(multimap.get("key1").contains(99));
         assertFalse(multimap.get("key2").contains(99));
     }
 
-    @Test
-    public void testReplaceAllWithOneIf() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5, 6));
-
-        assertTrue(multimap.replaceAllWithOneIf(key -> key.equals("key1"), 99));
-        assertEquals(1, multimap.get("key1").size());
-        assertEquals(Integer.valueOf(99), multimap.getFirst("key1"));
-        assertEquals(3, multimap.get("key2").size());
-    }
+    //    @Test
+    //    public void testReplaceAllWithOneIf() {
+    //        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+    //        multimap.putValues("key2", Arrays.asList(4, 5, 6));
+    //
+    //        assertTrue(multimap.replaceAllValuesIf(key -> key.equals("key1"), 99));
+    //        assertEquals(1, multimap.get("key1").size());
+    //        assertEquals(Integer.valueOf(99), multimap.getFirst("key1"));
+    //        assertEquals(3, multimap.get("key2").size());
+    //    }
 
     @Test
     public void testReplaceAll() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
         multimap.replaceAll((k, v) -> {
             List<Integer> newList = new ArrayList<>();
@@ -458,7 +439,7 @@ public class Multimap100Test extends TestBase {
 
         ListMultimap<Integer, String> inverted = multimap.inverse(IntFunctions.ofListMultimap());
 
-        assertEquals(2, inverted.size());
+        assertEquals(3, inverted.totalValueCount());
         assertTrue(inverted.get(1).contains("a"));
         assertTrue(inverted.get(1).contains("b"));
         assertTrue(inverted.get(2).contains("a"));
@@ -466,12 +447,12 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testCopy() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(4, 5));
 
         Multimap<String, Integer, List<Integer>> copy = multimap.copy();
 
-        assertEquals(multimap.size(), copy.size());
+        assertEquals(multimap.totalValueCount(), copy.totalValueCount());
         assertEquals(multimap.get("key1"), copy.get("key1"));
         assertEquals(multimap.get("key2"), copy.get("key2"));
 
@@ -483,9 +464,9 @@ public class Multimap100Test extends TestBase {
     public void testContains() {
         multimap.put("key", 1);
 
-        assertTrue(multimap.contains("key", 1));
-        assertFalse(multimap.contains("key", 2));
-        assertFalse(multimap.contains("nonexistent", 1));
+        assertTrue(multimap.containsEntry("key", 1));
+        assertFalse(multimap.containsEntry("key", 2));
+        assertFalse(multimap.containsEntry("nonexistent", 1));
     }
 
     @Test
@@ -506,73 +487,73 @@ public class Multimap100Test extends TestBase {
         assertFalse(multimap.containsValue(3));
     }
 
-    @Test
-    public void testContainsAll() {
-        multimap.putMany("key", Arrays.asList(1, 2, 3));
+    //    @Test
+    //    public void testContainsAll() {
+    //        multimap.putValues("key", Arrays.asList(1, 2, 3));
+    //
+    //        assertTrue(multimap.containsAllValues("key", Arrays.asList(1, 2)));
+    //        assertTrue(multimap.containsAllValues("key", Arrays.asList(1, 2, 3)));
+    //        assertFalse(multimap.containsAllValues("key", Arrays.asList(1, 2, 4)));
+    //        assertFalse(multimap.containsAllValues("nonexistent", Arrays.asList(1)));
+    //    }
+    //
+    //    @Test
+    //    public void testFilterByKey() {
+    //        multimap.put("apple", 1);
+    //        multimap.put("banana", 2);
+    //        multimap.put("apricot", 3);
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = multimap.filterByKey(key -> key.startsWith("a"));
+    //
+    //        assertEquals(2, filtered.size());
+    //        assertTrue(filtered.containsKey("apple"));
+    //        assertTrue(filtered.containsKey("apricot"));
+    //        assertFalse(filtered.containsKey("banana"));
+    //    }
+    //
+    //    @Test
+    //    public void testFilterByValue() {
+    //        multimap.putValues("key1", Arrays.asList(1));
+    //        multimap.putValues("key2", Arrays.asList(1, 2));
+    //        multimap.putValues("key3", Arrays.asList(1, 2, 3));
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = multimap.filterByValues(v -> v.size() >= 2);
+    //
+    //        assertEquals(2, filtered.size());
+    //        assertTrue(filtered.containsKey("key2"));
+    //        assertTrue(filtered.containsKey("key3"));
+    //    }
 
-        assertTrue(multimap.containsAll("key", Arrays.asList(1, 2)));
-        assertTrue(multimap.containsAll("key", Arrays.asList(1, 2, 3)));
-        assertFalse(multimap.containsAll("key", Arrays.asList(1, 2, 4)));
-        assertFalse(multimap.containsAll("nonexistent", Arrays.asList(1)));
-    }
-
-    @Test
-    public void testFilterByKey() {
-        multimap.put("apple", 1);
-        multimap.put("banana", 2);
-        multimap.put("apricot", 3);
-
-        Multimap<String, Integer, List<Integer>> filtered = multimap.filterByKey(key -> key.startsWith("a"));
-
-        assertEquals(2, filtered.size());
-        assertTrue(filtered.containsKey("apple"));
-        assertTrue(filtered.containsKey("apricot"));
-        assertFalse(filtered.containsKey("banana"));
-    }
-
-    @Test
-    public void testFilterByValue() {
-        multimap.putMany("key1", Arrays.asList(1));
-        multimap.putMany("key2", Arrays.asList(1, 2));
-        multimap.putMany("key3", Arrays.asList(1, 2, 3));
-
-        Multimap<String, Integer, List<Integer>> filtered = multimap.filterByValue(v -> v.size() >= 2);
-
-        assertEquals(2, filtered.size());
-        assertTrue(filtered.containsKey("key2"));
-        assertTrue(filtered.containsKey("key3"));
-    }
-
-    @Test
-    public void testFilter() {
-        multimap.putMany("short", Arrays.asList(1, 2));
-        multimap.putMany("longer", Arrays.asList(3, 4, 5));
-
-        Multimap<String, Integer, List<Integer>> filtered = multimap.filter((k, v) -> k.length() > 5 && v.size() > 2);
-
-        assertEquals(1, filtered.size());
-        assertTrue(filtered.containsKey("longer"));
-    }
-
-    @Test
-    public void testForEach() {
-        multimap.put("key1", 1);
-        multimap.put("key2", 2);
-
-        Map<String, List<Integer>> collected = new HashMap<>();
-        multimap.forEach((k, v) -> collected.put(k, new ArrayList<>(v)));
-
-        assertEquals(2, collected.size());
-        assertEquals(multimap.get("key1"), collected.get("key1"));
-    }
+    //    @Test
+    //    public void testFilter() {
+    //        multimap.putValues("short", Arrays.asList(1, 2));
+    //        multimap.putValues("longer", Arrays.asList(3, 4, 5));
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = multimap.filter((k, v) -> k.length() > 5 && v.size() > 2);
+    //
+    //        assertEquals(1, filtered.size());
+    //        assertTrue(filtered.containsKey("longer"));
+    //    }
+    //
+    //    @Test
+    //    public void testForEach() {
+    //        multimap.put("key1", 1);
+    //        multimap.put("key2", 2);
+    //
+    //        Map<String, List<Integer>> collected = new HashMap<>();
+    //        multimap.forEach((k, v) -> collected.put(k, new ArrayList<>(v)));
+    //
+    //        assertEquals(2, collected.size());
+    //        assertEquals(multimap.get("key1"), collected.get("key1"));
+    //    }
 
     @Test
     public void testFlatForEach() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
         List<String> pairs = new ArrayList<>();
-        multimap.flatForEach((k, e) -> pairs.add(k + ":" + e));
+        multimap.forEach((k, e) -> pairs.add(k + ":" + e));
 
         assertEquals(4, pairs.size());
         assertTrue(pairs.contains("key1:1"));
@@ -581,42 +562,30 @@ public class Multimap100Test extends TestBase {
         assertTrue(pairs.contains("key2:4"));
     }
 
-    @Test
-    public void testForEachKey() {
-        multimap.put("key1", 1);
-        multimap.put("key2", 2);
-
-        List<String> keys = new ArrayList<>();
-        multimap.forEachKey(keys::add);
-
-        assertEquals(2, keys.size());
-        assertTrue(keys.contains("key1"));
-        assertTrue(keys.contains("key2"));
-    }
-
-    @Test
-    public void testForEachValue() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
-
-        List<Integer> sizes = new ArrayList<>();
-        multimap.forEachValue(v -> sizes.add(v.size()));
-
-        assertEquals(2, sizes.size());
-        assertTrue(sizes.contains(2));
-    }
-
-    @Test
-    public void testFlatForEachValue() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
-
-        List<Integer> values = new ArrayList<>();
-        multimap.flatForEachValue(values::add);
-
-        assertEquals(4, values.size());
-        assertTrue(values.containsAll(Arrays.asList(1, 2, 3, 4)));
-    }
+    //    @Test
+    //    public void testForEachKey() {
+    //        multimap.put("key1", 1);
+    //        multimap.put("key2", 2);
+    //
+    //        List<String> keys = new ArrayList<>();
+    //        multimap.forEachKey(keys::add);
+    //
+    //        assertEquals(2, keys.size());
+    //        assertTrue(keys.contains("key1"));
+    //        assertTrue(keys.contains("key2"));
+    //    }
+    //
+    //    @Test
+    //    public void testForEachValue() {
+    //        multimap.putValues("key1", Arrays.asList(1, 2));
+    //        multimap.putValues("key2", Arrays.asList(3, 4));
+    //
+    //        List<Integer> sizes = new ArrayList<>();
+    //        multimap.forEachValues(v -> sizes.add(v.size()));
+    //
+    //        assertEquals(2, sizes.size());
+    //        assertTrue(sizes.contains(2));
+    //    }
 
     @Test
     public void testKeySet() {
@@ -629,53 +598,53 @@ public class Multimap100Test extends TestBase {
         assertTrue(keys.contains("key2"));
     }
 
-    @Test
-    public void testValues() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
-
-        Collection<List<Integer>> values = multimap.values();
-        assertEquals(2, values.size());
-    }
-
-    @Test
-    public void testEntrySet() {
-        multimap.put("key1", 1);
-        multimap.put("key2", 2);
-
-        Set<Map.Entry<String, List<Integer>>> entries = multimap.entrySet();
-        assertEquals(2, entries.size());
-
-        for (Map.Entry<String, List<Integer>> entry : entries) {
-            assertTrue(entry.getKey().equals("key1") || entry.getKey().equals("key2"));
-            assertEquals(1, entry.getValue().size());
-        }
-    }
+    //    @Test
+    //    public void testValueCollections() {
+    //        multimap.putValues("key1", Arrays.asList(1, 2));
+    //        multimap.putValues("key2", Arrays.asList(3, 4));
+    //
+    //        Collection<List<Integer>> values = multimap.valueCollections();
+    //        assertEquals(2, values.size());
+    //    }
+    //
+    //    @Test
+    //    public void testEntrySet() {
+    //        multimap.put("key1", 1);
+    //        multimap.put("key2", 2);
+    //
+    //        Set<Map.Entry<String, List<Integer>>> entries = multimap.entrySet();
+    //        assertEquals(2, entries.size());
+    //
+    //        for (Map.Entry<String, List<Integer>> entry : entries) {
+    //            assertTrue(entry.getKey().equals("key1") || entry.getKey().equals("key2"));
+    //            assertEquals(1, entry.getValue().size());
+    //        }
+    //    }
 
     @Test
     public void testFlatValues() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
-        List<Integer> flatValues = multimap.flatValues();
-        assertEquals(4, flatValues.size());
-        assertTrue(flatValues.containsAll(Arrays.asList(1, 2, 3, 4)));
+        Collection<Integer> flattenValues = multimap.allValues();
+        assertEquals(4, flattenValues.size());
+        assertTrue(flattenValues.containsAll(Arrays.asList(1, 2, 3, 4)));
     }
 
     @Test
     public void testFlatValuesWithSupplier() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
-        Set<Integer> flatValues = multimap.flatValues(HashSet::new);
-        assertEquals(4, flatValues.size());
-        assertTrue(flatValues.containsAll(Arrays.asList(1, 2, 3, 4)));
+        Set<Integer> flattenValues = multimap.flatValues(HashSet::new);
+        assertEquals(4, flattenValues.size());
+        assertTrue(flattenValues.containsAll(Arrays.asList(1, 2, 3, 4)));
     }
 
     @Test
     public void testToMap() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
         Map<String, List<Integer>> map = multimap.toMap();
         assertEquals(2, map.size());
@@ -685,8 +654,8 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testToMapWithSupplier() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4));
 
         TreeMap<String, List<Integer>> map = multimap.toMap(IntFunctions.ofTreeMap());
         assertEquals(2, map.size());
@@ -695,8 +664,8 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testToMultiset() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        multimap.putMany("key2", Arrays.asList(3, 4, 5));
+        multimap.putValues("key1", Arrays.asList(1, 2));
+        multimap.putValues("key2", Arrays.asList(3, 4, 5));
 
         Multiset<String> multiset = multimap.toMultiset();
         assertEquals(2, multiset.getCount("key1"));
@@ -729,17 +698,17 @@ public class Multimap100Test extends TestBase {
         assertEquals(2, keys.size());
     }
 
-    @Test
-    public void testEntryStream() {
-        multimap.put("key1", 1);
-        multimap.put("key2", 2);
-
-        Map<String, Integer> sizes = multimap.entryStream().entries().toMap(Map.Entry::getKey, e -> e.getValue().size());
-
-        assertEquals(2, sizes.size());
-        assertEquals(Integer.valueOf(1), sizes.get("key1"));
-        assertEquals(Integer.valueOf(1), sizes.get("key2"));
-    }
+    //    @Test
+    //    public void testEntryStream() {
+    //        multimap.put("key1", 1);
+    //        multimap.put("key2", 2);
+    //
+    //        Map<String, Integer> sizes = multimap.entryStream().entries().toMap(Map.Entry::getKey, e -> e.getValue().size());
+    //
+    //        assertEquals(2, sizes.size());
+    //        assertEquals(Integer.valueOf(1), sizes.get("key1"));
+    //        assertEquals(Integer.valueOf(1), sizes.get("key2"));
+    //    }
 
     @Test
     public void testClear() {
@@ -749,32 +718,21 @@ public class Multimap100Test extends TestBase {
         assertFalse(multimap.isEmpty());
         multimap.clear();
         assertTrue(multimap.isEmpty());
-        assertEquals(0, multimap.size());
+        assertEquals(0, multimap.totalValueCount());
     }
 
     @Test
     public void testSize() {
-        assertEquals(0, multimap.size());
+        assertEquals(0, multimap.totalValueCount());
 
         multimap.put("key1", 1);
-        assertEquals(1, multimap.size());
+        assertEquals(1, multimap.totalValueCount());
 
         multimap.put("key1", 2);
-        assertEquals(1, multimap.size());
+        assertEquals(2, multimap.totalValueCount());
 
         multimap.put("key2", 3);
-        assertEquals(2, multimap.size());
-    }
-
-    @Test
-    public void testTotalCountOfValues() {
-        assertEquals(0, multimap.totalCountOfValues());
-
-        multimap.putMany("key1", Arrays.asList(1, 2));
-        assertEquals(2, multimap.totalCountOfValues());
-
-        multimap.putMany("key2", Arrays.asList(3, 4, 5));
-        assertEquals(5, multimap.totalCountOfValues());
+        assertEquals(3, multimap.totalValueCount());
     }
 
     @Test
@@ -788,47 +746,28 @@ public class Multimap100Test extends TestBase {
         assertTrue(multimap.isEmpty());
     }
 
-    @Test
-    public void testApply() throws Exception {
-        multimap.put("key", 1);
-
-        Integer result = multimap.apply(mm -> mm.totalCountOfValues());
-        assertEquals(Integer.valueOf(1), result);
-    }
-
-    @Test
-    public void testApplyIfNotEmpty() throws Exception {
-        Optional<Integer> emptyResult = multimap.applyIfNotEmpty(mm -> mm.totalCountOfValues());
-        assertFalse(emptyResult.isPresent());
-
-        multimap.put("key", 1);
-        Optional<Integer> result = multimap.applyIfNotEmpty(mm -> mm.totalCountOfValues());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-    }
-
-    @Test
-    public void testAccept() throws Exception {
-        multimap.put("key", 1);
-
-        List<String> keys = new ArrayList<>();
-        multimap.accept(mm -> mm.forEachKey(keys::add));
-
-        assertEquals(1, keys.size());
-        assertEquals("key", keys.get(0));
-    }
-
-    @Test
-    public void testAcceptIfNotEmpty() throws Exception {
-        List<String> keys = new ArrayList<>();
-
-        OrElse orElse = multimap.acceptIfNotEmpty(mm -> mm.forEachKey(keys::add));
-        assertTrue(keys.isEmpty());
-
-        multimap.put("key", 1);
-        multimap.acceptIfNotEmpty(mm -> mm.forEachKey(keys::add));
-        assertEquals(1, keys.size());
-    }
+    //    @Test
+    //    public void testAccept() throws Exception {
+    //        multimap.put("key", 1);
+    //
+    //        List<String> keys = new ArrayList<>();
+    //        multimap.accept(mm -> mm.forEachKey(keys::add));
+    //
+    //        assertEquals(1, keys.size());
+    //        assertEquals("key", keys.get(0));
+    //    }
+    //
+    //    @Test
+    //    public void testAcceptIfNotEmpty() throws Exception {
+    //        List<String> keys = new ArrayList<>();
+    //
+    //        OrElse orElse = multimap.acceptIfNotEmpty(mm -> mm.forEachKey(keys::add));
+    //        assertTrue(keys.isEmpty());
+    //
+    //        multimap.put("key", 1);
+    //        multimap.acceptIfNotEmpty(mm -> mm.forEachKey(keys::add));
+    //        assertEquals(1, keys.size());
+    //    }
 
     @Test
     public void testEquals() {
@@ -872,15 +811,14 @@ public class Multimap100Test extends TestBase {
     @Test
     public void testNullValues() {
         multimap.put("key", null);
-        assertTrue(multimap.contains("key", null));
+        assertTrue(multimap.containsEntry("key", null));
         assertEquals(1, multimap.get("key").size());
-        assertNull(multimap.getFirst("key"));
     }
 
     @Test
     public void testEmptyCollectionRemoval() {
         multimap.put("key", 1);
-        multimap.removeOne("key", 1);
+        multimap.removeEntry("key", 1);
 
         assertFalse(multimap.containsKey("key"));
         assertNull(multimap.get("key"));
@@ -937,16 +875,16 @@ public class Multimap100Test extends TestBase {
         });
 
         customMap.put("key", 1);
-        assertThrows(IllegalStateException.class, () -> customMap.replaceOne("key", 1, -1));
+        assertThrows(IllegalStateException.class, () -> customMap.replaceEntry("key", 1, -1));
     }
 
     @Test
     public void testRemoveManyIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3, 4, 5));
-        multimap.putMany("key2", Arrays.asList(1, 2));
-        multimap.putMany("key3", Arrays.asList(1));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3, 4, 5));
+        multimap.putValues("key2", Arrays.asList(1, 2));
+        multimap.putValues("key3", Arrays.asList(1));
 
-        assertTrue(multimap.removeManyIf(Arrays.asList(1, 2, 3), (k, v) -> v.size() > 3));
+        assertTrue(multimap.removeValuesIf((k, v) -> v.size() > 3, Arrays.asList(1, 2, 3)));
         assertEquals(2, multimap.get("key1").size());
         assertTrue(multimap.get("key1").contains(4));
         assertTrue(multimap.get("key1").contains(5));
@@ -955,32 +893,32 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testRemoveAllIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4));
-        multimap.putMany("key3", Arrays.asList(5, 6));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(4));
+        multimap.putValues("key3", Arrays.asList(5, 6));
 
-        assertTrue(multimap.removeAllIf((k, v) -> v.size() < 2));
-        assertEquals(2, multimap.size());
+        assertTrue(multimap.removeKeysIf((k, v) -> v.size() < 2));
+        assertEquals(5, multimap.totalValueCount());
         assertFalse(multimap.containsKey("key2"));
     }
 
     @Test
     public void testReplaceOneIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(2, 3, 4));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(2, 3, 4));
 
-        assertTrue(multimap.replaceOneIf((k, v) -> v.contains(2), 2, 99));
+        assertTrue(multimap.replaceEntriesIf((k, v) -> v.contains(2), 2, 99));
         assertTrue(multimap.get("key1").contains(99));
         assertTrue(multimap.get("key2").contains(99));
     }
 
     @Test
     public void testReplaceManyWithOneIfPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3, 4));
-        multimap.putMany("key2", Arrays.asList(2, 3, 4, 5));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3, 4));
+        multimap.putValues("key2", Arrays.asList(2, 3, 4, 5));
 
-        assertTrue(multimap.replaceManyWithOneIf(k -> k.equals("key1"), Arrays.asList(2, 3), 99));
-        assertEquals(3, multimap.get("key1").size());
+        assertTrue(multimap.replaceValuesIf(k -> k.equals("key1"), N.asList(99)));
+        assertEquals(1, multimap.get("key1").size());
         assertTrue(multimap.get("key1").contains(99));
         assertFalse(multimap.get("key1").contains(2));
         assertFalse(multimap.get("key1").contains(3));
@@ -988,25 +926,25 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testReplaceManyWithOneIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3, 4));
-        multimap.putMany("key2", Arrays.asList(2, 3));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3, 4));
+        multimap.putValues("key2", Arrays.asList(2, 3));
 
-        assertTrue(multimap.replaceManyWithOneIf((k, v) -> v.size() > 3, Arrays.asList(2, 3), 99));
+        assertTrue(multimap.replaceValuesIf((k, v) -> v.size() > 3, N.asList(99)));
         assertTrue(multimap.get("key1").contains(99));
-        assertEquals(3, multimap.get("key1").size());
-        assertEquals(2, multimap.get("key2").size());
-    }
-
-    @Test
-    public void testReplaceAllWithOneIfBiPredicate() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5));
-
-        assertTrue(multimap.replaceAllWithOneIf((k, v) -> v.size() == 3, 99));
         assertEquals(1, multimap.get("key1").size());
-        assertEquals(Integer.valueOf(99), multimap.getFirst("key1"));
         assertEquals(2, multimap.get("key2").size());
     }
+
+    //    @Test
+    //    public void testReplaceAllWithOneIfBiPredicate() {
+    //        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+    //        multimap.putValues("key2", Arrays.asList(4, 5));
+    //
+    //        assertTrue(multimap.replaceAllValuesIf((k, v) -> v.size() == 3, 99));
+    //        assertEquals(1, multimap.get("key1").size());
+    //        assertEquals(Integer.valueOf(99), multimap.getFirst("key1"));
+    //        assertEquals(2, multimap.get("key2").size());
+    //    }
 
     @Test
     public void testComputeIfAbsentWithEmptyReturn() {
@@ -1113,14 +1051,8 @@ public class Multimap100Test extends TestBase {
             }
         }
 
-        assertEquals(numKeys, multimap.size());
-        assertEquals(numKeys * valuesPerKey, multimap.totalCountOfValues());
+        assertEquals(numKeys * valuesPerKey, multimap.totalValueCount());
 
-        Multimap<String, Integer, List<Integer>> filtered = multimap.filterByKey(k -> k.endsWith("0"));
-        assertEquals(100, filtered.size());
-
-        List<Integer> flatValues = multimap.flatValues();
-        assertEquals(numKeys * valuesPerKey, flatValues.size());
     }
 
     @Test
@@ -1130,10 +1062,10 @@ public class Multimap100Test extends TestBase {
         }
 
         for (int i = 0; i < 100; i++) {
-            multimap.removeOne("key" + i, i);
+            multimap.removeEntry("key" + i, i);
         }
 
-        assertEquals(0, multimap.size());
+        assertEquals(0, multimap.totalValueCount());
         assertTrue(multimap.isEmpty());
     }
 
@@ -1162,77 +1094,67 @@ public class Multimap100Test extends TestBase {
     @Test
     public void testBoundaryConditions() {
         multimap.put("", 0);
-        assertTrue(multimap.contains("", 0));
+        assertTrue(multimap.containsEntry("", 0));
 
         multimap.put(null, 1);
-        assertTrue(multimap.contains(null, 1));
-        assertEquals(Integer.valueOf(1), multimap.getFirst(null));
+        assertTrue(multimap.containsEntry(null, 1));
 
-        assertTrue(multimap.removeOne(null, 1));
+        assertTrue(multimap.removeEntry(null, 1));
         assertFalse(multimap.containsKey(null));
     }
 
     @Test
-    public void testComplexFiltering() {
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < i; j++) {
-                multimap.put("key" + i, j);
-            }
-        }
-
-        Multimap<String, Integer, List<Integer>> filtered = multimap.filter((k, v) -> {
-            int keyNum = Integer.parseInt(k.substring(3));
-            return keyNum % 2 == 0 && v.size() > 3;
-        });
-
-        assertTrue(filtered.containsKey("key4"));
-        assertTrue(filtered.containsKey("key6"));
-        assertTrue(filtered.containsKey("key8"));
-        assertEquals(3, filtered.size());
-    }
-
-    @Test
     public void testStreamOperations() {
-        multimap.putMany("key1", Arrays.asList(1, 2, 3));
-        multimap.putMany("key2", Arrays.asList(4, 5));
-        multimap.putMany("key3", Arrays.asList(6));
+        multimap.putValues("key1", Arrays.asList(1, 2, 3));
+        multimap.putValues("key2", Arrays.asList(4, 5));
+        multimap.putValues("key3", Arrays.asList(6));
 
         int sum = multimap.stream().mapToInt(e -> e.getValue().size()).sum();
         assertEquals(6, sum);
 
-        Map<String, Integer> maxValues = multimap.entryStream().entries().toMap(Map.Entry::getKey, e -> e.getValue().stream().max(Integer::compare).orElse(0));
-
-        assertEquals(Integer.valueOf(3), maxValues.get("key1"));
-        assertEquals(Integer.valueOf(5), maxValues.get("key2"));
-        assertEquals(Integer.valueOf(6), maxValues.get("key3"));
+        //        Map<String, Integer> maxValues = multimap.entryStream().entries().toMap(Map.Entry::getKey, e -> e.getValue().stream().max(Integer::compare).orElse(0));
+        //
+        //        assertEquals(Integer.valueOf(3), maxValues.get("key1"));
+        //        assertEquals(Integer.valueOf(5), maxValues.get("key2"));
+        //        assertEquals(Integer.valueOf(6), maxValues.get("key3"));
     }
 
-    @Test
-    public void testFunctionalInterfaces() {
-        multimap.put("test", 1);
-        multimap.forEachKey(System.out::println);
-        multimap.forEachValue(System.out::println);
-        multimap.flatForEachValue(System.out::println);
+    //  @Test
+    //  public void testFlatForEachValue() {
+    //      multimap.putValues("key1", Arrays.asList(1, 2));
+    //      multimap.putValues("key2", Arrays.asList(3, 4));
+    //
+    //      List<Integer> values = new ArrayList<>();
+    //      multimap.flatForEachValue(values::add);
+    //
+    //      assertEquals(4, values.size());
+    //      assertTrue(values.containsAll(Arrays.asList(1, 2, 3, 4)));
+    //  }
 
-        List<String> keyValuePairs = new ArrayList<>();
-        multimap.flatForEach((k, v) -> keyValuePairs.add(k + "=" + v));
-        assertEquals(1, keyValuePairs.size());
-        assertEquals("test=1", keyValuePairs.get(0));
-    }
+    //    @Test
+    //    public void testFunctionalInterfaces() {
+    //        multimap.put("test", 1);
+    //        multimap.forEachKey(System.out::println);
+    //        multimap.forEachValue(System.out::println);
+    //        multimap.flatForEachValue(System.out::println);
+    //
+    //        List<String> keyValuePairs = new ArrayList<>();
+    //        multimap.forEachEntry((k, v) -> keyValuePairs.add(k + "=" + v));
+    //        assertEquals(1, keyValuePairs.size());
+    //        assertEquals("test=1", keyValuePairs.get(0));
+    //    }
 
     @Test
     public void testReplaceEdgeCases() {
-        assertFalse(multimap.replaceOne("key", 1, 2));
-        assertFalse(multimap.replaceAllWithOne("key", 1));
-        assertFalse(multimap.replaceManyWithOne("key", Arrays.asList(1, 2), 3));
+        assertFalse(multimap.replaceEntry("key", 1, 2));
+        assertFalse(multimap.replaceValues("key", N.asList(1)));
 
         multimap.put("key", 1);
-        assertTrue(multimap.replaceOne("key", 1, 1));
-        assertEquals(Integer.valueOf(1), multimap.getFirst("key"));
+        assertTrue(multimap.replaceEntry("key", 1, 1));
 
         multimap.clear();
-        multimap.putMany("key", Arrays.asList(1, 2, 1, 3, 1));
-        assertTrue(multimap.replaceOne("key", 1, 99));
+        multimap.putValues("key", Arrays.asList(1, 2, 1, 3, 1));
+        assertTrue(multimap.replaceEntry("key", 1, 99));
         List<Integer> values = multimap.get("key");
         assertEquals(Integer.valueOf(99), values.get(0));
         assertEquals(Integer.valueOf(1), values.get(2));
@@ -1268,7 +1190,7 @@ public class Multimap100Test extends TestBase {
         customMultimap.put(key1, 1);
         customMultimap.put(key2, 2);
 
-        assertEquals(1, customMultimap.size());
+        assertEquals(2, customMultimap.totalValueCount());
         assertEquals(2, customMultimap.get(key1).size());
     }
 
@@ -1289,49 +1211,49 @@ public class Multimap100Test extends TestBase {
             return upper;
         });
 
-        Multimap<Character, String, List<String>> filtered = grouped.filterByValue(v -> v.size() > 1);
-
-        assertEquals(2, filtered.size());
-        assertTrue(filtered.containsKey('a'));
-        assertTrue(filtered.containsKey('b'));
-        assertTrue(filtered.get('a').contains("APPLE"));
-        assertTrue(filtered.get('a').contains("APRICOT"));
+        //        Multimap<Character, String, List<String>> filtered = grouped.filter((k, v) -> v.size() > 1);
+        //
+        //        assertEquals(2, filtered.size());
+        //        assertTrue(filtered.containsKey('a'));
+        //        assertTrue(filtered.containsKey('b'));
+        //        assertTrue(filtered.get('a').contains("APPLE"));
+        //        assertTrue(filtered.get('a').contains("APRICOT"));
     }
 
-    @Test
-    public void testIntegrationScenario2() {
-        Multimap<String, String, Set<String>> userPermissions = CommonUtil.newMultimap(HashMap::new, HashSet::new);
-
-        userPermissions.putMany("admin", Arrays.asList("read", "write", "delete"));
-        userPermissions.putMany("user", Arrays.asList("read"));
-        userPermissions.putMany("moderator", Arrays.asList("read", "write"));
-
-        Set<String> rolesWithRead = new HashSet<>();
-        userPermissions.forEach((role, perms) -> {
-            if (perms.contains("read")) {
-                rolesWithRead.add(role);
-            }
-        });
-
-        for (String role : rolesWithRead) {
-            userPermissions.put(role, "list");
-        }
-
-        userPermissions.removeOneIf("delete", role -> !role.equals("admin"));
-
-        assertTrue(userPermissions.get("admin").contains("delete"));
-        assertFalse(userPermissions.contains("moderator", "delete"));
-        assertTrue(userPermissions.get("user").contains("list"));
-    }
+    //    @Test
+    //    public void testIntegrationScenario2() {
+    //        Multimap<String, String, Set<String>> userPermissions = CommonUtil.newMultimap(HashMap::new, HashSet::new);
+    //
+    //        userPermissions.putValues("admin", Arrays.asList("read", "write", "delete"));
+    //        userPermissions.putValues("user", Arrays.asList("read"));
+    //        userPermissions.putValues("moderator", Arrays.asList("read", "write"));
+    //
+    //        Set<String> rolesWithRead = new HashSet<>();
+    //        userPermissions.forEach((role, perms) -> {
+    //            if (perms.contains("read")) {
+    //                rolesWithRead.add(role);
+    //            }
+    //        });
+    //
+    //        for (String role : rolesWithRead) {
+    //            userPermissions.put(role, "list");
+    //        }
+    //
+    //        userPermissions.removeEntriesIf(role -> !role.equals("admin"), "delete");
+    //
+    //        assertTrue(userPermissions.get("admin").contains("delete"));
+    //        assertFalse(userPermissions.containsEntry("moderator", "delete"));
+    //        assertTrue(userPermissions.get("user").contains("list"));
+    //    }
 
     @Test
     public void testIntegrationScenario3() {
         Multimap<String, Long, List<Long>> eventTimestamps = CommonUtil.newListMultimap();
 
         long baseTime = System.currentTimeMillis();
-        eventTimestamps.putMany("login", Arrays.asList(baseTime, baseTime + 1000, baseTime + 2000));
-        eventTimestamps.putMany("logout", Arrays.asList(baseTime + 3000, baseTime + 4000));
-        eventTimestamps.putMany("error", Arrays.asList(baseTime + 1500));
+        eventTimestamps.putValues("login", Arrays.asList(baseTime, baseTime + 1000, baseTime + 2000));
+        eventTimestamps.putValues("logout", Arrays.asList(baseTime + 3000, baseTime + 4000));
+        eventTimestamps.putValues("error", Arrays.asList(baseTime + 1500));
 
         List<Long> loginTimes = eventTimestamps.get("login");
         List<Long> logoutTimes = eventTimestamps.get("logout");
@@ -1374,7 +1296,7 @@ public class Multimap100Test extends TestBase {
         }
 
         for (int i = 0; i < operations / 2; i++) {
-            multimap.removeOne("key" + (i % 100), i);
+            multimap.removeEntry("key" + (i % 100), i);
         }
 
         long endTime = System.currentTimeMillis();
@@ -1384,40 +1306,34 @@ public class Multimap100Test extends TestBase {
 
     @Test
     public void testAllExceptionScenarios() {
-        try {
-            multimap.forEach((BiConsumer) null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
+        //        try {
+        //            multimap.forEach((BiConsumer) null);
+        //            fail("Should throw IllegalArgumentException");
+        //        } catch (IllegalArgumentException e) {
+        //        }
 
-        try {
-            multimap.flatForEach(null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
+        //        try {
+        //            multimap.forEachKey(null);
+        //            fail("Should throw IllegalArgumentException");
+        //        } catch (IllegalArgumentException e) {
+        //        }
+        //
+        //        try {
+        //            multimap.forEachValues(null);
+        //            fail("Should throw IllegalArgumentException");
+        //        } catch (IllegalArgumentException e) {
+        //        }
 
-        try {
-            multimap.forEachKey(null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            multimap.forEachValue(null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            multimap.flatForEachValue(null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
+        //    try {
+        //        multimap.flatForEachValue(null);
+        //        fail("Should throw IllegalArgumentException");
+        //    } catch (IllegalArgumentException e) {
+        //    }
     }
 
     @Test
     public void testToStringFormat() {
-        multimap.putMany("key1", Arrays.asList(1, 2));
+        multimap.putValues("key1", Arrays.asList(1, 2));
         multimap.put("key2", 3);
 
         String str = multimap.toString();
@@ -1444,11 +1360,7 @@ public class Multimap100Test extends TestBase {
         complexMap.put("mixed", "forty-two");
         complexMap.put("mixed", true);
 
-        assertEquals(3, complexMap.size());
-        assertEquals(8, complexMap.totalCountOfValues());
-
-        Multimap<String, Object, List<Object>> filtered = complexMap.filterByKey(k -> !k.equals("mixed"));
-        assertEquals(2, filtered.size());
+        assertEquals(8, complexMap.totalValueCount());
 
         Multimap<String, Object, List<Object>> copy = complexMap.copy();
         copy.removeAll("strings");

@@ -12,43 +12,38 @@ import com.landawn.abacus.TestBase;
 public class ParserFactory2025Test extends TestBase {
 
     @Test
-    public void test_isAbacusXMLAvailable() {
+    public void test_isAbacusXmlParserAvailable() {
         // Just verify the method can be called
-        ParserFactory.isAbacusXMLAvailable();
+        ParserFactory.isAbacusXmlParserAvailable();
     }
 
     @Test
-    public void test_isXMLAvailable() {
-        ParserFactory.isXMLAvailable();
+    public void test_isXmlParserAvailable() {
+        ParserFactory.isXmlParserAvailable();
     }
 
     @Test
-    public void test_isAvroAvailable() {
-        ParserFactory.isAvroAvailable();
+    public void test_isAvroParserAvailable() {
+        ParserFactory.isAvroParserAvailable();
     }
 
     @Test
-    public void test_isKryoAvailable() {
-        ParserFactory.isKryoAvailable();
-    }
-
-    @Test
-    public void test_createJSONParser() {
-        JSONParser parser = ParserFactory.createJSONParser();
+    public void test_createJsonParser() {
+        JsonParser parser = ParserFactory.createJsonParser();
         assertNotNull(parser);
     }
 
     @Test
-    public void test_createJSONParser_withConfig() {
-        JSONSerializationConfig jsc = new JSONSerializationConfig();
-        JSONDeserializationConfig jdc = new JSONDeserializationConfig();
-        JSONParser parser = ParserFactory.createJSONParser(jsc, jdc);
+    public void test_createJsonParser_withConfig() {
+        JsonSerializationConfig jsc = new JsonSerializationConfig();
+        JsonDeserializationConfig jdc = new JsonDeserializationConfig();
+        JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
         assertNotNull(parser);
     }
 
     @Test
     public void test_createAvroParser() {
-        if (ParserFactory.isAvroAvailable()) {
+        if (ParserFactory.isAvroParserAvailable()) {
             AvroParser parser = ParserFactory.createAvroParser();
             assertNotNull(parser);
         }
@@ -56,65 +51,65 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_createKryoParser() {
-        if (ParserFactory.isKryoAvailable()) {
+        if (ParserFactory.isAvroParserAvailable()) {
             KryoParser parser = ParserFactory.createKryoParser();
             assertNotNull(parser);
         }
     }
 
     @Test
-    public void test_createAbacusXMLParser() {
-        if (ParserFactory.isAbacusXMLAvailable()) {
-            XMLParser parser = ParserFactory.createAbacusXMLParser();
+    public void test_createAbacusXmlParser() {
+        if (ParserFactory.isAbacusXmlParserAvailable()) {
+            XmlParser parser = ParserFactory.createAbacusXmlParser();
             assertNotNull(parser);
         }
     }
 
     @Test
-    public void test_createAbacusXMLParser_withConfig() {
-        if (ParserFactory.isAbacusXMLAvailable()) {
-            XMLSerializationConfig xsc = new XMLSerializationConfig();
-            XMLDeserializationConfig xdc = new XMLDeserializationConfig();
-            XMLParser parser = ParserFactory.createAbacusXMLParser(xsc, xdc);
+    public void test_createAbacusXmlParser_withConfig() {
+        if (ParserFactory.isAbacusXmlParserAvailable()) {
+            XmlSerializationConfig xsc = new XmlSerializationConfig();
+            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
             assertNotNull(parser);
         }
     }
 
     @Test
-    public void test_createXMLParser() {
-        if (ParserFactory.isXMLAvailable()) {
-            XMLParser parser = ParserFactory.createXMLParser();
+    public void test_createXmlParser() {
+        if (ParserFactory.isXmlParserAvailable()) {
+            XmlParser parser = ParserFactory.createXmlParser();
             assertNotNull(parser);
         }
     }
 
     @Test
-    public void test_createXMLParser_withConfig() {
-        if (ParserFactory.isXMLAvailable()) {
-            XMLSerializationConfig xsc = new XMLSerializationConfig();
-            XMLDeserializationConfig xdc = new XMLDeserializationConfig();
-            XMLParser parser = ParserFactory.createXMLParser(xsc, xdc);
+    public void test_createXmlParser_withConfig() {
+        if (ParserFactory.isXmlParserAvailable()) {
+            XmlSerializationConfig xsc = new XmlSerializationConfig();
+            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
             assertNotNull(parser);
         }
     }
 
     @Test
     public void test_createJAXBParser() {
-        XMLParser parser = ParserFactory.createJAXBParser();
+        XmlParser parser = ParserFactory.createJAXBParser();
         assertNotNull(parser);
     }
 
     @Test
     public void test_createJAXBParser_withConfig() {
-        XMLSerializationConfig xsc = new XMLSerializationConfig();
-        XMLDeserializationConfig xdc = new XMLDeserializationConfig();
-        XMLParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+        XmlSerializationConfig xsc = new XmlSerializationConfig();
+        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+        XmlParser parser = ParserFactory.createJAXBParser(xsc, xdc);
         assertNotNull(parser);
     }
 
     @Test
     public void test_registerKryo_class() {
-        if (ParserFactory.isKryoAvailable()) {
+        if (ParserFactory.isAvroParserAvailable()) {
             ParserFactory.registerKryo(String.class);
         }
     }
@@ -126,7 +121,7 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_registerKryo_classWithId() {
-        if (ParserFactory.isKryoAvailable()) {
+        if (ParserFactory.isAvroParserAvailable()) {
             ParserFactory.registerKryo(Integer.class, 100);
         }
     }

@@ -105,52 +105,52 @@ public class Dates2025Test extends TestBase {
     }
 
     @Test
-    public void test_currentTimeRolled() {
-        Time futureTime = Dates.currentTimeRolled(5, TimeUnit.MINUTES);
+    public void test_currentTimePlus() {
+        Time futureTime = Dates.currentTimePlus(5, TimeUnit.MINUTES);
         Time currentTime = Dates.currentTime();
         assertTrue(futureTime.getTime() > currentTime.getTime());
 
-        Time pastTime = Dates.currentTimeRolled(-5, TimeUnit.MINUTES);
+        Time pastTime = Dates.currentTimePlus(-5, TimeUnit.MINUTES);
         assertTrue(pastTime.getTime() < currentTime.getTime());
     }
 
     @Test
-    public void test_currentDateRolled() {
-        java.sql.Date futureDate = Dates.currentDateRolled(1, TimeUnit.DAYS);
+    public void test_currentDatePlus() {
+        java.sql.Date futureDate = Dates.currentDatePlus(1, TimeUnit.DAYS);
         java.sql.Date currentDate = Dates.currentDate();
         assertTrue(futureDate.getTime() > currentDate.getTime());
 
-        java.sql.Date pastDate = Dates.currentDateRolled(-1, TimeUnit.DAYS);
+        java.sql.Date pastDate = Dates.currentDatePlus(-1, TimeUnit.DAYS);
         assertTrue(pastDate.getTime() < currentDate.getTime());
     }
 
     @Test
-    public void test_currentTimestampRolled() {
-        Timestamp futureTs = Dates.currentTimestampRolled(10, TimeUnit.SECONDS);
+    public void test_currentTimestampPlus() {
+        Timestamp futureTs = Dates.currentTimestampPlus(10, TimeUnit.SECONDS);
         Timestamp currentTs = Dates.currentTimestamp();
         assertTrue(futureTs.getTime() > currentTs.getTime());
 
-        Timestamp pastTs = Dates.currentTimestampRolled(-10, TimeUnit.SECONDS);
+        Timestamp pastTs = Dates.currentTimestampPlus(-10, TimeUnit.SECONDS);
         assertTrue(pastTs.getTime() < currentTs.getTime());
     }
 
     @Test
-    public void test_currentJUDateRolled() {
-        java.util.Date futureDate = Dates.currentJUDateRolled(2, TimeUnit.HOURS);
+    public void test_currentJUDatePlus() {
+        java.util.Date futureDate = Dates.currentJUDatePlus(2, TimeUnit.HOURS);
         java.util.Date currentDate = Dates.currentJUDate();
         assertTrue(futureDate.getTime() > currentDate.getTime());
 
-        java.util.Date pastDate = Dates.currentJUDateRolled(-2, TimeUnit.HOURS);
+        java.util.Date pastDate = Dates.currentJUDatePlus(-2, TimeUnit.HOURS);
         assertTrue(pastDate.getTime() < currentDate.getTime());
     }
 
     @Test
-    public void test_currentCalendarRolled() {
-        Calendar futureCal = Dates.currentCalendarRolled(3, TimeUnit.HOURS);
+    public void test_currentCalendarPlus() {
+        Calendar futureCal = Dates.currentCalendarPlus(3, TimeUnit.HOURS);
         Calendar currentCal = Dates.currentCalendar();
         assertTrue(futureCal.getTimeInMillis() > currentCal.getTimeInMillis());
 
-        Calendar pastCal = Dates.currentCalendarRolled(-3, TimeUnit.HOURS);
+        Calendar pastCal = Dates.currentCalendarPlus(-3, TimeUnit.HOURS);
         assertTrue(pastCal.getTimeInMillis() < currentCal.getTimeInMillis());
     }
 
@@ -1760,42 +1760,42 @@ public class Dates2025Test extends TestBase {
     }
 
     @Test
-    public void test_getLastDateOfMonth() {
+    public void test_getLastDayOfMonth() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.JANUARY, 15, 10, 30, 45);
-        int lastDate = Dates.getLastDateOfMonth(cal.getTime());
+        int lastDate = Dates.getLastDayOfMonth(cal.getTime());
         assertEquals(31, lastDate);
 
         cal.set(2025, Calendar.FEBRUARY, 15, 10, 30, 45);
-        lastDate = Dates.getLastDateOfMonth(cal.getTime());
+        lastDate = Dates.getLastDayOfMonth(cal.getTime());
         assertEquals(28, lastDate);
 
-        assertThrows(IllegalArgumentException.class, () -> Dates.getLastDateOfMonth(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getLastDayOfMonth(null));
     }
 
     @Test
-    public void test_getLastDateOfYear() {
+    public void test_getLastDayOfYear() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.JUNE, 15, 10, 30, 45);
-        int lastDate = Dates.getLastDateOfYear(cal.getTime());
+        int lastDate = Dates.getLastDayOfYear(cal.getTime());
         assertEquals(365, lastDate);
 
-        assertThrows(IllegalArgumentException.class, () -> Dates.getLastDateOfYear(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getLastDayOfYear(null));
     }
 
     @Test
-    public void test_isOverlap() {
+    public void test_isOverlapping() {
         java.util.Date start1 = new java.util.Date(1000000000L);
         java.util.Date end1 = new java.util.Date(2000000000L);
         java.util.Date start2 = new java.util.Date(1500000000L);
         java.util.Date end2 = new java.util.Date(2500000000L);
 
-        assertTrue(Dates.isOverlap(start1, end1, start2, end2));
+        assertTrue(Dates.isOverlapping(start1, end1, start2, end2));
 
         java.util.Date start3 = new java.util.Date(2500000000L);
         java.util.Date end3 = new java.util.Date(3000000000L);
 
-        assertFalse(Dates.isOverlap(start1, end1, start3, end3));
+        assertFalse(Dates.isOverlapping(start1, end1, start3, end3));
     }
 
     @Test
@@ -1958,7 +1958,7 @@ public class Dates2025Test extends TestBase {
     public void test_edgeCase_leapYear() {
         Calendar cal = Calendar.getInstance();
         cal.set(2024, Calendar.FEBRUARY, 29, 12, 0, 0);
-        int lastDate = Dates.getLastDateOfMonth(cal.getTime());
+        int lastDate = Dates.getLastDayOfMonth(cal.getTime());
         assertEquals(29, lastDate);
     }
 

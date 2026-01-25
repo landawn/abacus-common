@@ -1055,7 +1055,7 @@ public class Iterators103Test extends TestBase {
             triple.set(str.substring(0, 1), Integer.parseInt(str.substring(1, 2)), str.substring(2));
         };
 
-        TriIterator<String, Integer, String> iter = Iterators.unzipp(inputIter, unzipFunction);
+        TriIterator<String, Integer, String> iter = Iterators.unzip3(inputIter, unzipFunction);
 
         Triple<String, Integer, String> triple = iter.next();
         assertEquals("a", triple.left());
@@ -1083,7 +1083,7 @@ public class Iterators103Test extends TestBase {
             triple.set(str.substring(0, 1), Integer.parseInt(str.substring(1, 2)), str.substring(2));
         };
 
-        TriIterator<String, Integer, String> iter = Iterators.unzipp(input, unzipFunction);
+        TriIterator<String, Integer, String> iter = Iterators.unzip3(input, unzipFunction);
 
         Triple<String, Integer, String> triple = iter.next();
         assertEquals("a", triple.left());

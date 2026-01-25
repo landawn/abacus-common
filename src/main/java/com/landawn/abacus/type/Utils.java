@@ -14,13 +14,13 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONParser;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonParser;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserFactory;
-import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.parser.XmlParser;
 
 /**
  * Internal utility class providing shared parser instances and configurations for the type system.
@@ -45,30 +45,30 @@ import com.landawn.abacus.parser.XMLParser;
  */
 public final class Utils {
 
-    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl
+    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
     /**
      * Shared JSON parser instance for use throughout the type system.
      * Lazily initialized to avoid class loading issues.
      */
-    static final JSONParser jsonParser = ParserFactory.createJSONParser();
+    static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     /**
      * Shared XML parser instance for use throughout the type system.
      * Will be {@code null} if XML parsing libraries are not available in the classpath.
      */
-    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+    static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
     /**
      * Default JSON serialization configuration used by type converters.
      * Created with standard settings suitable for most type conversions.
      */
-    static final JSONSerializationConfig jsc = JSC.create();
+    static final JsonSerializationConfig jsc = JSC.create();
 
     /**
      * Default JSON deserialization configuration used by type converters.
      * Created with standard settings suitable for most type conversions.
      */
-    static final JSONDeserializationConfig jdc = JDC.create();
+    static final JsonDeserializationConfig jdc = JDC.create();
 
     private Utils() {
         // singleton.

@@ -54,7 +54,7 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test guid() generates valid GUID")
     public void testGuid() {
-        String guid = Strings.guid();
+        String guid = Strings.uuid32();
         assertNotNull(guid);
         assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));
@@ -64,8 +64,8 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test guid() generates unique GUIDs")
     public void testGuid_Unique() {
-        String guid1 = Strings.guid();
-        String guid2 = Strings.guid();
+        String guid1 = Strings.uuid32();
+        String guid2 = Strings.uuid32();
         assertFalse(guid1.equals(guid2));
     }
 
@@ -888,12 +888,12 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test toLowerCaseWithUnderscore()")
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("hello_world", Strings.toLowerCaseWithUnderscore("HelloWorld"));
-        assertEquals("hello_world", Strings.toLowerCaseWithUnderscore("helloWorld"));
-        assertEquals("abc", Strings.toLowerCaseWithUnderscore("abc"));
-        assertNull(Strings.toLowerCaseWithUnderscore(null));
+    @DisplayName("Test toSnakeCase()")
+    public void testToSnakeCase() {
+        assertEquals("hello_world", Strings.toSnakeCase("HelloWorld"));
+        assertEquals("hello_world", Strings.toSnakeCase("helloWorld"));
+        assertEquals("abc", Strings.toSnakeCase("abc"));
+        assertNull(Strings.toSnakeCase(null));
     }
 
     @Test
@@ -923,12 +923,12 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test toUpperCaseWithUnderscore()")
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("HELLO_WORLD", Strings.toUpperCaseWithUnderscore("HelloWorld"));
-        assertEquals("HELLO_WORLD", Strings.toUpperCaseWithUnderscore("helloWorld"));
-        assertEquals("ABC", Strings.toUpperCaseWithUnderscore("ABC"));
-        assertNull(Strings.toUpperCaseWithUnderscore(null));
+    @DisplayName("Test toScreamingSnakeCase()")
+    public void testToScreamingSnakeCase() {
+        assertEquals("HELLO_WORLD", Strings.toScreamingSnakeCase("HelloWorld"));
+        assertEquals("HELLO_WORLD", Strings.toScreamingSnakeCase("helloWorld"));
+        assertEquals("ABC", Strings.toScreamingSnakeCase("ABC"));
+        assertNull(Strings.toScreamingSnakeCase(null));
     }
 
     @Test
@@ -950,21 +950,21 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test toPascalCase()")
-    public void testToPascalCase() {
-        assertEquals("HelloWorld", Strings.toPascalCase("hello_world"));
-        assertEquals("HelloWorld", Strings.toPascalCase("HELLO_WORLD"));
-        assertEquals("HelloWorld", Strings.toPascalCase("hello-world"));
-        assertNull(Strings.toPascalCase(null));
-        assertEquals("", Strings.toPascalCase(""));
+    @DisplayName("Test toUpperCamelCase()")
+    public void testToUpperCamelCase() {
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello_world"));
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("HELLO_WORLD"));
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello-world"));
+        assertNull(Strings.toUpperCamelCase(null));
+        assertEquals("", Strings.toUpperCamelCase(""));
     }
 
     @Test
-    @DisplayName("Test toPascalCase() with custom split char")
-    public void testToPascalCase_WithSplitChar() {
-        assertEquals("HelloWorld", Strings.toPascalCase("hello_world", '_'));
-        assertEquals("HelloWorld", Strings.toPascalCase("hello-world", '-'));
-        assertNull(Strings.toPascalCase(null, '_'));
+    @DisplayName("Test toUpperCamelCase() with custom split char")
+    public void testToUpperCamelCase_WithSplitChar() {
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello_world", '_'));
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello-world", '-'));
+        assertNull(Strings.toUpperCamelCase(null, '_'));
     }
 
     @Test
@@ -1953,14 +1953,14 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isAsciiDigitalNumber()")
-    public void testIsAsciiDigitalNumber() {
-        assertTrue(Strings.isAsciiDigitalNumber("123"));
-        assertTrue(Strings.isAsciiDigitalNumber("-123"));
-        assertTrue(Strings.isAsciiDigitalNumber("12.3"));
-        assertFalse(Strings.isAsciiDigitalNumber("abc"));
-        assertFalse(Strings.isAsciiDigitalNumber(null));
-        assertFalse(Strings.isAsciiDigitalNumber(""));
+    @DisplayName("Test isAsciiNumber()")
+    public void testisAsciiNumber() {
+        assertTrue(Strings.isAsciiNumber("123"));
+        assertTrue(Strings.isAsciiNumber("-123"));
+        assertTrue(Strings.isAsciiNumber("12.3"));
+        assertFalse(Strings.isAsciiNumber("abc"));
+        assertFalse(Strings.isAsciiNumber(null));
+        assertFalse(Strings.isAsciiNumber(""));
     }
 
     @Test
@@ -2342,47 +2342,47 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test smallestIndexOfAll()")
-    public void testSmallestIndexOfAll() {
-        assertEquals(0, Strings.smallestIndexOfAll("abcdefg", "abc", "efg"));
-        assertEquals(3, Strings.smallestIndexOfAll("abcdefg", "def", "efg"));
-        assertEquals(-1, Strings.smallestIndexOfAll("abc", "xyz", "123"));
+    @DisplayName("Test minIndexOfAll()")
+    public void testminIndexOfAll() {
+        assertEquals(0, Strings.minIndexOfAll("abcdefg", "abc", "efg"));
+        assertEquals(3, Strings.minIndexOfAll("abcdefg", "def", "efg"));
+        assertEquals(-1, Strings.minIndexOfAll("abc", "xyz", "123"));
     }
 
     @Test
-    @DisplayName("Test smallestIndexOfAll() with fromIndex")
-    public void testSmallestIndexOfAll_WithFromIndex() {
-        assertEquals(3, Strings.smallestIndexOfAll("abcdefg", 2, "def", "efg"));
-        assertEquals(-1, Strings.smallestIndexOfAll("abc", 5, "abc"));
+    @DisplayName("Test minIndexOfAll() with fromIndex")
+    public void testminIndexOfAll_WithFromIndex() {
+        assertEquals(3, Strings.minIndexOfAll("abcdefg", 2, "def", "efg"));
+        assertEquals(-1, Strings.minIndexOfAll("abc", 5, "abc"));
     }
 
     @Test
-    @DisplayName("Test largestIndexOfAll()")
-    public void testLargestIndexOfAll() {
-        assertEquals(4, Strings.largestIndexOfAll("abcdefg", "abc", "efg"));
-        assertEquals(3, Strings.largestIndexOfAll("abcdefg", "def", "abc"));
-        assertEquals(-1, Strings.largestIndexOfAll("abc", "xyz", "123"));
+    @DisplayName("Test maxIndexOfAll()")
+    public void testmaxIndexOfAll() {
+        assertEquals(4, Strings.maxIndexOfAll("abcdefg", "abc", "efg"));
+        assertEquals(3, Strings.maxIndexOfAll("abcdefg", "def", "abc"));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", "xyz", "123"));
     }
 
     @Test
-    @DisplayName("Test largestIndexOfAll() with fromIndex")
-    public void testLargestIndexOfAll_WithFromIndex() {
-        assertEquals(4, Strings.largestIndexOfAll("abcdefg", 2, "def", "efg"));
-        assertEquals(-1, Strings.largestIndexOfAll("abc", 5, "abc"));
+    @DisplayName("Test maxIndexOfAll() with fromIndex")
+    public void testmaxIndexOfAll_WithFromIndex() {
+        assertEquals(4, Strings.maxIndexOfAll("abcdefg", 2, "def", "efg"));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", 5, "abc"));
     }
 
     @Test
-    @DisplayName("Test largestLastIndexOfAll()")
-    public void testLargestLastIndexOfAll() {
-        assertEquals(6, Strings.largestLastIndexOfAll("abcabcabc", "abc"));
-        assertEquals(6, Strings.largestLastIndexOfAll("abcdefabc", "abc", "def"));
+    @DisplayName("Test maxLastIndexOfAll()")
+    public void testmaxLastIndexOfAll() {
+        assertEquals(6, Strings.maxLastIndexOfAll("abcabcabc", "abc"));
+        assertEquals(6, Strings.maxLastIndexOfAll("abcdefabc", "abc", "def"));
     }
 
     @Test
-    @DisplayName("Test smallestLastIndexOfAll()")
-    public void testSmallestLastIndexOfAll() {
-        assertEquals(3, Strings.smallestLastIndexOfAll("abcdefabc", "abc", "def"));
-        assertEquals(6, Strings.smallestLastIndexOfAll("abcabcabc", "abc"));
+    @DisplayName("Test minLastIndexOfAll()")
+    public void testminLastIndexOfAll() {
+        assertEquals(3, Strings.minLastIndexOfAll("abcdefabc", "abc", "def"));
+        assertEquals(6, Strings.minLastIndexOfAll("abcabcabc", "abc"));
     }
 
     @Test
@@ -2785,10 +2785,10 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test substringBetweenIgnoreCaes()")
-    public void testSubstringBetweenIgnoreCaes() {
-        assertEquals("content", Strings.substringBetweenIgnoreCaes("<TAG>content</tag>", "<tag>", "</TAG>"));
-        assertNull(Strings.substringBetweenIgnoreCaes(null, "<", ">"));
+    @DisplayName("Test substringBetweenIgnoreCase()")
+    public void testsubstringBetweenIgnoreCase() {
+        assertEquals("content", Strings.substringBetweenIgnoreCase("<TAG>content</tag>", "<tag>", "</TAG>"));
+        assertNull(Strings.substringBetweenIgnoreCase(null, "<", ">"));
     }
 
     @Test
@@ -3280,15 +3280,15 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isAsciiDigitalInteger()")
-    public void testIsAsciiDigitalInteger() {
-        assertTrue(Strings.isAsciiDigitalInteger("123"));
-        assertTrue(Strings.isAsciiDigitalInteger("-123"));
-        assertTrue(Strings.isAsciiDigitalInteger("+123"));
-        assertFalse(Strings.isAsciiDigitalInteger("12.3"));
-        assertFalse(Strings.isAsciiDigitalInteger("abc"));
-        assertFalse(Strings.isAsciiDigitalInteger(null));
-        assertFalse(Strings.isAsciiDigitalInteger(""));
+    @DisplayName("Test isAsciiInteger()")
+    public void testisAsciiInteger() {
+        assertTrue(Strings.isAsciiInteger("123"));
+        assertTrue(Strings.isAsciiInteger("-123"));
+        assertTrue(Strings.isAsciiInteger("+123"));
+        assertFalse(Strings.isAsciiInteger("12.3"));
+        assertFalse(Strings.isAsciiInteger("abc"));
+        assertFalse(Strings.isAsciiInteger(null));
+        assertFalse(Strings.isAsciiInteger(""));
     }
 
     @Test

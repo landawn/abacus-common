@@ -150,13 +150,13 @@ public class PrimitiveLongArrayType100Test extends TestBase {
 
     @Test
     public void testCollection2ArrayNull() {
-        assertNull(type.collection2Array(null));
+        assertNull(type.collectionToArray(null));
     }
 
     @Test
     public void testCollection2ArrayEmpty() {
         Collection<Long> collection = new ArrayList<>();
-        long[] result = type.collection2Array(collection);
+        long[] result = type.collectionToArray(collection);
         assertNotNull(result);
         assertEquals(0, result.length);
     }
@@ -164,28 +164,28 @@ public class PrimitiveLongArrayType100Test extends TestBase {
     @Test
     public void testCollection2ArrayNonEmpty() {
         Collection<Long> collection = Arrays.asList(1L, 2L, 3L);
-        long[] result = type.collection2Array(collection);
+        long[] result = type.collectionToArray(collection);
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
     }
 
     @Test
     public void testArray2CollectionNull() {
         List<Long> output = new ArrayList<>();
-        type.array2Collection(null, output);
+        type.arrayToCollection(null, output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionEmpty() {
         List<Long> output = new ArrayList<>();
-        type.array2Collection(new long[0], output);
+        type.arrayToCollection(new long[0], output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionNonEmpty() {
         List<Long> output = new ArrayList<>();
-        type.array2Collection(new long[] { 1L, 2L, 3L }, output);
+        type.arrayToCollection(new long[] { 1L, 2L, 3L }, output);
         assertEquals(3, output.size());
         assertEquals(Long.valueOf(1L), output.get(0));
         assertEquals(Long.valueOf(2L), output.get(1));

@@ -132,8 +132,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void toLowerCaseWithUnderscore() {
-        assertThat(Fn.toLowerCaseWithUnderscore().apply("helloWorld")).isEqualTo("hello_world");
+    public void toSnakeCase() {
+        assertThat(Fn.toSnakeCase().apply("helloWorld")).isEqualTo("hello_world");
     }
 
     @Test
@@ -142,8 +142,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void toUpperCaseWithUnderscore() {
-        assertThat(Fn.toUpperCaseWithUnderscore().apply("helloWorld")).isEqualTo("HELLO_WORLD");
+    public void toScreamingSnakeCase() {
+        assertThat(Fn.toScreamingSnakeCase().apply("helloWorld")).isEqualTo("HELLO_WORLD");
     }
 
     @Test

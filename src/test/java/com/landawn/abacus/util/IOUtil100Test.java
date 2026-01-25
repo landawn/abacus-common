@@ -86,87 +86,87 @@ public class IOUtil100Test extends TestBase {
 
     @Test
     public void testFreeDiskSpaceKb() {
-        long freeSpace = IOUtil.freeDiskSpaceKb();
+        long freeSpace = IOUtil.freeDiskSpaceKB();
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKb(5000);
+        long freeSpace = IOUtil.freeDiskSpaceKB(5000);
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithPath() {
-        long freeSpace = IOUtil.freeDiskSpaceKb(tempDir.getAbsolutePath());
+        long freeSpace = IOUtil.freeDiskSpaceKB(tempDir.getAbsolutePath());
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithPathAndTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKb(tempDir.getAbsolutePath(), 5000);
+        long freeSpace = IOUtil.freeDiskSpaceKB(tempDir.getAbsolutePath(), 5000);
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testChars2Bytes() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars);
+        byte[] bytes = IOUtil.charsToBytes(chars);
         assertArrayEquals(TEST_CONTENT.getBytes(), bytes);
     }
 
     @Test
     public void testChars2BytesWithCharset() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, UTF_8);
         assertArrayEquals(TEST_CONTENT.getBytes(UTF_8), bytes);
     }
 
     @Test
     public void testChars2BytesWithOffsetAndCount() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, 0, 5, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, 0, 5, UTF_8);
         assertArrayEquals("Hello".getBytes(UTF_8), bytes);
     }
 
     @Test
     public void testBytes2Chars() {
         byte[] bytes = TEST_CONTENT.getBytes();
-        char[] chars = IOUtil.bytes2Chars(bytes);
+        char[] chars = IOUtil.bytesToChars(bytes);
         assertArrayEquals(TEST_CONTENT.toCharArray(), chars);
     }
 
     @Test
     public void testBytes2CharsWithCharset() {
         byte[] bytes = TEST_CONTENT.getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, UTF_8);
         assertArrayEquals(TEST_CONTENT.toCharArray(), chars);
     }
 
     @Test
     public void testBytes2CharsWithOffsetAndCount() {
         byte[] bytes = TEST_CONTENT.getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, 0, 5, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, 0, 5, UTF_8);
         assertArrayEquals("Hello".toCharArray(), chars);
     }
 
     @Test
     public void testString2InputStream() throws IOException {
-        InputStream is = IOUtil.string2InputStream(TEST_CONTENT);
+        InputStream is = IOUtil.stringToInputStream(TEST_CONTENT);
         String result = IOUtil.readAllToString(is);
         assertEquals(TEST_CONTENT, result);
     }
 
     @Test
     public void testString2InputStreamWithCharset() throws IOException {
-        InputStream is = IOUtil.string2InputStream(TEST_CONTENT, UTF_8);
+        InputStream is = IOUtil.stringToInputStream(TEST_CONTENT, UTF_8);
         String result = IOUtil.readAllToString(is, UTF_8);
         assertEquals(TEST_CONTENT, result);
     }
 
     @Test
     public void testString2Reader() throws IOException {
-        Reader reader = IOUtil.string2Reader(TEST_CONTENT);
+        Reader reader = IOUtil.stringToReader(TEST_CONTENT);
         String result = IOUtil.readAllToString(reader);
         assertEquals(TEST_CONTENT, result);
     }
@@ -174,7 +174,7 @@ public class IOUtil100Test extends TestBase {
     @Test
     public void testStringBuilder2Writer() throws IOException {
         StringBuilder sb = new StringBuilder(TEST_CONTENT);
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write(" Additional");
         assertEquals(TEST_CONTENT + " Additional", sb.toString());
     }
@@ -564,7 +564,7 @@ public class IOUtil100Test extends TestBase {
         File subFile = new File(subDir, "subfile.txt");
         Files.write(subFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
 
-        boolean deleted = IOUtil.deleteAllIfExists(tempDir);
+        boolean deleted = IOUtil.deleteRecursivelyIfExists(tempDir);
 
         assertTrue(deleted);
         assertFalse(tempDir.exists());

@@ -516,7 +516,7 @@ public class ParallelArrayStream102Test extends TestBase {
             Multimap<String, Integer, List<Integer>> result = stream.limit(6)
                     .toMultimap(x -> x % 2 == 0 ? "even" : "odd", Fn.identity(), Suppliers.ofListMultimap());
 
-            assertEquals(2, result.size());
+            assertEquals(6, result.totalValueCount());
             assertEquals(3, result.get("even").size());
             assertEquals(3, result.get("odd").size());
         }

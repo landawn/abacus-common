@@ -1048,6 +1048,19 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
+     * Returns the input array as-is without any modification or copying.
+     * 
+     * @param <T> the type of the elements in the array.
+     * @param a the input array.
+     * @return the same input array.
+     * @see #oF(Object...)
+     */
+    @Beta
+    public static <T> T[] with(final T... a) { //NOSONAR
+        return a;
+    }
+
+    /**
      * Generates a range of characters from the start (inclusive) to the end (exclusive).
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
@@ -3786,23 +3799,23 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Example 1: Basic concatenation of two two-dimensional String arrays
      * String[][] a = {{"a", "b"}, {"c"}};
      * String[][] b = {{"d"}, {"e", "f"}};
-     * String[][] result = Array.concatt(a, b);
+     * String[][] result = Array.concat2D(a, b);
      * // result = {{"a", "b", "d"}, {"c", "e", "f"}}
      *
      * // Example 2: Arrays with different lengths
      * Integer[][] a = {{1, 2}, {3}};
      * Integer[][] b = {{4}};
-     * Integer[][] result = Array.concatt(a, b);
+     * Integer[][] result = Array.concat2D(a, b);
      * // result = {{1, 2, 4}, {3}}
      *
      * // Example 3: Concatenation with empty array
      * String[][] a = {{"hello", "world"}};
      * String[][] b = new String[0][];
-     * String[][] result = Array.concatt(a, b);
+     * String[][] result = Array.concat2D(a, b);
      * // result = {{"hello", "world"}} (clone of a)
      *
      * // Example 4: Both arrays are null/empty
-     * String[][] result = Array.concatt(null, null);
+     * String[][] result = Array.concat2D(null, null);
      * // result = null
      * }</pre>
      *
@@ -3813,7 +3826,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      *         Returns {@code null} if both input arrays are {@code null}.
      */
-    public static <T> T[][] concatt(final T[][] a, final T[][] b) {
+    public static <T> T[][] concat2D(final T[][] a, final T[][] b) {
         if (N.isEmpty(a)) {
             return N.clone(b);
         } else if (N.isEmpty(b)) {
@@ -3836,7 +3849,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concatt method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat2D method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
@@ -3849,23 +3862,23 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Example 1: Basic concatenation of two three-dimensional String arrays
      * String[][][] a = {{{"a", "b"}}, {{"c"}}};
      * String[][][] b = {{{"d"}}, {{"e", "f"}}};
-     * String[][][] result = Array.concatt(a, b);
+     * String[][][] result = Array.concat3D(a, b);
      * // result = {{{"a", "b", "d"}}, {{"c", "e", "f"}}}
      *
      * // Example 2: Arrays with different lengths
      * Integer[][][] a = {{{1, 2}}, {{3}}};
      * Integer[][][] b = {{{4}}};
-     * Integer[][][] result = Array.concatt(a, b);
+     * Integer[][][] result = Array.concat3D(a, b);
      * // result = {{{1, 2, 4}}, {{3}}}
      *
      * // Example 3: Concatenation with empty array
      * String[][][] a = {{{"hello", "world"}}};
      * String[][][] b = new String[0][][];
-     * String[][][] result = Array.concatt(a, b);
+     * String[][][] result = Array.concat3D(a, b);
      * // result = {{{"hello", "world"}}} (clone of a)
      *
      * // Example 4: Both arrays are null/empty
-     * String[][][] result = Array.concatt(null, null);
+     * String[][][] result = Array.concat3D(null, null);
      * // result = null
      * }</pre>
      *
@@ -3876,7 +3889,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      *         Returns {@code null} if both input arrays are {@code null}.
      */
-    public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
+    public static <T> T[][][] concat3D(final T[][][] a, final T[][][] b) {
         if (N.isEmpty(a)) {
             return N.clone(b);
         } else if (N.isEmpty(b)) {
@@ -3887,7 +3900,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final T[][][] result = newInstance(a.getClass().getComponentType(), maxLen);
 
         for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
-            result[i] = concatt(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
+            result[i] = concat2D(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
         return result;

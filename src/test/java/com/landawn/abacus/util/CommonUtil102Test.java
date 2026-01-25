@@ -513,12 +513,12 @@ public class CommonUtil102Test extends TestBase {
     @Test
     public void testNullToEmptyForEach() {
         String[] nullArray = null;
-        String[] result = CommonUtil.nullToEmptyForEach(nullArray);
+        String[] result = CommonUtil.nullElementsToEmpty(nullArray);
         assertNotNull(result);
         assertEquals(0, result.length);
 
         String[] arrayWithNulls = { "test", null, "test2", null };
-        String[] converted = CommonUtil.nullToEmptyForEach(arrayWithNulls);
+        String[] converted = CommonUtil.nullElementsToEmpty(arrayWithNulls);
         assertEquals("test", converted[0]);
         assertEquals("", converted[1]);
         assertEquals("test2", converted[2]);

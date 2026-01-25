@@ -69,7 +69,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_Default() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars);
+        byte[] bytes = IOUtil.charsToBytes(chars);
         assertNotNull(bytes);
         assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
     }
@@ -77,7 +77,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_WithCharset() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, UTF_8);
         assertNotNull(bytes);
         assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
     }
@@ -85,7 +85,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_WithCharsetUTF16() {
         char[] chars = TEST_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, UTF_16);
+        byte[] bytes = IOUtil.charsToBytes(chars, UTF_16);
         assertNotNull(bytes);
         assertEquals(TEST_CONTENT, new String(bytes, UTF_16));
     }
@@ -93,7 +93,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_WithOffsetAndLength() {
         char[] chars = "0123456789".toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, 2, 5, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, 2, 5, UTF_8);
         assertNotNull(bytes);
         assertEquals("23456", new String(bytes, UTF_8));
     }
@@ -101,7 +101,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_EmptyArray() {
         char[] chars = new char[0];
-        byte[] bytes = IOUtil.chars2Bytes(chars);
+        byte[] bytes = IOUtil.charsToBytes(chars);
         assertNotNull(bytes);
         assertEquals(0, bytes.length);
     }
@@ -109,7 +109,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_UnicodeChars() {
         char[] chars = UNICODE_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, UTF_8);
         assertNotNull(bytes);
         assertEquals(UNICODE_CONTENT, new String(bytes, UTF_8));
     }
@@ -117,7 +117,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testChars2Bytes_ZeroLength() {
         char[] chars = "0123456789".toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(chars, 5, 0, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(chars, 5, 0, UTF_8);
         assertNotNull(bytes);
         assertEquals(0, bytes.length);
     }
@@ -125,7 +125,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_Default() {
         byte[] bytes = TEST_CONTENT.getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes);
+        char[] chars = IOUtil.bytesToChars(bytes);
         assertNotNull(chars);
         assertEquals(TEST_CONTENT, new String(chars));
     }
@@ -133,7 +133,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_WithCharset() {
         byte[] bytes = TEST_CONTENT.getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, UTF_8);
         assertNotNull(chars);
         assertEquals(TEST_CONTENT, new String(chars));
     }
@@ -141,7 +141,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_WithCharsetUTF16() {
         byte[] bytes = TEST_CONTENT.getBytes(UTF_16);
-        char[] chars = IOUtil.bytes2Chars(bytes, UTF_16);
+        char[] chars = IOUtil.bytesToChars(bytes, UTF_16);
         assertNotNull(chars);
         assertEquals(TEST_CONTENT, new String(chars));
     }
@@ -149,7 +149,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_WithOffsetAndLength() {
         byte[] bytes = "0123456789".getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, 2, 5, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, 2, 5, UTF_8);
         assertNotNull(chars);
         assertEquals("23456", new String(chars));
     }
@@ -157,7 +157,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_EmptyArray() {
         byte[] bytes = new byte[0];
-        char[] chars = IOUtil.bytes2Chars(bytes);
+        char[] chars = IOUtil.bytesToChars(bytes);
         assertNotNull(chars);
         assertEquals(0, chars.length);
     }
@@ -165,7 +165,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_UnicodeBytes() {
         byte[] bytes = UNICODE_CONTENT.getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, UTF_8);
         assertNotNull(chars);
         assertEquals(UNICODE_CONTENT, new String(chars));
     }
@@ -173,14 +173,14 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testBytes2Chars_ZeroLength() {
         byte[] bytes = "0123456789".getBytes(UTF_8);
-        char[] chars = IOUtil.bytes2Chars(bytes, 5, 0, UTF_8);
+        char[] chars = IOUtil.bytesToChars(bytes, 5, 0, UTF_8);
         assertNotNull(chars);
         assertEquals(0, chars.length);
     }
 
     @Test
     public void testString2InputStream_Default() throws IOException {
-        InputStream is = IOUtil.string2InputStream(TEST_CONTENT);
+        InputStream is = IOUtil.stringToInputStream(TEST_CONTENT);
         assertNotNull(is);
         byte[] bytes = is.readAllBytes();
         assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
@@ -189,7 +189,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2InputStream_WithCharset() throws IOException {
-        InputStream is = IOUtil.string2InputStream(TEST_CONTENT, UTF_16);
+        InputStream is = IOUtil.stringToInputStream(TEST_CONTENT, UTF_16);
         assertNotNull(is);
         byte[] bytes = is.readAllBytes();
         assertEquals(TEST_CONTENT, new String(bytes, UTF_16));
@@ -198,7 +198,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2InputStream_EmptyString() throws IOException {
-        InputStream is = IOUtil.string2InputStream("");
+        InputStream is = IOUtil.stringToInputStream("");
         assertNotNull(is);
         byte[] bytes = is.readAllBytes();
         assertEquals(0, bytes.length);
@@ -207,7 +207,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2InputStream_UnicodeContent() throws IOException {
-        InputStream is = IOUtil.string2InputStream(UNICODE_CONTENT, UTF_8);
+        InputStream is = IOUtil.stringToInputStream(UNICODE_CONTENT, UTF_8);
         assertNotNull(is);
         byte[] bytes = is.readAllBytes();
         assertEquals(UNICODE_CONTENT, new String(bytes, UTF_8));
@@ -216,7 +216,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2InputStream_MultilineContent() throws IOException {
-        InputStream is = IOUtil.string2InputStream(MULTILINE_CONTENT);
+        InputStream is = IOUtil.stringToInputStream(MULTILINE_CONTENT);
         assertNotNull(is);
         byte[] bytes = is.readAllBytes();
         assertEquals(MULTILINE_CONTENT, new String(bytes, UTF_8));
@@ -225,7 +225,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2Reader() throws IOException {
-        Reader reader = IOUtil.string2Reader(TEST_CONTENT);
+        Reader reader = IOUtil.stringToReader(TEST_CONTENT);
         assertNotNull(reader);
         char[] buffer = new char[TEST_CONTENT.length()];
         int read = reader.read(buffer);
@@ -236,7 +236,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2Reader_EmptyString() throws IOException {
-        Reader reader = IOUtil.string2Reader("");
+        Reader reader = IOUtil.stringToReader("");
         assertNotNull(reader);
         char[] buffer = new char[10];
         int read = reader.read(buffer);
@@ -246,7 +246,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2Reader_UnicodeContent() throws IOException {
-        Reader reader = IOUtil.string2Reader(UNICODE_CONTENT);
+        Reader reader = IOUtil.stringToReader(UNICODE_CONTENT);
         assertNotNull(reader);
         char[] buffer = new char[UNICODE_CONTENT.length()];
         int read = reader.read(buffer);
@@ -257,7 +257,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2Reader_MultilineContent() throws IOException {
-        Reader reader = IOUtil.string2Reader(MULTILINE_CONTENT);
+        Reader reader = IOUtil.stringToReader(MULTILINE_CONTENT);
         assertNotNull(reader);
         char[] buffer = new char[MULTILINE_CONTENT.length()];
         int read = reader.read(buffer);
@@ -269,7 +269,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         assertNotNull(writer);
         writer.write(TEST_CONTENT);
         writer.flush();
@@ -280,7 +280,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer_MultipleWrites() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write("Hello");
         writer.write(" ");
         writer.write("World");
@@ -292,7 +292,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer_EmptyWrite() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write("");
         writer.flush();
         assertEquals("", sb.toString());
@@ -302,7 +302,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer_UnicodeContent() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write(UNICODE_CONTENT);
         writer.flush();
         assertEquals(UNICODE_CONTENT, sb.toString());
@@ -312,7 +312,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer_MultilineContent() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write(MULTILINE_CONTENT);
         writer.flush();
         assertEquals(MULTILINE_CONTENT, sb.toString());
@@ -766,17 +766,17 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testChars2Bytes_NullArray() {
-        assertArrayEquals(new byte[] {}, IOUtil.chars2Bytes(null));
+        assertArrayEquals(new byte[] {}, IOUtil.charsToBytes(null));
     }
 
     @Test
     public void testBytes2Chars_NullArray() {
-        assertArrayEquals(new char[] {}, IOUtil.bytes2Chars(null));
+        assertArrayEquals(new char[] {}, IOUtil.bytesToChars(null));
     }
 
     @Test
     public void testString2InputStream_NullString() {
-        try (InputStream is = IOUtil.string2InputStream(null)) {
+        try (InputStream is = IOUtil.stringToInputStream(null)) {
             byte[] bytes = is.readAllBytes();
             assertEquals(0, bytes.length);
         } catch (IOException e) {
@@ -787,7 +787,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testString2Reader_NullString() {
-        try (Reader reader = IOUtil.string2Reader(null)) {
+        try (Reader reader = IOUtil.stringToReader(null)) {
             char[] buffer = new char[10];
             int read = reader.read(buffer);
             assertEquals(-1, read);
@@ -799,7 +799,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testStringBuilder2Writer_NullStringBuilder() {
         assertThrows(Exception.class, () -> {
-            IOUtil.stringBuilder2Writer(null);
+            IOUtil.stringBuilderToWriter(null);
         });
     }
 
@@ -830,21 +830,21 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testRoundTrip_CharsToBytes() {
         char[] original = UNICODE_CONTENT.toCharArray();
-        byte[] bytes = IOUtil.chars2Bytes(original, UTF_8);
-        char[] result = IOUtil.bytes2Chars(bytes, UTF_8);
+        byte[] bytes = IOUtil.charsToBytes(original, UTF_8);
+        char[] result = IOUtil.bytesToChars(bytes, UTF_8);
         assertArrayEquals(original, result);
     }
 
     @Test
     public void testRoundTrip_StringToInputStreamToString() throws IOException {
-        InputStream is = IOUtil.string2InputStream(UNICODE_CONTENT, UTF_8);
+        InputStream is = IOUtil.stringToInputStream(UNICODE_CONTENT, UTF_8);
         String result = IOUtil.readAllToString(is, UTF_8);
         assertEquals(UNICODE_CONTENT, result);
     }
 
     @Test
     public void testRoundTrip_StringToReaderToString() throws IOException {
-        Reader reader = IOUtil.string2Reader(UNICODE_CONTENT);
+        Reader reader = IOUtil.stringToReader(UNICODE_CONTENT);
         String result = IOUtil.readAllToString(reader);
         assertEquals(UNICODE_CONTENT, result);
     }
@@ -852,7 +852,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testRoundTrip_StringBuilderWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         writer.write(UNICODE_CONTENT);
         writer.flush();
         assertEquals(UNICODE_CONTENT, sb.toString());
@@ -913,7 +913,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_BooleanToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(true, writer);
         writer.flush();
         assertEquals("true", sb.toString());
@@ -923,7 +923,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_BooleanFalseToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(false, writer);
         writer.flush();
         assertEquals("false", sb.toString());
@@ -933,7 +933,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write('A', writer);
         writer.flush();
         assertEquals("A", sb.toString());
@@ -943,7 +943,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharUnicodeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write('\u4E16', writer);
         writer.flush();
         assertEquals("世", sb.toString());
@@ -953,7 +953,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ByteToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((byte) 65, writer);
         writer.flush();
         assertEquals("65", sb.toString());
@@ -963,7 +963,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ByteNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((byte) -128, writer);
         writer.flush();
         assertEquals("-128", sb.toString());
@@ -973,7 +973,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ShortToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((short) 12345, writer);
         writer.flush();
         assertEquals("12345", sb.toString());
@@ -983,7 +983,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ShortNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((short) -32768, writer);
         writer.flush();
         assertEquals("-32768", sb.toString());
@@ -993,7 +993,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_IntToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(123456789, writer);
         writer.flush();
         assertEquals("123456789", sb.toString());
@@ -1003,7 +1003,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_IntNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(-987654321, writer);
         writer.flush();
         assertEquals("-987654321", sb.toString());
@@ -1013,7 +1013,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_LongToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(9876543210L, writer);
         writer.flush();
         assertEquals("9876543210", sb.toString());
@@ -1023,7 +1023,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_LongNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(-9876543210L, writer);
         writer.flush();
         assertEquals("-9876543210", sb.toString());
@@ -1033,7 +1033,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_FloatToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(3.14f, writer);
         writer.flush();
         assertEquals("3.14", sb.toString());
@@ -1043,7 +1043,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_FloatNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(-2.718f, writer);
         writer.flush();
         assertEquals("-2.718", sb.toString());
@@ -1053,7 +1053,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_DoubleToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(3.141592653589793, writer);
         writer.flush();
         assertEquals("3.141592653589793", sb.toString());
@@ -1063,7 +1063,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_DoubleNegativeToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(-2.718281828459045, writer);
         writer.flush();
         assertEquals("-2.718281828459045", sb.toString());
@@ -1073,7 +1073,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ObjectToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((Object) "Hello", writer);
         writer.flush();
         assertEquals("Hello", sb.toString());
@@ -1083,7 +1083,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ObjectIntegerToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(Integer.valueOf(42), writer);
         writer.flush();
         assertEquals("42", sb.toString());
@@ -1093,7 +1093,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ObjectNullToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write((Object) null, writer);
         writer.flush();
         assertEquals("null", sb.toString());
@@ -1170,7 +1170,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharSequenceToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(TEST_CONTENT, writer);
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
@@ -1180,7 +1180,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharSequenceToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(TEST_CONTENT, writer, true);
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
@@ -1189,7 +1189,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharSequenceToWriterWithoutFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(TEST_CONTENT, writer, false);
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
@@ -1323,7 +1323,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharArrayToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(TEST_CONTENT.toCharArray(), writer);
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
@@ -1333,7 +1333,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharArrayWithOffsetCountToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         char[] chars = "0123456789".toCharArray();
         IOUtil.write(chars, 2, 5, writer);
         writer.flush();
@@ -1344,7 +1344,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharArrayToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         IOUtil.write(TEST_CONTENT.toCharArray(), writer, true);
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
@@ -1353,7 +1353,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharArrayWithOffsetCountToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         char[] chars = "ABCDEFGHIJ".toCharArray();
         IOUtil.write(chars, 3, 4, writer, true);
         assertEquals("DEFG", sb.toString());
@@ -1371,7 +1371,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_CharArrayZeroCountToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         char[] chars = "0123456789".toCharArray();
         IOUtil.write(chars, 5, 0, writer);
         writer.flush();
@@ -1701,7 +1701,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ReaderToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         try (Reader reader = new StringReader(TEST_CONTENT)) {
             long charsWritten = IOUtil.write(reader, writer);
             assertEquals(TEST_CONTENT.length(), charsWritten);
@@ -1714,7 +1714,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ReaderWithOffsetCountToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         try (Reader reader = new StringReader("0123456789ABCDEF")) {
             long charsWritten = IOUtil.write(reader, 5, 6, writer);
             assertEquals(6, charsWritten);
@@ -1727,7 +1727,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ReaderToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         try (Reader reader = new StringReader(TEST_CONTENT)) {
             long charsWritten = IOUtil.write(reader, writer, true);
             assertEquals(TEST_CONTENT.length(), charsWritten);
@@ -1739,7 +1739,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_ReaderWithOffsetCountToWriterWithFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         try (Reader reader = new StringReader("0123456789")) {
             long charsWritten = IOUtil.write(reader, 3, 4, writer, true);
             assertEquals(4, charsWritten);
@@ -1784,7 +1784,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_MultilineReaderToWriter() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
             long charsWritten = IOUtil.write(reader, writer);
             assertEquals(MULTILINE_CONTENT.length(), charsWritten);
@@ -4137,7 +4137,7 @@ public class IOUtil2025Test extends TestBase {
         File file = Files.createTempFile(tempFolder, "delete_all", ".txt").toFile();
         assertTrue(file.exists());
 
-        boolean result = IOUtil.deleteAllIfExists(file);
+        boolean result = IOUtil.deleteRecursivelyIfExists(file);
 
         assertTrue(result);
         assertTrue(!file.exists());
@@ -4151,7 +4151,7 @@ public class IOUtil2025Test extends TestBase {
         Files.write(file1.toPath(), "Content 1".getBytes());
         Files.write(file2.toPath(), "Content 2".getBytes());
 
-        boolean result = IOUtil.deleteAllIfExists(dir);
+        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
 
         assertTrue(result);
         assertTrue(!dir.exists());
@@ -4169,7 +4169,7 @@ public class IOUtil2025Test extends TestBase {
         Files.write(file1.toPath(), "Content 1".getBytes());
         Files.write(file2.toPath(), "Content 2".getBytes());
 
-        boolean result = IOUtil.deleteAllIfExists(dir);
+        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
 
         assertTrue(result);
         assertTrue(!dir.exists());
@@ -4177,7 +4177,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testDeleteAllIfExists_NullFile() {
-        boolean result = IOUtil.deleteAllIfExists(null);
+        boolean result = IOUtil.deleteRecursivelyIfExists(null);
         assertTrue(!result);
     }
 
@@ -7008,14 +7008,14 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testFreeDiskSpaceKb_Default() {
-        long freeSpace = IOUtil.freeDiskSpaceKb();
+        long freeSpace = IOUtil.freeDiskSpaceKB();
 
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKb_WithTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKb(5000);
+        long freeSpace = IOUtil.freeDiskSpaceKB(5000);
 
         assertTrue(freeSpace > 0);
     }
@@ -7023,7 +7023,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testFreeDiskSpaceKb_WithPath() throws Exception {
         String path = tempFolder.toFile().getAbsolutePath();
-        long freeSpace = IOUtil.freeDiskSpaceKb(path);
+        long freeSpace = IOUtil.freeDiskSpaceKB(path);
 
         assertTrue(freeSpace > 0);
     }
@@ -7031,7 +7031,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testFreeDiskSpaceKb_WithPathAndTimeout() throws Exception {
         String path = tempFolder.toFile().getAbsolutePath();
-        long freeSpace = IOUtil.freeDiskSpaceKb(path, 5000);
+        long freeSpace = IOUtil.freeDiskSpaceKB(path, 5000);
 
         assertTrue(freeSpace > 0);
     }

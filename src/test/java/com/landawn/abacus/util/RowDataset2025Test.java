@@ -130,7 +130,7 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testColumnNameList() {
-        ImmutableList<String> names = dataset.columnNameList();
+        ImmutableList<String> names = dataset.columnNames();
         assertNotNull(names);
         assertEquals(4, names.size());
         assertEquals("id", names.get(0));
@@ -184,7 +184,7 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testGetColumnIndexesSameAsColumnNameList() {
-        int[] indexes = dataset.getColumnIndexes(dataset.columnNameList());
+        int[] indexes = dataset.getColumnIndexes(dataset.columnNames());
         assertEquals(4, indexes.length);
         assertEquals(0, indexes[0]);
         assertEquals(1, indexes[1]);
@@ -494,32 +494,32 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testCurrentRowNum() {
-        assertEquals(0, dataset.currentRowNum());
-        dataset.absolute(2);
-        assertEquals(2, dataset.currentRowNum());
+        assertEquals(0, dataset.currentRowIndex());
+        dataset.moveToRow(2);
+        assertEquals(2, dataset.currentRowIndex());
     }
 
     @Test
     public void testAbsolute() {
-        Dataset ds = dataset.absolute(3);
+        Dataset ds = dataset.moveToRow(3);
         assertNotNull(ds);
-        assertEquals(3, ds.currentRowNum());
+        assertEquals(3, ds.currentRowIndex());
         assertEquals("Diana", ds.get("name"));
     }
 
     @Test
     public void testAbsoluteInvalid() {
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataset.absolute(10);
+            dataset.moveToRow(10);
         });
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataset.absolute(-1);
+            dataset.moveToRow(-1);
         });
     }
 
     @Test
     public void testGetByColumnIndex() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(1, (Integer) dataset.get(0));
         assertEquals("Alice", dataset.get(1));
         assertEquals(25, (Integer) dataset.get(2));
@@ -527,7 +527,7 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testGetByColumnName() {
-        dataset.absolute(1);
+        dataset.moveToRow(1);
         assertEquals(2, (Integer) dataset.get("id"));
         assertEquals("Bob", dataset.get("name"));
         assertEquals(30, (Integer) dataset.get("age"));
@@ -535,7 +535,7 @@ public class RowDataset2025Test extends TestBase {
 
     @Test
     public void testGetPrimitiveTypes() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(25, dataset.getInt(2));
         assertEquals(25, dataset.getInt("age"));
         assertEquals(50000.0, dataset.getDouble(3), 0.001);
@@ -547,9 +547,9 @@ public class RowDataset2025Test extends TestBase {
         List<List<Object>> cols = copyColumnList();
         cols.get(1).set(0, null);
         RowDataset ds = new RowDataset(columnNames, cols);
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.isNull(1));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.isNull(1));
     }
 
@@ -558,16 +558,16 @@ public class RowDataset2025Test extends TestBase {
         List<List<Object>> cols = copyColumnList();
         cols.get(1).set(0, null);
         RowDataset ds = new RowDataset(columnNames, cols);
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.isNull("name"));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.isNull("name"));
     }
 
     @Test
     public void testSetByColumnIndex() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.absolute(0);
+        ds.moveToRow(0);
         ds.set(1, "NewName");
         assertEquals("NewName", ds.get(0, 1));
     }
@@ -575,7 +575,7 @@ public class RowDataset2025Test extends TestBase {
     @Test
     public void testSetByColumnName() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.absolute(0);
+        ds.moveToRow(0);
         ds.set("name", "NewName");
         assertEquals("NewName", ds.get(0, 1));
     }
@@ -915,7 +915,7 @@ public class RowDataset2025Test extends TestBase {
     @Test
     public void testRemoveRows() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.removeMultiRows(0, 2);
+        ds.removeRowsAt(0, 2);
         assertEquals(3, ds.size());
         assertEquals(2, (Integer) ds.get(0, 0));
     }

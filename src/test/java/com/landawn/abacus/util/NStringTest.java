@@ -22,7 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.Splitter.MapSplitter;
 import com.landawn.abacus.util.Strings.StrUtil;
 
@@ -591,15 +591,15 @@ public class NStringTest extends AbstractParserTest {
         assertEquals("aBbCd", Beans.formalizePropName("_A_Bb_cd"));
         assertEquals("firstName", Beans.formalizePropName("_FIRST_NAME_"));
 
-        assertEquals("a_bb_cd", Beans.toLowerCaseWithUnderscore("aBBCd"));
-        assertEquals("a_b_cd", Beans.toLowerCaseWithUnderscore("aBCd"));
-        assertEquals("a_b", Beans.toLowerCaseWithUnderscore("aB"));
-        assertEquals("A_BB_CD", Beans.toUpperCaseWithUnderscore("aBBCd"));
-        assertEquals("A_B_CD", Beans.toUpperCaseWithUnderscore("aBCd"));
-        assertEquals("A_B", Beans.toUpperCaseWithUnderscore("aB"));
+        assertEquals("a_bb_cd", Beans.toSnakeCase("aBBCd"));
+        assertEquals("a_b_cd", Beans.toSnakeCase("aBCd"));
+        assertEquals("a_b", Beans.toSnakeCase("aB"));
+        assertEquals("A_BB_CD", Beans.toScreamingSnakeCase("aBBCd"));
+        assertEquals("A_B_CD", Beans.toScreamingSnakeCase("aBCd"));
+        assertEquals("A_B", Beans.toScreamingSnakeCase("aB"));
 
-        assertEquals("abc123efg456", Beans.toLowerCaseWithUnderscore("abc123EFG456"));
-        assertEquals("ABC123EFG456A_AA", Beans.toUpperCaseWithUnderscore("abc123EFG456aAa"));
+        assertEquals("abc123efg456", Beans.toSnakeCase("abc123EFG456"));
+        assertEquals("ABC123EFG456A_AA", Beans.toScreamingSnakeCase("abc123EFG456aAa"));
     }
 
     @Test
@@ -1162,17 +1162,17 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Numbers.isNumber("-123g"));
             assertFalse(Numbers.isNumber("-0X123g"));
 
-            assertTrue(Strings.isAsciiDigitalNumber("123"));
-            assertTrue(Strings.isAsciiDigitalNumber("-123"));
-            assertTrue(Strings.isAsciiDigitalNumber("-123.00"));
-            assertFalse(Strings.isAsciiDigitalNumber("-"));
-            assertFalse(Strings.isAsciiDigitalNumber("."));
+            assertTrue(Strings.isAsciiNumber("123"));
+            assertTrue(Strings.isAsciiNumber("-123"));
+            assertTrue(Strings.isAsciiNumber("-123.00"));
+            assertFalse(Strings.isAsciiNumber("-"));
+            assertFalse(Strings.isAsciiNumber("."));
 
-            assertTrue(Strings.isAsciiDigitalInteger("123"));
-            assertTrue(Strings.isAsciiDigitalInteger("-123"));
-            assertFalse(Strings.isAsciiDigitalInteger("-123.00"));
-            assertFalse(Strings.isAsciiDigitalInteger("-"));
-            assertFalse(Strings.isAsciiDigitalInteger("."));
+            assertTrue(Strings.isAsciiInteger("123"));
+            assertTrue(Strings.isAsciiInteger("-123"));
+            assertFalse(Strings.isAsciiInteger("-123.00"));
+            assertFalse(Strings.isAsciiInteger("-"));
+            assertFalse(Strings.isAsciiInteger("."));
         }
     }
 

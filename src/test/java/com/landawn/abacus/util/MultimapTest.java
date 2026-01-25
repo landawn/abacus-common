@@ -39,7 +39,6 @@ public class MultimapTest extends AbstractTest {
         assertEquals(CommonUtil.asList(1, 2, 3), list);
 
         N.println(map.keySet());
-        N.println(map.values());
 
         assertTrue(map.containsKey("a"));
         assertTrue(map.containsValue(5));
@@ -47,9 +46,8 @@ public class MultimapTest extends AbstractTest {
         assertFalse(map.containsKey("e"));
         assertFalse(map.containsValue(0));
 
-        N.println(map.size());
+        N.println(map.totalValueCount());
         N.println(map.isEmpty());
-        N.println(map.entrySet());
 
         Multimap<String, Integer, Set<Integer>> map2 = CommonUtil.newSetMultimap();
         map2.put("a", 11);
@@ -59,7 +57,7 @@ public class MultimapTest extends AbstractTest {
         map2.put("b", 15);
 
         map2.put("d", 20);
-        map.putMany(map2);
+        map.putValues(map2);
 
         N.println(map);
 
@@ -72,13 +70,13 @@ public class MultimapTest extends AbstractTest {
 
         map.clear();
 
-        assertEquals(0, map.size());
+        assertEquals(0, map.totalValueCount());
     }
 
     @Test
     public void test_02() {
         Map<String, Integer> m = CommonUtil.asMap("abc", 123, "abc", 123, "abc", 456, "a", 1, "b", 2);
-        Multimap<String, Integer, List<Integer>> multimap2 = ListMultimap.create(m);
+        Multimap<String, Integer, List<Integer>> multimap2 = ListMultimap.fromMap(m);
         N.println(multimap2);
 
     }

@@ -27,7 +27,7 @@ public class URLEncodedUtilTest extends AbstractTest {
         Account account2 = URLEncodedUtil.decode(query, Account.class);
         N.println(CommonUtil.stringOf(account2));
 
-        query = URLEncodedUtil.encode(Beans.bean2Map(account));
+        query = URLEncodedUtil.encode(Beans.beanToMap(account));
         N.println(query);
 
         account2 = URLEncodedUtil.decode(query, Account.class);
@@ -35,16 +35,16 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_parameters2Bean() {
+    public void test_decodeToBean() {
         Account account = createAccount(Account.class);
-        Map<String, Object> props = Beans.bean2Map(account);
+        Map<String, Object> props = Beans.beanToMap(account);
         Map<String, String[]> parameters = new HashMap<>();
 
         for (String propName : props.keySet()) {
             parameters.put(propName, CommonUtil.asArray(CommonUtil.stringOf(props.get(propName))));
         }
 
-        Account account2 = URLEncodedUtil.parameters2Bean(parameters, Account.class);
+        Account account2 = URLEncodedUtil.decodeToBean(parameters, Account.class);
 
         assertEquals(account, account2);
     }

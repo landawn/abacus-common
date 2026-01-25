@@ -22,7 +22,7 @@ import java.util.Collection;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -240,7 +240,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final char[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final char[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -286,7 +286,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return a char array containing the unboxed values, or {@code null} if input is null
      */
     @Override
-    public char[] collection2Array(final Collection<?> c) {
+    public char[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -312,7 +312,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param output the Collection to add the boxed Character values to
      */
     @Override
-    public <E> void array2Collection(final char[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final char[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

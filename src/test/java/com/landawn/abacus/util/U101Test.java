@@ -466,7 +466,7 @@ public class U101Test extends TestBase {
 
         @Test
         @DisplayName("Test orElseIfNull()")
-        public void testOrElseIfNull() {
+        public void testOrDefaultIfNull() {
             u.Nullable<String> nonNull = u.Nullable.of("test");
             assertEquals("test", nonNull.orElseIfNull("default"));
 

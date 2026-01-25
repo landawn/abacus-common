@@ -982,16 +982,16 @@ public class Array101Test extends TestBase {
     public void testConcatt_2D() {
         String[][] a = { { "a", "b" }, { "c", "d" } };
         String[][] b = { { "e", "f" }, { "g", "h" } };
-        String[][] result = Array.concatt(a, b);
+        String[][] result = Array.concat2D(a, b);
 
         Assertions.assertEquals(2, result.length);
         Assertions.assertArrayEquals(new String[] { "a", "b", "e", "f" }, result[0]);
         Assertions.assertArrayEquals(new String[] { "c", "d", "g", "h" }, result[1]);
 
-        String[][] empty1 = Array.concatt(new String[0][], b);
+        String[][] empty1 = Array.concat2D(new String[0][], b);
         Assertions.assertArrayEquals(b, empty1);
 
-        String[][] null1 = Array.concatt(null, b);
+        String[][] null1 = Array.concat2D(null, b);
         Assertions.assertArrayEquals(b, null1);
     }
 
@@ -999,7 +999,7 @@ public class Array101Test extends TestBase {
     public void testConcatt_3D() {
         Integer[][][] a = { { { 1, 2 } }, { { 3, 4 } } };
         Integer[][][] b = { { { 5, 6 } }, { { 7, 8 } } };
-        Integer[][][] result = Array.concatt(a, b);
+        Integer[][][] result = Array.concat3D(a, b);
 
         Assertions.assertEquals(2, result.length);
     }

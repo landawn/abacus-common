@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
@@ -271,7 +271,7 @@ public class InstantType100Test extends TestBase {
     @Test
     public void testWriteCharacter_LongFormat() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -282,7 +282,7 @@ public class InstantType100Test extends TestBase {
     @Test
     public void testWriteCharacter_ISO8601DateTime() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -293,7 +293,7 @@ public class InstantType100Test extends TestBase {
     @Test
     public void testWriteCharacter_ISO8601Timestamp() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -304,7 +304,7 @@ public class InstantType100Test extends TestBase {
     @Test
     public void testWriteCharacter_WithQuotes() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn('"');
 

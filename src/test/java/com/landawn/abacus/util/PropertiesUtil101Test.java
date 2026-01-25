@@ -200,7 +200,7 @@ public class PropertiesUtil101Test extends TestBase {
         String className = "TestConfig";
 
         try {
-            PropertiesUtil.xml2Java(xml, srcPath, packageName, className, false);
+            PropertiesUtil.xmlToJava(xml, srcPath, packageName, className, false);
             File expectedFile = new File(srcPath + "/com/test/TestConfig.java");
             if (expectedFile.exists()) {
                 expectedFile.delete();

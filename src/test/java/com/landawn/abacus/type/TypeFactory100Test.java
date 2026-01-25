@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONParser;
+import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.util.N;
 
 @Tag("new-test")
@@ -70,8 +70,8 @@ public class TypeFactory100Test extends TestBase {
             String value = "test";
         }
 
-        BiFunction<CustomClass, JSONParser, String> toStringFunc = (obj, parser) -> obj.value;
-        BiFunction<String, JSONParser, CustomClass> fromStringFunc = (str, parser) -> {
+        BiFunction<CustomClass, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
+        BiFunction<String, JsonParser, CustomClass> fromStringFunc = (str, parser) -> {
             CustomClass obj = new CustomClass();
             obj.value = str;
             return obj;
@@ -358,21 +358,21 @@ public class TypeFactory100Test extends TestBase {
 
             @Override
             public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x,
-                    com.landawn.abacus.parser.JSONXMLSerializationConfig<?> config) {
+                    com.landawn.abacus.parser.JsonXmlSerializationConfig<?> config) {
             }
 
             @Override
-            public CustomClass3 collection2Array(Collection<?> c) {
+            public CustomClass3 collectionToArray(Collection<?> c) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public <E> Collection<E> array2Collection(CustomClass3 x, Class<?> collClass) {
+            public <E> Collection<E> arrayToCollection(CustomClass3 x, Class<?> collClass) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public <E> void array2Collection(CustomClass3 x, Collection<E> output) {
+            public <E> void arrayToCollection(CustomClass3 x, Collection<E> output) {
                 throw new UnsupportedOperationException();
             }
 
@@ -416,8 +416,8 @@ public class TypeFactory100Test extends TestBase {
             String value = "test";
         }
 
-        BiFunction<CustomClass4, JSONParser, String> toStringFunc = (obj, parser) -> obj.value;
-        BiFunction<String, JSONParser, CustomClass4> fromStringFunc = (str, parser) -> {
+        BiFunction<CustomClass4, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
+        BiFunction<String, JsonParser, CustomClass4> fromStringFunc = (str, parser) -> {
             CustomClass4 obj = new CustomClass4();
             obj.value = str;
             return obj;
@@ -708,21 +708,21 @@ public class TypeFactory100Test extends TestBase {
 
             @Override
             public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, Object x,
-                    com.landawn.abacus.parser.JSONXMLSerializationConfig<?> config) {
+                    com.landawn.abacus.parser.JsonXmlSerializationConfig<?> config) {
             }
 
             @Override
-            public Object collection2Array(Collection<?> c) {
+            public Object collectionToArray(Collection<?> c) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public <E> Collection<E> array2Collection(Object x, Class<?> collClass) {
+            public <E> Collection<E> arrayToCollection(Object x, Class<?> collClass) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public <E> void array2Collection(Object x, Collection<E> output) {
+            public <E> void arrayToCollection(Object x, Collection<E> output) {
                 throw new UnsupportedOperationException();
             }
 

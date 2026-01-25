@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("2025")
@@ -230,7 +230,7 @@ public class BooleanType2025Test extends TestBase {
 
     @Test
     public void test_writeCharacter_withoutConfig() throws Exception {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test true
         type.writeCharacter(writer, Boolean.TRUE, null);
@@ -247,8 +247,8 @@ public class BooleanType2025Test extends TestBase {
 
     @Test
     public void test_writeCharacter_withConfig_writeNullAsFalse() throws Exception {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.writeNullBooleanAsFalse()).thenReturn(true);
 
         // Test null with writeNullBooleanAsFalse

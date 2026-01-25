@@ -170,7 +170,7 @@ public class BlobInputStreamType100Test extends TestBase {
         InputStream expectedStream = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
         when(blob.getBinaryStream()).thenReturn(expectedStream);
 
-        InputStream result = BlobInputStreamType.blob2InputStream(blob);
+        InputStream result = BlobInputStreamType.blobToInputStream(blob);
 
         assertEquals(expectedStream, result);
         verify(blob).getBinaryStream();
@@ -178,7 +178,7 @@ public class BlobInputStreamType100Test extends TestBase {
 
     @Test
     public void testBlob2InputStream_Null() throws SQLException {
-        InputStream result = BlobInputStreamType.blob2InputStream(null);
+        InputStream result = BlobInputStreamType.blobToInputStream(null);
 
         Assertions.assertNull(result);
     }

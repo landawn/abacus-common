@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Set;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableSet;
@@ -233,7 +233,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * <pre>{@code
      * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * JsonXmlSerializationConfig config = JsonXmlSerializationConfig.of();
      * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
      * type.writeCharacter(writer, set, config);
      * String result = writer.toString();
@@ -246,7 +246,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JsonXmlSerializationConfig<?> config) throws IOException {
         setType.writeCharacter(writer, x, config);
     }
 

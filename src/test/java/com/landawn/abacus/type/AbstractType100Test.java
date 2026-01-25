@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -427,7 +427,7 @@ public class AbstractType100Test extends TestBase {
     @Test
     @DisplayName("Test writeCharacter() without config")
     public void testWriteCharacterNoConfig() throws IOException {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         stringType.writeCharacter(writer, "test", null);
         verify(writer).writeCharacter("test");
@@ -439,9 +439,9 @@ public class AbstractType100Test extends TestBase {
     @Test
     @DisplayName("Test writeCharacter() with config")
     public void testWriteCharacterWithConfig() throws IOException {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
 
         stringType.writeCharacter(writer, "test", config);
@@ -450,26 +450,26 @@ public class AbstractType100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test collection2Array()")
+    @DisplayName("Test collectionToArray()")
     public void testCollection2Array() {
         assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.collection2Array(Arrays.asList("a", "b", "c"));
+            stringType.collectionToArray(Arrays.asList("a", "b", "c"));
         });
     }
 
     @Test
-    @DisplayName("Test array2Collection(T, Class)")
+    @DisplayName("Test arrayToCollection(T, Class)")
     public void testArray2CollectionWithClass() {
         assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.array2Collection("test", ArrayList.class);
+            stringType.arrayToCollection("test", ArrayList.class);
         });
     }
 
     @Test
-    @DisplayName("Test array2Collection(T, Collection)")
+    @DisplayName("Test arrayToCollection(T, Collection)")
     public void testArray2CollectionWithOutput() {
         assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.array2Collection("test", new ArrayList<>());
+            stringType.arrayToCollection("test", new ArrayList<>());
         });
     }
 

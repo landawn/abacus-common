@@ -87,7 +87,7 @@ public @interface Table {
      * 
      * <p><b>Naming considerations:</b></p>
      * <ul>
-     *   <li>Follow your database's naming conventions (snake_case, PascalCase, etc.)</li>
+     *   <li>Follow your database's naming conventions (snake_case, UpperCamelCase, etc.)</li>
      *   <li>Consider using prefixes for table grouping (e.g., "app_users", "sys_config")</li>
      *   <li>Be consistent with plural/singular naming across your schema</li>
      * </ul>

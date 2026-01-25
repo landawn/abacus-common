@@ -139,7 +139,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>{@link #splitThenApply(CharSequence, Function)} - Split and transform in one operation</li>
  *   <li>{@link #splitThenAccept(CharSequence, Consumer)} - Split and process with side effects</li>
- *   <li>{@link #splitAndForEach(CharSequence, Consumer)} - Lazy per-element processing</li>
+ *   <li>{@link #splitThenForEach(CharSequence, Consumer)} - Lazy per-element processing</li>
  * </ul>
  *
  * <p><b>Delimiter Types and Behavior:</b>
@@ -256,6 +256,11 @@ import com.landawn.abacus.util.stream.Stream;
  */
 @SuppressWarnings("java:S1192")
 public final class Splitter {
+
+    /**
+     * The default delimiter used to separate elements when joining.
+     */
+    public static final String DEFAULT_DELIMITER = Strings.ELEMENT_SEPARATOR;
 
     /**
      * A compiled regular expression pattern that matches one or more whitespace characters.
@@ -1312,7 +1317,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @return a Stream containing the split results; returns an empty stream if source is {@code null}.
      * @see #split(CharSequence)
-     * @see #splitAndForEach(CharSequence, Consumer)
+     * @see #splitThenForEach(CharSequence, Consumer)
      */
     public Stream<String> splitToStream(final CharSequence source) {
         return Stream.of(iterate(source));
@@ -1366,7 +1371,7 @@ public final class Splitter {
      * @param consumer a consumer that processes the list of split strings.
      * @see #split(CharSequence)
      * @see #splitThenApply(CharSequence, Function)
-     * @see #splitAndForEach(CharSequence, Consumer)
+     * @see #splitThenForEach(CharSequence, Consumer)
      */
     public void splitThenAccept(final CharSequence source, final Consumer<? super List<String>> consumer) {
         consumer.accept(split(source));
@@ -1383,7 +1388,7 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").splitAndForEach("a,b,c", part -> {
+     * Splitter.with(",").splitThenForEach("a,b,c", part -> {
      *     System.out.println("Processing: " + part);
      * });
      * // Prints each part as it's split
@@ -1395,7 +1400,7 @@ public final class Splitter {
      * @see #splitThenAccept(CharSequence, Consumer)
      */
     @Beta
-    public void splitAndForEach(final CharSequence source, final Consumer<? super String> action) {
+    public void splitThenForEach(final CharSequence source, final Consumer<? super String> action) {
         iterate(source).forEachRemaining(action);
     }
 

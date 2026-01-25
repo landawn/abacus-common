@@ -624,12 +624,12 @@ public class Collectors101Test extends TestBase {
     }
 
     @Test
-    public void testCollectingOrElseIfEmpty() {
-        List<String> result = Stream.of("a", "b", "c").collect(Collectors.collectingOrElseIfEmpty(Collectors.toList(), Arrays.asList("default")));
+    public void testCollectingOrDefaultIfEmpty() {
+        List<String> result = Stream.of("a", "b", "c").collect(Collectors.collectingOrDefaultIfEmpty(Collectors.toList(), Arrays.asList("default")));
 
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), result);
 
-        List<String> defaultResult = Stream.<String> empty().collect(Collectors.collectingOrElseIfEmpty(Collectors.toList(), Arrays.asList("default")));
+        List<String> defaultResult = Stream.<String> empty().collect(Collectors.collectingOrDefaultIfEmpty(Collectors.toList(), Arrays.asList("default")));
 
         Assertions.assertEquals(Arrays.asList("default"), defaultResult);
     }
@@ -1895,7 +1895,7 @@ public class Collectors101Test extends TestBase {
         BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc").collect(Collectors.toBiMap(String::length, e -> e));
 
         Assertions.assertEquals("a", biMap.get(1));
-        Assertions.assertEquals(1, biMap.inversed().get("a"));
+        Assertions.assertEquals(1, biMap.inverse().get("a"));
     }
 
     @Test

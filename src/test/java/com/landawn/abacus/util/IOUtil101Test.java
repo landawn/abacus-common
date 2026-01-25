@@ -907,9 +907,9 @@ public class IOUtil101Test extends TestBase {
 
     @Test
     public void testNullAndEmptyInputs() throws IOException {
-        assertEquals(0, IOUtil.chars2Bytes(new char[0]).length);
+        assertEquals(0, IOUtil.charsToBytes(new char[0]).length);
 
-        assertEquals(0, IOUtil.bytes2Chars(new byte[0]).length);
+        assertEquals(0, IOUtil.bytesToChars(new byte[0]).length);
 
         File outputFile = Files.createTempFile(tempFolder, "empty_output", ".txt").toFile();
         IOUtil.write(new byte[0], outputFile);

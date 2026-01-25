@@ -32,8 +32,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
@@ -57,7 +57,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
     private final Type<?>[] parameterTypes;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));

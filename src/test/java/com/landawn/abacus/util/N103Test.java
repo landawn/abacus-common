@@ -892,7 +892,7 @@ public class N103Test extends TestBase {
     @Test
     public void testUnzipp() {
         List<Triple<Integer, String, Double>> triples = Arrays.asList(Triple.of(1, "a", 1.0), Triple.of(2, "b", 2.0));
-        Triple<List<Integer>, List<String>, List<Double>> result = N.unzipp(triples, (t, out) -> {
+        Triple<List<Integer>, List<String>, List<Double>> result = N.unzip3(triples, (t, out) -> {
             out.setLeft(t.left());
             out.setMiddle(t.middle());
             out.setRight(t.right());

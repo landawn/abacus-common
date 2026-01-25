@@ -28,7 +28,7 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testSliding_WindowSize() throws Exception {
-        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5).slide(3);
+        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3);
         List<List<Integer>> result = seq.toList();
 
         assertEquals(3, result.size());
@@ -36,33 +36,33 @@ public class Seq103Test extends TestBase {
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
         assertEquals(Arrays.asList(3, 4, 5), result.get(2));
 
-        seq = Seq.of(1, 2).slide(3);
+        seq = Seq.of(1, 2).sliding(3);
         result = seq.toList();
         assertEquals(1, result.size());
         assertEquals(Arrays.asList(1, 2), result.get(0));
 
-        seq = Seq.of(1, 2, 3).slide(1);
+        seq = Seq.of(1, 2, 3).sliding(1);
         result = seq.toList();
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(1), result.get(0));
         assertEquals(Arrays.asList(2), result.get(1));
         assertEquals(Arrays.asList(3), result.get(2));
 
-        seq = Seq.<Integer, Exception> empty().slide(2);
+        seq = Seq.<Integer, Exception> empty().sliding(2);
         result = seq.toList();
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testSliding_WindowSizeAndCollectionSupplier() throws IllegalStateException, Exception {
-        Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 2, 3, 3, 4).slide(3, HashSet::new);
+        Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 2, 3, 3, 4).sliding(3, HashSet::new);
         List<Set<Integer>> result = seq.toList();
 
         assertEquals(4, result.size());
         assertEquals(new HashSet<>(Arrays.asList(1, 2)), result.get(0));
         assertEquals(new HashSet<>(Arrays.asList(2, 3)), result.get(1));
 
-        Seq<LinkedList<String>, Exception> seqStr = Seq.of("a", "b", "c", "d").slide(2, n -> new LinkedList<>());
+        Seq<LinkedList<String>, Exception> seqStr = Seq.of("a", "b", "c", "d").sliding(2, n -> new LinkedList<>());
         List<LinkedList<String>> resultStr = seqStr.toList();
 
         assertEquals(3, resultStr.size());
@@ -72,7 +72,7 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testSliding_WindowSizeAndCollector() throws Exception {
-        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).slide(3, com.landawn.abacus.util.stream.Collectors.joining(","));
+        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, com.landawn.abacus.util.stream.Collectors.joining(","));
         List<String> result = seq.toList();
 
         assertEquals(3, result.size());
@@ -80,7 +80,7 @@ public class Seq103Test extends TestBase {
         assertEquals("2,3,4", result.get(1));
         assertEquals("3,4,5", result.get(2));
 
-        Seq<Integer, Exception> seqSum = Seq.of(1, 2, 3, 4, 5).slide(2, Collectors.summingInt(Integer::intValue));
+        Seq<Integer, Exception> seqSum = Seq.of(1, 2, 3, 4, 5).sliding(2, Collectors.summingInt(Integer::intValue));
         List<Integer> resultSum = seqSum.toList();
 
         assertEquals(4, resultSum.size());
@@ -92,7 +92,7 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testSliding_WindowSizeAndIncrement() throws IllegalStateException, Exception {
-        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5).slide(3, 1);
+        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, 1);
         List<List<Integer>> result = seq.toList();
 
         assertEquals(3, result.size());
@@ -100,14 +100,14 @@ public class Seq103Test extends TestBase {
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
         assertEquals(Arrays.asList(3, 4, 5), result.get(2));
 
-        seq = Seq.of(1, 2, 3, 4, 5).slide(3, 2);
+        seq = Seq.of(1, 2, 3, 4, 5).sliding(3, 2);
         result = seq.toList();
 
         assertEquals(2, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(3, 4, 5), result.get(1));
 
-        seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8).slide(2, 3);
+        seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8).sliding(2, 3);
         result = seq.toList();
 
         assertEquals(3, result.size());
@@ -119,7 +119,7 @@ public class Seq103Test extends TestBase {
     @Test
     public void testSliding_WindowSizeIncrementAndCollectionSupplier() throws Exception {
         {
-            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).slide(3, 2, HashSet::new);
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new);
             List<Set<Integer>> result = seq.toList();
 
             assertEquals(3, result.size());
@@ -128,7 +128,7 @@ public class Seq103Test extends TestBase {
             assertEquals(new HashSet<>(Arrays.asList(5, 6)), result.get(2));
         }
         {
-            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).slide(3, 3, HashSet::new);
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new);
             List<Set<Integer>> result = seq.toList();
 
             assertEquals(2, result.size());
@@ -136,7 +136,7 @@ public class Seq103Test extends TestBase {
             assertEquals(new HashSet<>(Arrays.asList(4, 5, 6)), result.get(1));
         }
         {
-            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).slide(3, 2, HashSet::new);
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new);
             List<Set<Integer>> result = seq.skip(1).toList();
 
             assertEquals(2, result.size());
@@ -144,7 +144,7 @@ public class Seq103Test extends TestBase {
             assertEquals(new HashSet<>(Arrays.asList(5, 6)), result.get(1));
         }
         {
-            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).slide(3, 3, HashSet::new);
+            Seq<Set<Integer>, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new);
             List<Set<Integer>> result = seq.skip(1).toList();
 
             assertEquals(1, result.size());
@@ -152,10 +152,10 @@ public class Seq103Test extends TestBase {
         }
 
         {
-            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).slide(3, HashSet::new).count());
-            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).slide(3, 2, HashSet::new).count());
+            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, HashSet::new).count());
+            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 2, HashSet::new).count());
 
-            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).slide(3, 3, HashSet::new).count());
+            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).sliding(3, 3, HashSet::new).count());
         }
     }
 
@@ -163,32 +163,32 @@ public class Seq103Test extends TestBase {
     public void testSliding_WindowSizeIncrementAndCollector() throws Exception {
         {
 
-            List<String> result = Seq.of("a", "b", "c", "d", "e").slide(2, 2, Collectors.joining("-")).toList();
+            List<String> result = Seq.of("a", "b", "c", "d", "e").sliding(2, 2, Collectors.joining("-")).toList();
             assertEquals(3, result.size());
             assertEquals("a-b", result.get(0));
             assertEquals("c-d", result.get(1));
             assertEquals("e", result.get(2));
 
-            result = Seq.of("a", "b", "c", "d", "e").slide(2, 1, Collectors.joining("-")).skip(2).toList();
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 1, Collectors.joining("-")).skip(2).toList();
             assertEquals(2, result.size());
             assertEquals("c-d", result.get(0));
             assertEquals("d-e", result.get(1));
 
-            result = Seq.of("a", "b", "c", "d", "e").slide(2, 3, Collectors.joining("-")).toList();
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 3, Collectors.joining("-")).toList();
             assertEquals(2, result.size());
             assertEquals("a-b", result.get(0));
             assertEquals("d-e", result.get(1));
 
-            result = Seq.of("a", "b", "c", "d", "e").slide(2, 3, Collectors.joining("-")).skip(1).toList();
+            result = Seq.of("a", "b", "c", "d", "e").sliding(2, 3, Collectors.joining("-")).skip(1).toList();
             assertEquals(1, result.size());
             assertEquals("d-e", result.get(0));
         }
 
         {
-            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).slide(3, Collectors.joining("-")).count());
-            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).slide(3, 2, Collectors.joining("-")).count());
+            assertEquals(4, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, Collectors.joining("-")).count());
+            assertEquals(3, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, 2, Collectors.joining("-")).count());
 
-            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).slide(3, 3, Collectors.joining("-")).count());
+            assertEquals(2, Seq.of(1, 2, 3, 4, 5, 6).map(String::valueOf).sliding(3, 3, Collectors.joining("-")).count());
         }
 
     }
@@ -978,7 +978,7 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testEdgeCases() throws Exception {
-        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3).slide(3);
+        Seq<List<Integer>, Exception> seq = Seq.of(1, 2, 3).sliding(3);
         List<List<Integer>> result = seq.toList();
         assertEquals(1, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
@@ -997,8 +997,8 @@ public class Seq103Test extends TestBase {
 
     @Test
     public void testExceptionHandling() throws Exception {
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).slide(0));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).slide(2, 0));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).sliding(0));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).sliding(2, 0));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).skip(-1));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).limit(-1));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).step(0));

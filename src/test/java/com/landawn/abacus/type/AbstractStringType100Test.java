@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -32,13 +32,13 @@ public class AbstractStringType100Test extends TestBase {
 
     private Type<String> stringType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         stringType = createType("String");
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test

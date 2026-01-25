@@ -18,7 +18,7 @@ public class XMLTest extends AbstractParserTest {
 
         StringWriter stWriter = new StringWriter();
 
-        abacusXMLParser.serialize(account, stWriter);
+        abacusXmlParser.serialize(account, stWriter);
 
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
@@ -34,13 +34,13 @@ public class XMLTest extends AbstractParserTest {
         Account account = createAccount(Account.class);
         account.setId(100);
 
-        String str = abacusXMLParser.serialize(account);
+        String str = abacusXmlParser.serialize(account);
         println(str);
 
-        println(abacusXMLParser.deserialize(str, Account.class));
+        println(abacusXmlParser.deserialize(str, Account.class));
 
         str = "<account><id>100</id><gui>737a45812bad4d5bafbb62428cefe66c</gui><unknownProperty1><list><e>11</e></list></unknownProperty1><emailAddress>fc3283c92282499ea2ba515e840e305a@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1399944204713</birthDate><lastUpdateTime>1399944204713</lastUpdateTime><createdTime>1399944204713</createdTime><unknownProperty2>null</unknownProperty2></account>";
-        println(abacusXMLParser.deserialize(str, Account.class));
+        println(abacusXmlParser.deserialize(str, Account.class));
 
     }
 }

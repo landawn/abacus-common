@@ -64,22 +64,22 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     /**
      * Converts an array to a collection of the specified type.
      * Creates a new collection instance of the specified class and populates it
-     * with the elements from the array using the {@link #array2Collection(Object, Collection)} method.
+     * with the elements from the array using the {@link #arrayToCollection(Object, Collection)} method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry"};
      * Type<String[]> type = Type.of(String[].class);
-     * List<String> list = type.array2Collection(array, ArrayList.class);
+     * List<String> list = type.arrayToCollection(array, ArrayList.class);
      * // list contains: ["apple", "banana", "cherry"]
      *
      * Integer[] numbers = {1, 2, 3, 4, 5};
      * Type<Integer[]> intType = Type.of(Integer[].class);
-     * Set<Integer> set = intType.array2Collection(numbers, HashSet.class);
+     * Set<Integer> set = intType.arrayToCollection(numbers, HashSet.class);
      * // set contains: [1, 2, 3, 4, 5]
      *
      * // Handling null arrays
-     * List<String> result = type.array2Collection(null, ArrayList.class);
+     * List<String> result = type.arrayToCollection(null, ArrayList.class);
      * // result is null
      * }</pre>
      *
@@ -90,7 +90,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @throws IllegalArgumentException if the collection class cannot be instantiated
      */
     @Override
-    public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
+    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {
         if (array == null) {
             return null; // NOSONAR
         }
@@ -98,7 +98,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
         @SuppressWarnings("rawtypes")
         final Collection<E> result = N.newCollection((Class<Collection>) collClass, Array.getLength(array));
 
-        array2Collection(array, result);
+        arrayToCollection(array, result);
 
         return result;
     }

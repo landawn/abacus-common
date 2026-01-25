@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Beans;

@@ -42,7 +42,7 @@ public class ExcelUtilTest extends AbstractTest {
         N.println(IOUtil.readAllToString(csvOutputFile));
 
         N.println(Strings.repeat("=", 80));
-        CSVUtil.loadCSV(csvOutputFile).println();
+        CsvUtil.load(csvOutputFile).println();
 
         IOUtil.deleteQuietly(outputExcelFile);
         IOUtil.deleteQuietly(csvOutputFile);

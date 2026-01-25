@@ -210,16 +210,16 @@ public class Dates200Test extends TestBase {
     @Nested
     public class CurrentTimeRolledTests {
         @Test
-        public void testCurrentTimeRolled() {
+        public void testCurrentTimePlus() {
             long now = System.currentTimeMillis();
-            Time rolled = Dates.currentTimeRolled(1, TimeUnit.SECONDS);
+            Time rolled = Dates.currentTimePlus(1, TimeUnit.SECONDS);
             assertTrue(Math.abs(rolled.getTime() - (now + 1000)) < 50);
         }
 
         @Test
-        public void testCurrentDateRolled() {
+        public void testCurrentDatePlus() {
             long now = System.currentTimeMillis();
-            java.sql.Date rolled = Dates.currentDateRolled(1, TimeUnit.DAYS);
+            java.sql.Date rolled = Dates.currentDatePlus(1, TimeUnit.DAYS);
             Calendar calNow = Calendar.getInstance();
             calNow.setTimeInMillis(now);
             Calendar calRolled = Calendar.getInstance();
@@ -240,23 +240,23 @@ public class Dates200Test extends TestBase {
         }
 
         @Test
-        public void testCurrentTimestampRolled() {
+        public void testCurrentTimestampPlus() {
             long now = System.currentTimeMillis();
-            Timestamp rolled = Dates.currentTimestampRolled(-1, TimeUnit.HOURS);
+            Timestamp rolled = Dates.currentTimestampPlus(-1, TimeUnit.HOURS);
             assertTrue(Math.abs(rolled.getTime() - (now - TimeUnit.HOURS.toMillis(1))) < 50);
         }
 
         @Test
-        public void testCurrentJUDateRolled() {
+        public void testCurrentJUDatePlus() {
             long now = System.currentTimeMillis();
-            java.util.Date rolled = Dates.currentJUDateRolled(5, TimeUnit.MINUTES);
+            java.util.Date rolled = Dates.currentJUDatePlus(5, TimeUnit.MINUTES);
             assertTrue(Math.abs(rolled.getTime() - (now + TimeUnit.MINUTES.toMillis(5))) < 50);
         }
 
         @Test
-        public void testCurrentCalendarRolled() {
+        public void testCurrentCalendarPlus() {
             long now = System.currentTimeMillis();
-            Calendar rolled = Dates.currentCalendarRolled(10, TimeUnit.MILLISECONDS);
+            Calendar rolled = Dates.currentCalendarPlus(10, TimeUnit.MILLISECONDS);
             assertTrue(Math.abs(rolled.getTimeInMillis() - (now + 10)) < 50);
         }
     }
@@ -1222,21 +1222,21 @@ public class Dates200Test extends TestBase {
 
         @Test
         public void testGetLastDateOfMonth() {
-            assertEquals(28, Dates.getLastDateOfMonth(date1));
-            assertEquals(29, Dates.getLastDateOfMonth(date2));
-            assertEquals(31, Dates.getLastDateOfMonth(date3));
-            assertEquals(31, Dates.getLastDateOfMonth(date4));
-            assertThrows(IllegalArgumentException.class, () -> Dates.getLastDateOfMonth(null));
+            assertEquals(28, Dates.getLastDayOfMonth(date1));
+            assertEquals(29, Dates.getLastDayOfMonth(date2));
+            assertEquals(31, Dates.getLastDayOfMonth(date3));
+            assertEquals(31, Dates.getLastDayOfMonth(date4));
+            assertThrows(IllegalArgumentException.class, () -> Dates.getLastDayOfMonth(null));
         }
 
         @Test
         public void testGetLastDateOfYear() {
             Calendar cal = Calendar.getInstance(Dates.UTC_TIME_ZONE);
             cal.setTime(date1);
-            assertEquals(365, Dates.getLastDateOfYear(date1));
+            assertEquals(365, Dates.getLastDayOfYear(date1));
             cal.setTime(date2);
-            assertEquals(366, Dates.getLastDateOfYear(date2));
-            assertThrows(IllegalArgumentException.class, () -> Dates.getLastDateOfYear(null));
+            assertEquals(366, Dates.getLastDayOfYear(date2));
+            assertThrows(IllegalArgumentException.class, () -> Dates.getLastDayOfYear(null));
         }
 
         @Test
@@ -1248,18 +1248,18 @@ public class Dates200Test extends TestBase {
             java.util.Date s3 = Dates.parseJUDate("2023-01-12");
             java.util.Date e3 = Dates.parseJUDate("2023-01-20");
 
-            assertTrue(Dates.isOverlap(s1, e1, s2, e2));
-            assertTrue(Dates.isOverlap(s2, e2, s1, e1));
-            assertFalse(Dates.isOverlap(s1, e1, s3, e3));
-            assertTrue(Dates.isOverlap(s1, e1, s1, e1));
-            assertTrue(Dates.isOverlap(s1, e2, s2, e1));
+            assertTrue(Dates.isOverlapping(s1, e1, s2, e2));
+            assertTrue(Dates.isOverlapping(s2, e2, s1, e1));
+            assertFalse(Dates.isOverlapping(s1, e1, s3, e3));
+            assertTrue(Dates.isOverlapping(s1, e1, s1, e1));
+            assertTrue(Dates.isOverlapping(s1, e2, s2, e1));
 
             java.util.Date s4 = Dates.parseJUDate("2023-01-10");
             java.util.Date e4 = Dates.parseJUDate("2023-01-15");
-            assertFalse(Dates.isOverlap(s1, e1, s4, e4));
+            assertFalse(Dates.isOverlapping(s1, e1, s4, e4));
 
-            assertThrows(IllegalArgumentException.class, () -> Dates.isOverlap(null, e1, s2, e2));
-            assertThrows(IllegalArgumentException.class, () -> Dates.isOverlap(e1, s1, s2, e2));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isOverlapping(null, e1, s2, e2));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isOverlapping(e1, s1, s2, e2));
         }
 
         @Test

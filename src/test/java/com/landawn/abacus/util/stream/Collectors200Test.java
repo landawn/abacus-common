@@ -350,13 +350,13 @@ public class Collectors200Test extends TestBase {
 
             Dataset dataset = data.stream().collect(MoreCollectors.toDataset());
             assertEquals(2, dataset.size());
-            assertEquals(2, dataset.columnNameList().size());
-            assertTrue(dataset.columnNameList().contains("id"));
-            assertTrue(dataset.columnNameList().contains("name"));
+            assertEquals(2, dataset.columnNames().size());
+            assertTrue(dataset.columnNames().contains("id"));
+            assertTrue(dataset.columnNames().contains("name"));
 
             Dataset datasetWithNames = data.stream().collect(MoreCollectors.toDataset(Arrays.asList("ID", "NAME")));
             assertEquals(2, datasetWithNames.size());
-            assertEquals(Arrays.asList("ID", "NAME"), datasetWithNames.columnNameList());
+            assertEquals(Arrays.asList("ID", "NAME"), datasetWithNames.columnNames());
         }
     }
 }

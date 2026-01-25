@@ -40,7 +40,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.parser.JSONParser;
+import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
@@ -135,7 +135,7 @@ import com.landawn.abacus.util.u.Optional;
  *     str -> LocalDate.parse(str)                // Deserialization function
  * );
  *
- * // Custom type registration with JSONParser support
+ * // Custom type registration with JsonParser support
  * TypeFactory.registerType(
  *     MyCustomClass.class,
  *     (obj, parser) -> obj.toJson(),             // Serialization with parser
@@ -221,7 +221,7 @@ public final class TypeFactory {
         // initializing built-in types
 
         // String pkgName = Type.class.getPackage().getName();
-        // List<Class<?>> classes = PackageUtil.getClassesByPackage(pkgName, true, false);
+        // List<Class<?>> classes = PackageUtil.findClassesInPackage(pkgName, true, false);
 
         // For Android.
         final List<Class<?>> classes = new ArrayList<>();
@@ -598,7 +598,7 @@ public final class TypeFactory {
             } else {
                 if (cls == null) {
                     try {
-                        cls = ClassUtil.forClass(clsName);
+                        cls = ClassUtil.forName(clsName);
                     } catch (final Throwable e) {
                         if (clsName.equals(ImmutableMapEntryType.MAP_IMMUTABLE_ENTRY)) {
                             cls = AbstractMap.SimpleImmutableEntry.class;
@@ -1345,7 +1345,7 @@ public final class TypeFactory {
      * <p>
      * This method allows you to define how objects of a specific class should be converted to and from strings.
      * The provided functions will be used by the Type system for serialization and deserialization operations.
-     * A JSONParser instance is provided to the functions for complex parsing scenarios.
+     * A JsonParser instance is provided to the functions for complex parsing scenarios.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1359,14 +1359,14 @@ public final class TypeFactory {
      *
      * @param <T> the type parameter
      * @param targetClass the class for which to register the custom type
-     * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JSONParser
-     * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JSONParser
+     * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
+     * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
      * @throws IllegalArgumentException if targetClass, toStringFunc, or fromStringFunc is null
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
-    public static <T> void registerType(final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
-            final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
+    public static <T> void registerType(final Class<T> targetClass, final BiFunction<? super T, JsonParser, String> toStringFunc,
+            final BiFunction<? super String, JsonParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
         N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
@@ -1393,7 +1393,7 @@ public final class TypeFactory {
      * Registers a custom Type for the specified class with simple serialization/deserialization functions.
      * <p>
      * This method provides a simpler alternative to {@link #registerType(Class, BiFunction, BiFunction)}
-     * when you don't need access to a JSONParser instance for serialization/deserialization.
+     * when you don't need access to a JsonParser instance for serialization/deserialization.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1477,7 +1477,7 @@ public final class TypeFactory {
     }
 
     /**
-     * Registers a custom Type with a specific type name and target class, using custom serialization functions with JSONParser.
+     * Registers a custom Type with a specific type name and target class, using custom serialization functions with JsonParser.
      * <p>
      * This method allows you to register a type with a custom name that may differ from the class name.
      * The type will be accessible by both the custom type name and potentially by the target class
@@ -1497,15 +1497,15 @@ public final class TypeFactory {
      * @param <T> the type parameter
      * @param typeName the custom name for this type registration
      * @param targetClass the class that this type handles
-     * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JSONParser
-     * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JSONParser
+     * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
+     * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
      * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is {@code null},
      *                                  or if a type with the given name already exists
      * @see #registerType(String, Class, Function, Function)
      * @see #registerType(String, Type)
      */
-    public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
-            final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
+    public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<? super T, JsonParser, String> toStringFunc,
+            final BiFunction<? super String, JsonParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, cs.typeName);
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
@@ -1539,7 +1539,7 @@ public final class TypeFactory {
      * Registers a custom Type with a specific type name and target class, using simple serialization functions.
      * <p>
      * This method provides a simpler alternative to {@link #registerType(String, Class, BiFunction, BiFunction)}
-     * when you don't need access to a JSONParser instance. The type will be accessible by the custom
+     * when you don't need access to a JsonParser instance. The type will be accessible by the custom
      * type name and potentially by the target class if no other type is registered for it.
      * </p>
      *

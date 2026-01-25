@@ -21,9 +21,9 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.IOUtil;
@@ -57,7 +57,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
     private final Type<?>[] parameterTypes;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     ImmutableMapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
@@ -236,7 +236,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
      *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * JsonXmlSerializationConfig config = JsonXmlSerializationConfig.of();
      * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
      *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
      * type.writeCharacter(writer, entry, config);
@@ -250,7 +250,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JSONXMLSerializationConfig<?> config)
+    public void writeCharacter(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerializationConfig<?> config)
             throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

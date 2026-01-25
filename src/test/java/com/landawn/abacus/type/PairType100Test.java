@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Pair;
 
@@ -28,14 +28,14 @@ public class PairType100Test extends TestBase {
     private PairType<String, Integer> stringIntPairType;
     private PairType<Double, Boolean> doubleBoolPairType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         stringIntPairType = (PairType<String, Integer>) createType("Pair<String, Integer>");
         doubleBoolPairType = (PairType<Double, Boolean>) createType("Pair<Double, Boolean>");
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test

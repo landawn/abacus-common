@@ -16,8 +16,8 @@ package com.landawn.abacus.type;
 
 import java.util.Map;
 
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -42,7 +42,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private final Type<E> elementType;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     @SuppressWarnings("unchecked")
     MultisetType(final String parameterTypeName) {

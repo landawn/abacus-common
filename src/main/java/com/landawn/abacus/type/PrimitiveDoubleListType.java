@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Strings;
@@ -131,7 +131,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final DoubleList x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final DoubleList x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

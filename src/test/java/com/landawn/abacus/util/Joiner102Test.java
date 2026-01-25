@@ -89,7 +89,7 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testReuseCachedBuffer() {
-        Joiner joiner = Joiner.with(", ").reuseCachedBuffer();
+        Joiner joiner = Joiner.with(", ").reuseBuffer();
         joiner.append("a").append("b");
         String result = joiner.toString();
         Assertions.assertEquals("a, b", result);
@@ -873,7 +873,7 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testClose() {
-        Joiner j = Joiner.with(", ").reuseCachedBuffer();
+        Joiner j = Joiner.with(", ").reuseBuffer();
         j.append("a").append("b");
         j.close();
         j.close();

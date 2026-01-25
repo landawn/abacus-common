@@ -969,8 +969,8 @@ public class Stream2025Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).slide(3);
+    public void testsliding() {
+        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(3);
         List<List<Integer>> result = stream.toList();
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
@@ -979,7 +979,7 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testSlidingWithIncrement() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).slide(2, 2);
+        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(2, 2);
         List<List<Integer>> result = stream.toList();
         assertEquals(Arrays.asList(1, 2), result.get(0));
         assertEquals(Arrays.asList(3, 4), result.get(1));
@@ -1974,7 +1974,7 @@ public class Stream2025Test extends TestBase {
     public void testToDatasetWithColumnNames() {
         Dataset dataset = Stream.of(Arrays.asList("a", 1), Arrays.asList("b", 2)).toDataset(Arrays.asList("col1", "col2"));
         assertEquals(2, dataset.size());
-        assertEquals(Arrays.asList("col1", "col2"), dataset.columnNameList());
+        assertEquals(Arrays.asList("col1", "col2"), dataset.columnNames());
     }
 
     @Test
@@ -2921,7 +2921,7 @@ public class Stream2025Test extends TestBase {
     public void testPersistToCSV() throws IOException {
         File tempFile = new File(tempDir.toFile(), "test.csv");
         List<List<String>> rows = Arrays.asList(Arrays.asList("a", "b", "c"), Arrays.asList("1", "2", "3"));
-        Stream.of(rows).persistToCSV(N.asList("Column1", "Column2", "Column3"), tempFile);
+        Stream.of(rows).persistToCsv(N.asList("Column1", "Column2", "Column3"), tempFile);
 
         assertTrue(tempFile.exists());
         assertTrue(tempFile.length() > 0);
@@ -2936,7 +2936,7 @@ public class Stream2025Test extends TestBase {
                 put("age", 30);
             }
         });
-        Stream.of(data).persistToJSON(tempFile);
+        Stream.of(data).persistToJson(tempFile);
 
         assertTrue(tempFile.exists());
         assertTrue(tempFile.length() > 0);

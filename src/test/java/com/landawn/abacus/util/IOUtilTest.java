@@ -64,8 +64,8 @@ public class IOUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_freeDiskSpaceKb() {
-        N.println(IOUtil.freeDiskSpaceKb());
+    public void test_freeDiskSpaceKB() {
+        N.println(IOUtil.freeDiskSpaceKB());
     }
 
     @Test
@@ -89,10 +89,10 @@ public class IOUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_chars2Bytes() throws Exception {
+    public void test_charsToBytes() throws Exception {
         final char[] chars = "abc124黎".toCharArray();
-        final byte[] bytes = IOUtil.chars2Bytes(chars);
-        final char[] chars2 = IOUtil.bytes2Chars(bytes);
+        final byte[] bytes = IOUtil.charsToBytes(chars);
+        final char[] chars2 = IOUtil.bytesToChars(bytes);
         assertTrue(CommonUtil.equals(chars, chars2));
     }
 
@@ -136,16 +136,16 @@ public class IOUtilTest extends AbstractTest {
         final String str = "abc";
 
         final StringBuilder sb = new StringBuilder();
-        assertEquals(str, IOUtil.readAllToString(IOUtil.string2InputStream(str)));
-        assertEquals(str, IOUtil.readAllToString(IOUtil.string2Reader(str)));
-        IOUtil.write(str, IOUtil.stringBuilder2Writer(sb));
+        assertEquals(str, IOUtil.readAllToString(IOUtil.stringToInputStream(str)));
+        assertEquals(str, IOUtil.readAllToString(IOUtil.stringToReader(str)));
+        IOUtil.write(str, IOUtil.stringBuilderToWriter(sb));
         assertEquals(str, sb.toString());
     }
 
     @Test
     public void test_splite() throws Exception {
         final File dir = new File("./tmpDir");
-        IOUtil.deleteAllIfExists(dir);
+        IOUtil.deleteRecursivelyIfExists(dir);
         dir.mkdir();
 
         final File file = new File("./tmpDir/test.txt");
@@ -177,13 +177,13 @@ public class IOUtilTest extends AbstractTest {
 
         assertEquals(IOUtil.readAllToString(file), IOUtil.readAllToString(destFile));
 
-        IOUtil.deleteAllIfExists(dir);
+        IOUtil.deleteRecursivelyIfExists(dir);
     }
 
     @Test
     public void test_splite_2() throws Exception {
         final File dir = new File("./tmpDir");
-        IOUtil.deleteAllIfExists(dir);
+        IOUtil.deleteRecursivelyIfExists(dir);
         dir.mkdir();
 
         final File file = new File("./tmpDir/test.txt");
@@ -215,7 +215,7 @@ public class IOUtilTest extends AbstractTest {
         final File zipFile = new File("./tmpDir/test.zip");
         IOUtil.zip(file, zipFile);
 
-        IOUtil.deleteAllIfExists(dir);
+        IOUtil.deleteRecursivelyIfExists(dir);
     }
 
     @Test
@@ -255,7 +255,7 @@ public class IOUtilTest extends AbstractTest {
         str2 = IOUtil.readAllToString(file);
         assertEquals(str, str2);
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     @Test
@@ -276,7 +276,7 @@ public class IOUtilTest extends AbstractTest {
         IOUtil.close(reader);
         IOUtil.close(writer);
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
 
         try {
             IOUtil.readAllBytes(file);
@@ -456,11 +456,11 @@ public class IOUtilTest extends AbstractTest {
     @Test
     public void test_zipDir() throws IOException {
         final File file = new File("./src/test/resources/test.txt");
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
         IOUtil.write("abc", file);
 
         final File file2 = new File("./src/test/resources/test2.txt");
-        IOUtil.deleteAllIfExists(file2);
+        IOUtil.deleteRecursivelyIfExists(file2);
         IOUtil.write("123", file2);
 
         final File targetFile = new File("./test.zip");
@@ -471,10 +471,10 @@ public class IOUtilTest extends AbstractTest {
 
         assertEquals(1, IOUtil.listFiles(targetDir).size());
 
-        IOUtil.deleteAllIfExists(file);
-        IOUtil.deleteAllIfExists(file2);
-        IOUtil.deleteAllIfExists(targetFile);
-        IOUtil.deleteAllIfExists(targetDir);
+        IOUtil.deleteRecursivelyIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file2);
+        IOUtil.deleteRecursivelyIfExists(targetFile);
+        IOUtil.deleteRecursivelyIfExists(targetDir);
     }
 
     @Test
@@ -486,7 +486,7 @@ public class IOUtilTest extends AbstractTest {
         IOUtil.write("test", os);
 
         IOUtil.close(os);
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     @Test
@@ -494,8 +494,8 @@ public class IOUtilTest extends AbstractTest {
         final File file = new File("./temp.properties");
         IOUtil.write("test", file);
 
-        assertTrue(IOUtil.deleteAllIfExists(file));
-        assertFalse(IOUtil.deleteAllIfExists(file));
+        assertTrue(IOUtil.deleteRecursivelyIfExists(file));
+        assertFalse(IOUtil.deleteRecursivelyIfExists(file));
     }
 
     @Test
@@ -550,7 +550,7 @@ public class IOUtilTest extends AbstractTest {
 
         assertEquals(str, IOUtil.readAllToString(newSrcFile));
 
-        IOUtil.deleteAllIfExists(newSrcFile);
+        IOUtil.deleteRecursivelyIfExists(newSrcFile);
     }
 
     @Test
@@ -560,17 +560,17 @@ public class IOUtilTest extends AbstractTest {
 
         File destDir = new File("./dir");
 
-        IOUtil.deleteAllIfExists(destDir);
+        IOUtil.deleteRecursivelyIfExists(destDir);
 
         IOUtil.copyToDirectory(srcFile, destDir);
 
         final File newDestFile = new File("./dir2");
 
-        IOUtil.deleteAllIfExists(newDestFile);
+        IOUtil.deleteRecursivelyIfExists(newDestFile);
 
         IOUtil.move(destDir, newDestFile);
 
-        IOUtil.deleteAllIfExists(newDestFile);
+        IOUtil.deleteRecursivelyIfExists(newDestFile);
 
         destDir = new File(".");
         IOUtil.copyToDirectory(srcFile, destDir);
@@ -585,7 +585,7 @@ public class IOUtilTest extends AbstractTest {
     @Test
     public void test_copyDir() throws IOException {
         final File srcFile = new File("./tempDir");
-        IOUtil.deleteAllIfExists(srcFile);
+        IOUtil.deleteRecursivelyIfExists(srcFile);
         srcFile.mkdir();
 
         final File subDir = new File("./tempDir/subDir");
@@ -601,7 +601,7 @@ public class IOUtilTest extends AbstractTest {
         IOUtil.write("file3", file3);
 
         final File destDir = new File("./tempDir2");
-        IOUtil.deleteAllIfExists(destDir);
+        IOUtil.deleteRecursivelyIfExists(destDir);
         destDir.mkdir();
 
         IOUtil.copyToDirectory(srcFile, destDir);
@@ -610,7 +610,7 @@ public class IOUtilTest extends AbstractTest {
         assertEquals("file2", IOUtil.readAllToString(new File("./tempDir2/tempDir/file2.txt")));
         assertEquals("file3", IOUtil.readAllToString(new File("./tempDir2/tempDir/subDir/file3.txt")));
 
-        IOUtil.deleteAllIfExists(new File("./tempDir2/tempDir/subDir"));
+        IOUtil.deleteRecursivelyIfExists(new File("./tempDir2/tempDir/subDir"));
 
         IOUtil.copyToDirectory(srcFile, destDir, true, (parentDir, file) -> file.getName().equals("subDir"));
 
@@ -629,8 +629,8 @@ public class IOUtilTest extends AbstractTest {
 
         IOUtil.copyToDirectory(subDir, srcFile);
 
-        IOUtil.deleteAllIfExists(srcFile);
-        IOUtil.deleteAllIfExists(destDir);
+        IOUtil.deleteRecursivelyIfExists(srcFile);
+        IOUtil.deleteRecursivelyIfExists(destDir);
     }
 
     @Test
@@ -654,6 +654,6 @@ public class IOUtilTest extends AbstractTest {
         assertEquals(allInString, Files.readString(file));
         assertEquals(allInString, IOUtil.readAllToString(file));
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 }

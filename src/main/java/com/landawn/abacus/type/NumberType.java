@@ -22,7 +22,7 @@ import java.lang.reflect.Modifier;
 import java.util.function.Function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -250,7 +250,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
         appendTo(writer, x);
     }
 }

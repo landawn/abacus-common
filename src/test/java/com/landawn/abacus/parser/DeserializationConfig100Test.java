@@ -19,7 +19,7 @@ public class DeserializationConfig100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        config = new JSONDeserializationConfig();
+        config = new JsonDeserializationConfig();
     }
 
     @Test
@@ -201,8 +201,8 @@ public class DeserializationConfig100Test extends TestBase {
 
     @Test
     public void testHashCode() {
-        DeserializationConfig<?> config1 = new JSONDeserializationConfig();
-        DeserializationConfig<?> config2 = new JSONDeserializationConfig();
+        DeserializationConfig<?> config1 = new JsonDeserializationConfig();
+        DeserializationConfig<?> config2 = new JsonDeserializationConfig();
 
         Assertions.assertEquals(config1.hashCode(), config2.hashCode());
 
@@ -212,8 +212,8 @@ public class DeserializationConfig100Test extends TestBase {
 
     @Test
     public void testEquals() {
-        DeserializationConfig<?> config1 = new JSONDeserializationConfig();
-        DeserializationConfig<?> config2 = new JSONDeserializationConfig();
+        DeserializationConfig<?> config1 = new JsonDeserializationConfig();
+        DeserializationConfig<?> config2 = new JsonDeserializationConfig();
 
         Assertions.assertEquals(config1, config1);
         Assertions.assertEquals(config1, config2);

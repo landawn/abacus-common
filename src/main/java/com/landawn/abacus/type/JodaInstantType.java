@@ -23,7 +23,7 @@ import java.sql.Timestamp;
 
 import org.joda.time.Instant;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -357,12 +357,12 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * CharacterWriter writer = new CharacterWriter();
      *
      * // Write with LONG format (no quotes)
-     * JSONXMLSerializationConfig config1 = JSONXMLSerializationConfig.builder()
+     * JsonXmlSerializationConfig config1 = JsonXmlSerializationConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.LONG).build();
      * type.writeCharacter(writer, instant, config1);   // Writes: 1609459200000
      *
      * // Write with ISO_8601_TIMESTAMP format (with quotes)
-     * JSONXMLSerializationConfig config2 = JSONXMLSerializationConfig.builder()
+     * JsonXmlSerializationConfig config2 = JsonXmlSerializationConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
      *     .setStringQuotation('"').build();
      * type.writeCharacter(writer, instant, config2);   // Writes: "2021-01-01T10:30:00.123"
@@ -375,7 +375,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Instant x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

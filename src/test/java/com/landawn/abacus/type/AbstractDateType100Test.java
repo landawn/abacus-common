@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
@@ -27,7 +27,7 @@ public class AbstractDateType100Test extends TestBase {
     private CharacterWriter characterWriter;
 
     @Mock
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {

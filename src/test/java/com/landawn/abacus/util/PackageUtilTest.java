@@ -17,7 +17,7 @@ public class PackageUtilTest extends AbstractTest {
     @Test
     public void test_type() {
         String pkgName = Type.class.getPackage().getName();
-        List<Class<?>> classes = ClassUtil.getClassesByPackage(pkgName, true, true);
+        List<Class<?>> classes = ClassUtil.findClassesInPackage(pkgName, true, true);
 
         for (Class<?> cls : classes) {
             if (Type.class.isAssignableFrom(cls)) {
@@ -29,7 +29,7 @@ public class PackageUtilTest extends AbstractTest {
     @Test
     public void testGetClassesForPackageWithinJar() {
         String pkgName = "lombok";
-        List<Class<?>> classes = ClassUtil.getClassesByPackage(pkgName, false, true);
+        List<Class<?>> classes = ClassUtil.findClassesInPackage(pkgName, false, true);
 
         for (Class<?> clazz : classes) {
             N.println(clazz.getCanonicalName() + " : " + clazz);
@@ -37,7 +37,7 @@ public class PackageUtilTest extends AbstractTest {
 
         assertEquals(41, classes.size());
         pkgName = "lombok";
-        classes = ClassUtil.getClassesByPackage(pkgName, true, true);
+        classes = ClassUtil.findClassesInPackage(pkgName, true, true);
 
         for (Class<?> clazz : classes) {
             N.println(clazz.getCanonicalName() + " : " + clazz);
@@ -49,7 +49,7 @@ public class PackageUtilTest extends AbstractTest {
     @Test
     public void testNoFoundPackage() {
         try {
-            ClassUtil.getClassesByPackage("no.package", true, true);
+            ClassUtil.findClassesInPackage("no.package", true, true);
             fail("should throw RuntimeException");
         } catch (IllegalArgumentException e) {
         }

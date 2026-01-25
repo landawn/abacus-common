@@ -23,8 +23,8 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -52,7 +52,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
     private final boolean isOrdered;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     @SuppressWarnings("unchecked")
     GuavaMultisetType(final Class<T> typeClass, final String parameterTypeName) {

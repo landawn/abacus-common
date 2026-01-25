@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -121,7 +121,7 @@ public class PrimitiveCharListType100Test extends TestBase {
     public void testWriteCharacterEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[0]);
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');
@@ -132,7 +132,7 @@ public class PrimitiveCharListType100Test extends TestBase {
     public void testWriteCharacterNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[] { 'a', 'b' });
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');
@@ -146,7 +146,7 @@ public class PrimitiveCharListType100Test extends TestBase {
     public void testWriteCharacterWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[] { 'a' });
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(writer, list, config);

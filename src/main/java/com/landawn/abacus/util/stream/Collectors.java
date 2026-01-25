@@ -320,7 +320,7 @@ import com.landawn.abacus.util.function.TriFunction;
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR
 
-    static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
+    static final Object NONE = ClassUtil.newNullSentinel(); //NOSONAR
 
     static final Characteristics[] CH_NOID = {};
 
@@ -2769,7 +2769,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Collector<Object, ?, String> joining(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
         @SuppressWarnings("resource")
-        final Supplier<Joiner> supplier = () -> Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
+        final Supplier<Joiner> supplier = () -> Joiner.with(delimiter, prefix, suffix).reuseBuffer();
 
         final BiConsumer<Joiner, Object> accumulator = Joiner_Accumulator;
         final BinaryOperator<Joiner> combiner = Joiner_Combiner;
@@ -3206,7 +3206,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Returns default list when stream is empty
      * List<String> result = Stream.<String>empty()
-     *     .collect(Collectors.collectingOrElseIfEmpty(
+     *     .collect(Collectors.collectingOrDefaultIfEmpty(
      *         Collectors.toList(),
      *         Arrays.asList("default")));
      * // Result: ["default"]
@@ -3221,7 +3221,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         no elements were collected
      */
     @Beta
-    public static <T, A, R> Collector<T, A, R> collectingOrElseIfEmpty(final Collector<T, A, R> collector, final R defaultForEmpty) {
+    public static <T, A, R> Collector<T, A, R> collectingOrDefaultIfEmpty(final Collector<T, A, R> collector, final R defaultForEmpty) {
         return collectingOrElseGetIfEmpty(collector, () -> defaultForEmpty);
     }
 
@@ -9204,7 +9204,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return (m1, m2) -> {
             K key = null;
             V value = null;
-            for (final Map.Entry<K, V> e : m2.entrySet()) {
+            for (final Map.Entry<K, V> e : m2) {
                 key = e.getKey();
                 value = N.requireNonNull(e.getValue(), "Multimap value cannot be null");
 
@@ -9212,7 +9212,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                     final V oldValue = m1.get(key);
 
                     if (oldValue == null) {
-                        m1.putMany(key, value);
+                        m1.putValues(key, value);
                     } else {
                         oldValue.addAll(value);
                     }

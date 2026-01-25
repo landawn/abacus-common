@@ -147,8 +147,8 @@ public class DateUtilTest extends AbstractTest {
         assertFalse(Dates.isSameYear(Dates.parseDate("2023-06-30", "yyyy-MM-dd"), Dates.parseDate("2025-01-30", "yyyy-MM-dd")));
         assertFalse(Dates.isSameMonth(Dates.parseDate("2023-06-30", "yyyy-MM-dd"), Dates.parseDate("2023-05-01", "yyyy-MM-dd")));
 
-        assertEquals(366, Dates.getLastDateOfYear(Dates.parseDate("2020-02-32", "yyyy-MM-dd")));
-        assertEquals(365, Dates.getLastDateOfYear(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
+        assertEquals(366, Dates.getLastDayOfYear(Dates.parseDate("2020-02-32", "yyyy-MM-dd")));
+        assertEquals(365, Dates.getLastDayOfYear(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
     }
 
 }

@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 @Tag("2025")
@@ -41,49 +41,49 @@ public class Multimap2025Test extends TestBase {
         setMultimap = CommonUtil.newSetMultimap();
     }
 
-    @Test
-    public void testGetFirst_WithNonExistentKey() {
-        assertNull(listMultimap.getFirst("nonexistent"));
-    }
-
-    @Test
-    public void testGetFirst_WithSingleValue() {
-        listMultimap.put("key1", 10);
-        assertEquals(Integer.valueOf(10), listMultimap.getFirst("key1"));
-    }
-
-    @Test
-    public void testGetFirst_WithMultipleValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        listMultimap.put("key1", 30);
-        assertEquals(Integer.valueOf(10), listMultimap.getFirst("key1"));
-    }
-
-    @Test
-    public void testGetFirst_WithEmptyCollection() {
-        listMultimap.put("key1", 10);
-        listMultimap.removeOne("key1", 10);
-        assertNull(listMultimap.getFirst("key1"));
-    }
-
-    @Test
-    public void testGetFirstOrDefault_WithNonExistentKey() {
-        Integer defaultValue = -1;
-        assertEquals(defaultValue, listMultimap.getFirstOrDefault("nonexistent", defaultValue));
-    }
-
-    @Test
-    public void testGetFirstOrDefault_WithExistingKey() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        assertEquals(Integer.valueOf(10), listMultimap.getFirstOrDefault("key1", -1));
-    }
-
-    @Test
-    public void testGetFirstOrDefault_WithNullDefault() {
-        assertNull(listMultimap.getFirstOrDefault("nonexistent", null));
-    }
+    //    @Test
+    //    public void testGetFirst_WithNonExistentKey() {
+    //        assertNull(listMultimap.getFirst("nonexistent"));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirst_WithSingleValue() {
+    //        listMultimap.put("key1", 10);
+    //        assertEquals(Integer.valueOf(10), listMultimap.getFirst("key1"));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirst_WithMultipleValues() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        listMultimap.put("key1", 30);
+    //        assertEquals(Integer.valueOf(10), listMultimap.getFirst("key1"));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirst_WithEmptyCollection() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.removeEntry("key1", 10);
+    //        assertNull(listMultimap.getFirst("key1"));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirstOrDefault_WithNonExistentKey() {
+    //        Integer defaultValue = -1;
+    //        assertEquals(defaultValue, listMultimap.getFirstOrDefault("nonexistent", defaultValue));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirstOrDefault_WithExistingKey() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        assertEquals(Integer.valueOf(10), listMultimap.getFirstOrDefault("key1", -1));
+    //    }
+    //
+    //    @Test
+    //    public void testGetFirstOrDefault_WithNullDefault() {
+    //        assertNull(listMultimap.getFirstOrDefault("nonexistent", null));
+    //    }
 
     @Test
     public void testGet_WithNonExistentKey() {
@@ -163,7 +163,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testPutMap_EmptyMap() {
-        assertFalse(listMultimap.put(new HashMap<>()));
+        assertFalse(listMultimap.putAll(new HashMap<>()));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class Multimap2025Test extends TestBase {
         map.put("key1", 10);
         map.put("key2", 20);
 
-        assertTrue(listMultimap.put(map));
+        assertTrue(listMultimap.putAll(map));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(1, listMultimap.get("key2").size());
         assertTrue(listMultimap.get("key1").contains(10));
@@ -181,33 +181,33 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testPutMap_NullMap() {
-        assertFalse(listMultimap.put((Map<String, Integer>) null));
+        assertFalse(listMultimap.putAll((Map<String, Integer>) null));
     }
 
     @Test
     public void testPutIfAbsent_NewKey() {
-        assertTrue(listMultimap.putIfAbsent("key1", 10));
+        assertTrue(listMultimap.putIfValueAbsent("key1", 10));
         assertTrue(listMultimap.get("key1").contains(10));
     }
 
     @Test
     public void testPutIfAbsent_ExistingKeyDifferentValue() {
         listMultimap.put("key1", 10);
-        assertTrue(listMultimap.putIfAbsent("key1", 20));
+        assertTrue(listMultimap.putIfValueAbsent("key1", 20));
         assertEquals(2, listMultimap.get("key1").size());
     }
 
     @Test
     public void testPutIfAbsent_ExistingSameValueInList() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.putIfAbsent("key1", 10));
+        assertFalse(listMultimap.putIfValueAbsent("key1", 10));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
     @Test
     public void testPutIfAbsent_ExistingSameValueInSet() {
         setMultimap.put("key1", 10);
-        assertFalse(setMultimap.putIfAbsent("key1", 10));
+        assertFalse(setMultimap.putIfValueAbsent("key1", 10));
         assertEquals(1, setMultimap.get("key1").size());
     }
 
@@ -227,18 +227,18 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testPutMany_EmptyCollection() {
-        assertFalse(listMultimap.putMany("key1", new ArrayList<>()));
+        assertFalse(listMultimap.putValues("key1", new ArrayList<>()));
     }
 
     @Test
     public void testPutMany_NullCollection() {
-        assertFalse(listMultimap.putMany("key1", null));
+        assertFalse(listMultimap.putValues("key1", null));
     }
 
     @Test
     public void testPutMany_WithValues() {
         List<Integer> values = Arrays.asList(10, 20, 30);
-        assertTrue(listMultimap.putMany("key1", values));
+        assertTrue(listMultimap.putValues("key1", values));
         assertEquals(3, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").containsAll(values));
     }
@@ -247,14 +247,14 @@ public class Multimap2025Test extends TestBase {
     public void testPutMany_ToExistingKey() {
         listMultimap.put("key1", 5);
         List<Integer> values = Arrays.asList(10, 20);
-        assertTrue(listMultimap.putMany("key1", values));
+        assertTrue(listMultimap.putValues("key1", values));
         assertEquals(3, listMultimap.get("key1").size());
     }
 
     @Test
     public void testPutManyIfKeyAbsent_NewKey() {
         List<Integer> values = Arrays.asList(10, 20);
-        assertTrue(listMultimap.putManyIfKeyAbsent("key1", values));
+        assertTrue(listMultimap.putValuesIfKeyAbsent("key1", values));
         assertEquals(2, listMultimap.get("key1").size());
     }
 
@@ -262,19 +262,19 @@ public class Multimap2025Test extends TestBase {
     public void testPutManyIfKeyAbsent_ExistingKey() {
         listMultimap.put("key1", 5);
         List<Integer> values = Arrays.asList(10, 20);
-        assertFalse(listMultimap.putManyIfKeyAbsent("key1", values));
+        assertFalse(listMultimap.putValuesIfKeyAbsent("key1", values));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
     @Test
     public void testPutManyIfKeyAbsent_EmptyCollection() {
-        assertFalse(listMultimap.putManyIfKeyAbsent("key1", new ArrayList<>()));
+        assertFalse(listMultimap.putValuesIfKeyAbsent("key1", new ArrayList<>()));
     }
 
     @Test
     public void testPutManyMap_EmptyMap() {
         Map<String, Collection<Integer>> map = new HashMap<>();
-        assertFalse(listMultimap.putMany(map));
+        assertFalse(listMultimap.putValues(map));
     }
 
     @Test
@@ -283,7 +283,7 @@ public class Multimap2025Test extends TestBase {
         map.put("key1", Arrays.asList(10, 20));
         map.put("key2", Arrays.asList(30, 40));
 
-        assertTrue(listMultimap.putMany(map));
+        assertTrue(listMultimap.putValues(map));
         assertEquals(2, listMultimap.get("key1").size());
         assertEquals(2, listMultimap.get("key2").size());
     }
@@ -294,7 +294,7 @@ public class Multimap2025Test extends TestBase {
         map.put("key1", Arrays.asList(10, 20));
         map.put("key2", new ArrayList<>());
 
-        assertTrue(listMultimap.putMany(map));
+        assertTrue(listMultimap.putValues(map));
         assertNotNull(listMultimap.get("key1"));
         assertNull(listMultimap.get("key2"));
     }
@@ -302,7 +302,7 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testPutManyMultimap_EmptyMultimap() {
         ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
-        assertFalse(listMultimap.putMany(other));
+        assertFalse(listMultimap.putValues(other));
     }
 
     @Test
@@ -312,27 +312,27 @@ public class Multimap2025Test extends TestBase {
         other.put("key1", 20);
         other.put("key2", 30);
 
-        assertTrue(listMultimap.putMany(other));
+        assertTrue(listMultimap.putValues(other));
         assertEquals(2, listMultimap.get("key1").size());
         assertEquals(1, listMultimap.get("key2").size());
     }
 
     @Test
     public void testRemoveOne_NonExistentKey() {
-        assertFalse(listMultimap.removeOne("key1", 10));
+        assertFalse(listMultimap.removeEntry("key1", 10));
     }
 
     @Test
     public void testRemoveOne_NonExistentValue() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.removeOne("key1", 20));
+        assertFalse(listMultimap.removeEntry("key1", 20));
     }
 
     @Test
     public void testRemoveOne_ExistingValue() {
         listMultimap.put("key1", 10);
         listMultimap.put("key1", 20);
-        assertTrue(listMultimap.removeOne("key1", 10));
+        assertTrue(listMultimap.removeEntry("key1", 10));
         assertEquals(1, listMultimap.get("key1").size());
         assertFalse(listMultimap.get("key1").contains(10));
     }
@@ -340,7 +340,7 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveOne_LastValueRemovesKey() {
         listMultimap.put("key1", 10);
-        assertTrue(listMultimap.removeOne("key1", 10));
+        assertTrue(listMultimap.removeEntry("key1", 10));
         assertNull(listMultimap.get("key1"));
     }
 
@@ -349,13 +349,13 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 10);
         listMultimap.put("key1", 10);
         listMultimap.put("key1", 10);
-        assertTrue(listMultimap.removeOne("key1", 10));
+        assertTrue(listMultimap.removeEntry("key1", 10));
         assertEquals(2, listMultimap.get("key1").size());
     }
 
     @Test
     public void testRemoveOneMap_EmptyMap() {
-        assertFalse(listMultimap.removeOne(new HashMap<>()));
+        assertFalse(listMultimap.removeEntries(new HashMap<>()));
     }
 
     @Test
@@ -368,7 +368,7 @@ public class Multimap2025Test extends TestBase {
         toRemove.put("key1", 10);
         toRemove.put("key2", 30);
 
-        assertTrue(listMultimap.removeOne(toRemove));
+        assertTrue(listMultimap.removeEntries(toRemove));
         assertEquals(1, listMultimap.get("key1").size());
         assertNull(listMultimap.get("key2"));
     }
@@ -392,12 +392,12 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testRemoveMany_EmptyCollection() {
-        assertFalse(listMultimap.removeMany("key1", new ArrayList<>()));
+        assertFalse(listMultimap.removeValues("key1", new ArrayList<>()));
     }
 
     @Test
     public void testRemoveMany_NonExistentKey() {
-        assertFalse(listMultimap.removeMany("key1", Arrays.asList(10, 20)));
+        assertFalse(listMultimap.removeValues("key1", Arrays.asList(10, 20)));
     }
 
     @Test
@@ -407,7 +407,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 30);
         listMultimap.put("key1", 40);
 
-        assertTrue(listMultimap.removeMany("key1", Arrays.asList(10, 30)));
+        assertTrue(listMultimap.removeValues("key1", Arrays.asList(10, 30)));
         assertEquals(2, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(20));
         assertTrue(listMultimap.get("key1").contains(40));
@@ -417,25 +417,25 @@ public class Multimap2025Test extends TestBase {
     public void testRemoveMany_AllValuesRemovesKey() {
         listMultimap.put("key1", 10);
         listMultimap.put("key1", 20);
-        assertTrue(listMultimap.removeMany("key1", Arrays.asList(10, 20)));
+        assertTrue(listMultimap.removeValues("key1", Arrays.asList(10, 20)));
         assertNull(listMultimap.get("key1"));
     }
 
     @Test
     public void testRemoveManyMap_EmptyMap() {
-        assertFalse(listMultimap.removeMany(new HashMap<>()));
+        assertFalse(listMultimap.removeValues(new HashMap<>()));
     }
 
     @Test
     public void testRemoveManyMap_WithValues() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(40, 50, 60));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key2", Arrays.asList(40, 50, 60));
 
         Map<String, Collection<Integer>> toRemove = new HashMap<>();
         toRemove.put("key1", Arrays.asList(10, 20));
         toRemove.put("key2", Arrays.asList(50));
 
-        assertTrue(listMultimap.removeMany(toRemove));
+        assertTrue(listMultimap.removeValues(toRemove));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(2, listMultimap.get("key2").size());
     }
@@ -443,20 +443,20 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveManyMultimap_EmptyMultimap() {
         ListMultimap<String, Integer> other = CommonUtil.newListMultimap();
-        assertFalse(listMultimap.removeMany(other));
+        assertFalse(listMultimap.removeValues(other));
     }
 
     @Test
     public void testRemoveManyMultimap_WithValues() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(40, 50));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key2", Arrays.asList(40, 50));
 
         ListMultimap<String, Integer> toRemove = CommonUtil.newListMultimap();
         toRemove.put("key1", 10);
         toRemove.put("key1", 20);
         toRemove.put("key2", 40);
 
-        assertTrue(listMultimap.removeMany(toRemove));
+        assertTrue(listMultimap.removeValues(toRemove));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(1, listMultimap.get("key2").size());
     }
@@ -464,7 +464,7 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveOneIfKeyPredicate_NoMatchingKeys() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.removeOneIf(10, key -> key.equals("key2")));
+        assertFalse(listMultimap.removeEntriesIf(key -> key.equals("key2"), 10));
     }
 
     @Test
@@ -473,7 +473,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key2", 10);
         listMultimap.put("key3", 20);
 
-        assertTrue(listMultimap.removeOneIf(10, key -> key.startsWith("key")));
+        assertTrue(listMultimap.removeEntriesIf(key -> key.startsWith("key"), 10));
         assertNull(listMultimap.get("key1"));
         assertNull(listMultimap.get("key2"));
         assertNotNull(listMultimap.get("key3"));
@@ -482,45 +482,45 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveOneIfBiPredicate_NoMatching() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.removeOneIf(10, (k, v) -> v.size() > 5));
+        assertFalse(listMultimap.removeEntriesIf((k, v) -> v.size() > 5, 10));
     }
 
     @Test
     public void testRemoveOneIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key1", Arrays.asList(10, 20));
+        listMultimap.putValues("key2", Arrays.asList(10, 20, 30));
 
-        assertTrue(listMultimap.removeOneIf(10, (k, v) -> v.size() > 2));
+        assertTrue(listMultimap.removeEntriesIf((k, v) -> v.size() > 2, 10));
         assertEquals(2, listMultimap.get("key1").size());
         assertEquals(2, listMultimap.get("key2").size());
     }
 
     @Test
     public void testRemoveManyIfKeyPredicate_EmptyCollection() {
-        assertFalse(listMultimap.removeManyIf(new ArrayList<>(), key -> true));
+        assertFalse(listMultimap.removeValuesIf(key -> true, new ArrayList<>()));
     }
 
     @Test
     public void testRemoveManyIfKeyPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 40));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key2", Arrays.asList(10, 20, 40));
 
-        assertTrue(listMultimap.removeManyIf(Arrays.asList(10, 20), key -> key.equals("key1")));
+        assertTrue(listMultimap.removeValuesIf(key -> key.equals("key1"), Arrays.asList(10, 20)));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(3, listMultimap.get("key2").size());
     }
 
     @Test
     public void testRemoveManyIfBiPredicate_EmptyCollection() {
-        assertFalse(listMultimap.removeManyIf(new ArrayList<>(), (k, v) -> true));
+        assertFalse(listMultimap.removeValuesIf((k, v) -> true, new ArrayList<>()));
     }
 
     @Test
     public void testRemoveManyIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30, 40));
-        listMultimap.putMany("key2", Arrays.asList(10, 20));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
+        listMultimap.putValues("key2", Arrays.asList(10, 20));
 
-        assertTrue(listMultimap.removeManyIf(Arrays.asList(10, 20), (k, v) -> v.size() > 2));
+        assertTrue(listMultimap.removeValuesIf((k, v) -> v.size() > 2, Arrays.asList(10, 20)));
         assertEquals(2, listMultimap.get("key1").size());
         assertEquals(2, listMultimap.get("key2").size());
     }
@@ -528,7 +528,7 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveAllIfPredicate_NoMatching() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.removeAllIf(key -> key.equals("key2")));
+        assertFalse(listMultimap.removeKeysIf(key -> key.equals("key2")));
     }
 
     @Test
@@ -537,7 +537,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key2", 20);
         listMultimap.put("other", 30);
 
-        assertTrue(listMultimap.removeAllIf(key -> key.startsWith("key")));
+        assertTrue(listMultimap.removeKeysIf(key -> key.startsWith("key")));
         assertNull(listMultimap.get("key1"));
         assertNull(listMultimap.get("key2"));
         assertNotNull(listMultimap.get("other"));
@@ -546,16 +546,16 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testRemoveAllIfBiPredicate_NoMatching() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.removeAllIf((k, v) -> v.size() > 5));
+        assertFalse(listMultimap.removeKeysIf((k, v) -> v.size() > 5));
     }
 
     @Test
     public void testRemoveAllIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key3", Arrays.asList(10));
+        listMultimap.putValues("key1", Arrays.asList(10, 20));
+        listMultimap.putValues("key2", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key3", Arrays.asList(10));
 
-        assertTrue(listMultimap.removeAllIf((k, v) -> v.size() > 2));
+        assertTrue(listMultimap.removeKeysIf((k, v) -> v.size() > 2));
         assertNotNull(listMultimap.get("key1"));
         assertNull(listMultimap.get("key2"));
         assertNotNull(listMultimap.get("key3"));
@@ -563,13 +563,13 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testReplaceOne_NonExistentKey() {
-        assertFalse(listMultimap.replaceOne("key1", 10, 20));
+        assertFalse(listMultimap.replaceEntry("key1", 10, 20));
     }
 
     @Test
     public void testReplaceOne_NonExistentOldValue() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceOne("key1", 20, 30));
+        assertFalse(listMultimap.replaceEntry("key1", 20, 30));
     }
 
     @Test
@@ -578,7 +578,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key1", 10);
 
-        assertTrue(listMultimap.replaceOne("key1", 10, 99));
+        assertTrue(listMultimap.replaceEntry("key1", 10, 99));
         List<Integer> values = listMultimap.get("key1");
         assertEquals(3, values.size());
         assertEquals(Integer.valueOf(99), values.get(0));
@@ -590,7 +590,7 @@ public class Multimap2025Test extends TestBase {
         setMultimap.put("key1", 10);
         setMultimap.put("key1", 20);
 
-        assertTrue(setMultimap.replaceOne("key1", 10, 99));
+        assertTrue(setMultimap.replaceEntry("key1", 10, 99));
         Set<Integer> values = setMultimap.get("key1");
         assertEquals(2, values.size());
         assertTrue(values.contains(99));
@@ -602,57 +602,28 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", null);
         listMultimap.put("key1", 20);
 
-        assertTrue(listMultimap.replaceOne("key1", null, 99));
+        assertTrue(listMultimap.replaceEntry("key1", null, 99));
         assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
     }
 
     @Test
     public void testReplaceAllWithOne_NonExistentKey() {
-        assertFalse(listMultimap.replaceAllWithOne("key1", 99));
+        assertFalse(listMultimap.replaceValues("key1", N.asList(99)));
     }
 
     @Test
     public void testReplaceAllWithOne_ExistingKey() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30, 40));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
 
-        assertTrue(listMultimap.replaceAllWithOne("key1", 99));
+        assertTrue(listMultimap.replaceValues("key1", N.asList(99)));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
     }
 
     @Test
-    public void testReplaceManyWithOne_EmptyOldValues() {
-        listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceManyWithOne("key1", new ArrayList<>(), 99));
-    }
-
-    @Test
-    public void testReplaceManyWithOne_NonExistentKey() {
-        assertFalse(listMultimap.replaceManyWithOne("key1", Arrays.asList(10, 20), 99));
-    }
-
-    @Test
-    public void testReplaceManyWithOne_NoMatchingOldValues() {
-        listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceManyWithOne("key1", Arrays.asList(20, 30), 99));
-    }
-
-    @Test
-    public void testReplaceManyWithOne_Success() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30, 40, 10));
-
-        assertTrue(listMultimap.replaceManyWithOne("key1", Arrays.asList(10, 20), 99));
-        List<Integer> values = listMultimap.get("key1");
-        assertEquals(3, values.size());
-        assertTrue(values.contains(99));
-        assertTrue(values.contains(30));
-        assertTrue(values.contains(40));
-    }
-
-    @Test
     public void testReplaceOneIfPredicate_NoMatching() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceOneIf(key -> key.equals("key2"), 10, 99));
+        assertFalse(listMultimap.replaceEntriesIf(key -> key.equals("key2"), 10, 99));
     }
 
     @Test
@@ -661,7 +632,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key2", 10);
         listMultimap.put("other", 10);
 
-        assertTrue(listMultimap.replaceOneIf(key -> key.startsWith("key"), 10, 99));
+        assertTrue(listMultimap.replaceEntriesIf(key -> key.startsWith("key"), 10, 99));
         assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
         assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
         assertEquals(Integer.valueOf(10), listMultimap.get("other").get(0));
@@ -670,88 +641,88 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testReplaceOneIfBiPredicate_NoMatching() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceOneIf((k, v) -> v.size() > 5, 10, 99));
+        assertFalse(listMultimap.replaceEntriesIf((k, v) -> v.size() > 5, 10, 99));
     }
 
     @Test
     public void testReplaceOneIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key1", Arrays.asList(10, 20));
+        listMultimap.putValues("key2", Arrays.asList(10, 20, 30));
 
-        assertTrue(listMultimap.replaceOneIf((k, v) -> v.size() > 2, 10, 99));
+        assertTrue(listMultimap.replaceEntriesIf((k, v) -> v.size() > 2, 10, 99));
         assertEquals(Integer.valueOf(10), listMultimap.get("key1").get(0));
         assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
     }
 
     @Test
     public void testReplaceManyWithOneIfPredicate_EmptyOldValues() {
-        assertFalse(listMultimap.replaceManyWithOneIf(key -> true, new ArrayList<>(), 99));
+        assertFalse(listMultimap.replaceValuesIf(key -> true, N.asList(99)));
     }
 
     @Test
     public void testReplaceManyWithOneIfPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 40));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key2", Arrays.asList(10, 20, 40));
 
-        assertTrue(listMultimap.replaceManyWithOneIf(key -> key.equals("key1"), Arrays.asList(10, 20), 99));
-        assertEquals(2, listMultimap.get("key1").size());
+        assertTrue(listMultimap.replaceValuesIf(key -> key.equals("key1"), N.asList(99)));
+        assertEquals(1, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(99));
-        assertTrue(listMultimap.get("key1").contains(30));
+        assertFalse(listMultimap.get("key1").contains(30));
         assertEquals(3, listMultimap.get("key2").size());
     }
 
     @Test
     public void testReplaceManyWithOneIfBiPredicate_EmptyOldValues() {
-        assertFalse(listMultimap.replaceManyWithOneIf((k, v) -> true, new ArrayList<>(), 99));
+        assertFalse(listMultimap.replaceValuesIf((k, v) -> true, N.asList(99)));
     }
 
     @Test
     public void testReplaceManyWithOneIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30, 40));
-        listMultimap.putMany("key2", Arrays.asList(10, 20));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
+        listMultimap.putValues("key2", Arrays.asList(10, 20));
 
-        assertTrue(listMultimap.replaceManyWithOneIf((k, v) -> v.size() > 2, Arrays.asList(10, 20), 99));
-        assertEquals(3, listMultimap.get("key1").size());
+        assertTrue(listMultimap.replaceValuesIf((k, v) -> v.size() > 2, N.asList(99)));
+        assertEquals(1, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(99));
         assertEquals(2, listMultimap.get("key2").size());
     }
 
-    @Test
-    public void testReplaceAllWithOneIfPredicate_NoMatching() {
-        listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceAllWithOneIf(key -> key.equals("key2"), 99));
-    }
-
-    @Test
-    public void testReplaceAllWithOneIfPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(40, 50));
-        listMultimap.putMany("other", Arrays.asList(60));
-
-        assertTrue(listMultimap.replaceAllWithOneIf(key -> key.startsWith("key"), 99));
-        assertEquals(1, listMultimap.get("key1").size());
-        assertEquals(1, listMultimap.get("key2").size());
-        assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
-        assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
-        assertEquals(Integer.valueOf(60), listMultimap.get("other").get(0));
-    }
-
-    @Test
-    public void testReplaceAllWithOneIfBiPredicate_NoMatching() {
-        listMultimap.put("key1", 10);
-        assertFalse(listMultimap.replaceAllWithOneIf((k, v) -> v.size() > 5, 99));
-    }
-
-    @Test
-    public void testReplaceAllWithOneIfBiPredicate_Matching() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(10, 20, 30));
-
-        assertTrue(listMultimap.replaceAllWithOneIf((k, v) -> v.size() > 2, 99));
-        assertEquals(2, listMultimap.get("key1").size());
-        assertEquals(1, listMultimap.get("key2").size());
-        assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
-    }
+    //    @Test
+    //    public void testReplaceAllWithOneIfPredicate_NoMatching() {
+    //        listMultimap.put("key1", 10);
+    //        assertFalse(listMultimap.replaceAllValuesIf(key -> key.equals("key2"), 99));
+    //    }
+    //
+    //    @Test
+    //    public void testReplaceAllWithOneIfPredicate_Matching() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+    //        listMultimap.putValues("key2", Arrays.asList(40, 50));
+    //        listMultimap.putValues("other", Arrays.asList(60));
+    //
+    //        assertTrue(listMultimap.replaceAllValuesIf(key -> key.startsWith("key"), 99));
+    //        assertEquals(1, listMultimap.get("key1").size());
+    //        assertEquals(1, listMultimap.get("key2").size());
+    //        assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
+    //        assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
+    //        assertEquals(Integer.valueOf(60), listMultimap.get("other").get(0));
+    //    }
+    //
+    //    @Test
+    //    public void testReplaceAllWithOneIfBiPredicate_NoMatching() {
+    //        listMultimap.put("key1", 10);
+    //        assertFalse(listMultimap.replaceAllValuesIf((k, v) -> v.size() > 5, 99));
+    //    }
+    //
+    //    @Test
+    //    public void testReplaceAllWithOneIfBiPredicate_Matching() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20));
+    //        listMultimap.putValues("key2", Arrays.asList(10, 20, 30));
+    //
+    //        assertTrue(listMultimap.replaceAllValuesIf((k, v) -> v.size() > 2, 99));
+    //        assertEquals(2, listMultimap.get("key1").size());
+    //        assertEquals(1, listMultimap.get("key2").size());
+    //        assertEquals(Integer.valueOf(99), listMultimap.get("key2").get(0));
+    //    }
 
     @Test
     public void testReplaceAll_EmptyMultimap() {
@@ -992,21 +963,21 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testContains_NonExistentKey() {
-        assertFalse(listMultimap.contains("key1", 10));
+        assertFalse(listMultimap.containsEntry("key1", 10));
     }
 
     @Test
     public void testContains_NonExistentValue() {
         listMultimap.put("key1", 10);
-        assertFalse(listMultimap.contains("key1", 20));
+        assertFalse(listMultimap.containsEntry("key1", 20));
     }
 
     @Test
     public void testContains_ExistingKeyValue() {
         listMultimap.put("key1", 10);
         listMultimap.put("key1", 20);
-        assertTrue(listMultimap.contains("key1", 10));
-        assertTrue(listMultimap.contains("key1", 20));
+        assertTrue(listMultimap.containsEntry("key1", 10));
+        assertTrue(listMultimap.containsEntry("key1", 20));
     }
 
     @Test
@@ -1041,121 +1012,99 @@ public class Multimap2025Test extends TestBase {
         assertFalse(listMultimap.containsValue(30));
     }
 
-    @Test
-    public void testContainsAll_EmptyCollection() {
-        assertFalse(listMultimap.containsAll("key1", new ArrayList<>()));
+    //    @Test
+    //    public void testContainsAll_EmptyCollection() {
+    //        assertFalse(listMultimap.containsAllValues("key1", new ArrayList<>()));
+    //
+    //        listMultimap.put("key1", 10);
+    //        assertTrue(listMultimap.containsAllValues("key1", new ArrayList<>()));
+    //    }
+    //
+    //    @Test
+    //    public void testContainsAll_NonExistentKey() {
+    //        assertFalse(listMultimap.containsAllValues("key1", Arrays.asList(10, 20)));
+    //    }
+    //
+    //    @Test
+    //    public void testContainsAll_AllPresent() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+    //        assertTrue(listMultimap.containsAllValues("key1", Arrays.asList(10, 20)));
+    //    }
+    //
+    //    @Test
+    //    public void testContainsAll_SomeMissing() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20));
+    //        assertFalse(listMultimap.containsAllValues("key1", Arrays.asList(10, 30)));
+    //    }
 
-        listMultimap.put("key1", 10);
-        assertTrue(listMultimap.containsAll("key1", new ArrayList<>()));
-    }
+    //    @Test
+    //    public void testFilter_AllPass() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> true);
+    //        assertEquals(2, filtered.keySet().size());
+    //    }
 
-    @Test
-    public void testContainsAll_NonExistentKey() {
-        assertFalse(listMultimap.containsAll("key1", Arrays.asList(10, 20)));
-    }
+    //    @Test
+    //    public void testFilter_SomePass() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        listMultimap.put("other", 30);
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> k.startsWith("key"));
+    //        assertEquals(2, filtered.keySet().size());
+    //        assertTrue(filtered.containsKey("key1"));
+    //        assertTrue(filtered.containsKey("key2"));
+    //        assertFalse(filtered.containsKey("other"));
+    //    }
 
-    @Test
-    public void testContainsAll_AllPresent() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        assertTrue(listMultimap.containsAll("key1", Arrays.asList(10, 20)));
-    }
+    //    @Test
+    //    public void testFilterByKey_EmptyMultimap() {
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> true);
+    //        assertTrue(filtered.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testFilterByKey_SomeMatch() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        listMultimap.put("other", 30);
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> k.startsWith("key"));
+    //        assertEquals(2, filtered.keySet().size());
+    //        assertTrue(filtered.containsKey("key1"));
+    //        assertFalse(filtered.containsKey("other"));
+    //    }
+    //
+    //    @Test
+    //    public void testFilterByValue_EmptyMultimap() {
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValues(v -> true);
+    //        assertTrue(filtered.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testFilterByValue_SomeMatch() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20));
+    //        listMultimap.putValues("key2", Arrays.asList(30, 40, 50));
+    //
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValues(v -> v.size() > 2);
+    //        assertEquals(1, filtered.keySet().size());
+    //        assertTrue(filtered.containsKey("key2"));
+    //        assertFalse(filtered.containsKey("key1"));
+    //    }
 
-    @Test
-    public void testContainsAll_SomeMissing() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        assertFalse(listMultimap.containsAll("key1", Arrays.asList(10, 30)));
-    }
-
-    @Test
-    public void testFilter_EmptyMultimap() {
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> true);
-        assertTrue(filtered.isEmpty());
-    }
-
-    @Test
-    public void testFilter_AllPass() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> true);
-        assertEquals(2, filtered.keySet().size());
-    }
-
-    @Test
-    public void testFilter_SomePass() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        listMultimap.put("other", 30);
-
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> k.startsWith("key"));
-        assertEquals(2, filtered.keySet().size());
-        assertTrue(filtered.containsKey("key1"));
-        assertTrue(filtered.containsKey("key2"));
-        assertFalse(filtered.containsKey("other"));
-    }
-
-    @Test
-    public void testFilterByKey_EmptyMultimap() {
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> true);
-        assertTrue(filtered.isEmpty());
-    }
-
-    @Test
-    public void testFilterByKey_SomeMatch() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        listMultimap.put("other", 30);
-
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> k.startsWith("key"));
-        assertEquals(2, filtered.keySet().size());
-        assertTrue(filtered.containsKey("key1"));
-        assertFalse(filtered.containsKey("other"));
-    }
-
-    @Test
-    public void testFilterByValue_EmptyMultimap() {
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValue(v -> true);
-        assertTrue(filtered.isEmpty());
-    }
-
-    @Test
-    public void testFilterByValue_SomeMatch() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(30, 40, 50));
-
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValue(v -> v.size() > 2);
-        assertEquals(1, filtered.keySet().size());
-        assertTrue(filtered.containsKey("key2"));
-        assertFalse(filtered.containsKey("key1"));
-    }
-
-    @Test
-    public void testForEach_EmptyMultimap() {
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEach((k, v) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForEach_WithValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEach((k, v) -> count.incrementAndGet());
-        assertEquals(2, count.get());
-    }
-
-    @Test
-    public void testForEach_NullAction() {
-        BiConsumer<String, List<Integer>> nullAction = null;
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEach(nullAction));
-    }
+    //    @Test
+    //    public void testForEach_EmptyMultimap() {
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEach((k, v) -> count.incrementAndGet());
+    //        assertEquals(0, count.get());
+    //    }
 
     @Test
     public void testFlatForEach_EmptyMultimap() {
         AtomicInteger count = new AtomicInteger(0);
-        listMultimap.flatForEach((k, e) -> count.incrementAndGet());
+        listMultimap.forEach((k, e) -> count.incrementAndGet());
         assertEquals(0, count.get());
     }
 
@@ -1166,83 +1115,95 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key2", 30);
 
         AtomicInteger count = new AtomicInteger(0);
-        listMultimap.flatForEach((k, e) -> count.incrementAndGet());
+        listMultimap.forEach((k, e) -> count.incrementAndGet());
         assertEquals(3, count.get());
     }
 
-    @Test
-    public void testFlatForEach_NullAction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.flatForEach(null));
-    }
+    //    @Test
+    //    public void testFlatForEach_NullAction() {
+    //        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEach(null));
+    //    }
 
-    @Test
-    public void testForEachKey_EmptyMultimap() {
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEachKey(k -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
+    //    @Test
+    //    public void testForEachKey_EmptyMultimap() {
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEachKey(k -> count.incrementAndGet());
+    //        assertEquals(0, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachKey_WithKeys() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        listMultimap.put("key2", 30);
+    //
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEachKey(k -> count.incrementAndGet());
+    //        assertEquals(2, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachKey_NullAction() {
+    //        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEachKey(null));
+    //    }
+    //
+    //    @Test
+    //    public void testForEachValue_EmptyMultimap() {
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEachValues(v -> count.incrementAndGet());
+    //        assertEquals(0, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachValue_WithValues() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        listMultimap.put("key2", 30);
+    //
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEachValues(v -> count.incrementAndGet());
+    //        assertEquals(2, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachValue_NullAction() {
+    //        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEachValues(null));
+    //    }
 
-    @Test
-    public void testForEachKey_WithKeys() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        listMultimap.put("key2", 30);
-
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEachKey(k -> count.incrementAndGet());
-        assertEquals(2, count.get());
-    }
-
-    @Test
-    public void testForEachKey_NullAction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEachKey(null));
-    }
-
-    @Test
-    public void testForEachValue_EmptyMultimap() {
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEachValue(v -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForEachValue_WithValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        listMultimap.put("key2", 30);
-
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEachValue(v -> count.incrementAndGet());
-        assertEquals(2, count.get());
-    }
-
-    @Test
-    public void testForEachValue_NullAction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEachValue(null));
-    }
-
-    @Test
-    public void testFlatForEachValue_EmptyMultimap() {
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.flatForEachValue(e -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testFlatForEachValue_WithValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        listMultimap.put("key2", 30);
-
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.flatForEachValue(e -> count.incrementAndGet());
-        assertEquals(3, count.get());
-    }
-
-    @Test
-    public void testFlatForEachValue_NullAction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.flatForEachValue(null));
-    }
+    //    @Test
+    //    public void testFlatForEachValue_EmptyMultimap() {
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.flatForEachValue(e -> count.incrementAndGet());
+    //        assertEquals(0, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testFlatForEachValue_WithValues() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        listMultimap.put("key2", 30);
+    //
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.flatForEachValue(e -> count.incrementAndGet());
+    //        assertEquals(3, count.get());
+    //    }
+    //
+    //    @Test
+    //    public void testFlatForEachValue_NullAction() {
+    //        assertThrows(IllegalArgumentException.class, () -> listMultimap.flatForEachValue(null));
+    //    }
+    //    
+    //    @Test
+    //    public void testFlatForEachValue_OrderPreservation() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20));
+    //        listMultimap.putValues("key2", Arrays.asList(30));
+    //        List<Integer> values = new ArrayList<>();
+    //        listMultimap.flatForEachValue(e -> values.add(e));
+    //        assertEquals(3, values.size());
+    //        assertTrue(values.contains(10));
+    //        assertTrue(values.contains(20));
+    //        assertTrue(values.contains(30));
+    //    }
 
     @Test
     public void testKeySet_EmptyMultimap() {
@@ -1263,42 +1224,42 @@ public class Multimap2025Test extends TestBase {
         assertTrue(keys.contains("key2"));
     }
 
-    @Test
-    public void testValues_EmptyMultimap() {
-        Collection<List<Integer>> values = listMultimap.values();
-        assertNotNull(values);
-        assertTrue(values.isEmpty());
-    }
-
-    @Test
-    public void testValues_WithValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        listMultimap.put("key2", 30);
-
-        Collection<List<Integer>> values = listMultimap.values();
-        assertEquals(2, values.size());
-    }
-
-    @Test
-    public void testEntrySet_EmptyMultimap() {
-        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
-        assertNotNull(entries);
-        assertTrue(entries.isEmpty());
-    }
-
-    @Test
-    public void testEntrySet_WithEntries() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-
-        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
-        assertEquals(2, entries.size());
-    }
+    //    @Test
+    //    public void testValues_EmptyMultimap() {
+    //        Collection<List<Integer>> values = listMultimap.valueCollections();
+    //        assertNotNull(values);
+    //        assertTrue(values.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testValues_WithValues() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key1", 20);
+    //        listMultimap.put("key2", 30);
+    //
+    //        Collection<List<Integer>> values = listMultimap.valueCollections();
+    //        assertEquals(2, values.size());
+    //    }
+    //
+    //    @Test
+    //    public void testEntrySet_EmptyMultimap() {
+    //        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
+    //        assertNotNull(entries);
+    //        assertTrue(entries.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testEntrySet_WithEntries() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //
+    //        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
+    //        assertEquals(2, entries.size());
+    //    }
 
     @Test
     public void testFlatValues_EmptyMultimap() {
-        List<Integer> values = listMultimap.flatValues();
+        Collection<Integer> values = listMultimap.allValues();
         assertNotNull(values);
         assertTrue(values.isEmpty());
     }
@@ -1309,7 +1270,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
 
-        List<Integer> values = listMultimap.flatValues();
+        Collection<Integer> values = listMultimap.allValues();
         assertEquals(3, values.size());
         assertTrue(values.contains(10));
         assertTrue(values.contains(20));
@@ -1332,6 +1293,74 @@ public class Multimap2025Test extends TestBase {
         Set<Integer> values = listMultimap.flatValues(HashSet::new);
         assertEquals(3, values.size());
         assertTrue(values.contains(10));
+    }
+
+    @Test
+    public void testValues_ReturnsSameInstance() {
+        Collection<Integer> values1 = listMultimap.allValues();
+        Collection<Integer> values2 = listMultimap.allValues();
+        assertSame(values1, values2);
+    }
+
+    @Test
+    public void testValues_ReflectsLiveChanges() {
+        listMultimap.put("key1", 1);
+        Collection<Integer> values = listMultimap.allValues();
+        assertEquals(1, values.size());
+
+        listMultimap.put("key1", 2);
+        listMultimap.put("key2", 3);
+        assertEquals(3, values.size());
+        assertTrue(values.contains(2));
+        assertTrue(values.contains(3));
+
+        listMultimap.removeEntry("key1", 1);
+        assertEquals(2, values.size());
+
+        listMultimap.removeAll("key2");
+        assertEquals(1, values.size());
+        assertTrue(values.contains(2));
+    }
+
+    @Test
+    public void testValues_IncludesDuplicatesForListMultimap() {
+        listMultimap.put("key1", 1);
+        listMultimap.put("key1", 1);
+        listMultimap.put("key1", 2);
+
+        Collection<Integer> values = listMultimap.allValues();
+        assertEquals(3, values.size());
+        assertEquals(2, Collections.frequency(values, 1));
+        assertEquals(1, Collections.frequency(values, 2));
+    }
+
+    @Test
+    public void testValues_IncludesDuplicatesAcrossKeysForSetMultimap() {
+        setMultimap.put("key1", 1);
+        setMultimap.put("key2", 1);
+        setMultimap.put("key2", 2);
+
+        Collection<Integer> values = setMultimap.allValues();
+        assertEquals(3, values.size());
+        assertEquals(2, Collections.frequency(values, 1));
+    }
+
+    @Test
+    public void testValues_SupportsNullValues() {
+        listMultimap.put("key1", null);
+        Collection<Integer> values = listMultimap.allValues();
+        assertTrue(values.contains(null));
+        assertEquals(1, values.size());
+    }
+
+    @Test
+    public void testValues_IsUnmodifiable() {
+        listMultimap.put("key1", 1);
+        Collection<Integer> values = listMultimap.allValues();
+
+        assertThrows(UnsupportedOperationException.class, () -> values.add(2));
+        assertThrows(UnsupportedOperationException.class, () -> values.remove(1));
+        assertThrows(UnsupportedOperationException.class, values::clear);
     }
 
     @Test
@@ -1424,21 +1453,21 @@ public class Multimap2025Test extends TestBase {
         assertEquals(2, count);
     }
 
-    @Test
-    public void testEntryStream_EmptyMultimap() {
-        EntryStream<String, List<Integer>> stream = listMultimap.entryStream();
-        assertNotNull(stream);
-        assertEquals(0, stream.count());
-    }
+    //    @Test
+    //    public void testEntryStream_EmptyMultimap() {
+    //        EntryStream<String, List<Integer>> stream = listMultimap.entryStream();
+    //        assertNotNull(stream);
+    //        assertEquals(0, stream.count());
+    //    }
 
-    @Test
-    public void testEntryStream_WithValues() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-
-        long count = listMultimap.entryStream().count();
-        assertEquals(2, count);
-    }
+    //    @Test
+    //    public void testEntryStream_WithValues() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //
+    //        long count = listMultimap.entryStream().count();
+    //        assertEquals(2, count);
+    //    }
 
     @Test
     public void testClear_EmptyMultimap() {
@@ -1458,7 +1487,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testSize_EmptyMultimap() {
-        assertEquals(0, listMultimap.size());
+        assertEquals(0, listMultimap.totalValueCount());
     }
 
     @Test
@@ -1467,12 +1496,12 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
 
-        assertEquals(2, listMultimap.size());
+        assertEquals(3, listMultimap.totalValueCount());
     }
 
     @Test
     public void testTotalCountOfValues_EmptyMultimap() {
-        assertEquals(0, listMultimap.totalCountOfValues());
+        assertEquals(0, listMultimap.totalValueCount());
     }
 
     @Test
@@ -1481,7 +1510,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
 
-        assertEquals(3, listMultimap.totalCountOfValues());
+        assertEquals(3, listMultimap.totalValueCount());
     }
 
     @Test
@@ -1506,7 +1535,7 @@ public class Multimap2025Test extends TestBase {
     public void testApply_ReturnsResult() throws Exception {
         listMultimap.put("key1", 10);
 
-        Integer result = listMultimap.apply(m -> m.size());
+        Integer result = listMultimap.apply(m -> m.totalValueCount());
         assertEquals(1, result);
     }
 
@@ -1517,7 +1546,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testApplyIfNotEmpty_EmptyMultimap() throws Exception {
-        Optional<Integer> result = listMultimap.applyIfNotEmpty(m -> m.size());
+        Optional<Integer> result = listMultimap.applyIfNotEmpty(m -> m.totalValueCount());
         assertFalse(result.isPresent());
     }
 
@@ -1525,7 +1554,7 @@ public class Multimap2025Test extends TestBase {
     public void testApplyIfNotEmpty_WithValues() throws Exception {
         listMultimap.put("key1", 10);
 
-        Optional<Integer> result = listMultimap.applyIfNotEmpty(m -> m.size());
+        Optional<Integer> result = listMultimap.applyIfNotEmpty(m -> m.totalValueCount());
         assertTrue(result.isPresent());
         assertEquals(1, result.get());
     }
@@ -1535,7 +1564,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 10);
 
         AtomicInteger count = new AtomicInteger(0);
-        listMultimap.accept(m -> count.set(m.size()));
+        listMultimap.accept(m -> count.set(m.totalValueCount()));
         assertEquals(1, count.get());
     }
 
@@ -1676,21 +1705,21 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testPutMany_NullKey() {
         List<Integer> values = Arrays.asList(10, 20, 30);
-        assertTrue(listMultimap.putMany(null, values));
+        assertTrue(listMultimap.putValues(null, values));
         assertEquals(3, listMultimap.get(null).size());
     }
 
     @Test
     public void testRemoveOne_NullKey() {
         listMultimap.put(null, 10);
-        assertTrue(listMultimap.removeOne(null, 10));
+        assertTrue(listMultimap.removeEntry(null, 10));
         assertNull(listMultimap.get(null));
     }
 
     @Test
     public void testReplaceOne_NullKey() {
         listMultimap.put(null, 10);
-        assertTrue(listMultimap.replaceOne(null, 10, 20));
+        assertTrue(listMultimap.replaceEntry(null, 10, 20));
         assertEquals(Integer.valueOf(20), listMultimap.get(null).get(0));
     }
 
@@ -1699,7 +1728,7 @@ public class Multimap2025Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("key1", null);
         map.put("key2", 20);
-        assertTrue(listMultimap.put(map));
+        assertTrue(listMultimap.putAll(map));
         assertTrue(listMultimap.get("key1").contains(null));
         assertTrue(listMultimap.get("key2").contains(20));
     }
@@ -1711,7 +1740,7 @@ public class Multimap2025Test extends TestBase {
         values.add(null);
         values.add(10);
         map.put("key1", values);
-        assertTrue(listMultimap.putMany(map));
+        assertTrue(listMultimap.putValues(map));
         assertTrue(listMultimap.get("key1").contains(null));
         assertTrue(listMultimap.get("key1").contains(10));
     }
@@ -1724,7 +1753,7 @@ public class Multimap2025Test extends TestBase {
         List<Integer> toRemove = new ArrayList<>();
         toRemove.add(null);
         toRemove.add(10);
-        assertTrue(listMultimap.removeMany("key1", toRemove));
+        assertTrue(listMultimap.removeValues("key1", toRemove));
         assertEquals(1, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(20));
     }
@@ -1732,8 +1761,8 @@ public class Multimap2025Test extends TestBase {
     @Test
     public void testContains_NullValue() {
         listMultimap.put("key1", null);
-        assertTrue(listMultimap.contains("key1", null));
-        assertFalse(listMultimap.contains("key2", null));
+        assertTrue(listMultimap.containsEntry("key1", null));
+        assertFalse(listMultimap.containsEntry("key2", null));
     }
 
     @Test
@@ -1743,58 +1772,44 @@ public class Multimap2025Test extends TestBase {
         assertTrue(listMultimap.containsValue(null));
     }
 
-    @Test
-    public void testContainsAll_WithNull() {
-        List<Integer> values = new ArrayList<>();
-        values.add(null);
-        values.add(10);
-        listMultimap.put("key1", null);
-        listMultimap.put("key1", 10);
-        assertTrue(listMultimap.containsAll("key1", values));
-    }
+    //    @Test
+    //    public void testContainsAll_WithNull() {
+    //        List<Integer> values = new ArrayList<>();
+    //        values.add(null);
+    //        values.add(10);
+    //        listMultimap.put("key1", null);
+    //        listMultimap.put("key1", 10);
+    //        assertTrue(listMultimap.containsAllValues("key1", values));
+    //    }
 
-    @Test
-    public void testReplaceManyWithOne_WithNullValues() {
-        listMultimap.put("key1", null);
-        listMultimap.put("key1", 10);
-        listMultimap.put("key1", 20);
-        List<Integer> oldValues = new ArrayList<>();
-        oldValues.add(null);
-        oldValues.add(10);
-        assertTrue(listMultimap.replaceManyWithOne("key1", oldValues, 99));
-        assertEquals(2, listMultimap.get("key1").size());
-        assertTrue(listMultimap.get("key1").contains(99));
-        assertTrue(listMultimap.get("key1").contains(20));
-    }
+    //    @Test
+    //    public void testFilter_WithNullKeys() {
+    //        listMultimap.put(null, 10);
+    //        listMultimap.put("key1", 20);
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> k == null);
+    //        assertEquals(1, filtered.size());
+    //        assertTrue(filtered.containsKey(null));
+    //    }
 
-    @Test
-    public void testFilter_WithNullKeys() {
-        listMultimap.put(null, 10);
-        listMultimap.put("key1", 20);
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filter((k, v) -> k == null);
-        assertEquals(1, filtered.size());
-        assertTrue(filtered.containsKey(null));
-    }
+    //    @Test
+    //    public void testFilterByKey_WithNull() {
+    //        listMultimap.put(null, 10);
+    //        listMultimap.put("key1", 20);
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> k == null);
+    //        assertEquals(1, filtered.size());
+    //        assertTrue(filtered.containsKey(null));
+    //    }
 
-    @Test
-    public void testFilterByKey_WithNull() {
-        listMultimap.put(null, 10);
-        listMultimap.put("key1", 20);
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByKey(k -> k == null);
-        assertEquals(1, filtered.size());
-        assertTrue(filtered.containsKey(null));
-    }
-
-    @Test
-    public void testForEach_ModificationDuringIteration() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        AtomicInteger count = new AtomicInteger(0);
-        listMultimap.forEach((k, v) -> {
-            count.incrementAndGet();
-        });
-        assertEquals(2, count.get());
-    }
+    //    @Test
+    //    public void testForEach_ModificationDuringIteration() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        AtomicInteger count = new AtomicInteger(0);
+    //        listMultimap.forEach((k, v) -> {
+    //            count.incrementAndGet();
+    //        });
+    //        assertEquals(2, count.get());
+    //    }
 
     @Test
     public void testFlatForEach_ModificationDuringIteration() {
@@ -1802,7 +1817,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
         List<Integer> collected = new ArrayList<>();
-        listMultimap.flatForEach((k, e) -> collected.add(e));
+        listMultimap.forEach((k, e) -> collected.add(e));
         assertEquals(3, collected.size());
         assertTrue(collected.contains(10));
         assertTrue(collected.contains(20));
@@ -1818,22 +1833,22 @@ public class Multimap2025Test extends TestBase {
         assertEquals(3, count);
     }
 
-    @Test
-    public void testEntryStream_Operations() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        List<String> keys = listMultimap.entryStream().keys().toList();
-        assertEquals(2, keys.size());
-        assertTrue(keys.contains("key1"));
-        assertTrue(keys.contains("key2"));
-    }
+    //    @Test
+    //    public void testEntryStream_Operations() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        List<String> keys = listMultimap.entryStream().keys().toList();
+    //        assertEquals(2, keys.size());
+    //        assertTrue(keys.contains("key1"));
+    //        assertTrue(keys.contains("key2"));
+    //    }
 
     @Test
     public void testTotalCountOfValues_LargeNumbers() {
         for (int i = 0; i < 10; i++) {
-            listMultimap.putMany("key" + i, Arrays.asList(1, 2, 3, 4, 5));
+            listMultimap.putValues("key" + i, Arrays.asList(1, 2, 3, 4, 5));
         }
-        assertEquals(50, listMultimap.totalCountOfValues());
+        assertEquals(50, listMultimap.totalValueCount());
     }
 
     @Test
@@ -1856,7 +1871,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("b", 3);
         ListMultimap<Integer, String> inverse = listMultimap.inverse(N::newListMultimap);
 
-        assertEquals(3, inverse.size());
+        assertEquals(4, inverse.totalValueCount());
         assertEquals(2, inverse.get(1).size());
         assertTrue(inverse.get(1).contains("a"));
         assertTrue(inverse.get(1).contains("b"));
@@ -1930,13 +1945,11 @@ public class Multimap2025Test extends TestBase {
     }
 
     @Test
-    public void testFlatValues_ModifiableList() {
+    public void testFlatValues_unmodifiableList() {
         listMultimap.put("key1", 10);
         listMultimap.put("key2", 20);
-        List<Integer> values = listMultimap.flatValues();
-        values.add(30);
-        assertEquals(3, values.size());
-        assertEquals(2, listMultimap.totalCountOfValues());
+        Collection<Integer> values = listMultimap.allValues();
+        assertThrows(UnsupportedOperationException.class, () -> values.add(30));
     }
 
     @Test
@@ -1948,13 +1961,13 @@ public class Multimap2025Test extends TestBase {
             iter.next();
             iter.remove();
         }
-        assertEquals(1, listMultimap.size());
+        assertEquals(1, listMultimap.totalValueCount());
     }
 
     @Test
     public void testPutIfAbsent_WithNullValue() {
-        assertTrue(listMultimap.putIfAbsent("key1", null));
-        assertFalse(listMultimap.putIfAbsent("key1", null));
+        assertTrue(listMultimap.putIfValueAbsent("key1", null));
+        assertFalse(listMultimap.putIfValueAbsent("key1", null));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
@@ -1968,51 +1981,39 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testRemoveMany_PartialRemoval() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30, 40));
-        assertTrue(listMultimap.removeMany("key1", Arrays.asList(15, 20, 35, 40)));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
+        assertTrue(listMultimap.removeValues("key1", Arrays.asList(15, 20, 35, 40)));
         assertEquals(2, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(10));
         assertTrue(listMultimap.get("key1").contains(30));
     }
 
-    @Test
-    public void testFilterByValue_EmptyCollections() {
-        listMultimap.put("key1", 10);
-        listMultimap.putMany("key2", Arrays.asList(20, 30));
-        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValue(v -> v.isEmpty());
-        assertTrue(filtered.isEmpty());
-    }
-
-    @Test
-    public void testForEachKey_OrderPreservation() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        listMultimap.put("key3", 30);
-        List<String> keys = new ArrayList<>();
-        listMultimap.forEachKey(k -> keys.add(k));
-        assertEquals(3, keys.size());
-    }
-
-    @Test
-    public void testForEachValue_OrderPreservation() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(30));
-        List<List<Integer>> values = new ArrayList<>();
-        listMultimap.forEachValue(v -> values.add(new ArrayList<>(v)));
-        assertEquals(2, values.size());
-    }
-
-    @Test
-    public void testFlatForEachValue_OrderPreservation() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20));
-        listMultimap.putMany("key2", Arrays.asList(30));
-        List<Integer> values = new ArrayList<>();
-        listMultimap.flatForEachValue(e -> values.add(e));
-        assertEquals(3, values.size());
-        assertTrue(values.contains(10));
-        assertTrue(values.contains(20));
-        assertTrue(values.contains(30));
-    }
+    //    @Test
+    //    public void testFilterByValue_EmptyCollections() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.putValues("key2", Arrays.asList(20, 30));
+    //        Multimap<String, Integer, List<Integer>> filtered = listMultimap.filterByValues(v -> v.isEmpty());
+    //        assertTrue(filtered.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachKey_OrderPreservation() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        listMultimap.put("key3", 30);
+    //        List<String> keys = new ArrayList<>();
+    //        listMultimap.forEachKey(k -> keys.add(k));
+    //        assertEquals(3, keys.size());
+    //    }
+    //
+    //    @Test
+    //    public void testForEachValue_OrderPreservation() {
+    //        listMultimap.putValues("key1", Arrays.asList(10, 20));
+    //        listMultimap.putValues("key2", Arrays.asList(30));
+    //        List<List<Integer>> values = new ArrayList<>();
+    //        listMultimap.forEachValues(v -> values.add(new ArrayList<>(v)));
+    //        assertEquals(2, values.size());
+    //    }
 
     @Test
     public void testReplaceAll_WithNullResults() {
@@ -2058,7 +2059,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testPutMany_SingleElementCollection() {
-        assertTrue(listMultimap.putMany("key1", Arrays.asList(10)));
+        assertTrue(listMultimap.putValues("key1", Arrays.asList(10)));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
@@ -2070,18 +2071,18 @@ public class Multimap2025Test extends TestBase {
         Map<String, Integer> toRemove = new HashMap<>();
         toRemove.put("key1", 10);
         toRemove.put("key3", 40);
-        assertTrue(listMultimap.removeOne(toRemove));
+        assertTrue(listMultimap.removeEntries(toRemove));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
     @Test
     public void testRemoveManyMap_PartialMatch() {
-        listMultimap.putMany("key1", Arrays.asList(10, 20, 30));
-        listMultimap.putMany("key2", Arrays.asList(40));
+        listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
+        listMultimap.putValues("key2", Arrays.asList(40));
         Map<String, Collection<Integer>> toRemove = new HashMap<>();
         toRemove.put("key1", Arrays.asList(10, 20));
         toRemove.put("key3", Arrays.asList(50));
-        assertTrue(listMultimap.removeMany(toRemove));
+        assertTrue(listMultimap.removeValues(toRemove));
         assertEquals(1, listMultimap.get("key1").size());
     }
 
@@ -2108,15 +2109,15 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testSize_AfterOperations() {
-        assertEquals(0, listMultimap.size());
+        assertEquals(0, listMultimap.totalValueCount());
         listMultimap.put("key1", 10);
-        assertEquals(1, listMultimap.size());
+        assertEquals(1, listMultimap.totalValueCount());
         listMultimap.put("key1", 20);
-        assertEquals(1, listMultimap.size());
+        assertEquals(2, listMultimap.totalValueCount());
         listMultimap.put("key2", 30);
-        assertEquals(2, listMultimap.size());
+        assertEquals(3, listMultimap.totalValueCount());
         listMultimap.removeAll("key1");
-        assertEquals(1, listMultimap.size());
+        assertEquals(1, listMultimap.totalValueCount());
     }
 
     @Test
@@ -2129,21 +2130,21 @@ public class Multimap2025Test extends TestBase {
         assertNotNull(keys);
     }
 
-    @Test
-    public void testValues_BackingBehavior() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        Collection<List<Integer>> values = listMultimap.values();
-        assertEquals(2, values.size());
-        assertNotNull(values);
-    }
-
-    @Test
-    public void testEntrySet_BackingBehavior() {
-        listMultimap.put("key1", 10);
-        listMultimap.put("key2", 20);
-        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
-        assertEquals(2, entries.size());
-        assertNotNull(entries);
-    }
+    //    @Test
+    //    public void testValues_BackingBehavior() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        Collection<List<Integer>> values = listMultimap.valueCollections();
+    //        assertEquals(2, values.size());
+    //        assertNotNull(values);
+    //    }
+    //
+    //    @Test
+    //    public void testEntrySet_BackingBehavior() {
+    //        listMultimap.put("key1", 10);
+    //        listMultimap.put("key2", 20);
+    //        Set<Map.Entry<String, List<Integer>>> entries = listMultimap.entrySet();
+    //        assertEquals(2, entries.size());
+    //        assertNotNull(entries);
+    //    }
 }

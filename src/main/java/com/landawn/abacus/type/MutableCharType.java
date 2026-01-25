@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
@@ -245,7 +245,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * // Writes: D
      *
      * // With quotation configured (using concrete subclass)
-     * JSONSerializationConfig config = JSONSerializationConfig.create();
+     * JsonSerializationConfig config = JsonSerializationConfig.create();
      * config.setCharQuotation('\'');
      * type.writeCharacter(writer, mc, config);
      * // Writes: 'D'
@@ -261,7 +261,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

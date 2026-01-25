@@ -190,7 +190,7 @@ public class AsyncExecutor {
      *     processData();
      * });
      *
-     * future.thenRun(() -> System.out.println("Task completed"));
+     * future.thenRunAsync(() -> System.out.println("Task completed"));
      * }</pre>
      *
      * @param command the Runnable command to be executed asynchronously; may throw checked exceptions

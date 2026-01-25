@@ -336,8 +336,8 @@ public class Fn202Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("foo_bar", Fn.toLowerCaseWithUnderscore().apply("fooBar"));
+    public void testToSnakeCase() {
+        assertEquals("foo_bar", Fn.toSnakeCase().apply("fooBar"));
     }
 
     @Test
@@ -346,8 +346,8 @@ public class Fn202Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("FOO_BAR", Fn.toUpperCaseWithUnderscore().apply("fooBar"));
+    public void testToScreamingSnakeCase() {
+        assertEquals("FOO_BAR", Fn.toScreamingSnakeCase().apply("fooBar"));
     }
 
     @Test

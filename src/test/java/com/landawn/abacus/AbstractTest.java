@@ -151,7 +151,7 @@ public abstract class AbstractTest {
 
     public static <T> T createAccountWithContact(final Class<T> cls) {
         final T account = createAccount(cls);
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AccountPNL.CONTACT);
+        final Method propSetMethod = Beans.getPropSetter(cls, AccountPNL.CONTACT);
         Beans.setPropValue(account, propSetMethod, createAccountContact(propSetMethod.getParameterTypes()[0]));
 
         return account;
@@ -160,7 +160,7 @@ public abstract class AbstractTest {
     public static <T> List<T> createAccountWithContact(final Class<T> cls, final int size) {
         final List<T> accounts = new ArrayList<>();
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AccountPNL.CONTACT);
+        final Method propSetMethod = Beans.getPropSetter(cls, AccountPNL.CONTACT);
 
         T account = null;
 
@@ -225,7 +225,7 @@ public abstract class AbstractTest {
     public static <T> T createAclUserWithAclGroup(final Class<T> cls) {
         final T aclUser = createAclUser(cls);
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUserPNL.GROUP_LIST);
+        final Method propSetMethod = Beans.getPropSetter(cls, AclUserPNL.GROUP_LIST);
         final Class aclGroupClass = (Class) ((ParameterizedType) propSetMethod.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
 
         Beans.setPropValue(aclUser, propSetMethod, N.asList(createAclGroup(aclGroupClass)));
@@ -236,7 +236,7 @@ public abstract class AbstractTest {
     public static <T> List<T> createAclUserWithAclGroup(final Class<T> cls, final int size) {
         final List<T> aclUsers = new ArrayList<>();
 
-        final Method propSetMethod = Beans.getPropSetMethod(cls, AclUserPNL.GROUP_LIST);
+        final Method propSetMethod = Beans.getPropSetter(cls, AclUserPNL.GROUP_LIST);
         final Class aclGroupClass = (Class) ((ParameterizedType) propSetMethod.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
 
         T aclUser = null;

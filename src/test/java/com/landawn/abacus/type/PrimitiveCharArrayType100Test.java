@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -196,7 +196,7 @@ public class PrimitiveCharArrayType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(writer, new char[] { 'a', 'b' }, config);
@@ -211,7 +211,7 @@ public class PrimitiveCharArrayType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithQuotationAndEscape() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(writer, new char[] { '\'' }, config);
@@ -224,13 +224,13 @@ public class PrimitiveCharArrayType100Test extends TestBase {
 
     @Test
     public void testCollection2ArrayNull() {
-        assertNull(type.collection2Array(null));
+        assertNull(type.collectionToArray(null));
     }
 
     @Test
     public void testCollection2ArrayEmpty() {
         Collection<Character> collection = new ArrayList<>();
-        char[] result = type.collection2Array(collection);
+        char[] result = type.collectionToArray(collection);
         assertNotNull(result);
         assertEquals(0, result.length);
     }
@@ -238,28 +238,28 @@ public class PrimitiveCharArrayType100Test extends TestBase {
     @Test
     public void testCollection2ArrayNonEmpty() {
         Collection<Character> collection = Arrays.asList('a', 'b', 'c');
-        char[] result = type.collection2Array(collection);
+        char[] result = type.collectionToArray(collection);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
     }
 
     @Test
     public void testArray2CollectionNull() {
         List<Character> output = new ArrayList<>();
-        type.array2Collection(null, output);
+        type.arrayToCollection(null, output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionEmpty() {
         List<Character> output = new ArrayList<>();
-        type.array2Collection(new char[0], output);
+        type.arrayToCollection(new char[0], output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionNonEmpty() {
         List<Character> output = new ArrayList<>();
-        type.array2Collection(new char[] { 'a', 'b', 'c' }, output);
+        type.arrayToCollection(new char[] { 'a', 'b', 'c' }, output);
         assertEquals(3, output.size());
         assertEquals(Character.valueOf('a'), output.get(0));
         assertEquals(Character.valueOf('b'), output.get(1));

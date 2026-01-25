@@ -210,7 +210,7 @@ public final class TypeAttrParser {
             }
 
             final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R)).trim();
-            parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CSVUtil.CSV_HEADER_PARSER.apply(str));
+            parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CsvUtil.CSV_HEADER_PARSER.apply(str));
         }
 
         if (className == null) {
@@ -252,7 +252,7 @@ public final class TypeAttrParser {
         final String[] attrParameters = attrResult.getParameters();
 
         if (cls == null) {
-            cls = ClassUtil.forClass(className);
+            cls = ClassUtil.forName(className);
         }
 
         int parameterLength = attrTypeParameters.length + attrParameters.length;
@@ -338,7 +338,7 @@ public final class TypeAttrParser {
         final String[] attrParameters = attrResult.getParameters();
 
         if (cls == null) {
-            cls = ClassUtil.forClass(className);
+            cls = ClassUtil.forName(className);
         }
 
         int parameterLength = attrTypeParameters.length + attrParameters.length + (args.length / 2);

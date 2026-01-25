@@ -357,8 +357,8 @@ public class Builder200Test extends TestBase {
         DatasetBuilder builder = Builder.of(dataset);
 
         builder.renameColumn("Name", "FullName");
-        assertTrue(dataset.columnNameList().contains("FullName"));
-        assertFalse(dataset.columnNameList().contains("Name"));
+        assertTrue(dataset.columnNames().contains("FullName"));
+        assertFalse(dataset.columnNames().contains("Name"));
 
         builder.addColumn("Age", Arrays.asList(30, 25));
         assertEquals(3, dataset.columnCount());

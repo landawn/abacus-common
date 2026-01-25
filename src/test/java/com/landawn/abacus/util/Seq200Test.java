@@ -2078,9 +2078,9 @@ public class Seq200Test extends TestBase {
         List<Map<String, Object>> data = Arrays.asList(CommonUtil.asMap("id", 1, "name", "Alice"), CommonUtil.asMap("id", 2, "name", "Bob"));
         Dataset dataset = Seq.of(data).toDataset();
         assertEquals(2, dataset.size());
-        assertTrue(dataset.columnNameList().containsAll(Arrays.asList("id", "name")));
-        assertEquals((Integer) 1, dataset.absolute(0).get("id"));
-        assertEquals("Bob", dataset.absolute(1).get("name"));
+        assertTrue(dataset.columnNames().containsAll(Arrays.asList("id", "name")));
+        assertEquals((Integer) 1, dataset.moveToRow(0).get("id"));
+        assertEquals("Bob", dataset.moveToRow(1).get("name"));
     }
 
     @Test
@@ -2089,9 +2089,9 @@ public class Seq200Test extends TestBase {
         List<String> columnNames = Arrays.asList("UserID", "UserName");
         Dataset dataset = Seq.of(data).toDataset(columnNames);
         assertEquals(2, dataset.size());
-        assertEquals(columnNames, dataset.columnNameList());
-        assertEquals((Integer) 1, dataset.absolute(0).get("UserID"));
-        assertEquals("Bob", dataset.absolute(1).get("UserName"));
+        assertEquals(columnNames, dataset.columnNames());
+        assertEquals((Integer) 1, dataset.moveToRow(0).get("UserID"));
+        assertEquals("Bob", dataset.moveToRow(1).get("UserName"));
     }
 
     @Test
@@ -2452,16 +2452,16 @@ public class Seq200Test extends TestBase {
 
     @Test
     public void test_sliding_withCollector() throws Exception {
-        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).slide(3, Collectors.mapping(String::valueOf, Collectors.joining(",")));
+        Seq<String, Exception> seq = Seq.of(1, 2, 3, 4, 5).sliding(3, Collectors.mapping(String::valueOf, Collectors.joining(",")));
         assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), drainWithException(seq));
     }
 
     @Test
     public void test_sliding_withCollector_andIncrement() throws Exception {
-        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).slide(3, 2, Collectors.counting());
+        Seq<Long, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7).sliding(3, 2, Collectors.counting());
         assertEquals(Arrays.asList(3L, 3L, 3L), drainWithException(seq));
 
-        Seq<Long, Exception> smallSeq = Seq.of(1, 2).slide(3, 1, Collectors.counting());
+        Seq<Long, Exception> smallSeq = Seq.of(1, 2).sliding(3, 1, Collectors.counting());
         assertEquals(Collections.singletonList(2L), drainWithException(smallSeq));
     }
 

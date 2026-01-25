@@ -18,8 +18,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
@@ -47,7 +47,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     private final Type<?>[] parameterTypes;
 
-    protected final JSONDeserializationConfig jdc;
+    protected final JsonDeserializationConfig jdc;
 
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));
@@ -240,7 +240,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putMany(entry.getKey(), entry.getValue());
+                multiMap.putValues(entry.getKey(), entry.getValue());
             }
 
             return (T) multiMap;
@@ -248,7 +248,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             final Multimap<K, E, V> multimap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multimap.putMany(entry.getKey(), entry.getValue());
+                multimap.putValues(entry.getKey(), entry.getValue());
             }
 
             return (T) multimap;

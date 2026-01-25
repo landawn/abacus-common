@@ -189,7 +189,7 @@ public class Joiner2025Test extends TestBase {
 
     @Test
     public void testReuseCachedBuffer() {
-        Joiner joiner = Joiner.with(",").reuseCachedBuffer();
+        Joiner joiner = Joiner.with(",").reuseBuffer();
         joiner.append("a").append("b");
         String result = joiner.toString();
         assertEquals("a,b", result);
@@ -199,7 +199,7 @@ public class Joiner2025Test extends TestBase {
     public void testReuseCachedBufferAfterBufferCreated() {
         Joiner joiner = Joiner.with(",");
         joiner.append("a");
-        assertThrows(IllegalStateException.class, () -> joiner.reuseCachedBuffer());
+        assertThrows(IllegalStateException.class, () -> joiner.reuseBuffer());
     }
 
     @Test
@@ -1628,7 +1628,7 @@ public class Joiner2025Test extends TestBase {
 
     @Test
     public void testClose() {
-        Joiner joiner = Joiner.with(",").reuseCachedBuffer();
+        Joiner joiner = Joiner.with(",").reuseBuffer();
         joiner.append("a").append("b");
         joiner.close();
 
@@ -1762,6 +1762,6 @@ public class Joiner2025Test extends TestBase {
         Joiner joiner = Joiner.with(",");
         joiner.append("a");
 
-        assertThrows(IllegalStateException.class, () -> joiner.reuseCachedBuffer());
+        assertThrows(IllegalStateException.class, () -> joiner.reuseBuffer());
     }
 }

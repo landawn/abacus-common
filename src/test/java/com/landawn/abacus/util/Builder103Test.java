@@ -46,8 +46,8 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.renameColumn("name", "employee_name");
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("employee_name"));
-        Assertions.assertFalse(dataset.columnNameList().contains("name"));
+        Assertions.assertTrue(dataset.columnNames().contains("employee_name"));
+        Assertions.assertFalse(dataset.columnNames().contains("name"));
     }
 
     @Test
@@ -59,10 +59,10 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.renameColumns(oldNewNames);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("employee_name"));
-        Assertions.assertTrue(dataset.columnNameList().contains("employee_age"));
-        Assertions.assertFalse(dataset.columnNameList().contains("name"));
-        Assertions.assertFalse(dataset.columnNameList().contains("age"));
+        Assertions.assertTrue(dataset.columnNames().contains("employee_name"));
+        Assertions.assertTrue(dataset.columnNames().contains("employee_age"));
+        Assertions.assertFalse(dataset.columnNames().contains("name"));
+        Assertions.assertFalse(dataset.columnNames().contains("age"));
     }
 
     @Test
@@ -73,10 +73,10 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.renameColumns(columnNames, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("NAME"));
-        Assertions.assertTrue(dataset.columnNameList().contains("DEPARTMENT"));
-        Assertions.assertTrue(dataset.columnNameList().contains("age"));
-        Assertions.assertTrue(dataset.columnNameList().contains("salary"));
+        Assertions.assertTrue(dataset.columnNames().contains("NAME"));
+        Assertions.assertTrue(dataset.columnNames().contains("DEPARTMENT"));
+        Assertions.assertTrue(dataset.columnNames().contains("age"));
+        Assertions.assertTrue(dataset.columnNames().contains("salary"));
     }
 
     @Test
@@ -86,10 +86,10 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.renameColumns(func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("prefix_name"));
-        Assertions.assertTrue(dataset.columnNameList().contains("prefix_age"));
-        Assertions.assertTrue(dataset.columnNameList().contains("prefix_salary"));
-        Assertions.assertTrue(dataset.columnNameList().contains("prefix_department"));
+        Assertions.assertTrue(dataset.columnNames().contains("prefix_name"));
+        Assertions.assertTrue(dataset.columnNames().contains("prefix_age"));
+        Assertions.assertTrue(dataset.columnNames().contains("prefix_salary"));
+        Assertions.assertTrue(dataset.columnNames().contains("prefix_department"));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn("city", cities);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("city"));
+        Assertions.assertTrue(dataset.columnNames().contains("city"));
         Assertions.assertEquals(5, dataset.columnCount());
         Assertions.assertEquals("New York", dataset.getColumn("city").get(0));
     }
@@ -111,7 +111,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn(1, "city", cities);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("city"));
+        Assertions.assertTrue(dataset.columnNames().contains("city"));
         Assertions.assertEquals(1, dataset.getColumnIndex("city"));
         Assertions.assertEquals(5, dataset.columnCount());
     }
@@ -123,7 +123,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn("double_age", "age", func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("double_age"));
+        Assertions.assertTrue(dataset.columnNames().contains("double_age"));
         Assertions.assertEquals(60, dataset.getColumn("double_age").get(0));
         Assertions.assertEquals(50, dataset.getColumn("double_age").get(1));
     }
@@ -135,7 +135,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn(2, "new_salary", "salary", func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("new_salary"));
+        Assertions.assertTrue(dataset.columnNames().contains("new_salary"));
         Assertions.assertEquals(2, dataset.getColumnIndex("new_salary"));
         Assertions.assertEquals(55000.0, (Double) dataset.getColumn("new_salary").get(0), 0.000001d);
     }
@@ -148,7 +148,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn("name_dept", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("name_dept"));
+        Assertions.assertTrue(dataset.columnNames().contains("name_dept"));
         Assertions.assertEquals("John - IT", dataset.getColumn("name_dept").get(0));
     }
 
@@ -160,7 +160,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn(3, "age_salary_factor", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("age_salary_factor"));
+        Assertions.assertTrue(dataset.columnNames().contains("age_salary_factor"));
         Assertions.assertEquals(3, dataset.getColumnIndex("age_salary_factor"));
     }
 
@@ -172,7 +172,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn("email", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("email"));
+        Assertions.assertTrue(dataset.columnNames().contains("email"));
         Assertions.assertEquals("John@IT", dataset.getColumn("email").get(0));
     }
 
@@ -184,7 +184,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn(4, "salary_per_year", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("salary_per_year"));
+        Assertions.assertTrue(dataset.columnNames().contains("salary_per_year"));
         Assertions.assertEquals(4, dataset.getColumnIndex("salary_per_year"));
     }
 
@@ -198,7 +198,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn("summary", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("summary"));
+        Assertions.assertTrue(dataset.columnNames().contains("summary"));
         Assertions.assertEquals("John total: 55000.0", dataset.getColumn("summary").get(0));
     }
 
@@ -212,7 +212,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.addColumn(2, "total_per_year", fromColumns, func);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("total_per_year"));
+        Assertions.assertTrue(dataset.columnNames().contains("total_per_year"));
         Assertions.assertEquals(2, dataset.getColumnIndex("total_per_year"));
     }
 
@@ -221,7 +221,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.removeColumn("department");
 
         Assertions.assertSame(builder, result);
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
         Assertions.assertEquals(3, dataset.columnCount());
     }
 
@@ -232,8 +232,8 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.removeColumns(columnsToRemove);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertFalse(dataset.columnNameList().contains("age"));
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
+        Assertions.assertFalse(dataset.columnNames().contains("age"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
         Assertions.assertEquals(2, dataset.columnCount());
     }
 
@@ -244,10 +244,10 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.removeColumns(filter);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertFalse(dataset.columnNameList().contains("salary"));
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
-        Assertions.assertTrue(dataset.columnNameList().contains("name"));
-        Assertions.assertTrue(dataset.columnNameList().contains("age"));
+        Assertions.assertFalse(dataset.columnNames().contains("salary"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
+        Assertions.assertTrue(dataset.columnNames().contains("name"));
+        Assertions.assertTrue(dataset.columnNames().contains("age"));
     }
 
     @Test
@@ -310,9 +310,9 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.combineColumns(columnsToCombine, "combined", a -> a.join(", "));
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("combined"));
-        Assertions.assertFalse(dataset.columnNameList().contains("name"));
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
+        Assertions.assertTrue(dataset.columnNames().contains("combined"));
+        Assertions.assertFalse(dataset.columnNames().contains("name"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
     }
 
     @Test
@@ -323,7 +323,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.combineColumns(columnsToCombine, "person_info", combineFunc);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("person_info"));
+        Assertions.assertTrue(dataset.columnNames().contains("person_info"));
         Assertions.assertEquals("John (age: 30)", dataset.getColumn("person_info").get(0));
     }
 
@@ -335,7 +335,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.combineColumns(columnsToCombine, "name_in_dept", combineFunc);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("name_in_dept"));
+        Assertions.assertTrue(dataset.columnNames().contains("name_in_dept"));
         Assertions.assertEquals("John in IT", dataset.getColumn("name_in_dept").get(0));
     }
 
@@ -349,7 +349,7 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.combineColumns(columnsToCombine, "total_comp", combineFunc);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("total_comp"));
+        Assertions.assertTrue(dataset.columnNames().contains("total_comp"));
         Assertions.assertEquals("John: $55000.0", dataset.getColumn("total_comp").get(0));
     }
 
@@ -363,9 +363,9 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.divideColumn("full_name", newColumns, divideFunc);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("first_name"));
-        Assertions.assertTrue(dataset.columnNameList().contains("last_name"));
-        Assertions.assertFalse(dataset.columnNameList().contains("full_name"));
+        Assertions.assertTrue(dataset.columnNames().contains("first_name"));
+        Assertions.assertTrue(dataset.columnNames().contains("last_name"));
+        Assertions.assertFalse(dataset.columnNames().contains("full_name"));
         Assertions.assertEquals("John", dataset.getColumn("first_name").get(0));
         Assertions.assertEquals("Doe", dataset.getColumn("last_name").get(0));
     }
@@ -384,8 +384,8 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.divideColumn("coordinates", newColumns, output);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("x"));
-        Assertions.assertTrue(dataset.columnNameList().contains("y"));
+        Assertions.assertTrue(dataset.columnNames().contains("x"));
+        Assertions.assertTrue(dataset.columnNames().contains("y"));
         Assertions.assertEquals(10.5, dataset.getColumn("x").get(0));
         Assertions.assertEquals(20.3, dataset.getColumn("y").get(0));
     }
@@ -404,8 +404,8 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.divideColumn("key_value", newColumns, output);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("key"));
-        Assertions.assertTrue(dataset.columnNameList().contains("value"));
+        Assertions.assertTrue(dataset.columnNames().contains("key"));
+        Assertions.assertTrue(dataset.columnNames().contains("value"));
         Assertions.assertEquals("name", dataset.getColumn("key").get(0));
         Assertions.assertEquals("John", dataset.getColumn("value").get(0));
     }
@@ -425,9 +425,9 @@ public class Builder103Test extends TestBase {
         DatasetBuilder result = builder.divideColumn("rgb", newColumns, output);
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("red"));
-        Assertions.assertTrue(dataset.columnNameList().contains("green"));
-        Assertions.assertTrue(dataset.columnNameList().contains("blue"));
+        Assertions.assertTrue(dataset.columnNames().contains("red"));
+        Assertions.assertTrue(dataset.columnNames().contains("green"));
+        Assertions.assertTrue(dataset.columnNames().contains("blue"));
         Assertions.assertEquals(255, dataset.getColumn("red").get(0));
         Assertions.assertEquals(0, dataset.getColumn("green").get(0));
         Assertions.assertEquals(0, dataset.getColumn("blue").get(0));
@@ -506,9 +506,9 @@ public class Builder103Test extends TestBase {
                 .removeColumn("department");
 
         Assertions.assertSame(builder, result);
-        Assertions.assertTrue(dataset.columnNameList().contains("employee"));
-        Assertions.assertTrue(dataset.columnNameList().contains("bonus"));
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
+        Assertions.assertTrue(dataset.columnNames().contains("employee"));
+        Assertions.assertTrue(dataset.columnNames().contains("bonus"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
         Assertions.assertEquals(31, dataset.getColumn("age").get(0));
     }
 
@@ -520,10 +520,10 @@ public class Builder103Test extends TestBase {
                 .addColumn("category", "age", (Integer age) -> age < 30 ? "Junior" : "Senior")
                 .renameColumn("full_name", "employee_info");
 
-        Assertions.assertTrue(dataset.columnNameList().contains("employee_info"));
-        Assertions.assertTrue(dataset.columnNameList().contains("category"));
-        Assertions.assertFalse(dataset.columnNameList().contains("name"));
-        Assertions.assertFalse(dataset.columnNameList().contains("department"));
+        Assertions.assertTrue(dataset.columnNames().contains("employee_info"));
+        Assertions.assertTrue(dataset.columnNames().contains("category"));
+        Assertions.assertFalse(dataset.columnNames().contains("name"));
+        Assertions.assertFalse(dataset.columnNames().contains("department"));
         Assertions.assertEquals("John from IT", dataset.getColumn("employee_info").get(0));
         Assertions.assertEquals("Senior", dataset.getColumn("category").get(0));
         Assertions.assertEquals("Junior", dataset.getColumn("category").get(1));

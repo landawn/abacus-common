@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
@@ -257,7 +257,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final RowId x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final RowId x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

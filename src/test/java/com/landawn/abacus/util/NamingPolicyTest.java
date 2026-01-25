@@ -14,82 +14,82 @@ public class NamingPolicyTest extends AbstractParserTest {
     public void test_01() {
         Account bean = createAccountWithContact(Account.class);
 
-        Map<String, Object> props = Beans.bean2Map(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.bean2Map(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.bean2Map(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, Account.class));
+        N.println(Beans.mapToBean(props, Account.class));
     }
 
     @Test
     public void test_02() {
         AclUser bean = createAclUserWithAclGroup(AclUser.class);
 
-        Map<String, Object> props = Beans.bean2Map(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.bean2Map(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.bean2Map(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.deepBean2Map(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.LOWER_CAMEL_CASE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-        props = Beans.bean2FlatMap(bean, true, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
         N.println(props);
-        N.println(Beans.map2Bean(props, AclUser.class));
+        N.println(Beans.mapToBean(props, AclUser.class));
     }
 
 }

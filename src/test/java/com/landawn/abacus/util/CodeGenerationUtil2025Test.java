@@ -259,7 +259,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         tempGeneratedFile = new File(packageDir, "s.java");
         assertTrue(tempGeneratedFile.exists());
 
-        IOUtil.deleteAllIfExists(tempDir);
+        IOUtil.deleteRecursivelyIfExists(tempDir);
     }
 
     @Test
@@ -319,7 +319,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateLowerCaseWithUnderscore(true)
+                .generateSnakeCase(true)
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -335,7 +335,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateUpperCaseWithUnderscore(true)
+                .generateScreamingSnakeCase(true)
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -386,8 +386,8 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateLowerCaseWithUnderscore(true)
-                .classNameForLowerCaseWithUnderscore("lower")
+                .generateSnakeCase(true)
+                .classNameForSnakeCase("lower")
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -402,8 +402,8 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateUpperCaseWithUnderscore(true)
-                .classNameForUpperCaseWithUnderscore("upper")
+                .generateScreamingSnakeCase(true)
+                .classNameForScreamingSnakeCase("upper")
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -507,8 +507,8 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .packageName("com.test.all")
                 .srcDir(tempDir.getAbsolutePath())
                 .generateClassPropNameList(true)
-                .generateLowerCaseWithUnderscore(true)
-                .generateUpperCaseWithUnderscore(true)
+                .generateSnakeCase(true)
+                .generateScreamingSnakeCase(true)
                 .generateFunctionPropName(true)
                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
                 .build();
@@ -528,7 +528,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         tempGeneratedFile = new File(packageDir, "s.java");
         assertTrue(tempGeneratedFile.exists());
 
-        IOUtil.deleteAllIfExists(tempDir);
+        IOUtil.deleteRecursivelyIfExists(tempDir);
     }
 
     @Test
@@ -537,9 +537,9 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateLowerCaseWithUnderscore(true)
-                .propNameConverterForLowerCaseWithUnderscore(
-                        (cls, propName) -> propName.equals("id") ? "user_id_custom" : Strings.toLowerCaseWithUnderscore(propName))
+                .generateSnakeCase(true)
+                .propNameConverterForSnakeCase(
+                        (cls, propName) -> propName.equals("id") ? "user_id_custom" : Strings.toSnakeCase(propName))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -554,9 +554,9 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateUpperCaseWithUnderscore(true)
-                .propNameConverterForUpperCaseWithUnderscore(
-                        (cls, propName) -> propName.equals("id") ? "USER_ID_CUSTOM" : Strings.toUpperCaseWithUnderscore(propName))
+                .generateScreamingSnakeCase(true)
+                .propNameConverterForScreamingSnakeCase(
+                        (cls, propName) -> propName.equals("id") ? "USER_ID_CUSTOM" : Strings.toScreamingSnakeCase(propName))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -571,8 +571,8 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .generateLowerCaseWithUnderscore(true)
-                .propNameConverterForLowerCaseWithUnderscore((cls, propName) -> "")
+                .generateSnakeCase(true)
+                .propNameConverterForSnakeCase((cls, propName) -> "")
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);

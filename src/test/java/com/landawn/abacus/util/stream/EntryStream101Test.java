@@ -624,7 +624,7 @@ public class EntryStream101Test extends TestBase {
 
     @Test
     public void testSlidingWithIncrement() {
-        List<List<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5).slide(3, 2).toList();
+        List<List<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5).sliding(3, 2).toList();
 
         assertEquals(2, windows.size());
         assertEquals(3, windows.get(0).size());
@@ -640,7 +640,7 @@ public class EntryStream101Test extends TestBase {
 
     @Test
     public void testSlidingAndSplitWithCollectionSupplier() {
-        List<LinkedList<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).slide(2, IntFunctions.ofLinkedList()).toList();
+        List<LinkedList<Entry<String, Integer>>> windows = EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4).sliding(2, IntFunctions.ofLinkedList()).toList();
 
         assertEquals(3, windows.size());
         assertTrue(windows.get(0) instanceof LinkedList);

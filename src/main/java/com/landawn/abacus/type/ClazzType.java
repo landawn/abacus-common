@@ -33,7 +33,7 @@ public class ClazzType extends AbstractType<Class> {
     protected ClazzType(final String typeName) {
         super("Clazz<" + typeName + ">");
 
-        clazz = ClassUtil.forClass(typeName);
+        clazz = ClassUtil.forName(typeName);
     }
 
     /**
@@ -82,6 +82,6 @@ public class ClazzType extends AbstractType<Class> {
      */
     @Override
     public Class valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : ClassUtil.forClass(str);
+        return Strings.isEmpty(str) ? null : ClassUtil.forName(str);
     }
 }

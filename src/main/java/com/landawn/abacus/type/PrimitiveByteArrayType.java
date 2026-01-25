@@ -25,7 +25,7 @@ import java.util.Collection;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -300,7 +300,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final byte[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final byte[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -327,7 +327,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @return a byte array containing the unboxed values, or {@code null} if input is null
      */
     @Override
-    public byte[] collection2Array(final Collection<?> c) {
+    public byte[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -353,7 +353,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param output the Collection to add the boxed Byte values to
      */
     @Override
-    public <E> void array2Collection(final byte[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final byte[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

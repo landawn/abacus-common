@@ -380,7 +380,7 @@ public class Splitter100Test extends TestBase {
     public void testSplitAndForEach() {
         Splitter splitter = Splitter.with(',');
         List<String> captured = new ArrayList<>();
-        splitter.splitAndForEach("a,b,c", captured::add);
+        splitter.splitThenForEach("a,b,c", captured::add);
         assertEquals(Arrays.asList("a", "b", "c"), captured);
     }
 

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableChar;
 
@@ -137,14 +137,14 @@ public class MutableCharType100Test extends TestBase {
 
     @Test
     public void testWriteCharacterWithNonNullNoQuotation() throws IOException {
-        JSONXMLSerializationConfig<?> config = Mockito.mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = Mockito.mock(JsonXmlSerializationConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn((char) 0);
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('R'), config);
     }
 
     @Test
     public void testWriteCharacterWithNonNullWithQuotation() throws IOException {
-        JSONXMLSerializationConfig<?> config = Mockito.mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = Mockito.mock(JsonXmlSerializationConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn('"');
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('S'), config);
     }

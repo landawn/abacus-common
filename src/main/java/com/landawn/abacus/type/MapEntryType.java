@@ -20,9 +20,9 @@ import java.io.Writer;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.IOUtil;
@@ -52,7 +52,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final Type<?>[] parameterTypes;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     MapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
@@ -269,7 +269,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Map.Entry<String, Integer> entry = Map.entry("age", 25);
      * CharacterWriter writer = CharacterWriter.of(new StringWriter());
-     * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();
+     * JsonXmlSerializationConfig<?> config = JsonXmlSerializationConfig.of();
      *
      * type.writeCharacter(writer, entry, config);
      * // writer now contains: {"age":25}
@@ -284,7 +284,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

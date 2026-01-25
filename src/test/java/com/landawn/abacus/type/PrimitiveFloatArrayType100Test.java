@@ -150,13 +150,13 @@ public class PrimitiveFloatArrayType100Test extends TestBase {
 
     @Test
     public void testCollection2ArrayNull() {
-        assertNull(type.collection2Array(null));
+        assertNull(type.collectionToArray(null));
     }
 
     @Test
     public void testCollection2ArrayEmpty() {
         Collection<Float> collection = new ArrayList<>();
-        float[] result = type.collection2Array(collection);
+        float[] result = type.collectionToArray(collection);
         assertNotNull(result);
         assertEquals(0, result.length);
     }
@@ -164,28 +164,28 @@ public class PrimitiveFloatArrayType100Test extends TestBase {
     @Test
     public void testCollection2ArrayNonEmpty() {
         Collection<Float> collection = Arrays.asList(1.5f, 2.7f, 3.14f);
-        float[] result = type.collection2Array(collection);
+        float[] result = type.collectionToArray(collection);
         assertArrayEquals(new float[] { 1.5f, 2.7f, 3.14f }, result);
     }
 
     @Test
     public void testArray2CollectionNull() {
         List<Float> output = new ArrayList<>();
-        type.array2Collection(null, output);
+        type.arrayToCollection(null, output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionEmpty() {
         List<Float> output = new ArrayList<>();
-        type.array2Collection(new float[0], output);
+        type.arrayToCollection(new float[0], output);
         assertTrue(output.isEmpty());
     }
 
     @Test
     public void testArray2CollectionNonEmpty() {
         List<Float> output = new ArrayList<>();
-        type.array2Collection(new float[] { 1.5f, 2.7f, 3.14f }, output);
+        type.arrayToCollection(new float[] { 1.5f, 2.7f, 3.14f }, output);
         assertEquals(3, output.size());
         assertEquals(Float.valueOf(1.5f), output.get(0));
         assertEquals(Float.valueOf(2.7f), output.get(1));

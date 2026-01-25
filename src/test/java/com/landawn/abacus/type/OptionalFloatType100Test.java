@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalFloat;
 
@@ -31,13 +31,13 @@ public class OptionalFloatType100Test extends TestBase {
 
     private OptionalFloatType optionalFloatType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalFloatType = (OptionalFloatType) createType("OptionalFloat");
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test

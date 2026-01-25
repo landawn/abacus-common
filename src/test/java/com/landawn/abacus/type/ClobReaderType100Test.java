@@ -170,7 +170,7 @@ public class ClobReaderType100Test extends TestBase {
         Reader expectedReader = new StringReader("clob content");
         when(clob.getCharacterStream()).thenReturn(expectedReader);
 
-        Reader result = ClobReaderType.clob2Reader(clob);
+        Reader result = ClobReaderType.clobToReader(clob);
 
         assertEquals(expectedReader, result);
         verify(clob).getCharacterStream();
@@ -178,7 +178,7 @@ public class ClobReaderType100Test extends TestBase {
 
     @Test
     public void testClob2Reader_Null() throws SQLException {
-        Reader result = ClobReaderType.clob2Reader(null);
+        Reader result = ClobReaderType.clobToReader(null);
         Assertions.assertNull(result);
     }
 
@@ -190,8 +190,8 @@ public class ClobReaderType100Test extends TestBase {
 
         when(clob.getCharacterStream()).thenReturn(reader1, reader2);
 
-        Reader result1 = ClobReaderType.clob2Reader(clob);
-        Reader result2 = ClobReaderType.clob2Reader(clob);
+        Reader result1 = ClobReaderType.clobToReader(clob);
+        Reader result2 = ClobReaderType.clobToReader(clob);
 
         assertEquals(reader1, result1);
         assertEquals(reader2, result2);

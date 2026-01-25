@@ -75,7 +75,7 @@ import com.landawn.abacus.annotation.Internal;
  * String userName = userIdMap.getByValue(1002);   // "bob"
  *
  * // Inverse view with swapped keys and values
- * BiMap<Integer, String> idUserMap = userIdMap.inversed();
+ * BiMap<Integer, String> idUserMap = userIdMap.inverse();
  * String user = idUserMap.get(1003);   // "charlie"
  *
  * // Bijective constraint enforcement
@@ -128,14 +128,14 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>Reverse Lookup:</b> {@code getByValue(value)} - Value-to-key lookup</li>
  *   <li><b>Safe Reverse Lookup:</b> {@code getByValueOrDefault(value, defaultKey)}</li>
  *   <li><b>Reverse Removal:</b> {@code removeByValue(value)} - Remove by value</li>
- *   <li><b>Inverse View:</b> {@code inversed()} - Swapped key-value BiMap</li>
+ *   <li><b>Inverse View:</b> {@code inverse()} - Swapped key-value BiMap</li>
  * </ul>
  *
  * <p><b>Advanced Operations:</b>
  * <ul>
  *   <li>{@link #forcePut(Object, Object)} - Override bijective constraint</li>
  *   <li>{@link #copy()} - Create independent copy with same data</li>
- *   <li>{@link #inversed()} - Get inverse view (cached for efficiency)</li>
+ *   <li>{@link #inverse()} - Get inverse view (cached for efficiency)</li>
  * </ul>
  *
  * <p><b>Collection Views:</b>
@@ -1167,13 +1167,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * BiMap<Integer, String> inverse = map.inversed();
+     * BiMap<Integer, String> inverse = map.inverse();
      * String key = inverse.get(1);   // returns "one"
      * }</pre>
      *
      * @return The inverse view of this BiMap where keys and values are swapped.
      */
-    public BiMap<V, K> inversed() {
+    public BiMap<V, K> inverse() {
         return (inverse == null) ? inverse = new BiMap<>(valueMap, keyMap, this) : inverse;
     }
 

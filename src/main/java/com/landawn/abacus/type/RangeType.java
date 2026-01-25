@@ -20,9 +20,9 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedJSONWriter;
-import com.landawn.abacus.util.BufferedXMLWriter;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
@@ -277,7 +277,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -292,8 +292,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 type = TypeFactory.getType(x.upperEndpoint().getClass());
             }
 
-            final boolean isBufferedJSONWriter = writer instanceof BufferedJSONWriter;
-            final CharacterWriter tmpWriter = isBufferedJSONWriter ? Objectory.createBufferedJSONWriter() : Objectory.createBufferedXMLWriter();
+            final boolean isBufferedJsonWriter = writer instanceof BufferedJsonWriter;
+            final CharacterWriter tmpWriter = isBufferedJsonWriter ? Objectory.createBufferedJsonWriter() : Objectory.createBufferedXmlWriter();
 
             try {
                 tmpWriter.write(prefix);
@@ -306,10 +306,10 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
-                if (isBufferedJSONWriter) {
-                    Objectory.recycle((BufferedJSONWriter) tmpWriter);
+                if (isBufferedJsonWriter) {
+                    Objectory.recycle((BufferedJsonWriter) tmpWriter);
                 } else {
-                    Objectory.recycle((BufferedXMLWriter) tmpWriter);
+                    Objectory.recycle((BufferedXmlWriter) tmpWriter);
                 }
             }
         }

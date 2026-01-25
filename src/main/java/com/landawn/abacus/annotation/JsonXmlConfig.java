@@ -52,15 +52,15 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common naming policies:</b></p>
      * <ul>
-     *   <li>LOWER_CAMEL_CASE: myFieldName (default)</li>
+     *   <li>CAMEL_CASE: myFieldName (default)</li>
      *   <li>UPPER_CAMEL_CASE: MyFieldName</li>
-     *   <li>LOWER_CASE_WITH_UNDERSCORE: my_field_name</li>
-     *   <li>UPPER_CASE_WITH_UNDERSCORE: MY_FIELD_NAME</li>
+     *   <li>SNAKE_CASE: my_field_name</li>
+     *   <li>SCREAMING_SNAKE_CASE: MY_FIELD_NAME</li>
      * </ul>
      *
      * @return the naming policy to apply to field names during serialization
      */
-    NamingPolicy namingPolicy() default NamingPolicy.LOWER_CAMEL_CASE;
+    NamingPolicy namingPolicy() default NamingPolicy.CAMEL_CASE;
 
     /**
      * Specifies fields to ignore during serialization/deserialization.

@@ -19,8 +19,8 @@ public class DifferenceTest extends AbstractTest {
     @Test
     public void test_001() {
         Account a = new Account();
-        a.setLastUpdateTime(Dates.currentTimestampRolled(1, TimeUnit.DAYS));
-        a.setCreatedTime(Dates.currentTimestampRolled(1, TimeUnit.DAYS));
+        a.setLastUpdateTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
+        a.setCreatedTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
         Account b = new Account();
         b.setLastUpdateTime(Dates.currentTimestamp());
         b.setCreatedTime(Dates.currentTimestamp());
@@ -28,10 +28,10 @@ public class DifferenceTest extends AbstractTest {
 
         println(diff);
 
-        assertFalse(diff.withDifferentValues().containsKey("lastUpdateTime"));
+        assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
 
         diff = BeanDifference.of(a, b, CommonUtil.asList("lastUpdateTime", "createdTime"));
-        assertTrue(diff.withDifferentValues().containsKey("lastUpdateTime"));
+        assertTrue(diff.differentValues().containsKey("lastUpdateTime"));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class DifferenceTest extends AbstractTest {
 
         println(diff);
 
-        println(diff.withDifferentValues());
+        println(diff.differentValues());
 
         for (int i = 0; i < listA.size(); i++) {
             listA.set(i, Beans.copy(listB.get(i)));

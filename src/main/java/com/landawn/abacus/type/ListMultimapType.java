@@ -126,7 +126,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
         final ListMultimap<K, E> multiMap = N.newLinkedListMultimap(map.size());
 
         for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-            multiMap.putMany(entry.getKey(), entry.getValue());
+            multiMap.putValues(entry.getKey(), entry.getValue());
         }
 
         return multiMap;

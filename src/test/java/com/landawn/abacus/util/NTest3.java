@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.parser.ParserFactory;
-import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.parser.XmlParser;
 
 import lombok.Builder;
 import lombok.Data;
 
 public class NTest3 {
 
-    static final XMLParser abacusXMLParser = ParserFactory.createAbacusXMLParser();
+    static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();
 
     @Test
     public void test_forEach_2() {

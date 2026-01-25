@@ -97,7 +97,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithWindowSizeOne() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<List<Integer>> result = seq.slide(1, 1, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(1, 1, IntFunctions.ofList()).toList();
 
         assertEquals(4, result.size());
         assertEquals(Arrays.asList(1), result.get(0));
@@ -109,7 +109,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithWindowSizeTwoIncrementOne() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        List<List<Integer>> result = seq.slide(2, 1, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 1, IntFunctions.ofList()).toList();
 
         assertEquals(2, result.size());
         assertEquals(Arrays.asList(1, 2), result.get(0));
@@ -119,7 +119,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithWindowSizeTwoIncrementTwo() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<List<Integer>> result = seq.slide(2, 2, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 2, IntFunctions.ofList()).toList();
 
         assertEquals(2, result.size());
         assertEquals(Arrays.asList(1, 2), result.get(0));
@@ -129,7 +129,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithWindowSizeLargerThanIncrement() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        List<List<Integer>> result = seq.slide(3, 2, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(3, 2, IntFunctions.ofList()).toList();
 
         assertEquals(2, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
@@ -139,7 +139,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithIncrementLargerThanWindowSize() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        List<List<Integer>> result = seq.slide(2, 3, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 3, IntFunctions.ofList()).toList();
 
         assertEquals(2, result.size());
         assertEquals(Arrays.asList(1, 2), result.get(0));
@@ -149,7 +149,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithSingleElement() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1);
-        List<List<Integer>> result = seq.slide(2, 1, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 1, IntFunctions.ofList()).toList();
 
         assertEquals(1, result.size());
         assertEquals(Arrays.asList(1), result.get(0));
@@ -158,7 +158,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithEmptySequence() throws Exception {
         Seq<Integer, Exception> seq = Seq.of();
-        List<List<Integer>> result = seq.slide(2, 1, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 1, IntFunctions.ofList()).toList();
 
         assertTrue(result.isEmpty());
     }
@@ -166,7 +166,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithLinkedListSupplier() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<LinkedList<Integer>> result = seq.slide(2, 1, IntFunctions.ofLinkedList()).toList();
+        List<LinkedList<Integer>> result = seq.sliding(2, 1, IntFunctions.ofLinkedList()).toList();
 
         assertEquals(3, result.size());
         assertTrue(result.get(0) instanceof LinkedList);
@@ -176,7 +176,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithHashSetSupplier() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<HashSet<Integer>> result = seq.slide(2, 1, HashSet::new).toList();
+        List<HashSet<Integer>> result = seq.sliding(2, 1, HashSet::new).toList();
 
         assertEquals(3, result.size());
         assertTrue(result.get(0) instanceof HashSet);
@@ -186,22 +186,22 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_WithInvalidWindowSize() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> {
-            Seq.of(1, 2, 3).slide(0, 1, IntFunctions.ofList());
+            Seq.of(1, 2, 3).sliding(0, 1, IntFunctions.ofList());
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            Seq.of(1, 2, 3).slide(-1, 1, IntFunctions.ofList());
+            Seq.of(1, 2, 3).sliding(-1, 1, IntFunctions.ofList());
         });
     }
 
     @Test
     public void testSliding_WithInvalidIncrement() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> {
-            Seq.of(1, 2, 3).slide(1, 0, IntFunctions.ofList());
+            Seq.of(1, 2, 3).sliding(1, 0, IntFunctions.ofList());
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            Seq.of(1, 2, 3).slide(1, -1, IntFunctions.ofList());
+            Seq.of(1, 2, 3).sliding(1, -1, IntFunctions.ofList());
         });
     }
 
@@ -210,7 +210,7 @@ public class Seq106Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.slide(2, 1, (IntFunction) null);
+            seq.sliding(2, 1, (IntFunction) null);
         });
     }
 
@@ -220,14 +220,14 @@ public class Seq106Test extends TestBase {
         seq.close();
 
         assertThrows(IllegalStateException.class, () -> {
-            seq.slide(2, 1, IntFunctions.ofList());
+            seq.sliding(2, 1, IntFunctions.ofList());
         });
     }
 
     @Test
     public void testSliding_CountMethod() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        Seq<List<Integer>, Exception> slidingSeq = seq.slide(2, 1, IntFunctions.ofList());
+        Seq<List<Integer>, Exception> slidingSeq = seq.sliding(2, 1, IntFunctions.ofList());
 
         assertEquals(4, slidingSeq.count());
     }
@@ -235,7 +235,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSliding_AdvanceMethod() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        Seq<List<Integer>, Exception> slidingSeq = seq.slide(2, 1, IntFunctions.ofList()).skip(2);
+        Seq<List<Integer>, Exception> slidingSeq = seq.sliding(2, 1, IntFunctions.ofList()).skip(2);
         List<List<Integer>> result = slidingSeq.toList();
 
         assertEquals(2, result.size());
@@ -246,7 +246,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_SimpleCase() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<String> result = seq.map(String::valueOf).slide(2, 1, Collectors.joining(",")).toList();
+        List<String> result = seq.map(String::valueOf).sliding(2, 1, Collectors.joining(",")).toList();
 
         assertEquals(3, result.size());
         assertEquals("1,2", result.get(0));
@@ -257,7 +257,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_SumCollector() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        List<Integer> result = seq.slide(3, 2, Collectors.summingInt(Integer::intValue)).toList();
+        List<Integer> result = seq.sliding(3, 2, Collectors.summingInt(Integer::intValue)).toList();
 
         assertEquals(2, result.size());
         assertEquals(6, result.get(0));
@@ -267,7 +267,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_ListCollector() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
-        List<List<Integer>> result = seq.slide(2, 1, Collectors.toList()).toList();
+        List<List<Integer>> result = seq.sliding(2, 1, Collectors.toList()).toList();
 
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(1, 2), result.get(0));
@@ -278,7 +278,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_EmptySequence() throws Exception {
         Seq<Integer, Exception> seq = Seq.of();
-        List<String> result = seq.map(String::valueOf).slide(2, 1, Collectors.joining(",")).toList();
+        List<String> result = seq.map(String::valueOf).sliding(2, 1, Collectors.joining(",")).toList();
 
         assertTrue(result.isEmpty());
     }
@@ -286,7 +286,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_SingleElement() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1);
-        List<String> result = seq.map(String::valueOf).slide(2, 1, Collectors.joining(",")).toList();
+        List<String> result = seq.map(String::valueOf).sliding(2, 1, Collectors.joining(",")).toList();
 
         assertEquals(1, result.size());
         assertEquals("1", result.get(0));
@@ -295,7 +295,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_IncrementLargerThanWindowSize() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        List<String> result = seq.map(String::valueOf).slide(2, 3, Collectors.joining(",")).toList();
+        List<String> result = seq.map(String::valueOf).sliding(2, 3, Collectors.joining(",")).toList();
 
         assertEquals(2, result.size());
         assertEquals("1,2", result.get(0));
@@ -307,7 +307,7 @@ public class Seq106Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.slide(0, 1, Collectors.toList());
+            seq.sliding(0, 1, Collectors.toList());
         });
     }
 
@@ -316,7 +316,7 @@ public class Seq106Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.slide(2, 0, Collectors.toList());
+            seq.sliding(2, 0, Collectors.toList());
         });
     }
 
@@ -325,7 +325,7 @@ public class Seq106Test extends TestBase {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.slide(2, 1, (Collector) null);
+            seq.sliding(2, 1, (Collector) null);
         });
     }
 
@@ -335,14 +335,14 @@ public class Seq106Test extends TestBase {
         seq.close();
 
         assertThrows(IllegalStateException.class, () -> {
-            seq.map(String::valueOf).slide(2, 1, Collectors.toList());
+            seq.map(String::valueOf).sliding(2, 1, Collectors.toList());
         });
     }
 
     @Test
     public void testSlidingWithCollector_CountMethod() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        Seq<String, Exception> slidingSeq = seq.map(String::valueOf).slide(2, 1, Collectors.joining(","));
+        Seq<String, Exception> slidingSeq = seq.map(String::valueOf).sliding(2, 1, Collectors.joining(","));
 
         assertEquals(4, slidingSeq.count());
     }
@@ -350,7 +350,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testSlidingWithCollector_AdvanceMethod() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        Seq<String, Exception> slidingSeq = seq.map(String::valueOf).slide(2, 1, Collectors.joining(",")).skip(2);
+        Seq<String, Exception> slidingSeq = seq.map(String::valueOf).sliding(2, 1, Collectors.joining(",")).skip(2);
 
         List<String> result = slidingSeq.toList();
 

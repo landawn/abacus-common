@@ -53,7 +53,7 @@ public class JSONType<T> extends AbstractType<T> {
         super(JSON + WD.LESS_THAN + TypeFactory.getType(clsName).name() + WD.GREATER_THAN);
 
         declaringName = JSON + WD.LESS_THAN + TypeFactory.getType(clsName).declaringName() + WD.GREATER_THAN;
-        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forClass(clsName)));
+        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forName(clsName)));
         //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
         //        this.elementType = parameterTypes[0];
     }

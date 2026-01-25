@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -103,8 +103,8 @@ import com.landawn.abacus.util.TypeReference;
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3));   // Collection to array
- * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class);   // Array to collection
+ * int[] array = arrayType.collectionToArray(Arrays.asList(1, 2, 3));   // Collection to array
+ * Collection<Integer> list = arrayType.arrayToCollection(array, ArrayList.class);   // Array to collection
  *
  * // Type checking and metadata
  * if (type.isNumber()) {
@@ -1273,7 +1273,7 @@ public interface Type<T> {
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */
-    void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException;
+    void writeCharacter(CharacterWriter writer, T x, JsonXmlSerializationConfig<?> config) throws IOException;
 
     /**
      * Converts a collection to an array of this type.
@@ -1283,7 +1283,7 @@ public interface Type<T> {
      * @return the array representation
      * @throws UnsupportedOperationException if not an array type
      */
-    T collection2Array(Collection<?> c);
+    T collectionToArray(Collection<?> c);
 
     /**
      * Converts an array to a collection of the specified type.
@@ -1295,7 +1295,7 @@ public interface Type<T> {
      * @return the created collection containing array elements
      * @throws UnsupportedOperationException if not an array type
      */
-    <E> Collection<E> array2Collection(T x, Class<?> collClass);
+    <E> Collection<E> arrayToCollection(T x, Class<?> collClass);
 
     /**
      * Converts an array to a collection by adding elements to the output collection.
@@ -1306,7 +1306,7 @@ public interface Type<T> {
      * @param output the collection to add elements to
      * @throws UnsupportedOperationException if not an array type
      */
-    <E> void array2Collection(T x, Collection<E> output);
+    <E> void arrayToCollection(T x, Collection<E> output);
 
     /**
      * Calculates the hash code for a value of this type.

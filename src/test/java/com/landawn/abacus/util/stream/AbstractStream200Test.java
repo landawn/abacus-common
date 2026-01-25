@@ -398,14 +398,14 @@ public class AbstractStream200Test extends TestBase {
     }
 
     @Test
-    public void test_slide() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).slide(3).toList();
+    public void test_sliding() {
+        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).sliding(3).toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)), result);
     }
 
     @Test
     public void test_sliding_withIncrement() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).slide(3, 2).toList();
+        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).sliding(3, 2).toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), result);
     }
 
@@ -957,7 +957,7 @@ public class AbstractStream200Test extends TestBase {
         List<Map<String, Object>> data = List.of(Map.of("id", 1, "name", "A"), Map.of("id", 2, "name", "B"));
         com.landawn.abacus.util.Dataset dataset = Stream.of(data).toDataset();
         assertEquals(2, dataset.size());
-        assertTrue(dataset.columnNameList().containsAll(List.of("id", "name")));
+        assertTrue(dataset.columnNames().containsAll(List.of("id", "name")));
     }
 
     @Test
@@ -965,7 +965,7 @@ public class AbstractStream200Test extends TestBase {
         List<List<Object>> data = List.of(List.of(1, "A"), List.of(2, "B"));
         com.landawn.abacus.util.Dataset dataset = Stream.of(data).toDataset(List.of("id", "name"));
         assertEquals(2, dataset.size());
-        assertEquals(List.of("id", "name"), dataset.columnNameList());
+        assertEquals(List.of("id", "name"), dataset.columnNames());
     }
 
     @Test

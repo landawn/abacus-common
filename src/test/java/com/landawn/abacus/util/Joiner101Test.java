@@ -566,7 +566,7 @@ public class Joiner101Test extends TestBase {
 
     @Test
     public void testReuseCachedBufferMultipleOperations() {
-        Joiner joiner = Joiner.with(",").reuseCachedBuffer();
+        Joiner joiner = Joiner.with(",").reuseBuffer();
 
         joiner.append("a").append("b");
         assertEquals("a,b", joiner.toString());
@@ -578,7 +578,7 @@ public class Joiner101Test extends TestBase {
     public void testReuseCachedBufferAfterBufferCreated() {
         Joiner joiner = Joiner.with(",");
         joiner.append("a");
-        assertThrows(IllegalStateException.class, () -> joiner.reuseCachedBuffer());
+        assertThrows(IllegalStateException.class, () -> joiner.reuseBuffer());
     }
 
     @Test
@@ -670,7 +670,7 @@ public class Joiner101Test extends TestBase {
 
     @Test
     public void testAllConfigurationsCombined() {
-        Joiner joiner = Joiner.with("|", "->", "<<", ">>").setEmptyValue("NOTHING").trimBeforeAppend().skipNulls().useForNull("NIL").reuseCachedBuffer();
+        Joiner joiner = Joiner.with("|", "->", "<<", ">>").setEmptyValue("NOTHING").trimBeforeAppend().skipNulls().useForNull("NIL").reuseBuffer();
 
         assertEquals("NOTHING", joiner.toString());
 

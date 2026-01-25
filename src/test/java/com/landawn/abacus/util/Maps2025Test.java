@@ -523,11 +523,11 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutIfAbsent() {
         Map<String, String> map = new HashMap<>();
-        String result1 = Maps.getAndPutIfAbsent(map, "key", () -> "value");
+        String result1 = Maps.getOrPutIfAbsent(map, "key", () -> "value");
         assertEquals("value", result1);
         assertEquals("value", map.get("key"));
 
-        String result2 = Maps.getAndPutIfAbsent(map, "key", () -> "newValue");
+        String result2 = Maps.getOrPutIfAbsent(map, "key", () -> "newValue");
         assertEquals("value", result2);
         assertEquals("value", map.get("key"));
     }
@@ -535,7 +535,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutListIfAbsent() {
         Map<String, List<String>> map = new HashMap<>();
-        List<String> list = Maps.getAndPutListIfAbsent(map, "key");
+        List<String> list = Maps.getOrPutListIfAbsent(map, "key");
         assertNotNull(list);
         assertTrue(list.isEmpty());
         assertEquals(list, map.get("key"));
@@ -547,7 +547,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutSetIfAbsent() {
         Map<String, Set<String>> map = new HashMap<>();
-        Set<String> set = Maps.getAndPutSetIfAbsent(map, "key");
+        Set<String> set = Maps.getOrPutSetIfAbsent(map, "key");
         assertNotNull(set);
         assertTrue(set.isEmpty());
         assertTrue(set instanceof HashSet);
@@ -556,7 +556,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutLinkedHashSetIfAbsent() {
         Map<String, Set<String>> map = new HashMap<>();
-        Set<String> set = Maps.getAndPutLinkedHashSetIfAbsent(map, "key");
+        Set<String> set = Maps.getOrPutLinkedHashSetIfAbsent(map, "key");
         assertNotNull(set);
         assertTrue(set instanceof LinkedHashSet);
     }
@@ -564,7 +564,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutMapIfAbsent() {
         Map<String, Map<String, String>> map = new HashMap<>();
-        Map<String, String> innerMap = Maps.getAndPutMapIfAbsent(map, "key");
+        Map<String, String> innerMap = Maps.getOrPutMapIfAbsent(map, "key");
         assertNotNull(innerMap);
         assertTrue(innerMap.isEmpty());
         assertTrue(innerMap instanceof HashMap);
@@ -573,7 +573,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetAndPutLinkedHashMapIfAbsent() {
         Map<String, Map<String, String>> map = new HashMap<>();
-        Map<String, String> innerMap = Maps.getAndPutLinkedHashMapIfAbsent(map, "key");
+        Map<String, String> innerMap = Maps.getOrPutLinkedHashMapIfAbsent(map, "key");
         assertNotNull(innerMap);
         assertTrue(innerMap instanceof LinkedHashMap);
     }
@@ -581,22 +581,22 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetIfPresentForEach() {
         List<String> keys = Arrays.asList("key1", "missing", "key2", "key3");
-        List<String> values = Maps.getIfPresentForEach(testMap, keys);
+        List<String> values = Maps.getValuesIfPresent(testMap, keys);
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "value2", "value3"), values);
 
-        assertTrue(Maps.getIfPresentForEach(null, keys).isEmpty());
-        assertTrue(Maps.getIfPresentForEach(testMap, null).isEmpty());
+        assertTrue(Maps.getValuesIfPresent(null, keys).isEmpty());
+        assertTrue(Maps.getValuesIfPresent(testMap, null).isEmpty());
     }
 
     @Test
     public void testGetOrDefaultIfAbsentForEach() {
         List<String> keys = Arrays.asList("key1", "missing", "key2");
-        List<String> values = Maps.getOrDefaultIfAbsentForEach(testMap, keys, "default");
+        List<String> values = Maps.getValuesOrDefault(testMap, keys, "default");
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "default", "value2"), values);
 
-        List<String> defaultValues = Maps.getOrDefaultIfAbsentForEach(new HashMap<>(), keys, "default");
+        List<String> defaultValues = Maps.getValuesOrDefault(new HashMap<>(), keys, "default");
         assertEquals(Arrays.asList("default", "default", "default"), defaultValues);
     }
 
@@ -669,26 +669,26 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testContainsEntry() {
         Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
-        assertTrue(Maps.contains(testMap, entry));
+        assertTrue(Maps.containsEntry(testMap, entry));
 
         Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key1", "wrongValue");
-        assertFalse(Maps.contains(testMap, wrongValue));
+        assertFalse(Maps.containsEntry(testMap, wrongValue));
 
         Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
-        assertFalse(Maps.contains(testMap, missing));
+        assertFalse(Maps.containsEntry(testMap, missing));
     }
 
     @Test
     public void testContainsKeyValue() {
-        assertTrue(Maps.contains(testMap, "key1", "value1"));
-        assertFalse(Maps.contains(testMap, "key1", "wrongValue"));
-        assertFalse(Maps.contains(testMap, "missing", "value1"));
+        assertTrue(Maps.containsEntry(testMap, "key1", "value1"));
+        assertFalse(Maps.containsEntry(testMap, "key1", "wrongValue"));
+        assertFalse(Maps.containsEntry(testMap, "missing", "value1"));
 
         testMap.put("nullKey", null);
-        assertTrue(Maps.contains(testMap, "nullKey", null));
+        assertTrue(Maps.containsEntry(testMap, "nullKey", null));
 
-        assertFalse(Maps.contains(new HashMap<>(), "key", "value"));
-        assertFalse(Maps.contains(null, "key", "value"));
+        assertFalse(Maps.containsEntry(new HashMap<>(), "key", "value"));
+        assertFalse(Maps.containsEntry(null, "key", "value"));
     }
 
     @Test
@@ -853,14 +853,14 @@ public class Maps2025Test extends TestBase {
         Map<String, String> map = new HashMap<>(testMap);
 
         Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
-        assertTrue(Maps.remove(map, entry));
+        assertTrue(Maps.removeEntry(map, entry));
         assertFalse(map.containsKey("key1"));
 
         Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
-        assertFalse(Maps.remove(map, missing));
+        assertFalse(Maps.removeEntry(map, missing));
 
         Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key2", "wrongValue");
-        assertFalse(Maps.remove(map, wrongValue));
+        assertFalse(Maps.removeEntry(map, wrongValue));
         assertTrue(map.containsKey("key2"));
     }
 
@@ -868,16 +868,16 @@ public class Maps2025Test extends TestBase {
     public void testRemoveKeyValue() {
         Map<String, String> map = new HashMap<>(testMap);
 
-        assertTrue(Maps.remove(map, "key1", "value1"));
+        assertTrue(Maps.removeEntry(map, "key1", "value1"));
         assertFalse(map.containsKey("key1"));
 
-        assertFalse(Maps.remove(map, "key2", "wrongValue"));
+        assertFalse(Maps.removeEntry(map, "key2", "wrongValue"));
         assertTrue(map.containsKey("key2"));
 
-        assertFalse(Maps.remove(map, "missing", "value"));
+        assertFalse(Maps.removeEntry(map, "missing", "value"));
 
-        assertFalse(Maps.remove(null, "key", "value"));
-        assertFalse(Maps.remove(new HashMap<>(), "key", "value"));
+        assertFalse(Maps.removeEntry(null, "key", "value"));
+        assertFalse(Maps.removeEntry(new HashMap<>(), "key", "value"));
     }
 
     @Test

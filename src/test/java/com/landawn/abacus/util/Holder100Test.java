@@ -328,7 +328,7 @@ public class Holder100Test extends TestBase {
     }
 
     @Test
-    public void testOrElseIfNull() {
+    public void testOrDefaultIfNull() {
         Holder<String> holder = Holder.of("value");
         String result = holder.orElseIfNull("default");
         Assertions.assertEquals("value", result);

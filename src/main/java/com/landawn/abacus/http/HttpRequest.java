@@ -1505,7 +1505,7 @@ public final class HttpRequest {
      * File file = new File("data.json");
      * HttpRequest.url("https://api.example.com/large-data")
      *     .asyncExecute(HttpMethod.GET, file)
-     *     .thenRun(() -> System.out.println("Download complete"));
+     *     .thenRunAsync(() -> System.out.println("Download complete"));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
@@ -1533,7 +1533,7 @@ public final class HttpRequest {
      * File file = new File("data.json");
      * HttpRequest.url("https://api.example.com/large-data")
      *     .asyncExecute(HttpMethod.GET, file, executor)
-     *     .thenRun(() -> System.out.println("Download complete"));
+     *     .thenRunAsync(() -> System.out.println("Download complete"));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
@@ -1561,7 +1561,7 @@ public final class HttpRequest {
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * HttpRequest.url("https://api.example.com/data")
      *     .asyncExecute(HttpMethod.GET, baos)
-     *     .thenRun(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
+     *     .thenRunAsync(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
@@ -1589,7 +1589,7 @@ public final class HttpRequest {
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * HttpRequest.url("https://api.example.com/data")
      *     .asyncExecute(HttpMethod.GET, baos, executor)
-     *     .thenRun(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
+     *     .thenRunAsync(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
@@ -1617,7 +1617,7 @@ public final class HttpRequest {
      * StringWriter writer = new StringWriter();
      * HttpRequest.url("https://api.example.com/text")
      *     .asyncExecute(HttpMethod.GET, writer)
-     *     .thenRun(() -> System.out.println("Content: " + writer.toString()));
+     *     .thenRunAsync(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
@@ -1645,7 +1645,7 @@ public final class HttpRequest {
      * StringWriter writer = new StringWriter();
      * HttpRequest.url("https://api.example.com/text")
      *     .asyncExecute(HttpMethod.GET, writer, executor)
-     *     .thenRun(() -> System.out.println("Content: " + writer.toString()));
+     *     .thenRunAsync(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.

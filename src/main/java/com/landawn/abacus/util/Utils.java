@@ -14,14 +14,14 @@
 
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.parser.JSONParser;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonParser;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
-import com.landawn.abacus.parser.XMLParser;
-import com.landawn.abacus.parser.XMLSerializationConfig;
-import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlParser;
+import com.landawn.abacus.parser.XmlSerializationConfig;
+import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
 /**
@@ -48,29 +48,29 @@ import com.landawn.abacus.type.Type;
  * </ul>
  * 
  * @see ParserFactory
- * @see JSONSerializationConfig
- * @see XMLSerializationConfig
+ * @see JsonSerializationConfig
+ * @see XmlSerializationConfig
  */
 final class Utils {
 
-    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl
-    static final JSONParser jsonParser = ParserFactory.createJSONParser();
+    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
+    static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
-    static final XMLParser abacusXMLParser = ParserFactory.isAbacusXMLAvailable() ? ParserFactory.createAbacusXMLParser() : null;
+    static final XmlParser abacusXmlParser = ParserFactory.isAbacusXmlParserAvailable() ? ParserFactory.createAbacusXmlParser() : null;
 
-    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+    static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
-    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
 
-    static final JSONSerializationConfig jsc = JSC.create().quotePropName(true).quoteMapKey(true);
+    static final JsonSerializationConfig jsc = JSC.create().quotePropName(true).quoteMapKey(true);
 
-    static final JSONSerializationConfig jscPrettyFormat = JSC.create().quotePropName(true).quoteMapKey(true).prettyFormat(true);
+    static final JsonSerializationConfig jscPrettyFormat = JSC.create().quotePropName(true).quoteMapKey(true).prettyFormat(true);
 
-    static final XMLSerializationConfig xsc = XSC.create();
+    static final XmlSerializationConfig xsc = XSC.create();
 
-    static final XMLSerializationConfig xscPrettyFormat = XSC.create().prettyFormat(true);
+    static final XmlSerializationConfig xscPrettyFormat = XSC.create().prettyFormat(true);
 
-    static final XMLSerializationConfig xscForClone = XSC.create().writeTypeInfo(true);
+    static final XmlSerializationConfig xscForClone = XSC.create().writeTypeInfo(true);
 
     static final Type<Boolean> booleanType = Type.of(boolean.class);
 

@@ -64,7 +64,7 @@ public class NClobReaderType extends ReaderType {
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         final NClob clob = rs.getNClob(columnIndex);
-        return clob2Reader(clob);
+        return clobToReader(clob);
     }
 
     /**
@@ -95,7 +95,7 @@ public class NClobReaderType extends ReaderType {
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clob2Reader(rs.getNClob(columnLabel));
+        return clobToReader(rs.getNClob(columnLabel));
     }
 
     /**
@@ -214,7 +214,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NClob nclob = resultSet.getNClob(1);
-     * Reader reader = NClobReaderType.clob2Reader(nclob);
+     * Reader reader = NClobReaderType.clobToReader(nclob);
      * // NCLOB is automatically freed after conversion
      * }</pre>
      *
@@ -222,7 +222,7 @@ public class NClobReaderType extends ReaderType {
      * @return a Reader for the NCLOB character stream, or {@code null} if the input NCLOB is null
      * @throws SQLException if a database access error occurs while accessing the NCLOB
      */
-    static Reader clob2Reader(final NClob clob) throws SQLException {
+    static Reader clobToReader(final NClob clob) throws SQLException {
         Reader reader = null;
 
         if (clob != null) {

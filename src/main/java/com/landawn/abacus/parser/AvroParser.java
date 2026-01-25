@@ -308,7 +308,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         final Type<Object> type = Type.of(cls);
 
         if (type.isBean()) {
-            return toGenericRecord(Beans.bean2Map(obj), schema);
+            return toGenericRecord(Beans.beanToMap(obj), schema);
         } else if (type.isMap()) {
             final Map<String, Object> m = (Map<String, Object>) obj;
             final Record localRecord = new Record(schema);

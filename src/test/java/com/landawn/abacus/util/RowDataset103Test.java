@@ -244,7 +244,7 @@ public class RowDataset103Test extends TestBase {
             Multimap<Integer, Object[], List<Object[]>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofObjectArray(),
                     mapSupplier);
 
-            Assertions.assertEquals(4, result.size());
+            Assertions.assertEquals(4, result.totalValueCount());
             List<Object[]> firstValue = result.get(1);
             Assertions.assertEquals("John", firstValue.get(0)[0]);
             Assertions.assertEquals(25, firstValue.get(0)[1]);
@@ -257,7 +257,7 @@ public class RowDataset103Test extends TestBase {
             Multimap<Integer, List<Object>, List<List<Object>>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, IntFunctions.ofList(),
                     mapSupplier);
 
-            Assertions.assertEquals(4, result.size());
+            Assertions.assertEquals(4, result.totalValueCount());
             List<List<Object>> firstValue = result.get(1);
             Assertions.assertEquals("John", firstValue.get(0).get(0));
             Assertions.assertEquals(25, firstValue.get(0).get(1));
@@ -270,7 +270,7 @@ public class RowDataset103Test extends TestBase {
             Multimap<Integer, Map<String, Object>, List<Map<String, Object>>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns,
                     IntFunctions.ofMap(), mapSupplier);
 
-            Assertions.assertEquals(4, result.size());
+            Assertions.assertEquals(4, result.totalValueCount());
             List<Map<String, Object>> firstValue = result.get(1);
             Assertions.assertEquals("John", firstValue.get(0).get("name"));
             Assertions.assertEquals(25, firstValue.get(0).get("age"));
@@ -282,7 +282,7 @@ public class RowDataset103Test extends TestBase {
 
             Multimap<Integer, Person, List<Person>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, i -> new Person(), mapSupplier);
 
-            Assertions.assertEquals(4, result.size());
+            Assertions.assertEquals(4, result.totalValueCount());
             List<Person> firstValue = result.get(1);
             Assertions.assertEquals("John", firstValue.get(0).getName());
             Assertions.assertEquals(25, firstValue.get(0).getAge());
@@ -426,7 +426,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset intersection = dataset.intersection(otherDataset);
+        Dataset intersection = N.intersection(dataset, otherDataset);
 
         Assertions.assertEquals(2, intersection.size());
     }
@@ -442,7 +442,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset intersection = dataset.intersection(otherDataset, true);
+        Dataset intersection = N.intersection(dataset, otherDataset, true);
 
         Assertions.assertEquals(2, intersection.size());
     }
@@ -459,7 +459,7 @@ public class RowDataset103Test extends TestBase {
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
-        Dataset intersection = dataset.intersection(otherDataset, keyColumns);
+        Dataset intersection = N.intersection(dataset, otherDataset, keyColumns);
 
         Assertions.assertEquals(2, intersection.size());
     }
@@ -475,7 +475,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset difference = dataset.difference(otherDataset);
+        Dataset difference = N.difference(dataset, otherDataset);
 
         Assertions.assertEquals(2, difference.size());
     }
@@ -491,7 +491,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset difference = dataset.difference(otherDataset, true);
+        Dataset difference = N.difference(dataset, otherDataset, true);
 
         Assertions.assertEquals(2, difference.size());
     }
@@ -508,7 +508,7 @@ public class RowDataset103Test extends TestBase {
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
-        Dataset difference = dataset.difference(otherDataset, keyColumns);
+        Dataset difference = N.difference(dataset, otherDataset, keyColumns);
 
         Assertions.assertEquals(2, difference.size());
     }
@@ -524,7 +524,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset);
+        Dataset symmetricDiff = N.symmetricDifference(dataset, otherDataset);
 
         Assertions.assertEquals(4, symmetricDiff.size());
     }
@@ -540,7 +540,7 @@ public class RowDataset103Test extends TestBase {
 
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
-        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, true);
+        Dataset symmetricDiff = N.symmetricDifference(dataset, otherDataset, true);
 
         Assertions.assertEquals(3, symmetricDiff.size());
     }
@@ -557,7 +557,7 @@ public class RowDataset103Test extends TestBase {
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
-        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns);
+        Dataset symmetricDiff = N.symmetricDifference(dataset, otherDataset, keyColumns);
 
         Assertions.assertEquals(5, symmetricDiff.size());
     }
@@ -574,7 +574,7 @@ public class RowDataset103Test extends TestBase {
         RowDataset otherDataset = new RowDataset(otherColumnNames, otherColumnList);
 
         Collection<String> keyColumns = Arrays.asList("id");
-        Dataset symmetricDiff = dataset.symmetricDifference(otherDataset, keyColumns, true);
+        Dataset symmetricDiff = N.symmetricDifference(dataset, otherDataset, keyColumns, true);
 
         Assertions.assertEquals(4, symmetricDiff.size());
     }

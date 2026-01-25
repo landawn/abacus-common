@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -331,13 +331,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * CharacterWriter writer = new CharacterWriter();
      * Instant instant = Instant.ofEpochMilli(1703502645123L);
      *
-     * JSONXMLSerializationConfig config =
-     *     JSONXMLSerializationConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
+     * JsonXmlSerializationConfig config =
+     *     JsonXmlSerializationConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
      * type.writeCharacter(writer, instant, config);
      * // Writes: 1703502645123
      *
      * writer = new CharacterWriter();
-     * config = JSONXMLSerializationConfig.of()
+     * config = JsonXmlSerializationConfig.of()
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
      * type.writeCharacter(writer, instant, config);
      * // Writes: "2023-12-25T10:30:45.123Z"
@@ -350,7 +350,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Instant x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

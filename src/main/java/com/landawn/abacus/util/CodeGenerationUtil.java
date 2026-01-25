@@ -395,8 +395,8 @@ public final class CodeGenerationUtil {
      *     .className("Props")
      *     .packageName("com.example.generated")
      *     .srcDir("./src/main/java")
-     *     .generateLowerCaseWithUnderscore(true)
-     *     .generateUpperCaseWithUnderscore(true)
+     *     .generateSnakeCase(true)
+     *     .generateScreamingSnakeCase(true)
      *     .generateFunctionPropName(true)
      *     .propFunctions(N.asLinkedHashMap("min", MIN_FUNC, "max", MAX_FUNC))
      *     .build();
@@ -521,7 +521,7 @@ public final class CodeGenerationUtil {
             }
 
             if (generateClassPropNameList) {
-                for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
                     final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                     sb.append(LINE_SEPARATOR)
@@ -542,16 +542,16 @@ public final class CodeGenerationUtil {
         }
 
         {
-            if (codeConfig.isGenerateLowerCaseWithUnderscore()) {
+            if (codeConfig.isGenerateSnakeCase()) {
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
-                final BiFunction<Class<?>, String, String> propNameConverterForLowerCaseWithUnderscore = N.defaultIfNull(
-                        codeConfig.getPropNameConverterForLowerCaseWithUnderscore(), (cls, propName) -> Strings.toLowerCaseWithUnderscore(propName));
+                final BiFunction<Class<?>, String, String> propNameConverterForSnakeCase = N.defaultIfNull(codeConfig.getPropNameConverterForSnakeCase(),
+                        (cls, propName) -> Strings.toSnakeCase(propName));
 
                 for (final Class<?> cls : entityClassesToUse) {
                     final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                     String newPropName = null;
-                    String propNameInLowerCaseWithUnderscore = null;
+                    String propNameInSnakeCase = null;
 
                     for (final String propName : Beans.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
@@ -560,16 +560,16 @@ public final class CodeGenerationUtil {
                             continue;
                         }
 
-                        propNameInLowerCaseWithUnderscore = propNameConverterForLowerCaseWithUnderscore.apply(cls, propName);
+                        propNameInSnakeCase = propNameConverterForSnakeCase.apply(cls, propName);
 
-                        if (Strings.isEmpty(propNameInLowerCaseWithUnderscore)) {
+                        if (Strings.isEmpty(propNameInSnakeCase)) {
                             continue;
                         }
 
                         if (newPropName.equals(propName)) {
-                            propNameMap.put(Tuple.of(newPropName, propNameInLowerCaseWithUnderscore), simpleClassName);
+                            propNameMap.put(Tuple.of(newPropName, propNameInSnakeCase), simpleClassName);
                         } else {
-                            propNameMap.put(Tuple.of(newPropName, propNameInLowerCaseWithUnderscore), simpleClassName + "." + propName);
+                            propNameMap.put(Tuple.of(newPropName, propNameInSnakeCase), simpleClassName + "." + propName);
                         }
 
                         if (generateClassPropNameList) {
@@ -594,7 +594,7 @@ public final class CodeGenerationUtil {
                 sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("public interface ")
-                        .append(N.defaultIfEmpty(codeConfig.getClassNameForLowerCaseWithUnderscore(), SL))
+                        .append(N.defaultIfEmpty(codeConfig.getClassNameForSnakeCase(), SL))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
                         .append(LINE_SEPARATOR); //
@@ -625,7 +625,7 @@ public final class CodeGenerationUtil {
                 }
 
                 if (generateClassPropNameList) {
-                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPARATOR)
@@ -652,16 +652,16 @@ public final class CodeGenerationUtil {
         }
 
         {
-            if (codeConfig.isGenerateUpperCaseWithUnderscore()) {
+            if (codeConfig.isGenerateScreamingSnakeCase()) {
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
-                final BiFunction<Class<?>, String, String> propNameConverterForUpperCaseWithUnderscore = N.defaultIfNull(
-                        codeConfig.getPropNameConverterForUpperCaseWithUnderscore(), (cls, propName) -> Strings.toUpperCaseWithUnderscore(propName));
+                final BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase = N
+                        .defaultIfNull(codeConfig.getPropNameConverterForScreamingSnakeCase(), (cls, propName) -> Strings.toScreamingSnakeCase(propName));
 
                 for (final Class<?> cls : entityClassesToUse) {
                     final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                     String newPropName = null;
-                    String propNameInUpperCaseWithUnderscore = null;
+                    String propNameInScreamingSnakeCase = null;
 
                     for (final String propName : Beans.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
@@ -670,16 +670,16 @@ public final class CodeGenerationUtil {
                             continue;
                         }
 
-                        propNameInUpperCaseWithUnderscore = propNameConverterForUpperCaseWithUnderscore.apply(cls, propName);
+                        propNameInScreamingSnakeCase = propNameConverterForScreamingSnakeCase.apply(cls, propName);
 
-                        if (Strings.isEmpty(propNameInUpperCaseWithUnderscore)) {
+                        if (Strings.isEmpty(propNameInScreamingSnakeCase)) {
                             continue;
                         }
 
                         if (newPropName.equals(propName)) {
-                            propNameMap.put(Tuple.of(newPropName, propNameInUpperCaseWithUnderscore), simpleClassName);
+                            propNameMap.put(Tuple.of(newPropName, propNameInScreamingSnakeCase), simpleClassName);
                         } else {
-                            propNameMap.put(Tuple.of(newPropName, propNameInUpperCaseWithUnderscore), simpleClassName + "." + propName);
+                            propNameMap.put(Tuple.of(newPropName, propNameInScreamingSnakeCase), simpleClassName + "." + propName);
                         }
 
                         if (generateClassPropNameList) {
@@ -704,7 +704,7 @@ public final class CodeGenerationUtil {
                 sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("public interface ")
-                        .append(N.defaultIfEmpty(codeConfig.getClassNameForUpperCaseWithUnderscore(), SU))
+                        .append(N.defaultIfEmpty(codeConfig.getClassNameForScreamingSnakeCase(), SU))
                         .append(" {")
                         .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
                         .append(LINE_SEPARATOR); //
@@ -735,7 +735,7 @@ public final class CodeGenerationUtil {
                 }
 
                 if (generateClassPropNameList) {
-                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
                         final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPARATOR)
@@ -784,7 +784,7 @@ public final class CodeGenerationUtil {
                                 continue;
                             }
 
-                            final Method propGetMethod = Beans.getPropGetMethod(cls, propName);
+                            final Method propGetMethod = Beans.getPropGetter(cls, propName);
 
                             if (propGetMethod == null) {
                                 continue;
@@ -900,9 +900,9 @@ public final class CodeGenerationUtil {
      *     .srcDir("./samples")
      *     .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName)
      *     .generateClassPropNameList(true)
-     *     .generateLowerCaseWithUnderscore(true)
-     *     .generateUpperCaseWithUnderscore(true)
-     *     .classNameForUpperCaseWithUnderscore("sau")
+     *     .generateSnakeCase(true)
+     *     .generateScreamingSnakeCase(true)
+     *     .classNameForScreamingSnakeCase("sau")
      *     .generateFunctionPropName(true)
      *     .functionClassName("f")
      *     .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
@@ -934,24 +934,24 @@ public final class CodeGenerationUtil {
         private boolean generateClassPropNameList;
 
         /** Whether to generate an inner interface with lower case property names concatenated with underscore. Default is false. */
-        private boolean generateLowerCaseWithUnderscore;
+        private boolean generateSnakeCase;
 
         /** Name for the lower case with underscore inner interface. If null, uses {@link #SL}. */
-        private String classNameForLowerCaseWithUnderscore;
+        private String classNameForSnakeCase;
 
         /** Function to convert property names to lower case with underscore format.
-         * If null, uses {@link Strings#toLowerCaseWithUnderscore(String)}. */
-        private BiFunction<Class<?>, String, String> propNameConverterForLowerCaseWithUnderscore;
+         * If null, uses {@link Strings#toSnakeCase(String)}. */
+        private BiFunction<Class<?>, String, String> propNameConverterForSnakeCase;
 
         /** Whether to generate an inner interface with upper case property names concatenated with underscore. Default is false. */
-        private boolean generateUpperCaseWithUnderscore;
+        private boolean generateScreamingSnakeCase;
 
         /** Name for the upper case with underscore inner interface. If null, uses {@link #SU}. */
-        private String classNameForUpperCaseWithUnderscore;
+        private String classNameForScreamingSnakeCase;
 
         /** Function to convert property names to upper case with underscore format.
-         * If null, uses {@link Strings#toUpperCaseWithUnderscore(String)}. */
-        private BiFunction<Class<?>, String, String> propNameConverterForUpperCaseWithUnderscore;
+         * If null, uses {@link Strings#toScreamingSnakeCase(String)}. */
+        private BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase;
 
         /** Whether to generate an inner interface with function-based property names (e.g., min(age), max(salary)). Default is false. */
         private boolean generateFunctionPropName;

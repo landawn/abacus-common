@@ -80,7 +80,7 @@ public class XMLUtilTest extends AbstractParserTest {
         contact.setCity("sunnyvale");
         account.setContact(contact);
 
-        final String xml = abacusXMLParser.serialize(account);
+        final String xml = abacusXmlParser.serialize(account);
         N.println(xml);
 
         final Document doc = XmlUtil.createDOMParser().parse(new ByteArrayInputStream(xml.getBytes()));
@@ -132,7 +132,7 @@ public class XMLUtilTest extends AbstractParserTest {
         transfermer.getOutputProperties();
 
         final Account account = createAccount(Account.class);
-        final String xml = abacusXMLParser.serialize(account);
+        final String xml = abacusXmlParser.serialize(account);
 
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser();
         final Document doc = docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
@@ -150,13 +150,13 @@ public class XMLUtilTest extends AbstractParserTest {
         str = IOUtil.readAllToString(file);
         N.println(str);
         assertEquals(xml, str.substring(54));
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     @Test
     public void test_xmlStreamReader_writer() throws Exception {
         final Account account = createAccount(Account.class);
-        final String xml = abacusXMLParser.serialize(account);
+        final String xml = abacusXmlParser.serialize(account);
         XMLStreamReader reader = XmlUtil.createXMLStreamReader(new ByteArrayInputStream(xml.getBytes()));
         reader.next();
         N.println(reader.getLocalName());

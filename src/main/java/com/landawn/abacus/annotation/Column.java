@@ -83,7 +83,7 @@ public @interface Column {
      * <ul>
      *   <li>snake_case for PostgreSQL and MySQL</li>
      *   <li>UPPER_CASE for Oracle</li>
-     *   <li>PascalCase for SQL Server</li>
+     *   <li>UpperCamelCase for SQL Server</li>
      * </ul>
      * 
      * <p><b>Usage Examples:</b></p>

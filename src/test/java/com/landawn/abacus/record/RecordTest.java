@@ -37,7 +37,7 @@ public class RecordTest {
 
         N.println(N.convert(record2, RecordB.class));
 
-        assertEquals(recordA, Beans.map2Bean(Beans.bean2Map(record2), RecordA.class));
+        assertEquals(recordA, Beans.mapToBean(Beans.beanToMap(record2), RecordA.class));
     }
 
     @Test
@@ -61,18 +61,18 @@ public class RecordTest {
 
         N.println(N.convert(record2, RecordA.class));
 
-        assertEquals(recordA, Beans.map2Bean(Beans.bean2Map(record2), RecordB.class));
+        assertEquals(recordA, Beans.mapToBean(Beans.beanToMap(record2), RecordB.class));
 
     }
 
     @Test
     public void test_03() {
         Element e = new Element(100, "abc", N.asList(1L), N.asMap("a", BigInteger.ZERO), N.asMap("b", 2d), N.asList("Speaker"));
-        Map<String, Object> map = Beans.bean2Map(e);
+        Map<String, Object> map = Beans.beanToMap(e);
 
         N.println(map);
 
-        Element e2 = Beans.map2Bean(map, Element.class);
+        Element e2 = Beans.mapToBean(map, Element.class);
 
         assertEquals(e, e2);
 

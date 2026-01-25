@@ -113,7 +113,7 @@ public class Dataset2025Test extends TestBase {
 
     @Test
     public void testColumnNameList() {
-        ImmutableList<String> names = dataset.columnNameList();
+        ImmutableList<String> names = dataset.columnNames();
         assertNotNull(names);
         assertEquals(4, names.size());
         assertEquals("id", names.get(0));
@@ -287,7 +287,7 @@ public class Dataset2025Test extends TestBase {
 
     @Test
     public void testGet_CurrentRow_ByIndex() {
-        dataset.absolute(1);
+        dataset.moveToRow(1);
         assertEquals(Integer.valueOf(2), dataset.get(0));
         assertEquals("Bob", dataset.get(1));
         assertEquals(Integer.valueOf(30), dataset.get(2));
@@ -296,7 +296,7 @@ public class Dataset2025Test extends TestBase {
 
     @Test
     public void testGet_CurrentRow_ByName() {
-        dataset.absolute(1);
+        dataset.moveToRow(1);
         assertEquals(Integer.valueOf(2), dataset.get("id"));
         assertEquals("Bob", dataset.get("name"));
         assertEquals(Integer.valueOf(30), dataset.get("age"));
@@ -306,114 +306,114 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testGetBoolean_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("flag"), new Object[][] { { true }, { false } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.getBoolean(0));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.getBoolean(0));
     }
 
     @Test
     public void testGetBoolean_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("flag"), new Object[][] { { true }, { false } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.getBoolean("flag"));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.getBoolean("flag"));
     }
 
     @Test
     public void testGetChar_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("letter"), new Object[][] { { 'A' }, { 'B' } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals('A', ds.getChar(0));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertEquals('B', ds.getChar(0));
     }
 
     @Test
     public void testGetChar_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("letter"), new Object[][] { { 'A' }, { 'B' } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals('A', ds.getChar("letter"));
     }
 
     @Test
     public void testGetByte_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals((byte) 1, ds.getByte(0));
     }
 
     @Test
     public void testGetByte_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals((byte) 1, ds.getByte("num"));
     }
 
     @Test
     public void testGetShort_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals((short) 100, ds.getShort(0));
     }
 
     @Test
     public void testGetShort_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals((short) 100, ds.getShort("num"));
     }
 
     @Test
     public void testGetInt_ByIndex() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(25, dataset.getInt(2));
     }
 
     @Test
     public void testGetInt_ByName() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(25, dataset.getInt("age"));
     }
 
     @Test
     public void testGetLong_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals(1000L, ds.getLong(0));
     }
 
     @Test
     public void testGetLong_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals(1000L, ds.getLong("num"));
     }
 
     @Test
     public void testGetFloat_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals(1.5f, ds.getFloat(0));
     }
 
     @Test
     public void testGetFloat_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertEquals(1.5f, ds.getFloat("num"));
     }
 
     @Test
     public void testGetDouble_ByIndex() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(50000.0, dataset.getDouble(3));
     }
 
     @Test
     public void testGetDouble_ByName() {
-        dataset.absolute(0);
+        dataset.moveToRow(0);
         assertEquals(50000.0, dataset.getDouble("salary"));
     }
 
@@ -427,18 +427,18 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testIsNull_CurrentRow_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("val"), new Object[][] { { null }, { "test" } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.isNull(0));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.isNull(0));
     }
 
     @Test
     public void testIsNull_CurrentRow_ByName() {
         Dataset ds = Dataset.rows(Arrays.asList("val"), new Object[][] { { null }, { "test" } });
-        ds.absolute(0);
+        ds.moveToRow(0);
         assertTrue(ds.isNull("val"));
-        ds.absolute(1);
+        ds.moveToRow(1);
         assertFalse(ds.isNull("val"));
     }
 
@@ -452,7 +452,7 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testSet_CurrentRow_ByIndex() {
         Dataset ds = dataset.copy();
-        ds.absolute(0);
+        ds.moveToRow(0);
         ds.set(1, "UpdatedName");
         assertEquals("UpdatedName", ds.get(0, 1));
     }
@@ -460,7 +460,7 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testSet_CurrentRow_ByName() {
         Dataset ds = dataset.copy();
-        ds.absolute(0);
+        ds.moveToRow(0);
         ds.set("name", "UpdatedName");
         assertEquals("UpdatedName", ds.get(0, 1));
     }
@@ -719,30 +719,30 @@ public class Dataset2025Test extends TestBase {
 
     @Test
     public void testCurrentRowNum() {
-        assertEquals(0, dataset.currentRowNum());
-        dataset.absolute(2);
-        assertEquals(2, dataset.currentRowNum());
+        assertEquals(0, dataset.currentRowIndex());
+        dataset.moveToRow(2);
+        assertEquals(2, dataset.currentRowIndex());
     }
 
     @Test
     public void testAbsolute() {
-        dataset.absolute(2);
-        assertEquals(2, dataset.currentRowNum());
+        dataset.moveToRow(2);
+        assertEquals(2, dataset.currentRowIndex());
         assertEquals(Integer.valueOf(3), dataset.get("id"));
     }
 
     @Test
     public void testFirst() {
-        dataset.absolute(2);
-        dataset.absolute(0);
-        assertEquals(0, dataset.currentRowNum());
+        dataset.moveToRow(2);
+        dataset.moveToRow(0);
+        assertEquals(0, dataset.currentRowIndex());
         assertEquals(Integer.valueOf(1), dataset.get("id"));
     }
 
     @Test
     public void testLast() {
-        dataset.absolute(dataset.size() - 1);
-        assertEquals(3, dataset.currentRowNum());
+        dataset.moveToRow(dataset.size() - 1);
+        assertEquals(3, dataset.currentRowIndex());
         assertEquals(Integer.valueOf(4), dataset.get("id"));
     }
 
@@ -1164,7 +1164,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" } });
 
-        Dataset diff = ds1.difference(ds2);
+        Dataset diff = N.difference(ds1, ds2);
         assertNotNull(diff);
     }
 
@@ -1174,7 +1174,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" } });
 
-        Dataset diff = ds1.symmetricDifference(ds2);
+        Dataset diff = N.symmetricDifference(ds1, ds2);
         assertNotNull(diff);
     }
 
@@ -1569,7 +1569,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" }, { 4, "Diana" } });
 
-        Dataset intersection = ds1.intersection(ds2);
+        Dataset intersection = N.intersection(ds1, ds2);
 
         assertNotNull(intersection);
         assertEquals(2, intersection.size());
@@ -1581,7 +1581,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" } });
 
-        Dataset intersection = ds1.intersection(ds2, true);
+        Dataset intersection = N.intersection(ds1, ds2, true);
 
         assertNotNull(intersection);
         assertEquals(1, intersection.size());
@@ -1595,7 +1595,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name", "salary"), new Object[][] { { 2, "Bob", 60000.0 }, { 3, "Charlie", 70000.0 } });
 
-        Dataset intersection = ds1.intersection(ds2, Arrays.asList("id"));
+        Dataset intersection = N.intersection(ds1, ds2, Arrays.asList("id"));
 
         assertNotNull(intersection);
         assertEquals(1, intersection.size());
@@ -1608,7 +1608,7 @@ public class Dataset2025Test extends TestBase {
 
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "Bob" }, { 3, "Charlie" } });
 
-        Dataset intersection = ds1.intersection(ds2, Arrays.asList("id", "name"), true);
+        Dataset intersection = N.intersection(ds1, ds2, Arrays.asList("id", "name"), true);
 
         assertNotNull(intersection);
         assertEquals(1, intersection.size());

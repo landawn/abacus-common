@@ -15,12 +15,12 @@ import com.landawn.abacus.entity.BigXBean;
 import com.landawn.abacus.entity.PersonType;
 import com.landawn.abacus.entity.PersonsType;
 import com.landawn.abacus.entity.XBean;
-import com.landawn.abacus.parser.JSONParser;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonParser;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
-import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.parser.XmlParser;
 import com.landawn.abacus.types.JAXBean;
 import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Beans;
@@ -30,31 +30,31 @@ import com.landawn.abacus.util.Strings;
 
 @Tag("old-test")
 public abstract class AbstractParserTest extends AbstractTest {
-    protected static final JSONParser jsonParser = ParserFactory.createJSONParser();
-    protected static final XMLParser abacusXMLParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLParser;
-    protected static final XMLParser abacusXMLSAXParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLSAXParser;
-    protected static final XMLParser abacusXMLStAXParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLStAXParser;
-    protected static final XMLParser abacusXMLDOMParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLDOMParser;
-    protected static final XMLParser xmlParser = com.landawn.abacus.parser.AbstractParserTest.xmlParser;
-    protected static final XMLParser xmlDOMParser = com.landawn.abacus.parser.AbstractParserTest.xmlDOMParser;
+    protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
+    protected static final XmlParser abacusXmlParser = com.landawn.abacus.parser.AbstractParserTest.abacusXmlParser;
+    protected static final XmlParser abacusXMLSAXParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLSAXParser;
+    protected static final XmlParser abacusXMLStAXParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLStAXParser;
+    protected static final XmlParser abacusXMLDOMParser = com.landawn.abacus.parser.AbstractParserTest.abacusXMLDOMParser;
+    protected static final XmlParser xmlParser = com.landawn.abacus.parser.AbstractParserTest.xmlParser;
+    protected static final XmlParser xmlDOMParser = com.landawn.abacus.parser.AbstractParserTest.xmlDOMParser;
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
-    protected static final JSONSerializationConfig jsc = JSC.of(true, true);
+    protected static final JsonSerializationConfig jsc = JSC.of(true, true);
     protected static final XBean simpleBean = createXBean();
     protected static final BigXBean bigBean = createBigBean(100);
     static final List<ObjectMapper> objectMapperPool = new ArrayList<>(100);
     static final List<Gson> gsonPool = new ArrayList<>(100);
 
     static {
-        Beans.registerXMLBindingClass(PersonsType.class);
-        Beans.registerXMLBindingClass(BigXBean.class);
-        Beans.registerXMLBindingClass(PersonType.class);
-        Beans.registerXMLBindingClass(JAXBean.class);
+        Beans.registerXmlBindingClass(PersonsType.class);
+        Beans.registerXmlBindingClass(BigXBean.class);
+        Beans.registerXmlBindingClass(PersonType.class);
+        Beans.registerXmlBindingClass(JAXBean.class);
     }
 
     static {
         try {
             N.println("xml======================================================================");
-            N.println(abacusXMLParser.serialize(simpleBean));
+            N.println(abacusXmlParser.serialize(simpleBean));
 
             N.println("josn======================================================================");
             N.println(jsonParser.serialize(simpleBean, jsc));

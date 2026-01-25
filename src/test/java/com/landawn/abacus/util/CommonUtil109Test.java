@@ -885,15 +885,15 @@ public class CommonUtil109Test extends TestBase {
     @Test
     public void testIndicesOfAllMin_array() {
         Integer[] arr = { 3, 1, 4, 1, 5, 1 };
-        int[] indices = CommonUtil.indicesOfAllMin(arr);
+        int[] indices = CommonUtil.indicesOfMin(arr);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         Integer[] single = { 5 };
-        int[] singleIndices = CommonUtil.indicesOfAllMin(single);
+        int[] singleIndices = CommonUtil.indicesOfMin(single);
         Assertions.assertArrayEquals(new int[] { 0 }, singleIndices);
 
         Integer[] empty = {};
-        int[] emptyIndices = CommonUtil.indicesOfAllMin(empty);
+        int[] emptyIndices = CommonUtil.indicesOfMin(empty);
         Assertions.assertArrayEquals(new int[] {}, emptyIndices);
     }
 
@@ -901,22 +901,22 @@ public class CommonUtil109Test extends TestBase {
     public void testIndicesOfAllMin_array_withComparator() {
         String[] arr = { "cat", "a", "dog", "a", "bird", "a" };
         Comparator<String> cmp = Comparator.comparing(String::length);
-        int[] indices = CommonUtil.indicesOfAllMin(arr, cmp);
+        int[] indices = CommonUtil.indicesOfMin(arr, cmp);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         String[] arrWithNull = { null, "a", "b", null };
-        int[] nullIndices = CommonUtil.indicesOfAllMin(arrWithNull, null);
+        int[] nullIndices = CommonUtil.indicesOfMin(arrWithNull, null);
         Assertions.assertArrayEquals(new int[] { 1 }, nullIndices);
     }
 
     @Test
     public void testIndicesOfAllMin_collection() {
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 1);
-        int[] indices = CommonUtil.indicesOfAllMin(list);
+        int[] indices = CommonUtil.indicesOfMin(list);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         List<Integer> empty = new ArrayList<>();
-        int[] emptyIndices = CommonUtil.indicesOfAllMin(empty);
+        int[] emptyIndices = CommonUtil.indicesOfMin(empty);
         Assertions.assertArrayEquals(new int[] {}, emptyIndices);
     }
 
@@ -924,22 +924,22 @@ public class CommonUtil109Test extends TestBase {
     public void testIndicesOfAllMin_collection_withComparator() {
         List<String> list = Arrays.asList("cat", "a", "dog", "a", "bird", "a");
         Comparator<String> cmp = Comparator.comparing(String::length);
-        int[] indices = CommonUtil.indicesOfAllMin(list, cmp);
+        int[] indices = CommonUtil.indicesOfMin(list, cmp);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
     }
 
     @Test
     public void testIndicesOfAllMax_array() {
         Integer[] arr = { 3, 5, 4, 5, 1, 5 };
-        int[] indices = CommonUtil.indicesOfAllMax(arr);
+        int[] indices = CommonUtil.indicesOfMax(arr);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         Integer[] single = { 5 };
-        int[] singleIndices = CommonUtil.indicesOfAllMax(single);
+        int[] singleIndices = CommonUtil.indicesOfMax(single);
         Assertions.assertArrayEquals(new int[] { 0 }, singleIndices);
 
         Integer[] empty = {};
-        int[] emptyIndices = CommonUtil.indicesOfAllMax(empty);
+        int[] emptyIndices = CommonUtil.indicesOfMax(empty);
         Assertions.assertArrayEquals(new int[] {}, emptyIndices);
     }
 
@@ -947,22 +947,22 @@ public class CommonUtil109Test extends TestBase {
     public void testIndicesOfAllMax_array_withComparator() {
         String[] arr = { "a", "cat", "b", "dog", "c", "dog" };
         Comparator<String> cmp = Comparator.comparing(String::length);
-        int[] indices = CommonUtil.indicesOfAllMax(arr, cmp);
+        int[] indices = CommonUtil.indicesOfMax(arr, cmp);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         String[] arrWithNull = { "a", null, "b", null };
-        int[] nullIndices = CommonUtil.indicesOfAllMax(arrWithNull, null);
+        int[] nullIndices = CommonUtil.indicesOfMax(arrWithNull, null);
         Assertions.assertArrayEquals(new int[] { 2 }, nullIndices);
     }
 
     @Test
     public void testIndicesOfAllMax_collection() {
         List<Integer> list = Arrays.asList(3, 5, 4, 5, 1, 5);
-        int[] indices = CommonUtil.indicesOfAllMax(list);
+        int[] indices = CommonUtil.indicesOfMax(list);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         List<Integer> empty = new ArrayList<>();
-        int[] emptyIndices = CommonUtil.indicesOfAllMax(empty);
+        int[] emptyIndices = CommonUtil.indicesOfMax(empty);
         Assertions.assertArrayEquals(new int[] {}, emptyIndices);
     }
 
@@ -970,7 +970,7 @@ public class CommonUtil109Test extends TestBase {
     public void testIndicesOfAllMax_collection_withComparator() {
         List<String> list = Arrays.asList("a", "cat", "b", "dog", "c", "dog");
         Comparator<String> cmp = Comparator.comparing(String::length);
-        int[] indices = CommonUtil.indicesOfAllMax(list, cmp);
+        int[] indices = CommonUtil.indicesOfMax(list, cmp);
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
     }
 
@@ -1079,9 +1079,9 @@ public class CommonUtil109Test extends TestBase {
     @Test
     public void testEdgeCases() {
         Integer[] allSame = { 5, 5, 5, 5, 5 };
-        int[] minIndices = CommonUtil.indicesOfAllMin(allSame);
+        int[] minIndices = CommonUtil.indicesOfMin(allSame);
         Assertions.assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, minIndices);
-        int[] maxIndices = CommonUtil.indicesOfAllMax(allSame);
+        int[] maxIndices = CommonUtil.indicesOfMax(allSame);
         Assertions.assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, maxIndices);
 
         String[] arr = { "a", "b", "c" };

@@ -161,21 +161,31 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  *
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
+ * List<String> list = Arrays.asList("a", "bb", "ccc");
+ * Collection<String> collection = list;
+ * String value = "42";
+ * String text = "  hello  ";
+ * int[] array = {3, 1, 2};
+ * int element = 2;
+ * com.landawn.abacus.util.function.Predicate<String> predicate = s -> s.length() > 1;
+ * com.landawn.abacus.util.function.Function<String, String> classifier = s -> s.substring(0, 1);
+ * com.landawn.abacus.util.function.Function<String, String> converter = String::toUpperCase;
+ * 
  * // Null-safe operations
  * boolean isEmpty = N.isEmpty(collection);
  * String safe = N.defaultIfNull(value, "default");
  * 
  * // Array operations
- * int[] sorted = N.sort(array);
+ * N.sort(array);   // array is now sorted
  * boolean contains = N.contains(array, element);
  * 
  * // Collection operations
  * List<String> filtered = N.filter(list, predicate);
- * Map<String, Integer> grouped = N.groupBy(list, classifier);
+ * Map<String, List<String>> grouped = N.groupBy(list, classifier);
  * 
  * // String operations
- * boolean valid = N.isNotBlank(text);
- * String trimmed = N.trim(text);
+ * boolean valid = Strings.isNotBlank(text);
+ * String trimmed = Strings.trim(text);
  * 
  * // Type conversions
  * int parsed = Numbers.toInt(value);   // Throws NumberFormatException if invalid
@@ -257,7 +267,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
  * 
  * // Filter out null and empty strings
- * List<String> validNames = N.filter(names, CommonUtil::isNotBlank);
+ * List<String> validNames = N.filter(names, Strings::isNotBlank);
  * 
  * // Safe conversion and transformation
  * List<Integer> lengths = N.map(validNames, String::length);
@@ -266,15 +276,15 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * Map<Integer, List<String>> grouped = N.groupBy(validNames, String::length);
  * 
  * // Find maximum length safely
- * OptionalInt maxLength = N.maxInt(lengths);
+ * com.landawn.abacus.util.u.OptionalInt maxLength = Iterables.maxInt(lengths, Integer::intValue);
  * 
  * // Array operations
  * String[] array = validNames.toArray(new String[0]);
  * boolean contains = N.contains(array, "Alice");
- * String[] sorted = N.sort(array);
+ * N.sort(array);   // array is now sorted
  * 
  * // Null-safe operations
- * String result = N.defaultIfNull(N.firstOrNull(validNames), "No names");
+ * String result = N.defaultIfNull(N.firstOrNullIfEmpty(validNames), "No names");
  * boolean isEmpty = N.isEmpty(validNames);
  * }</pre>
  *
@@ -572,7 +582,7 @@ sealed class CommonUtil permits N {
     static final Comparator<Double> DOUBLE_COMPARATOR = Double::compare;
 
     // ...
-    static final Object NULL_MASK = ClassUtil.createNullMask();
+    static final Object NULL_SENTINEL = ClassUtil.newNullSentinel();
 
     // ...
     static final Map<Class<?>, Object> CLASS_EMPTY_ARRAY = new ConcurrentHashMap<>();
@@ -743,7 +753,7 @@ sealed class CommonUtil permits N {
      * 
      * // Invalid range checks - throw IndexOutOfBoundsException
      * checkFromIndexSize(-1, 3, array.length);   // Negative fromIndex
-     * checkFromIndexSize(2, -1, array.length);   // Negative size  
+     * checkFromIndexSize(2, -1, array.length);   // throws IllegalArgumentException (negative size)
      * checkFromIndexSize(3, 3, array.length);    // fromIndex + size > length
      * }</pre>
      * 
@@ -1068,7 +1078,7 @@ sealed class CommonUtil permits N {
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty("", "username");        // Empty string
-     * checkArgNotEmpty(null, "username");      // Null
+     * checkArgNotEmpty((CharSequence) null, "username");      // Null
      * }</pre>
      *
      * @param <T> the type of the argument, which extends CharSequence
@@ -1096,7 +1106,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new boolean[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");             // throws IllegalArgumentException
+     * checkArgNotEmpty((boolean[]) null, "array");             // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the boolean array argument to check
@@ -1123,7 +1133,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new char[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
+     * checkArgNotEmpty((char[]) null, "array");          // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the char array argument to check
@@ -1150,7 +1160,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new byte[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
+     * checkArgNotEmpty((byte[]) null, "array");          // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the byte array argument to check
@@ -1177,7 +1187,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new short[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");           // throws IllegalArgumentException
+     * checkArgNotEmpty((short[]) null, "array");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the short array argument to check
@@ -1204,7 +1214,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new int[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");         // throws IllegalArgumentException
+     * checkArgNotEmpty((int[]) null, "array");         // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the int array argument to check
@@ -1231,7 +1241,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new long[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");          // throws IllegalArgumentException
+     * checkArgNotEmpty((long[]) null, "array");          // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the long array argument to check
@@ -1258,7 +1268,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new float[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");           // throws IllegalArgumentException
+     * checkArgNotEmpty((float[]) null, "array");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the float array argument to check
@@ -1285,7 +1295,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new double[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");            // throws IllegalArgumentException
+     * checkArgNotEmpty((double[]) null, "array");            // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the double array argument to check
@@ -1312,7 +1322,7 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(array, "array");   // returns array
      *
      * checkArgNotEmpty(new String[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty(null, "array");            // throws IllegalArgumentException
+     * checkArgNotEmpty((Object[]) null, "array");            // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the array elements
@@ -1345,7 +1355,7 @@ sealed class CommonUtil permits N {
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyList(), "items");       // Empty collection
      * checkArgNotEmpty(new ArrayList<>(), "items");             // Empty collection
-     * checkArgNotEmpty(null, "items");                          // Null
+     * checkArgNotEmpty((Collection<?>) null, "items");                          // Null
      * }</pre>
      *
      * @param <T> the type of the collection
@@ -1376,7 +1386,7 @@ sealed class CommonUtil permits N {
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyList(), "iterable");   // Empty iterable
-     * checkArgNotEmpty(null, "iterable");                      // Null
+     * checkArgNotEmpty((Iterable<?>) null, "iterable");                      // Null
      * }</pre>
      *
      * @param <T> the type of the Iterable
@@ -1409,7 +1419,7 @@ sealed class CommonUtil permits N {
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyIterator(), "iterator");   // Empty iterator
-     * checkArgNotEmpty(null, "iterator");                          // Null
+     * checkArgNotEmpty((Iterator<?>) null, "iterator");                          // Null
      * }</pre>
      *
      * @param <T> the type of the Iterator
@@ -1442,7 +1452,7 @@ sealed class CommonUtil permits N {
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Collections.emptyMap(), "map");   // Empty map
      * checkArgNotEmpty(new HashMap<>(), "map");          // Empty map
-     * checkArgNotEmpty(null, "map");                     // Null
+     * checkArgNotEmpty((Map<?, ?>) null, "map");                     // Null
      * }</pre>
      *
      * @param <T> the type of the Map
@@ -1473,8 +1483,8 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(intList, "intList");   // Returns intList
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(IntList.empty(), "intList");   // Empty list
-     * checkArgNotEmpty(null, "intList");              // Null
+     * checkArgNotEmpty(IntList.of(), "intList");      // Empty list
+     * checkArgNotEmpty((PrimitiveList<?, ?, ?>) null, "intList");              // Null
      * }</pre>
      *
      * @param <T> the type of the PrimitiveList
@@ -1505,7 +1515,7 @@ sealed class CommonUtil permits N {
      *
      * // Invalid - throws IllegalArgumentException
      * checkArgNotEmpty(Multiset.of(), "multiset");   // Empty multiset
-     * checkArgNotEmpty(null, "multiset");            // Null
+     * checkArgNotEmpty((Multiset<?>) null, "multiset");            // Null
      * }</pre>
      *
      * @param <T> the type of elements in the Multiset
@@ -1535,8 +1545,8 @@ sealed class CommonUtil permits N {
      * checkArgNotEmpty(multimap, "multimap");   // Returns multimap
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(ListMultimap.of(), "multimap");   // Empty multimap
-     * checkArgNotEmpty(null, "multimap");                // Null
+     * checkArgNotEmpty(N.newListMultimap(), "multimap");   // Empty multimap
+     * checkArgNotEmpty((Multimap<?, ?, ?>) null, "multimap");                // Null
      * }</pre>
      *
      * @param <T> the type of the Multimap
@@ -1562,13 +1572,12 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid - no exception thrown
-     * Dataset dataset = Dataset.builder().column("name", String.class).build();
-     * dataset.addRow("Alice");
+     * Dataset dataset = Dataset.rows(Arrays.asList("name"), new Object[][] {{"Alice"}});
      * checkArgNotEmpty(dataset, "dataset");   // Returns dataset
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Dataset.builder().build(), "dataset");   // Empty dataset
-     * checkArgNotEmpty(null, "dataset");                        // Null
+     * checkArgNotEmpty(Dataset.rows(Arrays.asList("name"), new Object[0][0]), "dataset");   // Empty dataset
+     * checkArgNotEmpty((Dataset) null, "dataset");                        // Null
      * }</pre>
      *
      * @param <T> the type of the Dataset
@@ -1599,6 +1608,8 @@ sealed class CommonUtil permits N {
      *
      * <p>A string is considered blank if it contains only whitespace characters as defined by {@link Character#isWhitespace(char)}.
      *
+     * <p><b>Note:</b> The method name intentionally retains {@code OrEmptyOrBlank} to preserve its ordering in auto-complete lists.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid - no exception thrown
@@ -1616,7 +1627,6 @@ sealed class CommonUtil permits N {
      * @return the {@code non-null}, {@code non-empty}, and {@code non-blank} argument
      * @throws IllegalArgumentException if the argument is {@code null}, empty, or blank
      */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isBlank(arg)) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
@@ -2231,6 +2241,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int count = 1;
      * checkArgument(count > 0);   // Valid if count > 0
      * checkArgument(false);       // throws IllegalArgumentException
      * }</pre>
@@ -2249,6 +2260,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int count = 1;
      * checkArgument(count > 0, "Count must be positive");
      * }</pre>
      *
@@ -2267,6 +2279,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int i = 1;
+     * int j = 2;
      * checkArgument(i >= 0, "Argument was %s but expected nonnegative", i);
      * checkArgument(i < j, "Expected i < j, but %s >= %s", i, j);
      * }</pre>
@@ -2306,6 +2320,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int count = 1;
      * checkArgument(count > 0, "Count must be positive: %s", count);
      * }</pre>
      *
@@ -2325,6 +2340,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int count = 1;
      * checkArgument(count > 0, "Count must be positive: %s", count);
      * }</pre>
      *
@@ -5482,7 +5498,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Map<String, Object[]>> complexObject = ...
+     * Map<String, Object[]> map = new HashMap<>();
+     * map.put("values", new Object[] {1, "a"});
+     * List<Map<String, Object[]>> complexObject = asList(map);
      * long hashCode = hashCodeEverything(complexObject);
      * }</pre>
      *
@@ -8892,9 +8910,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmptyForEach(null);   // returns empty String array
+     * nullElementsToEmpty(null);   // returns empty String array
      * String[] array = {"a", null, "b"};
-     * nullToEmptyForEach(array);   // modifies array to {"a", "", "b"} and returns it
+     * nullElementsToEmpty(array);   // modifies array to {"a", "", "b"} and returns it
      * }</pre>
      *
      * @param a the String array to check
@@ -8903,7 +8921,7 @@ sealed class CommonUtil permits N {
      * @see Strings#nullToEmpty(String[])
      */
     @Beta
-    public static String[] nullToEmptyForEach(final String[] a) { // nullToEmptyForAll is better?
+    public static String[] nullElementsToEmpty(final String[] a) { // nullToEmptyForAll is better?
         if (a == null) {
             return EMPTY_STRING_ARRAY;
         }
@@ -10146,14 +10164,14 @@ sealed class CommonUtil permits N {
             if (srcType.isBean()) {
                 return Beans.copy(srcObj, targetType.clazz());
             } else if (srcType.isMap()) {
-                return Beans.map2Bean((Map<String, Object>) srcObj, targetType.clazz());
+                return Beans.mapToBean((Map<String, Object>) srcObj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
                     final Map<String, Object> result = newMap((Class<Map>) targetType.clazz());
-                    Beans.bean2Map(srcObj, result);
+                    Beans.beanToMap(srcObj, result);
                     return (T) result;
                 } catch (final Exception e) {
                     // ignore.
@@ -10553,7 +10571,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * ImmutableBiMap<DayOfWeek, String> dayMap = N.enumMapOf(DayOfWeek.class);
      * // dayMap.get(DayOfWeek.MONDAY) returns "MONDAY"
-     * // dayMap.inversed().get("MONDAY") returns DayOfWeek.MONDAY
+     * // dayMap.inverse().get("MONDAY") returns DayOfWeek.MONDAY
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
@@ -12228,7 +12246,7 @@ sealed class CommonUtil permits N {
      * biMap.put("one", 1);
      * biMap.put("two", 2);
      * biMap.get("one");          // returns 1
-     * biMap.inversed().get(1);   // returns "one"
+     * biMap.inverse().get(1);   // returns "one"
      * }</pre>
      *
      * @param <K> the type of keys maintained by this map
@@ -12391,7 +12409,7 @@ sealed class CommonUtil permits N {
     public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = newListMultimap(size(m));
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -12406,7 +12424,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a ListMultimap with the keys extracted from the specified collection elements
      */
     public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
-        return ListMultimap.create(c, keyExtractor);
+        return ListMultimap.fromCollection(c, keyExtractor);
     }
 
     /**
@@ -12422,7 +12440,7 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, E> ListMultimap<K, E> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
-        return ListMultimap.create(c, keyExtractor, valueExtractor);
+        return ListMultimap.fromCollection(c, keyExtractor, valueExtractor);
     }
 
     /**
@@ -12471,7 +12489,7 @@ sealed class CommonUtil permits N {
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(newLinkedHashMap(size(m)), ArrayList.class);
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -12500,7 +12518,7 @@ sealed class CommonUtil permits N {
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<>(), ArrayList.class);
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -12598,7 +12616,7 @@ sealed class CommonUtil permits N {
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = newSetMultimap(size(m));
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -12613,7 +12631,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of a SetMultimap with the keys extracted from the specified collection elements
      */
     public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
-        return SetMultimap.create(c, keyExtractor);
+        return SetMultimap.fromCollection(c, keyExtractor);
     }
 
     /**
@@ -12629,7 +12647,7 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, E> SetMultimap<K, E> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
-        return SetMultimap.create(c, keyExtractor, valueExtractor);
+        return SetMultimap.fromCollection(c, keyExtractor, valueExtractor);
     }
 
     /**
@@ -12666,7 +12684,7 @@ sealed class CommonUtil permits N {
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(newLinkedHashMap(size(m)), HashSet.class);
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -12695,7 +12713,7 @@ sealed class CommonUtil permits N {
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<>(), HashSet.class);
 
-        multiMap.put(m);
+        multiMap.putAll(m);
 
         return multiMap;
     }
@@ -13256,7 +13274,7 @@ sealed class CommonUtil permits N {
             int totalSize = 0;
 
             for (final Dataset ds : dss) {
-                columnNameSet.addAll(ds.columnNameList());
+                columnNameSet.addAll(ds.columnNames());
                 totalSize += ds.size();
 
                 if (notEmpty(ds.getProperties())) {
@@ -13295,9 +13313,9 @@ sealed class CommonUtil permits N {
     }
 
     private static void checkIfColumnNamesAreSame(final Dataset a, final Dataset b) {
-        if (!(a.columnNameList().size() == b.columnNameList().size() && a.columnNameList().containsAll(b.columnNameList())
-                && b.columnNameList().containsAll(a.columnNameList()))) {
-            throw new IllegalArgumentException("These two Datasets do not have the same column names: " + a.columnNameList() + ", " + b.columnNameList());
+        if (!(a.columnNames().size() == b.columnNames().size() && a.columnNames().containsAll(b.columnNames())
+                && b.columnNames().containsAll(a.columnNames()))) {
+            throw new IllegalArgumentException("These two Datasets do not have the same column names: " + a.columnNames() + ", " + b.columnNames());
         }
     }
 
@@ -16186,6 +16204,11 @@ sealed class CommonUtil permits N {
         return result;
     }
 
+    //    @SafeVarargs
+    //    public static <T> T[] arrayOf(final T... a) {
+    //        return a;
+    //    }
+
     /**
      * Returns the input array as-is without any modification or copying.
      * This is a type-safe varargs method that allows creating arrays inline.
@@ -16238,7 +16261,7 @@ sealed class CommonUtil permits N {
             if (a[0] instanceof Map) {
                 m.putAll((Map<K, V>) a[0]);
             } else if (Beans.isBeanClass(a[0].getClass())) {
-                Beans.bean2Map(a[0], (Map<String, Object>) m);
+                Beans.beanToMap(a[0], (Map<String, Object>) m);
             } else {
                 throw new IllegalArgumentException(
                         "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
@@ -21340,9 +21363,9 @@ sealed class CommonUtil permits N {
      * @param a the first boolean array to compare, may be {@code null}
      * @param b the second boolean array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final boolean[] a, final boolean[] b) {
+    public static boolean containsSameElements(final boolean[] a, final boolean[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21380,9 +21403,9 @@ sealed class CommonUtil permits N {
      * @param a the first char array to compare, may be {@code null}
      * @param b the second char array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final char[] a, final char[] b) {
+    public static boolean containsSameElements(final char[] a, final char[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21420,9 +21443,9 @@ sealed class CommonUtil permits N {
      * @param a the first byte array to compare, may be {@code null}
      * @param b the second byte array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final byte[] a, final byte[] b) {
+    public static boolean containsSameElements(final byte[] a, final byte[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21460,9 +21483,9 @@ sealed class CommonUtil permits N {
      * @param a the first short array to compare, may be {@code null}
      * @param b the second short array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final short[] a, final short[] b) {
+    public static boolean containsSameElements(final short[] a, final short[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21506,11 +21529,11 @@ sealed class CommonUtil permits N {
      * int[] c = {1, 2, 3};
      * int[] d = {1, 2, 2, 2};
      * 
-     * haveSameElements(a, b);                     // returns {@code true} (same elements, different order)
-     * haveSameElements(a, c);                     // returns {@code false} (different lengths)
-     * haveSameElements(a, d);                     // returns {@code false} (different frequencies of element 2)
-     * haveSameElements(null, null);               // returns true
-     * haveSameElements(new int[0], new int[0]);   // returns true
+     * containsSameElements(a, b);                     // returns {@code true} (same elements, different order)
+     * containsSameElements(a, c);                     // returns {@code false} (different lengths)
+     * containsSameElements(a, d);                     // returns {@code false} (different frequencies of element 2)
+     * containsSameElements(null, null);               // returns true
+     * containsSameElements(new int[0], new int[0]);   // returns true
      * }</pre>
      * 
      * 
@@ -21518,7 +21541,7 @@ sealed class CommonUtil permits N {
      * @param b the second int array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
      */
-    public static boolean haveSameElements(final int[] a, final int[] b) {
+    public static boolean containsSameElements(final int[] a, final int[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21556,9 +21579,9 @@ sealed class CommonUtil permits N {
      * @param a the first long array to compare, may be {@code null}
      * @param b the second long array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final long[] a, final long[] b) {
+    public static boolean containsSameElements(final long[] a, final long[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21596,9 +21619,9 @@ sealed class CommonUtil permits N {
      * @param a the first float array to compare, may be {@code null}
      * @param b the second float array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final float[] a, final float[] b) {
+    public static boolean containsSameElements(final float[] a, final float[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21636,9 +21659,9 @@ sealed class CommonUtil permits N {
      * @param a the first double array to compare, may be {@code null}
      * @param b the second double array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final double[] a, final double[] b) {
+    public static boolean containsSameElements(final double[] a, final double[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21676,9 +21699,9 @@ sealed class CommonUtil permits N {
      * @param a the first object array to compare, may be {@code null}
      * @param b the second object array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
-     * @see #haveSameElements(int[], int[])
+     * @see #containsSameElements(int[], int[])
      */
-    public static boolean haveSameElements(final Object[] a, final Object[] b) {
+    public static boolean containsSameElements(final Object[] a, final Object[] b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -21722,20 +21745,20 @@ sealed class CommonUtil permits N {
      * List<String> b = Arrays.asList("c", "a", "b");
      * List<String> c = Arrays.asList("a", "b", "b");
      *
-     * N.haveSameElements(a, b);         // returns true (same elements, different order)
-     * N.haveSameElements(a, c);         // returns false (different frequencies)
-     * N.haveSameElements(null, null);   // returns true
+     * N.containsSameElements(a, b);         // returns true (same elements, different order)
+     * N.containsSameElements(a, c);         // returns false (different frequencies)
+     * N.containsSameElements(null, null);   // returns true
      * }</pre>
      *
      * @param a the first collection to compare, may be {@code null}
      * @param b the second collection to compare, may be {@code null}
      * @return {@code true} if both collections contain the same elements with the same frequencies,
      *         {@code false} otherwise
-     * @see #haveSameElements(Object[], Object[])
+     * @see #containsSameElements(Object[], Object[])
      * @see N#isProperSubCollection(Collection, Collection)
      * @see N#isSubCollection(Collection, Collection)
      */
-    public static boolean haveSameElements(final Collection<?> a, final Collection<?> b) {
+    public static boolean containsSameElements(final Collection<?> a, final Collection<?> b) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
             return true;
         }
@@ -25345,7 +25368,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeatElements(asList(1, 2, 3), 2) => [1, 1, 2, 2, 3, 3]
+     * List<Integer> result = repeatElements(asList(1, 2, 3), 2);
+     * // result => [1, 1, 2, 2, 3, 3]
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -25378,7 +25402,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeatCollection(asList(1, 2, 3), 2) => [1, 2, 3, 1, 2, 3]
+     * List<Integer> result = repeatCollection(asList(1, 2, 3), 2);
+     * // result => [1, 2, 3, 1, 2, 3]
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -25409,7 +25434,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeatElementsToSize(asList(1, 2, 3), 5) => [1, 1, 2, 2, 3]
+     * List<Integer> result = repeatElementsToSize(asList(1, 2, 3), 5);
+     * // result => [1, 1, 2, 2, 3]
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -25450,7 +25476,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeatCollectionToSize(asList(1, 2, 3), 5) => [1, 2, 3, 1, 2]
+     * List<Integer> result = repeatCollectionToSize(asList(1, 2, 3), 5);
+     * // result => [1, 2, 3, 1, 2]
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -32060,16 +32087,16 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 1, 4, 1, 5};
-     * int[] minIndices1 = indicesOfAllMin(array1);   // Returns [1, 3] (both 1's)
+     * int[] minIndices1 = indicesOfMin(array1);   // Returns [1, 3] (both 1's)
      *
      * String[] array2 = {"cat", "dog", "ant", "ant"};
-     * int[] minIndices2 = indicesOfAllMin(array2);   // Returns [2, 3] (both "ant"s)
+     * int[] minIndices2 = indicesOfMin(array2);   // Returns [2, 3] (both "ant"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] minIndices3 = indicesOfAllMin(array3);   // Returns [0, 1, 2] (all equal)
+     * int[] minIndices3 = indicesOfMin(array3);   // Returns [0, 1, 2] (all equal)
      *
      * Integer[] emptyArray = {};
-     * int[] minIndices4 = indicesOfAllMin(emptyArray);   // Returns empty array []
+     * int[] minIndices4 = indicesOfMin(emptyArray);   // Returns empty array []
      * }</pre>
      *
      * @param <T> the type of elements in the array - must implement {@link Comparable}
@@ -32079,13 +32106,13 @@ sealed class CommonUtil permits N {
      *         ascending order.
      * @throws ClassCastException if elements in the array are not mutually comparable
      *         using their natural ordering
-     * @see #indicesOfAllMin(Object[], Comparator)
-     * @see #indicesOfAllMax(Comparable[])
+     * @see #indicesOfMin(Object[], Comparator)
+     * @see #indicesOfMax(Comparable[])
      * @see Arrays#sort(Object[])
      * @see Comparable#compareTo(Object)
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final T[] a) {
-        return indicesOfAllMin(a, NATURAL_COMPARATOR);
+    public static <T extends Comparable<? super T>> int[] indicesOfMin(final T[] a) {
+        return indicesOfMin(a, NATURAL_COMPARATOR);
     }
 
     /**
@@ -32096,7 +32123,7 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator to compare elements of the array
      * @return an array of indices of all minimum elements. An empty array if the input array is empty.
      */
-    public static <T> int[] indicesOfAllMin(final T[] a, Comparator<? super T> cmp) {
+    public static <T> int[] indicesOfMin(final T[] a, Comparator<? super T> cmp) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
@@ -32131,8 +32158,8 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final Collection<? extends T> c) throws IllegalArgumentException {
-        return indicesOfAllMin(c, NATURAL_COMPARATOR);
+    public static <T extends Comparable<? super T>> int[] indicesOfMin(final Collection<? extends T> c) throws IllegalArgumentException {
+        return indicesOfMin(c, NATURAL_COMPARATOR);
     }
 
     /**
@@ -32160,12 +32187,12 @@ sealed class CommonUtil permits N {
      *
      * // Find all youngest people (minimum age)
      * Comparator<Person> byAge = Comparator.comparingInt(p -> p.age);
-     * int[] minIndices = indicesOfAllMin(people, byAge);
+     * int[] minIndices = indicesOfMin(people, byAge);
      * // Returns [1, 2] (Bob and Charlie, both age 25)
      *
      * // Find alphabetically first names
      * Comparator<Person> byName = Comparator.comparing(p -> p.name);
-     * int[] firstNames = indicesOfAllMin(people, byName);
+     * int[] firstNames = indicesOfMin(people, byName);
      * // Returns [0] (Alice is alphabetically first)
      * }</pre>
      *
@@ -32176,11 +32203,11 @@ sealed class CommonUtil permits N {
      *         Returns an empty array if the input collection is {@code null} or empty.
      *         The indices are in ascending order.
      * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
-     * @see #indicesOfAllMin(Collection)
-     * @see #indicesOfAllMax(Collection, Comparator)
-     * @see #indicesOfAllMin(Object[], Comparator)
+     * @see #indicesOfMin(Collection)
+     * @see #indicesOfMax(Collection, Comparator)
+     * @see #indicesOfMin(Object[], Comparator)
      */
-    public static <T> int[] indicesOfAllMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> int[] indicesOfMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }
@@ -32223,21 +32250,21 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 5, 4, 5, 2};
-     * int[] maxIndices1 = indicesOfAllMax(array1);   // Returns [1, 3] (both 5's)
+     * int[] maxIndices1 = indicesOfMax(array1);   // Returns [1, 3] (both 5's)
      *
      * String[] array2 = {"cat", "dog", "dog", "ant"};
-     * int[] maxIndices2 = indicesOfAllMax(array2);   // Returns [1, 2] (both "dog"s)
+     * int[] maxIndices2 = indicesOfMax(array2);   // Returns [1, 2] (both "dog"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] maxIndices3 = indicesOfAllMax(array3);   // Returns [0, 1, 2] (all equal)
+     * int[] maxIndices3 = indicesOfMax(array3);   // Returns [0, 1, 2] (all equal)
      * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within
      * @return an array of indices of all maximum elements. An empty array if the input array is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final T[] a) throws IllegalArgumentException {
-        return indicesOfAllMax(a, NATURAL_COMPARATOR);
+    public static <T extends Comparable<? super T>> int[] indicesOfMax(final T[] a) throws IllegalArgumentException {
+        return indicesOfMax(a, NATURAL_COMPARATOR);
     }
 
     /**
@@ -32265,12 +32292,12 @@ sealed class CommonUtil permits N {
      *
      * // Find all most expensive products (maximum price)
      * Comparator<Product> byPrice = Comparator.comparingDouble(p -> p.price);
-     * int[] maxIndices = indicesOfAllMax(products, byPrice);
+     * int[] maxIndices = indicesOfMax(products, byPrice);
      * // Returns [2, 3] (Cherry and Date, both $2.00)
      *
      * // Find products with longest names (maximum length)
      * Comparator<Product> byNameLength = Comparator.comparingInt(p -> p.name.length());
-     * int[] longestNames = indicesOfAllMax(products, byNameLength);
+     * int[] longestNames = indicesOfMax(products, byNameLength);
      * // Returns [1, 2] (Banana and Cherry, both 6 characters)
      * }</pre>
      *
@@ -32281,11 +32308,11 @@ sealed class CommonUtil permits N {
      *         Returns an empty array if the input array is {@code null} or empty.
      *         The indices are in ascending order.
      * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
-     * @see #indicesOfAllMax(Comparable[])
-     * @see #indicesOfAllMin(Object[], Comparator)
-     * @see #indicesOfAllMax(Collection, Comparator)
+     * @see #indicesOfMax(Comparable[])
+     * @see #indicesOfMin(Object[], Comparator)
+     * @see #indicesOfMax(Collection, Comparator)
      */
-    public static <T> int[] indicesOfAllMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> int[] indicesOfMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
@@ -32320,8 +32347,8 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final Collection<? extends T> c) throws IllegalArgumentException {
-        return indicesOfAllMax(c, NATURAL_COMPARATOR);
+    public static <T extends Comparable<? super T>> int[] indicesOfMax(final Collection<? extends T> c) throws IllegalArgumentException {
+        return indicesOfMax(c, NATURAL_COMPARATOR);
     }
 
     /**
@@ -32349,12 +32376,12 @@ sealed class CommonUtil permits N {
      *
      * // Find all players with highest score (maximum points)
      * Comparator<Score> byPoints = Comparator.comparingInt(s -> s.points);
-     * int[] topScorers = indicesOfAllMax(scores, byPoints);
+     * int[] topScorers = indicesOfMax(scores, byPoints);
      * // Returns [1, 2] (Bob and Charlie, both 150 points)
      *
      * // Find alphabetically last player names
      * Comparator<Score> byName = Comparator.comparing(s -> s.player);
-     * int[] lastNames = indicesOfAllMax(scores, byName);
+     * int[] lastNames = indicesOfMax(scores, byName);
      * // Returns [3] (David is alphabetically last)
      * }</pre>
      *
@@ -32365,11 +32392,11 @@ sealed class CommonUtil permits N {
      *         Returns an empty array if the input collection is {@code null} or empty.
      *         The indices are in ascending order.
      * @throws IllegalArgumentException if comparison operations fail (e.g., incomparable elements when using natural ordering)
-     * @see #indicesOfAllMax(Collection)
-     * @see #indicesOfAllMin(Collection, Comparator)
-     * @see #indicesOfAllMax(Object[], Comparator)
+     * @see #indicesOfMax(Collection)
+     * @see #indicesOfMin(Collection, Comparator)
+     * @see #indicesOfMax(Object[], Comparator)
      */
-    public static <T> int[] indicesOfAllMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> int[] indicesOfMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }

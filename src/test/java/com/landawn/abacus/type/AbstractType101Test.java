@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -35,13 +35,13 @@ public class AbstractType101Test extends TestBase {
 
     private Type<String> testType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         testType = createType("String");
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test
@@ -215,9 +215,9 @@ public class AbstractType101Test extends TestBase {
 
     @Test
     public void testUnsupportedOperations() {
-        assertThrows(UnsupportedOperationException.class, () -> testType.collection2Array(new ArrayList<>()));
-        assertThrows(UnsupportedOperationException.class, () -> testType.array2Collection("test", List.class));
-        assertThrows(UnsupportedOperationException.class, () -> testType.array2Collection("test", new ArrayList<>()));
+        assertThrows(UnsupportedOperationException.class, () -> testType.collectionToArray(new ArrayList<>()));
+        assertThrows(UnsupportedOperationException.class, () -> testType.arrayToCollection("test", List.class));
+        assertThrows(UnsupportedOperationException.class, () -> testType.arrayToCollection("test", new ArrayList<>()));
     }
 
     @Test

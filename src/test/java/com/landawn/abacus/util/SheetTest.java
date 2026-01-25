@@ -35,7 +35,7 @@ public class SheetTest extends AbstractTest {
 
         assertEquals(sheet, N.fromJson(N.toJson(sheet), Sheet.class));
 
-        N.println(sheet.countOfNonNullValue());
+        N.println(sheet.countOfNonNullValues());
 
         sheet = new Sheet<>(CommonUtil.asList("r1", "r2", "r3"), CommonUtil.asList("c1", "c2"));
         sheet.forEachH((r, c, v) -> N.println(r + ": " + c + ": " + v));

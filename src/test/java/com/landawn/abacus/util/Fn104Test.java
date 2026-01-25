@@ -460,8 +460,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        UnaryOperator<String> op = Fn.toLowerCaseWithUnderscore();
+    public void testToSnakeCase() {
+        UnaryOperator<String> op = Fn.toSnakeCase();
         assertEquals("hello_world", op.apply("HelloWorld"));
     }
 
@@ -472,8 +472,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        UnaryOperator<String> op = Fn.toUpperCaseWithUnderscore();
+    public void testToScreamingSnakeCase() {
+        UnaryOperator<String> op = Fn.toScreamingSnakeCase();
         assertEquals("HELLO_WORLD", op.apply("HelloWorld"));
     }
 

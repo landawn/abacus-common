@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 @Tag("new-test")
@@ -165,23 +164,23 @@ public class Builder102Test extends TestBase {
         Assertions.assertEquals(value, builder.val());
     }
 
-    @Test
-    public void testMap() {
-        Builder<String> builder = Builder.of("test");
-        Builder<Integer> mappedBuilder = builder.map(String::length);
-        Assertions.assertEquals(Integer.valueOf(4), mappedBuilder.val());
-    }
-
-    @Test
-    public void testFilter() {
-        Builder<String> builder = Builder.of("test");
-        Optional<String> result = builder.filter(s -> s.length() > 3);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("test", result.get());
-
-        Optional<String> emptyResult = builder.filter(s -> s.length() > 10);
-        Assertions.assertFalse(emptyResult.isPresent());
-    }
+    //    @Test
+    //    public void testMap() {
+    //        Builder<String> builder = Builder.of("test");
+    //        Builder<Integer> mappedBuilder = builder.map(String::length);
+    //        Assertions.assertEquals(Integer.valueOf(4), mappedBuilder.val());
+    //    }
+    //
+    //    @Test
+    //    public void testFilter() {
+    //        Builder<String> builder = Builder.of("test");
+    //        Optional<String> result = builder.filter(s -> s.length() > 3);
+    //        Assertions.assertTrue(result.isPresent());
+    //        Assertions.assertEquals("test", result.get());
+    //
+    //        Optional<String> emptyResult = builder.filter(s -> s.length() > 10);
+    //        Assertions.assertFalse(emptyResult.isPresent());
+    //    }
 
     @Test
     public void testAccept() {
@@ -628,7 +627,7 @@ public class Builder102Test extends TestBase {
     public void testMultimapBuilderPutManyMultimap() {
         ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
         ListMultimap<String, Integer> toAdd = CommonUtil.newListMultimap();
-        toAdd.putMany("key", Arrays.asList(1, 2, 3));
+        toAdd.putValues("key", Arrays.asList(1, 2, 3));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.putMany(toAdd);
@@ -668,7 +667,7 @@ public class Builder102Test extends TestBase {
     @Test
     public void testMultimapBuilderRemoveAll() {
         ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
-        multimap.putMany("key", CommonUtil.asList(1, 2, 3));
+        multimap.putValues("key", CommonUtil.asList(1, 2, 3));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.removeAll("key");
@@ -679,7 +678,7 @@ public class Builder102Test extends TestBase {
     @Test
     public void testMultimapBuilderRemoveMany() {
         ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
-        multimap.putMany("key", Arrays.asList(1, 2, 3, 4));
+        multimap.putValues("key", Arrays.asList(1, 2, 3, 4));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.removeMany("key", Arrays.asList(1, 3));
@@ -695,8 +694,8 @@ public class Builder102Test extends TestBase {
         Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.renameColumn("oldName", "newName");
-        Assertions.assertTrue(ds.columnNameList().contains("newName"));
-        Assertions.assertFalse(ds.columnNameList().contains("oldName"));
+        Assertions.assertTrue(ds.columnNames().contains("newName"));
+        Assertions.assertFalse(ds.columnNames().contains("oldName"));
     }
 
     @Test
@@ -706,7 +705,7 @@ public class Builder102Test extends TestBase {
 
         builder.addColumn("col2", CommonUtil.asList("val2"));
         Assertions.assertEquals(2, ds.columnCount());
-        Assertions.assertTrue(ds.columnNameList().contains("col2"));
+        Assertions.assertTrue(ds.columnNames().contains("col2"));
     }
 
     @Test
@@ -716,7 +715,7 @@ public class Builder102Test extends TestBase {
 
         builder.removeColumn("col2");
         Assertions.assertEquals(1, ds.columnCount());
-        Assertions.assertFalse(ds.columnNameList().contains("col2"));
+        Assertions.assertFalse(ds.columnNames().contains("col2"));
     }
 
     @Test

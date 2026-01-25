@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("2025")
@@ -87,8 +87,8 @@ public class PrimitiveDoubleArrayType2025Test extends TestBase {
 
     @Test
     public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         double[] arr = new double[] { 1.1, 2.2 };
         type.writeCharacter(writer, arr, config);

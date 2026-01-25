@@ -137,7 +137,7 @@ public final class ParserUtil {
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
+    private static final int defaultNameIndex = NamingPolicy.CAMEL_CASE.ordinal();
 
     // ...
     private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
@@ -436,9 +436,9 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
-     * // tags[0].name = "firstName" (LOWER_CAMEL_CASE)
+     * // tags[0].name = "firstName" (CAMEL_CASE)
      * // tags[1].name = "FirstName" (UPPER_CAMEL_CASE)
-     * // tags[2].name = "first_name" (LOWER_CASE_WITH_UNDERSCORES)
+     * // tags[2].name = "first_name" (SNAKE_CASES)
      * }</pre>
      * 
      * @param name the original name to convert
@@ -681,7 +681,7 @@ public final class ParserUtil {
      * @return the converted name
      */
     private static String convertName(final String name, final NamingPolicy namingPolicy) {
-        return namingPolicy == null || namingPolicy == NamingPolicy.NO_CHANGE || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE ? name
+        return namingPolicy == null || namingPolicy == NamingPolicy.NO_CHANGE || namingPolicy == NamingPolicy.CAMEL_CASE ? name
                 : ((namingPolicy == NamingPolicy.UPPER_CAMEL_CASE && name.startsWith("_")) ? "_" + namingPolicy.convert(name.substring(1))
                         : namingPolicy.convert(name));
     }
@@ -910,7 +910,7 @@ public final class ParserUtil {
      * <p>BeanInfo provides access to all property information, annotations, naming policies,
      * and other metadata needed for serialization/deserialization operations.</p>
      * 
-     * <p>This class implements {@link JSONReader.SymbolReader} for efficient property lookup
+     * <p>This class implements {@link JsonReader.SymbolReader} for efficient property lookup
      * during JSON parsing.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -929,7 +929,7 @@ public final class ParserUtil {
      * 
      * @see PropInfo
      */
-    public static class BeanInfo implements JSONReader.SymbolReader {
+    public static class BeanInfo implements JsonReader.SymbolReader {
 
         /** Type information for this class */
         public final Type<Object> type;
@@ -1069,7 +1069,7 @@ public final class ParserUtil {
             if (Beans.isRecordClass(beanClass)) {
                 //noinspection DataFlowIssue
                 localIsImmutable = true;
-            } else if (Beans.isRegisteredXMLBindingClass(beanClass)) {
+            } else if (Beans.isRegisteredXmlBindingClass(beanClass)) {
                 localIsImmutable = false;
             } else {
                 try {
@@ -1079,7 +1079,7 @@ public final class ParserUtil {
 
                     for (final String propName : propNameList) {
                         field = Beans.getPropField(beanClass, propName);
-                        setMethod = Beans.getPropSetMethod(beanClass, propName);
+                        setMethod = Beans.getPropSetter(beanClass, propName);
 
                         if (setMethod != null) {
                             localIsImmutable = false;
@@ -1105,7 +1105,7 @@ public final class ParserUtil {
             isByBuilder = localIsImmutable && builderInfo != null;
 
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
-            jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE : jsonXmlConfig.namingPolicy();
+            jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.CAMEL_CASE : jsonXmlConfig.namingPolicy();
             jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
             final String name = Beans.formalizePropName(simpleClassName);
@@ -1148,8 +1148,8 @@ public final class ParserUtil {
 
             for (final String propName : propNameList) {
                 field = Beans.getPropField(beanClass, propName);
-                getMethod = Beans.getPropGetMethod(beanClass, propName);
-                setMethod = isByBuilder ? Beans.getPropSetMethod(builderInfo._1, propName) : Beans.getPropSetMethod(beanClass, propName);
+                getMethod = Beans.getPropGetter(beanClass, propName);
+                setMethod = isByBuilder ? Beans.getPropSetter(builderInfo._1, propName) : Beans.getPropSetter(beanClass, propName);
 
                 propInfo = ASMUtil.isASMAvailable() && isASMSupported
                         ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
@@ -1358,7 +1358,7 @@ public final class ParserUtil {
             if (propInfoOpt == null) {
                 PropInfo propInfo = null;
 
-                final Method method = Beans.getPropGetMethod(clazz, propName);
+                final Method method = Beans.getPropGetter(clazz, propName);
 
                 if (method != null) {
                     propInfoOpt = propInfoMap.get(Beans.getPropNameByMethod(method));
@@ -1560,7 +1560,7 @@ public final class ParserUtil {
                                     propInfo.setPropValue(propBean, c);
                                 } else {
                                     // TODO what's about if propInfo.clazz is immutable (Record)?
-                                    // For example: set "account.Name.firstName" key in Beans.map2Bean, if Account.Name is a Record?
+                                    // For example: set "account.Name.firstName" key in Beans.mapToBean, if Account.Name is a Record?
                                     subPropValue = N.newInstance(propInfo.clazz);
                                     propInfo.setPropValue(propBean, subPropValue);
                                 }
@@ -2433,7 +2433,7 @@ public final class ParserUtil {
             tablePrefix = type.isBean() && clazz.getAnnotation(Table.class) != null ? Optional.ofNullable(clazz.getAnnotation(Table.class).alias())
                     : Optional.empty();
 
-            canSetFieldByGetMethod = Beans.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
+            canSetFieldByGetMethod = Beans.isRegisteredXmlBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
 
             this.fieldOrder = fieldOrder;
@@ -2535,7 +2535,7 @@ public final class ParserUtil {
                     } else if (setMethod != null) {
                         setMethod.invoke(obj, propValue);
                     } else if (canSetFieldByGetMethod) {
-                        Beans.setPropValueByGet(obj, getMethod, propValue);
+                        Beans.setPropValueByGetter(obj, getMethod, propValue);
                     } else {
                         field.set(obj, propValue);
                     }
@@ -2553,7 +2553,7 @@ public final class ParserUtil {
                     } else if (setMethod != null) {
                         setMethod.invoke(obj, propValue);
                     } else if (canSetFieldByGetMethod) {
-                        Beans.setPropValueByGet(obj, getMethod, propValue);
+                        Beans.setPropValueByGetter(obj, getMethod, propValue);
                     } else {
                         field.set(obj, propValue);
                     }
@@ -2581,7 +2581,7 @@ public final class ParserUtil {
                         } else if (setMethod != null) {
                             setMethod.invoke(obj, propValue);
                         } else if (canSetFieldByGetMethod) {
-                            Beans.setPropValueByGet(obj, getMethod, propValue);
+                            Beans.setPropValueByGetter(obj, getMethod, propValue);
                         } else {
                             field.set(obj, propValue);
                         }
@@ -2954,7 +2954,7 @@ public final class ParserUtil {
          * @throws IOException if an I/O error occurs during writing
          * @throws UnsupportedOperationException if date format is specified for unsupported types
          */
-        public void writePropValue(final CharacterWriter writer, final Object x, final JSONXMLSerializationConfig<?> config) throws IOException {
+        public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerializationConfig<?> config) throws IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
@@ -3416,7 +3416,7 @@ public final class ParserUtil {
                 } else if (setMethodAccessIndex > -1) {
                     setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                 } else if (canSetFieldByGetMethod) {
-                    Beans.setPropValueByGet(obj, getMethod, propValue);
+                    Beans.setPropValueByGetter(obj, getMethod, propValue);
                 } else {
                     try {
                         field.set(obj, propValue); //NOSONAR
@@ -3436,7 +3436,7 @@ public final class ParserUtil {
                     } else if (setMethodAccessIndex > -1) {
                         setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                     } else if (canSetFieldByGetMethod) {
-                        Beans.setPropValueByGet(obj, getMethod, propValue);
+                        Beans.setPropValueByGetter(obj, getMethod, propValue);
                     } else {
                         field.set(obj, propValue); //NOSONAR
                     }
@@ -3468,7 +3468,7 @@ public final class ParserUtil {
                     } else if (setMethodAccessIndex > -1) {
                         setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                     } else if (canSetFieldByGetMethod) {
-                        Beans.setPropValueByGet(obj, getMethod, propValue);
+                        Beans.setPropValueByGetter(obj, getMethod, propValue);
                     } else {
                         try {
                             field.set(obj, propValue); //NOSONAR

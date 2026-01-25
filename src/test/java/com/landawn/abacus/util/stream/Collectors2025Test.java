@@ -596,9 +596,9 @@ public class Collectors2025Test extends TestBase {
     }
 
     @Test
-    public void testCollectingOrElseIfEmpty() {
+    public void testCollectingOrDefaultIfEmpty() {
         List<String> defaultList = Arrays.asList("default");
-        List<String> result = Stream.<String> empty().collect(Collectors.collectingOrElseIfEmpty(Collectors.toList(), defaultList));
+        List<String> result = Stream.<String> empty().collect(Collectors.collectingOrDefaultIfEmpty(Collectors.toList(), defaultList));
         assertEquals(defaultList, result);
     }
 
@@ -1819,6 +1819,6 @@ public class Collectors2025Test extends TestBase {
         Dataset result = personList.stream().collect(MoreCollectors.toDataset(columnNames));
         assertNotNull(result);
         assertEquals(5, result.size());
-        assertEquals(columnNames, result.columnNameList());
+        assertEquals(columnNames, result.columnNames());
     }
 }

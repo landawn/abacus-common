@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -157,7 +157,7 @@ public class SingleValueType100Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         TestValue value = new TestValue("test");
         singleValueType.writeCharacter(writer, value, config);

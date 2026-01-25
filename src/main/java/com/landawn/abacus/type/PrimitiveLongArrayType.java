@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -219,13 +219,13 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * BufferedJSONWriter writer = new BufferedJSONWriter();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
      * long[] arr = {5L, 10L, 15L};
      * type.writeCharacter(writer, arr, null);
      * String result = writer.toString();
      * // result: "[5, 10, 15]"
      *
-     * BufferedJSONWriter writer2 = new BufferedJSONWriter();
+     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
      * type.writeCharacter(writer2, null, null);
      * String result2 = writer2.toString();
      * // result2: "null"
@@ -237,7 +237,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final long[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final long[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -263,10 +263,10 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
      * List&lt;Long&gt; list = Arrays.asList(1L, 2L, 3L, 4L);
-     * long[] arr = type.collection2Array(list);
+     * long[] arr = type.collectionToArray(list);
      * // arr equals {1L, 2L, 3L, 4L}
      *
-     * long[] nullArr = type.collection2Array(null);
+     * long[] nullArr = type.collectionToArray(null);
      * // nullArr equals null
      * }</pre>
      *
@@ -276,7 +276,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws ClassCastException if any element in the collection is not a Long
      */
     @Override
-    public long[] collection2Array(final Collection<?> c) {
+    public long[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -301,10 +301,10 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr = {1L, 2L, 3L};
      * List&lt;Long&gt; list = new ArrayList&lt;&gt;();
-     * type.array2Collection(arr, list);
+     * type.arrayToCollection(arr, list);
      * // list now contains [1L, 2L, 3L]
      *
-     * type.array2Collection(null, list);
+     * type.arrayToCollection(null, list);
      * // list remains unchanged
      * }</pre>
      *
@@ -314,7 +314,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws ClassCastException if the output collection cannot accept Long objects
      */
     @Override
-    public <E> void array2Collection(final long[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final long[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

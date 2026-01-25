@@ -62,9 +62,9 @@ public final class Reflection<T> {
         boolean tmp = true;
 
         try {
-            ClassUtil.forClass("com.esotericsoftware.reflectasm.ConstructorAccess");
-            ClassUtil.forClass("com.esotericsoftware.reflectasm.FieldAccess");
-            ClassUtil.forClass("com.esotericsoftware.reflectasm.MethodAccess");
+            ClassUtil.forName("com.esotericsoftware.reflectasm.ConstructorAccess");
+            ClassUtil.forName("com.esotericsoftware.reflectasm.FieldAccess");
+            ClassUtil.forName("com.esotericsoftware.reflectasm.MethodAccess");
         } catch (final Exception e) {
             tmp = false;
         }
@@ -106,7 +106,7 @@ public final class Reflection<T> {
      * @throws RuntimeException if the class cannot be found
      */
     public static <T> Reflection<T> on(final String clsName) {
-        return on(ClassUtil.forClass(clsName));
+        return on(ClassUtil.forName(clsName));
     }
 
     /**

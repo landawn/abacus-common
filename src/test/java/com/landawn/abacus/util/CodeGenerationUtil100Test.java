@@ -136,7 +136,7 @@ public class CodeGenerationUtil100Test extends TestBase {
     public void testGeneratePropNameTableClass_ThreeParams() {
         N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/java/"));
 
-        final Collection<Class<?>> classes = N.concat(ClassUtil.getClassesByPackage(User.class.getPackageName(), false, false));
+        final Collection<Class<?>> classes = N.concat(ClassUtil.findClassesInPackage(User.class.getPackageName(), false, false));
 
         final PropNameTableCodeConfig codeConfig = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
@@ -145,8 +145,8 @@ public class CodeGenerationUtil100Test extends TestBase {
                 .srcDir("../src/test/java/")
                 .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createTime" : propName)
                 .generateClassPropNameList(true)
-                .generateLowerCaseWithUnderscore(true)
-                .generateUpperCaseWithUnderscore(true)
+                .generateSnakeCase(true)
+                .generateScreamingSnakeCase(true)
                 .generateFunctionPropName(true)
                 .functionClassName("f")
                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
@@ -209,10 +209,10 @@ public class CodeGenerationUtil100Test extends TestBase {
                 .srcDir(tempDir.toString())
                 .propNameConverter((cls, propName) -> propName.equals("createdTime") ? "created_time" : propName)
                 .generateClassPropNameList(true)
-                .generateLowerCaseWithUnderscore(true)
-                .classNameForLowerCaseWithUnderscore("sl_custom")
-                .generateUpperCaseWithUnderscore(true)
-                .classNameForUpperCaseWithUnderscore("su_custom")
+                .generateSnakeCase(true)
+                .classNameForSnakeCase("sl_custom")
+                .generateScreamingSnakeCase(true)
+                .classNameForScreamingSnakeCase("su_custom")
                 .generateFunctionPropName(true)
                 .functionClassName("func")
                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))

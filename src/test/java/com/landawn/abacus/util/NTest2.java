@@ -14,15 +14,15 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserFactory;
-import com.landawn.abacus.parser.XMLParser;
-import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlParser;
+import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.util.stream.Stream;
 
 public class NTest2 extends AbstractParserTest {
 
-    static final XMLParser abacusXMLParser = ParserFactory.createAbacusXMLParser();
+    static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();
 
     @Test
     public void test_stringOf() {
@@ -204,7 +204,7 @@ public class NTest2 extends AbstractParserTest {
 
         N.println(N.toJson(a));
         N.println(N.toXml(a));
-        N.println(abacusXMLParser.serialize(a));
+        N.println(abacusXmlParser.serialize(a));
 
         N.println(N.fromJson(N.toJson(a), Object[].class));
         N.println(N.fromXml(N.toXml(a), Object[].class));
@@ -227,7 +227,7 @@ public class NTest2 extends AbstractParserTest {
         }
 
         try {
-            N.println(abacusXMLParser.serialize(a));
+            N.println(abacusXmlParser.serialize(a));
             fail("should throw StackOverflowError");
         } catch (final StackOverflowError e) {
 
@@ -235,11 +235,11 @@ public class NTest2 extends AbstractParserTest {
 
         N.println(N.toJson(a, JSC.create().supportCircularReference(true)));
         N.println(N.toXml(a, XSC.create().supportCircularReference(true)));
-        N.println(abacusXMLParser.serialize(a, XSC.create().supportCircularReference(true)));
+        N.println(abacusXmlParser.serialize(a, XSC.create().supportCircularReference(true)));
 
         N.println(N.fromJson(N.toJson(a, JSC.create().supportCircularReference(true)), Object[].class));
         N.println(N.fromXml(N.toXml(a, XSC.create().supportCircularReference(true)), Object[].class));
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(a, XSC.create().supportCircularReference(true)), Object[].class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(a, XSC.create().supportCircularReference(true)), Object[].class));
     }
 
     @Test
@@ -252,11 +252,11 @@ public class NTest2 extends AbstractParserTest {
 
         N.println(N.toJson(ab));
         N.println(N.toXml(ab));
-        N.println(abacusXMLParser.serialize(ab));
+        N.println(abacusXmlParser.serialize(ab));
 
         N.println(N.fromJson(N.toJson(ab), AB.class));
         N.println(N.fromXml(N.toXml(ab), AB.class));
-        N.println(abacusXMLParser.deserialize(abacusXMLParser.serialize(ab), AB.class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(ab), AB.class));
 
         ba.setA(ab);
 
@@ -275,7 +275,7 @@ public class NTest2 extends AbstractParserTest {
         }
 
         try {
-            N.println(abacusXMLParser.serialize(ab));
+            N.println(abacusXmlParser.serialize(ab));
             fail("should throw StackOverflowError");
         } catch (final StackOverflowError e) {
 
@@ -283,12 +283,12 @@ public class NTest2 extends AbstractParserTest {
 
         N.println(N.toJson(ab, JSC.create().supportCircularReference(true)));
         N.println(N.toXml(ab, XSC.create().supportCircularReference(true)));
-        N.println(abacusXMLParser.serialize(ab, XSC.create().supportCircularReference(true)));
+        N.println(abacusXmlParser.serialize(ab, XSC.create().supportCircularReference(true)));
 
         N.println(N.fromJson(N.toJson(ab, JSC.create().supportCircularReference(true)), AB.class));
         N.println(N.fromXml(N.toXml(ab, XSC.create().supportCircularReference(true)), AB.class));
-        String xml = abacusXMLParser.serialize(ab, XSC.create().supportCircularReference(true));
-        N.println(abacusXMLParser.deserialize(xml, AB.class));
+        String xml = abacusXmlParser.serialize(ab, XSC.create().supportCircularReference(true));
+        N.println(abacusXmlParser.deserialize(xml, AB.class));
     }
 
     public static class AB {

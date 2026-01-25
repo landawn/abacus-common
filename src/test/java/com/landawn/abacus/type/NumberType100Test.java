@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -25,7 +25,7 @@ public class NumberType100Test extends TestBase {
     private NumberType<Double> doubleNumberType;
     private NumberType<Long> longNumberType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -33,7 +33,7 @@ public class NumberType100Test extends TestBase {
         doubleNumberType = (NumberType<Double>) createType(Double.class);
         longNumberType = (NumberType<Long>) createType(Long.class);
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test

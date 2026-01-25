@@ -261,6 +261,16 @@ public final class WD {
     public static final String UNDERSCORE = "_";
 
     /**
+     * Represents the hyphen character: {@code '-'}.
+     */
+    public static final char _HYPHEN = '-';
+
+    /**
+     * Represents the hyphen string: {@code "-"}.
+     */
+    public static final String HYPHEN = "-";
+
+    /**
      * Represents the less than character: {@code '<'}.
      * Used as comparison operator and XML/HTML tag delimiter.
      */

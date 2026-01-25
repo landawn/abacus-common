@@ -27,43 +27,98 @@ import com.landawn.abacus.annotation.Beta;
  * 
  * <p>The available naming policies are:</p>
  * <ul>
- *   <li>{@link #LOWER_CAMEL_CASE} - Converts to lowerCamelCase (e.g., "myVariableName")</li>
- *   <li>{@link #LOWER_CASE_WITH_UNDERSCORE} - Converts to lower_case_with_underscore (e.g., "my_variable_name")</li>
- *   <li>{@link #UPPER_CASE_WITH_UNDERSCORE} - Converts to UPPER_CASE_WITH_UNDERSCORE (e.g., "MY_VARIABLE_NAME")</li>
+ *   <li>{@link #CAMEL_CASE} - Converts to camelCase (e.g., "myVariableName")</li>
+ *   <li>{@link #SNAKE_CASE} - Converts to lower_case_with_underscore (e.g., "my_variable_name")</li>
+ *   <li>{@link #SCREAMING_SNAKE_CASE} - Converts to SCREAMING_SNAKE_CASE (e.g., "MY_VARIABLE_NAME")</li>
  *   <li>{@link #NO_CHANGE} - Leaves the string unchanged</li>
  * </ul>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String original = "user-name";
- * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original);   // "userName"
- * String snakeCase = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert(original);   // "user_name"
+ * String camelCase = NamingPolicy.CAMEL_CASE.convert(original);   // "userName"
+ * String snakeCase = NamingPolicy.SNAKE_CASE.convert(original);   // "user_name"
  * }</pre>
  * 
  * @see Strings#toCamelCase(String)
- * @see Strings#toLowerCaseWithUnderscore(String)
- * @see Strings#toUpperCaseWithUnderscore(String)
+ * @see Strings#toSnakeCase(String)
+ * @see Strings#toScreamingSnakeCase(String)
  */
 public enum NamingPolicy {
 
     /**
      * Lower camel case naming policy (e.g., "myVariableName").
      *
-     * <p>This policy converts strings to lowerCamelCase format where the first word
+     * <p>This policy converts strings to camelCase format where the first word
      * starts with a lowercase letter and subsequent words start with uppercase letters.
      * Words are joined without any separators.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user_name");     // "userName"
-     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("first-name");    // "firstName"
-     * String result3 = NamingPolicy.LOWER_CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
+     * String result1 = NamingPolicy.CAMEL_CASE.convert("user_name");     // "userName"
+     * String result2 = NamingPolicy.CAMEL_CASE.convert("first-name");    // "firstName"
+     * String result3 = NamingPolicy.CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
      * }</pre>
      *
      * @see #convert(String)
      * @see Strings#toCamelCase(String)
      */
-    LOWER_CAMEL_CASE(Strings::toCamelCase),
+    CAMEL_CASE(Strings::toCamelCase),
+
+    //    In Java, UpperCamelCase is the better choice — both technically and culturally.
+    //
+    //    Short answer
+    //
+    //    Prefer UpperCamelCase in Java documentation, APIs, and naming utilities.
+    //
+    //    UpperCamelCase is understood, but it is non-idiomatic in Java.
+    //
+    //    Why UpperCamelCase is better in Java
+    //    1️⃣ It matches Java’s official terminology
+    //
+    //    The Java Language Specification, JDK docs, and common Java libraries consistently use:
+    //
+    //    camel case
+    //
+    //    lower camel case
+    //
+    //    upper camel case
+    //
+    //    Examples:
+    //
+    //    JLS: “class names are written in UpperCamelCase”
+    //
+    //    Guava, Apache Commons, Spring → all use UpperCamelCase terminology
+    //
+    //    You’ll rarely see UpperCamelCase in authoritative Java docs.
+    //
+    //    2️⃣ UpperCamelCase is language-agnostic, not Java-centric
+    //
+    //    UpperCamelCase originated in:
+    //
+    //    Pascal
+    //
+    //    C#
+    //
+    //    .NET ecosystem
+    //
+    //    In C# docs:
+    //
+    //    UpperCamelCase → types, methods
+    //
+    //    camelCase → locals, parameters
+    //
+    //    Java never adopted this terminology.
+    //
+    //    3️⃣ Java naming rules map cleanly
+    //    Java element    Case
+    //    Class / Interface / Enum    UpperCamelCase
+    //    Method  camelCase
+    //    Field (non-constant)    camelCase
+    //    Constant    SCREAMING_SNAKE_CASE
+    //    Package lowercase
+    //
+    //    This symmetry (UpperCamelCase ↔ camelCase) is conceptually clean.
 
     /**
      * Upper camel case naming policy (e.g., "MyVariableName").
@@ -80,12 +135,12 @@ public enum NamingPolicy {
      * }</pre>
      *
      * @see #convert(String)
-     * @see Strings#toPascalCase(String)
+     * @see Strings#toUpperCamelCase(String)
      */
-    UPPER_CAMEL_CASE(Strings::toPascalCase),
+    UPPER_CAMEL_CASE(Strings::toUpperCamelCase),
 
     /**
-     * Lower case with underscore naming policy (e.g., "my_variable_name").
+     * Lower case with underscores naming policy (e.g., "my_variable_name").
      *
      * <p>This policy converts strings to snake_case format where all letters are
      * lowercase and words are separated by underscores. This is commonly used in
@@ -93,18 +148,18 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName");     // "user_name"
-     * String result2 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("FirstName");    // "first_name"
-     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("myConstant");   // "my_constant"
+     * String result1 = NamingPolicy.SNAKE_CASE.convert("userName");     // "user_name"
+     * String result2 = NamingPolicy.SNAKE_CASE.convert("FirstName");    // "first_name"
+     * String result3 = NamingPolicy.SNAKE_CASE.convert("myConstant");   // "my_constant"
      * }</pre>
      *
      * @see #convert(String)
-     * @see Strings#toLowerCaseWithUnderscore(String)
+     * @see Strings#toSnakeCase(String)
      */
-    LOWER_CASE_WITH_UNDERSCORE(Strings::toLowerCaseWithUnderscore),
+    SNAKE_CASE(Strings::toSnakeCase),
 
     /**
-     * Upper case with underscore naming policy (e.g., "MY_VARIABLE_NAME").
+     * Upper case with underscores naming policy (e.g., "MY_VARIABLE_NAME").
      *
      * <p>This policy converts strings to UPPER_SNAKE_CASE format where all letters
      * are uppercase and words are separated by underscores. This is commonly used
@@ -112,15 +167,33 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("userName");     // "USER_NAME"
-     * String result2 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("firstName");    // "FIRST_NAME"
-     * String result3 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("myConstant");   // "MY_CONSTANT"
+     * String result1 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("userName");     // "USER_NAME"
+     * String result2 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("firstName");    // "FIRST_NAME"
+     * String result3 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("myConstant");   // "MY_CONSTANT"
      * }</pre>
      *
      * @see #convert(String)
-     * @see Strings#toUpperCaseWithUnderscore(String)
+     * @see Strings#toScreamingSnakeCase(String)
      */
-    UPPER_CASE_WITH_UNDERSCORE(Strings::toUpperCaseWithUnderscore),
+    SCREAMING_SNAKE_CASE(Strings::toScreamingSnakeCase),
+
+    /**
+     * Lower case with hyphens naming policy (e.g., "my-variable-name").
+     *
+     * <p>This policy converts strings to kebab-case format where all letters are
+     * lowercase and words are separated by hyphens.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.KEBAB_CASE.convert("userName");     // "user-name"
+     * String result2 = NamingPolicy.KEBAB_CASE.convert("FirstName");    // "first-name"
+     * String result3 = NamingPolicy.KEBAB_CASE.convert("myConstant");   // "my-constant"
+     * }</pre>
+     *
+     * @see #convert(String)
+     * @see Strings#toKebabCase(String)
+     */
+    KEBAB_CASE(Strings::toKebabCase),
 
     /**
      * No change naming policy - returns the string as-is.
@@ -152,7 +225,7 @@ public enum NamingPolicy {
      *
      * <p>This method applies the transformation function associated with this naming policy
      * to convert the input string to the desired format. The exact transformation depends on
-     * which naming policy constant is used (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE, etc.).</p>
+     * which naming policy constant is used (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE, etc.).</p>
      *
      * <p>The method handles various input formats and intelligently detects word boundaries based on:
      * <ul>
@@ -165,19 +238,19 @@ public enum NamingPolicy {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to lower camel case
-     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user-name");            // "userName"
-     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("USER_NAME");            // "userName"
+     * String result1 = NamingPolicy.CAMEL_CASE.convert("user-name");            // "userName"
+     * String result2 = NamingPolicy.CAMEL_CASE.convert("USER_NAME");            // "userName"
      *
      * // Convert to snake case
-     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName");   // "user_name"
+     * String result3 = NamingPolicy.SNAKE_CASE.convert("userName");   // "user_name"
      *
      * // Null and empty string handling
-     * String result4 = NamingPolicy.LOWER_CAMEL_CASE.convert(null);                   // null
-     * String result5 = NamingPolicy.LOWER_CAMEL_CASE.convert("");                     // ""
+     * String result4 = NamingPolicy.CAMEL_CASE.convert(null);                   // null
+     * String result5 = NamingPolicy.CAMEL_CASE.convert("");                     // ""
      * }</pre>
      *
      * @param str the string to convert; may be {@code null}, empty, or contain various separators
-     *            (underscores, hyphens, spaces) or be in camelCase/PascalCase format
+     *            (underscores, hyphens, spaces) or be in camelCase/UpperCamelCase format
      * @return the converted string according to this naming policy's rules; returns {@code null} if
      *         the input is {@code null}, returns an empty string if the input is empty, otherwise
      *         returns the result of applying the policy's transformation function to the input string
@@ -196,7 +269,7 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Function<String, String> converter = NamingPolicy.LOWER_CAMEL_CASE.func();
+     * Function<String, String> converter = NamingPolicy.CAMEL_CASE.func();
      * List<String> names = Arrays.asList("user_name", "first_name");
      * List<String> camelCaseNames = names.stream()
      *     .map(converter)

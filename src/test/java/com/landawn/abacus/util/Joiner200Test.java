@@ -184,14 +184,14 @@ public class Joiner200Test extends TestBase {
 
     @Test
     public void testReuseCachedBuffer() {
-        Joiner joiner = Joiner.with(", ").reuseCachedBuffer();
+        Joiner joiner = Joiner.with(", ").reuseBuffer();
         joiner.append("a").append("b");
         assertEquals("a, b", joiner.toString());
 
         joiner.append("c").append("d");
         assertEquals("a, b, c, d", joiner.toString());
 
-        Joiner joiner2 = Joiner.with(", ").reuseCachedBuffer();
+        Joiner joiner2 = Joiner.with(", ").reuseBuffer();
         joiner2.append("x");
         joiner2.close();
         assertThrows(IllegalStateException.class, () -> joiner2.append("y"));
@@ -200,7 +200,7 @@ public class Joiner200Test extends TestBase {
     @Test
     public void testReuseCachedBufferThrowsException() {
         Joiner joiner = Joiner.with(", ").append("a");
-        assertThrows(IllegalStateException.class, joiner::reuseCachedBuffer);
+        assertThrows(IllegalStateException.class, joiner::reuseBuffer);
     }
 
     @Test

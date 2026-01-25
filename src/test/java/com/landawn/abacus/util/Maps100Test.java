@@ -533,11 +533,11 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutIfAbsent() {
         Map<String, String> map = new HashMap<>();
-        String result1 = Maps.getAndPutIfAbsent(map, "key", () -> "value");
+        String result1 = Maps.getOrPutIfAbsent(map, "key", () -> "value");
         assertEquals("value", result1);
         assertEquals("value", map.get("key"));
 
-        String result2 = Maps.getAndPutIfAbsent(map, "key", () -> "newValue");
+        String result2 = Maps.getOrPutIfAbsent(map, "key", () -> "newValue");
         assertEquals("value", result2);
         assertEquals("value", map.get("key"));
     }
@@ -545,7 +545,7 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutListIfAbsent() {
         Map<String, List<String>> map = new HashMap<>();
-        List<String> list = Maps.getAndPutListIfAbsent(map, "key");
+        List<String> list = Maps.getOrPutListIfAbsent(map, "key");
         assertNotNull(list);
         assertTrue(list.isEmpty());
         assertEquals(list, map.get("key"));
@@ -557,7 +557,7 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutSetIfAbsent() {
         Map<String, Set<String>> map = new HashMap<>();
-        Set<String> set = Maps.getAndPutSetIfAbsent(map, "key");
+        Set<String> set = Maps.getOrPutSetIfAbsent(map, "key");
         assertNotNull(set);
         assertTrue(set.isEmpty());
         assertTrue(set instanceof HashSet);
@@ -566,7 +566,7 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutLinkedHashSetIfAbsent() {
         Map<String, Set<String>> map = new HashMap<>();
-        Set<String> set = Maps.getAndPutLinkedHashSetIfAbsent(map, "key");
+        Set<String> set = Maps.getOrPutLinkedHashSetIfAbsent(map, "key");
         assertNotNull(set);
         assertTrue(set instanceof LinkedHashSet);
     }
@@ -574,7 +574,7 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutMapIfAbsent() {
         Map<String, Map<String, String>> map = new HashMap<>();
-        Map<String, String> innerMap = Maps.getAndPutMapIfAbsent(map, "key");
+        Map<String, String> innerMap = Maps.getOrPutMapIfAbsent(map, "key");
         assertNotNull(innerMap);
         assertTrue(innerMap.isEmpty());
         assertTrue(innerMap instanceof HashMap);
@@ -583,7 +583,7 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetAndPutLinkedHashMapIfAbsent() {
         Map<String, Map<String, String>> map = new HashMap<>();
-        Map<String, String> innerMap = Maps.getAndPutLinkedHashMapIfAbsent(map, "key");
+        Map<String, String> innerMap = Maps.getOrPutLinkedHashMapIfAbsent(map, "key");
         assertNotNull(innerMap);
         assertTrue(innerMap instanceof LinkedHashMap);
     }
@@ -591,22 +591,22 @@ public class Maps100Test extends TestBase {
     @Test
     public void testGetIfPresentForEach() {
         List<String> keys = Arrays.asList("key1", "missing", "key2", "key3");
-        List<String> values = Maps.getIfPresentForEach(testMap, keys);
+        List<String> values = Maps.getValuesIfPresent(testMap, keys);
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "value2", "value3"), values);
 
-        assertTrue(Maps.getIfPresentForEach(null, keys).isEmpty());
-        assertTrue(Maps.getIfPresentForEach(testMap, null).isEmpty());
+        assertTrue(Maps.getValuesIfPresent(null, keys).isEmpty());
+        assertTrue(Maps.getValuesIfPresent(testMap, null).isEmpty());
     }
 
     @Test
     public void testGetOrDefaultIfAbsentForEach() {
         List<String> keys = Arrays.asList("key1", "missing", "key2");
-        List<String> values = Maps.getOrDefaultIfAbsentForEach(testMap, keys, "default");
+        List<String> values = Maps.getValuesOrDefault(testMap, keys, "default");
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "default", "value2"), values);
 
-        List<String> defaultValues = Maps.getOrDefaultIfAbsentForEach(new HashMap<>(), keys, "default");
+        List<String> defaultValues = Maps.getValuesOrDefault(new HashMap<>(), keys, "default");
         assertEquals(Arrays.asList("default", "default", "default"), defaultValues);
     }
 
@@ -679,26 +679,26 @@ public class Maps100Test extends TestBase {
     @Test
     public void testContainsEntry() {
         Map.Entry<String, String> entry = new AbstractMap.SimpleEntry<>("key1", "value1");
-        assertTrue(Maps.contains(testMap, entry));
+        assertTrue(Maps.containsEntry(testMap, entry));
 
         Map.Entry<String, String> wrongValue = new AbstractMap.SimpleEntry<>("key1", "wrongValue");
-        assertFalse(Maps.contains(testMap, wrongValue));
+        assertFalse(Maps.containsEntry(testMap, wrongValue));
 
         Map.Entry<String, String> missing = new AbstractMap.SimpleEntry<>("missing", "value");
-        assertFalse(Maps.contains(testMap, missing));
+        assertFalse(Maps.containsEntry(testMap, missing));
     }
 
     @Test
     public void testContainsKeyValue() {
-        assertTrue(Maps.contains(testMap, "key1", "value1"));
-        assertFalse(Maps.contains(testMap, "key1", "wrongValue"));
-        assertFalse(Maps.contains(testMap, "missing", "value1"));
+        assertTrue(Maps.containsEntry(testMap, "key1", "value1"));
+        assertFalse(Maps.containsEntry(testMap, "key1", "wrongValue"));
+        assertFalse(Maps.containsEntry(testMap, "missing", "value1"));
 
         testMap.put("nullKey", null);
-        assertTrue(Maps.contains(testMap, "nullKey", null));
+        assertTrue(Maps.containsEntry(testMap, "nullKey", null));
 
-        assertFalse(Maps.contains(new HashMap<>(), "key", "value"));
-        assertFalse(Maps.contains(null, "key", "value"));
+        assertFalse(Maps.containsEntry(new HashMap<>(), "key", "value"));
+        assertFalse(Maps.containsEntry(null, "key", "value"));
     }
 
     @Test
@@ -864,14 +864,14 @@ public class Maps100Test extends TestBase {
         Map<String, String> map = new HashMap<>(testMap);
 
         Map.Entry<String, String> entry = new AbstractMap.SimpleEntry<>("key1", "value1");
-        assertTrue(Maps.remove(map, entry));
+        assertTrue(Maps.removeEntry(map, entry));
         assertFalse(map.containsKey("key1"));
 
         Map.Entry<String, String> missing = new AbstractMap.SimpleEntry<>("missing", "value");
-        assertFalse(Maps.remove(map, missing));
+        assertFalse(Maps.removeEntry(map, missing));
 
         Map.Entry<String, String> wrongValue = new AbstractMap.SimpleEntry<>("key2", "wrongValue");
-        assertFalse(Maps.remove(map, wrongValue));
+        assertFalse(Maps.removeEntry(map, wrongValue));
         assertTrue(map.containsKey("key2"));
     }
 
@@ -879,16 +879,16 @@ public class Maps100Test extends TestBase {
     public void testRemoveKeyValue() {
         Map<String, String> map = new HashMap<>(testMap);
 
-        assertTrue(Maps.remove(map, "key1", "value1"));
+        assertTrue(Maps.removeEntry(map, "key1", "value1"));
         assertFalse(map.containsKey("key1"));
 
-        assertFalse(Maps.remove(map, "key2", "wrongValue"));
+        assertFalse(Maps.removeEntry(map, "key2", "wrongValue"));
         assertTrue(map.containsKey("key2"));
 
-        assertFalse(Maps.remove(map, "missing", "value"));
+        assertFalse(Maps.removeEntry(map, "missing", "value"));
 
-        assertFalse(Maps.remove(null, "key", "value"));
-        assertFalse(Maps.remove(new HashMap<>(), "key", "value"));
+        assertFalse(Maps.removeEntry(null, "key", "value"));
+        assertFalse(Maps.removeEntry(new HashMap<>(), "key", "value"));
     }
 
     @Test
@@ -1183,13 +1183,13 @@ public class Maps100Test extends TestBase {
         map.put("age", 30);
         map.put("active", true);
 
-        TestBean bean = Beans.map2Bean(map, TestBean.class);
+        TestBean bean = Beans.mapToBean(map, TestBean.class);
         assertNotNull(bean);
         assertEquals("John", bean.getName());
         assertEquals(30, bean.getAge());
         assertTrue(bean.isActive());
 
-        assertNull(Beans.map2Bean((Map) null, TestBean.class));
+        assertNull(Beans.mapToBean((Map) null, TestBean.class));
     }
 
     @Test
@@ -1199,12 +1199,12 @@ public class Maps100Test extends TestBase {
         map.put("age", null);
         map.put("unknownProperty", "value");
 
-        TestBean bean1 = Beans.map2Bean(map, true, true, TestBean.class);
+        TestBean bean1 = Beans.mapToBean(map, true, true, TestBean.class);
         assertEquals("John", bean1.getName());
         assertEquals(0, bean1.getAge());
 
         try {
-            Beans.map2Bean(map, false, false, TestBean.class);
+            Beans.mapToBean(map, false, false, TestBean.class);
             fail("Should throw exception for unmatched property");
         } catch (Exception e) {
         }
@@ -1217,7 +1217,7 @@ public class Maps100Test extends TestBase {
         map.put("age", 30);
         map.put("active", true);
 
-        TestBean bean = Beans.map2Bean(map, Arrays.asList("name", "age"), TestBean.class);
+        TestBean bean = Beans.mapToBean(map, Arrays.asList("name", "age"), TestBean.class);
         assertEquals("John", bean.getName());
         assertEquals(30, bean.getAge());
         assertFalse(bean.isActive());
@@ -1234,7 +1234,7 @@ public class Maps100Test extends TestBase {
         map2.put("age", 25);
 
         List<Map<String, Object>> maps = Arrays.asList(map1, map2);
-        List<TestBean> beans = Beans.map2Bean(maps, TestBean.class);
+        List<TestBean> beans = Beans.mapToBean(maps, TestBean.class);
 
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
@@ -1242,7 +1242,7 @@ public class Maps100Test extends TestBase {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Beans.map2Bean(maps, CommonUtil.asList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.mapToBean(maps, CommonUtil.asList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());
@@ -1258,7 +1258,7 @@ public class Maps100Test extends TestBase {
         bean.setAge(30);
         bean.setActive(true);
 
-        Map<String, Object> map = Beans.bean2Map(bean);
+        Map<String, Object> map = Beans.beanToMap(bean);
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
         assertEquals(true, map.get("active"));
@@ -1269,7 +1269,7 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("John");
 
-        Map<String, Object> map = Beans.bean2Map(bean, IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.beanToMap(bean, IntFunctions.ofLinkedHashMap());
         assertTrue(map instanceof LinkedHashMap);
         assertEquals("John", map.get("name"));
     }
@@ -1281,7 +1281,7 @@ public class Maps100Test extends TestBase {
         bean.setAge(30);
         bean.setActive(true);
 
-        Map<String, Object> map = Beans.bean2Map(bean, Arrays.asList("name", "age"));
+        Map<String, Object> map = Beans.beanToMap(bean, Arrays.asList("name", "age"));
         assertEquals(2, map.size());
         assertEquals("John", map.get("name"));
         assertEquals(30, map.get("age"));
@@ -1294,7 +1294,7 @@ public class Maps100Test extends TestBase {
         bean.setName("John");
         bean.setAge(30);
 
-        Map<String, Object> map = Beans.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToMap(bean, null, NamingPolicy.SCREAMING_SNAKE_CASE, IntFunctions.ofMap());
         assertEquals("John", map.get("NAME"));
         assertEquals(30, map.get("AGE"));
     }
@@ -1305,10 +1305,10 @@ public class Maps100Test extends TestBase {
         bean.setName("John");
         bean.setNullableField(null);
 
-        Map<String, Object> map1 = Beans.bean2Map(bean, true);
+        Map<String, Object> map1 = Beans.beanToMap(bean, true);
         assertFalse(map1.containsKey("nullableField"));
 
-        Map<String, Object> map2 = Beans.bean2Map(bean, false);
+        Map<String, Object> map2 = Beans.beanToMap(bean, false);
         assertTrue(map2.containsKey("nullableField"));
         assertNull(map2.get("nullableField"));
     }
@@ -1321,7 +1321,7 @@ public class Maps100Test extends TestBase {
         bean.setActive(true);
 
         Set<String> ignored = new HashSet<>(Arrays.asList("age", "active"));
-        Map<String, Object> map = Beans.bean2Map(bean, false, ignored);
+        Map<String, Object> map = Beans.beanToMap(bean, false, ignored);
 
         assertEquals(3, map.size());
         assertEquals("John", map.get("name"));
@@ -1339,7 +1339,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Beans.deepBean2Map(bean);
+            Map<String, Object> map = Beans.deepBeanToMap(bean);
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1354,7 +1354,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Beans.deepBean2Map(bean, CommonUtil.asList("name", "nestedBean"));
+            Map<String, Object> map = Beans.deepBeanToMap(bean, CommonUtil.asList("name", "nestedBean"));
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1374,7 +1374,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Beans.bean2FlatMap(bean);
+            Map<String, Object> flatMap = Beans.beanToFlatMap(bean);
             assertEquals("John", flatMap.get("name"));
             assertEquals(30, flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));
@@ -1389,7 +1389,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Beans.bean2FlatMap(bean, CommonUtil.asList("name", "nestedBean"));
+            Map<String, Object> flatMap = Beans.beanToFlatMap(bean, CommonUtil.asList("name", "nestedBean"));
             assertEquals("John", flatMap.get("name"));
             assertNull(flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));
@@ -1549,7 +1549,7 @@ public class Maps100Test extends TestBase {
         bean.setStringList(Arrays.asList("a", "b", "c"));
         bean.setIntArray(new int[] { 1, 2, 3 });
 
-        Map<String, Object> map = Beans.bean2Map(bean);
+        Map<String, Object> map = Beans.beanToMap(bean);
         assertNotNull(map.get("date"));
         assertEquals(bean.getBigDecimal(), map.get("bigDecimal"));
         assertEquals(bean.getStringList(), map.get("stringList"));
@@ -1565,7 +1565,7 @@ public class Maps100Test extends TestBase {
         nestedMap.put("value", "NestedValue");
         map.put("nestedBean", nestedMap);
 
-        TestBean bean = Beans.map2Bean(map, TestBean.class);
+        TestBean bean = Beans.mapToBean(map, TestBean.class);
         assertEquals("Parent", bean.getName());
         assertNotNull(bean.getNestedBean());
         assertEquals("NestedValue", bean.getNestedBean().getValue());
@@ -1816,10 +1816,10 @@ public class Maps100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("Test");
 
-        Map<String, Object> lowerUnderscoreMap = Beans.bean2Map(bean, (Collection<String>) null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> lowerUnderscoreMap = Beans.beanToMap(bean, (Collection<String>) null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(lowerUnderscoreMap.containsKey("name"));
 
-        Map<String, Object> upperUnderscoreMap = Beans.bean2Map(bean, (Collection<String>) null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> upperUnderscoreMap = Beans.beanToMap(bean, (Collection<String>) null, NamingPolicy.SCREAMING_SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(upperUnderscoreMap.containsKey("NAME"));
     }
 
@@ -1832,12 +1832,12 @@ public class Maps100Test extends TestBase {
         bean1.setReference(bean2);
         bean2.setReference(bean1);
 
-        Map<String, Object> map = Beans.bean2Map(bean1);
+        Map<String, Object> map = Beans.beanToMap(bean1);
         assertEquals("Bean1", map.get("name"));
         assertEquals(bean2, map.get("reference"));
 
         try {
-            Beans.deepBean2Map(bean1);
+            Beans.deepBeanToMap(bean1);
         } catch (StackOverflowError e) {
         }
     }

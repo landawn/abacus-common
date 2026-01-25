@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple5;
@@ -132,7 +132,7 @@ public class TupleType104Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = null;
+        JsonXmlSerializationConfig<?> config = null;
 
         tuple5Type.writeCharacter(writer, testTuple5, config);
 
@@ -142,7 +142,7 @@ public class TupleType104Test extends TestBase {
     @Test
     public void testWriteCharacterNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = null;
+        JsonXmlSerializationConfig<?> config = null;
 
         tuple5Type.writeCharacter(writer, null, config);
 

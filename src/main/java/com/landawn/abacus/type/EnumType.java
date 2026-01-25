@@ -30,7 +30,7 @@ import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -89,7 +89,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
         super(enumRepresentation == null ? className + "(NAME)" : className + "(" + enumRepresentation.name() + ")",
-                (Class<T>) getEnumClass(ClassUtil.forClass(className)));
+                (Class<T>) getEnumClass(ClassUtil.forName(className)));
 
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
         jsonXmlNameEnumMap = new HashMap<>();
@@ -203,7 +203,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return null; // NOSONAR
             }
 
-            if (Strings.isAsciiDigitalInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
+            if (Strings.isAsciiInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
                 final T value = jsonXmlNameEnumMap.get(str);
@@ -353,7 +353,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

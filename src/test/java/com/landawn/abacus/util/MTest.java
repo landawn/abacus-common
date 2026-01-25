@@ -86,7 +86,7 @@ public class MTest {
         final String[] a = new String[len];
 
         for (int i = 0; i < len; i++) {
-            a[i] = Strings.guid();
+            a[i] = Strings.uuid32();
         }
 
         N.println("Sorting");

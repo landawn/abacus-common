@@ -592,7 +592,7 @@ public class N2025Test extends TestBase {
     public void testUnzippIterable() {
         List<Triple<String, Integer, Boolean>> triples = Arrays.asList(Triple.of("a", 1, true), Triple.of("b", 2, false), Triple.of("c", 3, true));
 
-        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzipp(triples, (triple, output) -> {
+        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzip3(triples, (triple, output) -> {
             output.setLeft(triple.left());
             output.setMiddle(triple.middle());
             output.setRight(triple.right());
@@ -607,7 +607,7 @@ public class N2025Test extends TestBase {
     public void testUnzippIterableNull() {
         List<Triple<String, Integer, Boolean>> triples = null;
 
-        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzipp(triples, (triple, output) -> {
+        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzip3(triples, (triple, output) -> {
             output.setLeft(triple.left());
             output.setMiddle(triple.middle());
             output.setRight(triple.right());
@@ -622,7 +622,7 @@ public class N2025Test extends TestBase {
     public void testUnzippIterableEmpty() {
         List<Triple<String, Integer, Boolean>> triples = new ArrayList<>();
 
-        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzipp(triples, (triple, output) -> {
+        Triple<List<String>, List<Integer>, List<Boolean>> result = N.unzip3(triples, (triple, output) -> {
             output.setLeft(triple.left());
             output.setMiddle(triple.middle());
             output.setRight(triple.right());
@@ -637,7 +637,7 @@ public class N2025Test extends TestBase {
     public void testUnzippIterableWithSupplier() {
         List<Triple<String, Integer, Boolean>> triples = Arrays.asList(Triple.of("a", 1, true), Triple.of("b", 2, false));
 
-        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = N.unzipp(triples, (triple, output) -> {
+        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = N.unzip3(triples, (triple, output) -> {
             output.setLeft(triple.left());
             output.setMiddle(triple.middle());
             output.setRight(triple.right());

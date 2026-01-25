@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.function.IntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
@@ -87,7 +87,7 @@ public class Dataset113Test extends TestBase {
 
     @Test
     public void testColumnNameList() {
-        ImmutableList<String> names = dataset.columnNameList();
+        ImmutableList<String> names = dataset.columnNames();
         assertNotNull(names);
         assertEquals(4, names.size());
         assertEquals("id", names.get(0));
@@ -231,15 +231,15 @@ public class Dataset113Test extends TestBase {
 
     @Test
     public void testCurrentRowNum() {
-        assertEquals(0, dataset.currentRowNum());
-        dataset.absolute(1);
-        assertEquals(1, dataset.currentRowNum());
+        assertEquals(0, dataset.currentRowIndex());
+        dataset.moveToRow(1);
+        assertEquals(1, dataset.currentRowIndex());
     }
 
     @Test
     public void testAbsolute() {
-        Dataset ds = dataset.absolute(2);
-        assertEquals(2, ds.currentRowNum());
+        Dataset ds = dataset.moveToRow(2);
+        assertEquals(2, ds.currentRowIndex());
         assertEquals("Charlie", ds.get("name"));
     }
 
@@ -268,35 +268,35 @@ public class Dataset113Test extends TestBase {
 
     @Test
     public void testGetByColumnIndex() {
-        Dataset ds = dataset.absolute(1);
+        Dataset ds = dataset.moveToRow(1);
         assertEquals("Bob", ds.get(1));
         assertEquals((Integer) 30, ds.get(2));
     }
 
     @Test
     public void testGetByColumnName() {
-        Dataset ds = dataset.absolute(0);
+        Dataset ds = dataset.moveToRow(0);
         assertEquals("Alice", ds.get("name"));
         assertEquals((Integer) 25, ds.get("age"));
     }
 
     @Test
     public void testSetByColumnIndex() {
-        Dataset ds = dataset.copy().absolute(0);
+        Dataset ds = dataset.copy().moveToRow(0);
         ds.set(1, "Alicia");
         assertEquals("Alicia", ds.get(1));
     }
 
     @Test
     public void testSetByColumnName() {
-        Dataset ds = dataset.copy().absolute(0);
+        Dataset ds = dataset.copy().moveToRow(0);
         ds.set("name", "Alicia");
         assertEquals("Alicia", ds.get("name"));
     }
 
     @Test
     public void testIsNullByColumnIndex() {
-        Dataset ds = dataset.copy().absolute(0);
+        Dataset ds = dataset.copy().moveToRow(0);
         assertFalse(ds.isNull(1));
         ds.set(1, null);
         assertTrue(ds.isNull(1));
@@ -304,7 +304,7 @@ public class Dataset113Test extends TestBase {
 
     @Test
     public void testIsNullByColumnName() {
-        Dataset ds = dataset.copy().absolute(0);
+        Dataset ds = dataset.copy().moveToRow(0);
         assertFalse(ds.isNull("name"));
         ds.set("name", null);
         assertTrue(ds.isNull("name"));
@@ -314,7 +314,7 @@ public class Dataset113Test extends TestBase {
     public void testTypedGetters() {
         Dataset ds = Dataset
                 .rows(Arrays.asList("bool", "ch", "bt", "sh", "i", "l", "f", "d"), new Object[][] { { true, 'A', (byte) 1, (short) 2, 3, 4L, 5.0f, 6.0 } })
-                .absolute(0);
+                .moveToRow(0);
 
         assertEquals(true, ds.getBoolean(0));
         assertEquals('A', ds.getChar(1));
@@ -330,7 +330,7 @@ public class Dataset113Test extends TestBase {
     public void testTypedGettersByColumnName() {
         Dataset ds = Dataset
                 .rows(Arrays.asList("bool", "ch", "bt", "sh", "i", "l", "f", "d"), new Object[][] { { true, 'A', (byte) 1, (short) 2, 3, 4L, 5.0f, 6.0 } })
-                .absolute(0);
+                .moveToRow(0);
 
         assertEquals(true, ds.getBoolean("bool"));
         assertEquals('A', ds.getChar("ch"));
@@ -525,7 +525,7 @@ public class Dataset113Test extends TestBase {
         Dataset ds = Dataset.rows(Arrays.asList("fullName"), new Object[][] { { "John_Doe" }, { "Jane_Smith" } });
         ds.divideColumn("fullName", Arrays.asList("firstName", "lastName"), (String full) -> Arrays.asList(full.split("_")));
         assertEquals(2, ds.columnCount());
-        System.out.println(ds.columnNameList());
+        System.out.println(ds.columnNames());
         ds.println("     *  // ");
         assertEquals("John", ds.get(0, ds.getColumnIndex("firstName")));
         assertEquals("Doe", ds.get(0, ds.getColumnIndex("lastName")));
@@ -569,7 +569,7 @@ public class Dataset113Test extends TestBase {
     @Test
     public void testRemoveRows() {
         Dataset ds = dataset.copy();
-        ds.removeMultiRows(1, 2);
+        ds.removeRowsAt(1, 2);
         assertEquals(2, ds.size());
         assertEquals("Alice", ds.get(0, 1));
         assertEquals("Diana", ds.get(1, 1));
@@ -832,7 +832,7 @@ public class Dataset113Test extends TestBase {
     public void testDifference() {
         Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 2, "B" } });
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 3, "C" } });
-        Dataset diff = ds1.difference(ds2);
+        Dataset diff = N.difference(ds1, ds2);
         assertEquals(1, diff.size());
         assertEquals("B", diff.get(0, 1));
     }
@@ -841,7 +841,7 @@ public class Dataset113Test extends TestBase {
     public void testIntersection() {
         Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 2, "B" } });
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 3, "C" } });
-        Dataset intersection = ds1.intersection(ds2);
+        Dataset intersection = N.intersection(ds1, ds2);
         assertEquals(1, intersection.size());
         assertEquals("A", intersection.get(0, 1));
     }
@@ -850,7 +850,7 @@ public class Dataset113Test extends TestBase {
     public void testSymmetricDifference() {
         Dataset ds1 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 2, "B" } });
         Dataset ds2 = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "A" }, { 3, "C" } });
-        Dataset symDiff = ds1.symmetricDifference(ds2);
+        Dataset symDiff = N.symmetricDifference(ds1, ds2);
         assertEquals(2, symDiff.size());
     }
 

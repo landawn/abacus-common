@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -220,7 +220,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Character x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Character x, JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

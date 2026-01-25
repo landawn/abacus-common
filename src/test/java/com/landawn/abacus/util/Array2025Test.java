@@ -1090,24 +1090,24 @@ public class Array2025Test extends TestBase {
     }
 
     @Test
-    public void test_concatt_2D() {
+    public void test_concat_2D() {
         String[][] a = { { "a", "b" }, { "c", "d" } };
         String[][] b = { { "e", "f" } };
-        String[][] result = Array.concatt(a, b);
+        String[][] result = Array.concat2D(a, b);
 
         assertEquals(2, result.length);
         assertArrayEquals(new String[] { "a", "b", "e", "f" }, result[0]);
         assertArrayEquals(new String[] { "c", "d" }, result[1]);
 
-        String[][] nullResult = Array.concatt((String[][]) null, (String[][]) null);
+        String[][] nullResult = Array.concat2D((String[][]) null, (String[][]) null);
         assertNull(nullResult);
     }
 
     @Test
-    public void test_concatt_3D() {
+    public void test_concat_3D() {
         String[][][] a = { { { "a", "b" } } };
         String[][][] b = { { { "c", "d" } } };
-        String[][][] result = Array.concatt(a, b);
+        String[][][] result = Array.concat3D(a, b);
 
         assertEquals(1, result.length);
         assertArrayEquals(new String[] { "a", "b", "c", "d" }, result[0][0]);
@@ -2179,14 +2179,14 @@ public class Array2025Test extends TestBase {
     }
 
     @Test
-    public void test_concatt_generic_nullHandling() {
+    public void test_concat_generic_nullHandling() {
         String[][] a = { { "a", "b" } };
         String[][] b = null;
-        String[][] result = Array.concatt(a, b);
+        String[][] result = Array.concat2D(a, b);
         assertNotNull(result);
         assertEquals(1, result.length);
 
-        String[][] nullBoth = Array.concatt((String[][]) null, (String[][]) null);
+        String[][] nullBoth = Array.concat2D((String[][]) null, (String[][]) null);
         assertNull(nullBoth);
     }
 

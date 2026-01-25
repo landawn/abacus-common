@@ -103,7 +103,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * // Result: "/api/search?query=java&category=programming&limit=10"
  *
  * // Custom charset and naming policy
- * String encoded = URLEncodedUtil.encode(criteria, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+ * String encoded = URLEncodedUtil.encode(criteria, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASES);
  * // Result: "query=java&category=programming&limit=10"
  *
  * // Decoding query strings to Maps
@@ -137,7 +137,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * // Servlet parameter processing
  * HttpServletRequest request = getRequest();
- * UserProfile profile = URLEncodedUtil.parameters2Bean(
+ * UserProfile profile = URLEncodedUtil.decodeToBean(
  *     request.getParameterMap(), UserProfile.class);
  * }</pre>
  *
@@ -162,7 +162,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * <p><b>Naming Policy Integration:</b>
  * <ul>
  *   <li><b>CAMEL_CASE:</b> Convert property names to camelCase format</li>
- *   <li><b>LOWER_CASE_WITH_UNDERSCORES:</b> Convert to snake_case format</li>
+ *   <li><b>SNAKE_CASES:</b> Convert to snake_case format</li>
  *   <li><b>LOWER_CASE_WITH_DASHES:</b> Convert to kebab-case format</li>
  *   <li><b>NO_CHANGE:</b> Preserve original property names</li>
  *   <li><b>Custom Policies:</b> Support for user-defined naming transformations</li>
@@ -253,7 +253,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  *     public <T> List<T> search(SearchRequest request, Class<T> responseType) {
  *         String url = URLEncodedUtil.encode(BASE_URL + "/search", request,
- *             StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+ *             StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASES);
  *
  *         // Use url with HTTP client
  *         String response = httpClient.get(url);
@@ -451,7 +451,7 @@ public final class URLEncodedUtil {
      * This method accepts various parameter formats:
      * <ul>
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
-     * <li>JavaBean: Bean properties are encoded using lowerCamelCase naming</li>
+     * <li>JavaBean: Bean properties are encoded using camelCase naming</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
      * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
      * </ul>
@@ -480,7 +480,7 @@ public final class URLEncodedUtil {
      * This method accepts various parameter formats:
      * <ul>
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
-     * <li>JavaBean: Bean properties are encoded using lowerCamelCase naming (default)</li>
+     * <li>JavaBean: Bean properties are encoded using camelCase naming (default)</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
      * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
      * </ul>
@@ -501,7 +501,7 @@ public final class URLEncodedUtil {
      * @see URLEncoder#encode(String, Charset)
      */
     public static String encode(final Object parameters, final Charset charset) {
-        return encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+        return encode(parameters, charset, NamingPolicy.CAMEL_CASE);
     }
 
     /**
@@ -520,13 +520,13 @@ public final class URLEncodedUtil {
      * <pre>{@code
      * class User { String firstName; int userAge; }
      * User user = new User("John", 30);
-     * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
      * // query: "first_name=John&amp;user_age=30"
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
-     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
      * @see #encode(Object, Charset)
@@ -597,7 +597,7 @@ public final class URLEncodedUtil {
      * @see #encode(String, Object, Charset, NamingPolicy)
      */
     public static String encode(final String url, final Object parameters, final Charset charset) {
-        return encode(url, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+        return encode(url, parameters, charset, NamingPolicy.CAMEL_CASE);
     }
 
     /**
@@ -613,14 +613,14 @@ public final class URLEncodedUtil {
      * <pre>{@code
      * class User { String firstName; }
      * String url = URLEncodedUtil.encode("http://api.com/users", new User("John"),
-     *                                     StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+     *                                     StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
      * // url: "http://api.com/users?first_name=John"
      * }</pre>
      *
      * @param url the base URL to which the query string will be appended.
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
-     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null} or empty.
@@ -691,7 +691,7 @@ public final class URLEncodedUtil {
      * @see #encode(Object, Charset, NamingPolicy, Appendable)
      */
     public static void encode(final Object parameters, final Charset charset, final Appendable output) {
-        encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE, output);
+        encode(parameters, charset, NamingPolicy.CAMEL_CASE, output);
     }
 
     /**
@@ -715,13 +715,13 @@ public final class URLEncodedUtil {
      * <pre>{@code
      * class User { String firstName; int age; }
      * StringBuilder sb = new StringBuilder();
-     * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, sb);
+     * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE, sb);
      * // sb: "first_name=John&amp;age=30"
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
-     * @param namingPolicy the naming policy to transform property/key names (e.g., LOWER_CAMEL_CASE, UPPER_CASE_WITH_UNDERSCORE);
+     * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
@@ -757,7 +757,7 @@ public final class URLEncodedUtil {
                     encodeFormFields(N.stringOf(entry.getValue()), charset, output);
                 }
             } else if (Beans.isBeanClass(parameters.getClass())) {
-                encode(Beans.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
+                encode(Beans.beanToMap(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
             } else if (parameters instanceof Object[] a) {
                 if (0 != (a.length % 2)) {
                     throw new IllegalArgumentException(
@@ -1206,7 +1206,7 @@ public final class URLEncodedUtil {
      * Map<String, String[]> params = new HashMap<>();
      * params.put("name", new String[] {"Alice"});
      * params.put("tags", new String[] {"java", "coding"});
-     * User user = URLEncodedUtil.parameters2Bean(params, User.class);
+     * User user = URLEncodedUtil.decodeToBean(params, User.class);
      * // user: {name="Alice", tags="java, coding"}
      * }</pre>
      *
@@ -1217,7 +1217,7 @@ public final class URLEncodedUtil {
      * @return an instance of type T with properties populated from the parameter map;
      *         returns an empty instance if {@code parameters} is {@code null} or empty.
      */
-    public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
+    public static <T> T decodeToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 

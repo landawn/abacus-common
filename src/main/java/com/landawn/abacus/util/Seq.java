@@ -143,7 +143,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.stream.Collectors
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
- * @see com.landawn.abacus.util.CSVUtil
+ * @see com.landawn.abacus.util.CsvUtil
  * @see java.util.stream.Stream
  *
  * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
@@ -182,7 +182,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     // private static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = t -> t.getKey().val();
 
-    private static final Object NONE = ClassUtil.createNullMask();
+    private static final Object NONE = ClassUtil.newNullSentinel();
 
     private static final Random RAND = new SecureRandom();
 
@@ -7007,7 +7007,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<List<Integer>> windows = seq.slide(3);
+     * Seq<List<Integer>> windows = seq.sliding(3);
      * // windows contains: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
      * }</pre>
      *
@@ -7017,8 +7017,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero
      */
     @IntermediateOp
-    public Seq<List<T>, E> slide(final int windowSize) throws IllegalStateException {
-        return slide(windowSize, 1);
+    public Seq<List<T>, E> sliding(final int windowSize) throws IllegalStateException {
+        return sliding(windowSize, 1);
     }
 
     /**
@@ -7031,7 +7031,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String> seq = Seq.of("a", "b", "c", "d");
-     * Seq<Set<String>> windows = seq.slide(2, HashSet::new);
+     * Seq<Set<String>> windows = seq.sliding(2, HashSet::new);
      * // windows contains: [{"a", "b"}, {"b", "c"}, {"c", "d"}]
      * }</pre>
      *
@@ -7043,9 +7043,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero or collectionSupplier is null
      */
     @IntermediateOp
-    public <C extends Collection<T>> Seq<C, E> slide(final int windowSize, final IntFunction<? extends C> collectionSupplier)
+    public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
-        return slide(windowSize, 1, collectionSupplier);
+        return sliding(windowSize, 1, collectionSupplier);
     }
 
     /**
@@ -7058,7 +7058,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<String> windows = seq.slide(3, Collectors.joining(","));
+     * Seq<String> windows = seq.sliding(3, Collectors.joining(","));
      * // windows contains: ["1,2,3", "2,3,4", "3,4,5"]
      * }</pre>
      *
@@ -7070,16 +7070,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the window size is less than or equal to zero or collector is null
      */
     @IntermediateOp
-    public <R> Seq<R, E> slide(final int windowSize, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
-        return slide(windowSize, 1, collector);
+    public <R> Seq<R, E> sliding(final int windowSize, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
+        return sliding(windowSize, 1, collector);
     }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size and increment.
      * Each window is a list containing a subset of elements from the sequence.
      * 
-     * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).slide(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
-     * <p>And {@code Seq.of(1, 2, 3, 4, 5).slide(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
+     * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
+     * <p>And {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -7088,11 +7088,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is a list representing a sliding window of the original sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero
-     * @see #slide(int, int, IntFunction)
+     * @see #sliding(int, int, IntFunction)
      */
     @IntermediateOp
-    public Seq<List<T>, E> slide(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
-        return slide(windowSize, increment, IntFunctions.ofList());
+    public Seq<List<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
+        return sliding(windowSize, increment, IntFunctions.ofList());
     }
 
     /**
@@ -7112,11 +7112,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is a collection representing a sliding window of the original sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero, or if collectionSupplier is null
-     * @see #slide(int, int)
-     * @see #slide(int, int, Collector)
+     * @see #sliding(int, int)
+     * @see #sliding(int, int, Collector)
      */
     @IntermediateOp
-    public <C extends Collection<T>> Seq<C, E> slide(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
+    public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -7138,8 +7138,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                // Seq.of(1, 2, 3).slide(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Seq.of(1).slide(2, 1) will return [[1]], not []
+                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
                 // Why? we need to check if the queue is not empty?
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
@@ -7266,11 +7266,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a new Seq where each element is the result of collecting the elements of a sliding window
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the window size or increment is less than or equal to zero, or if collector is null
-     * @see #slide(int, int)
+     * @see #sliding(int, int)
      * @see Collectors
      */
     @IntermediateOp
-    public <R> Seq<R, E> slide(final int windowSize, final int increment, final Collector<? super T, ?, R> collector)
+    public <R> Seq<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, ?, R> collector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -7296,8 +7296,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     toSkip = false;
                 }
 
-                // Seq.of(1, 2, 3).slide(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Seq.of(1).slide(2, 1) will return [[1]], not []
+                // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
+                // But Seq.of(1).sliding(2, 1) will return [[1]], not []
                 // Why? we need to check if the queue is not empty?
                 // Not really, because elements.hasNext() is used to check if there are more elements to process.
                 // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
@@ -13013,7 +13013,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         try {
             @SuppressWarnings("resource")
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer();
 
             while (elements.hasNext()) {
                 joiner.append(elements.next());

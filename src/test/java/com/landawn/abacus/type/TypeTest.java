@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -35,7 +35,7 @@ import com.landawn.abacus.types.MyConstant;
 import com.landawn.abacus.util.AccountStatus;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BooleanList;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.Color;
@@ -238,17 +238,17 @@ public class TypeTest extends AbstractTest {
         final Type<Object> type = N.typeOf(XMLGregorianCalendar.class);
         Dates.currentXMLGregorianCalendar();
 
-        BufferedJSONWriter writer = Objectory.createBufferedJSONWriter();
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
         type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JSC.of(DateTimeFormat.LONG));
 
         N.println(writer.toString());
 
-        writer = Objectory.createBufferedJSONWriter();
+        writer = Objectory.createBufferedJsonWriter();
         type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JSC.of(DateTimeFormat.ISO_8601_DATE_TIME));
 
         N.println(writer.toString());
 
-        writer = Objectory.createBufferedJSONWriter();
+        writer = Objectory.createBufferedJsonWriter();
         type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JSC.of(DateTimeFormat.ISO_8601_TIMESTAMP));
 
         N.println(writer.toString());
@@ -309,7 +309,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -329,7 +329,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -348,7 +348,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -368,7 +368,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -388,7 +388,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -408,7 +408,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -428,7 +428,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -448,7 +448,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -471,7 +471,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -491,7 +491,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -510,7 +510,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -530,7 +530,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -550,7 +550,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -570,7 +570,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -590,7 +590,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -610,7 +610,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, a);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, a, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -633,7 +633,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -651,7 +651,7 @@ public class TypeTest extends AbstractTest {
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -671,7 +671,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -691,7 +691,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -711,7 +711,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -731,7 +731,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -751,7 +751,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -771,7 +771,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -794,7 +794,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -812,7 +812,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -830,7 +830,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -848,7 +848,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -866,7 +866,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -885,7 +885,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -904,7 +904,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -922,7 +922,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
             assertEquals(str, writer.toString());
 
-            BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
             type.writeCharacter(bw, list, JSC.create());
             assertEquals(str, bw.toString());
 
@@ -955,17 +955,17 @@ public class TypeTest extends AbstractTest {
         Type<InputStream> type = N.typeOf(ClobAsciiStreamType.CLOB_ASCII_STREAM);
 
         Writer writer = new StringWriter();
-        type.appendTo(writer, IOUtil.string2InputStream("[abc, 123, 213]"));
+        type.appendTo(writer, IOUtil.stringToInputStream("[abc, 123, 213]"));
 
         N.println(writer.toString());
 
-        BufferedJSONWriter writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), null);
+        BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
-        writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
+        writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
     }
@@ -975,17 +975,17 @@ public class TypeTest extends AbstractTest {
         Type<InputStream> type = N.typeOf(AsciiStreamType.ASCII_STREAM);
 
         Writer writer = new StringWriter();
-        type.appendTo(writer, IOUtil.string2InputStream("[abc, 123, 213]"));
+        type.appendTo(writer, IOUtil.stringToInputStream("[abc, 123, 213]"));
 
         N.println(writer.toString());
 
-        BufferedJSONWriter writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), null);
+        BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
-        writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
+        writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
     }
@@ -995,17 +995,17 @@ public class TypeTest extends AbstractTest {
         Type<InputStream> type = N.typeOf(InputStream.class);
 
         Writer writer = new StringWriter();
-        type.appendTo(writer, IOUtil.string2InputStream("[abc, 123, 213]"));
+        type.appendTo(writer, IOUtil.stringToInputStream("[abc, 123, 213]"));
 
         N.println(writer.toString());
 
-        BufferedJSONWriter writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), null);
+        BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
-        writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2InputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
+        writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
     }
@@ -1015,17 +1015,17 @@ public class TypeTest extends AbstractTest {
         Type<Reader> type = N.typeOf(Reader.class);
 
         Writer writer = new StringWriter();
-        type.appendTo(writer, IOUtil.string2Reader("[abc, 123, 213]"));
+        type.appendTo(writer, IOUtil.stringToReader("[abc, 123, 213]"));
 
         N.println(writer.toString());
 
-        BufferedJSONWriter writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2Reader("[abc, 123, 213]"), null);
+        BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToReader("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
-        writer1 = Objectory.createBufferedJSONWriter();
-        type.writeCharacter(writer1, IOUtil.string2Reader("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
+        writer1 = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer1, IOUtil.stringToReader("[abc, 123, 213]"), JSC.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
     }
@@ -1039,9 +1039,9 @@ public class TypeTest extends AbstractTest {
 
         N.println(writer.toString());
 
-        N.println(type.array2Collection(N.asArray("abc", "123", "213"), List.class));
-        N.println(type.array2Collection(N.asArray("abc", "123", "213"), Set.class));
-        N.println(type.array2Collection(N.asArray("abc", "123", "213"), Queue.class));
+        N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), List.class));
+        N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), Set.class));
+        N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), Queue.class));
     }
 
     @Test

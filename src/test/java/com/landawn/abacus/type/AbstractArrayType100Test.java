@@ -41,14 +41,14 @@ public class AbstractArrayType100Test extends TestBase {
 
     @Test
     public void testArray2Collection_NullArray() {
-        Collection<Object> result = type.array2Collection(null, ArrayList.class);
+        Collection<Object> result = type.arrayToCollection(null, ArrayList.class);
         assertNull(result);
     }
 
     @Test
     public void testArray2Collection_ArrayList() {
         Object[] array = new Object[] { "a", "b", "c" };
-        Collection<Object> result = type.array2Collection(array, ArrayList.class);
+        Collection<Object> result = type.arrayToCollection(array, ArrayList.class);
         assertNotNull(result);
         assertTrue(result instanceof ArrayList);
         assertEquals(3, result.size());
@@ -57,7 +57,7 @@ public class AbstractArrayType100Test extends TestBase {
     @Test
     public void testArray2Collection_HashSet() {
         Object[] array = new Object[] { "a", "b", "c" };
-        Collection<Object> result = type.array2Collection(array, HashSet.class);
+        Collection<Object> result = type.arrayToCollection(array, HashSet.class);
         assertNotNull(result);
         assertTrue(result instanceof HashSet);
         assertEquals(3, result.size());
@@ -66,7 +66,7 @@ public class AbstractArrayType100Test extends TestBase {
     @Test
     public void testArray2Collection_LinkedList() {
         Object[] array = new Object[] { "a", "b", "c" };
-        Collection<Object> result = type.array2Collection(array, LinkedList.class);
+        Collection<Object> result = type.arrayToCollection(array, LinkedList.class);
         assertNotNull(result);
         assertTrue(result instanceof LinkedList);
         assertEquals(3, result.size());
@@ -75,7 +75,7 @@ public class AbstractArrayType100Test extends TestBase {
     @Test
     public void testArray2Collection_EmptyArray() {
         Object[] array = new Object[0];
-        Collection<Object> result = type.array2Collection(array, ArrayList.class);
+        Collection<Object> result = type.arrayToCollection(array, ArrayList.class);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }

@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -452,7 +452,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Sample text");
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * JsonXmlSerializationConfig<?> config = new JsonXmlSerializationConfig<>();
      * config.setStringQuotation('"');
      * type.writeCharacter(writer, reader, config);
      * System.out.println(writer.toString());   // Output: "Sample text"
@@ -470,7 +470,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Reader x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Reader x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

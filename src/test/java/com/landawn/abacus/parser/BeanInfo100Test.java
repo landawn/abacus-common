@@ -158,7 +158,7 @@ public class BeanInfo100Test extends TestBase {
     public void testGetAnnotation() {
         JsonXmlConfig jsonXmlConfig = beanInfo.getAnnotation(JsonXmlConfig.class);
         Assertions.assertNotNull(jsonXmlConfig);
-        Assertions.assertEquals(NamingPolicy.LOWER_CAMEL_CASE, jsonXmlConfig.namingPolicy());
+        Assertions.assertEquals(NamingPolicy.CAMEL_CASE, jsonXmlConfig.namingPolicy());
 
         Table table = beanInfo.getAnnotation(Table.class);
         Assertions.assertNotNull(table);
@@ -210,7 +210,7 @@ public class BeanInfo100Test extends TestBase {
         Assertions.assertEquals("com.landawn.abacus.parser.BeanInfo100Test.TestBean", toString);
     }
 
-    @JsonXmlConfig(namingPolicy = NamingPolicy.LOWER_CAMEL_CASE)
+    @JsonXmlConfig(namingPolicy = NamingPolicy.CAMEL_CASE)
     @Table("test_bean")
     public static class TestBean {
         @Id

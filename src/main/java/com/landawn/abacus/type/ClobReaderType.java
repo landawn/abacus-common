@@ -63,7 +63,7 @@ public class ClobReaderType extends ReaderType {
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Clob clob = rs.getClob(columnIndex);
-        return clob2Reader(clob);
+        return clobToReader(clob);
     }
 
     /**
@@ -76,7 +76,7 @@ public class ClobReaderType extends ReaderType {
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clob2Reader(rs.getClob(columnLabel));
+        return clobToReader(rs.getClob(columnLabel));
     }
 
     /**
@@ -145,7 +145,7 @@ public class ClobReaderType extends ReaderType {
      * @return A Reader for the CLOB's character stream, or {@code null} if the CLOB is null
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
-    static Reader clob2Reader(final Clob clob) throws SQLException {
+    static Reader clobToReader(final Clob clob) throws SQLException {
         if (clob != null) {
             return clob.getCharacterStream();
         }

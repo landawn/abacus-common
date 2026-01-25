@@ -12,15 +12,15 @@ public class JAXBParser2025Test extends TestBase {
 
     @Test
     public void test_constructor_default() {
-        XMLParser parser = new JAXBParser();
+        XmlParser parser = new JAXBParser();
         assertNotNull(parser);
     }
 
     @Test
     public void test_constructor_withConfig() {
-        XMLSerializationConfig xsc = new XMLSerializationConfig();
-        XMLDeserializationConfig xdc = new XMLDeserializationConfig();
-        XMLParser parser = new JAXBParser(xsc, xdc);
+        XmlSerializationConfig xsc = new XmlSerializationConfig();
+        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+        XmlParser parser = new JAXBParser(xsc, xdc);
         assertNotNull(parser);
     }
 }

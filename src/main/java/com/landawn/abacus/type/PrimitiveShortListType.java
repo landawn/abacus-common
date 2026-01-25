@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
@@ -187,7 +187,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * JsonXmlSerializationConfig<?> config = new JsonXmlSerializationConfig<>();
      * type.writeCharacter(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
@@ -202,7 +202,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ShortList x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ShortList x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

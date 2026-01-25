@@ -30,7 +30,7 @@ import java.util.function.Function;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -471,7 +471,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

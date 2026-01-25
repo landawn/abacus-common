@@ -402,29 +402,29 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testRegisterNonPropGetSetMethod() {
-        Beans.registerNonPropGetSetMethod(SimpleBean.class, "internal");
+        Beans.registerNonPropertyAccessor(SimpleBean.class, "internal");
     }
 
     @Test
     public void testRegisterPropGetSetMethod() throws Exception {
         Method method = SimpleBean.class.getMethod("getName");
-        Beans.registerPropGetSetMethod("name", method);
+        Beans.registerPropertyAccessor("name", method);
 
         Method invalidMethod = Object.class.getMethod("toString");
-        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropGetSetMethod("invalid", invalidMethod));
+        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropertyAccessor("invalid", invalidMethod));
     }
 
     @Test
     public void testRegisterXMLBindingClass() {
-        Beans.registerXMLBindingClass(SimpleBean.class);
-        assertTrue(Beans.isRegisteredXMLBindingClass(SimpleBean.class));
+        Beans.registerXmlBindingClass(SimpleBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(SimpleBean.class));
     }
 
     @Test
     public void testIsRegisteredXMLBindingClass() {
-        Beans.registerXMLBindingClass(EntityBean.class);
-        assertTrue(Beans.isRegisteredXMLBindingClass(EntityBean.class));
-        assertFalse(Beans.isRegisteredXMLBindingClass(Address.class));
+        Beans.registerXmlBindingClass(EntityBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(EntityBean.class));
+        assertFalse(Beans.isRegisteredXmlBindingClass(Address.class));
     }
 
     @Test
@@ -533,19 +533,19 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetPropGetMethod() {
-        Method method = Beans.getPropGetMethod(SimpleBean.class, "name");
+        Method method = Beans.getPropGetter(SimpleBean.class, "name");
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        method = Beans.getPropGetMethod(SimpleBean.class, "NAME");
+        method = Beans.getPropGetter(SimpleBean.class, "NAME");
         assertNotNull(method);
 
-        assertNull(Beans.getPropGetMethod(SimpleBean.class, "nonExistent"));
+        assertNull(Beans.getPropGetter(SimpleBean.class, "nonExistent"));
     }
 
     @Test
     public void testGetPropGetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropGetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropGetters(SimpleBean.class);
         assertNotNull(methods);
         assertFalse(methods.isEmpty());
         assertNotNull(methods.get("name"));
@@ -554,16 +554,16 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetPropSetMethod() {
-        Method method = Beans.getPropSetMethod(SimpleBean.class, "name");
+        Method method = Beans.getPropSetter(SimpleBean.class, "name");
         assertNotNull(method);
         assertEquals("setName", method.getName());
 
-        assertNull(Beans.getPropSetMethod(SimpleBean.class, "nonExistent"));
+        assertNull(Beans.getPropSetter(SimpleBean.class, "nonExistent"));
     }
 
     @Test
     public void testGetPropSetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropSetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropSetters(SimpleBean.class);
         assertNotNull(methods);
         assertFalse(methods.isEmpty());
         assertNotNull(methods.get("name"));
@@ -617,13 +617,13 @@ public class Beans2025Test extends TestBase {
         Method getItems = CollectionBean.class.getMethod("getItems");
 
         List<String> newList = Arrays.asList("new1", "new2");
-        Beans.setPropValueByGet(bean, getItems, newList);
+        Beans.setPropValueByGetter(bean, getItems, newList);
 
         assertEquals(2, bean.getItems().size());
         assertEquals("new1", bean.getItems().get(0));
         assertEquals("new2", bean.getItems().get(1));
 
-        Beans.setPropValueByGet(bean, getItems, null);
+        Beans.setPropValueByGetter(bean, getItems, null);
         assertEquals(2, bean.getItems().size());
     }
 
@@ -646,21 +646,21 @@ public class Beans2025Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("user_name", Beans.toLowerCaseWithUnderscore("userName"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("FirstName"));
-        assertEquals("user_id", Beans.toLowerCaseWithUnderscore("userID"));
-        assertEquals("", Beans.toLowerCaseWithUnderscore(""));
-        assertNull(Beans.toLowerCaseWithUnderscore((String) null));
+    public void testToSnakeCase() {
+        assertEquals("user_name", Beans.toSnakeCase("userName"));
+        assertEquals("first_name", Beans.toSnakeCase("FirstName"));
+        assertEquals("user_id", Beans.toSnakeCase("userID"));
+        assertEquals("", Beans.toSnakeCase(""));
+        assertNull(Beans.toSnakeCase((String) null));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("USER_NAME", Beans.toUpperCaseWithUnderscore("userName"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("firstName"));
-        assertEquals("USER_ID", Beans.toUpperCaseWithUnderscore("userID"));
-        assertEquals("", Beans.toUpperCaseWithUnderscore(""));
-        assertNull(Beans.toUpperCaseWithUnderscore((String) null));
+    public void testToScreamingSnakeCase() {
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("USER_ID", Beans.toScreamingSnakeCase("userID"));
+        assertEquals("", Beans.toScreamingSnakeCase(""));
+        assertNull(Beans.toScreamingSnakeCase((String) null));
     }
 
     @Test
@@ -669,7 +669,7 @@ public class Beans2025Test extends TestBase {
         map.put("user_name", "John");
         map.put("first_name", "Jane");
 
-        Beans.toCamelCase(map);
+        Beans.toCamelCaseKeys(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -678,12 +678,12 @@ public class Beans2025Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscoreMap() {
+    public void testToSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toLowerCaseWithUnderscore(map);
+        Beans.toSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -691,12 +691,12 @@ public class Beans2025Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscoreMap() {
+    public void testToScreamingSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toUpperCaseWithUnderscore(map);
+        Beans.toScreamingSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -710,12 +710,12 @@ public class Beans2025Test extends TestBase {
         map.put("age", 30);
         map.put("active", false);
 
-        SimpleBean bean = Beans.map2Bean(map, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
         assertEquals(false, bean.getActive());
 
-        assertNull(Beans.map2Bean((Map<String, Object>) null, SimpleBean.class));
+        assertNull(Beans.mapToBean((Map<String, Object>) null, SimpleBean.class));
     }
 
     @Test
@@ -725,12 +725,12 @@ public class Beans2025Test extends TestBase {
         map.put("age", 30);
         map.put("active", null);
 
-        SimpleBean bean = Beans.map2Bean(map, true, true, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, true, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
         assertNull(bean.getActive());
 
-        bean = Beans.map2Bean(map, Arrays.asList("name", "age"), SimpleBean.class);
+        bean = Beans.mapToBean(map, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
     }
@@ -749,12 +749,12 @@ public class Beans2025Test extends TestBase {
         map2.put("age", 30);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.map2Bean(mapList, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapToBean(mapList, SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals("Jane", beans.get(1).getName());
 
-        beans = Beans.map2Bean(mapList, Arrays.asList("name"), SimpleBean.class);
+        beans = Beans.mapToBean(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -769,26 +769,26 @@ public class Beans2025Test extends TestBase {
         map1.put("age", null);
         mapList.add(map1);
 
-        List<SimpleBean> beans = Beans.map2Bean(mapList, true, true, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapToBean(mapList, true, true, SimpleBean.class);
         assertEquals(1, beans.size());
         assertEquals("John", beans.get(0).getName());
     }
 
     @Test
     public void testBean2Map() {
-        Map<String, Object> map = Beans.bean2Map(simpleBean);
+        Map<String, Object> map = Beans.beanToMap(simpleBean);
         assertEquals("John", map.get("name"));
         assertEquals(25, map.get("age"));
         assertEquals(true, map.get("active"));
 
-        TreeMap<String, Object> treeMap = Beans.bean2Map(simpleBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.beanToMap(simpleBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
 
-        map = Beans.bean2Map(simpleBean, Arrays.asList("name", "age"));
+        map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("active"));
 
-        map = Beans.bean2Map(simpleBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.beanToMap(simpleBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
     }
@@ -796,14 +796,14 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2MapWithOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, output);
+        Beans.beanToMap(simpleBean, output);
 
         assertEquals("John", output.get("name"));
         assertEquals(25, output.get("age"));
         assertEquals(true, output.get("active"));
 
         output.clear();
-        Beans.bean2Map(simpleBean, Arrays.asList("name"), output);
+        Beans.beanToMap(simpleBean, Arrays.asList("name"), output);
         assertEquals(1, output.size());
         assertTrue(output.containsKey("name"));
     }
@@ -812,16 +812,16 @@ public class Beans2025Test extends TestBase {
     public void testBean2MapWithFiltering() {
         simpleBean.setActive(null);
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, true);
+        Map<String, Object> map = Beans.beanToMap(simpleBean, true);
         assertFalse(map.containsKey("active"));
 
-        map = Beans.bean2Map(simpleBean, false);
+        map = Beans.beanToMap(simpleBean, false);
         assertTrue(map.containsKey("active"));
         assertNull(map.get("active"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
-        map = Beans.bean2Map(simpleBean, true, ignored);
+        map = Beans.beanToMap(simpleBean, true, ignored);
         assertFalse(map.containsKey("age"));
         assertFalse(map.containsKey("active"));
         assertTrue(map.containsKey("name"));
@@ -832,7 +832,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToMap(simpleBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
 
         assertTrue(map.containsKey("name"));
         assertFalse(map.containsKey("age"));
@@ -840,7 +840,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2Map() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertTrue(map.get("simpleBean") instanceof Map);
         assertTrue(map.get("address") instanceof Map);
@@ -848,7 +848,7 @@ public class Beans2025Test extends TestBase {
         Map<String, Object> simpleBeanMap = (Map<String, Object>) map.get("simpleBean");
         assertEquals("John", simpleBeanMap.get("name"));
 
-        map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"));
+        map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals(2, map.size());
         assertFalse(map.containsKey("simpleBean"));
 
@@ -856,7 +856,7 @@ public class Beans2025Test extends TestBase {
         snakeBean.setFirstName("John");
         snakeBean.setLastName("Doe");
 
-        map = Beans.deepBean2Map(snakeBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.deepBeanToMap(snakeBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("first_name"));
         assertTrue(map.containsKey("last_name"));
     }
@@ -864,13 +864,13 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testDeepBean2MapWithOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, output);
+        Beans.deepBeanToMap(nestedBean, output);
 
         assertEquals("123", output.get("id"));
         assertTrue(output.get("simpleBean") instanceof Map);
 
         output.clear();
-        Beans.deepBean2Map(nestedBean, Arrays.asList("id"), output);
+        Beans.deepBeanToMap(nestedBean, Arrays.asList("id"), output);
         assertEquals(1, output.size());
     }
 
@@ -878,13 +878,13 @@ public class Beans2025Test extends TestBase {
     public void testDeepBean2MapWithFiltering() {
         nestedBean.setSimpleBean(null);
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true);
         assertFalse(map.containsKey("simpleBean"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
         nestedBean.setSimpleBean(simpleBean);
-        map = Beans.deepBean2Map(nestedBean, true, ignored);
+        map = Beans.deepBeanToMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
     }
@@ -894,7 +894,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
 
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean"));
@@ -902,19 +902,19 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMap() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertEquals("John", map.get("simpleBean.name"));
         assertEquals(25, map.get("simpleBean.age"));
         assertEquals("New York", map.get("address.city"));
         assertEquals("5th Avenue", map.get("address.street"));
 
-        map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"));
+        map = Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals("123", map.get("id"));
         assertTrue(map.containsKey("address.city"));
         assertFalse(map.containsKey("simpleBean.name"));
 
-        map = Beans.bean2FlatMap(nestedBean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        map = Beans.beanToFlatMap(nestedBean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean.name"));
     }
@@ -922,13 +922,13 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2FlatMapWithOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, output);
+        Beans.beanToFlatMap(nestedBean, output);
 
         assertEquals("123", output.get("id"));
         assertEquals("John", output.get("simpleBean.name"));
 
         output.clear();
-        Beans.bean2FlatMap(nestedBean, Arrays.asList("id"), output);
+        Beans.beanToFlatMap(nestedBean, Arrays.asList("id"), output);
         assertTrue(output.containsKey("id"));
     }
 
@@ -936,12 +936,12 @@ public class Beans2025Test extends TestBase {
     public void testBean2FlatMapWithFiltering() {
         nestedBean.getAddress().setZipCode(null);
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true);
         assertFalse(map.containsKey("address.zipCode"));
 
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
-        map = Beans.bean2FlatMap(nestedBean, true, ignored);
+        map = Beans.beanToFlatMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simpleBean.name"));
     }
@@ -951,7 +951,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
 
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean.name"));
@@ -1322,23 +1322,23 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testProperties() {
-        List<Map.Entry<String, Object>> props = Beans.properties(simpleBean).toList();
+        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean).toList();
 
         assertFalse(props.isEmpty());
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey()) && "John".equals(e.getValue())));
         assertTrue(props.stream().anyMatch(e -> "age".equals(e.getKey()) && Integer.valueOf(25).equals(e.getValue())));
 
         simpleBean.setActive(null);
-        props = Beans.properties(simpleBean, (name, value) -> value != null).toList();
+        props = Beans.propertyEntries(simpleBean, (name, value) -> value != null).toList();
 
         assertFalse(props.stream().anyMatch(e -> "active".equals(e.getKey())));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.properties(null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.propertyEntries(null));
     }
 
     @Test
     public void testPropertiesWithFilter() {
-        List<Map.Entry<String, Object>> props = Beans.properties(simpleBean, (name, value) -> value instanceof String).toList();
+        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean, (name, value) -> value instanceof String).toList();
 
         assertEquals(1, props.size());
         assertEquals("name", props.get(0).getKey());
@@ -1352,24 +1352,24 @@ public class Beans2025Test extends TestBase {
         map.put("age", null);
         map.put("unknownField", "value");
 
-        SimpleBean bean = Beans.map2Bean(map, false, true, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, false, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertNull(bean.getActive());
 
         map.put("age", 25);
-        bean = Beans.map2Bean(map, true, true, SimpleBean.class);
+        bean = Beans.mapToBean(map, true, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(25, bean.getAge());
     }
 
     @Test
     public void testBean2MapWithMapSupplier() {
-        TreeMap<String, Object> treeMap = Beans.bean2Map(simpleBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.beanToMap(simpleBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
         assertEquals("John", treeMap.get("name"));
         assertEquals(25, treeMap.get("age"));
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, Arrays.asList("name", "age"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE,
+        Map<String, Object> map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.SNAKE_CASE,
                 IntFunctions.ofLinkedHashMap());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
@@ -1379,7 +1379,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2MapWithNamingPolicyAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, Arrays.asList("name", "age"), NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.SCREAMING_SNAKE_CASE, output);
 
         assertTrue(output.containsKey("NAME") || output.containsKey("name"));
         assertTrue(output.containsKey("AGE") || output.containsKey("age"));
@@ -1390,7 +1390,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToMap(simpleBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
 
         assertTrue(map.containsKey("name"));
         assertFalse(map.containsKey("age"));
@@ -1402,14 +1402,14 @@ public class Beans2025Test extends TestBase {
         simpleBean.setActive(null);
         Map<String, Object> output = new LinkedHashMap<>();
 
-        Beans.bean2Map(simpleBean, true, output);
+        Beans.beanToMap(simpleBean, true, output);
         assertFalse(output.containsKey("active"));
         assertTrue(output.containsKey("name"));
 
         output.clear();
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
-        Beans.bean2Map(simpleBean, true, ignored, output);
+        Beans.beanToMap(simpleBean, true, ignored, output);
         assertFalse(output.containsKey("age"));
         assertFalse(output.containsKey("active"));
         assertTrue(output.containsKey("name"));
@@ -1421,7 +1421,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("age");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToMap(simpleBean, false, ignored, NamingPolicy.SNAKE_CASE, output);
 
         assertTrue(output.containsKey("name"));
         assertFalse(output.containsKey("age"));
@@ -1430,7 +1430,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithMapSupplier() {
-        TreeMap<String, Object> treeMap = Beans.deepBean2Map(nestedBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.deepBeanToMap(nestedBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
         assertEquals("123", treeMap.get("id"));
         assertTrue(treeMap.get("simpleBean") instanceof Map);
@@ -1438,7 +1438,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSelectPropsAndSupplier() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"), IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "address"), IntFunctions.ofLinkedHashMap());
         assertEquals(2, map.size());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
@@ -1447,7 +1447,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSelectPropsNamingAndSupplier() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "address"), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
     }
@@ -1455,7 +1455,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testDeepBean2MapWithSelectPropsAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, Arrays.asList("id", "simpleBean"), output);
+        Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "simpleBean"), output);
         assertEquals(2, output.size());
         assertTrue(output.containsKey("id"));
         assertTrue(output.containsKey("simpleBean"));
@@ -1464,7 +1464,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testDeepBean2MapWithSelectPropsNamingAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, Arrays.asList("id"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.deepBeanToMap(nestedBean, Arrays.asList("id"), NamingPolicy.SNAKE_CASE, output);
         assertTrue(output.containsKey("id"));
     }
 
@@ -1473,7 +1473,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true, ignored, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true, ignored, IntFunctions.ofMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
     }
@@ -1483,7 +1483,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean") || map.containsKey("simpleBean"));
     }
@@ -1493,7 +1493,7 @@ public class Beans2025Test extends TestBase {
         nestedBean.setSimpleBean(null);
         Map<String, Object> output = new LinkedHashMap<>();
 
-        Beans.deepBean2Map(nestedBean, true, output);
+        Beans.deepBeanToMap(nestedBean, true, output);
         assertFalse(output.containsKey("simpleBean"));
         assertTrue(output.containsKey("id"));
     }
@@ -1504,7 +1504,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("id");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, false, ignored, output);
+        Beans.deepBeanToMap(nestedBean, false, ignored, output);
         assertFalse(output.containsKey("id"));
         assertTrue(output.containsKey("address"));
     }
@@ -1515,14 +1515,14 @@ public class Beans2025Test extends TestBase {
         ignored.add("id");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.deepBeanToMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, output);
         assertFalse(output.containsKey("id"));
         assertTrue(output.size() > 0);
     }
 
     @Test
     public void testBean2FlatMapWithMapSupplier() {
-        TreeMap<String, Object> treeMap = Beans.bean2FlatMap(nestedBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.beanToFlatMap(nestedBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
         assertEquals("123", treeMap.get("id"));
         assertEquals("John", treeMap.get("simpleBean.name"));
@@ -1530,7 +1530,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSelectPropsAndSupplier() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"), IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"), IntFunctions.ofLinkedHashMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("address.city"));
         assertFalse(map.containsKey("simpleBean.name"));
@@ -1538,7 +1538,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSelectPropsNamingAndSupplier() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("address.city") || map.containsKey("address.CITY"));
     }
@@ -1546,7 +1546,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2FlatMapWithSelectPropsAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"), output);
+        Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"), output);
         assertTrue(output.containsKey("id"));
         assertTrue(output.containsKey("address.city"));
     }
@@ -1554,7 +1554,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2FlatMapWithSelectPropsNamingAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, Arrays.asList("id"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToFlatMap(nestedBean, Arrays.asList("id"), NamingPolicy.SNAKE_CASE, output);
         assertTrue(output.containsKey("id"));
     }
 
@@ -1563,7 +1563,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true, ignored, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true, ignored, IntFunctions.ofMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simpleBean.name"));
     }
@@ -1573,7 +1573,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean.name") || map.containsKey("simpleBean.name"));
     }
@@ -1583,7 +1583,7 @@ public class Beans2025Test extends TestBase {
         nestedBean.getAddress().setZipCode(null);
         Map<String, Object> output = new LinkedHashMap<>();
 
-        Beans.bean2FlatMap(nestedBean, true, output);
+        Beans.beanToFlatMap(nestedBean, true, output);
         assertFalse(output.containsKey("address.zipCode"));
         assertTrue(output.containsKey("address.city"));
     }
@@ -1594,7 +1594,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("id");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, false, ignored, output);
+        Beans.beanToFlatMap(nestedBean, false, ignored, output);
         assertFalse(output.containsKey("id"));
         assertTrue(output.containsKey("simpleBean.name"));
     }
@@ -1605,7 +1605,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("id");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToFlatMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, output);
         assertFalse(output.containsKey("id"));
         assertTrue(output.size() > 0);
     }
@@ -1805,17 +1805,17 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("John", 25);
         bean.setActive(null);
 
-        List<Map.Entry<String, Object>> allProps = Beans.properties(bean).toList();
+        List<Map.Entry<String, Object>> allProps = Beans.propertyEntries(bean).toList();
         assertTrue(allProps.size() >= 3);
 
-        List<Map.Entry<String, Object>> filteredByName = Beans.properties(bean, (name, value) -> name.startsWith("n")).toList();
+        List<Map.Entry<String, Object>> filteredByName = Beans.propertyEntries(bean, (name, value) -> name.startsWith("n")).toList();
         assertEquals(1, filteredByName.size());
         assertEquals("name", filteredByName.get(0).getKey());
 
-        List<Map.Entry<String, Object>> nonNulls = Beans.properties(bean, (name, value) -> value != null).toList();
+        List<Map.Entry<String, Object>> nonNulls = Beans.propertyEntries(bean, (name, value) -> value != null).toList();
         assertFalse(nonNulls.stream().anyMatch(e -> e.getValue() == null));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.properties(null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.propertyEntries(null));
     }
 
     @Test
@@ -1834,7 +1834,7 @@ public class Beans2025Test extends TestBase {
         map2.put("active", false);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.map2Bean(mapList, Arrays.asList("name", "age"), SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapToBean(mapList, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(25, beans.get(0).getAge());
@@ -1846,16 +1846,16 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testNullHandlingInConversions() {
-        SimpleBean bean = Beans.map2Bean((Map<String, Object>) null, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean((Map<String, Object>) null, SimpleBean.class);
         assertNull(bean);
 
-        Map<String, Object> map = Beans.bean2Map((Object) null);
+        Map<String, Object> map = Beans.beanToMap((Object) null);
         assertTrue(map.isEmpty());
 
-        map = Beans.deepBean2Map((Object) null);
+        map = Beans.deepBeanToMap((Object) null);
         assertTrue(map.isEmpty());
 
-        map = Beans.bean2FlatMap((Object) null);
+        map = Beans.beanToFlatMap((Object) null);
         assertTrue(map.isEmpty());
     }
 
@@ -1878,7 +1878,7 @@ public class Beans2025Test extends TestBase {
         tags.add("tag2");
         nested.setTags(tags);
 
-        Map<String, Object> deepMap = Beans.deepBean2Map(nested);
+        Map<String, Object> deepMap = Beans.deepBeanToMap(nested);
         assertEquals("test123", deepMap.get("id"));
         assertTrue(deepMap.get("simpleBean") instanceof Map);
         assertTrue(deepMap.get("address") instanceof Map);
@@ -1888,7 +1888,7 @@ public class Beans2025Test extends TestBase {
         assertEquals("Nested", simpleMap.get("name"));
         assertEquals(40, simpleMap.get("age"));
 
-        Map<String, Object> flatMap = Beans.bean2FlatMap(nested);
+        Map<String, Object> flatMap = Beans.beanToFlatMap(nested);
         assertEquals("test123", flatMap.get("id"));
         assertEquals("Nested", flatMap.get("simpleBean.name"));
         assertEquals(40, flatMap.get("simpleBean.age"));
@@ -1902,7 +1902,7 @@ public class Beans2025Test extends TestBase {
         List<String> items = Arrays.asList("item1", "item2");
         bean.setItems(items);
 
-        Map<String, Object> map = Beans.bean2Map(bean);
+        Map<String, Object> map = Beans.beanToMap(bean);
         assertNotNull(map.get("items"));
 
         @SuppressWarnings("unchecked")
@@ -1917,11 +1917,11 @@ public class Beans2025Test extends TestBase {
         bean.setLastName("Doe");
         bean.setUserID("user123");
 
-        Map<String, Object> lowerMap = Beans.bean2Map(bean, null, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> lowerMap = Beans.beanToMap(bean, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(lowerMap.containsKey("first_name") || lowerMap.containsKey("firstName"));
         assertTrue(lowerMap.containsKey("last_name") || lowerMap.containsKey("lastName"));
 
-        Map<String, Object> upperMap = Beans.bean2Map(bean, null, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> upperMap = Beans.beanToMap(bean, null, NamingPolicy.SCREAMING_SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(upperMap.size() > 0);
     }
 
@@ -2027,27 +2027,27 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetPropGetMethodWithCaseVariations() {
-        Method method = Beans.getPropGetMethod(SimpleBean.class, "NAME");
+        Method method = Beans.getPropGetter(SimpleBean.class, "NAME");
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        method = Beans.getPropGetMethod(SimpleBean.class, "NaMe");
+        method = Beans.getPropGetter(SimpleBean.class, "NaMe");
         assertNotNull(method);
 
-        method = Beans.getPropGetMethod(SimpleBean.class, "name");
+        method = Beans.getPropGetter(SimpleBean.class, "name");
         assertNotNull(method);
     }
 
     @Test
     public void testGetPropSetMethodWithCaseVariations() {
-        Method method = Beans.getPropSetMethod(SimpleBean.class, "NAME");
+        Method method = Beans.getPropSetter(SimpleBean.class, "NAME");
         assertNotNull(method);
         assertEquals("setName", method.getName());
 
-        method = Beans.getPropSetMethod(SimpleBean.class, "AgE");
+        method = Beans.getPropSetter(SimpleBean.class, "AgE");
         assertNotNull(method);
 
-        method = Beans.getPropSetMethod(SimpleBean.class, "active");
+        method = Beans.getPropSetter(SimpleBean.class, "active");
         assertNotNull(method);
     }
 
@@ -2091,14 +2091,14 @@ public class Beans2025Test extends TestBase {
         Method getItems = CollectionBean.class.getMethod("getItems");
 
         List<String> newItems = Arrays.asList("new1", "new2", "new3");
-        Beans.setPropValueByGet(bean, getItems, newItems);
+        Beans.setPropValueByGetter(bean, getItems, newItems);
 
         assertEquals(3, bean.getItems().size());
         assertTrue(bean.getItems().contains("new1"));
         assertTrue(bean.getItems().contains("new2"));
         assertTrue(bean.getItems().contains("new3"));
 
-        Beans.setPropValueByGet(bean, getItems, Collections.emptyList());
+        Beans.setPropValueByGetter(bean, getItems, Collections.emptyList());
         assertEquals(0, bean.getItems().size());
     }
 
@@ -2139,41 +2139,41 @@ public class Beans2025Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscoreVariants() {
-        assertEquals("user_name", Beans.toLowerCaseWithUnderscore("userName"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("firstName"));
+    public void testToSnakeCaseVariants() {
+        assertEquals("user_name", Beans.toSnakeCase("userName"));
+        assertEquals("first_name", Beans.toSnakeCase("firstName"));
 
-        assertEquals("user_name", Beans.toLowerCaseWithUnderscore("UserName"));
+        assertEquals("user_name", Beans.toSnakeCase("UserName"));
 
-        assertEquals("user_id", Beans.toLowerCaseWithUnderscore("userID"));
-        assertEquals("url", Beans.toLowerCaseWithUnderscore("URL"));
+        assertEquals("user_id", Beans.toSnakeCase("userID"));
+        assertEquals("url", Beans.toSnakeCase("URL"));
 
-        assertEquals("simple", Beans.toLowerCaseWithUnderscore("simple"));
+        assertEquals("simple", Beans.toSnakeCase("simple"));
 
-        assertEquals("a", Beans.toLowerCaseWithUnderscore("a"));
-        assertEquals("a", Beans.toLowerCaseWithUnderscore("A"));
+        assertEquals("a", Beans.toSnakeCase("a"));
+        assertEquals("a", Beans.toSnakeCase("A"));
 
-        assertEquals("", Beans.toLowerCaseWithUnderscore(""));
-        assertNull(Beans.toLowerCaseWithUnderscore((String) null));
+        assertEquals("", Beans.toSnakeCase(""));
+        assertNull(Beans.toSnakeCase((String) null));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscoreVariants() {
-        assertEquals("USER_NAME", Beans.toUpperCaseWithUnderscore("userName"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("firstName"));
+    public void testToScreamingSnakeCaseVariants() {
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
 
-        assertEquals("USER_NAME", Beans.toUpperCaseWithUnderscore("UserName"));
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("UserName"));
 
-        assertEquals("USER_ID", Beans.toUpperCaseWithUnderscore("userID"));
-        assertEquals("URL", Beans.toUpperCaseWithUnderscore("URL"));
+        assertEquals("USER_ID", Beans.toScreamingSnakeCase("userID"));
+        assertEquals("URL", Beans.toScreamingSnakeCase("URL"));
 
-        assertEquals("SIMPLE", Beans.toUpperCaseWithUnderscore("SIMPLE"));
+        assertEquals("SIMPLE", Beans.toScreamingSnakeCase("SIMPLE"));
 
-        assertEquals("A", Beans.toUpperCaseWithUnderscore("a"));
-        assertEquals("A", Beans.toUpperCaseWithUnderscore("A"));
+        assertEquals("A", Beans.toScreamingSnakeCase("a"));
+        assertEquals("A", Beans.toScreamingSnakeCase("A"));
 
-        assertEquals("", Beans.toUpperCaseWithUnderscore(""));
-        assertNull(Beans.toUpperCaseWithUnderscore((String) null));
+        assertEquals("", Beans.toScreamingSnakeCase(""));
+        assertNull(Beans.toScreamingSnakeCase((String) null));
     }
 
     @Test
@@ -2184,7 +2184,7 @@ public class Beans2025Test extends TestBase {
         map.put("USER_ID", 123);
         map.put("address-line", "Main St");
 
-        Beans.toCamelCase(map);
+        Beans.toCamelCaseKeys(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -2197,19 +2197,19 @@ public class Beans2025Test extends TestBase {
         assertFalse(map.containsKey("address-line"));
 
         Map<String, Object> emptyMap = new HashMap<>();
-        Beans.toCamelCase(emptyMap);
+        Beans.toCamelCaseKeys(emptyMap);
         assertTrue(emptyMap.isEmpty());
     }
 
     @Test
-    public void testToLowerCaseWithUnderscoreMapTransformation() {
+    public void testToSnakeCaseMapTransformation() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
         map.put("userId", 123);
         map.put("addressLine", "Main St");
 
-        Beans.toLowerCaseWithUnderscore(map);
+        Beans.toSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -2221,13 +2221,13 @@ public class Beans2025Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscoreMapTransformation() {
+    public void testToScreamingSnakeCaseMapTransformation() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Jane");
         map.put("userId", 123);
 
-        Beans.toUpperCaseWithUnderscore(map);
+        Beans.toScreamingSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -2243,11 +2243,11 @@ public class Beans2025Test extends TestBase {
         map.put("age", 99);
         map.put("active", true);
 
-        SimpleBean bean = Beans.map2Bean(map, Arrays.asList("name"), SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, Arrays.asList("name"), SimpleBean.class);
         assertEquals("Selected", bean.getName());
         assertEquals(0, bean.getAge());
 
-        bean = Beans.map2Bean(map, Arrays.asList("name", "age"), SimpleBean.class);
+        bean = Beans.mapToBean(map, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals("Selected", bean.getName());
         assertEquals(99, bean.getAge());
         assertNull(bean.getActive());
@@ -2267,7 +2267,7 @@ public class Beans2025Test extends TestBase {
         map2.put("age", 25);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.map2Bean(mapList, true, true, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapToBean(mapList, true, true, SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -2277,23 +2277,23 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2MapWithMapSupplierOnly() {
-        Map<String, Object> linkedMap = Beans.bean2Map(simpleBean, IntFunctions.ofLinkedHashMap());
+        Map<String, Object> linkedMap = Beans.beanToMap(simpleBean, IntFunctions.ofLinkedHashMap());
         assertTrue(linkedMap instanceof LinkedHashMap);
         assertEquals("John", linkedMap.get("name"));
 
-        TreeMap<String, Object> treeMap = Beans.bean2Map(simpleBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> treeMap = Beans.beanToMap(simpleBean, IntFunctions.ofTreeMap());
         assertTrue(treeMap instanceof TreeMap);
         assertEquals("John", treeMap.get("name"));
     }
 
     @Test
     public void testBean2MapWithSelectPropsOnly() {
-        Map<String, Object> map = Beans.bean2Map(simpleBean, Arrays.asList("name"));
+        Map<String, Object> map = Beans.beanToMap(simpleBean, Arrays.asList("name"));
         assertEquals(1, map.size());
         assertTrue(map.containsKey("name"));
         assertFalse(map.containsKey("age"));
 
-        map = Beans.bean2Map(simpleBean, Arrays.asList("name", "active"));
+        map = Beans.beanToMap(simpleBean, Arrays.asList("name", "active"));
         assertEquals(2, map.size());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("active"));
@@ -2301,7 +2301,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2MapWithSelectPropsAndSupplier() {
-        TreeMap<String, Object> map = Beans.bean2Map(simpleBean, Arrays.asList("name", "age"), NamingPolicy.NO_CHANGE, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.NO_CHANGE, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertEquals(2, map.size());
         assertTrue(map.containsKey("name"));
@@ -2312,7 +2312,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2MapWithOutputOnly() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, output);
+        Beans.beanToMap(simpleBean, output);
 
         assertTrue(output.size() >= 3);
         assertEquals("John", output.get("name"));
@@ -2322,7 +2322,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2MapWithSelectPropsAndNamingAndOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, Arrays.asList("name", "age"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.SNAKE_CASE, output);
 
         assertTrue(output.size() >= 2);
         assertFalse(output.containsKey("active"));
@@ -2332,12 +2332,12 @@ public class Beans2025Test extends TestBase {
     public void testBean2MapWithIgnoreNullOnly() {
         simpleBean.setActive(null);
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, true);
+        Map<String, Object> map = Beans.beanToMap(simpleBean, true);
         assertFalse(map.containsKey("active"));
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
 
-        map = Beans.bean2Map(simpleBean, false);
+        map = Beans.beanToMap(simpleBean, false);
         assertTrue(map.containsKey("active"));
         assertNull(map.get("active"));
     }
@@ -2348,7 +2348,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, true, ignored);
+        Map<String, Object> map = Beans.beanToMap(simpleBean, true, ignored);
         assertTrue(map.containsKey("name"));
         assertFalse(map.containsKey("age"));
         assertFalse(map.containsKey("active"));
@@ -2359,7 +2359,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        TreeMap<String, Object> map = Beans.bean2Map(simpleBean, false, ignored, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.beanToMap(simpleBean, false, ignored, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertTrue(map.containsKey("name"));
         assertFalse(map.containsKey("age"));
@@ -2371,7 +2371,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("active");
 
-        Map<String, Object> map = Beans.bean2Map(simpleBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToMap(simpleBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
 
         assertFalse(map.containsKey("active"));
         assertTrue(map.size() >= 2);
@@ -2382,7 +2382,7 @@ public class Beans2025Test extends TestBase {
         simpleBean.setActive(null);
         Map<String, Object> output = new LinkedHashMap<>();
 
-        Beans.bean2Map(simpleBean, true, output);
+        Beans.beanToMap(simpleBean, true, output);
         assertFalse(output.containsKey("active"));
         assertTrue(output.containsKey("name"));
     }
@@ -2393,7 +2393,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("age");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, false, ignored, output);
+        Beans.beanToMap(simpleBean, false, ignored, output);
 
         assertTrue(output.containsKey("name"));
         assertFalse(output.containsKey("age"));
@@ -2406,7 +2406,7 @@ public class Beans2025Test extends TestBase {
         ignored.add("age");
 
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2Map(simpleBean, true, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToMap(simpleBean, true, ignored, NamingPolicy.SNAKE_CASE, output);
 
         assertTrue(output.containsKey("name"));
         assertFalse(output.containsKey("age"));
@@ -2414,7 +2414,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapBasic() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertTrue(map.get("simpleBean") instanceof Map);
         assertTrue(map.get("address") instanceof Map);
@@ -2426,14 +2426,14 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSupplierOnly() {
-        TreeMap<String, Object> map = Beans.deepBean2Map(nestedBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.deepBeanToMap(nestedBean, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertEquals("123", map.get("id"));
     }
 
     @Test
     public void testDeepBean2MapWithSelectPropsOnly() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "address"));
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "address"));
         assertEquals(2, map.size());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
@@ -2442,7 +2442,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSelectPropsAndSupplierOnly() {
-        TreeMap<String, Object> map = Beans.deepBean2Map(nestedBean, Arrays.asList("id"), IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id"), IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertEquals(1, map.size());
         assertTrue(map.containsKey("id"));
@@ -2450,7 +2450,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSelectPropsNamingAndSupplierFull() {
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, Arrays.asList("id", "simpleBean"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE,
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "simpleBean"), NamingPolicy.SNAKE_CASE,
                 IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean") || map.containsKey("simpleBean"));
@@ -2459,7 +2459,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testDeepBean2MapWithOutputOnly() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.deepBean2Map(nestedBean, output);
+        Beans.deepBeanToMap(nestedBean, output);
 
         assertTrue(output.size() >= 2);
         assertEquals("123", output.get("id"));
@@ -2470,7 +2470,7 @@ public class Beans2025Test extends TestBase {
     public void testDeepBean2MapWithIgnoreNullOnly() {
         nestedBean.setSimpleBean(null);
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true);
         assertTrue(map.containsKey("id"));
         assertFalse(map.containsKey("simpleBean"));
     }
@@ -2480,7 +2480,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true, ignored);
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("address"));
     }
@@ -2490,7 +2490,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        TreeMap<String, Object> map = Beans.deepBean2Map(nestedBean, false, ignored, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.deepBeanToMap(nestedBean, false, ignored, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertFalse(map.containsKey("id"));
     }
@@ -2500,7 +2500,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("tags");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, true, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, true, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertFalse(map.containsKey("tags"));
         assertTrue(map.size() >= 2);
     }
@@ -2510,14 +2510,14 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.deepBean2Map(nestedBean, false, ignored, NamingPolicy.NO_CHANGE, IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, false, ignored, NamingPolicy.NO_CHANGE, IntFunctions.ofLinkedHashMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map instanceof LinkedHashMap);
     }
 
     @Test
     public void testBean2FlatMapBasic() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean);
         assertEquals("123", map.get("id"));
         assertEquals("John", map.get("simpleBean.name"));
         assertEquals(25, map.get("simpleBean.age"));
@@ -2526,7 +2526,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSupplierOnly() {
-        TreeMap<String, Object> map = Beans.bean2FlatMap(nestedBean, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.beanToFlatMap(nestedBean, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertEquals("123", map.get("id"));
         assertEquals("John", map.get("simpleBean.name"));
@@ -2534,7 +2534,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSelectPropsOnly() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "simpleBean"));
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "simpleBean"));
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simpleBean.name"));
         assertFalse(map.containsKey("address.city"));
@@ -2542,7 +2542,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSelectPropsAndSupplierOnly() {
-        TreeMap<String, Object> map = Beans.bean2FlatMap(nestedBean, Arrays.asList("address"), IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.beanToFlatMap(nestedBean, Arrays.asList("address"), IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertTrue(map.containsKey("address.city"));
         assertFalse(map.containsKey("simpleBean.name"));
@@ -2550,14 +2550,14 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testBean2FlatMapWithSelectPropsNamingAndSupplierFull() {
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, Arrays.asList("simpleBean"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, Arrays.asList("simpleBean"), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("simple_bean.name") || map.containsKey("simpleBean.name"));
     }
 
     @Test
     public void testBean2FlatMapWithOutputOnly() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, output);
+        Beans.beanToFlatMap(nestedBean, output);
 
         assertTrue(output.size() >= 5);
         assertEquals("123", output.get("id"));
@@ -2567,7 +2567,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2FlatMapWithSelectPropsAndOutputOnly() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, Arrays.asList("address"), output);
+        Beans.beanToFlatMap(nestedBean, Arrays.asList("address"), output);
 
         assertTrue(output.containsKey("address.city"));
         assertFalse(output.containsKey("simpleBean.name"));
@@ -2576,7 +2576,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testBean2FlatMapWithSelectPropsNamingAndOutputFull() {
         Map<String, Object> output = new LinkedHashMap<>();
-        Beans.bean2FlatMap(nestedBean, Arrays.asList("id", "address"), NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, output);
+        Beans.beanToFlatMap(nestedBean, Arrays.asList("id", "address"), NamingPolicy.SNAKE_CASE, output);
         assertTrue(output.containsKey("id"));
         assertTrue(output.size() >= 1);
     }
@@ -2585,7 +2585,7 @@ public class Beans2025Test extends TestBase {
     public void testBean2FlatMapWithIgnoreNullOnly() {
         nestedBean.getAddress().setZipCode(null);
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true);
         assertFalse(map.containsKey("address.zipCode"));
         assertTrue(map.containsKey("address.city"));
     }
@@ -2595,7 +2595,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true, ignored);
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true, ignored);
         assertFalse(map.containsKey("id"));
         assertTrue(map.containsKey("simpleBean.name"));
     }
@@ -2605,7 +2605,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("tags");
 
-        TreeMap<String, Object> map = Beans.bean2FlatMap(nestedBean, false, ignored, IntFunctions.ofTreeMap());
+        TreeMap<String, Object> map = Beans.beanToFlatMap(nestedBean, false, ignored, IntFunctions.ofTreeMap());
         assertTrue(map instanceof TreeMap);
         assertFalse(map.containsKey("tags"));
     }
@@ -2615,7 +2615,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("id");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, false, ignored, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, IntFunctions.ofMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, false, ignored, NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertFalse(map.containsKey("id"));
         assertTrue(map.size() >= 4);
     }
@@ -2625,7 +2625,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("address");
 
-        Map<String, Object> map = Beans.bean2FlatMap(nestedBean, true, ignored, NamingPolicy.NO_CHANGE, IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, true, ignored, NamingPolicy.NO_CHANGE, IntFunctions.ofLinkedHashMap());
         assertTrue(map instanceof LinkedHashMap);
         assertFalse(map.containsKey("address.city"));
     }
@@ -3151,7 +3151,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamBasic() {
-        List<Map.Entry<String, Object>> props = Beans.properties(simpleBean).toList();
+        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean).toList();
 
         assertFalse(props.isEmpty());
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey())));
@@ -3162,7 +3162,7 @@ public class Beans2025Test extends TestBase {
     public void testPropertiesStreamWithFilter() {
         simpleBean.setActive(null);
 
-        List<Map.Entry<String, Object>> nonNullProps = Beans.properties(simpleBean, (name, value) -> value != null).toList();
+        List<Map.Entry<String, Object>> nonNullProps = Beans.propertyEntries(simpleBean, (name, value) -> value != null).toList();
 
         assertTrue(nonNullProps.stream().noneMatch(e -> e.getValue() == null));
         assertTrue(nonNullProps.stream().anyMatch(e -> "name".equals(e.getKey())));
@@ -3171,7 +3171,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamWithTypeFilter() {
-        List<Map.Entry<String, Object>> stringProps = Beans.properties(simpleBean, (name, value) -> value instanceof String).toList();
+        List<Map.Entry<String, Object>> stringProps = Beans.propertyEntries(simpleBean, (name, value) -> value instanceof String).toList();
 
         assertEquals(1, stringProps.size());
         assertEquals("name", stringProps.get(0).getKey());
@@ -3179,7 +3179,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamWithNameFilter() {
-        List<Map.Entry<String, Object>> filteredProps = Beans.properties(simpleBean, (name, value) -> name.startsWith("a")).toList();
+        List<Map.Entry<String, Object>> filteredProps = Beans.propertyEntries(simpleBean, (name, value) -> name.startsWith("a")).toList();
 
         assertTrue(filteredProps.stream().allMatch(e -> e.getKey().startsWith("a")));
         assertTrue(filteredProps.stream().anyMatch(e -> "age".equals(e.getKey())));
@@ -3208,17 +3208,17 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testRegisterNonPropGetSetMethodFunctionality() {
-        Beans.registerNonPropGetSetMethod(SimpleBean.class, "toString");
+        Beans.registerNonPropertyAccessor(SimpleBean.class, "toString");
 
     }
 
     @Test
     public void testRegisterPropGetSetMethodWithValidMethod() throws Exception {
         Method getName = SimpleBean.class.getMethod("getName");
-        Beans.registerPropGetSetMethod("name", getName);
+        Beans.registerPropertyAccessor("name", getName);
 
         Method setName = SimpleBean.class.getMethod("setName", String.class);
-        Beans.registerPropGetSetMethod("name", setName);
+        Beans.registerPropertyAccessor("name", setName);
 
     }
 
@@ -3236,11 +3236,11 @@ public class Beans2025Test extends TestBase {
             }
         }
 
-        assertFalse(Beans.isRegisteredXMLBindingClass(XMLBean.class));
+        assertFalse(Beans.isRegisteredXmlBindingClass(XMLBean.class));
 
-        Beans.registerXMLBindingClass(XMLBean.class);
+        Beans.registerXmlBindingClass(XMLBean.class);
 
-        assertTrue(Beans.isRegisteredXMLBindingClass(XMLBean.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(XMLBean.class));
     }
 
     @Test
@@ -3290,7 +3290,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetPropGetMethodsReturnsAllGetters() {
-        ImmutableMap<String, Method> methods = Beans.getPropGetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropGetters(SimpleBean.class);
         assertNotNull(methods);
         assertTrue(methods.size() >= 3);
         assertNotNull(methods.get("name"));
@@ -3300,7 +3300,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetPropSetMethodsReturnsAllSetters() {
-        ImmutableMap<String, Method> methods = Beans.getPropSetMethods(SimpleBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropSetters(SimpleBean.class);
         assertNotNull(methods);
         assertTrue(methods.size() >= 3);
         assertNotNull(methods.get("name"));

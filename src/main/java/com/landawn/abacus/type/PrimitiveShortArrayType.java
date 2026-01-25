@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -221,7 +221,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
      * CharacterWriter writer = new CharacterWriter();
-     * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
+     * JsonXmlSerializationConfig<?> config = new JsonXmlSerializationConfig<>();
      * type.writeCharacter(writer, array, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
@@ -236,7 +236,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final short[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final short[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -262,10 +262,10 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * List<Short> list = Arrays.asList((short) 5, (short) 10, (short) 15);
-     * short[] array = type.collection2Array(list);
+     * short[] array = type.collectionToArray(list);
      * System.out.println(Arrays.toString(array));   // Output: [5, 10, 15]
      *
-     * short[] nullArray = type.collection2Array(null);
+     * short[] nullArray = type.collectionToArray(null);
      * System.out.println(nullArray);   // Output: null
      * }</pre>
      *
@@ -275,7 +275,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws ClassCastException if any element in the collection is not a Short
      */
     @Override
-    public short[] collection2Array(final Collection<?> c) {
+    public short[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -300,11 +300,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {1, 2, 3};
      * List<Short> list = new ArrayList<>();
-     * type.array2Collection(array, list);
+     * type.arrayToCollection(array, list);
      * System.out.println(list);   // Output: [1, 2, 3]
      *
      * Set<Short> set = new HashSet<>();
-     * type.array2Collection(array, set);
+     * type.arrayToCollection(array, set);
      * System.out.println(set);   // Output: [1, 2, 3]
      * }</pre>
      *
@@ -314,7 +314,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws ClassCastException if the output collection cannot accept Short objects
      */
     @Override
-    public <E> void array2Collection(final short[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final short[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

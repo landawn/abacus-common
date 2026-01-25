@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
@@ -247,7 +247,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, Boolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, Boolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullBooleanAsFalse() ? Boolean.FALSE : x;
 
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));

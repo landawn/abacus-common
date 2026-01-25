@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -34,7 +34,7 @@ public class ObjectArrayType100Test extends TestBase {
     private ObjectArrayType<Integer> intArrayType;
     private ObjectArrayType<Object> objectArrayType;
     private CharacterWriter writer;
-    private JSONXMLSerializationConfig<?> config;
+    private JsonXmlSerializationConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +42,7 @@ public class ObjectArrayType100Test extends TestBase {
         intArrayType = (ObjectArrayType<Integer>) createType(Integer[].class);
         objectArrayType = (ObjectArrayType<Object>) createType(Object[].class);
         writer = createCharacterWriter();
-        config = mock(JSONXMLSerializationConfig.class);
+        config = mock(JsonXmlSerializationConfig.class);
     }
 
     @Test
@@ -198,13 +198,13 @@ public class ObjectArrayType100Test extends TestBase {
 
     @Test
     public void testCollection2ArrayWithNull() {
-        assertNull(stringArrayType.collection2Array(null));
+        assertNull(stringArrayType.collectionToArray(null));
     }
 
     @Test
     public void testCollection2ArrayWithEmptyCollection() {
         List<String> emptyList = new ArrayList<>();
-        String[] result = stringArrayType.collection2Array(emptyList);
+        String[] result = stringArrayType.collectionToArray(emptyList);
         assertNotNull(result);
         assertEquals(0, result.length);
     }
@@ -212,7 +212,7 @@ public class ObjectArrayType100Test extends TestBase {
     @Test
     public void testCollection2ArrayWithElements() {
         List<String> list = Arrays.asList("one", "two", "three");
-        String[] result = stringArrayType.collection2Array(list);
+        String[] result = stringArrayType.collectionToArray(list);
         assertNotNull(result);
         assertEquals(3, result.length);
         assertEquals("one", result[0]);
@@ -223,7 +223,7 @@ public class ObjectArrayType100Test extends TestBase {
     @Test
     public void testArray2CollectionWithNull() {
         List<String> list = new ArrayList<>();
-        stringArrayType.array2Collection(null, list);
+        stringArrayType.arrayToCollection(null, list);
         assertTrue(list.isEmpty());
     }
 
@@ -231,7 +231,7 @@ public class ObjectArrayType100Test extends TestBase {
     public void testArray2CollectionWithEmptyArray() {
         List<String> list = new ArrayList<>();
         String[] emptyArray = new String[0];
-        stringArrayType.array2Collection(emptyArray, list);
+        stringArrayType.arrayToCollection(emptyArray, list);
         assertTrue(list.isEmpty());
     }
 
@@ -239,7 +239,7 @@ public class ObjectArrayType100Test extends TestBase {
     public void testArray2CollectionWithArray() {
         List<String> list = new ArrayList<>();
         String[] array = { "a", "b", "c" };
-        stringArrayType.array2Collection(array, list);
+        stringArrayType.arrayToCollection(array, list);
         assertEquals(3, list.size());
         assertTrue(list.contains("a"));
         assertTrue(list.contains("b"));

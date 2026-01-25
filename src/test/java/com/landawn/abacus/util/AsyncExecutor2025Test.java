@@ -644,7 +644,7 @@ public class AsyncExecutor2025Test extends TestBase {
     public void testExecuteWithChaining() throws Exception {
         AsyncExecutor executor = new AsyncExecutor();
 
-        ContinuableFuture<Integer> future = executor.execute(() -> 10).thenCall(x -> x * 2).thenCall(x -> x + 5);
+        ContinuableFuture<Integer> future = executor.execute(() -> 10).thenCallAsync(x -> x * 2).thenCallAsync(x -> x + 5);
 
         Integer result = future.get();
         Assertions.assertEquals(25, result);

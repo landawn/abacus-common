@@ -737,7 +737,7 @@ public class ExcelUtil2025Test extends TestBase {
         File csvFile = createTempFile(".csv");
         ExcelUtil.saveSheetAsCsv(excelFile, 0, csvFile);
 
-        Dataset dataset = CSVUtil.loadCSV(csvFile);
+        Dataset dataset = CsvUtil.load(csvFile);
         Assertions.assertEquals(2, dataset.columnCount());
         Assertions.assertEquals(2, dataset.size());
     }

@@ -1084,7 +1084,7 @@ public final class Throwables {
             final Throwables.Iterator<T, E> iter = this;
 
             return new Throwables.Iterator<>() {
-                private final T NONE = (T) N.NULL_MASK; //NOSONAR
+                private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
                 private T next = NONE;
                 private T tmp = null;
 

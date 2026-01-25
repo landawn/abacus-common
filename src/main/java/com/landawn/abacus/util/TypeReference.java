@@ -204,8 +204,8 @@ public abstract class TypeReference<T> {
      * Type<List<Map<String, Integer>>> type = complexType.type();
      *
      * // Use with abacus framework operations
-     * String json = N.toJSON(data, type);
-     * List<Map<String, Integer>> result = N.fromJSON(json, type);
+     * String json = N.toJson(data, type);
+     * List<Map<String, Integer>> result = N.fromJson(json, type);
      *
      * // Or access type metadata
      * System.out.println("Type name: " + type.name());
@@ -259,7 +259,7 @@ public abstract class TypeReference<T> {
      * java.lang.reflect.Type rawType = token.getType();
      *
      * // Use with framework operations
-     * List<String> result = N.fromJSON(json, type);
+     * List<String> result = N.fromJson(json, type);
      * }</pre>
      *
      * <p><strong>Comparison with other frameworks:</strong></p>

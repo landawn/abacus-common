@@ -42,26 +42,26 @@ import com.landawn.abacus.util.cs;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check availability before creating parsers
- * if (ParserFactory.isKryoAvailable()) {
+ * if (ParserFactory.isKryoParserAvailable()) {
  *     KryoParser parser = ParserFactory.createKryoParser();
  *     // Use Kryo parser
  * }
  * 
  * // Create JSON parser (always available)
- * JSONParser jsonParser = ParserFactory.createJSONParser();
+ * JsonParser jsonParser = ParserFactory.createJsonParser();
  * 
  * // Create XML parser with configuration
- * XMLSerializationConfig xsc = new XMLSerializationConfig();
- * XMLDeserializationConfig xdc = new XMLDeserializationConfig();
- * XMLParser xmlParser = ParserFactory.createXMLParser(xsc, xdc);
+ * XmlSerializationConfig xsc = new XmlSerializationConfig();
+ * XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+ * XmlParser xmlParser = ParserFactory.createXmlParser(xsc, xdc);
  * 
  * // Register Kryo classes for better performance
  * ParserFactory.registerKryo(MyClass.class);
  * ParserFactory.registerKryo(MyClass.class, 100);   // with ID
  * }</pre>
  * 
- * @see JSONParser
- * @see XMLParser
+ * @see JsonParser
+ * @see XmlParser
  * @see AvroParser
  * @see KryoParser
  */
@@ -69,18 +69,18 @@ import com.landawn.abacus.util.cs;
 public final class ParserFactory {
 
     // Check for Android.
-    private static final boolean isAbacusXMLAvailable;
+    private static final boolean isAbacusXmlParserAvailable;
 
-    private static final boolean isXMLAvailable;
+    private static final boolean isXmlParserAvailable;
 
-    private static final boolean isAvroAvailable;
+    private static final boolean isAvroParserAvailable;
 
-    private static final boolean isKryoAvailable;
+    private static final boolean isKryoParserAvailable;
 
     static {
         // initial N to avoid below error if 'ParserFactory' is called before N initialized.
-        //    java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl
-        //    at com.landawn.abacus.parser.ParserFactory.createJSONParser(ParserFactory.java:188)
+        //    java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
+        //    at com.landawn.abacus.parser.ParserFactory.createJsonParser(ParserFactory.java:188)
         //    at com.landawn.abacus.util.MongoDBExecutor.<clinit>(MongoDBExecutor.java:92)
         //    at com.landawn.abacus.util.MongoDBExecutorTest.<clinit>(MongoDBExecutorTest.java:42)
 
@@ -88,13 +88,13 @@ public final class ParserFactory {
             boolean isAvailable = false;
 
             try {
-                new AbacusXMLParserImpl(XMLParserType.StAX);
+                new AbacusXmlParserImpl(XmlParserType.StAX);
                 isAvailable = true;
             } catch (final Throwable e) {
                 // ignore;
             }
 
-            isAbacusXMLAvailable = isAvailable;
+            isAbacusXmlParserAvailable = isAvailable;
         }
 
         {
@@ -102,13 +102,13 @@ public final class ParserFactory {
             boolean isAvailable = false;
 
             try {
-                new XMLParserImpl(XMLParserType.StAX);
+                new XmlParserImpl(XmlParserType.StAX);
                 isAvailable = true;
             } catch (final Throwable e) {
                 // ignore;
             }
 
-            isXMLAvailable = isAvailable;
+            isXmlParserAvailable = isAvailable;
         }
 
         {
@@ -132,7 +132,7 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isAvroAvailable = isAvailable;
+            isAvroParserAvailable = isAvailable;
         }
 
         {
@@ -146,7 +146,7 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isKryoAvailable = isAvailable;
+            isKryoParserAvailable = isAvailable;
         }
     }
 
@@ -171,8 +171,8 @@ public final class ParserFactory {
      * 
      * @return {@code true} if abacus-common XML parser is available, {@code false} otherwise
      */
-    public static boolean isAbacusXMLAvailable() {
-        return isAbacusXMLAvailable;
+    public static boolean isAbacusXmlParserAvailable() {
+        return isAbacusXmlParserAvailable;
     }
 
     /**
@@ -181,8 +181,8 @@ public final class ParserFactory {
      * 
      * @return {@code true} if XML parser is available, {@code false} otherwise
      */
-    public static boolean isXMLAvailable() {
-        return isXMLAvailable;
+    public static boolean isXmlParserAvailable() {
+        return isXmlParserAvailable;
     }
 
     /**
@@ -191,8 +191,8 @@ public final class ParserFactory {
      * 
      * @return {@code true} if Avro parser is available, {@code false} otherwise
      */
-    public static boolean isAvroAvailable() {
-        return isAvroAvailable;
+    public static boolean isAvroParserAvailable() {
+        return isAvroParserAvailable;
     }
 
     /**
@@ -201,8 +201,8 @@ public final class ParserFactory {
      * 
      * @return {@code true} if Kryo parser is available, {@code false} otherwise
      */
-    public static boolean isKryoAvailable() {
-        return isKryoAvailable;
+    public static boolean isKryoParserAvailable() {
+        return isKryoParserAvailable;
     }
 
     /**
@@ -211,7 +211,7 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (ParserFactory.isAvroAvailable()) {
+     * if (ParserFactory.isAvroParserAvailable()) {
      *     AvroParser parser = ParserFactory.createAvroParser();
      *     // Use Avro parser
      * }
@@ -230,7 +230,7 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (ParserFactory.isKryoAvailable()) {
+     * if (ParserFactory.isKryoParserAvailable()) {
      *     KryoParser parser = ParserFactory.createKryoParser();
      *     byte[] data = parser.serialize(myObject);
      * }
@@ -249,16 +249,16 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONParser parser = ParserFactory.createJSONParser();
+     * JsonParser parser = ParserFactory.createJsonParser();
      * String json = parser.serialize(myObject);
      * MyObject obj = parser.deserialize(json, MyObject.class);
      * }</pre>
      *
-     * @return a new {@link JSONParser} instance
+     * @return a new {@link JsonParser} instance
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
-    public static JSONParser createJSONParser() {
-        return new JSONParserImpl();
+    public static JsonParser createJsonParser() {
+        return new JsonParserImpl();
     }
 
     /**
@@ -266,22 +266,22 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JSONSerializationConfig jsc = new JSONSerializationConfig()
+     * JsonSerializationConfig jsc = new JsonSerializationConfig()
      *     .prettyFormat(true)
      *     .writeLongAsString(true);
-     * JSONDeserializationConfig jdc = new JSONDeserializationConfig()
+     * JsonDeserializationConfig jdc = new JsonDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
      *
-     * JSONParser parser = ParserFactory.createJSONParser(jsc, jdc);
+     * JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
      * }</pre>
      *
      * @param jsc the JSON serialization configuration (may be {@code null} for default behavior)
      * @param jdc the JSON deserialization configuration (may be {@code null} for default behavior)
-     * @return a new {@link JSONParser} instance with the specified configurations
+     * @return a new {@link JsonParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
-    public static JSONParser createJSONParser(final JSONSerializationConfig jsc, final JSONDeserializationConfig jdc) {
-        return new JSONParserImpl(jsc, jdc);
+    public static JsonParser createJsonParser(final JsonSerializationConfig jsc, final JsonDeserializationConfig jdc) {
+        return new JsonParserImpl(jsc, jdc);
     }
 
     /**
@@ -290,17 +290,17 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (ParserFactory.isAbacusXMLAvailable()) {
-     *     XMLParser parser = ParserFactory.createAbacusXMLParser();
+     * if (ParserFactory.isAbacusXmlParserAvailable()) {
+     *     XmlParser parser = ParserFactory.createAbacusXmlParser();
      *     String xml = parser.serialize(myObject);
      * }
      * }</pre>
      *
-     * @return a new abacus-common {@link XMLParser} instance
+     * @return a new abacus-common {@link XmlParser} instance
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
-    public static XMLParser createAbacusXMLParser() {
-        return new AbacusXMLParserImpl(XMLParserType.StAX);
+    public static XmlParser createAbacusXmlParser() {
+        return new AbacusXmlParserImpl(XmlParserType.StAX);
     }
 
     /**
@@ -308,22 +308,22 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig xsc = new XMLSerializationConfig()
+     * XmlSerializationConfig xsc = new XmlSerializationConfig()
      *     .tagByPropertyName(true)
      *     .writeTypeInfo(false);
-     * XMLDeserializationConfig xdc = new XMLDeserializationConfig()
+     * XmlDeserializationConfig xdc = new XmlDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
      *
-     * XMLParser parser = ParserFactory.createAbacusXMLParser(xsc, xdc);
+     * XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
      * }</pre>
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new abacus-common {@link XMLParser} instance with the specified configurations
+     * @return a new abacus-common {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
-    public static XMLParser createAbacusXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
-        return new AbacusXMLParserImpl(XMLParserType.StAX, xsc, xdc);
+    public static XmlParser createAbacusXmlParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+        return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
     /**
@@ -332,8 +332,8 @@ public final class ParserFactory {
      * 
      * @return a new abacus-common XML SAX parser
      */
-    static XMLParser createAbacusXMLSAXParser() {
-        return new AbacusXMLParserImpl(XMLParserType.SAX);
+    static XmlParser createAbacusXmlSAXParser() {
+        return new AbacusXmlParserImpl(XmlParserType.SAX);
     }
 
     /**
@@ -342,8 +342,8 @@ public final class ParserFactory {
      * 
      * @return a new abacus-common XML StAX parser
      */
-    static XMLParser createAbacusXMLStAXParser() {
-        return new AbacusXMLParserImpl(XMLParserType.StAX);
+    static XmlParser createAbacusXmlStAXParser() {
+        return new AbacusXmlParserImpl(XmlParserType.StAX);
     }
 
     /**
@@ -352,8 +352,8 @@ public final class ParserFactory {
      * 
      * @return a new abacus-common XML DOM parser
      */
-    static XMLParser createAbacusXMLDOMParser() {
-        return new AbacusXMLParserImpl(XMLParserType.DOM);
+    static XmlParser createAbacusXmlDOMParser() {
+        return new AbacusXmlParserImpl(XmlParserType.DOM);
     }
 
     /**
@@ -362,17 +362,17 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (ParserFactory.isXMLAvailable()) {
-     *     XMLParser parser = ParserFactory.createXMLParser();
+     * if (ParserFactory.isXmlParserAvailable()) {
+     *     XmlParser parser = ParserFactory.createXmlParser();
      *     String xml = parser.serialize(myObject);
      * }
      * }</pre>
      *
-     * @return a new standard {@link XMLParser} instance
+     * @return a new standard {@link XmlParser} instance
      * @throws NoClassDefFoundError if XML support is not available
      */
-    public static XMLParser createXMLParser() {
-        return new XMLParserImpl(XMLParserType.StAX);
+    public static XmlParser createXmlParser() {
+        return new XmlParserImpl(XmlParserType.StAX);
     }
 
     /**
@@ -380,21 +380,21 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig xsc = new XMLSerializationConfig()
+     * XmlSerializationConfig xsc = new XmlSerializationConfig()
      *     .prettyFormat(true);
-     * XMLDeserializationConfig xdc = new XMLDeserializationConfig()
+     * XmlDeserializationConfig xdc = new XmlDeserializationConfig()
      *     .setElementType(String.class);
      *
-     * XMLParser parser = ParserFactory.createXMLParser(xsc, xdc);
+     * XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
      * }</pre>
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new standard {@link XMLParser} instance with the specified configurations
+     * @return a new standard {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if XML support is not available
      */
-    public static XMLParser createXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
-        return new XMLParserImpl(XMLParserType.StAX, xsc, xdc);
+    public static XmlParser createXmlParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+        return new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
     /**
@@ -402,8 +402,8 @@ public final class ParserFactory {
      * 
      * @return a new XML StAX parser
      */
-    static XMLParser createXMLStAXParser() {
-        return new XMLParserImpl(XMLParserType.StAX);
+    static XmlParser createXmlStAXParser() {
+        return new XmlParserImpl(XmlParserType.StAX);
     }
 
     /**
@@ -411,8 +411,8 @@ public final class ParserFactory {
      * 
      * @return a new XML DOM parser
      */
-    static XMLParser createXMLDOMParser() {
-        return new XMLParserImpl(XMLParserType.DOM);
+    static XmlParser createXmlDOMParser() {
+        return new XmlParserImpl(XmlParserType.DOM);
     }
 
     /**
@@ -421,14 +421,14 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLParser parser = ParserFactory.createJAXBParser();
+     * XmlParser parser = ParserFactory.createJAXBParser();
      * // Use with JAXB-annotated classes
      * }</pre>
      *
-     * @return a new JAXB {@link XMLParser} instance
+     * @return a new JAXB {@link XmlParser} instance
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XMLParser createJAXBParser() {
+    public static XmlParser createJAXBParser() {
         return new JAXBParser();
     }
 
@@ -438,17 +438,17 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLSerializationConfig xsc = new XMLSerializationConfig().prettyFormat(true);
-     * XMLDeserializationConfig xdc = new XMLDeserializationConfig();
-     * XMLParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+     * XmlSerializationConfig xsc = new XmlSerializationConfig().prettyFormat(true);
+     * XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+     * XmlParser parser = ParserFactory.createJAXBParser(xsc, xdc);
      * }</pre>
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new JAXB {@link XMLParser} instance with the specified configurations
+     * @return a new JAXB {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
+    public static XmlParser createJAXBParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);
     }
 

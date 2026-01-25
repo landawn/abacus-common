@@ -30,10 +30,10 @@ public class ParserUtilTest extends AbstractTest {
     public void test_setPropValue() {
         final Account account = Beans.fill(Account.class);
         N.println(account);
-        Beans.setPropValue(account, Beans.getPropSetMethod(Account.class, "id"), 1);
+        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), 1);
         assertEquals(1, account.getId());
 
-        Beans.setPropValue(account, Beans.getPropSetMethod(Account.class, "id"), "101");
+        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), "101");
         assertEquals(101, account.getId());
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
@@ -73,41 +73,41 @@ public class ParserUtilTest extends AbstractTest {
 
     @Test
     public void test_underscorePropName() {
-        assertEquals("a", Beans.toLowerCaseWithUnderscore("A"));
-        assertEquals("a", Beans.toLowerCaseWithUnderscore("a"));
-        assertEquals("name", Beans.toLowerCaseWithUnderscore("name"));
-        assertEquals("name", Beans.toLowerCaseWithUnderscore("Name"));
-        assertEquals("name", Beans.toLowerCaseWithUnderscore("NAME"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("firstName"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("FIRSTName"));
-        assertEquals("gui", Beans.toLowerCaseWithUnderscore("GUI"));
+        assertEquals("a", Beans.toSnakeCase("A"));
+        assertEquals("a", Beans.toSnakeCase("a"));
+        assertEquals("name", Beans.toSnakeCase("name"));
+        assertEquals("name", Beans.toSnakeCase("Name"));
+        assertEquals("name", Beans.toSnakeCase("NAME"));
+        assertEquals("first_name", Beans.toSnakeCase("firstName"));
+        assertEquals("first_name", Beans.toSnakeCase("FIRSTName"));
+        assertEquals("gui", Beans.toSnakeCase("GUI"));
     }
 
     @Test
-    public void test_upperCaseWithUnderscore() {
-        assertEquals("A", Beans.toUpperCaseWithUnderscore("A"));
-        assertEquals("A", Beans.toUpperCaseWithUnderscore("a"));
-        assertEquals("NAME", Beans.toUpperCaseWithUnderscore("name"));
-        assertEquals("NAME", Beans.toUpperCaseWithUnderscore("Name"));
-        assertEquals("NAME", Beans.toUpperCaseWithUnderscore("NAME"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("firstName"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("FIRSTName"));
-        assertEquals("GUI", Beans.toUpperCaseWithUnderscore("GUI"));
+    public void test_screamingSnakeCase() {
+        assertEquals("A", Beans.toScreamingSnakeCase("A"));
+        assertEquals("A", Beans.toScreamingSnakeCase("a"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("name"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("Name"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("NAME"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("FIRSTName"));
+        assertEquals("GUI", Beans.toScreamingSnakeCase("GUI"));
     }
 
     @Test
-    public void test_toUpperCaseWithUnderscore() {
+    public void test_toScreamingSnakeCase() {
         final Account account = createAccount(Account.class);
 
-        Map<String, Object> props = Beans.bean2Map(account);
+        Map<String, Object> props = Beans.beanToMap(account);
 
-        Beans.toLowerCaseWithUnderscore(props);
+        Beans.toSnakeCaseKeys(props);
 
         N.println(props);
 
-        props = Beans.bean2Map(account);
+        props = Beans.beanToMap(account);
 
-        Beans.toUpperCaseWithUnderscore(props);
+        Beans.toScreamingSnakeCaseKeys(props);
 
         N.println(props);
     }

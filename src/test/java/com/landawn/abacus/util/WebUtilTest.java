@@ -28,10 +28,10 @@ class WebUtilTest {
                    -d '{"productId": "abd\\\'123", "quantity": 100}'
                                                     """;
 
-        String httpRequestCode = WebUtil.curl2HttpRequest(curl);
+        String httpRequestCode = WebUtil.curlToHttpRequest(curl);
         N.println(httpRequestCode);
 
-        httpRequestCode = WebUtil.curl2OkHttpRequest(curl);
+        httpRequestCode = WebUtil.curlToOkHttpRequest(curl);
         N.println(httpRequestCode);
 
         {

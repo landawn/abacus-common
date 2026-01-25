@@ -61,8 +61,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONSerializationConfig;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -145,7 +145,7 @@ public class N104Test extends TestBase {
     @Test
     public void testToJsonWithConfig() {
         TestPerson person = new TestPerson("John", 30);
-        JSONSerializationConfig config = JSC.create();
+        JsonSerializationConfig config = JSC.create();
         String json = N.toJson(person, config);
         assertNotNull(json);
         assertTrue(json.contains("John"));
@@ -289,14 +289,14 @@ public class N104Test extends TestBase {
 
     @Test
     public void testXml2Json() {
-        String json = N.xml2Json(TEST_XML);
+        String json = N.xmlToJson(TEST_XML);
         assertNotNull(json);
         assertTrue(json.contains("John"));
     }
 
     @Test
     public void testJson2Xml() {
-        String xml = N.json2Xml(TEST_JSON);
+        String xml = N.jsonToXml(TEST_JSON);
         assertNotNull(xml);
         assertTrue(xml.contains("John"));
     }
@@ -447,14 +447,14 @@ public class N104Test extends TestBase {
     @Test
     public void testExecute() {
         AtomicInteger counter = new AtomicInteger(0);
-        N.execute(counter::incrementAndGet, 2, 10, e -> e instanceof RuntimeException);
+        N.runWithRetry(counter::incrementAndGet, 2, 10, e -> e instanceof RuntimeException);
         assertEquals(1, counter.get());
     }
 
     @Test
     public void testExecuteCallable() {
         Callable<String> callable = () -> "success";
-        String result = N.execute(callable, 2, 10, (r, e) -> e != null);
+        String result = N.callWithRetry(callable, 2, 10, (r, e) -> e != null);
         assertEquals("success", result);
     }
 
@@ -497,7 +497,7 @@ public class N104Test extends TestBase {
         }, () -> {
         }, () -> {
         });
-        ObjIterator<Void> iter = N.asynRun(commands);
+        ObjIterator<Void> iter = N.asyncRun(commands);
         int count = 0;
         while (iter.hasNext()) {
             iter.next();
@@ -509,7 +509,7 @@ public class N104Test extends TestBase {
     @Test
     public void testAsynCall() {
         List<Callable<Integer>> commands = Arrays.asList(() -> 1, () -> 2, () -> 3);
-        ObjIterator<Integer> iter = N.asynCall(commands);
+        ObjIterator<Integer> iter = N.asyncCall(commands);
         List<Integer> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -1244,7 +1244,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithFileAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         File outputFile = new File(tempDir, "test_config.json");
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         N.toJson(person, config, outputFile);
 
         assertTrue(outputFile.exists());
@@ -1259,7 +1259,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithOutputStreamAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         N.toJson(person, config, baos);
 
         String json = baos.toString();
@@ -1271,7 +1271,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithWriterAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         StringWriter writer = new StringWriter();
-        JSONSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerializationConfig config = JSC.create().prettyFormat(true);
         N.toJson(person, config, writer);
 
         String json = writer.toString();
@@ -1739,7 +1739,7 @@ public class N104Test extends TestBase {
             throw new RuntimeException("Test exception");
         }, counter::incrementAndGet);
 
-        ObjIterator<Void> iter = N.asynRun(commands);
+        ObjIterator<Void> iter = N.asyncRun(commands);
 
         assertTrue(iter.hasNext());
         iter.next();
@@ -1764,7 +1764,7 @@ public class N104Test extends TestBase {
             return "medium";
         });
 
-        ObjIterator<String> iter = N.asynCall(commands);
+        ObjIterator<String> iter = N.asyncCall(commands);
         List<String> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -2096,7 +2096,7 @@ public class N104Test extends TestBase {
             });
         }
 
-        ObjIterator<Integer> iter = N.asynCall(commands);
+        ObjIterator<Integer> iter = N.asyncCall(commands);
         Set<Integer> results = new HashSet<>();
 
         while (iter.hasNext()) {
@@ -2312,7 +2312,7 @@ public class N104Test extends TestBase {
     @Test
     public void testExecuteWithRetryRecovery() {
         AtomicInteger attempts = new AtomicInteger(0);
-        String result = N.execute(() -> {
+        String result = N.callWithRetry(() -> {
             int attempt = attempts.incrementAndGet();
             if (attempt < 3) {
                 throw new RuntimeException("Fail " + attempt);
@@ -3161,7 +3161,7 @@ public class N104Test extends TestBase {
     @Test
     public void testExecuteWithNoRetries() {
         AtomicInteger attempts = new AtomicInteger(0);
-        N.execute(() -> attempts.incrementAndGet(), 0, 0, e -> false);
+        N.runWithRetry(() -> attempts.incrementAndGet(), 0, 0, e -> false);
         assertEquals(1, attempts.get());
     }
 
@@ -3170,7 +3170,7 @@ public class N104Test extends TestBase {
         AtomicInteger attempts = new AtomicInteger(0);
         List<Exception> exceptions = new ArrayList<>();
 
-        assertThrows(RuntimeException.class, () -> N.execute(() -> {
+        assertThrows(RuntimeException.class, () -> N.runWithRetry(() -> {
             int attempt = attempts.incrementAndGet();
             RuntimeException e = new RuntimeException("Attempt " + attempt);
             exceptions.add(e);
@@ -3185,7 +3185,7 @@ public class N104Test extends TestBase {
     public void testExecuteCallableWithBiPredicate() {
         AtomicInteger attempts = new AtomicInteger(0);
 
-        String result = N.execute(() -> {
+        String result = N.callWithRetry(() -> {
             int attempt = attempts.incrementAndGet();
             if (attempt == 1) {
                 return "wrong";

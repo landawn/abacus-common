@@ -363,9 +363,9 @@ public class ArrayStream100Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
+    public void testsliding() {
         Stream<Integer> stream = Stream.of(integerArray);
-        List<List<Integer>> result = stream.slide(3, 2, IntFunctions.ofList()).toList();
+        List<List<Integer>> result = stream.sliding(3, 2, IntFunctions.ofList()).toList();
         assertTrue(result.size() > 0);
         assertEquals(3, result.get(0).size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
@@ -374,7 +374,7 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testSlidingWithCollector() {
         Stream<Integer> stream = Stream.of(integerArray);
-        List<String> result = stream.slide(3, 2, Collectors.mapping(Fn.toStr(), Collectors.joining(","))).toList();
+        List<String> result = stream.sliding(3, 2, Collectors.mapping(Fn.toStr(), Collectors.joining(","))).toList();
         assertTrue(result.size() > 0);
         assertEquals("1,2,3", result.get(0));
     }

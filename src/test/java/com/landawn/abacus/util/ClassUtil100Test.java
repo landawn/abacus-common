@@ -258,30 +258,30 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testRegisterNonPropGetSetMethod() {
-        Beans.registerNonPropGetSetMethod(TestBean.class, "name");
+        Beans.registerNonPropertyAccessor(TestBean.class, "name");
 
     }
 
     @Test
     public void testRegisterPropGetSetMethod() throws NoSuchMethodException {
         Method getMethod = TestBean.class.getMethod("getName");
-        Beans.registerPropGetSetMethod("customName", getMethod);
+        Beans.registerPropertyAccessor("customName", getMethod);
 
         Method setMethod = TestBean.class.getMethod("setName", String.class);
-        Beans.registerPropGetSetMethod("customName", setMethod);
+        Beans.registerPropertyAccessor("customName", setMethod);
 
         Method invalidMethod = Object.class.getMethod("toString");
         assertThrows(IllegalArgumentException.class, () -> {
-            Beans.registerPropGetSetMethod("invalid", invalidMethod);
+            Beans.registerPropertyAccessor("invalid", invalidMethod);
         });
     }
 
     @Test
     public void testRegisterXMLBindingClass() {
-        Beans.registerXMLBindingClass(EntityBean.class);
-        assertTrue(Beans.isRegisteredXMLBindingClass(EntityBean.class));
+        Beans.registerXmlBindingClass(EntityBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(EntityBean.class));
 
-        assertFalse(Beans.isRegisteredXMLBindingClass(TestBean.class));
+        assertFalse(Beans.isRegisteredXmlBindingClass(TestBean.class));
     }
 
     @Test
@@ -293,42 +293,42 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testDistanceOfInheritance() {
-        assertEquals(0, ClassUtil.distanceOfInheritance(String.class, String.class));
+        assertEquals(0, ClassUtil.inheritanceDistance(String.class, String.class));
 
-        assertEquals(1, ClassUtil.distanceOfInheritance(ArrayList.class, AbstractList.class));
-        assertEquals(2, ClassUtil.distanceOfInheritance(ArrayList.class, AbstractCollection.class));
-        assertEquals(1, ClassUtil.distanceOfInheritance(String.class, Object.class));
+        assertEquals(1, ClassUtil.inheritanceDistance(ArrayList.class, AbstractList.class));
+        assertEquals(2, ClassUtil.inheritanceDistance(ArrayList.class, AbstractCollection.class));
+        assertEquals(1, ClassUtil.inheritanceDistance(String.class, Object.class));
 
-        assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, Integer.class));
+        assertEquals(-1, ClassUtil.inheritanceDistance(String.class, Integer.class));
 
-        assertEquals(-1, ClassUtil.distanceOfInheritance(null, String.class));
-        assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, null));
-        assertEquals(-1, ClassUtil.distanceOfInheritance(null, null));
+        assertEquals(-1, ClassUtil.inheritanceDistance(null, String.class));
+        assertEquals(-1, ClassUtil.inheritanceDistance(String.class, null));
+        assertEquals(-1, ClassUtil.inheritanceDistance(null, null));
     }
 
     @Test
     public void testForClass() {
-        assertEquals(int.class, ClassUtil.forClass("int"));
-        assertEquals(boolean.class, ClassUtil.forClass("boolean"));
-        assertEquals(double.class, ClassUtil.forClass("double"));
+        assertEquals(int.class, ClassUtil.forName("int"));
+        assertEquals(boolean.class, ClassUtil.forName("boolean"));
+        assertEquals(double.class, ClassUtil.forName("double"));
 
-        assertEquals(Integer.class, ClassUtil.forClass("java.lang.Integer"));
-        assertEquals(Integer.class, ClassUtil.forClass("Integer"));
+        assertEquals(Integer.class, ClassUtil.forName("java.lang.Integer"));
+        assertEquals(Integer.class, ClassUtil.forName("Integer"));
 
-        assertEquals(String[].class, ClassUtil.forClass("String[]"));
-        assertEquals(int[].class, ClassUtil.forClass("int[]"));
-        assertEquals(String[][].class, ClassUtil.forClass("String[][]"));
+        assertEquals(String[].class, ClassUtil.forName("String[]"));
+        assertEquals(int[].class, ClassUtil.forName("int[]"));
+        assertEquals(String[][].class, ClassUtil.forName("String[][]"));
 
-        assertEquals(String.class, ClassUtil.forClass("java.lang.String"));
-        assertEquals(String.class, ClassUtil.forClass("String"));
-        assertEquals(ArrayList.class, ClassUtil.forClass("java.util.ArrayList"));
-        assertEquals(HashMap.class, ClassUtil.forClass("java.util.HashMap"));
+        assertEquals(String.class, ClassUtil.forName("java.lang.String"));
+        assertEquals(String.class, ClassUtil.forName("String"));
+        assertEquals(ArrayList.class, ClassUtil.forName("java.util.ArrayList"));
+        assertEquals(HashMap.class, ClassUtil.forName("java.util.HashMap"));
 
-        assertEquals(Map.Entry.class, ClassUtil.forClass("java.util.Map$Entry"));
-        assertEquals(Map.Entry.class, ClassUtil.forClass("Map.Entry"));
+        assertEquals(Map.Entry.class, ClassUtil.forName("java.util.Map$Entry"));
+        assertEquals(Map.Entry.class, ClassUtil.forName("Map.Entry"));
 
         assertThrows(IllegalArgumentException.class, () -> {
-            ClassUtil.forClass("com.invalid.NonExistentClass");
+            ClassUtil.forName("com.invalid.NonExistentClass");
         });
     }
 
@@ -396,11 +396,11 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetClassesByPackage() {
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.getClassesByPackage("java.lang", false, true));
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.getClassesByPackage("java.util", false, true));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("java.lang", false, true));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("java.util", false, true));
 
         assertThrows(IllegalArgumentException.class, () -> {
-            ClassUtil.getClassesByPackage("com.invalid.package.that.does.not.exist", false, false);
+            ClassUtil.findClassesInPackage("com.invalid.package.that.does.not.exist", false, false);
         });
     }
 
@@ -594,21 +594,21 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetPropGetMethod() {
-        Method method = Beans.getPropGetMethod(TestBean.class, "name");
+        Method method = Beans.getPropGetter(TestBean.class, "name");
         assertNotNull(method);
         assertEquals("getName", method.getName());
 
-        method = Beans.getPropGetMethod(TestBean.class, "active");
+        method = Beans.getPropGetter(TestBean.class, "active");
         assertNotNull(method);
         assertEquals("isActive", method.getName());
 
-        method = Beans.getPropGetMethod(TestBean.class, "nonExistent");
+        method = Beans.getPropGetter(TestBean.class, "nonExistent");
         assertNull(method);
     }
 
     @Test
     public void testGetPropGetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropGetMethods(TestBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropGetters(TestBean.class);
         assertNotNull(methods);
         assertTrue(methods.containsKey("name"));
         assertTrue(methods.containsKey("age"));
@@ -618,21 +618,21 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetPropSetMethod() {
-        Method method = Beans.getPropSetMethod(TestBean.class, "name");
+        Method method = Beans.getPropSetter(TestBean.class, "name");
         assertNotNull(method);
         assertEquals("setName", method.getName());
 
-        method = Beans.getPropSetMethod(TestBean.class, "age");
+        method = Beans.getPropSetter(TestBean.class, "age");
         assertNotNull(method);
         assertEquals("setAge", method.getName());
 
-        method = Beans.getPropSetMethod(TestBean.class, "nonExistent");
+        method = Beans.getPropSetter(TestBean.class, "nonExistent");
         assertNull(method);
     }
 
     @Test
     public void testGetPropSetMethods() {
-        ImmutableMap<String, Method> methods = Beans.getPropSetMethods(TestBean.class);
+        ImmutableMap<String, Method> methods = Beans.getPropSetters(TestBean.class);
         assertNotNull(methods);
         assertTrue(methods.containsKey("name"));
         assertTrue(methods.containsKey("age"));
@@ -734,19 +734,19 @@ public class ClassUtil100Test extends TestBase {
         Method method = EntityBean.class.getMethod("getTags");
 
         List<String> newTags = Arrays.asList("tag1", "tag2");
-        Beans.setPropValueByGet(bean, method, newTags);
+        Beans.setPropValueByGetter(bean, method, newTags);
 
         assertEquals(2, bean.getTags().size());
         assertTrue(bean.getTags().contains("tag1"));
         assertTrue(bean.getTags().contains("tag2"));
 
-        Beans.setPropValueByGet(bean, method, null);
+        Beans.setPropValueByGetter(bean, method, null);
         assertEquals(2, bean.getTags().size());
 
         Method invalidMethod = TestBean.class.getMethod("getName");
         TestBean testBean = new TestBean();
         assertThrows(IllegalArgumentException.class, () -> {
-            Beans.setPropValueByGet(testBean, invalidMethod, "value");
+            Beans.setPropValueByGetter(testBean, invalidMethod, "value");
         });
     }
 
@@ -972,9 +972,9 @@ public class ClassUtil100Test extends TestBase {
     }
 
     @Test
-    public void testCreateNullMask() {
-        Object nullMask1 = ClassUtil.createNullMask();
-        Object nullMask2 = ClassUtil.createNullMask();
+    public void test_newNullSentinel() {
+        Object nullMask1 = ClassUtil.newNullSentinel();
+        Object nullMask2 = ClassUtil.newNullSentinel();
 
         assertNotNull(nullMask1);
         assertNotNull(nullMask2);
@@ -995,25 +995,25 @@ public class ClassUtil100Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscore() {
-        assertEquals("user_name", Beans.toLowerCaseWithUnderscore("userName"));
-        assertEquals("first_name", Beans.toLowerCaseWithUnderscore("firstName"));
-        assertEquals("my_property_name", Beans.toLowerCaseWithUnderscore("myPropertyName"));
-        assertEquals("id", Beans.toLowerCaseWithUnderscore("id"));
-        assertEquals("id", Beans.toLowerCaseWithUnderscore("ID"));
-        assertEquals("", Beans.toLowerCaseWithUnderscore(""));
-        assertNull(Beans.toLowerCaseWithUnderscore((String) null));
+    public void testToSnakeCase() {
+        assertEquals("user_name", Beans.toSnakeCase("userName"));
+        assertEquals("first_name", Beans.toSnakeCase("firstName"));
+        assertEquals("my_property_name", Beans.toSnakeCase("myPropertyName"));
+        assertEquals("id", Beans.toSnakeCase("id"));
+        assertEquals("id", Beans.toSnakeCase("ID"));
+        assertEquals("", Beans.toSnakeCase(""));
+        assertNull(Beans.toSnakeCase((String) null));
     }
 
     @Test
-    public void testToUpperCaseWithUnderscore() {
-        assertEquals("USER_NAME", Beans.toUpperCaseWithUnderscore("userName"));
-        assertEquals("FIRST_NAME", Beans.toUpperCaseWithUnderscore("firstName"));
-        assertEquals("MY_PROPERTY_NAME", Beans.toUpperCaseWithUnderscore("myPropertyName"));
-        assertEquals("ID", Beans.toUpperCaseWithUnderscore("id"));
-        assertEquals("ID", Beans.toUpperCaseWithUnderscore("ID"));
-        assertEquals("", Beans.toUpperCaseWithUnderscore(""));
-        assertNull(Beans.toUpperCaseWithUnderscore((String) null));
+    public void testToScreamingSnakeCase() {
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("MY_PROPERTY_NAME", Beans.toScreamingSnakeCase("myPropertyName"));
+        assertEquals("ID", Beans.toScreamingSnakeCase("id"));
+        assertEquals("ID", Beans.toScreamingSnakeCase("ID"));
+        assertEquals("", Beans.toScreamingSnakeCase(""));
+        assertNull(Beans.toScreamingSnakeCase((String) null));
     }
 
     @Test
@@ -1023,7 +1023,7 @@ public class ClassUtil100Test extends TestBase {
         map.put("first_name", "Doe");
         map.put("age_value", 30);
 
-        Beans.toCamelCase(map);
+        Beans.toCamelCaseKeys(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -1038,13 +1038,13 @@ public class ClassUtil100Test extends TestBase {
     }
 
     @Test
-    public void testToLowerCaseWithUnderscoreMap() {
+    public void testToSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.toLowerCaseWithUnderscore(map);
+        Beans.toSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -1059,13 +1059,13 @@ public class ClassUtil100Test extends TestBase {
     }
 
     @Test
-    public void testToUpperCaseWithUnderscoreMap() {
+    public void testToScreamingSnakeCaseMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", "John");
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.toUpperCaseWithUnderscore(map);
+        Beans.toScreamingSnakeCaseKeys(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -1111,14 +1111,14 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testConstantFields() {
-        assertNotNull(ClassUtil.CLASS_MASK);
-        assertEquals("ClassMask", ClassUtil.CLASS_MASK.getSimpleName());
+        assertNotNull(ClassUtil.SENTINEL_CLASS);
+        assertEquals("SentinelClass", ClassUtil.SENTINEL_CLASS.getSimpleName());
 
-        assertNotNull(ClassUtil.METHOD_MASK);
-        assertEquals("methodMask", ClassUtil.METHOD_MASK.getName());
+        assertNotNull(ClassUtil.SENTINEL_METHOD);
+        assertEquals("sentinelMethod", ClassUtil.SENTINEL_METHOD.getName());
 
-        assertNotNull(ClassUtil.FIELD_MASK);
-        assertEquals("FIELD_MASK", ClassUtil.FIELD_MASK.getName());
+        assertNotNull(ClassUtil.SENTINEL_FIELD);
+        assertEquals("SENTINEL_FIELD", ClassUtil.SENTINEL_FIELD.getName());
     }
 
     @Test
@@ -1164,8 +1164,8 @@ public class ClassUtil100Test extends TestBase {
 
         for (int i = 0; i < 1000; i++) {
             Beans.getPropNameList(TestBean.class);
-            Beans.getPropGetMethods(TestBean.class);
-            Beans.getPropSetMethods(TestBean.class);
+            Beans.getPropGetters(TestBean.class);
+            Beans.getPropSetters(TestBean.class);
         }
 
         long elapsed = System.currentTimeMillis() - start;
@@ -1184,7 +1184,7 @@ public class ClassUtil100Test extends TestBase {
                 try {
                     for (int j = 0; j < 100; j++) {
                         Beans.getPropNameList(TestBean.class);
-                        ClassUtil.forClass("java.lang.String");
+                        ClassUtil.forName("java.lang.String");
                         Beans.toCamelCase("test_name_" + j);
                     }
                 } catch (Exception e) {

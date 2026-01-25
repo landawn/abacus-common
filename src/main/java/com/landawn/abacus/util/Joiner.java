@@ -108,7 +108,7 @@ import com.landawn.abacus.util.u.Optional;
  * // Result: "name=John, age=30, title=Engineer"
  *
  * // High-performance with buffer reuse
- * try (Joiner joiner = Joiner.with(",").reuseCachedBuffer()) {
+ * try (Joiner joiner = Joiner.with(",").reuseBuffer()) {
  *     for (int i = 0; i < 1000; i++) {
  *         joiner.append(i);
  *     }
@@ -131,7 +131,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>{@link #trimBeforeAppend()} - Trim whitespace from elements before appending</li>
  *   <li>{@link #skipNulls()} - Skip null elements instead of converting to text</li>
  *   <li>{@link #useForNull(String)} - Custom text for null values (default: "null")</li>
- *   <li>{@link #reuseCachedBuffer()} - Enable buffer reuse for performance optimization</li>
+ *   <li>{@link #reuseBuffer()} - Enable buffer reuse for performance optimization</li>
  * </ul>
  *
  * <p><b>Append Operations:</b>
@@ -163,7 +163,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Memory Management:</b>
  * <ul>
- *   <li>Use {@link #reuseCachedBuffer()} for high-frequency operations</li>
+ *   <li>Use {@link #reuseBuffer()} for high-frequency operations</li>
  *   <li>Call {@link #close()} or use try-with-resources when buffer reuse is enabled</li>
  *   <li>Internal buffer is automatically recycled after {@link #toString()}</li>
  *   <li>Consider buffer reuse for operations with many small strings</li>
@@ -252,7 +252,7 @@ public final class Joiner implements Closeable {
 
     private boolean skipNulls = false;
 
-    private boolean useCachedBuffer = false;
+    private boolean reuseBuffer = false;
 
     private String nullText = Strings.NULL;
 
@@ -481,7 +481,7 @@ public final class Joiner implements Closeable {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner joiner = Joiner.with(", ").reuseCachedBuffer();
+     * Joiner joiner = Joiner.with(", ").reuseBuffer();
      * try {
      *     String result = joiner.appendAll("a", "b", "c").toString();
      * } finally {
@@ -493,12 +493,12 @@ public final class Joiner implements Closeable {
      * @throws IllegalStateException if the buffer has already been created.
      */
     @Beta
-    public Joiner reuseCachedBuffer() {
+    public Joiner reuseBuffer() {
         if (buffer != null) {
             throw new IllegalStateException("Can't reset because the buffer has been created");
         }
 
-        useCachedBuffer = true;
+        reuseBuffer = true;
 
         return this;
     }
@@ -2784,7 +2784,7 @@ public final class Joiner implements Closeable {
      * If the specified {@code Joiner} is empty, the call has no effect.
      * Only the content between prefix and suffix from the other Joiner is merged.
      *
-     * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code true}.
+     * <p>Remember to close {@code other} Joiner if {@code reuseBuffer} is set to {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2918,6 +2918,7 @@ public final class Joiner implements Closeable {
      * @param mapper the function to apply to the joined string
      * @return the result of applying the mapper function
      */
+    @Beta
     public <T> T map(final Function<? super String, T> mapper) {
         return mapper.apply(toString());
     }
@@ -2940,6 +2941,7 @@ public final class Joiner implements Closeable {
      * @return a Optional containing the result, or empty if no elements were appended
      * @throws IllegalArgumentException if mapper is null
      */
+    @Beta
     public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
@@ -2954,7 +2956,7 @@ public final class Joiner implements Closeable {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (Joiner j = Joiner.with(", ").reuseCachedBuffer()) {
+     * try (Joiner j = Joiner.with(", ").reuseBuffer()) {
      *     j.append("a").append("b");
      *     System.out.println(j.toString());
      * } // Joiner is automatically closed
@@ -2991,8 +2993,7 @@ public final class Joiner implements Closeable {
                 buffer.append(separator);
             }
         } else {
-            buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder())
-                    .append(latestToStringValue == null ? prefix : latestToStringValue);
+            buffer = (reuseBuffer ? Objectory.createStringBuilder() : new StringBuilder()).append(latestToStringValue == null ? prefix : latestToStringValue);
 
             if (!isEmptySeparator && latestToStringValue != null) {
                 buffer.append(separator);
@@ -3003,12 +3004,12 @@ public final class Joiner implements Closeable {
     }
 
     private void recycleBuffer() {
-        if (useCachedBuffer) {
+        if (reuseBuffer) {
             Objectory.recycle(buffer);
             buffer = null;
 
-            // reset useCachedBuffer.
-            useCachedBuffer = false;
+            // reset reuseBuffer.
+            reuseBuffer = false;
         }
     }
 

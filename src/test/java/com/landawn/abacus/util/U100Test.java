@@ -2060,7 +2060,7 @@ public class U100Test extends TestBase {
         }
 
         @Test
-        public void testOrElseIfNull() {
+        public void testOrDefaultIfNull() {
             assertEquals("test", Nullable.of("test").orElseIfNull("other"));
             assertEquals("other", Nullable.of((String) null).orElseIfNull("other"));
             assertEquals("other", Nullable.empty().orElseIfNull("other"));

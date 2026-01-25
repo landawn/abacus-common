@@ -65,7 +65,7 @@ public class ParserUtil101Test extends TestBase {
         Assertions.assertNotSame(beanInfo1, beanInfo2);
     }
 
-    @JsonXmlConfig(namingPolicy = NamingPolicy.LOWER_CAMEL_CASE)
+    @JsonXmlConfig(namingPolicy = NamingPolicy.CAMEL_CASE)
     public static class TestBean {
         @Id
         private Long id;

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -183,7 +183,7 @@ public class CharacterArrayType100Test extends TestBase {
     public void testWriteCharacter_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { 'a', null, 'b' };
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(mockWriter, array, config);
@@ -200,7 +200,7 @@ public class CharacterArrayType100Test extends TestBase {
     public void testWriteCharacter_WithSingleQuote() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { 'x' };
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(mockWriter, array, config);
@@ -215,7 +215,7 @@ public class CharacterArrayType100Test extends TestBase {
     public void testWriteCharacter_EscapeSingleQuote() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { '\'' };
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(mockWriter, array, config);

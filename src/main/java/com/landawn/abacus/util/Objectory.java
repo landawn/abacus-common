@@ -113,12 +113,12 @@ public final class Objectory {
 
     private static final Queue<BufferedWriter> bufferedWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
-    private static final Queue<BufferedXMLWriter> bufferedXMLWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+    private static final Queue<BufferedXmlWriter> bufferedXmlWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
-    private static final Queue<BufferedJSONWriter> bufferedJSONWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+    private static final Queue<BufferedJsonWriter> bufferedJsonWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
-    private static final Queue<BufferedCSVWriter> bufferedCSVWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
-    private static final Queue<BufferedCSVWriter> backSlashBufferedCSVWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+    private static final Queue<BufferedCsvWriter> bufferedCsvWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
+    private static final Queue<BufferedCsvWriter> backSlashBufferedCsvWriterPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
     private static final Queue<BufferedReader> bufferedReaderPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
@@ -605,20 +605,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXMLWriter with no underlying writer.
+     * Creates or retrieves a BufferedXmlWriter with no underlying writer.
      * The writer must be initialized before use.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXMLWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
-     * @return a BufferedXMLWriter from the pool or a new instance if the pool is empty
+     * @return a BufferedXmlWriter from the pool or a new instance if the pool is empty
      */
-    public static BufferedXMLWriter createBufferedXMLWriter() {
-        BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
+    public static BufferedXmlWriter createBufferedXmlWriter() {
+        BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedXMLWriter"); //NOSONAR
+            logCreated("createBufferedXmlWriter"); //NOSONAR
 
-            bw = new BufferedXMLWriter();
+            bw = new BufferedXmlWriter();
         } else {
             bw.reinit();
         }
@@ -627,13 +627,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXMLWriter wrapping the specified OutputStream.
+     * Creates or retrieves a BufferedXmlWriter wrapping the specified OutputStream.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXMLWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedXMLWriter writer = Objectory.createBufferedXMLWriter(outputStream);
+     * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(outputStream);
      * try {
      *     writer.write("Hello");
      * } finally {
@@ -642,15 +642,15 @@ public final class Objectory {
      * }</pre>
      *
      * @param os the OutputStream to wrap
-     * @return a BufferedXMLWriter wrapping the specified stream
+     * @return a BufferedXmlWriter wrapping the specified stream
      */
-    public static BufferedXMLWriter createBufferedXMLWriter(final OutputStream os) {
-        BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
+    public static BufferedXmlWriter createBufferedXmlWriter(final OutputStream os) {
+        BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedXMLWriter");
+            logCreated("createBufferedXmlWriter");
 
-            bw = new BufferedXMLWriter(os);
+            bw = new BufferedXmlWriter(os);
         } else {
             bw.reinit(os);
         }
@@ -659,20 +659,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXMLWriter wrapping the specified Writer.
+     * Creates or retrieves a BufferedXmlWriter wrapping the specified Writer.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXMLWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
      * @param writer the Writer to wrap
-     * @return a BufferedXMLWriter wrapping the specified writer
+     * @return a BufferedXmlWriter wrapping the specified writer
      */
-    public static BufferedXMLWriter createBufferedXMLWriter(final Writer writer) {
-        BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
+    public static BufferedXmlWriter createBufferedXmlWriter(final Writer writer) {
+        BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedXMLWriter");
+            logCreated("createBufferedXmlWriter");
 
-            bw = new BufferedXMLWriter(writer);
+            bw = new BufferedXmlWriter(writer);
         } else {
             bw.reinit(writer);
         }
@@ -681,20 +681,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJSONWriter with no underlying writer.
+     * Creates or retrieves a BufferedJsonWriter with no underlying writer.
      * The writer must be initialized before use.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJSONWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
-     * @return a BufferedJSONWriter from the pool or a new instance if the pool is empty
+     * @return a BufferedJsonWriter from the pool or a new instance if the pool is empty
      */
-    public static BufferedJSONWriter createBufferedJSONWriter() {
-        BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
+    public static BufferedJsonWriter createBufferedJsonWriter() {
+        BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedJSONWriter"); //NOSONAR
+            logCreated("createBufferedJsonWriter"); //NOSONAR
 
-            bw = new BufferedJSONWriter();
+            bw = new BufferedJsonWriter();
         } else {
             bw.reinit();
         }
@@ -703,13 +703,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJSONWriter wrapping the specified OutputStream.
+     * Creates or retrieves a BufferedJsonWriter wrapping the specified OutputStream.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJSONWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedJSONWriter writer = Objectory.createBufferedJSONWriter(outputStream);
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(outputStream);
      * try {
      *     writer.write("Hello");
      * } finally {
@@ -718,15 +718,15 @@ public final class Objectory {
      * }</pre>
      *
      * @param os the OutputStream to wrap
-     * @return a BufferedJSONWriter wrapping the specified stream
+     * @return a BufferedJsonWriter wrapping the specified stream
      */
-    public static BufferedJSONWriter createBufferedJSONWriter(final OutputStream os) {
-        BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
+    public static BufferedJsonWriter createBufferedJsonWriter(final OutputStream os) {
+        BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedJSONWriter");
+            logCreated("createBufferedJsonWriter");
 
-            bw = new BufferedJSONWriter(os);
+            bw = new BufferedJsonWriter(os);
         } else {
             bw.reinit(os);
         }
@@ -735,20 +735,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJSONWriter wrapping the specified Writer.
+     * Creates or retrieves a BufferedJsonWriter wrapping the specified Writer.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJSONWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
      * @param writer the Writer to wrap
-     * @return a BufferedJSONWriter wrapping the specified writer
+     * @return a BufferedJsonWriter wrapping the specified writer
      */
-    public static BufferedJSONWriter createBufferedJSONWriter(final Writer writer) {
-        BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
+    public static BufferedJsonWriter createBufferedJsonWriter(final Writer writer) {
+        BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedJSONWriter");
+            logCreated("createBufferedJsonWriter");
 
-            bw = new BufferedJSONWriter(writer);
+            bw = new BufferedJsonWriter(writer);
         } else {
             bw.reinit(writer);
         }
@@ -757,20 +757,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCSVWriter with no underlying writer.
+     * Creates or retrieves a BufferedCsvWriter with no underlying writer.
      * The writer must be initialized before use.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCSVWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
-     * @return a BufferedCSVWriter from the pool or a new instance if the pool is empty
+     * @return a BufferedCsvWriter from the pool or a new instance if the pool is empty
      */
-    public static BufferedCSVWriter createBufferedCSVWriter() {
-        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+    public static BufferedCsvWriter createBufferedCsvWriter() {
+        BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedCSVWriter"); //NOSONAR
+            logCreated("createBufferedCsvWriter"); //NOSONAR
 
-            bw = new BufferedCSVWriter();
+            bw = new BufferedCsvWriter();
         } else {
             bw.reinit();
         }
@@ -779,13 +779,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCSVWriter wrapping the specified OutputStream.
+     * Creates or retrieves a BufferedCsvWriter wrapping the specified OutputStream.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCSVWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedCSVWriter writer = Objectory.createBufferedCSVWriter(outputStream);
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(outputStream);
      * try {
      *     writer.write("Hello");
      * } finally {
@@ -794,15 +794,15 @@ public final class Objectory {
      * }</pre>
      *
      * @param os the OutputStream to wrap
-     * @return a BufferedCSVWriter wrapping the specified stream
+     * @return a BufferedCsvWriter wrapping the specified stream
      */
-    public static BufferedCSVWriter createBufferedCSVWriter(final OutputStream os) {
-        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+    public static BufferedCsvWriter createBufferedCsvWriter(final OutputStream os) {
+        BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedCSVWriter");
+            logCreated("createBufferedCsvWriter");
 
-            bw = new BufferedCSVWriter(os);
+            bw = new BufferedCsvWriter(os);
         } else {
             bw.reinit(os);
         }
@@ -811,20 +811,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCSVWriter wrapping the specified Writer.
+     * Creates or retrieves a BufferedCsvWriter wrapping the specified Writer.
      * 
-     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCSVWriter)}.</p>
+     * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
      * @param writer the Writer to wrap
-     * @return a BufferedCSVWriter wrapping the specified writer
+     * @return a BufferedCsvWriter wrapping the specified writer
      */
-    public static BufferedCSVWriter createBufferedCSVWriter(final Writer writer) {
-        BufferedCSVWriter bw = CSVUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCSVWriterPool.poll() : bufferedCSVWriterPool.poll();
+    public static BufferedCsvWriter createBufferedCsvWriter(final Writer writer) {
+        BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedCSVWriter");
+            logCreated("createBufferedCsvWriter");
 
-            bw = new BufferedCSVWriter(writer);
+            bw = new BufferedCsvWriter(writer);
         } else {
             bw.reinit(writer);
         }
@@ -1133,13 +1133,13 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedXMLWriter to the object pool for reuse.
+     * Returns a BufferedXmlWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      *
-     * @param bw the BufferedXMLWriter to recycle
+     * @param bw the BufferedXmlWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
-    public static void recycle(final BufferedXMLWriter bw) {
+    public static void recycle(final BufferedXmlWriter bw) {
         if (bw == null) {
             return;
         }
@@ -1151,17 +1151,17 @@ public final class Objectory {
         }
 
         bw._reset();
-        bufferedXMLWriterPool.offer(bw);
+        bufferedXmlWriterPool.offer(bw);
     }
 
     /**
-     * Returns a BufferedJSONWriter to the object pool for reuse.
+     * Returns a BufferedJsonWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      *
-     * @param bw the BufferedJSONWriter to recycle
+     * @param bw the BufferedJsonWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
-    public static void recycle(final BufferedJSONWriter bw) {
+    public static void recycle(final BufferedJsonWriter bw) {
         if (bw == null) {
             return;
         }
@@ -1173,18 +1173,18 @@ public final class Objectory {
         }
 
         bw._reset();
-        bufferedJSONWriterPool.offer(bw);
+        bufferedJsonWriterPool.offer(bw);
     }
 
     /**
-     * Returns a BufferedCSVWriter to the object pool for reuse.
+     * Returns a BufferedCsvWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      * Writers are pooled separately based on their escape character settings.
      *
-     * @param bw the BufferedCSVWriter to recycle
+     * @param bw the BufferedCsvWriter to recycle
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
-    public static void recycle(final BufferedCSVWriter bw) {
+    public static void recycle(final BufferedCsvWriter bw) {
         if (bw == null) {
             return;
         }
@@ -1198,9 +1198,9 @@ public final class Objectory {
         bw._reset();
 
         if (bw.isBackSlash()) {
-            backSlashBufferedCSVWriterPool.offer(bw);
+            backSlashBufferedCsvWriterPool.offer(bw);
         } else {
-            bufferedCSVWriterPool.offer(bw);
+            bufferedCsvWriterPool.offer(bw);
         }
     }
 
@@ -1224,12 +1224,12 @@ public final class Objectory {
      * @throws UncheckedIOException if an I/O error occurs while flushing
      */
     public static void recycle(final java.io.BufferedWriter writer) {
-        if (writer instanceof BufferedJSONWriter) {
-            recycle((BufferedJSONWriter) writer);
-        } else if (writer instanceof BufferedXMLWriter) {
-            recycle((BufferedXMLWriter) writer);
-        } else if (writer instanceof BufferedCSVWriter) {
-            recycle((BufferedCSVWriter) writer);
+        if (writer instanceof BufferedJsonWriter) {
+            recycle((BufferedJsonWriter) writer);
+        } else if (writer instanceof BufferedXmlWriter) {
+            recycle((BufferedXmlWriter) writer);
+        } else if (writer instanceof BufferedCsvWriter) {
+            recycle((BufferedCsvWriter) writer);
         } else if (writer instanceof BufferedWriter bw) {
             try {
                 bw.flushBufferToWriter();

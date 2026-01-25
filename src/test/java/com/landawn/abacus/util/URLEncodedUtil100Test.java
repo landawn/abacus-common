@@ -96,7 +96,7 @@ public class URLEncodedUtil100Test extends TestBase {
         Assertions.assertTrue(result.isEmpty());
 
         result = URLEncodedUtil.decodeToMultimap("key=value");
-        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(1, result.totalValueCount());
         Assertions.assertEquals("value", result.get("key").get(0));
 
         result = URLEncodedUtil.decodeToMultimap("key=value1&key=value2&key=value3");
@@ -159,30 +159,30 @@ public class URLEncodedUtil100Test extends TestBase {
         parameters.put("age", new String[] { "30" });
         parameters.put("active", new String[] { "true" });
 
-        TestBean bean = URLEncodedUtil.parameters2Bean(parameters, TestBean.class);
+        TestBean bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
 
         Assertions.assertEquals("John", bean.getName());
         Assertions.assertEquals(30, bean.getAge());
         Assertions.assertTrue(bean.isActive());
 
         parameters.put("tags", new String[] { "reading", "swimming", "coding" });
-        bean = URLEncodedUtil.parameters2Bean(parameters, TestBean.class);
+        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
         Assertions.assertNotNull(bean);
 
-        bean = URLEncodedUtil.parameters2Bean(new HashMap<>(), TestBean.class);
+        bean = URLEncodedUtil.decodeToBean(new HashMap<>(), TestBean.class);
         Assertions.assertNotNull(bean);
 
-        bean = URLEncodedUtil.parameters2Bean(null, TestBean.class);
+        bean = URLEncodedUtil.decodeToBean(null, TestBean.class);
         Assertions.assertNotNull(bean);
 
         parameters.clear();
         parameters.put("name", new String[] { "" });
-        bean = URLEncodedUtil.parameters2Bean(parameters, TestBean.class);
+        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
         Assertions.assertNull(bean.getName());
 
         parameters.clear();
         parameters.put("tags", new String[] { "tag1", "tag2", "tag3" });
-        bean = URLEncodedUtil.parameters2Bean(parameters, TestBean.class);
+        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
         Assertions.assertArrayEquals(new String[] { "tag1", "tag2", "tag3" }, bean.getTags());
     }
 
@@ -250,7 +250,7 @@ public class URLEncodedUtil100Test extends TestBase {
         bean.setName("John");
         bean.setAge(30);
 
-        String result = URLEncodedUtil.encode(bean, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE);
+        String result = URLEncodedUtil.encode(bean, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE);
         Assertions.assertTrue(result.contains("name=John"));
 
         result = URLEncodedUtil.encode(bean, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE);
@@ -291,7 +291,7 @@ public class URLEncodedUtil100Test extends TestBase {
         TestBean bean = new TestBean();
         bean.setName("John");
 
-        String result = URLEncodedUtil.encode("http://example.com", bean, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE);
+        String result = URLEncodedUtil.encode("http://example.com", bean, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE);
         Assertions.assertTrue(result.startsWith("http://example.com?"));
         Assertions.assertTrue(result.contains("name=John"));
     }
@@ -327,7 +327,7 @@ public class URLEncodedUtil100Test extends TestBase {
         bean.setName("John");
         bean.setAge(30);
 
-        URLEncodedUtil.encode(bean, StandardCharsets.UTF_8, NamingPolicy.LOWER_CAMEL_CASE, sb);
+        URLEncodedUtil.encode(bean, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         String result = sb.toString();
         Assertions.assertTrue(result.contains("name=John"));
         Assertions.assertTrue(result.contains("age=30"));

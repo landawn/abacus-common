@@ -103,9 +103,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #curl2OkHttpRequest(String)
+     * @see #curlToOkHttpRequest(String)
      */
-    public static String curl2HttpRequest(final String curl) {
+    public static String curlToHttpRequest(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
@@ -196,10 +196,10 @@ public final class WebUtil {
      *
      * <p>This method parses a cURL command and generates the equivalent Java code
      * using the OkHttpRequest API. It handles the same cURL options as
-     * {@link #curl2HttpRequest(String)} but generates code specifically for the
+     * {@link #curlToHttpRequest(String)} but generates code specifically for the
      * OkHttp client library.</p>
      *
-     * <p>Key differences from {@link #curl2HttpRequest(String)}:</p>
+     * <p>Key differences from {@link #curlToHttpRequest(String)}:</p>
      * <ul>
      *   <li>Creates {@code RequestBody} with {@code MediaType} when body is present</li>
      *   <li>Automatically extracts {@code MediaType} from Content-Type header</li>
@@ -214,7 +214,7 @@ public final class WebUtil {
      *   <li>Appropriate HTTP method call ({@code get()}, {@code post()}, {@code put()}, {@code delete()}, or {@code execute()})</li>
      * </ul>
      *
-     * <p>HTTP Method Detection follows the same rules as {@link #curl2HttpRequest(String)}:</p>
+     * <p>HTTP Method Detection follows the same rules as {@link #curlToHttpRequest(String)}:</p>
      * <ul>
      *   <li>If {@code -X} is specified, uses that method</li>
      *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
@@ -245,9 +245,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #curl2HttpRequest(String)
+     * @see #curlToHttpRequest(String)
      */
-    public static String curl2OkHttpRequest(final String curl) {
+    public static String curlToOkHttpRequest(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 

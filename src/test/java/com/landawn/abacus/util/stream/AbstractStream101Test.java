@@ -267,7 +267,7 @@ public class AbstractStream101Test extends TestBase {
 
         Stream<Map<String, Object>> stream = createStream(input);
 
-        long count = stream.persistToCSV(Arrays.asList("name", "age"), file);
+        long count = stream.persistToCsv(Arrays.asList("name", "age"), file);
         assertEquals(2, count);
 
         List<String> lines = IOUtil.readAllLines(file);
@@ -282,7 +282,7 @@ public class AbstractStream101Test extends TestBase {
         List<TestBean> input = Arrays.asList(new TestBean("John", 25), new TestBean("Jane", 30));
         Stream<TestBean> stream = createStream(input);
 
-        long count = stream.persistToCSV(baos);
+        long count = stream.persistToCsv(baos);
         assertEquals(2, count);
 
         String csv = baos.toString();
@@ -298,7 +298,7 @@ public class AbstractStream101Test extends TestBase {
         List<TestBean> input = Arrays.asList(new TestBean("John", 25));
         Stream<TestBean> stream = createStream(input);
 
-        long count = stream.persistToCSV(writer);
+        long count = stream.persistToCsv(writer);
         assertEquals(1, count);
 
         String csv = writer.toString();
@@ -315,7 +315,7 @@ public class AbstractStream101Test extends TestBase {
             List<TestBean> input = Arrays.asList(new TestBean("John", 25));
             Stream<TestBean> stream = createStream(input);
 
-            long count = stream.persistToCSV(N.asList("name", "age"), writer);
+            long count = stream.persistToCsv(N.asList("name", "age"), writer);
             assertEquals(1, count);
 
             String csv = writer.toString();
@@ -329,7 +329,7 @@ public class AbstractStream101Test extends TestBase {
             List<Map<String, Object>> input = Arrays.asList(Map.of("name", "John", "age", 25));
             Stream<Map<String, Object>> stream = createStream(input);
 
-            long count = stream.persistToCSV(N.asList("name", "age"), writer);
+            long count = stream.persistToCsv(N.asList("name", "age"), writer);
             assertEquals(1, count);
 
             String csv = writer.toString();
@@ -343,7 +343,7 @@ public class AbstractStream101Test extends TestBase {
             List<List<Object>> input = Arrays.asList(N.asList("John", 25));
             Stream<List<Object>> stream = createStream(input);
 
-            long count = stream.persistToCSV(N.asList("name", "age"), writer);
+            long count = stream.persistToCsv(N.asList("name", "age"), writer);
             assertEquals(1, count);
 
             String csv = writer.toString();
@@ -358,7 +358,7 @@ public class AbstractStream101Test extends TestBase {
             List<Object[]> input = N.asSingletonList(a);
             Stream<Object[]> stream = createStream(input);
 
-            long count = stream.persistToCSV(N.asList("name", "age"), writer);
+            long count = stream.persistToCsv(N.asList("name", "age"), writer);
             assertEquals(1, count);
 
             String csv = writer.toString();
@@ -375,7 +375,7 @@ public class AbstractStream101Test extends TestBase {
         List<TestBean> input = Arrays.asList(new TestBean("John", 25), new TestBean("Jane", 30));
         Stream<TestBean> stream = createStream(input);
 
-        long count = stream.persistToJSON(baos);
+        long count = stream.persistToJson(baos);
         assertEquals(2, count);
 
         String json = baos.toString();
@@ -395,7 +395,7 @@ public class AbstractStream101Test extends TestBase {
 
         Stream<Map<String, Object>> stream = createStream(input);
 
-        long count = stream.persistToJSON(writer);
+        long count = stream.persistToJson(writer);
         assertEquals(1, count);
 
         String json = writer.toString();
@@ -699,7 +699,7 @@ public class AbstractStream101Test extends TestBase {
 
         assertNotNull(dataset);
         assertEquals(2, dataset.size());
-        assertEquals(Arrays.asList("name", "age"), dataset.columnNameList());
+        assertEquals(Arrays.asList("name", "age"), dataset.columnNames());
     }
 
     @Test

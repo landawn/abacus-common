@@ -13,11 +13,15 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.*;
-import java.util.function.BiPredicate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
@@ -42,7 +46,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>Memory Efficient:</b> Only creates sets when values are actually added to keys</li>
  * </ul>
  *
- * <p><b>⚠️ IMPORTANT - Design Decisions:</b>
+ * <p><b>IMPORTANT - Design Decisions:</b>
  * <ul>
  *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
  *   <li>Extends {@link Multimap} to inherit common multimap operations</li>
@@ -72,7 +76,7 @@ import com.landawn.abacus.annotation.Internal;
  * // Creating from collections with grouping
  * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
  * SetMultimap<Integer, String> byLength =
- *     SetMultimap.create(words, String::length);
+ *     SetMultimap.fromCollection(words, String::length);
  * // Result: {5: ["apple"], 7: ["apricot", "banana"], 9: ["blueberry"]}
  *
  * // Tag system example
@@ -87,9 +91,16 @@ import com.landawn.abacus.annotation.Internal;
  * SetMultimap<String, String> inverse = articleTags.inverse();
  * Set<String> javaArticles = inverse.get("java");   // ["article1", "article2"]
  *
- * // Filtering and transformations
- * SetMultimap<String, String> filtered = articleTags.filter((key, values) -> values.size() > 2);
- * SetMultimap<String, String> javaOnly = articleTags.filterByValue(tags -> tags.contains("java"));
+ * // Filtering and transformations (stream-based)
+ * SetMultimap<String, String> filtered = N.newSetMultimap();
+ * articleTags.stream()
+ *     .filter(e -> e.getValue().size() > 2)
+ *     .forEach(e -> filtered.putValues(e.getKey(), e.getValue()));
+ *
+ * SetMultimap<String, String> javaOnly = N.newSetMultimap();
+ * articleTags.stream()
+ *     .filter(e -> e.getValue().contains("java"))
+ *     .forEach(e -> javaOnly.putValues(e.getKey(), e.getValue()));
  *
  * // Conversion to immutable structures
  * ImmutableMap<String, ImmutableSet<String>> immutable = articleTags.toImmutableMap();
@@ -98,10 +109,10 @@ import com.landawn.abacus.annotation.Internal;
  * <p><b>Factory Methods:</b>
  * <ul>
  *   <li>{@link #of(Object, Object)} - Single key-value pair</li>
- *   <li>{@link #create(Map)} - From existing Map</li>
- *   <li>{@link #create(Collection, Function)} - Grouping by key extractor</li>
- *   <li>{@link #create(Collection, Function, Function)} - Key and value extractors</li>
- *   <li>{@link #concat(Map, Map)} - Concatenating multiple maps</li>
+ *   <li>{@link #fromMap(Map)} - From existing Map</li>
+ *   <li>{@link #fromCollection(Collection, Function)} - Grouping by key extractor</li>
+ *   <li>{@link #fromCollection(Collection, Function, Function)} - Key and value extractors</li>
+ *   <li>{@link #merge(Map, Map)} - Concatenating multiple maps</li>
  *   <li>{@link #wrap(Map)} - Wrapping existing Map&lt;K, Set&lt;E&gt;&gt;</li>
  *   <li>{@link N#newSetMultimap()} - Empty instance with default backing</li>
  * </ul>
@@ -110,9 +121,7 @@ import com.landawn.abacus.annotation.Internal;
  * <ul>
  *   <li>{@link #inverse()} - Invert keys and values while maintaining uniqueness</li>
  *   <li>{@link #toImmutableMap()} - Convert to immutable representation</li>
- *   <li>{@link #filter(BiPredicate)} - Filter by key-value set pairs</li>
- *   <li>{@link #filterByKey(Predicate)} - Filter by keys only</li>
- *   <li>{@link #filterByValue(Predicate)} - Filter by value sets</li>
+ *   <li>{@link #copy()} - Create a deep copy of the SetMultimap</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
@@ -153,7 +162,7 @@ import com.landawn.abacus.annotation.Internal;
  * <ul>
  *   <li>Use appropriate backing implementations based on ordering and concurrency needs</li>
  *   <li>Consider using {@link #toImmutableMap()} for read-only snapshots</li>
- *   <li>Filter operations create new instances - chain operations efficiently</li>
+ *   <li>Stream-based filtering creates new instances - chain operations efficiently</li>
  *   <li>Use {@link #wrap(Map)} when you already have a suitable Map structure</li>
  *   <li>Choose TreeSet backing for naturally ordered values</li>
  * </ul>
@@ -228,7 +237,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     @Internal
     @SuppressWarnings("rawtypes")
     SetMultimap(final Map<K, Set<E>> valueMap, final Class<? extends Set> valueType) {
-        super(valueMap, valueType2Supplier(valueType));
+        super(valueMap, valueTypeToSupplier(valueType));
     }
 
     /**
@@ -261,7 +270,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v1 the value of the key-value pair
      * @return a new instance of SetMultimap with the specified key-value pair
      * @see #of(Object, Object, Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1) {
         final SetMultimap<K, E> map = new SetMultimap<>(1);
@@ -296,7 +305,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v2 the second value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
         final SetMultimap<K, E> map = new SetMultimap<>(2);
@@ -331,7 +340,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v3 the third value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
         final SetMultimap<K, E> map = new SetMultimap<>(3);
@@ -369,7 +378,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v4 the fourth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
         final SetMultimap<K, E> map = new SetMultimap<>(4);
@@ -410,7 +419,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v5 the fifth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
@@ -455,7 +464,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v6 the sixth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
@@ -503,7 +512,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param v7 the seventh value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
      * @see #of(Object, Object)
-     * @see #create(Map)
+     * @see #fromMap(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
@@ -530,7 +539,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2);
-     * SetMultimap<String, Integer> multimap = SetMultimap.create(map);
+     * SetMultimap<String, Integer> multimap = SetMultimap.fromMap(map);
      * // multimap contains: {"a" -> [1], "b" -> [2]}
      * }</pre>
      *
@@ -539,12 +548,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      */
-    public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
+    public static <K, E> SetMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map) {
         //noinspection rawtypes
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
         if (N.notEmpty(map)) {
-            multimap.put(map);
+            multimap.putAll(map);
         }
 
         return multimap;
@@ -559,7 +568,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana", "bear");
-     * SetMultimap<Character, String> grouped = SetMultimap.create(words, s -> s.charAt(0));
+     * SetMultimap<Character, String> grouped = SetMultimap.fromCollection(words, s -> s.charAt(0));
      * // grouped contains: {'a' -> ["apple", "ant"], 'b' -> ["banana", "bear"]}
      * }</pre>
      *
@@ -570,7 +579,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
      * @throws IllegalArgumentException if the keyExtractor is null
      */
-    public static <T, K> SetMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
+    public static <T, K> SetMultimap<K, T> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
@@ -597,7 +606,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana");
      * SetMultimap<Character, Integer> multimap =
-     *     SetMultimap.create(words, s -> s.charAt(0), String::length);
+     *     SetMultimap.fromCollection(words, s -> s.charAt(0), String::length);
      * // multimap contains: {'a' -> [5, 3], 'b' -> [6]}
      * }</pre>
      *
@@ -610,8 +619,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
      * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
      */
-    public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, E> SetMultimap<K, E> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
+        N.checkArgNotNull(keyExtractor);
+        N.checkArgNotNull(valueExtractor);
+
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
@@ -624,7 +636,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Creates a new instance of SetMultimap by concatenating the key-value pairs from two specified maps.
+     * Creates a new instance of SetMultimap by merging the key-value pairs from two specified maps.
      *
      * <p>If the same key appears in both maps, both values will be added to the resulting set for that key.
      * Since this is a SetMultimap, duplicate values for the same key will be automatically eliminated.
@@ -634,7 +646,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
      * Map<String, Integer> map2 = Map.of("c", 3, "a", 4);
-     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(map1, map2);
+     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(map1, map2);
      * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
      * }</pre>
      *
@@ -644,18 +656,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param b the second map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
      * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
-    public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
+    public static <K, E> SetMultimap<K, E> merge(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
-            return b == null ? N.newSetMultimap() : create(b);
+            return b == null ? N.newSetMultimap() : fromMap(b);
         } else {
-            final SetMultimap<K, E> res = create(a);
-            res.put(b);
+            final SetMultimap<K, E> res = fromMap(a);
+            res.putAll(b);
             return res;
         }
     }
 
     /**
-     * Creates a new instance of SetMultimap by concatenating the key-value pairs from three specified maps.
+     * Creates a new instance of SetMultimap by merging the key-value pairs from three specified maps.
      *
      * <p>If the same key appears in multiple maps, all unique values will be added to the resulting set for that key.
      * Since this is a SetMultimap, duplicate values for the same key will be automatically eliminated.
@@ -666,7 +678,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Map<String, Integer> map1 = Map.of("a", 1);
      * Map<String, Integer> map2 = Map.of("b", 2);
      * Map<String, Integer> map3 = Map.of("c", 3);
-     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(map1, map2, map3);
+     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(map1, map2, map3);
      * // concatenated contains: {"a" -> [1], "b" -> [2], "c" -> [3]}
      * }</pre>
      *
@@ -677,26 +689,26 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param c the third map containing the key-value pairs to be added to the new SetMultimap, may be {@code null}
      * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
-    public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b,
+    public static <K, E> SetMultimap<K, E> merge(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b,
             final Map<? extends K, ? extends E> c) {
         if (a == null) {
             if (b == null) {
-                return c == null ? N.newSetMultimap() : create(c);
+                return c == null ? N.newSetMultimap() : fromMap(c);
             } else {
-                final SetMultimap<K, E> res = create(b);
-                res.put(c);
+                final SetMultimap<K, E> res = fromMap(b);
+                res.putAll(c);
                 return res;
             }
         } else {
-            final SetMultimap<K, E> res = create(a);
-            res.put(b);
-            res.put(c);
+            final SetMultimap<K, E> res = fromMap(a);
+            res.putAll(b);
+            res.putAll(c);
             return res;
         }
     }
 
     /**
-     * Creates a new instance of SetMultimap by concatenating the key-value pairs from a collection of maps.
+     * Creates a new instance of SetMultimap by merging the key-value pairs from a collection of maps.
      *
      * <p>If the same key appears in multiple maps within the collection, all unique values will be added to the
      * resulting set for that key. Since this is a SetMultimap, duplicate values for the same key will be
@@ -709,7 +721,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *     Map.of("c", 3),
      *     Map.of("a", 4)
      * );
-     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(maps);
+     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(maps);
      * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
      * }</pre>
      *
@@ -718,16 +730,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param c the collection of maps containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified collection of maps
      */
-    public static <K, E> SetMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
+    public static <K, E> SetMultimap<K, E> merge(final Collection<? extends Map<? extends K, ? extends E>> c) {
         if (N.isEmpty(c)) {
             return N.newSetMultimap();
         }
 
         final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
-        final SetMultimap<K, E> res = create(iter.next());
+        final SetMultimap<K, E> res = fromMap(iter.next());
 
         while (iter.hasNext()) {
-            res.put(iter.next());
+            res.putAll(iter.next());
         }
 
         return res;
@@ -827,7 +839,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<E, K> result = new SetMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
 
         if (N.notEmpty(multimap)) {
-            for (final Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
+            for (final Map.Entry<K, Set<E>> entry : multimap.backingMap.entrySet()) {
                 final Set<E> c = entry.getValue();
 
                 if (N.notEmpty(c)) {
@@ -858,110 +870,110 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @return a new SetMultimap containing all the key-value pairs of this SetMultimap
-     * @see #putMany(Multimap)
+     * @see #putValues(Multimap)
      */
     @Override
     public SetMultimap<K, E> copy() {
         final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
 
-        copy.putMany(this);
+        copy.putValues(this);
 
         return copy;
     }
 
-    /**
-     * Creates a new SetMultimap containing only the entries that satisfy the given predicate.
-     * The predicate is applied to each key and its complete set of values.
-     *
-     * <p>The new SetMultimap shares the same set instances as the original for matching entries
-     * (shallow copy of matching entries), and uses the same map and set suppliers.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
-     * SetMultimap<String, Integer> filtered = map.filter((k, v) -> v.size() > 1);
-     * // filtered contains: {"a" -> [1, 2]}
-     * }</pre>
-     *
-     * @param filter the predicate to test each key-value pair; must not be {@code null}.
-     *               The predicate receives the key and the complete set of values associated with that key.
-     *               If it returns {@code true}, the entire entry is included in the result.
-     * @return a new SetMultimap containing only the entries that match the filter
-     */
-    @Override
-    public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
-        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
+    //    /**
+    //     * Creates a new SetMultimap containing only the entries that satisfy the given predicate.
+    //     * The predicate is applied to each key and its complete set of values.
+    //     *
+    //     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+    //     * (shallow copy of matching entries), and uses the same map and set suppliers.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
+    //     * SetMultimap<String, Integer> filtered = map.filter((k, v) -> v.size() > 1);
+    //     * // filtered contains: {"a" -> [1, 2]}
+    //     * }</pre>
+    //     *
+    //     * @param filter the predicate to test each key-value pair; must not be {@code null}.
+    //     *               The predicate receives the key and the complete set of values associated with that key.
+    //     *               If it returns {@code true}, the entire entry is included in the result.
+    //     * @return a new SetMultimap containing only the entries that match the filter
+    //     */
+    //    @Override
+    //    public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
+    //        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
+    //
+    //        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+    //            if (filter.test(entry.getKey(), entry.getValue())) {
+    //                result.putValues(entry.getKey(), entry.getValue());
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
 
-        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue())) {
-                result.putMany(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Creates a new SetMultimap containing only the entries whose keys satisfy the given predicate.
-     *
-     * <p>The new SetMultimap shares the same set instances as the original for matching entries
-     * (shallow copy of matching entries), and uses the same map and set suppliers.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
-     * SetMultimap<String, Integer> filtered = map.filterByKey(k -> k.equals("a") || k.equals("b"));
-     * // filtered contains: {"a" -> [1], "b" -> [2]}
-     * }</pre>
-     *
-     * @param filter the predicate to test each key; must not be {@code null}.
-     *               If it returns {@code true} for a key, all values associated with that key are included in the result.
-     * @return a new SetMultimap containing only the entries whose keys match the filter
-     */
-    @Override
-    public SetMultimap<K, E> filterByKey(final Predicate<? super K> filter) {
-        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
-
-        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getKey())) {
-                result.putMany(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Creates a new SetMultimap containing only the entries whose value sets satisfy the given predicate.
-     * The predicate is applied to each complete set of values associated with a key.
-     *
-     * <p>The new SetMultimap shares the same set instances as the original for matching entries
-     * (shallow copy of matching entries), and uses the same map and set suppliers.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
-     * SetMultimap<String, Integer> filtered = map.filterByValue(v -> !v.isEmpty() && v.size() > 1);
-     * // filtered contains: {"a" -> [1, 2]}
-     * }</pre>
-     *
-     * @param filter the predicate to test each value set; must not be {@code null}.
-     *               The predicate receives the complete set of values for each key.
-     *               If it returns {@code true}, the entire entry is included in the result.
-     * @return a new SetMultimap containing only the entries whose value sets match the filter
-     */
-    @Override
-    public SetMultimap<K, E> filterByValue(final Predicate<? super Set<E>> filter) {
-        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
-
-        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            if (filter.test(entry.getValue())) {
-                result.putMany(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
+    //    /**
+    //     * Creates a new SetMultimap containing only the entries whose keys satisfy the given predicate.
+    //     *
+    //     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+    //     * (shallow copy of matching entries), and uses the same map and set suppliers.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
+    //     * SetMultimap<String, Integer> filtered = map.filterByKey(k -> k.equals("a") || k.equals("b"));
+    //     * // filtered contains: {"a" -> [1], "b" -> [2]}
+    //     * }</pre>
+    //     *
+    //     * @param keyPredicate the predicate to test each key; must not be {@code null}.
+    //     *               If it returns {@code true} for a key, all values associated with that key are included in the result.
+    //     * @return a new SetMultimap containing only the entries whose keys match the filter
+    //     */
+    //    @Override
+    //    public SetMultimap<K, E> filterByKey(final Predicate<? super K> keyPredicate) {
+    //        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
+    //
+    //        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+    //            if (keyPredicate.test(entry.getKey())) {
+    //                result.putValues(entry.getKey(), entry.getValue());
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     * Creates a new SetMultimap containing only the entries whose value sets satisfy the given predicate.
+    //     * The predicate is applied to each complete set of values associated with a key.
+    //     *
+    //     * <p>The new SetMultimap shares the same set instances as the original for matching entries
+    //     * (shallow copy of matching entries), and uses the same map and set suppliers.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
+    //     * SetMultimap<String, Integer> filtered = map.filterByValues(v -> !v.isEmpty() && v.size() > 1);
+    //     * // filtered contains: {"a" -> [1, 2]}
+    //     * }</pre>
+    //     *
+    //     * @param filter the predicate to test each value set; must not be {@code null}.
+    //     *               The predicate receives the complete set of values for each key.
+    //     *               If it returns {@code true}, the entire entry is included in the result.
+    //     * @return a new SetMultimap containing only the entries whose value sets match the filter
+    //     */
+    //    @Override
+    //    public SetMultimap<K, E> filterByValues(final Predicate<? super Set<E>> filter) {
+    //        final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
+    //
+    //        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+    //            if (filter.test(entry.getValue())) {
+    //                result.putValues(entry.getKey(), entry.getValue());
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
 
     /**
      * Converts this SetMultimap into an immutable map where each key is associated with an immutable set of values.
@@ -1023,5 +1035,5 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         return ImmutableMap.wrap(map);
     }
 
-    //    public SetMultimap<E, K> inversed() {
+    //    public SetMultimap<E, K> inverse() {
 }

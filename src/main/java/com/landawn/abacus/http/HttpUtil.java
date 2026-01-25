@@ -47,12 +47,12 @@ import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.parser.DeserializationConfig;
-import com.landawn.abacus.parser.JSONParser;
+import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.Parser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.SerializationConfig;
-import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.parser.XmlParser;
 import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
@@ -133,11 +133,11 @@ public final class HttpUtil {
 
     static final String URL_ENCODED = "urlencoded";
 
-    static final JSONParser jsonParser = ParserFactory.createJSONParser();
+    static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
-    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+    static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
-    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<>(ContentFormat.class);
 

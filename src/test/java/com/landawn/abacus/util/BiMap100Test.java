@@ -223,7 +223,7 @@ public class BiMap100Test extends TestBase {
         biMap.put("one", 1);
         biMap.put("two", 2);
 
-        BiMap<Integer, String> inverse = biMap.inversed();
+        BiMap<Integer, String> inverse = biMap.inverse();
         assertEquals(2, inverse.size());
         assertEquals("one", inverse.get(1));
         assertEquals("two", inverse.get(2));
@@ -239,8 +239,8 @@ public class BiMap100Test extends TestBase {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
 
-        BiMap<Integer, String> inverse = biMap.inversed();
-        BiMap<String, Integer> inverseInverse = inverse.inversed();
+        BiMap<Integer, String> inverse = biMap.inverse();
+        BiMap<String, Integer> inverseInverse = inverse.inverse();
 
         assertSame(biMap, inverseInverse);
     }

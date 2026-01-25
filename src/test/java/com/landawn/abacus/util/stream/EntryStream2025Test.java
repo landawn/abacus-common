@@ -613,13 +613,13 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testSliding_WindowSize() {
-        List<List<Entry<String, Integer>>> result = EntryStream.of(testMap).slide(2).toList();
+        List<List<Entry<String, Integer>>> result = EntryStream.of(testMap).sliding(2).toList();
         assertEquals(4, result.size());
     }
 
     @Test
     public void testSliding_WithIncrement() {
-        List<List<Entry<String, Integer>>> result = EntryStream.of(testMap).slide(2, 2).toList();
+        List<List<Entry<String, Integer>>> result = EntryStream.of(testMap).sliding(2, 2).toList();
         assertEquals(3, result.size());
     }
 

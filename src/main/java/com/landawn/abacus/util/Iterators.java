@@ -2987,7 +2987,7 @@ public final class Iterators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a:1:x", "b:2:y").iterator();
-     * TriIterator<String, Integer, String> result = Iterators.unzipp(iter, (s, triple) -> {
+     * TriIterator<String, Integer, String> result = Iterators.unzip3(iter, (s, triple) -> {
      *     String[] parts = s.split(":");
      *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
      * });
@@ -3008,7 +3008,7 @@ public final class Iterators {
      */
     @Deprecated
     @Beta
-    public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(iter, unzip);
     }
 
@@ -3019,7 +3019,7 @@ public final class Iterators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a:1:x", "b:2:y");
-     * TriIterator<String, Integer, String> result = Iterators.unzipp(list, (s, triple) -> {
+     * TriIterator<String, Integer, String> result = Iterators.unzip3(list, (s, triple) -> {
      *     String[] parts = s.split(":");
      *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
      * });
@@ -3041,7 +3041,7 @@ public final class Iterators {
      */
     @Deprecated
     @Beta
-    public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(N.iterate(c), unzip);
     }
 
@@ -3399,7 +3399,7 @@ public final class Iterators {
         final Set<T> set = new HashSet<>();
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -3499,7 +3499,7 @@ public final class Iterators {
         final Set<Object> set = new HashSet<>();
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -3591,7 +3591,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -3685,7 +3685,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private T tmp = null;
             private boolean hasMore = true;
@@ -3779,7 +3779,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private T tmp = null;
             private boolean hasMore = true;
@@ -3874,7 +3874,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private boolean hasDropped = false;
 
@@ -3975,7 +3975,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK; //NOSONAR
+            private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
             private boolean hasSkipped = false;
 

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("2025")
@@ -134,7 +134,7 @@ public class AtomicLongType2025Test extends TestBase {
 
     @Test
     public void test_writeCharacter() throws Exception {
-        CharacterWriter writer = mock(BufferedJSONWriter.class);
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test value
         type.writeCharacter(writer, new AtomicLong(456789L), null);

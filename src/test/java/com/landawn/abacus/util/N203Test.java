@@ -1379,7 +1379,7 @@ public class N203Test extends TestBase {
             triple.setMiddle(Integer.parseInt(parts[1]));
             triple.setRight(parts[2].charAt(0));
         };
-        Triple<List<String>, List<Integer>, List<Character>> result = N.unzipp(input, unzipper);
+        Triple<List<String>, List<Integer>, List<Character>> result = N.unzip3(input, unzipper);
         assertEquals(List.of("a", "b"), result.left());
         assertEquals(List.of(1, 2), result.middle());
         assertEquals(List.of('x', 'y'), result.right());
@@ -1395,7 +1395,7 @@ public class N203Test extends TestBase {
             triple.setMiddle(Integer.parseInt(parts[1]));
             triple.setRight(parts[2].charAt(0));
         };
-        Triple<List<String>, List<Integer>, List<Character>> result = N.unzipp(input, unzipper, ArrayList::new);
+        Triple<List<String>, List<Integer>, List<Character>> result = N.unzip3(input, unzipper, ArrayList::new);
         assertEquals(List.of("a", "b", "a"), result.left());
         assertEquals(List.of(1, 2, 3), result.middle());
         assertEquals(List.of('x', 'y', 'z'), result.right());

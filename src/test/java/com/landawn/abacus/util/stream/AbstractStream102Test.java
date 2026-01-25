@@ -499,9 +499,9 @@ public class AbstractStream102Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
+    public void testsliding() {
         stream = createStream(1, 2, 3, 4, 5);
-        Stream<List<Integer>> result = stream.slide(3);
+        Stream<List<Integer>> result = stream.sliding(3);
         List<List<Integer>> lists = result.toList();
         assertEquals(3, lists.size());
         assertEquals(Arrays.asList(1, 2, 3), lists.get(0));
@@ -511,7 +511,7 @@ public class AbstractStream102Test extends TestBase {
     @Test
     public void testSlidingWithIncrement() {
         stream = createStream(1, 2, 3, 4, 5, 6);
-        Stream<List<Integer>> result = stream.slide(3, 2);
+        Stream<List<Integer>> result = stream.sliding(3, 2);
         List<List<Integer>> lists = result.toList();
         assertEquals(3, lists.size());
         assertEquals(Arrays.asList(1, 2, 3), lists.get(0));
@@ -522,14 +522,14 @@ public class AbstractStream102Test extends TestBase {
     @Test
     public void testSlidingWithCollectionSupplier() {
         stream = createStream(1, 2, 3, 4);
-        Stream<Set<Integer>> result = stream.slide(2, i -> new HashSet<>());
+        Stream<Set<Integer>> result = stream.sliding(2, i -> new HashSet<>());
         assertEquals(3, result.toList().size());
     }
 
     @Test
     public void testSlidingWithCollector() {
         stream = createStream(1, 2, 3, 4);
-        Stream<String> result = stream.slide(2, Collectors.mapping(Object::toString, Collectors.joining(",")));
+        Stream<String> result = stream.sliding(2, Collectors.mapping(Object::toString, Collectors.joining(",")));
         assertEquals(Arrays.asList("1,2", "2,3", "3,4"), result.toList());
     }
 
@@ -1755,7 +1755,7 @@ public class AbstractStream102Test extends TestBase {
 
         List<TestBean> beans = Arrays.asList(new TestBean("John", 25), new TestBean("Jane", 30));
         Stream<TestBean> beanStream = createStream(beans.toArray(new TestBean[0]));
-        long count = beanStream.persistToCSV(tempFile);
+        long count = beanStream.persistToCsv(tempFile);
 
         assertEquals(2, count);
         List<String> lines = Files.readAllLines(tempFile);
@@ -1768,7 +1768,7 @@ public class AbstractStream102Test extends TestBase {
         tempFile.deleteOnExit();
 
         objectStream = createStream(new Integer[] { 1, 2 }, new Integer[] { 3, 4 });
-        long count = objectStream.persistToCSV(Arrays.asList("col1", "col2"), tempFile);
+        long count = objectStream.persistToCsv(Arrays.asList("col1", "col2"), tempFile);
 
         assertEquals(2, count);
         List<String> lines = Files.readAllLines(tempFile);
@@ -1781,7 +1781,7 @@ public class AbstractStream102Test extends TestBase {
 
         List<TestBean> beans = Arrays.asList(new TestBean("John", 25));
         Stream<TestBean> beanStream = createStream(beans.toArray(new TestBean[0]));
-        long count = beanStream.persistToCSV(baos);
+        long count = beanStream.persistToCsv(baos);
 
         assertEquals(1, count);
         String result = baos.toString();
@@ -1795,7 +1795,7 @@ public class AbstractStream102Test extends TestBase {
 
         List<TestBean> beans = Arrays.asList(new TestBean("John", 25));
         Stream<TestBean> beanStream = createStream(beans.toArray(new TestBean[0]));
-        long count = beanStream.persistToCSV(writer);
+        long count = beanStream.persistToCsv(writer);
 
         assertEquals(1, count);
         String result = writer.toString();
@@ -1809,7 +1809,7 @@ public class AbstractStream102Test extends TestBase {
         tempFile.deleteOnExit();
 
         stream = createStream(1, 2, 3);
-        long count = stream.persistToJSON(tempFile);
+        long count = stream.persistToJson(tempFile);
 
         assertEquals(3, count);
         String content = new String(Files.readAllBytes(tempFile));
@@ -1824,7 +1824,7 @@ public class AbstractStream102Test extends TestBase {
     public void testPersistToJSONOutputStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         stream = createStream(1, 2, 3);
-        long count = stream.persistToJSON(baos);
+        long count = stream.persistToJson(baos);
 
         assertEquals(3, count);
         String result = baos.toString();
@@ -1837,7 +1837,7 @@ public class AbstractStream102Test extends TestBase {
     public void testPersistToJSONWriter() throws IOException {
         StringWriter writer = new StringWriter();
         stream = createStream(1, 2, 3);
-        long count = stream.persistToJSON(writer);
+        long count = stream.persistToJson(writer);
 
         assertEquals(3, count);
         String result = writer.toString();

@@ -394,7 +394,7 @@ public class Splitter2025Test extends TestBase {
     public void testSplitAndForEach() {
         Splitter splitter = Splitter.with(',');
         List<String> captured = new ArrayList<>();
-        splitter.splitAndForEach("a,b,c", captured::add);
+        splitter.splitThenForEach("a,b,c", captured::add);
         assertEquals(Arrays.asList("a", "b", "c"), captured);
     }
 
@@ -874,7 +874,7 @@ public class Splitter2025Test extends TestBase {
         List<String> collected = new ArrayList<>();
         List<Integer> lengths = new ArrayList<>();
 
-        splitter.splitAndForEach("a,bb,ccc", s -> {
+        splitter.splitThenForEach("a,bb,ccc", s -> {
             collected.add(s);
             lengths.add(s.length());
         });
@@ -1221,7 +1221,7 @@ public class Splitter2025Test extends TestBase {
         Splitter splitter = Splitter.with(',');
         List<String> collected = new ArrayList<>();
 
-        splitter.splitAndForEach(null, collected::add);
+        splitter.splitThenForEach(null, collected::add);
         assertTrue(collected.isEmpty());
     }
 

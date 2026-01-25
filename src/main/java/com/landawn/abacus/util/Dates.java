@@ -149,7 +149,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * // Comparisons and checks
  * boolean sameDay = Dates.isSameDay(date1, date2);
  * boolean isLastDay = Dates.isLastDateOfMonth(today);
- * boolean overlaps = Dates.isOverlap(start1, end1, start2, end2);
+ * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
  *
  * // SQL type conversions
  * java.sql.Date sqlDate = Dates.createDate(System.currentTimeMillis());
@@ -967,8 +967,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long futureTime = Dates.currentTimeMillisRolled(5, TimeUnit.MINUTES);   // 5 minutes from now
-     * long pastTime = Dates.currentTimeMillisRolled(-2, TimeUnit.HOURS);      // 2 hours ago
+     * long futureTime = Dates.currentTimeMillisPlus(5, TimeUnit.MINUTES);   // 5 minutes from now
+     * long pastTime = Dates.currentTimeMillisPlus(-2, TimeUnit.HOURS);      // 2 hours ago
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -976,7 +976,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the current time in milliseconds with the specified amount applied.
      */
     @Beta
-    static long currentTimeMillisRolled(final long amount, final TimeUnit unit) {
+    static long currentTimeMillisPlus(final long amount, final TimeUnit unit) {
         return System.currentTimeMillis() + unit.toMillis(amount);
     }
 
@@ -986,8 +986,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Time futureTime = Dates.currentTimeRolled(30, TimeUnit.MINUTES);   // Current time + 30 minutes
-     * Time pastTime = Dates.currentTimeRolled(-1, TimeUnit.HOURS);       // Current time - 1 hour
+     * Time futureTime = Dates.currentTimePlus(30, TimeUnit.MINUTES);   // Current time + 30 minutes
+     * Time pastTime = Dates.currentTimePlus(-1, TimeUnit.HOURS);       // Current time - 1 hour
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -995,8 +995,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code java.sql.Time} instance representing the current time with the specified amount applied.
      */
     @Beta
-    public static Time currentTimeRolled(final long amount, final TimeUnit unit) {
-        return new Time(currentTimeMillisRolled(amount, unit));
+    public static Time currentTimePlus(final long amount, final TimeUnit unit) {
+        return new Time(currentTimeMillisPlus(amount, unit));
     }
 
     /**
@@ -1005,8 +1005,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date tomorrow = Dates.currentDateRolled(1, TimeUnit.DAYS);    // Current date + 1 day
-     * Date lastWeek = Dates.currentDateRolled(-7, TimeUnit.DAYS);   // Current date - 7 days
+     * Date tomorrow = Dates.currentDatePlus(1, TimeUnit.DAYS);    // Current date + 1 day
+     * Date lastWeek = Dates.currentDatePlus(-7, TimeUnit.DAYS);   // Current date - 7 days
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -1014,8 +1014,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code java.sql.Date} instance representing the current date with the specified amount applied.
      */
     @Beta
-    public static Date currentDateRolled(final long amount, final TimeUnit unit) {
-        return new Date(currentTimeMillisRolled(amount, unit));
+    public static Date currentDatePlus(final long amount, final TimeUnit unit) {
+        return new Date(currentTimeMillisPlus(amount, unit));
     }
 
     /**
@@ -1024,8 +1024,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Timestamp future = Dates.currentTimestampRolled(5, TimeUnit.MINUTES);   // Current timestamp + 5 minutes
-     * Timestamp past = Dates.currentTimestampRolled(-3, TimeUnit.HOURS);      // Current timestamp - 3 hours
+     * Timestamp future = Dates.currentTimestampPlus(5, TimeUnit.MINUTES);   // Current timestamp + 5 minutes
+     * Timestamp past = Dates.currentTimestampPlus(-3, TimeUnit.HOURS);      // Current timestamp - 3 hours
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -1033,8 +1033,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code java.sql.Timestamp} instance representing the current timestamp with the specified amount applied.
      */
     @Beta
-    public static Timestamp currentTimestampRolled(final long amount, final TimeUnit unit) {
-        return new Timestamp(currentTimeMillisRolled(amount, unit));
+    public static Timestamp currentTimestampPlus(final long amount, final TimeUnit unit) {
+        return new Timestamp(currentTimeMillisPlus(amount, unit));
     }
 
     /**
@@ -1043,8 +1043,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date future = Dates.currentJUDateRolled(2, TimeUnit.DAYS);   // Current date + 2 days
-     * Date past = Dates.currentJUDateRolled(-1, TimeUnit.WEEKS);   // Current date - 1 week
+     * Date future = Dates.currentJUDatePlus(2, TimeUnit.DAYS);   // Current date + 2 days
+     * Date past = Dates.currentJUDatePlus(-1, TimeUnit.WEEKS);   // Current date - 1 week
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -1052,8 +1052,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code java.util.Date} instance representing the current date/time with the specified amount applied.
      */
     @Beta
-    public static java.util.Date currentJUDateRolled(final long amount, final TimeUnit unit) {
-        return new java.util.Date(currentTimeMillisRolled(amount, unit));
+    public static java.util.Date currentJUDatePlus(final long amount, final TimeUnit unit) {
+        return new java.util.Date(currentTimeMillisPlus(amount, unit));
     }
 
     /**
@@ -1062,8 +1062,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar future = Dates.currentCalendarRolled(3, TimeUnit.HOURS);   // Current time + 3 hours
-     * Calendar past = Dates.currentCalendarRolled(-10, TimeUnit.DAYS);    // Current time - 10 days
+     * Calendar future = Dates.currentCalendarPlus(3, TimeUnit.HOURS);   // Current time + 3 hours
+     * Calendar past = Dates.currentCalendarPlus(-10, TimeUnit.DAYS);    // Current time - 10 days
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -1071,9 +1071,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code java.util.Calendar} instance representing the current date/time with the specified amount applied.
      */
     @Beta
-    public static Calendar currentCalendarRolled(final long amount, final TimeUnit unit) {
+    public static Calendar currentCalendarPlus(final long amount, final TimeUnit unit) {
         final Calendar ret = Calendar.getInstance();
-        ret.setTimeInMillis(currentTimeMillisRolled(amount, unit));
+        ret.setTimeInMillis(currentTimeMillisPlus(amount, unit));
         return ret;
     }
 
@@ -5677,20 +5677,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date jan15 = Dates.parseDate("2023-01-15");
-     * int lastDay = Dates.getLastDateOfMonth(jan15);   // 31
+     * int lastDay = Dates.getLastDayOfMonth(jan15);   // 31
      *
      * Date feb15 = Dates.parseDate("2023-02-15");
-     * int febLastDay = Dates.getLastDateOfMonth(feb15);   // 28 (non-leap year)
+     * int febLastDay = Dates.getLastDayOfMonth(feb15);   // 28 (non-leap year)
      *
      * Date feb15Leap = Dates.parseDate("2024-02-15");
-     * int febLeapLastDay = Dates.getLastDateOfMonth(feb15Leap);   // 29 (leap year)
+     * int febLeapLastDay = Dates.getLastDayOfMonth(feb15Leap);   // 29 (leap year)
      * }</pre>
      *
      * @param date the date to be evaluated. Must not be {@code null}.
      * @return the last day of the month for the given date as an integer.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
-    public static int getLastDateOfMonth(final java.util.Date date) throws IllegalArgumentException {
+    public static int getLastDayOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
         final Calendar cal = Calendar.getInstance();
@@ -5705,17 +5705,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date jan15 = Dates.parseDate("2023-01-15");
-     * int lastDay = Dates.getLastDateOfYear(jan15);   // 365 (non-leap year)
+     * int lastDay = Dates.getLastDayOfYear((jan15);   // 365 (non-leap year)
      *
      * Date feb15Leap = Dates.parseDate("2024-02-15");
-     * int lastDayLeap = Dates.getLastDateOfYear(feb15Leap);   // 366 (leap year)
+     * int lastDayLeap = Dates.getLastDayOfYear((feb15Leap);   // 366 (leap year)
      * }</pre>
      *
      * @param date the date to be evaluated. Must not be {@code null}.
      * @return the last day of the year for the given date as an integer.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
-    public static int getLastDateOfYear(final java.util.Date date) throws IllegalArgumentException {
+    public static int getLastDayOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
         final Calendar cal = Calendar.getInstance();
@@ -5734,7 +5734,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * java.util.Date end1 = Dates.parse("2023-01-10");
      * java.util.Date start2 = Dates.parse("2023-01-05");
      * java.util.Date end2 = Dates.parse("2023-01-15");
-     * boolean overlaps = Dates.isOverlap(start1, end1, start2, end2);
+     * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: true (ranges overlap from Jan 5 to Jan 10)
      *
      * // Example 2: Check non-overlapping ranges
@@ -5742,7 +5742,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * java.util.Date end1 = Dates.parse("2023-01-10");
      * java.util.Date start2 = Dates.parse("2023-01-15");
      * java.util.Date end2 = Dates.parse("2023-01-20");
-     * boolean overlaps = Dates.isOverlap(start1, end1, start2, end2);
+     * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: false (no overlap, there's a gap)
      *
      * // Example 3: Check adjacent ranges (touching but not overlapping)
@@ -5750,7 +5750,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * java.util.Date end1 = Dates.parse("2023-01-10");
      * java.util.Date start2 = Dates.parse("2023-01-10");
      * java.util.Date end2 = Dates.parse("2023-01-20");
-     * boolean overlaps = Dates.isOverlap(start1, end1, start2, end2);
+     * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: false (ranges are adjacent but don't overlap)
      * }</pre>
      *
@@ -5762,7 +5762,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if any date is {@code null} or invalid.
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
-    public static boolean isOverlap(java.util.Date startTimeOne, java.util.Date endTimeOne, java.util.Date startTimeTwo, java.util.Date endTimeTwo) {
+    public static boolean isOverlapping(java.util.Date startTimeOne, java.util.Date endTimeOne, java.util.Date startTimeTwo, java.util.Date endTimeTwo) {
         if (startTimeOne == null || endTimeOne == null || startTimeTwo == null || endTimeTwo == null) {
             throw new IllegalArgumentException("Date cannot be null");
         }

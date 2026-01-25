@@ -144,38 +144,38 @@ public class IOUtil200Test extends TestBase {
     @Test
     @Disabled("Depends on FileSystemUtil and external environment, hard to unit test reliably")
     public void testFreeDiskSpaceKb() {
-        assertTrue(IOUtil.freeDiskSpaceKb() >= 0);
+        assertTrue(IOUtil.freeDiskSpaceKB() >= 0);
         File currentDir = new File(".");
-        assertTrue(IOUtil.freeDiskSpaceKb(currentDir.getAbsolutePath()) >= 0);
-        assertTrue(IOUtil.freeDiskSpaceKb(currentDir.getAbsolutePath(), 5000) >= 0);
+        assertTrue(IOUtil.freeDiskSpaceKB(currentDir.getAbsolutePath()) >= 0);
+        assertTrue(IOUtil.freeDiskSpaceKB(currentDir.getAbsolutePath(), 5000) >= 0);
     }
 
     @Test
     public void testChars2BytesAndBytes2Chars() {
         char[] emptyChars = CommonUtil.EMPTY_CHAR_ARRAY;
-        byte[] emptyBytes = IOUtil.chars2Bytes(emptyChars);
+        byte[] emptyBytes = IOUtil.charsToBytes(emptyChars);
         assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, emptyBytes);
-        assertArrayEquals(emptyChars, IOUtil.bytes2Chars(emptyBytes));
+        assertArrayEquals(emptyChars, IOUtil.bytesToChars(emptyBytes));
 
         char[] testChars = "Hello World".toCharArray();
-        byte[] utf8Bytes = IOUtil.chars2Bytes(testChars, StandardCharsets.UTF_8);
-        char[] convertedCharsUtf8 = IOUtil.bytes2Chars(utf8Bytes, StandardCharsets.UTF_8);
+        byte[] utf8Bytes = IOUtil.charsToBytes(testChars, StandardCharsets.UTF_8);
+        char[] convertedCharsUtf8 = IOUtil.bytesToChars(utf8Bytes, StandardCharsets.UTF_8);
         assertArrayEquals(testChars, convertedCharsUtf8);
 
-        byte[] defaultCharsetBytes = IOUtil.chars2Bytes(testChars);
-        char[] convertedCharsDefault = IOUtil.bytes2Chars(defaultCharsetBytes);
+        byte[] defaultCharsetBytes = IOUtil.charsToBytes(testChars);
+        char[] convertedCharsDefault = IOUtil.bytesToChars(defaultCharsetBytes);
         assertArrayEquals(testChars, convertedCharsDefault);
 
         char[] subChars = { 'W', 'o', 'r' };
-        byte[] subBytesUtf8 = IOUtil.chars2Bytes(testChars, 6, 3, StandardCharsets.UTF_8);
-        assertArrayEquals(IOUtil.chars2Bytes(subChars, StandardCharsets.UTF_8), subBytesUtf8);
+        byte[] subBytesUtf8 = IOUtil.charsToBytes(testChars, 6, 3, StandardCharsets.UTF_8);
+        assertArrayEquals(IOUtil.charsToBytes(subChars, StandardCharsets.UTF_8), subBytesUtf8);
 
-        char[] convertedSubChars = IOUtil.bytes2Chars(subBytesUtf8, 0, subBytesUtf8.length, StandardCharsets.UTF_8);
+        char[] convertedSubChars = IOUtil.bytesToChars(subBytesUtf8, 0, subBytesUtf8.length, StandardCharsets.UTF_8);
         assertArrayEquals(subChars, convertedSubChars);
 
-        byte[] bytesNullCharset = IOUtil.chars2Bytes(testChars, null);
+        byte[] bytesNullCharset = IOUtil.charsToBytes(testChars, null);
         assertArrayEquals(defaultCharsetBytes, bytesNullCharset);
-        char[] charsNullCharset = IOUtil.bytes2Chars(bytesNullCharset, null);
+        char[] charsNullCharset = IOUtil.bytesToChars(bytesNullCharset, null);
         assertArrayEquals(testChars, charsNullCharset);
     }
 
@@ -183,32 +183,32 @@ public class IOUtil200Test extends TestBase {
     public void testStringConversions() throws IOException {
         String testStr = "Hello Gemini";
 
-        InputStream isDefault = IOUtil.string2InputStream(testStr);
+        InputStream isDefault = IOUtil.stringToInputStream(testStr);
         assertNotNull(isDefault);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(isDefault)));
 
-        InputStream isUtf8 = IOUtil.string2InputStream(testStr, StandardCharsets.UTF_8);
+        InputStream isUtf8 = IOUtil.stringToInputStream(testStr, StandardCharsets.UTF_8);
         assertNotNull(isUtf8);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(isUtf8, StandardCharsets.UTF_8)));
 
-        InputStream is = IOUtil.string2InputStream(null);
+        InputStream is = IOUtil.stringToInputStream(null);
 
         assertEquals(0, IOUtil.readBytes(is).length);
 
-        Reader reader = IOUtil.string2Reader(testStr);
+        Reader reader = IOUtil.stringToReader(testStr);
         assertNotNull(reader);
         assertEquals(testStr, assertDoesNotThrow(() -> IOUtil.readAllToString(reader)));
 
-        Reader readerNull = IOUtil.string2Reader(null);
+        Reader readerNull = IOUtil.stringToReader(null);
         assertEquals("", assertDoesNotThrow(() -> IOUtil.readAllToString(readerNull)));
 
         StringBuilder sb = new StringBuilder("Test SB");
-        Writer writer = IOUtil.stringBuilder2Writer(sb);
+        Writer writer = IOUtil.stringBuilderToWriter(sb);
         assertNotNull(writer);
         assertDoesNotThrow(() -> writer.write(" Appended"));
         assertEquals("Test SB Appended", sb.toString());
 
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.stringBuilder2Writer(null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.stringBuilderToWriter(null));
     }
 
     @Test
@@ -742,11 +742,11 @@ public class IOUtil200Test extends TestBase {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtil.write(chars, baos, true);
-        assertArrayEquals(chars, IOUtil.bytes2Chars(baos.toByteArray(), Charsets.DEFAULT));
+        assertArrayEquals(chars, IOUtil.bytesToChars(baos.toByteArray(), Charsets.DEFAULT));
 
         baos.reset();
         IOUtil.write(chars, 5, 5, StandardCharsets.UTF_8, baos, true);
-        assertArrayEquals(subChars, IOUtil.bytes2Chars(baos.toByteArray(), StandardCharsets.UTF_8));
+        assertArrayEquals(subChars, IOUtil.bytesToChars(baos.toByteArray(), StandardCharsets.UTF_8));
 
         StringWriter sw = new StringWriter();
         IOUtil.write(chars, sw, true);
@@ -1491,7 +1491,7 @@ public class IOUtil200Test extends TestBase {
         assertFalse(IOUtil.deleteQuietly(nonExistent));
 
         File toDeleteAllFile = createTempFileWithContent("delAllFile", ".txt", "data");
-        assertTrue(IOUtil.deleteAllIfExists(toDeleteAllFile));
+        assertTrue(IOUtil.deleteRecursivelyIfExists(toDeleteAllFile));
         assertFalse(toDeleteAllFile.exists());
 
         File dirToDelete = createTempDirectory("dirDelAll");
@@ -1500,7 +1500,7 @@ public class IOUtil200Test extends TestBase {
         subDir.mkdir();
         createTempFileWithContent(subDir.toPath().resolve("f2.txt").toString(), null, "d2");
 
-        assertTrue(IOUtil.deleteAllIfExists(dirToDelete));
+        assertTrue(IOUtil.deleteRecursivelyIfExists(dirToDelete));
         assertFalse(dirToDelete.exists());
 
         File dirToClean = createTempDirectory("dirClean");
@@ -2053,12 +2053,12 @@ public class IOUtil200Test extends TestBase {
             assertTrue(linkFile.exists());
             assertTrue(IOUtil.isSymbolicLink(linkFile));
 
-            assertTrue(IOUtil.deleteAllIfExists(linkFile));
+            assertTrue(IOUtil.deleteRecursivelyIfExists(linkFile));
             assertFalse(linkFile.exists());
             assertTrue(targetFile.exists());
 
         } catch (UnsupportedOperationException | FileSystemException | SecurityException e) {
-            System.err.println("Skipping deleteAllIfExists_symlink test: Symlink creation not supported or permission denied. " + e.getMessage());
+            System.err.println("Skipping deleteRecursivelyIfExists_symlink test: Symlink creation not supported or permission denied. " + e.getMessage());
         }
     }
 

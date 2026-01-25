@@ -1201,7 +1201,7 @@ public final class Profiler {
          * @param timeInMillis the time in milliseconds since epoch
          * @return the formatted time string in ISO local date-time format
          */
-        protected String time2String(final long timeInMillis) {
+        protected String timeToString(final long timeInMillis) {
             final Timestamp timestamp = Dates.createTimestamp(timeInMillis);
             return Dates.format(timestamp, Dates.ISO_LOCAL_DATE_TIME_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
         }
@@ -1300,10 +1300,10 @@ public final class Profiler {
         public String toString() {
             if (isFailed()) {
                 final Exception e = (Exception) result;
-                return "method=" + methodName + ", startTime=" + time2String(getStartTimeInMillis()) + ", endTime=" + time2String(getEndTimeInMillis())
+                return "method=" + methodName + ", startTime=" + timeToString(getStartTimeInMillis()) + ", endTime=" + timeToString(getEndTimeInMillis())
                         + ", result=" + ClassUtil.getSimpleClassName(e.getClass()) + ": " + e.getMessage() + ".";
             } else {
-                return "method=" + methodName + ", startTime=" + time2String(getStartTimeInMillis()) + ", endTime=" + time2String(getEndTimeInMillis())
+                return "method=" + methodName + ", startTime=" + timeToString(getStartTimeInMillis()) + ", endTime=" + timeToString(getEndTimeInMillis())
                         + ", result=" + result + ".";
             }
         }
@@ -2053,8 +2053,8 @@ public final class Profiler {
             output.println(SEPARATOR_LINE);
             output.println("(unit: milliseconds)");
             output.println("threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
-            output.println("startTime: " + time2String(getStartTimeInMillis()));
-            output.println("endTime:   " + time2String(getEndTimeInMillis()));
+            output.println("startTime: " + timeToString(getStartTimeInMillis()));
+            output.println("endTime:   " + timeToString(getEndTimeInMillis()));
             output.println("totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
             output.println();
             final String methodNameTitle = "<method name>";
@@ -2257,8 +2257,8 @@ public final class Profiler {
             output.println(SEPARATOR_LINE);
             output.println("<br/>" + "(unit: milliseconds)"); //NOSONAR
             output.println("<br/>" + "threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
-            output.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()));
-            output.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()));
+            output.println("<br/>" + "startTime: " + timeToString(getStartTimeInMillis()));
+            output.println("<br/>" + "endTime:   " + timeToString(getEndTimeInMillis()));
             output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
             output.println("<br/>"); //NOSONAR
 
@@ -2508,8 +2508,8 @@ public final class Profiler {
             output.println("<unit>milliseconds</unit>");
             output.println("<threadNum>" + threadNum + "</threadNum>");
             output.println("<loops>" + (loopStatisticsList.size() / threadNum) + "</loops>");
-            output.println("<startTime>" + time2String(getStartTimeInMillis()) + "</startTime>");
-            output.println("<endTime>" + time2String(getEndTimeInMillis()) + "</endTime>");
+            output.println("<startTime>" + timeToString(getStartTimeInMillis()) + "</startTime>");
+            output.println("<endTime>" + timeToString(getEndTimeInMillis()) + "</endTime>");
             output.println("<totalElapsedTime>" + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "</totalElapsedTime>");
             output.println();
             final List<String> methodNameList = getMethodNameList();

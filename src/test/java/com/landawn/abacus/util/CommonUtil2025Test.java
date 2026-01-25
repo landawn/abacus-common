@@ -4111,7 +4111,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testNullToEmptyForEach() {
         String[] arr = { null, "a", null, "b" };
-        CommonUtil.nullToEmptyForEach(arr);
+        CommonUtil.nullElementsToEmpty(arr);
         assertEquals("", arr[0]);
         assertEquals("a", arr[1]);
         assertEquals("", arr[2]);
@@ -4436,7 +4436,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testIndicesOfAllMax() {
         List<Integer> list = Arrays.asList(1, 5, 3, 5, 2);
-        int[] indices = CommonUtil.indicesOfAllMax(list);
+        int[] indices = CommonUtil.indicesOfMax(list);
         assertEquals(2, indices.length);
         assertEquals(1, indices[0]);
         assertEquals(3, indices[1]);
@@ -4445,7 +4445,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testIndicesOfAllMin() {
         List<Integer> list = Arrays.asList(5, 1, 3, 1, 2);
-        int[] indices = CommonUtil.indicesOfAllMin(list);
+        int[] indices = CommonUtil.indicesOfMin(list);
         assertEquals(2, indices.length);
         assertEquals(1, indices[0]);
         assertEquals(3, indices[1]);
@@ -4455,10 +4455,10 @@ public class CommonUtil2025Test extends TestBase {
     public void testHaveSameElements() {
         List<Integer> list1 = Arrays.asList(1, 2, 3);
         List<Integer> list2 = Arrays.asList(3, 2, 1);
-        assertTrue(CommonUtil.haveSameElements(list1, list2));
+        assertTrue(CommonUtil.containsSameElements(list1, list2));
 
         List<Integer> list3 = Arrays.asList(1, 2, 4);
-        assertFalse(CommonUtil.haveSameElements(list1, list3));
+        assertFalse(CommonUtil.containsSameElements(list1, list3));
     }
 
     @Test

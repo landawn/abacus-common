@@ -39,7 +39,6 @@ import java.util.function.ToIntFunction;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntBiObjFunction;
 import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.TriFunction;
@@ -673,33 +672,33 @@ public class Builder<T> {
         return val;
     }
 
-    /**
-     * Transforms the wrapped value using the provided mapping function and returns a new Builder
-     * containing the transformed value.
-     *
-     * @param <R> the type of the result of the mapping function
-     * @param mapper the function to transform the wrapped value
-     * @return a new Builder containing the transformed value
-     * @deprecated This method is deprecated and may be removed in future versions
-     */
-    @Deprecated
-    public <R> Builder<R> map(final Function<? super T, ? extends R> mapper) {
-        return of(mapper.apply(val));
-    }
-
-    /**
-     * Tests the wrapped value with the given predicate and returns an Optional containing the value
-     * if the predicate returns {@code true}, otherwise returns an empty Optional.
-     *
-     * @param predicate the predicate to test the wrapped value
-     * @return {@code Optional} with the value if {@code predicate} returns {@code true},
-     * otherwise, return an empty {@code Optional}
-     * @deprecated This method is deprecated and may be removed in future versions
-     */
-    @Deprecated
-    public Optional<T> filter(final Predicate<? super T> predicate) {
-        return predicate.test(val) ? Optional.of(val) : Optional.empty();
-    }
+    //    /**
+    //     * Transforms the wrapped value using the provided mapping function and returns a new Builder
+    //     * containing the transformed value.
+    //     *
+    //     * @param <R> the type of the result of the mapping function
+    //     * @param mapper the function to transform the wrapped value
+    //     * @return a new Builder containing the transformed value
+    //     * @deprecated This method is deprecated and may be removed in future versions
+    //     */
+    //    @Deprecated
+    //    public <R> Builder<R> map(final Function<? super T, ? extends R> mapper) {
+    //        return of(mapper.apply(val));
+    //    }
+    //
+    //    /**
+    //     * Tests the wrapped value with the given predicate and returns an Optional containing the value
+    //     * if the predicate returns {@code true}, otherwise returns an empty Optional.
+    //     *
+    //     * @param predicate the predicate to test the wrapped value
+    //     * @return {@code Optional} with the value if {@code predicate} returns {@code true},
+    //     * otherwise, return an empty {@code Optional}
+    //     * @deprecated This method is deprecated and may be removed in future versions
+    //     */
+    //    @Deprecated
+    //    public Optional<T> filter(final Predicate<? super T> predicate) {
+    //        return predicate.test(val) ? Optional.of(val) : Optional.empty();
+    //    }
 
     /**
      * Performs the given action on the wrapped value and returns this builder for method chaining.
@@ -715,8 +714,6 @@ public class Builder<T> {
 
     /**
      * Applies the given function to the wrapped value and returns the result directly.
-     * Unlike {@link #map(Function)}, this method returns the function result directly
-     * instead of wrapping it in a new Builder.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2113,7 +2110,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> put(final Map<? extends K, ? extends E> m) {
-            val.put(m);
+            val.putAll(m);
 
             return this;
         }
@@ -2132,7 +2129,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> putMany(final K k, final Collection<? extends E> c) {
-            val.putMany(k, c);
+            val.putValues(k, c);
 
             return this;
         }
@@ -2154,7 +2151,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> putMany(final Map<? extends K, ? extends Collection<? extends E>> m) {
-            val.putMany(m);
+            val.putValues(m);
 
             return this;
         }
@@ -2173,7 +2170,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> putMany(final Multimap<? extends K, ? extends E, ? extends V> m) {
-            val.putMany(m);
+            val.putValues(m);
 
             return this;
         }
@@ -2192,7 +2189,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> removeOne(final Object k, final Object e) {
-            val.removeOne(k, e);
+            val.removeEntry(k, e);
 
             return this;
         }
@@ -2211,7 +2208,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> removeOne(final Map<? extends K, ? extends E> m) {
-            val.removeOne(m);
+            val.removeEntries(m);
 
             return this;
         }
@@ -2248,7 +2245,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> removeMany(final Object k, final Collection<?> valuesToRemove) {
-            val.removeMany(k, valuesToRemove);
+            val.removeValues(k, valuesToRemove);
 
             return this;
         }
@@ -2270,7 +2267,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> removeMany(final Map<?, ? extends Collection<?>> m) {
-            val.removeMany(m);
+            val.removeValues(m);
 
             return this;
         }
@@ -2289,7 +2286,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          */
         public MultimapBuilder<K, E, V, M> removeMany(final Multimap<?, ?, ?> m) {
-            val.removeMany(m);
+            val.removeValues(m);
 
             return this;
         }

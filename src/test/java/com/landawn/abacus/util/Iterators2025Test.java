@@ -778,7 +778,7 @@ public class Iterators2025Test extends TestBase {
             triple.setRight(str.charAt(2) == 't');
         };
 
-        TriIterator<String, Integer, Boolean> result = Iterators.unzipp(Arrays.asList("a1t", "b2f").iterator(), unzipFn);
+        TriIterator<String, Integer, Boolean> result = Iterators.unzip3(Arrays.asList("a1t", "b2f").iterator(), unzipFn);
 
         List<Triple<String, Integer, Boolean>> list = new ArrayList<>();
         result.forEachRemaining((l, m, r) -> list.add(Triple.of(l, m, r)));
@@ -797,7 +797,7 @@ public class Iterators2025Test extends TestBase {
             triple.setRight(str.charAt(2) == 't');
         };
 
-        TriIterator<String, Integer, Boolean> result = Iterators.unzipp(Arrays.asList("x1t"), unzipFn);
+        TriIterator<String, Integer, Boolean> result = Iterators.unzip3(Arrays.asList("x1t"), unzipFn);
 
         assertTrue(result.hasNext());
     }

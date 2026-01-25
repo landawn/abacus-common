@@ -168,7 +168,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   </tr>
  *   <tr>
  *     <td>Class Loading</td>
- *     <td>forClass(), loadClass()</td>
+ *     <td>forName(), loadClass()</td>
  *     <td>ClassLoader cache</td>
  *     <td>Dynamic class loading, plugin systems</td>
  *   </tr>
@@ -211,7 +211,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Dynamic class loading and instantiation
- * Class<?> clazz = ClassUtil.forClass("com.example.MyClass");
+ * Class<?> clazz = ClassUtil.forName("com.example.MyClass");
  * Object instance = ClassUtil.newInstance(clazz);
  *
  * // Bean property introspection
@@ -233,7 +233,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);   // Returns int.class
  *
  * // Method handle creation for performance
- * Method getter = ClassUtil.getPropGetMethod(MyBean.class, "name");
+ * Method getter = ClassUtil.getPropGetter(MyBean.class, "name");
  * MethodHandle handle = ClassUtil.createMethodHandle(getter);
  * }</pre>
  *
@@ -384,35 +384,35 @@ public final class ClassUtil {
     }
 
     /**
-     * The Constant CLASS_MASK.
+     * The Constant SENTINEL_CLASS.
      *
      * @deprecated for internal only.
      */
     @Deprecated
     @Internal
-    public static final Class<?> CLASS_MASK = ClassMask.class;
+    public static final Class<?> SENTINEL_CLASS = SentinelClass.class;
 
     /**
-     * The Constant METHOD_MASK.
+     * The Constant SENTINEL_METHOD.
      *
      * @deprecated for internal only.
      */
     @Deprecated
     @Internal
-    public static final Method METHOD_MASK = ClassUtil.lookupDeclaredMethod(ClassMask.class, "methodMask");
+    public static final Method SENTINEL_METHOD = ClassUtil.lookupDeclaredMethod(SentinelClass.class, "sentinelMethod");
 
     /**
-     * The Constant FIELD_MASK.
+     * The Constant SENTINEL_FIELD.
      *
      * @deprecated for internal only.
      */
     @Deprecated
     @Internal
-    public static final Field FIELD_MASK;
+    public static final Field SENTINEL_FIELD;
 
     static {
         try {
-            FIELD_MASK = ClassMask.class.getDeclaredField(ClassMask.FIELD_MASK);
+            SENTINEL_FIELD = SentinelClass.class.getDeclaredField("SENTINEL_FIELD");
         } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -736,14 +736,14 @@ public final class ClassUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String location = Configuration.getSourceCodeLocation(MyClass.class);
+     * String location = ClassUtil.getClassLocation(MyClass.class);
      * // Returns: "/path/to/myapp/classes" or "/path/to/myapp.jar"
      * }</pre>
      *
      * @param clazz the class whose source code location is to be retrieved
      * @return the path to the source code location of the specified class, with URL encoding removed
      */
-    public static String getSourceCodeLocation(final Class<?> clazz) {
+    public static String getClassLocation(final Class<?> clazz) {
         final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
         if (codeSource == null || codeSource.getLocation() == null) {
             return null;
@@ -766,9 +766,9 @@ public final class ClassUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<?> strClass = ClassUtil.forClass("java.lang.String");
-     * Class<?> intClass = ClassUtil.forClass("int");
-     * Class<?> arrClass = ClassUtil.forClass("String[]");
+     * Class<?> strClass = ClassUtil.forName("java.lang.String");
+     * Class<?> intClass = ClassUtil.forName("int");
+     * Class<?> arrClass = ClassUtil.forName("String[]");
      * }</pre>
      *
      * @param <T> the type of the class
@@ -776,8 +776,8 @@ public final class ClassUtil {
      * @return the Class object for the class with the specified name
      * @throws IllegalArgumentException if the class cannot be located
      */
-    public static <T> Class<T> forClass(final String clsName) throws IllegalArgumentException {
-        return forClass(clsName, true);
+    public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
+        return forName(clsName, true);
     }
 
     /**
@@ -790,7 +790,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException if class not found.
      */
     @SuppressWarnings("unchecked")
-    private static <T> Class<T> forClass(final String clsName, final boolean cacheResult) throws IllegalArgumentException {
+    private static <T> Class<T> forName(final String clsName, final boolean cacheResult) throws IllegalArgumentException {
         Class<?> cls = clsNamePool.get(clsName);
 
         if (cls == null) {
@@ -1039,7 +1039,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Class<?>> classes = ClassUtil.getClassesByPackage("com.example.myapp", true, false);
+     * List<Class<?>> classes = ClassUtil.findClassesInPackage("com.example.myapp", true, false);
      * }</pre>
      *
      * @param pkgName the name of the package to search for classes
@@ -1048,11 +1048,11 @@ public final class ClassUtil {
      * @return a list of classes in the specified package
      * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
      * @throws UncheckedIOException if an I/O error occurs during package scanning
-     * @see #getClassesByPackage(String, boolean, boolean, Predicate)
+     * @see #findClassesInPackage(String, boolean, boolean, Predicate)
      */
-    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
+    public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
             throws IllegalArgumentException, UncheckedIOException {
-        return getClassesByPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
+        return findClassesInPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
     }
 
     /**
@@ -1108,7 +1108,7 @@ public final class ClassUtil {
      * <p><b>Common Usage Patterns:</b>
      * <pre>{@code
      * // Basic package scanning for all classes
-     * List<Class<?>> allClasses = ClassUtil.getClassesByPackage(
+     * List<Class<?>> allClasses = ClassUtil.findClassesInPackage(
      *     "com.example.myapp",
      *     true,  // Recursive
      *     true,  // Skip loading errors
@@ -1116,7 +1116,7 @@ public final class ClassUtil {
      * );
      *
      * // Filter for interface classes only
-     * List<Class<?>> interfaces = ClassUtil.getClassesByPackage(
+     * List<Class<?>> interfaces = ClassUtil.findClassesInPackage(
      *     "com.example.api",
      *     true,
      *     false,
@@ -1124,7 +1124,7 @@ public final class ClassUtil {
      * );
      *
      * // Find classes with specific annotation
-     * List<Class<?>> services = ClassUtil.getClassesByPackage(
+     * List<Class<?>> services = ClassUtil.findClassesInPackage(
      *     "com.example.services",
      *     true,
      *     true,
@@ -1132,7 +1132,7 @@ public final class ClassUtil {
      * );
      *
      * // Find concrete implementation classes
-     * List<Class<?>> implementations = ClassUtil.getClassesByPackage(
+     * List<Class<?>> implementations = ClassUtil.findClassesInPackage(
      *     "com.example.impl",
      *     false,  // Non-recursive
      *     true,
@@ -1150,7 +1150,7 @@ public final class ClassUtil {
      *     Arrays.stream(cls.getInterfaces())
      *           .anyMatch(intf -> intf.equals(Processor.class));
      *
-     * List<Class<?>> processors = ClassUtil.getClassesByPackage(
+     * List<Class<?>> processors = ClassUtil.findClassesInPackage(
      *     "com.example.processors",
      *     true,
      *     true,
@@ -1158,7 +1158,7 @@ public final class ClassUtil {
      * );
      *
      * // Filter by class hierarchy
-     * List<Class<?>> subclasses = ClassUtil.getClassesByPackage(
+     * List<Class<?>> subclasses = ClassUtil.findClassesInPackage(
      *     "com.example.handlers",
      *     true,
      *     false,
@@ -1235,18 +1235,18 @@ public final class ClassUtil {
      *                         operation fails. The exception will contain details about the specific class
      *                         that failed to load and the underlying cause of the failure.
      *
-     * @see #getClassesByPackage(String, boolean, boolean)
+     * @see #findClassesInPackage(String, boolean, boolean)
      * @see java.lang.ClassLoader#getResources(String)
      * @see java.util.function.Predicate
      * @see java.util.jar.JarFile
      */
-    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
+    public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
         if (logger.isInfoEnabled()) {
             logger.info("Looking for classes in package: " + pkgName);
         }
 
-        final String pkgPath = packageName2FilePath(pkgName);
+        final String pkgPath = packageNameToFilePath(pkgName);
 
         final List<URL> resourceList = getResources(pkgName);
 
@@ -1284,7 +1284,7 @@ public final class ClassUtil {
                         final String className = pkgName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
 
                         try {
-                            final Class<?> clazz = ClassUtil.forClass(className, false);
+                            final Class<?> clazz = ClassUtil.forName(className, false);
 
                             if (clazz.getCanonicalName() != null && predicate.test(clazz)) {
                                 classes.add(clazz);
@@ -1301,7 +1301,7 @@ public final class ClassUtil {
                     } else if (file2.isDirectory() && isRecursive) {
                         final String subPkgName = pkgName + WD._PERIOD + file2.getName();
                         //noinspection ConstantValue
-                        classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
+                        classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                     }
                 }
             } else if (file.exists() && file.getName().endsWith(JAR_POSTFIX)) {
@@ -1320,10 +1320,10 @@ public final class ClassUtil {
 
                         if (entryName.startsWith(pkgPath)) {
                             if (entryName.endsWith(CLASS_POSTFIX) && (entryName.indexOf("/", pkgPath.length()) < 0)) {
-                                final String className = filePath2PackageName(entryName).replace(CLASS_POSTFIX, "");
+                                final String className = filePathToPackageName(entryName).replace(CLASS_POSTFIX, "");
 
                                 try { //NOSONAR
-                                    final Class<?> clazz = ClassUtil.forClass(className, false);
+                                    final Class<?> clazz = ClassUtil.forName(className, false);
                                     final Package pkg = clazz.getPackage();
 
                                     if ((clazz.getCanonicalName() != null) && (pkg != null)
@@ -1342,9 +1342,9 @@ public final class ClassUtil {
                                     }
                                 }
                             } else if (entry.isDirectory() && (entryName.length() > (pkgPath.length() + 1)) && isRecursive) {
-                                final String subPkgName = filePath2PackageName(entryName);
+                                final String subPkgName = filePathToPackageName(entryName);
                                 //noinspection ConstantValue
-                                classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
+                                classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                             }
                         }
                     }
@@ -1364,7 +1364,7 @@ public final class ClassUtil {
 
     private static List<URL> getResources(final String pkgName) {
         final List<URL> resourceList = new ArrayList<>();
-        final String pkgPath = packageName2FilePath(pkgName);
+        final String pkgPath = packageNameToFilePath(pkgName);
         final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
         final ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
@@ -1410,12 +1410,12 @@ public final class ClassUtil {
         return resourceList;
     }
 
-    private static String filePath2PackageName(final String entryName) {
+    private static String filePathToPackageName(final String entryName) {
         final String pkgName = entryName.replace('/', '.').replace('\\', '.');
         return pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
     }
 
-    private static String packageName2FilePath(final String pkgName) {
+    private static String packageNameToFilePath(final String pkgName) {
         final String pkgPath = pkgName.replace('.', '/');
         return pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
     }
@@ -1553,13 +1553,13 @@ public final class ClassUtil {
             enclosingClass = cls.getEnclosingClass();
 
             if (enclosingClass == null) {
-                enclosingClass = CLASS_MASK;
+                enclosingClass = SENTINEL_CLASS;
             }
 
             enclosingClassPool.put(cls, enclosingClass);
         }
 
-        return (enclosingClass == CLASS_MASK) ? null : enclosingClass;
+        return (enclosingClass == SENTINEL_CLASS) ? null : enclosingClass;
     }
 
     /**
@@ -2007,10 +2007,10 @@ public final class ClassUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int distance = ClassUtil.distanceOfInheritance(ArrayList.class, List.class);
+     * int distance = ClassUtil.inheritanceDistance(ArrayList.class, List.class);
      * // Returns 1 (ArrayList directly implements List)
      * 
-     * distance = ClassUtil.distanceOfInheritance(String.class, Object.class);
+     * distance = ClassUtil.inheritanceDistance(String.class, Object.class);
      * // Returns 1 (String directly extends Object)
      * }</pre>
      *
@@ -2019,7 +2019,7 @@ public final class ClassUtil {
      * @return the number of generations between the child and parent; 0 if the same class;
      * -1 if the classes are not related as child and parent (includes where either class is null)
      */
-    public static int distanceOfInheritance(final Class<?> child, final Class<?> parent) {
+    public static int inheritanceDistance(final Class<?> child, final Class<?> parent) {
         if (child == null || parent == null) {
             return -1;
         }
@@ -2035,7 +2035,7 @@ public final class ClassUtil {
             return d;
         }
 
-        d += distanceOfInheritance(cParent, parent);
+        d += inheritanceDistance(cParent, parent);
 
         return d > 0 ? d + 1 : -1;
     }
@@ -2607,25 +2607,25 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Object nullMask = ClassUtil.createNullMask();
+     * Object nullMask = ClassUtil.newNullSentinel();
      * // Use nullMask as a sentinel value to represent null in contexts where null itself cannot be used
      * }</pre>
      *
      * @return a new instance of the <i>None</i> class that serves as a {@code null} placeholder
      */
-    public static Object createNullMask() {
+    public static Object newNullSentinel() {
         return new None();
     }
 
     /**
-     * The Class ClassMask.
+     * The Class ClassSentinel.
      */
-    static final class ClassMask {//NOSONAR
+    static final class SentinelClass {//NOSONAR
 
-        /** The Constant FIELD_MASK. */
-        static final String FIELD_MASK = "FIELD_MASK";
+        /** The Constant SENTINEL_FIELD. */
+        static final String SENTINEL_FIELD = "SENTINEL_FIELD";
 
-        static void methodMask() { //NOSONAR
+        static void sentinelMethod() { //NOSONAR
         }
     }
 

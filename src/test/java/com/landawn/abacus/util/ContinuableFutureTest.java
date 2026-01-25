@@ -21,7 +21,7 @@ public class ContinuableFutureTest extends AbstractTest {
         N.asyncExecute(
                 (Throwables.Runnable<RuntimeException>) () -> N.println("1st run at: " + Thread.currentThread().getName() + ", " + System.currentTimeMillis()))
                 .thenDelay(1000, TimeUnit.MILLISECONDS)
-                .thenCall((Callable<String>) () -> N.println("2nd apply at: " + Thread.currentThread().getName() + ", " + System.currentTimeMillis()));
+                .thenCallAsync((Callable<String>) () -> N.println("2nd apply at: " + Thread.currentThread().getName() + ", " + System.currentTimeMillis()));
 
         N.sleep(1000);
     }
@@ -35,7 +35,7 @@ public class ContinuableFutureTest extends AbstractTest {
             N.sleep(100);
             N.println(System.currentTimeMillis());
             N.println("abc");
-        }).thenRun((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
+        }).thenRunAsync((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
 
         N.println(System.currentTimeMillis());
 
@@ -52,7 +52,7 @@ public class ContinuableFutureTest extends AbstractTest {
             N.println(System.currentTimeMillis());
             N.println("abc");
             throw new RuntimeException();
-        }).thenRun((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
+        }).thenRunAsync((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
 
         N.println(System.currentTimeMillis());
 
@@ -70,7 +70,7 @@ public class ContinuableFutureTest extends AbstractTest {
                 N.println(System.currentTimeMillis());
                 N.println(Thread.currentThread());
                 throw new RuntimeException();
-            }).thenRun((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
+            }).thenRunAsync((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
         }
 
         N.println(System.currentTimeMillis());
@@ -84,14 +84,14 @@ public class ContinuableFutureTest extends AbstractTest {
 
         asyncExecutor.execute((Callable<String>) () -> {
             throw new RuntimeException();
-        }).thenCall((BiFunction<String, Exception, String>) (result, e) -> {
+        }).thenCallAsync((BiFunction<String, Exception, String>) (result, e) -> {
             if (e != null) {
             }
 
             N.println("123: ");
 
             return "abc";
-        }).thenRun((BiConsumer<String, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
+        }).thenRunAsync((BiConsumer<String, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
 
         N.println("#################");
 

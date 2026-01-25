@@ -861,7 +861,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
 
             Assertions.assertSame(supplier, Suppliers.ofListMultimap());
         }
@@ -877,7 +877,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -891,7 +891,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -907,7 +907,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -921,7 +921,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
 
             Assertions.assertSame(supplier, Suppliers.ofSetMultimap());
         }
@@ -937,7 +937,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -951,7 +951,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -967,7 +967,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -983,7 +983,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
         }
 
         @Test
@@ -1942,7 +1942,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
 
             Assertions.assertSame(func, IntFunctions.ofListMultimap());
         }
@@ -1958,7 +1958,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(map1);
             Assertions.assertNotNull(map2);
             Assertions.assertNotSame(map1, map2);
-            Assertions.assertEquals(0, map1.size());
+            Assertions.assertEquals(0, map1.totalValueCount());
 
             Assertions.assertSame(func, IntFunctions.ofSetMultimap());
         }

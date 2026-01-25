@@ -20,11 +20,11 @@ import java.io.Writer;
 import java.util.Collection;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.Array;
-import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -72,7 +72,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     protected final Type<T> elementType;
     protected final Type<T>[] parameterTypes;
 
-    protected final JSONDeserializationConfig jdc;
+    protected final JsonDeserializationConfig jdc;
 
     /**
      * Constructs an ObjectArrayType for the specified array class.
@@ -170,7 +170,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         }
 
         if (this.isSerializable()) {
-            final BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+            final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
 
             try {
                 bw.write(WD._BRACKET_L);
@@ -294,7 +294,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -329,7 +329,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return an array containing all elements from the collection, or {@code null} if the collection is null
      */
     @Override
-    public T[] collection2Array(final Collection<?> c) {
+    public T[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -353,7 +353,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param output the collection to add elements to
      */
     @Override
-    public <E> void array2Collection(final T[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final T[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

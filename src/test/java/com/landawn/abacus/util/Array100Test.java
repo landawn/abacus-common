@@ -641,7 +641,7 @@ public class Array100Test extends TestBase {
     public void testConcatt_Generic2D() {
         String[][] a = { { "a", "b" }, { "c", "d" } };
         String[][] b = { { "e", "f" }, { "g", "h" } };
-        String[][] result = Array.concatt(a, b);
+        String[][] result = Array.concat2D(a, b);
 
         assertEquals(2, result.length);
         assertArrayEquals(new String[] { "a", "b", "e", "f" }, result[0]);

@@ -388,7 +388,7 @@ public final class IOUtil {
         Method decodeMethod = null;
 
         try {
-            final Class<?> cls = ClassUtil.forClass("java.lang.StringCoding");
+            final Class<?> cls = ClassUtil.forName("java.lang.StringCoding");
             final Method enMethod = ClassUtil.getDeclaredMethod(cls, "encode", Charset.class, char[].class, int.class, int.class);
             final Method deMethod = ClassUtil.getDeclaredMethod(cls, "decode", Charset.class, byte[].class, int.class, int.class);
 
@@ -774,12 +774,12 @@ public final class IOUtil {
 
     /**
      * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
-     * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath())}.
+     * This is equivalent to calling {@code freeDiskSpaceKB(new File(".").getAbsolutePath())}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceKb();
+     *     long freeSpace = IOUtil.freeDiskSpaceKB();
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space: " + e.getMessage());
@@ -789,7 +789,7 @@ public final class IOUtil {
      * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      */
-    public static long freeDiskSpaceKb() throws UncheckedIOException {
+    public static long freeDiskSpaceKB() throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb();
         } catch (final IOException e) {
@@ -799,13 +799,13 @@ public final class IOUtil {
 
     /**
      * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
-     * This is equivalent to calling {@code freeDiskSpaceKb(new File(".").getAbsolutePath(), timeout)}.
+     * This is equivalent to calling {@code freeDiskSpaceKB(new File(".").getAbsolutePath(), timeout)}.
      * The command to retrieve the disk space will be aborted if it exceeds the specified timeout.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceKb(5000);   // 5-second timeout
+     *     long freeSpace = IOUtil.freeDiskSpaceKB(5000);   // 5-second timeout
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
@@ -816,7 +816,7 @@ public final class IOUtil {
      * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs or the command times out.
      */
-    public static long freeDiskSpaceKb(final long timeout) throws UncheckedIOException {
+    public static long freeDiskSpaceKB(final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(timeout);
         } catch (final IOException e) {
@@ -840,11 +840,11 @@ public final class IOUtil {
      * <pre>{@code
      * try {
      *     // For Windows
-     *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\");
+     *     long freeSpace = IOUtil.freeDiskSpaceKB("C:\\");
      *     System.out.println("Free space on C: " + freeSpace + " KB");
      * 
      *     // For Unix-like systems
-     *     long freeSpaceUnix = IOUtil.freeDiskSpaceKb("/home");
+     *     long freeSpaceUnix = IOUtil.freeDiskSpaceKB("/home");
      *     System.out.println("Free space on /home: " + freeSpaceUnix + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path: " + e.getMessage());
@@ -856,7 +856,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      * @throws IllegalArgumentException if the path is invalid.
      */
-    public static long freeDiskSpaceKb(final String path) throws UncheckedIOException {
+    public static long freeDiskSpaceKB(final String path) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path);
         } catch (final IOException e) {
@@ -878,7 +878,7 @@ public final class IOUtil {
      * <pre>{@code
      * try {
      *     // For Windows, with a 5-second timeout
-     *     long freeSpace = IOUtil.freeDiskSpaceKb("C:\\", 5000);
+     *     long freeSpace = IOUtil.freeDiskSpaceKB("C:\\", 5000);
      *     System.out.println("Free space on C: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path within the timeout: " + e.getMessage());
@@ -891,7 +891,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs or the command times out.
      * @throws IllegalArgumentException if the path is invalid.
      */
-    public static long freeDiskSpaceKb(final String path, final long timeout) throws UncheckedIOException {
+    public static long freeDiskSpaceKB(final String path, final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path, timeout);
         } catch (final IOException e) {
@@ -909,14 +909,14 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = new char[] {'H', 'e', 'l', 'l', 'o'};
-     * byte[] bytes = IOUtil.chars2Bytes(chars);
+     * byte[] bytes = IOUtil.charsToBytes(chars);
      * }</pre>
      *
      * @param chars the character array to convert. May be {@code null} or empty.
      * @return the resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
-    public static byte[] chars2Bytes(final char[] chars) {
-        return chars2Bytes(chars, DEFAULT_CHARSET);
+    public static byte[] charsToBytes(final char[] chars) {
+        return charsToBytes(chars, DEFAULT_CHARSET);
     }
 
     /**
@@ -925,20 +925,20 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = new char[] {'H', 'e', 'l', 'l', 'o'};
-     * byte[] bytes = IOUtil.chars2Bytes(chars, StandardCharsets.UTF_8);
-     * IOUtil.chars2Bytes(null);   // returns empty byte array
+     * byte[] bytes = IOUtil.charsToBytes(chars, StandardCharsets.UTF_8);
+     * IOUtil.charsToBytes(null);   // returns empty byte array
      * }</pre>
      *
      * @param chars the character array to convert. May be {@code null} or empty.
      * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
      * @return the resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
-    public static byte[] chars2Bytes(final char[] chars, final Charset charset) {
+    public static byte[] charsToBytes(final char[] chars, final Charset charset) {
         if (N.isEmpty(chars)) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        return chars2Bytes(chars, 0, chars.length, charset);
+        return charsToBytes(chars, 0, chars.length, charset);
     }
 
     /**
@@ -948,7 +948,7 @@ public final class IOUtil {
      * <pre>{@code
      * char[] chars = new char[] {'H', 'e', 'l', 'l', 'o'};
      * // Convert the sub-array {'e', 'l', 'l'}
-     * byte[] bytes = IOUtil.chars2Bytes(chars, 1, 3, StandardCharsets.UTF_8);
+     * byte[] bytes = IOUtil.charsToBytes(chars, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
      *
      * @param chars the source character array, may be {@code null} or empty.
@@ -958,7 +958,7 @@ public final class IOUtil {
      * @return the resulting byte array, or an empty byte array if {@code charCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code charCount} is out of bounds.
      */
-    public static byte[] chars2Bytes(final char[] chars, final int offset, final int charCount, Charset charset) {
+    public static byte[] charsToBytes(final char[] chars, final int offset, final int charCount, Charset charset) {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(charCount, cs.count);
 
@@ -981,15 +981,15 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello"
-     * char[] chars = IOUtil.bytes2Chars(bytes);
-     * IOUtil.bytes2Chars(null);   // returns empty char array
+     * char[] chars = IOUtil.bytesToChars(bytes);
+     * IOUtil.bytesToChars(null);   // returns empty char array
      * }</pre>
      *
      * @param bytes the byte array to convert. May be {@code null} or empty.
      * @return the resulting character array, or an empty character array if the input is {@code null} or empty.
      */
-    public static char[] bytes2Chars(final byte[] bytes) {
-        return bytes2Chars(bytes, DEFAULT_CHARSET);
+    public static char[] bytesToChars(final byte[] bytes) {
+        return bytesToChars(bytes, DEFAULT_CHARSET);
     }
 
     /**
@@ -998,19 +998,19 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
-     * char[] chars = IOUtil.bytes2Chars(bytes, StandardCharsets.UTF_8);
+     * char[] chars = IOUtil.bytesToChars(bytes, StandardCharsets.UTF_8);
      * }</pre>
      *
      * @param bytes the byte array to convert. May be {@code null} or empty.
      * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return the resulting character array, or an empty character array if the input is {@code null} or empty.
      */
-    public static char[] bytes2Chars(final byte[] bytes, final Charset charset) {
+    public static char[] bytesToChars(final byte[] bytes, final Charset charset) {
         if (N.isEmpty(bytes)) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        return bytes2Chars(bytes, 0, bytes.length, charset);
+        return bytesToChars(bytes, 0, bytes.length, charset);
     }
 
     /**
@@ -1020,7 +1020,7 @@ public final class IOUtil {
      * <pre>{@code
      * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
      * // Convert the sub-array {101, 108, 108}
-     * char[] chars = IOUtil.bytes2Chars(bytes, 1, 3, StandardCharsets.UTF_8);
+     * char[] chars = IOUtil.bytesToChars(bytes, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
      *
      * @param bytes the source byte array, may be {@code null} or empty.
@@ -1030,7 +1030,7 @@ public final class IOUtil {
      * @return the resulting character array, or an empty character array if {@code byteCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} is out of bounds.
      */
-    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int byteCount, Charset charset) {
+    public static char[] bytesToChars(final byte[] bytes, final int offset, final int byteCount, Charset charset) {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(byteCount, cs.count);
 
@@ -1054,7 +1054,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String str = "Hello, World!";
-     * try (InputStream inputStream = IOUtil.string2InputStream(str)) {
+     * try (InputStream inputStream = IOUtil.stringToInputStream(str)) {
      *     // Use the inputStream
      * }
      * }</pre>
@@ -1062,8 +1062,8 @@ public final class IOUtil {
      * @param str the string to convert, must not be {@code null}.
      * @return an {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
      */
-    public static InputStream string2InputStream(final String str) {
-        return string2InputStream(str, DEFAULT_CHARSET);
+    public static InputStream stringToInputStream(final String str) {
+        return stringToInputStream(str, DEFAULT_CHARSET);
     }
 
     /**
@@ -1073,7 +1073,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String str = "Hello, World!";
-     * try (InputStream inputStream = IOUtil.string2InputStream(str, StandardCharsets.UTF_8)) {
+     * try (InputStream inputStream = IOUtil.stringToInputStream(str, StandardCharsets.UTF_8)) {
      *     // Use the inputStream
      * }
      * }</pre>
@@ -1082,10 +1082,10 @@ public final class IOUtil {
      * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
      * @return an {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null}.
      */
-    public static InputStream string2InputStream(final String str, Charset charset) {
+    public static InputStream stringToInputStream(final String str, Charset charset) {
         charset = checkCharset(charset);
 
-        final byte[] bytes = N.isEmpty(str) ? N.EMPTY_BYTE_ARRAY : chars2Bytes(str.toCharArray(), charset);
+        final byte[] bytes = N.isEmpty(str) ? N.EMPTY_BYTE_ARRAY : charsToBytes(str.toCharArray(), charset);
 
         return new ByteArrayInputStream(bytes);
     }
@@ -1097,7 +1097,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String str = "Hello, World!";
-     * try (Reader reader = IOUtil.string2Reader(str)) {
+     * try (Reader reader = IOUtil.stringToReader(str)) {
      *     // Use the reader
      * }
      * }</pre>
@@ -1106,7 +1106,7 @@ public final class IOUtil {
      * @return a {@code Reader} for the given string, or an empty reader if the input is {@code null}.
      * @see StringReader
      */
-    public static Reader string2Reader(final String str) {
+    public static Reader stringToReader(final String str) {
         return new StringReader(Strings.nullToEmpty(str));
     }
 
@@ -1117,7 +1117,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
-     * try (Writer writer = IOUtil.stringBuilder2Writer(sb)) {
+     * try (Writer writer = IOUtil.stringBuilderToWriter(sb)) {
      *     writer.write("Hello");
      * }
      * // sb.toString() will be "Hello"
@@ -1127,7 +1127,7 @@ public final class IOUtil {
      * @return a {@code Writer} that appends to the specified string builder.
      * @throws IllegalArgumentException if the input {@code StringBuilder} is {@code null}.
      */
-    public static Writer stringBuilder2Writer(final StringBuilder sb) throws IllegalArgumentException {
+    public static Writer stringBuilderToWriter(final StringBuilder sb) throws IllegalArgumentException {
         if (sb == null) {
             throw new IllegalArgumentException("The input StringBuilder cannot be null");
         }
@@ -3875,7 +3875,7 @@ public final class IOUtil {
      * @param output the File where the character array's byte array representation is to be written, must not be {@code null}.
      *               If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], Charset)
+     * @see #charsToBytes(char[], Charset)
      */
     public static void write(final char[] chars, final File output) throws IOException {
         if (N.isEmpty(chars)) {
@@ -3901,7 +3901,7 @@ public final class IOUtil {
      * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}.
      *                If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], Charset)
+     * @see #charsToBytes(char[], Charset)
      */
     public static void write(final char[] chars, final Charset charset, final File output) throws IOException {
         if (N.isEmpty(chars)) {
@@ -3928,7 +3928,7 @@ public final class IOUtil {
      * @param output the File where the character array's byte array representation is to be written, must not be {@code null}.
      *               If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final File output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
@@ -3956,7 +3956,7 @@ public final class IOUtil {
      * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}.
      *                If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final File output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
@@ -3964,7 +3964,7 @@ public final class IOUtil {
             return;
         }
 
-        write(chars2Bytes(chars, offset, count, charset), output);
+        write(charsToBytes(chars, offset, count, charset), output);
     }
 
     /**
@@ -4029,7 +4029,7 @@ public final class IOUtil {
      * @param count  the number of characters to be written from the character array.
      * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final OutputStream output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
@@ -4055,7 +4055,7 @@ public final class IOUtil {
      * @param charset the Charset to be used to encode the character array into a sequence of bytes.
      * @param output  the OutputStream where the character array's byte array representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final OutputStream output) throws IOException {
         if (count == 0 && N.len(chars) >= offset) {
@@ -4079,7 +4079,7 @@ public final class IOUtil {
      * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}.
      * @param flush  if {@code true}, the output stream is flushed after writing the character array.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], Charset)
+     * @see #charsToBytes(char[], Charset)
      */
     public static void write(final char[] chars, final OutputStream output, final boolean flush) throws IOException {
         if (N.isEmpty(chars)) {
@@ -4105,7 +4105,7 @@ public final class IOUtil {
      * @param output the OutputStream where the character array's byte array representation is to be written, must not be {@code null}.
      * @param flush  if {@code true}, the output stream is flushed after writing the character array.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final OutputStream output, final boolean flush) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -4135,7 +4135,7 @@ public final class IOUtil {
      * @param output  the OutputStream where the character array's byte array representation is to be written, must not be {@code null}.
      * @param flush   if {@code true}, the output stream is flushed after writing the character array.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final OutputStream output, final boolean flush)
             throws IOException {
@@ -4146,7 +4146,7 @@ public final class IOUtil {
             return;
         }
 
-        write(chars2Bytes(chars, offset, count, charset), output, flush);
+        write(charsToBytes(chars, offset, count, charset), output, flush);
     }
 
     /**
@@ -5056,7 +5056,7 @@ public final class IOUtil {
      * @param targetFile the file to which the character array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], Charset)
+     * @see #charsToBytes(char[], Charset)
      */
     public static void append(final char[] chars, final File targetFile) throws IOException {
         if (N.isEmpty(chars)) {
@@ -5081,7 +5081,7 @@ public final class IOUtil {
      * @param targetFile the file to which the character array will be appended.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], Charset)
+     * @see #charsToBytes(char[], Charset)
      */
     public static void append(final char[] chars, final Charset charset, final File targetFile) throws IOException {
         if (N.isEmpty(chars)) {
@@ -5108,7 +5108,7 @@ public final class IOUtil {
      * @param targetFile the file to which the character array will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void append(final char[] chars, final int offset, final int count, final File targetFile) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -5133,7 +5133,7 @@ public final class IOUtil {
      * @param targetFile the file to which the character array will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
-     * @see #chars2Bytes(char[], int, int, Charset)
+     * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void append(final char[] chars, final int offset, final int count, final Charset charset, final File targetFile) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -5144,7 +5144,7 @@ public final class IOUtil {
             return;
         }
 
-        append(chars2Bytes(chars, offset, count, charset), targetFile);
+        append(charsToBytes(chars, offset, count, charset), targetFile);
     }
 
     /**
@@ -7369,7 +7369,7 @@ public final class IOUtil {
         }
 
         if (srcFile.length() != destFile.length()) {
-            deleteAllIfExists(destFile);
+            deleteRecursivelyIfExists(destFile);
             throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
         }
 
@@ -7842,6 +7842,43 @@ public final class IOUtil {
     }
 
     /**
+     * Deletes the specified file or directory quietly, suppressing any exceptions that may occur.
+     * <p>
+     * This method attempts to delete the specified file or directory by calling {@link #deleteIfExists(File)}.
+     * If any exception occurs during the deletion process, it is caught and logged, and the method
+     * returns {@code false}. This makes it safe to use in situations where you want to attempt
+     * deletion but don't want to handle exceptions explicitly.
+     * <p>
+     * Unlike {@link #deleteIfExists(File)}, this method will never throw an exception.
+     * It only deletes the file itself, not its contents if it's a directory with files.
+     * For recursive deletion, use {@link #deleteRecursivelyIfExists(File)} instead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("./temp-file.txt");
+     * boolean deleted = IOUtil.deleteQuietly(file);
+     * // No exception handling needed - method handles all errors internally
+     * System.out.println("File deleted: " + deleted);
+     * }</pre>
+     *
+     * @param file the file or directory to delete. Can be {@code null}.
+     * @return {@code true} if the file was deleted successfully; {@code false} if the file.
+     *         is {@code null}, does not exist, could not be deleted, or if an exception occurred.
+     * @see File#delete()
+     * @see Files#deleteIfExists(Path)
+     * @see #deleteIfExists(File)
+     * @see #deleteRecursivelyIfExists(File)
+     */
+    public static boolean deleteQuietly(final File file) {
+        try {
+            return deleteIfExists(file);
+        } catch (final Throwable e) {
+            logger.error("Failed to delete file: " + file, e);
+            return false;
+        }
+    }
+
+    /**
      * Deletes the specified file if it exists by calling {@link File#delete()}.
      * <p>
      * This method attempts to delete the specified file or directory. if the file is {@code null}
@@ -7850,7 +7887,7 @@ public final class IOUtil {
      * directories that contain files or subdirectories.
      * <p>
      * This is a simple deletion method that only removes the file itself. For recursive
-     * deletion of directories and their contents, use {@link #deleteAllIfExists(File)} instead.
+     * deletion of directories and their contents, use {@link #deleteRecursivelyIfExists(File)} instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7869,7 +7906,7 @@ public final class IOUtil {
      * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
-     * @see #deleteAllIfExists(File)
+     * @see #deleteRecursivelyIfExists(File)
      * @see #deleteQuietly(File)
      */
     public static boolean deleteIfExists(final File file) {
@@ -7878,43 +7915,6 @@ public final class IOUtil {
         }
 
         return file.delete(); //NOSONAR
-    }
-
-    /**
-     * Deletes the specified file or directory quietly, suppressing any exceptions that may occur.
-     * <p>
-     * This method attempts to delete the specified file or directory by calling {@link #deleteIfExists(File)}.
-     * If any exception occurs during the deletion process, it is caught and logged, and the method
-     * returns {@code false}. This makes it safe to use in situations where you want to attempt
-     * deletion but don't want to handle exceptions explicitly.
-     * <p>
-     * Unlike {@link #deleteIfExists(File)}, this method will never throw an exception.
-     * It only deletes the file itself, not its contents if it's a directory with files.
-     * For recursive deletion, use {@link #deleteAllIfExists(File)} instead.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * File file = new File("./temp-file.txt");
-     * boolean deleted = IOUtil.deleteQuietly(file);
-     * // No exception handling needed - method handles all errors internally
-     * System.out.println("File deleted: " + deleted);
-     * }</pre>
-     *
-     * @param file the file or directory to delete. Can be {@code null}.
-     * @return {@code true} if the file was deleted successfully; {@code false} if the file.
-     *         is {@code null}, does not exist, could not be deleted, or if an exception occurred.
-     * @see File#delete()
-     * @see Files#deleteIfExists(Path)
-     * @see #deleteIfExists(File)
-     * @see #deleteAllIfExists(File)
-     */
-    public static boolean deleteQuietly(final File file) {
-        try {
-            return deleteIfExists(file);
-        } catch (final Throwable e) {
-            logger.error("Failed to delete file: " + file, e);
-            return false;
-        }
     }
 
     /**
@@ -7930,7 +7930,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File directory = new File("./temp-folder");
-     * boolean deleted = IOUtil.deleteAllIfExists(directory);
+     * boolean deleted = IOUtil.deleteRecursivelyIfExists(directory);
      * if (deleted) {
      *     System.out.println("File/directory and all contents deleted successfully.");
      * } else {
@@ -7947,7 +7947,7 @@ public final class IOUtil {
      * @see #deleteIfExists(File)
      * @see #deleteFilesFromDirectory(File)
      */
-    public static boolean deleteAllIfExists(final File file) {
+    public static boolean deleteRecursivelyIfExists(final File file) {
         if ((file == null) || !file.exists()) {
             return false;
         }
@@ -7966,7 +7966,7 @@ public final class IOUtil {
                             return false;
                         }
                     } else {
-                        if (!deleteAllIfExists(subFile)) {
+                        if (!deleteRecursivelyIfExists(subFile)) {
                             return false;
                         }
                     }
@@ -8006,7 +8006,7 @@ public final class IOUtil {
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      * @see #deleteFilesFromDirectory(File, Throwables.BiPredicate)
-     * @see #deleteAllIfExists(File)
+     * @see #deleteRecursivelyIfExists(File)
      */
     public static boolean deleteFilesFromDirectory(final File dir) {
         return deleteFilesFromDirectory(dir, BiPredicates.alwaysTrue());
@@ -8047,7 +8047,7 @@ public final class IOUtil {
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      * @see #deleteFilesFromDirectory(File)
-     * @see #deleteAllIfExists(File)
+     * @see #deleteRecursivelyIfExists(File)
      */
     public static <E extends Exception> boolean deleteFilesFromDirectory(final File dir, final Throwables.BiPredicate<? super File, ? super File, E> filter)
             throws E {
@@ -8074,7 +8074,7 @@ public final class IOUtil {
                         return false;
                     }
                 } else {
-                    if (!deleteAllIfExists(subFile)) {
+                    if (!deleteRecursivelyIfExists(subFile)) {
                         return false;
                     }
                 }
@@ -8114,7 +8114,7 @@ public final class IOUtil {
      *         {@code false} if the directory does not exist or is actually a file, 
      *         or some files could not be deleted or if the operation failed.
      * @see #deleteFilesFromDirectory(File)
-     * @see #deleteAllIfExists(File)
+     * @see #deleteRecursivelyIfExists(File)
      * @see File#delete()
      */
     public static boolean cleanDirectory(final File dir) {

@@ -62,8 +62,8 @@ import com.landawn.abacus.util.N;
  * at any level of depth.</p>
  *
  * @param <C> the concrete configuration type for method chaining
- * @see JSONDeserializationConfig
- * @see XMLDeserializationConfig
+ * @see JsonDeserializationConfig
+ * @see XmlDeserializationConfig
  */
 public abstract class DeserializationConfig<C extends DeserializationConfig<C>> extends ParserConfig<C> {
 

@@ -149,16 +149,16 @@ public class RangeTest extends AbstractTest {
     @Test
     public void testElementCompareTo() {
         try {
-            intRange.compareTo(null);
+            intRange.positionOf(null);
             fail("NullPointerException should have been thrown");
         } catch (final IllegalArgumentException npe) {
         }
 
-        assertEquals(1, intRange.compareTo(5));
-        assertEquals(0, intRange.compareTo(10));
-        assertEquals(0, intRange.compareTo(15));
-        assertEquals(0, intRange.compareTo(20));
-        assertEquals(-1, intRange.compareTo(25));
+        assertEquals(1, intRange.positionOf(5));
+        assertEquals(0, intRange.positionOf(10));
+        assertEquals(0, intRange.positionOf(15));
+        assertEquals(0, intRange.positionOf(20));
+        assertEquals(-1, intRange.positionOf(25));
     }
 
     @Test

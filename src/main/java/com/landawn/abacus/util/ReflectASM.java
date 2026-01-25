@@ -126,7 +126,7 @@ final class ReflectASM<T> {
      * @throws RuntimeException if the class cannot be found or loaded
      */
     public static <T> ReflectASM<T> on(final String clsName) {
-        return on(ClassUtil.forClass(clsName));
+        return on(ClassUtil.forName(clsName));
     }
 
     /**

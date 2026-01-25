@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
@@ -240,7 +240,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OffsetDateTime x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

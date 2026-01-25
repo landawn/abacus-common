@@ -206,62 +206,62 @@ public class Objectory100Test extends TestBase {
     }
 
     @Test
-    public void testCreateBufferedXMLWriter() {
-        BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
+    public void testCreateBufferedXmlWriter() {
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedXMLWriterWithOutputStream() {
+    public void testCreateBufferedXmlWriterWithOutputStream() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(os);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(os);
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedXMLWriterWithWriter() {
+    public void testCreateBufferedXmlWriterWithWriter() {
         StringWriter writer = new StringWriter();
-        BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(writer);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedJSONWriter() {
-        BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+    public void testCreateBufferedJsonWriter() {
+        BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedJSONWriterWithOutputStream() {
+    public void testCreateBufferedJsonWriterWithOutputStream() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        BufferedJSONWriter bw = Objectory.createBufferedJSONWriter(os);
+        BufferedJsonWriter bw = Objectory.createBufferedJsonWriter(os);
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedJSONWriterWithWriter() {
+    public void testCreateBufferedJsonWriterWithWriter() {
         StringWriter writer = new StringWriter();
-        BufferedJSONWriter bw = Objectory.createBufferedJSONWriter(writer);
+        BufferedJsonWriter bw = Objectory.createBufferedJsonWriter(writer);
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedCSVWriter() {
-        BufferedCSVWriter bw = Objectory.createBufferedCSVWriter();
+    public void testCreateBufferedCsvWriter() {
+        BufferedCsvWriter bw = Objectory.createBufferedCsvWriter();
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedCSVWriterWithOutputStream() {
+    public void testCreateBufferedCsvWriterWithOutputStream() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(os);
+        BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(os);
         Assertions.assertNotNull(bw);
     }
 
     @Test
-    public void testCreateBufferedCSVWriterWithWriter() {
+    public void testCreateBufferedCsvWriterWithWriter() {
         StringWriter writer = new StringWriter();
-        BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(writer);
+        BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(writer);
         Assertions.assertNotNull(bw);
     }
 
@@ -422,20 +422,20 @@ public class Objectory100Test extends TestBase {
     }
 
     @Test
-    public void testRecycleBufferedXMLWriter() {
-        BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
+    public void testRecycleBufferedXmlWriter() {
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
         Objectory.recycle(bw);
     }
 
     @Test
-    public void testRecycleBufferedJSONWriter() {
-        BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
+    public void testRecycleBufferedJsonWriter() {
+        BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
         Objectory.recycle(bw);
     }
 
     @Test
-    public void testRecycleBufferedCSVWriter() {
-        BufferedCSVWriter bw = Objectory.createBufferedCSVWriter();
+    public void testRecycleBufferedCsvWriter() {
+        BufferedCsvWriter bw = Objectory.createBufferedCsvWriter();
         Objectory.recycle(bw);
     }
 
@@ -447,19 +447,19 @@ public class Objectory100Test extends TestBase {
 
     @Test
     public void testRecycleBufferedWriterJSON() {
-        BufferedJSONWriter writer = Objectory.createBufferedJSONWriter();
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
     }
 
     @Test
     public void testRecycleBufferedWriterXML() {
-        BufferedXMLWriter writer = Objectory.createBufferedXMLWriter();
+        BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
     }
 
     @Test
     public void testRecycleBufferedWriterCSV() {
-        BufferedCSVWriter writer = Objectory.createBufferedCSVWriter();
+        BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
         Objectory.recycle((java.io.BufferedWriter) writer);
     }
 

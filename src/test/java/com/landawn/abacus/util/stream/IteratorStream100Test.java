@@ -409,16 +409,16 @@ public class IteratorStream100Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
+    public void testsliding() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        List<List<Integer>> result = stream.slide(3, 1).toList();
+        List<List<Integer>> result = stream.sliding(3, 1).toList();
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(1, 2, 3), result.get(0));
         assertEquals(Arrays.asList(2, 3, 4), result.get(1));
         assertEquals(Arrays.asList(3, 4, 5), result.get(2));
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
-        List<List<Integer>> result2 = stream2.slide(2, 3).toList();
+        List<List<Integer>> result2 = stream2.sliding(2, 3).toList();
         assertEquals(2, result2.size());
         assertEquals(Arrays.asList(1, 2), result2.get(0));
         assertEquals(Arrays.asList(4, 5), result2.get(1));
@@ -427,7 +427,7 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testSlidingWithCollector() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        List<Integer> result = stream.slide(3, 1, Collectors.summingInt(Integer::intValue)).toList();
+        List<Integer> result = stream.sliding(3, 1, Collectors.summingInt(Integer::intValue)).toList();
         assertEquals(Arrays.asList(6, 9, 12), result);
     }
 

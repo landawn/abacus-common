@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
@@ -295,7 +295,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableBoolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Strings;
@@ -186,12 +186,12 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(100L, 200L, 300L);
-     * BufferedJSONWriter writer = new BufferedJSONWriter();
-     * JSONXMLSerializationConfig<?> config = null;
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * JsonXmlSerializationConfig<?> config = null;
      * type.writeCharacter(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * BufferedJSONWriter nullWriter = new BufferedJSONWriter();
+     * BufferedJsonWriter nullWriter = new BufferedJsonWriter();
      * type.writeCharacter(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>
@@ -202,7 +202,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final LongList x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final LongList x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

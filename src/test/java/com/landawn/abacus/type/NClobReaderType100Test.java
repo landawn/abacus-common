@@ -130,7 +130,7 @@ public class NClobReaderType100Test extends TestBase {
 
     @Test
     public void testClob2ReaderWithNull() throws SQLException {
-        Reader result = NClobReaderType.clob2Reader(null);
+        Reader result = NClobReaderType.clobToReader(null);
         Assertions.assertNull(result);
     }
 
@@ -139,7 +139,7 @@ public class NClobReaderType100Test extends TestBase {
         Reader expectedReader = new StringReader("test content");
         Mockito.when(mockNClob.getCharacterStream()).thenReturn(expectedReader);
 
-        Reader result = NClobReaderType.clob2Reader(mockNClob);
+        Reader result = NClobReaderType.clobToReader(mockNClob);
         Assertions.assertSame(expectedReader, result);
         // Mockito.verify(mockNClob).free();
     }

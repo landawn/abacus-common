@@ -936,7 +936,7 @@ public class CommonUtil103Test extends TestBase {
 
         ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap(source);
         assertNotNull(multimap);
-        assertEquals(2, multimap.size());
+        assertEquals(2, multimap.totalValueCount());
     }
 
     @Test
@@ -981,7 +981,7 @@ public class CommonUtil103Test extends TestBase {
 
         ListMultimap<String, Integer> multimap = CommonUtil.newLinkedListMultimap(source);
         assertNotNull(multimap);
-        assertEquals(2, multimap.size());
+        assertEquals(2, multimap.totalValueCount());
     }
 
     @Test
@@ -1000,7 +1000,7 @@ public class CommonUtil103Test extends TestBase {
 
         ListMultimap<String, Integer> multimap = CommonUtil.newSortedListMultimap(source);
         assertNotNull(multimap);
-        assertEquals(3, multimap.size());
+        assertEquals(3, multimap.totalValueCount());
 
         Iterator<String> iter = multimap.keySet().iterator();
         assertEquals("a", iter.next());
@@ -1051,7 +1051,7 @@ public class CommonUtil103Test extends TestBase {
 
         SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(source);
         assertNotNull(multimap);
-        assertEquals(2, multimap.size());
+        assertEquals(2, multimap.totalValueCount());
     }
 
     @Test
@@ -1096,7 +1096,7 @@ public class CommonUtil103Test extends TestBase {
 
         SetMultimap<String, Integer> multimap = CommonUtil.newLinkedSetMultimap(source);
         assertNotNull(multimap);
-        assertEquals(2, multimap.size());
+        assertEquals(2, multimap.totalValueCount());
     }
 
     @Test
@@ -1115,7 +1115,7 @@ public class CommonUtil103Test extends TestBase {
 
         SetMultimap<String, Integer> multimap = CommonUtil.newSortedSetMultimap(source);
         assertNotNull(multimap);
-        assertEquals(3, multimap.size());
+        assertEquals(3, multimap.totalValueCount());
 
         Iterator<String> iter = multimap.keySet().iterator();
         assertEquals("a", iter.next());
@@ -1140,7 +1140,7 @@ public class CommonUtil103Test extends TestBase {
         assertTrue(ds.isEmpty());
         assertEquals(0, ds.size());
         assertEquals(3, ds.columnCount());
-        assertEquals(columnNames, ds.columnNameList());
+        assertEquals(columnNames, ds.columnNames());
     }
 
     @Test
@@ -1173,8 +1173,8 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
-        assertTrue(ds.columnNameList().contains("name"));
-        assertTrue(ds.columnNameList().contains("age"));
+        assertTrue(ds.columnNames().contains("name"));
+        assertTrue(ds.columnNames().contains("age"));
     }
 
     @Test
@@ -1199,7 +1199,7 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
-        assertEquals(columnNames, ds.columnNameList());
+        assertEquals(columnNames, ds.columnNames());
     }
 
     @Test
@@ -1223,7 +1223,7 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
-        assertEquals(Arrays.asList("Name", "Age"), ds.columnNameList());
+        assertEquals(Arrays.asList("Name", "Age"), ds.columnNames());
     }
 
     @Test
@@ -1236,7 +1236,7 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(2, ds.size());
         assertEquals(2, ds.columnCount());
-        assertEquals(Arrays.asList("name", "age"), ds.columnNameList());
+        assertEquals(Arrays.asList("name", "age"), ds.columnNames());
     }
 
     @Test
@@ -1246,7 +1246,7 @@ public class CommonUtil103Test extends TestBase {
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(1, ds.columnCount());
-        assertEquals("Letter", ds.columnNameList().get(0));
+        assertEquals("Letter", ds.columnNames().get(0));
     }
 
     @Test

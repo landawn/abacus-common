@@ -13,7 +13,7 @@ public class CodeGenerationUtilTest {
     public void test_generatePropNameTableClasses() {
         N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/resources"));
 
-        final Collection<Class<?>> classes = N.concat(ClassUtil.getClassesByPackage(Account.class.getPackageName(), false, false));
+        final Collection<Class<?>> classes = N.concat(ClassUtil.findClassesInPackage(Account.class.getPackageName(), false, false));
 
         final PropNameTableCodeConfig codeConfig = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
@@ -22,9 +22,9 @@ public class CodeGenerationUtilTest {
                 .srcDir("./src/test/resources")
                 .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName)
                 .generateClassPropNameList(true)
-                .generateLowerCaseWithUnderscore(true)
-                .generateUpperCaseWithUnderscore(true)
-                .classNameForUpperCaseWithUnderscore("sau")
+                .generateSnakeCase(true)
+                .generateScreamingSnakeCase(true)
+                .classNameForScreamingSnakeCase("sau")
                 .generateFunctionPropName(true)
                 .functionClassName("f")
                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))

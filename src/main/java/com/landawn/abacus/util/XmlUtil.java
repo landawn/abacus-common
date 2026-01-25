@@ -65,7 +65,7 @@ import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.parser.XMLConstants;
+import com.landawn.abacus.parser.XmlConstants;
 import com.landawn.abacus.type.Type;
 
 import jakarta.xml.bind.JAXBContext;
@@ -198,13 +198,13 @@ public final class XmlUtil {
     private static final Map<String, NodeType> nodeTypePool = new HashMap<>();
 
     static {
-        nodeTypePool.put(XMLConstants.ARRAY, NodeType.ARRAY);
-        nodeTypePool.put(XMLConstants.LIST, NodeType.COLLECTION);
-        nodeTypePool.put(XMLConstants.E, NodeType.ELEMENT);
-        nodeTypePool.put(XMLConstants.MAP, NodeType.MAP);
-        nodeTypePool.put(XMLConstants.ENTRY, NodeType.ENTRY);
-        nodeTypePool.put(XMLConstants.KEY, NodeType.KEY);
-        nodeTypePool.put(XMLConstants.VALUE, NodeType.VALUE);
+        nodeTypePool.put(XmlConstants.ARRAY, NodeType.ARRAY);
+        nodeTypePool.put(XmlConstants.LIST, NodeType.COLLECTION);
+        nodeTypePool.put(XmlConstants.E, NodeType.ELEMENT);
+        nodeTypePool.put(XmlConstants.MAP, NodeType.MAP);
+        nodeTypePool.put(XmlConstants.ENTRY, NodeType.ENTRY);
+        nodeTypePool.put(XmlConstants.KEY, NodeType.KEY);
+        nodeTypePool.put(XmlConstants.VALUE, NodeType.VALUE);
     }
 
     private XmlUtil() {
@@ -1405,7 +1405,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output) throws IOException {
-        writeCharacters(cbuf, off, len, IOUtil.stringBuilder2Writer(output));
+        writeCharacters(cbuf, off, len, IOUtil.stringBuilderToWriter(output));
     }
 
     /**
@@ -1448,7 +1448,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output) throws IOException {
-        writeCharacters(str, off, len, IOUtil.stringBuilder2Writer(output));
+        writeCharacters(str, off, len, IOUtil.stringBuilderToWriter(output));
     }
 
     /**
@@ -1474,7 +1474,7 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a character array to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Uses a BufferedXMLWriter internally for efficient writing.
+     * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1492,7 +1492,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(cbuf, off, len);
@@ -1528,7 +1528,7 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a string to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Uses a BufferedXMLWriter internally for efficient writing.
+     * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1546,7 +1546,7 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final String str, final int off, final int len, final OutputStream output) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(str, off, len);
@@ -1580,7 +1580,7 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a character array to the given Writer.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Uses a BufferedXMLWriter for efficient writing if the output is not already a BufferedXMLWriter.
+     * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1597,8 +1597,8 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output) throws IOException {
-        final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
+        final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(cbuf, off, len);
@@ -1635,7 +1635,7 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given Writer.
-     * Uses a BufferedXMLWriter for efficient writing if the output is not already a BufferedXMLWriter.
+     * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1651,8 +1651,8 @@ public final class XmlUtil {
      * @throws IOException If an I/O error occurs
      */
     public static void writeCharacters(final String str, final int off, final int len, final Writer output) throws IOException {
-        final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
+        final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
+        final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(str, off, len);
@@ -1678,7 +1678,7 @@ public final class XmlUtil {
         }
 
         try {
-            return ClassUtil.forClass(typeAttr);
+            return ClassUtil.forName(typeAttr);
         } catch (final RuntimeException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to load type attribute class: " + typeAttr, e);
@@ -1699,7 +1699,7 @@ public final class XmlUtil {
      *
      * if (type != null) { return type.getTypeClass(); }
      *
-     * try { return N.forClass(typeAttr); } catch (RuntimeException e) { return null; } }
+     * try { return N.forName(typeAttr); } catch (RuntimeException e) { return null; } }
      */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if ((typeClass == null) || ((targetClass != null) && !targetClass.isAssignableFrom(typeClass))) {

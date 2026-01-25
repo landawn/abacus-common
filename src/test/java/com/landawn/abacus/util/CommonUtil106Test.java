@@ -51,15 +51,15 @@ public class CommonUtil106Test extends TestBase {
         boolean[] c = { true, true, false, false };
         boolean[] d = { true, false, true };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((boolean[]) null, (boolean[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new boolean[0], new boolean[0]));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, null));
-        Assertions.assertFalse(CommonUtil.haveSameElements(null, a));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((boolean[]) null, (boolean[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new boolean[0], new boolean[0]));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, null));
+        Assertions.assertFalse(CommonUtil.containsSameElements(null, a));
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, a));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, a));
     }
 
     @Test
@@ -69,11 +69,11 @@ public class CommonUtil106Test extends TestBase {
         char[] c = { 'a', 'b', 'b', 'c' };
         char[] d = { 'a', 'b', 'c' };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((char[]) null, (char[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new char[0], new char[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((char[]) null, (char[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new char[0], new char[0]));
     }
 
     @Test
@@ -83,11 +83,11 @@ public class CommonUtil106Test extends TestBase {
         byte[] c = { 1, 2, 2, 3 };
         byte[] d = { 1, 2, 3 };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((byte[]) null, (byte[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new byte[0], new byte[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((byte[]) null, (byte[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new byte[0], new byte[0]));
     }
 
     @Test
@@ -97,11 +97,11 @@ public class CommonUtil106Test extends TestBase {
         short[] c = { 1, 2, 2, 3 };
         short[] d = { 1, 2, 3 };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((short[]) null, (short[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new short[0], new short[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((short[]) null, (short[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new short[0], new short[0]));
     }
 
     @Test
@@ -112,12 +112,12 @@ public class CommonUtil106Test extends TestBase {
         int[] d = { 1, 2, 3 };
         int[] e = { 1, 2, 2, 2 };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, e));
-        Assertions.assertTrue(CommonUtil.haveSameElements((int[]) null, (int[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new int[0], new int[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, e));
+        Assertions.assertTrue(CommonUtil.containsSameElements((int[]) null, (int[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new int[0], new int[0]));
     }
 
     @Test
@@ -127,11 +127,11 @@ public class CommonUtil106Test extends TestBase {
         long[] c = { 1L, 2L, 2L, 3L };
         long[] d = { 1L, 2L, 3L };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((long[]) null, (long[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new long[0], new long[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((long[]) null, (long[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new long[0], new long[0]));
     }
 
     @Test
@@ -141,11 +141,11 @@ public class CommonUtil106Test extends TestBase {
         float[] c = { 1.0f, 2.0f, 2.0f, 3.0f };
         float[] d = { 1.0f, 2.0f, 3.0f };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((float[]) null, (float[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new float[0], new float[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((float[]) null, (float[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new float[0], new float[0]));
     }
 
     @Test
@@ -155,11 +155,11 @@ public class CommonUtil106Test extends TestBase {
         double[] c = { 1.0, 2.0, 2.0, 3.0 };
         double[] d = { 1.0, 2.0, 3.0 };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((double[]) null, (double[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new double[0], new double[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((double[]) null, (double[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new double[0], new double[0]));
     }
 
     @Test
@@ -169,15 +169,15 @@ public class CommonUtil106Test extends TestBase {
         String[] c = { "a", "b", "b", "c" };
         String[] d = { "a", "b", "c" };
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((Object[]) null, (Object[]) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new Object[0], new Object[0]));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((Object[]) null, (Object[]) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new Object[0], new Object[0]));
 
         String[] withNulls1 = { "a", null, "b", null };
         String[] withNulls2 = { null, "a", null, "b" };
-        Assertions.assertTrue(CommonUtil.haveSameElements(withNulls1, withNulls2));
+        Assertions.assertTrue(CommonUtil.containsSameElements(withNulls1, withNulls2));
     }
 
     @Test
@@ -187,13 +187,13 @@ public class CommonUtil106Test extends TestBase {
         List<String> c = Arrays.asList("a", "b", "b", "c");
         List<String> d = Arrays.asList("a", "b", "c");
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, b));
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, c));
-        Assertions.assertFalse(CommonUtil.haveSameElements(a, d));
-        Assertions.assertTrue(CommonUtil.haveSameElements((Collection<?>) null, (Collection<?>) null));
-        Assertions.assertTrue(CommonUtil.haveSameElements(new ArrayList<>(), new ArrayList<>()));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, b));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, c));
+        Assertions.assertFalse(CommonUtil.containsSameElements(a, d));
+        Assertions.assertTrue(CommonUtil.containsSameElements((Collection<?>) null, (Collection<?>) null));
+        Assertions.assertTrue(CommonUtil.containsSameElements(new ArrayList<>(), new ArrayList<>()));
 
-        Assertions.assertTrue(CommonUtil.haveSameElements(a, a));
+        Assertions.assertTrue(CommonUtil.containsSameElements(a, a));
     }
 
     @Test

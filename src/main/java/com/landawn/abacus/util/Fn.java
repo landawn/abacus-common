@@ -352,7 +352,7 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
 public final class Fn {
 
-    static final Object NONE = ClassUtil.createNullMask();
+    static final Object NONE = ClassUtil.newNullSentinel();
 
     //    private static final Timer timer = new Timer("Fn-Timer", true);
     //
@@ -416,11 +416,11 @@ public final class Fn {
 
     private static final UnaryOperator<String> TO_LOWER_CASE = Strings::toLowerCase;
 
-    private static final UnaryOperator<String> TO_LOWER_CASE_WITH_UNDERSCORE = Strings::toLowerCaseWithUnderscore;
+    private static final UnaryOperator<String> TO_SNAKE_CASE = Strings::toSnakeCase;
 
     private static final UnaryOperator<String> TO_UPPER_CASE = Strings::toUpperCase;
 
-    private static final UnaryOperator<String> TO_UPPER_CASE_WITH_UNDERSCORE = Strings::toUpperCaseWithUnderscore;
+    private static final UnaryOperator<String> TO_SCREAMING_SNAKE_CASE = Strings::toScreamingSnakeCase;
 
     private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = e -> ExceptionUtil.toRuntimeException(e, true);
 
@@ -1341,10 +1341,10 @@ public final class Fn {
      * Returns a UnaryOperator that converts strings to lower case with underscores.
      *
      * @return a UnaryOperator that converts strings to lower case with underscores
-     * @see Strings#toLowerCaseWithUnderscore(String)
+     * @see Strings#toSnakeCase(String)
      */
-    public static UnaryOperator<String> toLowerCaseWithUnderscore() {
-        return TO_LOWER_CASE_WITH_UNDERSCORE;
+    public static UnaryOperator<String> toSnakeCase() {
+        return TO_SNAKE_CASE;
     }
 
     /**
@@ -1361,10 +1361,10 @@ public final class Fn {
      * Returns a UnaryOperator that converts strings to upper case with underscores.
      *
      * @return a UnaryOperator that converts strings to upper case with underscores
-     * @see Strings#toUpperCaseWithUnderscore(String)
+     * @see Strings#toScreamingSnakeCase(String)
      */
-    public static UnaryOperator<String> toUpperCaseWithUnderscore() {
-        return TO_UPPER_CASE_WITH_UNDERSCORE;
+    public static UnaryOperator<String> toScreamingSnakeCase() {
+        return TO_SCREAMING_SNAKE_CASE;
     }
 
     /**

@@ -45,7 +45,7 @@ import static com.landawn.abacus.util.Strings.substringBeforeIgnoreCase;
 import static com.landawn.abacus.util.Strings.substringBeforeLast;
 import static com.landawn.abacus.util.Strings.substringBeforeLastIgnoreCase;
 import static com.landawn.abacus.util.Strings.substringBetween;
-import static com.landawn.abacus.util.Strings.substringBetweenIgnoreCaes;
+import static com.landawn.abacus.util.Strings.substringBetweenIgnoreCase;
 import static com.landawn.abacus.util.Strings.substringIndicesBetween;
 import static com.landawn.abacus.util.Strings.substringsBetween;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -406,11 +406,11 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testSubstringBetweenIgnoreCase() {
-        assertEquals("B", substringBetweenIgnoreCaes("aBc", "A", "C"));
-        assertEquals("tagged", substringBetweenIgnoreCaes("<TAG>tagged</TAG>", "<tag>", "</tag>"));
-        assertEquals("ABC", substringBetweenIgnoreCaes("xABCx", "X"));
-        assertNull(substringBetweenIgnoreCaes("abc", "x", "c"));
-        assertNull(substringBetweenIgnoreCaes(null, "a", "c"));
+        assertEquals("B", substringBetweenIgnoreCase("aBc", "A", "C"));
+        assertEquals("tagged", substringBetweenIgnoreCase("<TAG>tagged</TAG>", "<tag>", "</tag>"));
+        assertEquals("ABC", substringBetweenIgnoreCase("xABCx", "X"));
+        assertNull(substringBetweenIgnoreCase("abc", "x", "c"));
+        assertNull(substringBetweenIgnoreCase(null, "a", "c"));
     }
 
     @Test

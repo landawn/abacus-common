@@ -98,14 +98,14 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
-    public void test_xml2Java() throws Exception {
+    public void test_xmlToJava() throws Exception {
         N.println(int.class);
 
         File file = new File("./src/test/resources/myProperties.xml");
         final String srcPath = "./src/test/java";
         final String packageName = "com.landawn.abacus.properties";
         final String className = "MyProperties";
-        PropertiesUtil.xml2Java(file, srcPath, packageName, className, false);
+        PropertiesUtil.xmlToJava(file, srcPath, packageName, className, false);
         final MyProperties myProperties = PropertiesUtil.loadFromXml(file, MyProperties.class);
 
         N.println(myProperties);

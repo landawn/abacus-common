@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -43,7 +43,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final Type<?>[] parameterTypes;
 
-    private final JSONDeserializationConfig jdc;
+    private final JsonDeserializationConfig jdc;
 
     MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
@@ -55,7 +55,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         boolean isSpringMultiValueMap = false;
 
         try {
-            isSpringMultiValueMap = ClassUtil.forClass("org.springframework.util.MultiValueMap").isAssignableFrom(typeClass);
+            isSpringMultiValueMap = ClassUtil.forName("org.springframework.util.MultiValueMap").isAssignableFrom(typeClass);
         } catch (final Throwable e) {
             // ignore
         }

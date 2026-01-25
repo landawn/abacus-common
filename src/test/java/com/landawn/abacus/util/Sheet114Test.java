@@ -46,8 +46,8 @@ public class Sheet114Test extends TestBase {
     public void testDefaultConstructor() {
         Sheet<String, String, Integer> s = new Sheet<>();
         assertNotNull(s);
-        assertEquals(0, s.rowLength());
-        assertEquals(0, s.columnLength());
+        assertEquals(0, s.rowCount());
+        assertEquals(0, s.columnCount());
         assertTrue(s.isEmpty());
     }
 
@@ -55,8 +55,8 @@ public class Sheet114Test extends TestBase {
     public void testConstructorWithKeySets() {
         Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertFalse(s.isEmpty());
         assertNull(s.get("row1", "col1"));
     }
@@ -97,8 +97,8 @@ public class Sheet114Test extends TestBase {
     public void testConstructorWithData() {
         Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys, sampleData);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertFalse(s.isEmpty());
         assertEquals(Integer.valueOf(1), s.get("row1", "col1"));
         assertEquals(Integer.valueOf(9), s.get("row3", "col3"));
@@ -124,8 +124,8 @@ public class Sheet114Test extends TestBase {
     public void testConstructorWithNullData() {
         Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys, (Object[][]) null);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertFalse(s.isEmpty());
     }
 
@@ -134,8 +134,8 @@ public class Sheet114Test extends TestBase {
         Sheet<String, String, Integer> empty = Sheet.empty();
         assertNotNull(empty);
         assertTrue(empty.isEmpty());
-        assertEquals(0, empty.rowLength());
-        assertEquals(0, empty.columnLength());
+        assertEquals(0, empty.rowCount());
+        assertEquals(0, empty.columnCount());
         assertTrue(empty.isFrozen());
     }
 
@@ -143,8 +143,8 @@ public class Sheet114Test extends TestBase {
     public void testRowsWithObjectArray() {
         Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertEquals(Integer.valueOf(1), s.get("row1", "col1"));
         assertEquals(Integer.valueOf(5), s.get("row2", "col2"));
     }
@@ -154,8 +154,8 @@ public class Sheet114Test extends TestBase {
         List<List<Integer>> rowData = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9));
         Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, rowData);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertEquals(Integer.valueOf(1), s.get("row1", "col1"));
         assertEquals(Integer.valueOf(9), s.get("row3", "col3"));
     }
@@ -173,8 +173,8 @@ public class Sheet114Test extends TestBase {
         Integer[][] columnData = new Integer[][] { { 1, 4, 7 }, { 2, 5, 8 }, { 3, 6, 9 } };
         Sheet<String, String, Integer> s = Sheet.columns(rowKeys, columnKeys, columnData);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertEquals(Integer.valueOf(1), s.get("row1", "col1"));
         assertEquals(Integer.valueOf(5), s.get("row2", "col2"));
     }
@@ -184,8 +184,8 @@ public class Sheet114Test extends TestBase {
         List<List<Integer>> columnData = Arrays.asList(Arrays.asList(1, 4, 7), Arrays.asList(2, 5, 8), Arrays.asList(3, 6, 9));
         Sheet<String, String, Integer> s = Sheet.columns(rowKeys, columnKeys, columnData);
         assertNotNull(s);
-        assertEquals(3, s.rowLength());
-        assertEquals(3, s.columnLength());
+        assertEquals(3, s.rowCount());
+        assertEquals(3, s.columnCount());
         assertEquals(Integer.valueOf(1), s.get("row1", "col1"));
         assertEquals(Integer.valueOf(9), s.get("row3", "col3"));
     }
@@ -340,14 +340,14 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testPutWithKeys() {
-        Integer oldValue = sheet.put("row1", "col1", 100);
+        Integer oldValue = sheet.set("row1", "col1", 100);
         assertEquals(Integer.valueOf(1), oldValue);
         assertEquals(Integer.valueOf(100), sheet.get("row1", "col1"));
     }
 
     @Test
     public void testPutWithNullValue() {
-        Integer oldValue = sheet.put("row1", "col1", null);
+        Integer oldValue = sheet.set("row1", "col1", null);
         assertEquals(Integer.valueOf(1), oldValue);
         assertNull(sheet.get("row1", "col1"));
     }
@@ -355,13 +355,13 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testPutWithInvalidKeys() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.put("invalidRow", "col1", 100);
+            sheet.set("invalidRow", "col1", 100);
         });
     }
 
     @Test
     public void testPutWithIndices() {
-        Integer oldValue = sheet.put(0, 0, 100);
+        Integer oldValue = sheet.set(0, 0, 100);
         assertEquals(Integer.valueOf(1), oldValue);
         assertEquals(Integer.valueOf(100), sheet.get(0, 0));
     }
@@ -369,17 +369,17 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testPutWithInvalidIndices() {
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.put(-1, 0, 100);
+            sheet.set(-1, 0, 100);
         });
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.put(0, 10, 100);
+            sheet.set(0, 10, 100);
         });
     }
 
     @Test
     public void testPutWithPoint() {
         Point point = Point.of(0, 0);
-        Integer oldValue = sheet.put(point, 100);
+        Integer oldValue = sheet.set(point, 100);
         assertEquals(Integer.valueOf(1), oldValue);
         assertEquals(Integer.valueOf(100), sheet.get(point));
     }
@@ -388,14 +388,14 @@ public class Sheet114Test extends TestBase {
     public void testPutOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.put("row1", "col1", 100);
+            sheet.set("row1", "col1", 100);
         });
     }
 
     @Test
     public void testPutInitializesUninitializedSheet() {
         Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys);
-        assertNull(s.put("row1", "col1", 42));
+        assertNull(s.set("row1", "col1", 42));
         assertEquals(Integer.valueOf(42), s.get("row1", "col1"));
     }
 
@@ -509,24 +509,24 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testContains() {
-        assertTrue(sheet.contains("row1", "col1"));
-        assertTrue(sheet.contains("row2", "col2"));
-        assertFalse(sheet.contains("invalidRow", "col1"));
-        assertFalse(sheet.contains("row1", "invalidCol"));
+        assertTrue(sheet.containsCell("row1", "col1"));
+        assertTrue(sheet.containsCell("row2", "col2"));
+        assertFalse(sheet.containsCell("invalidRow", "col1"));
+        assertFalse(sheet.containsCell("row1", "invalidCol"));
     }
 
     @Test
     public void testContainsWithValue() {
-        assertTrue(sheet.contains("row1", "col1", 1));
-        assertTrue(sheet.contains("row2", "col2", 5));
-        assertFalse(sheet.contains("row1", "col1", 100));
+        assertTrue(sheet.containsValueAt("row1", "col1", 1));
+        assertTrue(sheet.containsValueAt("row2", "col2", 5));
+        assertFalse(sheet.containsValueAt("row1", "col1", 100));
     }
 
     @Test
     public void testContainsWithNullValue() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1"), new Integer[][] { { null } });
-        assertTrue(s.contains("r1", "c1", null));
-        assertFalse(s.contains("r1", "c1", 1));
+        assertTrue(s.containsValueAt("r1", "c1", null));
+        assertFalse(s.containsValueAt("r1", "c1", 1));
     }
 
     @Test
@@ -552,7 +552,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testGetRow() {
-        ImmutableList<Integer> row = sheet.getRow("row1");
+        ImmutableList<Integer> row = sheet.rowValues("row1");
         assertNotNull(row);
         assertEquals(3, row.size());
         assertEquals(Integer.valueOf(1), row.get(0));
@@ -563,7 +563,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testGetRowInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.getRow("invalidRow");
+            sheet.rowValues("invalidRow");
         });
     }
 
@@ -601,7 +601,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddRow() {
         sheet.addRow("row4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(10), sheet.get("row4", "col1"));
         assertEquals(Integer.valueOf(11), sheet.get("row4", "col2"));
         assertEquals(Integer.valueOf(12), sheet.get("row4", "col3"));
@@ -624,7 +624,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddRowEmptyCollection() {
         sheet.addRow("row4", Arrays.asList());
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertNull(sheet.get("row4", "col1"));
         assertNull(sheet.get("row4", "col2"));
         assertNull(sheet.get("row4", "col3"));
@@ -633,7 +633,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddRowAtIndex() {
         sheet.addRow(1, "row1.5", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
 
         assertEquals(Integer.valueOf(10), sheet.get("row1.5", "col1"));
 
@@ -645,7 +645,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddRowAtIndexAtEnd() {
         sheet.addRow(3, "row4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(10), sheet.get("row4", "col1"));
     }
 
@@ -685,7 +685,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testRemoveRow() {
         sheet.removeRow("row2");
-        assertEquals(2, sheet.rowLength());
+        assertEquals(2, sheet.rowCount());
         assertFalse(sheet.containsRow("row2"));
         assertThrows(IllegalArgumentException.class, () -> {
             sheet.get("row2", "col1");
@@ -803,7 +803,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testRow() {
-        Map<String, Integer> row = sheet.row("row1");
+        Map<String, Integer> row = sheet.rowAsMap("row1");
         assertNotNull(row);
         assertEquals(3, row.size());
         assertEquals(Integer.valueOf(1), row.get("col1"));
@@ -814,13 +814,13 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testRowInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.row("invalidRow");
+            sheet.rowAsMap("invalidRow");
         });
     }
 
     @Test
     public void testRowMap() {
-        Map<String, Map<String, Integer>> rowMap = sheet.rowMap();
+        Map<String, Map<String, Integer>> rowMap = sheet.rowsMap();
         assertNotNull(rowMap);
         assertEquals(3, rowMap.size());
         assertEquals(Integer.valueOf(1), rowMap.get("row1").get("col1"));
@@ -830,7 +830,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testGetColumn() {
-        ImmutableList<Integer> column = sheet.getColumn("col1");
+        ImmutableList<Integer> column = sheet.columnValues("col1");
         assertNotNull(column);
         assertEquals(3, column.size());
         assertEquals(Integer.valueOf(1), column.get(0));
@@ -841,7 +841,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testGetColumnInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.getColumn("invalidCol");
+            sheet.columnValues("invalidCol");
         });
     }
 
@@ -879,7 +879,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddColumn() {
         sheet.addColumn("col4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
         assertEquals(Integer.valueOf(11), sheet.get("row2", "col4"));
         assertEquals(Integer.valueOf(12), sheet.get("row3", "col4"));
@@ -902,7 +902,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddColumnEmptyCollection() {
         sheet.addColumn("col4", Arrays.asList());
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertNull(sheet.get("row1", "col4"));
         assertNull(sheet.get("row2", "col4"));
         assertNull(sheet.get("row3", "col4"));
@@ -911,7 +911,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddColumnAtIndex() {
         sheet.addColumn(1, "col1.5", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
 
         assertEquals(Integer.valueOf(10), sheet.get("row1", "col1.5"));
 
@@ -923,7 +923,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testAddColumnAtIndexAtEnd() {
         sheet.addColumn(3, "col4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
     }
 
@@ -963,7 +963,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testRemoveColumn() {
         sheet.removeColumn("col2");
-        assertEquals(2, sheet.columnLength());
+        assertEquals(2, sheet.columnCount());
         assertFalse(sheet.containsColumn("col2"));
         assertThrows(IllegalArgumentException.class, () -> {
             sheet.get("row1", "col2");
@@ -1081,7 +1081,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testColumn() {
-        Map<String, Integer> column = sheet.column("col1");
+        Map<String, Integer> column = sheet.columnAsMap("col1");
         assertNotNull(column);
         assertEquals(3, column.size());
         assertEquals(Integer.valueOf(1), column.get("row1"));
@@ -1092,13 +1092,13 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testColumnInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.column("invalidCol");
+            sheet.columnAsMap("invalidCol");
         });
     }
 
     @Test
     public void testColumnMap() {
-        Map<String, Map<String, Integer>> columnMap = sheet.columnMap();
+        Map<String, Map<String, Integer>> columnMap = sheet.columnsMap();
         assertNotNull(columnMap);
         assertEquals(3, columnMap.size());
         assertEquals(Integer.valueOf(1), columnMap.get("col1").get("row1"));
@@ -1108,14 +1108,14 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testRowLength() {
-        assertEquals(3, sheet.rowLength());
-        assertEquals(0, emptySheet.rowLength());
+        assertEquals(3, sheet.rowCount());
+        assertEquals(0, emptySheet.rowCount());
     }
 
     @Test
     public void testColumnLength() {
-        assertEquals(3, sheet.columnLength());
-        assertEquals(0, emptySheet.columnLength());
+        assertEquals(3, sheet.columnCount());
+        assertEquals(0, emptySheet.columnCount());
     }
 
     @Test
@@ -1225,7 +1225,7 @@ public class Sheet114Test extends TestBase {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("row1", "row2", "row3"), Arrays.asList("col1", "col2", "col3"),
                 new Integer[][] { { 3, 1, 2 }, { 6, 4, 5 }, { 9, 7, 8 } });
 
-        s.sortByRow("row1", Comparator.naturalOrder());
+        s.sortColumnsByRowValues("row1", Comparator.naturalOrder());
 
         assertEquals(Integer.valueOf(1), s.get("row1", "col2"));
         assertEquals(Integer.valueOf(2), s.get("row1", "col3"));
@@ -1236,7 +1236,7 @@ public class Sheet114Test extends TestBase {
     public void testSortByRowOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.sortByRow("row1", Comparator.naturalOrder());
+            sheet.sortColumnsByRowValues("row1", Comparator.naturalOrder());
         });
     }
 
@@ -1245,7 +1245,7 @@ public class Sheet114Test extends TestBase {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("row1", "row2", "row3"), Arrays.asList("col1", "col2", "col3"),
                 new Integer[][] { { 3, 1, 2 }, { 6, 4, 5 }, { 9, 7, 8 } });
 
-        s.sortByRows(Arrays.asList("row1", "row2"), Comparator.comparing((Object[] arr) -> (Integer) arr[0]));
+        s.sortColumnsByRowValues(Arrays.asList("row1", "row2"), Comparator.comparing((Object[] arr) -> (Integer) arr[0]));
 
         assertNotNull(s.get("row1", "col1"));
     }
@@ -1285,7 +1285,7 @@ public class Sheet114Test extends TestBase {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("row1", "row2", "row3"), Arrays.asList("col1", "col2", "col3"),
                 new Integer[][] { { 3, 2, 1 }, { 6, 5, 4 }, { 9, 8, 7 } });
 
-        s.sortByColumn("col1", Comparator.naturalOrder());
+        s.sortRowsByColumnValues("col1", Comparator.naturalOrder());
 
         assertEquals(Integer.valueOf(3), s.get("row1", "col1"));
     }
@@ -1294,7 +1294,7 @@ public class Sheet114Test extends TestBase {
     public void testSortByColumnOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.sortByColumn("col1", Comparator.naturalOrder());
+            sheet.sortRowsByColumnValues("col1", Comparator.naturalOrder());
         });
     }
 
@@ -1303,7 +1303,7 @@ public class Sheet114Test extends TestBase {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("row1", "row2", "row3"), Arrays.asList("col1", "col2", "col3"),
                 new Integer[][] { { 3, 2, 1 }, { 6, 5, 4 }, { 9, 8, 7 } });
 
-        s.sortByColumns(Arrays.asList("col1", "col2"), Comparator.comparing((Object[] arr) -> (Integer) arr[0]));
+        s.sortRowsByColumnValues(Arrays.asList("col1", "col2"), Comparator.comparing((Object[] arr) -> (Integer) arr[0]));
 
         assertNotNull(s.get("row1", "col1"));
     }
@@ -1312,11 +1312,11 @@ public class Sheet114Test extends TestBase {
     public void testCopy() {
         Sheet<String, String, Integer> copy = sheet.copy();
         assertNotNull(copy);
-        assertEquals(sheet.rowLength(), copy.rowLength());
-        assertEquals(sheet.columnLength(), copy.columnLength());
+        assertEquals(sheet.rowCount(), copy.rowCount());
+        assertEquals(sheet.columnCount(), copy.columnCount());
         assertEquals(sheet.get("row1", "col1"), copy.get("row1", "col1"));
 
-        copy.put("row1", "col1", 999);
+        copy.set("row1", "col1", 999);
         assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
         assertEquals(Integer.valueOf(999), copy.get("row1", "col1"));
     }
@@ -1325,8 +1325,8 @@ public class Sheet114Test extends TestBase {
     public void testCopySubset() {
         Sheet<String, String, Integer> copy = sheet.copy(Arrays.asList("row1", "row2"), Arrays.asList("col1", "col2"));
         assertNotNull(copy);
-        assertEquals(2, copy.rowLength());
-        assertEquals(2, copy.columnLength());
+        assertEquals(2, copy.rowCount());
+        assertEquals(2, copy.columnCount());
         assertEquals(Integer.valueOf(1), copy.get("row1", "col1"));
         assertEquals(Integer.valueOf(5), copy.get("row2", "col2"));
         assertFalse(copy.containsRow("row3"));
@@ -1337,8 +1337,8 @@ public class Sheet114Test extends TestBase {
     public void testClone() {
         Sheet<String, String, Integer> clone = sheet.clone();
         assertNotNull(clone);
-        assertEquals(sheet.rowLength(), clone.rowLength());
-        assertEquals(sheet.columnLength(), clone.columnLength());
+        assertEquals(sheet.rowCount(), clone.rowCount());
+        assertEquals(sheet.columnCount(), clone.columnCount());
         assertEquals(sheet.get("row1", "col1"), clone.get("row1", "col1"));
         assertFalse(clone.isFrozen());
     }
@@ -1349,7 +1349,7 @@ public class Sheet114Test extends TestBase {
         assertNotNull(clone);
         assertTrue(clone.isFrozen());
         assertThrows(IllegalStateException.class, () -> {
-            clone.put("row1", "col1", 999);
+            clone.set("row1", "col1", 999);
         });
     }
 
@@ -1357,8 +1357,8 @@ public class Sheet114Test extends TestBase {
     public void testTranspose() {
         Sheet<String, String, Integer> transposed = sheet.transpose();
         assertNotNull(transposed);
-        assertEquals(sheet.columnLength(), transposed.rowLength());
-        assertEquals(sheet.rowLength(), transposed.columnLength());
+        assertEquals(sheet.columnCount(), transposed.rowCount());
+        assertEquals(sheet.rowCount(), transposed.columnCount());
 
         assertEquals(Integer.valueOf(1), transposed.get("col1", "row1"));
         assertEquals(Integer.valueOf(5), transposed.get("col2", "row2"));
@@ -1382,7 +1382,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testFreezePreventsMutations() {
         sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> sheet.put("row1", "col1", 100));
+        assertThrows(IllegalStateException.class, () -> sheet.set("row1", "col1", 100));
         assertThrows(IllegalStateException.class, () -> sheet.remove("row1", "col1"));
         assertThrows(IllegalStateException.class, () -> sheet.addRow("row4", Arrays.asList(1, 2, 3)));
         assertThrows(IllegalStateException.class, () -> sheet.addColumn("col4", Arrays.asList(1, 2, 3)));
@@ -1391,8 +1391,8 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testClear() {
         sheet.clear();
-        assertEquals(3, sheet.rowLength());
-        assertEquals(3, sheet.columnLength());
+        assertEquals(3, sheet.rowCount());
+        assertEquals(3, sheet.columnCount());
         assertFalse(sheet.isEmpty());
         assertNull(sheet.get("row1", "col1"));
         assertNull(sheet.get("row2", "col2"));
@@ -1410,17 +1410,17 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testTrimToSize() {
         sheet.trimToSize();
-        assertEquals(3, sheet.rowLength());
-        assertEquals(3, sheet.columnLength());
+        assertEquals(3, sheet.rowCount());
+        assertEquals(3, sheet.columnCount());
     }
 
     @Test
     public void testCountOfNonNullValue() {
-        assertEquals(9, sheet.countOfNonNullValue());
+        assertEquals(9, sheet.countOfNonNullValues());
 
         Sheet<String, String, Integer> withNulls = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"),
                 new Integer[][] { { 1, null }, { null, 4 } });
-        assertEquals(2, withNulls.countOfNonNullValue());
+        assertEquals(2, withNulls.countOfNonNullValues());
     }
 
     @Test

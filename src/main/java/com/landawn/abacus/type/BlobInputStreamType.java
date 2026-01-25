@@ -53,7 +53,7 @@ public class BlobInputStreamType extends InputStreamType {
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Blob blob = rs.getBlob(columnIndex);
-        return blob2InputStream(blob);
+        return blobToInputStream(blob);
     }
 
     /**
@@ -68,7 +68,7 @@ public class BlobInputStreamType extends InputStreamType {
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return blob2InputStream(rs.getBlob(columnLabel));
+        return blobToInputStream(rs.getBlob(columnLabel));
     }
 
     /**
@@ -139,7 +139,7 @@ public class BlobInputStreamType extends InputStreamType {
      * ResultSet rs = stmt.executeQuery("SELECT document FROM files WHERE id = ?");
      * if (rs.next()) {
      *     Blob blob = rs.getBlob("document");
-     *     InputStream stream = BlobInputStreamType.blob2InputStream(blob);
+     *     InputStream stream = BlobInputStreamType.blobToInputStream(blob);
      *     // Read from stream...
      * }
      * }</pre>
@@ -148,7 +148,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @return an InputStream for reading the Blob's content, or {@code null} if the blob is null
      * @throws SQLException if there is an error accessing the BLOB value
      */
-    static InputStream blob2InputStream(final Blob blob) throws SQLException {
+    static InputStream blobToInputStream(final Blob blob) throws SQLException {
         if (blob != null) {
             return blob.getBinaryStream();
         }

@@ -1050,15 +1050,15 @@ public class Stream100Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
-        Stream<List<Integer>> sliding = createStream(1, 2, 3, 4, 5).slide(3);
+    public void testsliding() {
+        Stream<List<Integer>> sliding = createStream(1, 2, 3, 4, 5).sliding(3);
         List<List<Integer>> windows = sliding.toList();
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(1, 2, 3), windows.get(0));
         assertEquals(Arrays.asList(2, 3, 4), windows.get(1));
         assertEquals(Arrays.asList(3, 4, 5), windows.get(2));
 
-        Stream<List<Integer>> slidingWithIncrement = createStream(1, 2, 3, 4, 5).slide(3, 2);
+        Stream<List<Integer>> slidingWithIncrement = createStream(1, 2, 3, 4, 5).sliding(3, 2);
         List<List<Integer>> incrementWindows = slidingWithIncrement.toList();
         assertEquals(2, incrementWindows.size());
         assertEquals(Arrays.asList(1, 2, 3), incrementWindows.get(0));
@@ -1100,12 +1100,12 @@ public class Stream100Test extends TestBase {
             Stream<String> strings = createStream01("a", "bb", "ccc", "dd");
             List<String> distinctByLength = strings.parallel().distinctBy(String::length).toList();
 
-            assertTrue(N.haveSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength)
-                    || N.haveSameElements(Arrays.asList("a", "dd", "ccc"), distinctByLength));
+            assertTrue(N.containsSameElements(Arrays.asList("a", "bb", "ccc"), distinctByLength)
+                    || N.containsSameElements(Arrays.asList("a", "dd", "ccc"), distinctByLength));
             Stream<String> stringsForMerge = createStream01("a", "bb", "ccc", "dd", "e");
             List<String> distinctByLengthMerged = stringsForMerge.parallel().distinctBy(String::length, (a, b) -> Stream.of(a, b).sorted().join("+")).toList();
-            assertTrue(N.haveSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged)
-                    || N.haveSameElements(Arrays.asList("a+e", "dd+bb", "ccc"), distinctByLengthMerged));
+            assertTrue(N.containsSameElements(Arrays.asList("a+e", "bb+dd", "ccc"), distinctByLengthMerged)
+                    || N.containsSameElements(Arrays.asList("a+e", "dd+bb", "ccc"), distinctByLengthMerged));
         }
     }
 

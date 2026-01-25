@@ -133,7 +133,7 @@ public class Result100Test extends TestBase {
     }
 
     @Test
-    public void testOrElseIfFailure() {
+    public void testOrDefaultIfFailure() {
         Result<String, Exception> success = Result.of("success value", null);
         Assertions.assertEquals("success value", success.orElseIfFailure("default"));
 

@@ -147,21 +147,21 @@ public class AbstractStream201Test extends TestBase {
     }
 
     @Test
-    public void test_persistToCSV() throws IOException {
+    public void test_persistToCsv() throws IOException {
         List<Map<String, String>> data = List.of(Map.of("h1", "a", "h2", "b"), Map.of("h1", "c", "h2", "d"));
         StringWriter writer = new StringWriter();
 
-        long count = Stream.of(data).persistToCSV(List.of("h1", "h2"), writer);
+        long count = Stream.of(data).persistToCsv(List.of("h1", "h2"), writer);
         assertEquals(2, count);
         String expected = "\"h1\",\"h2\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"a\",\"b\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"c\",\"d\"";
         assertEquals(expected, writer.toString().trim());
     }
 
     @Test
-    public void test_persistToJSON() throws IOException {
+    public void test_persistToJson() throws IOException {
         List<Map<String, String>> data = List.of(Map.of("key", "val1"), Map.of("key", "val2"));
         StringWriter writer = new StringWriter();
-        long count = Stream.of(data).persistToJSON(writer);
+        long count = Stream.of(data).persistToJson(writer);
         assertEquals(2, count);
         N.println(writer.toString());
         String result = writer.toString().replaceAll("\\s", "");

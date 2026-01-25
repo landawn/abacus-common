@@ -4130,7 +4130,7 @@ public final class Iterables {
                     return new ObjIterator<>() {
                         private final Iterator<? extends E> iter1 = set1.iterator();
                         private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
+                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -4268,7 +4268,7 @@ public final class Iterables {
                 public ObjIterator<E> iterator() {
                     return new ObjIterator<>() {
                         private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
+                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -4397,7 +4397,7 @@ public final class Iterables {
                 public ObjIterator<E> iterator() {
                     return new ObjIterator<>() {
                         private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
+                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -4514,7 +4514,7 @@ public final class Iterables {
                     return new ObjIterator<>() {
                         private final Iterator<? extends E> iter1 = set1.iterator();
                         private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
+                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 

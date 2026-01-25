@@ -22,8 +22,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -511,7 +511,7 @@ public class ParallelArrayStream100Test extends TestBase {
             Multimap<String, Integer, List<Integer>> result = stream.limit(6)
                     .toMultimap(x -> x % 2 == 0 ? "even" : "odd", Fn.identity(), Suppliers.ofListMultimap());
 
-            assertEquals(2, result.size());
+            assertEquals(6, result.totalValueCount());
             assertEquals(3, result.get("even").size());
             assertEquals(3, result.get("odd").size());
         }

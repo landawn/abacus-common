@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
@@ -226,7 +226,7 @@ public class XMLGregorianCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithConfigLong() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -238,7 +238,7 @@ public class XMLGregorianCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithConfigISO8601DateTime() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -250,7 +250,7 @@ public class XMLGregorianCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithConfigISO8601Timestamp() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
@@ -262,7 +262,7 @@ public class XMLGregorianCalendarType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn('"');
 

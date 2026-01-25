@@ -368,7 +368,7 @@ public class PropertiesUtil100Test extends TestBase {
 
         IOUtil.mkdirsIfNotExists(new File(srcPath + "/com/test/generated"));
 
-        PropertiesUtil.xml2Java(xml, srcPath, packageName, className, false);
+        PropertiesUtil.xmlToJava(xml, srcPath, packageName, className, false);
 
         File generatedFile = new File(srcPath + "/com/test/generated/TestConfig.java");
         Assertions.assertTrue(generatedFile.exists());
@@ -391,7 +391,7 @@ public class PropertiesUtil100Test extends TestBase {
 
         IOUtil.mkdirsIfNotExists(new File(srcPath + "/com/test/generated"));
 
-        PropertiesUtil.xml2Java(testXmlFile, srcPath, packageName, className, true);
+        PropertiesUtil.xmlToJava(testXmlFile, srcPath, packageName, className, true);
 
         File generatedFile = new File(srcPath + "/com/test/generated/ConfigFromFile.java");
         Assertions.assertTrue(generatedFile.exists());
@@ -409,7 +409,7 @@ public class PropertiesUtil100Test extends TestBase {
         IOUtil.mkdirsIfNotExists(new File(srcPath + "/com/test/generated"));
 
         try (InputStream is = new FileInputStream(testXmlFile)) {
-            PropertiesUtil.xml2Java(is, srcPath, packageName, className, false);
+            PropertiesUtil.xmlToJava(is, srcPath, packageName, className, false);
         }
 
         File generatedFile = new File(srcPath + "/com/test/generated/ConfigFromStream.java");
@@ -424,7 +424,7 @@ public class PropertiesUtil100Test extends TestBase {
         IOUtil.mkdirsIfNotExists(new File(srcPath + "/com/test/generated"));
 
         try (Reader reader = new FileReader(testXmlFile)) {
-            PropertiesUtil.xml2Java(reader, srcPath, packageName, null, false);
+            PropertiesUtil.xmlToJava(reader, srcPath, packageName, null, false);
         }
 
         File generatedFile = new File(srcPath + "/com/test/generated/Config.java");
@@ -526,7 +526,7 @@ public class PropertiesUtil100Test extends TestBase {
         String className = "DuplicatedConfig";
 
         Assertions.assertThrows(RuntimeException.class, () -> {
-            PropertiesUtil.xml2Java(xml, srcPath, packageName, className, false);
+            PropertiesUtil.xmlToJava(xml, srcPath, packageName, className, false);
         });
     }
 

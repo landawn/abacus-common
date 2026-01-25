@@ -162,11 +162,11 @@ public class Range100Test extends TestBase {
     public void testCompareTo() {
         Range<Integer> range = Range.closed(5, 10);
 
-        Assertions.assertEquals(1, range.compareTo(3));
-        Assertions.assertEquals(0, range.compareTo(7));
-        Assertions.assertEquals(-1, range.compareTo(12));
+        Assertions.assertEquals(1, range.positionOf(3));
+        Assertions.assertEquals(0, range.positionOf(7));
+        Assertions.assertEquals(-1, range.positionOf(12));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> range.compareTo(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> range.positionOf(null));
     }
 
     @Test

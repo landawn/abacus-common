@@ -150,7 +150,7 @@ public class ExcelUtil100Test extends TestBase {
         assertEquals(4, dataset.columnCount());
         assertEquals(2, dataset.size());
 
-        List<String> columnNames = dataset.columnNameList();
+        List<String> columnNames = dataset.columnNames();
         assertEquals(Arrays.asList("Name", "Age", "Active", "Score"), columnNames);
 
         assertEquals("John", dataset.get(0, 0));

@@ -43,9 +43,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.BufferedCSVWriter;
-import com.landawn.abacus.util.CSVUtil;
+import com.landawn.abacus.util.BufferedCsvWriter;
 import com.landawn.abacus.util.Charsets;
+import com.landawn.abacus.util.CsvUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableInt;
@@ -125,7 +125,7 @@ import lombok.Data;
  *   </tr>
  *   <tr>
  *     <td>Format Conversion</td>
- *     <td>toCSV(), fromCSV()</td>
+ *     <td>toCsv(), fromCsv()</td>
  *     <td>Low to Medium</td>
  *     <td>Excel-CSV interoperability</td>
  *   </tr>
@@ -165,7 +165,7 @@ import lombok.Data;
  * ExcelUtil.writeSheet("Sales Report", dataset, new File("output.xlsx"));
  *
  * // Convert Excel to CSV
- * ExcelUtil.toCSV(new File("data.xlsx"), new File("data.csv"));
+ * ExcelUtil.toCsv(new File("data.xlsx"), new File("data.csv"));
  *
  * // Process Excel data with custom cell handling
  * Dataset dataset = ExcelUtil.loadSheet(
@@ -403,7 +403,7 @@ import lombok.Data;
  * </ul>
  *
  * @see Dataset
- * @see CSVUtil
+ * @see CsvUtil
  * @see org.apache.poi.ss.usermodel.Workbook
  * @see org.apache.poi.ss.usermodel.Sheet
  * @see org.apache.poi.ss.usermodel.Row
@@ -1053,7 +1053,7 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = CSVUtil.loadCSV(new File("data.csv"));
+     * Dataset dataset = CsvUtil.load(new File("data.csv"));
      * ExcelUtil.writeSheet("ImportedData", dataset, new File("output.xlsx"));
      * }</pre>
      *
@@ -1342,7 +1342,7 @@ public final class ExcelUtil {
         final char separator = WD._COMMA;
 
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile, charset)) {
-            final BufferedCSVWriter bw = Objectory.createBufferedCSVWriter(writer);
+            final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(writer);
 
             try {
                 if (N.notEmpty(csvHeaders)) {
@@ -1353,7 +1353,7 @@ public final class ExcelUtil {
                             bw.write(separator);
                         }
 
-                        CSVUtil.writeField(bw, strType, csvHeader);
+                        CsvUtil.writeField(bw, strType, csvHeader);
                     }
 
                 }
@@ -1379,11 +1379,11 @@ public final class ExcelUtil {
                         }
 
                         switch (cell.getCellType()) {
-                            case STRING -> CSVUtil.writeField(bw, strType, cell.getStringCellValue());
-                            case NUMERIC -> CSVUtil.writeField(bw, null, cell.getNumericCellValue());
-                            case BOOLEAN -> CSVUtil.writeField(bw, null, cell.getBooleanCellValue());
-                            case FORMULA -> CSVUtil.writeField(bw, strType, cell.getCellFormula());
-                            case BLANK -> CSVUtil.writeField(bw, strType, "");
+                            case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
+                            case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
+                            case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
+                            case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
+                            case BLANK -> CsvUtil.writeField(bw, strType, "");
                             default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
                         }
                     }

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -220,7 +220,7 @@ public class LongArrayType100Test extends TestBase {
     @Test
     public void testWriteCharacter_WithConfig() throws IOException {
         Long[] arr = { 1L, 2L, 3L };
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         longArrayType.writeCharacter(characterWriter, arr, config);
         verify(characterWriter).write('[');

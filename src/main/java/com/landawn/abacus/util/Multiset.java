@@ -69,7 +69,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Thread Safety:</b> Thread safety depends on the chosen backing Map implementation</li>
  * </ul>
  *
- * <p><b>⚠️ IMPORTANT - Count Limitations:</b>
+ * <p><b>IMPORTANT - Count Limitations:</b>
  * <ul>
  *   <li>Element counts are limited to {@code Integer.MAX_VALUE}</li>
  *   <li>Negative counts are not allowed and will throw IllegalArgumentException</li>
@@ -589,11 +589,14 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Migration Guidance:</b></p>
      * <p>This method is deprecated. Use {@link #getCount(Object)} instead for clearer semantics.</p>
      * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * String element = "a";
+     *
      * // Old code:
-     * int count = multiset.count(element);
+     * int oldCount = multiset.count(element);
      *
      * // New code:
-     * int count = multiset.getCount(element);
+     * int newCount = multiset.getCount(element);
      * }</pre>
      *
      * @param element the element to count occurrences of.
@@ -615,11 +618,14 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Migration Guidance:</b></p>
      * <p>This method is deprecated. Use {@link #getCount(Object)} instead for clearer semantics.</p>
      * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b");
+     * String element = "a";
+     *
      * // Old code:
-     * int count = multiset.get(element);
+     * int oldCount = multiset.get(element);
      *
      * // New code:
-     * int count = multiset.getCount(element);
+     * int newCount = multiset.getCount(element);
      * }</pre>
      *
      * @param element the element to count occurrences of.
@@ -671,8 +677,8 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param element the element to set the count of.
      * @param occurrences the desired count; must be non-negative.
-     * @return the count of the element before the operation..
-     * @throws IllegalArgumentException if occurrences is negative..
+     * @return the count of the element before the operation.
+     * @throws IllegalArgumentException if occurrences is negative.
      * @see #setCount(Object, int, int)
      * @see #add(Object, int)
      */
@@ -1017,6 +1023,9 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Migration Guidance:</b></p>
      * <p>This method is deprecated. Use {@link #removeAllOccurrences(Collection)} instead for clearer semantics.</p>
      * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "b", "c");
+     * Collection<String> collection = Arrays.asList("a", "b");
+     *
      * // Old code:
      * multiset.removeAll(collection);
      *
@@ -1025,7 +1034,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be removed.
-     * @return {@code true} if this multiset changed as a result of the call..
+     * @return {@code true} if this multiset changed as a result of the call.
      * @deprecated replaced by {@link #removeAllOccurrences(Collection)} for better clarity.
      */
     @Deprecated
@@ -1823,7 +1832,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * TreeMap<String, Integer> map = multiset.toMap(TreeMap::new);
+     * TreeMap<String, Integer> map = multiset.toMap(size -> new TreeMap<>());
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
@@ -2282,15 +2291,19 @@ public final class Multiset<E> implements Collection<E> {
          * if:</p>
          *
          * <pre>{@code
-         * N.equals(a.element(), b.element())
-         *     && a.count() == b.count()
+         * Multiset<String> multiset = Multiset.of("a", "a", "b");
+         * Iterator<Multiset.Entry<String>> it = multiset.entrySet().iterator();
+         * Multiset.Entry<String> entry1 = it.next();
+         * Multiset.Entry<String> entry2 = it.next();
+         * boolean same = N.equals(entry1.element(), entry2.element())
+         *     && entry1.count() == entry2.count();
          * }</pre>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Multiset.Entry<String> entry1 = ...;
-         * Multiset.Entry<String> entry2 = ...;
-         * boolean same = entry1.equals(entry2);
+         * Multiset<String> multiset = Multiset.of("a", "a", "b");
+         * Multiset.Entry<String> entry = multiset.entrySet().iterator().next();
+         * boolean same = entry.equals(entry);   // true
          * }</pre>
          *
          * @param o object to be compared for equality with this multiset entry.
@@ -2307,12 +2320,15 @@ public final class Multiset<E> implements Collection<E> {
          * defined as:</p>
          *
          * <pre>{@code
-         * ((element == null) ? 0 : element.hashCode()) ^ count
+         * String element = "a";
+         * int count = 2;
+         * int hash = ((element == null) ? 0 : element.hashCode()) ^ count;
          * }</pre>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Multiset.Entry<String> entry = ...;
+         * Multiset<String> multiset = Multiset.of("a", "a", "b");
+         * Multiset.Entry<String> entry = multiset.entrySet().iterator().next();
          * int hash = entry.hashCode();
          * }</pre>
          *
@@ -2329,8 +2345,12 @@ public final class Multiset<E> implements Collection<E> {
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Entry with element "hello" and count 1 returns: "hello"
-         * Entry with element "world" and count 3 returns: "world x 3"
+         * Multiset<String> multiset = Multiset.of("hello", "world", "world", "world");
+         * for (Multiset.Entry<String> entry : multiset.entrySet()) {
+         *     System.out.println(entry.toString());
+         * }
+         * // Prints: hello
+         * //         world x 3
          * }</pre>
          *
          * @return a string representation of this entry

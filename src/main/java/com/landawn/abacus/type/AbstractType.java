@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -124,11 +124,11 @@ public abstract class AbstractType<T> implements Type<T> {
             final String tmpTypeName = index > 0 ? typeName.substring(0, index) : typeName;
 
             try {
-                Class<?> cls = ClassUtil.forClass(tmpTypeName);
+                Class<?> cls = ClassUtil.forName(tmpTypeName);
 
                 //noinspection ConstantValue
                 if (cls != null) {
-                    cls = ClassUtil.forClass(ClassUtil.getSimpleClassName(cls));
+                    cls = ClassUtil.forName(ClassUtil.getSimpleClassName(cls));
 
                     //noinspection ConstantValue
                     if (cls != null) {
@@ -795,7 +795,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -820,8 +820,8 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public T collection2Array(final Collection<?> c) {
-        throw new UnsupportedOperationException(name() + " does not support collection2Array operation");
+    public T collectionToArray(final Collection<?> c) {
+        throw new UnsupportedOperationException(name() + " does not support collectionToArray operation");
     }
 
     /**
@@ -835,8 +835,8 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
-        throw new UnsupportedOperationException(name() + " does not support array2Collection operation");
+    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {
+        throw new UnsupportedOperationException(name() + " does not support arrayToCollection operation");
     }
 
     /**
@@ -849,8 +849,8 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public <E> void array2Collection(final T array, final Collection<E> output) {
-        throw new UnsupportedOperationException(name() + " does not support array2Collection operation");
+    public <E> void arrayToCollection(final T array, final Collection<E> output) {
+        throw new UnsupportedOperationException(name() + " does not support arrayToCollection operation");
     }
 
     /**

@@ -490,7 +490,7 @@ public class PropertiesUtil2025Test extends TestBase {
         String srcPath = tempDir.resolve("src").toFile().getAbsolutePath();
         new File(srcPath).mkdirs();
 
-        PropertiesUtil.xml2Java(xml, srcPath, "com.test", "TestConfig", false);
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.test", "TestConfig", false);
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test", "TestConfig.java");
         assertTrue(generatedFile.exists());
@@ -507,7 +507,7 @@ public class PropertiesUtil2025Test extends TestBase {
         String srcPath = tempDir.resolve("src2").toFile().getAbsolutePath();
         new File(srcPath).mkdirs();
 
-        PropertiesUtil.xml2Java(xml, srcPath, "com.test2", "AppConfig", true);
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.test2", "AppConfig", true);
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test2", "AppConfig.java");
         assertTrue(generatedFile.exists());
@@ -518,7 +518,7 @@ public class PropertiesUtil2025Test extends TestBase {
         String srcPath = tempDir.resolve("src3").toFile().getAbsolutePath();
         new File(srcPath).mkdirs();
 
-        PropertiesUtil.xml2Java(testComplexXmlFile, srcPath, "com.test3", "ComplexConfig", false);
+        PropertiesUtil.xmlToJava(testComplexXmlFile, srcPath, "com.test3", "ComplexConfig", false);
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test3", "ComplexConfig.java");
         assertTrue(generatedFile.exists());
@@ -533,7 +533,7 @@ public class PropertiesUtil2025Test extends TestBase {
         String srcPath = tempDir.resolve("src4").toFile().getAbsolutePath();
         new File(srcPath).mkdirs();
 
-        PropertiesUtil.xml2Java(testComplexXmlFile, srcPath, "com.test4", null, false);
+        PropertiesUtil.xmlToJava(testComplexXmlFile, srcPath, "com.test4", null, false);
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test4", "Application.java");
         assertTrue(generatedFile.exists());
@@ -547,7 +547,7 @@ public class PropertiesUtil2025Test extends TestBase {
         new File(srcPath).mkdirs();
 
         try (InputStream is = new ByteArrayInputStream(xml.getBytes())) {
-            PropertiesUtil.xml2Java(is, srcPath, "com.test5", "MyApp", false);
+            PropertiesUtil.xmlToJava(is, srcPath, "com.test5", "MyApp", false);
         }
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test5", "MyApp.java");
@@ -560,7 +560,7 @@ public class PropertiesUtil2025Test extends TestBase {
             String srcPath = tempDir.resolve("src6").toFile().getAbsolutePath();
             new File(srcPath).mkdirs();
 
-            PropertiesUtil.xml2Java(is, srcPath, "com.test6", "AppSettings", false);
+            PropertiesUtil.xmlToJava(is, srcPath, "com.test6", "AppSettings", false);
 
             File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test6", "AppSettings.java");
             assertTrue(generatedFile.exists());
@@ -575,7 +575,7 @@ public class PropertiesUtil2025Test extends TestBase {
         new File(srcPath).mkdirs();
 
         try (Reader reader = new StringReader(xml)) {
-            PropertiesUtil.xml2Java(reader, srcPath, "com.test7", "SystemConfig", false);
+            PropertiesUtil.xmlToJava(reader, srcPath, "com.test7", "SystemConfig", false);
         }
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test7", "SystemConfig.java");
@@ -593,7 +593,7 @@ public class PropertiesUtil2025Test extends TestBase {
         new File(srcPath).mkdirs();
 
         try (Reader reader = new StringReader(xml)) {
-            PropertiesUtil.xml2Java(reader, srcPath, "com.test8", "RootConfig", false);
+            PropertiesUtil.xmlToJava(reader, srcPath, "com.test8", "RootConfig", false);
         }
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test8", "RootConfig.java");
@@ -652,7 +652,7 @@ public class PropertiesUtil2025Test extends TestBase {
         new File(srcPath).mkdirs();
 
         assertThrows(RuntimeException.class, () -> {
-            PropertiesUtil.xml2Java(xml, srcPath, "com.test9", "DupConfig", false);
+            PropertiesUtil.xmlToJava(xml, srcPath, "com.test9", "DupConfig", false);
         });
     }
 

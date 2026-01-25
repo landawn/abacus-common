@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -235,7 +235,7 @@ public class JdkOptionalType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Present() throws IOException {
         Optional<String> opt = Optional.of("test");
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         optionalStringType.writeCharacter(characterWriter, opt, config);
         verify(characterWriter, times(1)).writeCharacter(anyString());

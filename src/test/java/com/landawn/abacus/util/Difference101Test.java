@@ -59,21 +59,21 @@ public class Difference101Test extends TestBase {
         MapDifference<List<Map<String, Object>>, List<Map<String, Object>>, Map<String, MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = MapDifference
                 .of(col1, col2, idExtractor1, idExtractor2);
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertEquals(1, diff.onLeftOnly().size());
-        assertEquals("B", diff.onLeftOnly().get(0).get("id"));
+        assertTrue(diff.common().isEmpty());
+        assertEquals(1, diff.leftOnly().size());
+        assertEquals("B", diff.leftOnly().get(0).get("id"));
 
-        assertEquals(1, diff.onRightOnly().size());
-        assertEquals("C", diff.onRightOnly().get(0).get("code"));
+        assertEquals(1, diff.rightOnly().size());
+        assertEquals("C", diff.rightOnly().get(0).get("code"));
 
-        assertEquals(1, diff.withDifferentValues().size());
-        assertTrue(diff.withDifferentValues().containsKey("A"));
+        assertEquals(1, diff.differentValues().size());
+        assertTrue(diff.differentValues().containsKey("A"));
 
-        MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.withDifferentValues().get("A");
-        assertEquals(1, innerDiff.inCommon().size());
-        assertEquals(100, innerDiff.inCommon().get("value"));
-        assertEquals(2, innerDiff.onLeftOnly().size());
-        assertEquals(2, innerDiff.onRightOnly().size());
+        MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.differentValues().get("A");
+        assertEquals(1, innerDiff.common().size());
+        assertEquals(100, innerDiff.common().get("value"));
+        assertEquals(2, innerDiff.leftOnly().size());
+        assertEquals(2, innerDiff.rightOnly().size());
     }
 
     @Test
@@ -111,19 +111,19 @@ public class Difference101Test extends TestBase {
         MapDifference<List<Map<String, Object>>, List<Map<String, Object>>, Map<Integer, MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = MapDifference
                 .of(col1, col2, keysToCompare, m -> (Integer) m.get("id"), m -> (Integer) m.get("userId"));
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertEquals(1, diff.onLeftOnly().size());
-        assertEquals("Bob", diff.onLeftOnly().get(0).get("name"));
+        assertTrue(diff.common().isEmpty());
+        assertEquals(1, diff.leftOnly().size());
+        assertEquals("Bob", diff.leftOnly().get(0).get("name"));
 
-        assertEquals(1, diff.onRightOnly().size());
-        assertEquals("Charlie", diff.onRightOnly().get(0).get("name"));
+        assertEquals(1, diff.rightOnly().size());
+        assertEquals("Charlie", diff.rightOnly().get(0).get("name"));
 
-        assertEquals(1, diff.withDifferentValues().size());
-        MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.withDifferentValues().get(1);
-        assertEquals(1, innerDiff.inCommon().size());
-        assertEquals("Alice", innerDiff.inCommon().get("name"));
-        assertEquals(1, innerDiff.withDifferentValues().size());
-        assertEquals(Pair.of(25, 26), innerDiff.withDifferentValues().get("age"));
+        assertEquals(1, diff.differentValues().size());
+        MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.differentValues().get(1);
+        assertEquals(1, innerDiff.common().size());
+        assertEquals("Alice", innerDiff.common().get("name"));
+        assertEquals(1, innerDiff.differentValues().size());
+        assertEquals(Pair.of(25, 26), innerDiff.differentValues().get("age"));
     }
 
     @Test
@@ -134,10 +134,10 @@ public class Difference101Test extends TestBase {
         MapDifference<List<Map<String, Integer>>, List<Map<String, Integer>>, Map<Integer, MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>>>> diff = MapDifference
                 .of(emptyList1, emptyList2, m -> m.get("id"));
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertTrue(diff.onLeftOnly().isEmpty());
-        assertTrue(diff.onRightOnly().isEmpty());
-        assertTrue(diff.withDifferentValues().isEmpty());
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.leftOnly().isEmpty());
+        assertTrue(diff.rightOnly().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
         assertTrue(diff.areEqual());
     }
 
@@ -152,15 +152,15 @@ public class Difference101Test extends TestBase {
         MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff1 = MapDifference
                 .of(list1, emptyList, m -> m.get("id"));
 
-        assertEquals(1, diff1.onLeftOnly().size());
-        assertTrue(diff1.onRightOnly().isEmpty());
+        assertEquals(1, diff1.leftOnly().size());
+        assertTrue(diff1.rightOnly().isEmpty());
         assertFalse(diff1.areEqual());
 
         MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff2 = MapDifference
                 .of(emptyList, list1, m -> m.get("id"));
 
-        assertTrue(diff2.onLeftOnly().isEmpty());
-        assertEquals(1, diff2.onRightOnly().size());
+        assertTrue(diff2.leftOnly().isEmpty());
+        assertEquals(1, diff2.rightOnly().size());
         assertFalse(diff2.areEqual());
     }
 
@@ -276,9 +276,9 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(4, diff.inCommon().size());
-        assertEquals(1, diff.withDifferentValues().size());
-        assertEquals(Pair.of(30, 31), diff.withDifferentValues().get("age"));
+        assertEquals(4, diff.common().size());
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of(30, 31), diff.differentValues().get("age"));
     }
 
     @Test
@@ -291,11 +291,11 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(4, diff.inCommon().size());
-        assertEquals(1, diff.withDifferentValues().size());
-        assertTrue(diff.withDifferentValues().containsKey("address"));
-        assertEquals(person1.getAddress(), diff.withDifferentValues().get("address").left());
-        assertNull(diff.withDifferentValues().get("address").right());
+        assertEquals(4, diff.common().size());
+        assertEquals(1, diff.differentValues().size());
+        assertTrue(diff.differentValues().containsKey("address"));
+        assertEquals(person1.getAddress(), diff.differentValues().get("address").left());
+        assertNull(diff.differentValues().get("address").right());
     }
 
     @Test
@@ -313,17 +313,17 @@ public class Difference101Test extends TestBase {
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
                 .of(list1, list2, nameExtractor);
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertEquals(1, diff.onLeftOnly().size());
-        assertEquals("Bob", diff.onLeftOnly().get(0).getFirstName());
+        assertTrue(diff.common().isEmpty());
+        assertEquals(1, diff.leftOnly().size());
+        assertEquals("Bob", diff.leftOnly().get(0).getFirstName());
 
-        assertEquals(1, diff.onRightOnly().size());
-        assertEquals("Charlie", diff.onRightOnly().get(0).getFirstName());
+        assertEquals(1, diff.rightOnly().size());
+        assertEquals("Charlie", diff.rightOnly().get(0).getFirstName());
 
-        assertEquals(1, diff.withDifferentValues().size());
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> aliceDiff = diff.withDifferentValues().get("Alice Smith");
-        assertEquals(2, aliceDiff.inCommon().size());
-        assertEquals(2, aliceDiff.withDifferentValues().size());
+        assertEquals(1, diff.differentValues().size());
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> aliceDiff = diff.differentValues().get("Alice Smith");
+        assertEquals(2, aliceDiff.common().size());
+        assertEquals(2, aliceDiff.differentValues().size());
     }
 
     @Test
@@ -341,16 +341,16 @@ public class Difference101Test extends TestBase {
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
                 .of(list1, list2, propsToCompare, PersonBean::getFirstName, PersonBean::getFirstName);
 
-        assertEquals(1, diff.inCommon().size());
-        assertEquals("Alice", diff.inCommon().get(0).getFirstName());
+        assertEquals(1, diff.common().size());
+        assertEquals("Alice", diff.common().get(0).getFirstName());
 
-        assertEquals(1, diff.onLeftOnly().size());
-        assertEquals("Bob", diff.onLeftOnly().get(0).getFirstName());
+        assertEquals(1, diff.leftOnly().size());
+        assertEquals("Bob", diff.leftOnly().get(0).getFirstName());
 
-        assertEquals(1, diff.onRightOnly().size());
-        assertEquals("Charlie", diff.onRightOnly().get(0).getFirstName());
+        assertEquals(1, diff.rightOnly().size());
+        assertEquals("Charlie", diff.rightOnly().get(0).getFirstName());
 
-        assertTrue(diff.withDifferentValues().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
     }
 
     @Test
@@ -365,8 +365,8 @@ public class Difference101Test extends TestBase {
             return Objects.equals(v1, v2);
         });
 
-        assertEquals(4, diff.inCommon().size());
-        assertTrue(diff.withDifferentValues().isEmpty());
+        assertEquals(4, diff.common().size());
+        assertTrue(diff.differentValues().isEmpty());
         assertTrue(diff.areEqual());
     }
 
@@ -378,10 +378,10 @@ public class Difference101Test extends TestBase {
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<Long, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
                 .of(emptyList1, emptyList2, PersonBean::getId);
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertTrue(diff.onLeftOnly().isEmpty());
-        assertTrue(diff.onRightOnly().isEmpty());
-        assertTrue(diff.withDifferentValues().isEmpty());
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.leftOnly().isEmpty());
+        assertTrue(diff.rightOnly().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
         assertTrue(diff.areEqual());
     }
 
@@ -394,15 +394,15 @@ public class Difference101Test extends TestBase {
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<Long, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff1 = BeanDifference
                 .of(list1, emptyList, PersonBean::getId);
 
-        assertEquals(1, diff1.onLeftOnly().size());
-        assertTrue(diff1.onRightOnly().isEmpty());
+        assertEquals(1, diff1.leftOnly().size());
+        assertTrue(diff1.rightOnly().isEmpty());
         assertFalse(diff1.areEqual());
 
         BeanDifference<List<PersonBean>, List<PersonBean>, Map<Long, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff2 = BeanDifference
                 .of(emptyList, list1, PersonBean::getId);
 
-        assertTrue(diff2.onLeftOnly().isEmpty());
-        assertEquals(1, diff2.onRightOnly().size());
+        assertTrue(diff2.leftOnly().isEmpty());
+        assertEquals(1, diff2.rightOnly().size());
         assertFalse(diff2.areEqual());
     }
 
@@ -421,9 +421,9 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(3, diff.inCommon().size());
-        assertEquals(1, diff.withDifferentValues().size());
-        assertEquals(Pair.of(null, "Doe"), diff.withDifferentValues().get("lastName"));
+        assertEquals(3, diff.common().size());
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of(null, "Doe"), diff.differentValues().get("lastName"));
     }
 
     @Test
@@ -433,10 +433,10 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2);
 
-        assertEquals(2, diff.inCommon().size());
-        assertTrue(diff.withDifferentValues().isEmpty());
-        assertTrue(diff.onLeftOnly().isEmpty());
-        assertTrue(diff.onRightOnly().isEmpty());
+        assertEquals(2, diff.common().size());
+        assertTrue(diff.differentValues().isEmpty());
+        assertTrue(diff.leftOnly().isEmpty());
+        assertTrue(diff.rightOnly().isEmpty());
     }
 
     @Test
@@ -448,8 +448,8 @@ public class Difference101Test extends TestBase {
 
         BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(person1, person2, propsToCompare);
 
-        assertEquals(2, diff.inCommon().size());
-        assertTrue(diff.withDifferentValues().isEmpty());
+        assertEquals(2, diff.common().size());
+        assertTrue(diff.differentValues().isEmpty());
     }
 
     @Test
@@ -474,14 +474,14 @@ public class Difference101Test extends TestBase {
 
         MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = MapDifference.of(map1, map2);
 
-        assertEquals(4, diff.inCommon().size());
-        assertEquals(1, diff.onLeftOnly().size());
-        assertTrue(diff.onLeftOnly().containsKey("onlyInFirst"));
-        assertEquals(1, diff.onRightOnly().size());
-        assertTrue(diff.onRightOnly().containsKey("onlyInSecond"));
-        assertEquals(2, diff.withDifferentValues().size());
-        assertEquals(Pair.of("value1", "value2"), diff.withDifferentValues().get("string"));
-        assertEquals(Pair.of(3.14, 3.14159), diff.withDifferentValues().get("double"));
+        assertEquals(4, diff.common().size());
+        assertEquals(1, diff.leftOnly().size());
+        assertTrue(diff.leftOnly().containsKey("onlyInFirst"));
+        assertEquals(1, diff.rightOnly().size());
+        assertTrue(diff.rightOnly().containsKey("onlyInSecond"));
+        assertEquals(2, diff.differentValues().size());
+        assertEquals(Pair.of("value1", "value2"), diff.differentValues().get("string"));
+        assertEquals(Pair.of(3.14, 3.14159), diff.differentValues().get("double"));
     }
 
     @Test
@@ -498,10 +498,10 @@ public class Difference101Test extends TestBase {
 
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
 
-        assertTrue(diff.inCommon() instanceof LinkedHashMap);
-        assertTrue(diff.onLeftOnly() instanceof LinkedHashMap);
-        assertTrue(diff.onRightOnly() instanceof LinkedHashMap);
-        assertTrue(diff.withDifferentValues() instanceof LinkedHashMap);
+        assertTrue(diff.common() instanceof LinkedHashMap);
+        assertTrue(diff.leftOnly() instanceof LinkedHashMap);
+        assertTrue(diff.rightOnly() instanceof LinkedHashMap);
+        assertTrue(diff.differentValues() instanceof LinkedHashMap);
     }
 
     @Test
@@ -518,10 +518,10 @@ public class Difference101Test extends TestBase {
 
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
 
-        assertTrue(diff.inCommon().isEmpty());
-        assertTrue(diff.onLeftOnly().isEmpty());
-        assertTrue(diff.onRightOnly().isEmpty());
-        assertEquals(3, diff.withDifferentValues().size());
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.leftOnly().isEmpty());
+        assertTrue(diff.rightOnly().isEmpty());
+        assertEquals(3, diff.differentValues().size());
         assertFalse(diff.areEqual());
     }
 
@@ -539,13 +539,13 @@ public class Difference101Test extends TestBase {
 
         Difference<List<Integer>, List<Integer>> diff = Difference.of(list1, list2);
 
-        assertEquals(5000, diff.inCommon().size());
-        assertEquals(5000, diff.onLeftOnly().size());
-        assertEquals(5000, diff.onRightOnly().size());
+        assertEquals(5000, diff.common().size());
+        assertEquals(5000, diff.leftOnly().size());
+        assertEquals(5000, diff.rightOnly().size());
 
-        assertTrue(diff.inCommon().contains(7500));
-        assertTrue(diff.onLeftOnly().contains(2500));
-        assertTrue(diff.onRightOnly().contains(12500));
+        assertTrue(diff.common().contains(7500));
+        assertTrue(diff.leftOnly().contains(2500));
+        assertTrue(diff.rightOnly().contains(12500));
     }
 
     @Test
@@ -555,9 +555,9 @@ public class Difference101Test extends TestBase {
 
         Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
 
-        assertEquals(Arrays.asList("a", "a"), diff.inCommon());
-        assertEquals(Arrays.asList("a", "a"), diff.onLeftOnly());
-        assertEquals(Arrays.asList("b", "b"), diff.onRightOnly());
+        assertEquals(Arrays.asList("a", "a"), diff.common());
+        assertEquals(Arrays.asList("a", "a"), diff.leftOnly());
+        assertEquals(Arrays.asList("b", "b"), diff.rightOnly());
     }
 
     @Test
@@ -567,9 +567,9 @@ public class Difference101Test extends TestBase {
 
         Difference<IntList, IntList> diff = Difference.of(list1, list2);
 
-        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.inCommon());
-        assertEquals(IntList.of(-1, 1), diff.onLeftOnly());
-        assertTrue(diff.onRightOnly().isEmpty());
+        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.common());
+        assertEquals(IntList.of(-1, 1), diff.leftOnly());
+        assertTrue(diff.rightOnly().isEmpty());
     }
 
     @Test
@@ -579,9 +579,9 @@ public class Difference101Test extends TestBase {
 
         Difference<FloatList, FloatList> diff = Difference.of(list1, list2);
 
-        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.inCommon());
-        assertEquals(FloatList.of(1.0f), diff.onLeftOnly());
-        assertEquals(FloatList.of(4.0f), diff.onRightOnly());
+        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f), diff.leftOnly());
+        assertEquals(FloatList.of(4.0f), diff.rightOnly());
     }
 
     @Test
@@ -591,8 +591,8 @@ public class Difference101Test extends TestBase {
 
         Difference<DoubleList, DoubleList> diff = Difference.of(list1, list2);
 
-        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.inCommon());
-        assertEquals(DoubleList.of(0.0), diff.onLeftOnly());
-        assertEquals(DoubleList.of(1.0), diff.onRightOnly());
+        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.common());
+        assertEquals(DoubleList.of(0.0), diff.leftOnly());
+        assertEquals(DoubleList.of(1.0), diff.rightOnly());
     }
 }

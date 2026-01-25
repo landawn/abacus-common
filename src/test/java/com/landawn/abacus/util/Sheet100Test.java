@@ -45,14 +45,14 @@ public class Sheet100Test extends TestBase {
     public void testDefaultConstructor() {
         Sheet<String, String, Integer> emptySheet = new Sheet<>();
         assertTrue(emptySheet.isEmpty());
-        assertEquals(0, emptySheet.rowLength());
-        assertEquals(0, emptySheet.columnLength());
+        assertEquals(0, emptySheet.rowCount());
+        assertEquals(0, emptySheet.columnCount());
     }
 
     @Test
     public void testConstructorWithKeySets() {
-        assertEquals(3, sheet.rowLength());
-        assertEquals(3, sheet.columnLength());
+        assertEquals(3, sheet.rowCount());
+        assertEquals(3, sheet.columnCount());
         assertTrue(sheet.rowKeySet().containsAll(rowKeys));
         assertTrue(sheet.columnKeySet().containsAll(columnKeys));
     }
@@ -94,8 +94,8 @@ public class Sheet100Test extends TestBase {
         }
         {
 
-            sheet.put("R1", "C1", 1);
-            sheet.put("R1", "C2", 2);
+            sheet.set("R1", "C1", 1);
+            sheet.set("R1", "C2", 2);
 
             List<Pair<String, Stream<Integer>>> rows = sheet.rows()
                     .map(pair -> Pair.of(pair.left(), pair.right().toList()))
@@ -139,8 +139,8 @@ public class Sheet100Test extends TestBase {
         }
         {
 
-            sheet.put("R1", "C1", 1);
-            sheet.put("R2", "C1", 2);
+            sheet.set("R1", "C1", 1);
+            sheet.set("R2", "C1", 2);
 
             List<Pair<String, Stream<Integer>>> columns = sheet.columns()
                     .map(pair -> Pair.of(pair.left(), pair.right().toList()))
@@ -166,14 +166,14 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testGetPut() {
         assertNull(sheet.get("R1", "C1"));
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         assertEquals(Integer.valueOf(100), sheet.get("R1", "C1"));
     }
 
     @Test
     public void testGetPutByIndex() {
         assertNull(sheet.get(0, 0));
-        sheet.put(0, 0, 100);
+        sheet.set(0, 0, 100);
         assertEquals(Integer.valueOf(100), sheet.get(0, 0));
     }
 
@@ -181,7 +181,7 @@ public class Sheet100Test extends TestBase {
     public void testGetPutByPoint() {
         Point point = Point.of(1, 1);
         assertNull(sheet.get(point));
-        sheet.put(point, 200);
+        sheet.set(point, 200);
         assertEquals(Integer.valueOf(200), sheet.get(point));
     }
 
@@ -208,8 +208,8 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testPutAll() {
         Sheet<String, String, Integer> source = new Sheet<>(Arrays.asList("R1", "R2"), Arrays.asList("C1", "C2"));
-        source.put("R1", "C1", 10);
-        source.put("R2", "C2", 20);
+        source.set("R1", "C1", 10);
+        source.set("R2", "C2", 20);
 
         sheet.putAll(source);
         assertEquals(Integer.valueOf(10), sheet.get("R1", "C1"));
@@ -218,14 +218,14 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRemove() {
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         assertEquals(Integer.valueOf(100), sheet.remove("R1", "C1"));
         assertNull(sheet.get("R1", "C1"));
     }
 
     @Test
     public void testRemoveByIndex() {
-        sheet.put(0, 0, 100);
+        sheet.set(0, 0, 100);
         assertEquals(Integer.valueOf(100), sheet.remove(0, 0));
         assertNull(sheet.get(0, 0));
     }
@@ -233,40 +233,40 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testRemoveByPoint() {
         Point point = Point.of(1, 1);
-        sheet.put(point, 200);
+        sheet.set(point, 200);
         assertEquals(Integer.valueOf(200), sheet.remove(point));
         assertNull(sheet.get(point));
     }
 
     @Test
     public void testContains() {
-        assertTrue(sheet.contains("R1", "C1"));
-        assertFalse(sheet.contains("R1", "InvalidColumn"));
-        assertFalse(sheet.contains("InvalidRow", "C1"));
+        assertTrue(sheet.containsCell("R1", "C1"));
+        assertFalse(sheet.containsCell("R1", "InvalidColumn"));
+        assertFalse(sheet.containsCell("InvalidRow", "C1"));
     }
 
     @Test
     public void testContainsValue() {
         assertFalse(sheet.containsValue(100));
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         assertTrue(sheet.containsValue(100));
         assertTrue(sheet.containsValue(null));
     }
 
     @Test
     public void testContainsWithValue() {
-        sheet.put("R1", "C1", 100);
-        assertTrue(sheet.contains("R1", "C1", 100));
-        assertFalse(sheet.contains("R1", "C1", 200));
+        sheet.set("R1", "C1", 100);
+        assertTrue(sheet.containsValueAt("R1", "C1", 100));
+        assertFalse(sheet.containsValueAt("R1", "C1", 200));
     }
 
     @Test
     public void testGetRow() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R1", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R1", "C3", 3);
 
-        List<Integer> row = sheet.getRow("R1");
+        List<Integer> row = sheet.rowValues("R1");
         assertEquals(Arrays.asList(1, 2, 3), row);
     }
 
@@ -283,14 +283,14 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testAddRow() {
         sheet.addRow("R4", Arrays.asList(1, 2, 3));
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(2), sheet.get("R4", "C2"));
     }
 
     @Test
     public void testAddRowAtIndex() {
         sheet.addRow(1, "R_NEW", Arrays.asList(10, 20, 30));
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(20), sheet.get("R_NEW", "C2"));
     }
 
@@ -301,9 +301,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testUpdateRow() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R1", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R1", "C3", 3);
 
         sheet.updateRow("R1", v -> v == null ? 0 : v * 10);
 
@@ -314,17 +314,17 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRemoveRow() {
-        sheet.put("R2", "C1", 100);
+        sheet.set("R2", "C1", 100);
         sheet.removeRow("R2");
-        assertEquals(2, sheet.rowLength());
+        assertEquals(2, sheet.rowCount());
         assertFalse(sheet.containsRow("R2"));
     }
 
     @Test
     public void testMoveRow() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
 
         sheet.moveRow("R1", 2);
 
@@ -335,8 +335,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSwapRowPosition() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
 
         sheet.swapRowPosition("R1", "R2");
 
@@ -346,7 +346,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRenameRow() {
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         sheet.renameRow("R1", "R1_NEW");
 
         assertTrue(sheet.containsRow("R1_NEW"));
@@ -362,11 +362,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRow() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R1", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R1", "C3", 3);
 
-        Map<String, Integer> rowMap = sheet.row("R1");
+        Map<String, Integer> rowMap = sheet.rowAsMap("R1");
         assertEquals(3, rowMap.size());
         assertEquals(Integer.valueOf(1), rowMap.get("C1"));
         assertEquals(Integer.valueOf(2), rowMap.get("C2"));
@@ -375,10 +375,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRowMap() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
-        Map<String, Map<String, Integer>> allRows = sheet.rowMap();
+        Map<String, Map<String, Integer>> allRows = sheet.rowsMap();
         assertEquals(3, allRows.size());
         assertEquals(Integer.valueOf(1), allRows.get("R1").get("C1"));
         assertEquals(Integer.valueOf(2), allRows.get("R2").get("C2"));
@@ -386,11 +386,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testGetColumn() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
 
-        List<Integer> column = sheet.getColumn("C1");
+        List<Integer> column = sheet.columnValues("C1");
         assertEquals(Arrays.asList(1, 2, 3), column);
     }
 
@@ -407,14 +407,14 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testAddColumn() {
         sheet.addColumn("C4", Arrays.asList(1, 2, 3));
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(2), sheet.get("R2", "C4"));
     }
 
     @Test
     public void testAddColumnAtIndex() {
         sheet.addColumn(1, "C_NEW", Arrays.asList(10, 20, 30));
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(20), sheet.get("R2", "C_NEW"));
     }
 
@@ -425,9 +425,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testUpdateColumn() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
 
         sheet.updateColumn("C1", v -> v == null ? 0 : v * 10);
 
@@ -438,17 +438,17 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRemoveColumn() {
-        sheet.put("R1", "C2", 100);
+        sheet.set("R1", "C2", 100);
         sheet.removeColumn("C2");
-        assertEquals(2, sheet.columnLength());
+        assertEquals(2, sheet.columnCount());
         assertFalse(sheet.containsColumn("C2"));
     }
 
     @Test
     public void testMoveColumn() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R1", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R1", "C3", 3);
 
         sheet.moveColumn("C1", 2);
 
@@ -459,8 +459,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSwapColumnPosition() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
 
         sheet.println();
 
@@ -484,7 +484,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRenameColumn() {
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         sheet.renameColumn("C1", "C1_NEW");
 
         assertTrue(sheet.containsColumn("C1_NEW"));
@@ -500,11 +500,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testColumn() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
 
-        Map<String, Integer> columnMap = sheet.column("C1");
+        Map<String, Integer> columnMap = sheet.columnAsMap("C1");
         assertEquals(3, columnMap.size());
         assertEquals(Integer.valueOf(1), columnMap.get("R1"));
         assertEquals(Integer.valueOf(2), columnMap.get("R2"));
@@ -513,10 +513,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testColumnMap() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
-        Map<String, Map<String, Integer>> allColumns = sheet.columnMap();
+        Map<String, Map<String, Integer>> allColumns = sheet.columnsMap();
         assertEquals(3, allColumns.size());
         assertEquals(Integer.valueOf(1), allColumns.get("C1").get("R1"));
         assertEquals(Integer.valueOf(2), allColumns.get("C2").get("R2"));
@@ -524,19 +524,19 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testRowLength() {
-        assertEquals(3, sheet.rowLength());
+        assertEquals(3, sheet.rowCount());
     }
 
     @Test
     public void testColumnLength() {
-        assertEquals(3, sheet.columnLength());
+        assertEquals(3, sheet.columnCount());
     }
 
     @Test
     public void testUpdateAll() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
-        sheet.put("R3", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
+        sheet.set("R3", "C3", 3);
 
         sheet.updateAll(v -> v == null ? 0 : v * 2);
 
@@ -570,9 +570,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testReplaceIf() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
-        sheet.put("R3", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
+        sheet.set("R3", "C3", 3);
 
         sheet.replaceIf(v -> v != null && v > 1, 999);
 
@@ -602,9 +602,9 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testSortByRowKey() {
         Sheet<String, String, Integer> unsortedSheet = new Sheet<>(Arrays.asList("R3", "R1", "R2"), columnKeys);
-        unsortedSheet.put("R1", "C1", 1);
-        unsortedSheet.put("R2", "C1", 2);
-        unsortedSheet.put("R3", "C1", 3);
+        unsortedSheet.set("R1", "C1", 1);
+        unsortedSheet.set("R2", "C1", 2);
+        unsortedSheet.set("R3", "C1", 3);
 
         unsortedSheet.sortByRowKey();
 
@@ -614,9 +614,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSortByRowKeyWithComparator() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
 
         sheet.sortByRowKey(Comparator.reverseOrder());
 
@@ -626,11 +626,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSortByRow() {
-        sheet.put("R1", "C1", 3);
-        sheet.put("R1", "C2", 1);
-        sheet.put("R1", "C3", 2);
+        sheet.set("R1", "C1", 3);
+        sheet.set("R1", "C2", 1);
+        sheet.set("R1", "C3", 2);
 
-        sheet.sortByRow("R1", Comparator.naturalOrder());
+        sheet.sortColumnsByRowValues("R1", Comparator.naturalOrder());
 
         List<String> sortedColumnKeys = new ArrayList<>(sheet.columnKeySet());
         assertEquals("C2", sortedColumnKeys.get(0));
@@ -640,16 +640,16 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSortByRows() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R1", "C3", 3);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 1);
-        sheet.put("R2", "C3", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R1", "C3", 3);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 1);
+        sheet.set("R2", "C3", 2);
 
         sheet.println();
 
-        sheet.sortByRows(Arrays.asList("R1", "R2"), (a, b) -> {
+        sheet.sortColumnsByRowValues(Arrays.asList("R1", "R2"), (a, b) -> {
             int sum1 = 0, sum2 = 0;
             for (Object o : a)
                 if (o != null)
@@ -662,7 +662,7 @@ public class Sheet100Test extends TestBase {
 
         sheet.println();
 
-        List<Integer> row1 = sheet.getRow("R1");
+        List<Integer> row1 = sheet.rowValues("R1");
         assertEquals(Integer.valueOf(2), row1.get(0));
         assertEquals(Integer.valueOf(1), row1.get(1));
         assertEquals(Integer.valueOf(3), row1.get(2));
@@ -671,9 +671,9 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testSortByColumnKey() {
         Sheet<String, String, Integer> unsortedSheet = new Sheet<>(rowKeys, Arrays.asList("C3", "C1", "C2"));
-        unsortedSheet.put("R1", "C1", 1);
-        unsortedSheet.put("R1", "C2", 2);
-        unsortedSheet.put("R1", "C3", 3);
+        unsortedSheet.set("R1", "C1", 1);
+        unsortedSheet.set("R1", "C2", 2);
+        unsortedSheet.set("R1", "C3", 3);
 
         unsortedSheet.sortByColumnKey();
 
@@ -683,11 +683,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSortByColumn() {
-        sheet.put("R1", "C1", 3);
-        sheet.put("R2", "C1", 1);
-        sheet.put("R3", "C1", 2);
+        sheet.set("R1", "C1", 3);
+        sheet.set("R2", "C1", 1);
+        sheet.set("R3", "C1", 2);
 
-        sheet.sortByColumn("C1", Comparator.naturalOrder());
+        sheet.sortRowsByColumnValues("C1", Comparator.naturalOrder());
 
         List<String> sortedRowKeys = new ArrayList<>(sheet.rowKeySet());
         assertEquals("R2", sortedRowKeys.get(0));
@@ -697,16 +697,16 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testSortByColumns() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
-        sheet.put("R3", "C1", 3);
-        sheet.put("R1", "C2", 3);
-        sheet.put("R2", "C2", 1);
-        sheet.put("R3", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
+        sheet.set("R3", "C1", 3);
+        sheet.set("R1", "C2", 3);
+        sheet.set("R2", "C2", 1);
+        sheet.set("R3", "C2", 2);
 
         sheet.println();
 
-        sheet.sortByColumns(Arrays.asList("C1", "C2"), (a, b) -> {
+        sheet.sortRowsByColumnValues(Arrays.asList("C1", "C2"), (a, b) -> {
             int sum1 = 0, sum2 = 0;
             for (Object o : a)
                 if (o != null)
@@ -719,7 +719,7 @@ public class Sheet100Test extends TestBase {
 
         sheet.println();
 
-        List<Integer> col1 = sheet.getColumn("C1");
+        List<Integer> col1 = sheet.columnValues("C1");
         assertEquals(Integer.valueOf(2), col1.get(0));
         assertEquals(Integer.valueOf(1), col1.get(1));
         assertEquals(Integer.valueOf(3), col1.get(2));
@@ -727,30 +727,30 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCopy() {
-        sheet.put("R1", "C1", 100);
-        sheet.put("R2", "C2", 200);
+        sheet.set("R1", "C1", 100);
+        sheet.set("R2", "C2", 200);
 
         Sheet<String, String, Integer> copy = sheet.copy();
 
-        assertEquals(sheet.rowLength(), copy.rowLength());
-        assertEquals(sheet.columnLength(), copy.columnLength());
+        assertEquals(sheet.rowCount(), copy.rowCount());
+        assertEquals(sheet.columnCount(), copy.columnCount());
         assertEquals(Integer.valueOf(100), copy.get("R1", "C1"));
         assertEquals(Integer.valueOf(200), copy.get("R2", "C2"));
 
-        copy.put("R1", "C1", 999);
+        copy.set("R1", "C1", 999);
         assertEquals(Integer.valueOf(100), sheet.get("R1", "C1"));
     }
 
     @Test
     public void testCopyWithSubset() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
-        sheet.put("R3", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
+        sheet.set("R3", "C3", 3);
 
         Sheet<String, String, Integer> copy = sheet.copy(Arrays.asList("R1", "R2"), Arrays.asList("C1", "C2"));
 
-        assertEquals(2, copy.rowLength());
-        assertEquals(2, copy.columnLength());
+        assertEquals(2, copy.rowCount());
+        assertEquals(2, copy.columnCount());
         assertEquals(Integer.valueOf(1), copy.get("R1", "C1"));
         assertEquals(Integer.valueOf(2), copy.get("R2", "C2"));
         assertFalse(copy.containsRow("R3"));
@@ -760,11 +760,11 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testClone() {
         try {
-            sheet.put("R1", "C1", 100);
+            sheet.set("R1", "C1", 100);
             Sheet<String, String, Integer> cloned = sheet.clone();
 
-            assertEquals(sheet.rowLength(), cloned.rowLength());
-            assertEquals(sheet.columnLength(), cloned.columnLength());
+            assertEquals(sheet.rowCount(), cloned.rowCount());
+            assertEquals(sheet.columnCount(), cloned.columnCount());
             assertEquals(Integer.valueOf(100), cloned.get("R1", "C1"));
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("Kryo is required"));
@@ -773,12 +773,12 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testMerge() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         Sheet<String, String, Integer> other = new Sheet<>(Arrays.asList("R2", "R3"), Arrays.asList("C2", "C3"));
-        other.put("R2", "C2", 20);
-        other.put("R3", "C3", 30);
+        other.set("R2", "C2", 20);
+        other.set("R3", "C3", 30);
 
         Sheet<String, String, Integer> merged = sheet.merge(other, (v1, v2) -> {
             if (v1 == null)
@@ -795,15 +795,15 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testTranspose() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Sheet<String, String, Integer> transposed = sheet.transpose();
 
-        assertEquals(sheet.rowLength(), transposed.columnLength());
-        assertEquals(sheet.columnLength(), transposed.rowLength());
+        assertEquals(sheet.rowCount(), transposed.columnCount());
+        assertEquals(sheet.columnCount(), transposed.rowCount());
         assertEquals(Integer.valueOf(1), transposed.get("C1", "R1"));
         assertEquals(Integer.valueOf(2), transposed.get("C2", "R1"));
         assertEquals(Integer.valueOf(3), transposed.get("C1", "R2"));
@@ -820,37 +820,37 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testModifyFrozenSheet() {
         sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> sheet.put("R1", "C1", 100));
+        assertThrows(IllegalStateException.class, () -> sheet.set("R1", "C1", 100));
     }
 
     @Test
     public void testClear() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         sheet.clear();
 
         assertNull(sheet.get("R1", "C1"));
         assertNull(sheet.get("R2", "C2"));
-        assertEquals(3, sheet.rowLength());
-        assertEquals(3, sheet.columnLength());
+        assertEquals(3, sheet.rowCount());
+        assertEquals(3, sheet.columnCount());
     }
 
     @Test
     public void testTrimToSize() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
         sheet.trimToSize();
     }
 
     @Test
     public void testCountOfNonNullValue() {
-        assertEquals(0, sheet.countOfNonNullValue());
+        assertEquals(0, sheet.countOfNonNullValues());
 
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
-        sheet.put("R3", "C3", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
+        sheet.set("R3", "C3", 3);
 
-        assertEquals(3, sheet.countOfNonNullValue());
+        assertEquals(3, sheet.countOfNonNullValues());
     }
 
     @Test
@@ -863,8 +863,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testForEachH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<String> visited = new ArrayList<>();
         sheet.forEachH((rowKey, columnKey, value) -> {
@@ -878,8 +878,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testForEachV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<String> visited = new ArrayList<>();
         sheet.forEachV((rowKey, columnKey, value) -> {
@@ -894,8 +894,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testForEachNonNullH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<String> visited = new ArrayList<>();
         sheet.forEachNonNullH((rowKey, columnKey, value) -> {
@@ -909,8 +909,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testForEachNonNullV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<String> visited = new ArrayList<>();
         sheet.forEachNonNullV((rowKey, columnKey, value) -> {
@@ -924,8 +924,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<Cell<String, String, Integer>> cells = sheet.cellsH().toList();
         assertEquals(9, cells.size());
@@ -938,8 +938,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsHRange() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<Cell<String, String, Integer>> cells = sheet.cellsH(1, 2).toList();
         assertEquals(3, cells.size());
@@ -947,8 +947,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         List<Cell<String, String, Integer>> cells = sheet.cellsV().toList();
         assertEquals(9, cells.size());
@@ -960,8 +960,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsR() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
 
         List<List<Cell<String, String, Integer>>> rows = sheet.cellsR().map(stream -> stream.toList()).toList();
 
@@ -972,8 +972,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsC() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
 
         List<List<Cell<String, String, Integer>>> columns = sheet.cellsC().map(stream -> stream.toList()).toList();
 
@@ -1022,9 +1022,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
 
         List<Integer> values = sheet.streamH().toList();
         assertEquals(9, values.size());
@@ -1034,9 +1034,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
 
         List<Integer> values = sheet.streamV().toList();
         assertEquals(9, values.size());
@@ -1046,8 +1046,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamR() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
 
         List<List<Integer>> rows = sheet.streamR().map(stream -> stream.toList()).toList();
 
@@ -1059,8 +1059,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamC() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
 
         List<List<Integer>> columns = sheet.streamC().map(stream -> stream.toList()).toList();
 
@@ -1072,10 +1072,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToDatasetH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Dataset ds = sheet.toDatasetH();
 
@@ -1088,10 +1088,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToDatasetV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Dataset ds = sheet.toDatasetV();
 
@@ -1104,10 +1104,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToArrayH() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Object[][] array = sheet.toArrayH();
 
@@ -1121,10 +1121,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToArrayHTyped() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Integer[][] array = sheet.toArrayH(Integer.class);
 
@@ -1136,10 +1136,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToArrayV() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Object[][] array = sheet.toArrayV();
 
@@ -1153,10 +1153,10 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testToArrayVTyped() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R1", "C2", 2);
-        sheet.put("R2", "C1", 3);
-        sheet.put("R2", "C2", 4);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R1", "C2", 2);
+        sheet.set("R2", "C1", 3);
+        sheet.set("R2", "C2", 4);
 
         Integer[][] array = sheet.toArrayV(Integer.class);
 
@@ -1168,7 +1168,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testApply() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         Integer result = sheet.apply(s -> s.get("R1", "C1"));
         assertEquals(Integer.valueOf(1), result);
@@ -1176,7 +1176,7 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testApplyIfNotEmpty() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         u.Optional<Integer> result = sheet.applyIfNotEmpty(s -> s.get("R1", "C1"));
         assertTrue(result.isPresent());
@@ -1190,7 +1190,7 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testAccept() {
         List<Integer> values = new ArrayList<>();
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         sheet.accept(s -> values.add(s.get("R1", "C1")));
         assertEquals(1, values.size());
@@ -1200,7 +1200,7 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testAcceptIfNotEmpty() {
         List<Integer> values = new ArrayList<>();
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         OrElse result = sheet.acceptIfNotEmpty(s -> values.add(s.get("R1", "C1")));
         assertEquals(OrElse.TRUE, result);
@@ -1214,8 +1214,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testPrintln() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         StringWriter writer = new StringWriter();
         sheet.println(writer);
@@ -1262,8 +1262,8 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testPrintlnWithSubset() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         StringWriter writer = new StringWriter();
         sheet.println(Arrays.asList("R1"), Arrays.asList("C1"), writer);
@@ -1277,33 +1277,33 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testHashCode() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         Sheet<String, String, Integer> other = new Sheet<>(rowKeys, columnKeys);
-        other.put("R1", "C1", 1);
+        other.set("R1", "C1", 1);
 
         assertEquals(sheet.hashCode(), other.hashCode());
     }
 
     @Test
     public void testEquals() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         Sheet<String, String, Integer> other = new Sheet<>(rowKeys, columnKeys);
-        other.put("R1", "C1", 1);
+        other.set("R1", "C1", 1);
 
         assertTrue(sheet.equals(other));
         assertTrue(sheet.equals(sheet));
         assertFalse(sheet.equals(null));
         assertFalse(sheet.equals("not a sheet"));
 
-        other.put("R1", "C1", 2);
+        other.set("R1", "C1", 2);
         assertFalse(sheet.equals(other));
     }
 
     @Test
     public void testToString() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
         String str = sheet.toString();
         assertTrue(str.contains("rowKeySet"));
@@ -1336,17 +1336,17 @@ public class Sheet100Test extends TestBase {
     public void testEmptySheetOperations() {
         Sheet<String, String, Integer> emptySheet = new Sheet<>();
 
-        assertEquals(0, emptySheet.countOfNonNullValue());
+        assertEquals(0, emptySheet.countOfNonNullValues());
         assertTrue(emptySheet.cellsH().toList().isEmpty());
         assertTrue(emptySheet.streamH().toList().isEmpty());
 
-        Map<String, Map<String, Integer>> rowMap = emptySheet.rowMap();
+        Map<String, Map<String, Integer>> rowMap = emptySheet.rowsMap();
         assertTrue(rowMap.isEmpty());
     }
 
     @Test
     public void testNullValueHandling() {
-        sheet.put("R1", "C1", null);
+        sheet.set("R1", "C1", null);
         assertNull(sheet.get("R1", "C1"));
         assertTrue(sheet.containsValue(null));
 
@@ -1367,18 +1367,18 @@ public class Sheet100Test extends TestBase {
         Sheet<String, String, Integer> largeSheet = new Sheet<>(largeRowKeys, largeColumnKeys);
 
         for (int i = 0; i < 100; i++) {
-            largeSheet.put(i, i, i);
+            largeSheet.set(i, i, i);
         }
 
-        assertEquals(100, largeSheet.countOfNonNullValue());
+        assertEquals(100, largeSheet.countOfNonNullValues());
         assertEquals(Integer.valueOf(50), largeSheet.get(50, 50));
     }
 
     @Test
     public void testCellsHWithSingleRow() {
-        sheet.put("R2", "C1", 21);
-        sheet.put("R2", "C2", 22);
-        sheet.put("R2", "C3", 23);
+        sheet.set("R2", "C1", 21);
+        sheet.set("R2", "C2", 22);
+        sheet.set("R2", "C3", 23);
 
         List<Cell<String, String, Integer>> cells = sheet.cellsH(1, 2).toList();
         assertEquals(3, cells.size());
@@ -1388,9 +1388,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCellsVWithSingleColumn() {
-        sheet.put("R1", "C2", 12);
-        sheet.put("R2", "C2", 22);
-        sheet.put("R3", "C2", 32);
+        sheet.set("R1", "C2", 12);
+        sheet.set("R2", "C2", 22);
+        sheet.set("R3", "C2", 32);
 
         List<Cell<String, String, Integer>> cells = sheet.cellsV(1, 2).toList();
         assertEquals(3, cells.size());
@@ -1418,9 +1418,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamHWithSingleRow() {
-        sheet.put("R2", "C1", 21);
-        sheet.put("R2", "C2", 22);
-        sheet.put("R2", "C3", 23);
+        sheet.set("R2", "C1", 21);
+        sheet.set("R2", "C2", 22);
+        sheet.set("R2", "C3", 23);
 
         List<Integer> values = sheet.streamH(1, 2).toList();
         assertEquals(3, values.size());
@@ -1431,9 +1431,9 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testStreamVWithSingleColumn() {
-        sheet.put("R1", "C2", 12);
-        sheet.put("R2", "C2", 22);
-        sheet.put("R3", "C2", 32);
+        sheet.set("R1", "C2", 12);
+        sheet.set("R2", "C2", 22);
+        sheet.set("R3", "C2", 32);
 
         List<Integer> values = sheet.streamV(1, 2).toList();
         assertEquals(3, values.size());
@@ -1446,7 +1446,7 @@ public class Sheet100Test extends TestBase {
     public void testCellsHWithCustomRange() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                sheet.put(i, j, i * 10 + j);
+                sheet.set(i, j, i * 10 + j);
             }
         }
 
@@ -1460,7 +1460,7 @@ public class Sheet100Test extends TestBase {
     public void testCellsVWithCustomRange() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                sheet.put(i, j, i * 10 + j);
+                sheet.set(i, j, i * 10 + j);
             }
         }
 
@@ -1474,7 +1474,7 @@ public class Sheet100Test extends TestBase {
     public void testRowsWithRange() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                sheet.put(i, j, i * 10 + j);
+                sheet.set(i, j, i * 10 + j);
             }
         }
 
@@ -1491,7 +1491,7 @@ public class Sheet100Test extends TestBase {
     public void testColumnsWithRange() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                sheet.put(i, j, i * 10 + j);
+                sheet.set(i, j, i * 10 + j);
             }
         }
 
@@ -1529,13 +1529,13 @@ public class Sheet100Test extends TestBase {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
 
         assertNull(uninitSheet.get("R1", "C1"));
-        assertEquals(0, uninitSheet.countOfNonNullValue());
+        assertEquals(0, uninitSheet.countOfNonNullValues());
 
-        List<Integer> row = uninitSheet.getRow("R1");
+        List<Integer> row = uninitSheet.rowValues("R1");
         assertEquals(3, row.size());
         assertTrue(row.stream().allMatch(Fn.isNull()));
 
-        List<Integer> column = uninitSheet.getColumn("C1");
+        List<Integer> column = uninitSheet.columnValues("C1");
         assertEquals(3, column.size());
         assertTrue(column.stream().allMatch(Fn.isNull()));
 
@@ -1549,11 +1549,11 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testFrozenSheetComprehensive() {
-        sheet.put("R1", "C1", 100);
+        sheet.set("R1", "C1", 100);
         sheet.freeze();
 
         try {
-            sheet.put("R2", "C2", 200);
+            sheet.set("R2", "C2", 200);
             fail("Should throw IllegalStateException");
         } catch (IllegalStateException e) {
         }
@@ -1601,19 +1601,19 @@ public class Sheet100Test extends TestBase {
         }
 
         assertEquals(Integer.valueOf(100), sheet.get("R1", "C1"));
-        assertTrue(sheet.contains("R1", "C1"));
+        assertTrue(sheet.containsCell("R1", "C1"));
     }
 
     @Test
     public void testSortingWithNulls() {
-        sheet.put("R1", "C1", null);
-        sheet.put("R1", "C2", 3);
-        sheet.put("R1", "C3", 1);
+        sheet.set("R1", "C1", null);
+        sheet.set("R1", "C2", 3);
+        sheet.set("R1", "C3", 1);
 
-        sheet.sortByRow("R1", Comparator.nullsFirst(Comparator.naturalOrder()));
+        sheet.sortColumnsByRowValues("R1", Comparator.nullsFirst(Comparator.naturalOrder()));
 
         List<String> sortedColumns = new ArrayList<>(sheet.columnKeySet());
-        List<Integer> sortedValues = sheet.getRow("R1");
+        List<Integer> sortedValues = sheet.rowValues("R1");
 
         assertNull(sortedValues.get(0));
         assertEquals(Integer.valueOf(1), sortedValues.get(1));
@@ -1624,8 +1624,8 @@ public class Sheet100Test extends TestBase {
     public void testWithStringValues() {
         Sheet<Integer, String, String> stringSheet = new Sheet<>(Arrays.asList(1, 2, 3), Arrays.asList("A", "B", "C"));
 
-        stringSheet.put(1, "A", "Hello");
-        stringSheet.put(2, "B", "World");
+        stringSheet.set(1, "A", "Hello");
+        stringSheet.set(2, "B", "World");
 
         assertEquals("Hello", stringSheet.get(1, "A"));
         assertEquals("World", stringSheet.get(2, "B"));
@@ -1637,12 +1637,12 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testAddRowAtBeginning() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C1", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C1", 2);
 
         sheet.addRow(0, "R0", Arrays.asList(0, 0, 0));
 
-        assertEquals(4, sheet.rowLength());
+        assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(0), sheet.get("R0", "C1"));
         assertEquals(Integer.valueOf(0), sheet.get(0, 0));
         assertEquals(Integer.valueOf(1), sheet.get(1, 0));
@@ -1650,22 +1650,22 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testAddColumnAtEnd() {
-        sheet.put("R1", "C1", 1);
+        sheet.set("R1", "C1", 1);
 
-        sheet.addColumn(sheet.columnLength(), "C4", Arrays.asList(4, 5, 6));
+        sheet.addColumn(sheet.columnCount(), "C4", Arrays.asList(4, 5, 6));
 
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(4), sheet.get("R1", "C4"));
     }
 
     @Test
     public void testPutAllWithOverlap() {
-        sheet.put("R1", "C1", 1);
-        sheet.put("R2", "C2", 2);
+        sheet.set("R1", "C1", 1);
+        sheet.set("R2", "C2", 2);
 
         Sheet<String, String, Integer> source = new Sheet<>(Arrays.asList("R1", "R2"), Arrays.asList("C1", "C2"));
-        source.put("R1", "C1", 10);
-        source.put("R1", "C2", 20);
+        source.set("R1", "C1", 10);
+        source.set("R1", "C2", 20);
 
         sheet.putAll(source);
 
@@ -1707,7 +1707,7 @@ public class Sheet100Test extends TestBase {
     @Test
     public void testCloneWithFrozenState() {
         try {
-            sheet.put("R1", "C1", 100);
+            sheet.set("R1", "C1", 100);
             sheet.freeze();
 
             Sheet<String, String, Integer> cloned = sheet.clone(false);
@@ -1734,14 +1734,14 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testContainsWithNull() {
-        assertTrue(sheet.contains("R1", "C1", null));
+        assertTrue(sheet.containsValueAt("R1", "C1", null));
         assertTrue(sheet.isNull("R1", "C1"));
 
-        sheet.put("R1", "C1", null);
-        assertTrue(sheet.contains("R1", "C1", null));
+        sheet.set("R1", "C1", null);
+        assertTrue(sheet.containsValueAt("R1", "C1", null));
 
-        sheet.put("R1", "C1", 100);
-        assertFalse(sheet.contains("R1", "C1", null));
+        sheet.set("R1", "C1", 100);
+        assertFalse(sheet.containsValueAt("R1", "C1", null));
     }
 
     @Test
@@ -1749,7 +1749,7 @@ public class Sheet100Test extends TestBase {
         Sheet<String, String, Integer> singleRowSheet = new Sheet<>(Arrays.asList("R1"), columnKeys);
 
         singleRowSheet.sortByRowKey();
-        assertEquals(1, singleRowSheet.rowLength());
+        assertEquals(1, singleRowSheet.rowCount());
     }
 
     @Test
@@ -1792,7 +1792,7 @@ public class Sheet100Test extends TestBase {
     public void testComprehensiveIntegration() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                sheet.put(i, j, (i + 1) * (j + 1));
+                sheet.set(i, j, (i + 1) * (j + 1));
             }
         }
 
@@ -1804,8 +1804,8 @@ public class Sheet100Test extends TestBase {
         sheet.swapColumnPosition("C1", "C4");
 
         sheet.println();
-        assertEquals(4, sheet.rowLength());
-        assertEquals(4, sheet.columnLength());
+        assertEquals(4, sheet.rowCount());
+        assertEquals(4, sheet.columnCount());
         assertEquals(Integer.valueOf(4), sheet.get("R1", "C4"));
         assertEquals(Integer.valueOf(10), sheet.get("R4", "C1"));
 
@@ -1814,8 +1814,8 @@ public class Sheet100Test extends TestBase {
         assertEquals(Arrays.asList("R1", "R2", "R3", "R4"), sortedRows);
 
         Sheet<String, String, Integer> transposed = sheet.transpose();
-        assertEquals(4, transposed.rowLength());
-        assertEquals(4, transposed.columnLength());
+        assertEquals(4, transposed.rowCount());
+        assertEquals(4, transposed.columnCount());
         assertEquals(sheet.get("R1", "C1"), transposed.get("C1", "R1"));
     }
 

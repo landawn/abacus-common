@@ -55,10 +55,10 @@ public class Builder101Test extends TestBase {
 
         builder.renameColumns(oldNewNames);
 
-        assertTrue(testDataset.columnNameList().contains("firstName"));
-        assertTrue(testDataset.columnNameList().contains("years"));
-        assertFalse(testDataset.columnNameList().contains("name"));
-        assertFalse(testDataset.columnNameList().contains("age"));
+        assertTrue(testDataset.columnNames().contains("firstName"));
+        assertTrue(testDataset.columnNames().contains("years"));
+        assertFalse(testDataset.columnNames().contains("name"));
+        assertFalse(testDataset.columnNames().contains("age"));
     }
 
     @Test
@@ -67,9 +67,9 @@ public class Builder101Test extends TestBase {
 
         builder.renameColumns(Arrays.asList("name", "city"), col -> col.toUpperCase());
 
-        assertTrue(testDataset.columnNameList().contains("NAME"));
-        assertTrue(testDataset.columnNameList().contains("CITY"));
-        assertTrue(testDataset.columnNameList().contains("age"));
+        assertTrue(testDataset.columnNames().contains("NAME"));
+        assertTrue(testDataset.columnNames().contains("CITY"));
+        assertTrue(testDataset.columnNames().contains("age"));
     }
 
     @Test
@@ -78,9 +78,9 @@ public class Builder101Test extends TestBase {
 
         builder.renameColumns(col -> "col_" + col);
 
-        assertTrue(testDataset.columnNameList().contains("col_name"));
-        assertTrue(testDataset.columnNameList().contains("col_age"));
-        assertTrue(testDataset.columnNameList().contains("col_city"));
+        assertTrue(testDataset.columnNames().contains("col_name"));
+        assertTrue(testDataset.columnNames().contains("col_age"));
+        assertTrue(testDataset.columnNames().contains("col_city"));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class Builder101Test extends TestBase {
 
         builder.addColumn("description", Tuple.of("name", "city"), combineFunc);
 
-        assertTrue(testDataset.columnNameList().contains("description"));
+        assertTrue(testDataset.columnNames().contains("description"));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class Builder101Test extends TestBase {
 
         builder.addColumn("nameAge", Arrays.asList("name", "age"), func);
 
-        assertTrue(testDataset.columnNameList().contains("nameAge"));
+        assertTrue(testDataset.columnNames().contains("nameAge"));
     }
 
     @Test
@@ -114,9 +114,9 @@ public class Builder101Test extends TestBase {
         builder.removeColumns(Arrays.asList("age", "city"));
 
         assertEquals(1, testDataset.columnCount());
-        assertTrue(testDataset.columnNameList().contains("name"));
-        assertFalse(testDataset.columnNameList().contains("age"));
-        assertFalse(testDataset.columnNameList().contains("city"));
+        assertTrue(testDataset.columnNames().contains("name"));
+        assertFalse(testDataset.columnNames().contains("age"));
+        assertFalse(testDataset.columnNames().contains("city"));
     }
 
     @Test
@@ -126,9 +126,9 @@ public class Builder101Test extends TestBase {
         builder.removeColumns(col -> col.startsWith("c"));
 
         assertEquals(2, testDataset.columnCount());
-        assertFalse(testDataset.columnNameList().contains("city"));
-        assertTrue(testDataset.columnNameList().contains("name"));
-        assertTrue(testDataset.columnNameList().contains("age"));
+        assertFalse(testDataset.columnNames().contains("city"));
+        assertTrue(testDataset.columnNames().contains("name"));
+        assertTrue(testDataset.columnNames().contains("age"));
     }
 
     @Test
@@ -141,9 +141,9 @@ public class Builder101Test extends TestBase {
 
         builder.divideColumn("fullName", Arrays.asList("firstName", "lastName"), splitFunc);
 
-        assertFalse(testDataset.columnNameList().contains("fullName"));
-        assertTrue(testDataset.columnNameList().contains("firstName"));
-        assertTrue(testDataset.columnNameList().contains("lastName"));
+        assertFalse(testDataset.columnNames().contains("fullName"));
+        assertTrue(testDataset.columnNames().contains("firstName"));
+        assertTrue(testDataset.columnNames().contains("lastName"));
     }
 
     @Test

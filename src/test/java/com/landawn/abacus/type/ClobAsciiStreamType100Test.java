@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -170,7 +170,7 @@ public class ClobAsciiStreamType100Test extends TestBase {
     public void testWriteCharacter_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         InputStream stream = new ByteArrayInputStream("ASCII content".getBytes());
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(mockWriter, stream, config);
@@ -182,7 +182,7 @@ public class ClobAsciiStreamType100Test extends TestBase {
     public void testWriteCharacter_WithQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         InputStream stream = new ByteArrayInputStream("data".getBytes());
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
 
         type.writeCharacter(mockWriter, stream, config);
@@ -197,7 +197,7 @@ public class ClobAsciiStreamType100Test extends TestBase {
         InputStream expectedStream = new ByteArrayInputStream("clob data".getBytes());
         when(clob.getAsciiStream()).thenReturn(expectedStream);
 
-        InputStream result = ClobAsciiStreamType.clob2AsciiStream(clob);
+        InputStream result = ClobAsciiStreamType.clobToAsciiStream(clob);
 
         assertEquals(expectedStream, result);
         verify(clob).getAsciiStream();
@@ -205,7 +205,7 @@ public class ClobAsciiStreamType100Test extends TestBase {
 
     @Test
     public void testClob2AsciiStream_Null() throws SQLException {
-        InputStream result = ClobAsciiStreamType.clob2AsciiStream(null);
+        InputStream result = ClobAsciiStreamType.clobToAsciiStream(null);
         Assertions.assertNull(result);
     }
 }

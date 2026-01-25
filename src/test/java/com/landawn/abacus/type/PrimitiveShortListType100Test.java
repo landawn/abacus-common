@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ShortList;
 
@@ -119,7 +119,7 @@ public class PrimitiveShortListType100Test extends TestBase {
     public void testWriteCharacterEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ShortList list = ShortList.of(new short[0]);
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');
@@ -130,7 +130,7 @@ public class PrimitiveShortListType100Test extends TestBase {
     public void testWriteCharacterNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ShortList list = ShortList.of(new short[] { 1, 2 });
-        JSONXMLSerializationConfig<?> config = mock(JSONXMLSerializationConfig.class);
+        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.entity.PersonType;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.types.WeekDay;
@@ -41,31 +41,31 @@ public abstract class AbstractParserTest extends AbstractTest {
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
     protected static final Random rand = new Random();
-    protected static final JSONParser jsonParser = ParserFactory.createJSONParser();
+    protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
     protected static final AvroParser avroParser = ParserFactory.createAvroParser();
-    public static final XMLParser abacusXMLParser = ParserFactory.createAbacusXMLParser();
-    public static final XMLParser abacusXMLSAXParser = ParserFactory.createAbacusXMLSAXParser();
-    public static final XMLParser abacusXMLStAXParser = ParserFactory.createAbacusXMLStAXParser();
-    public static final XMLParser abacusXMLDOMParser = ParserFactory.createAbacusXMLDOMParser();
-    public static final XMLParser xmlParser = ParserFactory.createXMLParser();
-    public static final XMLParser xmlDOMParser = ParserFactory.createXMLDOMParser();
-    protected static final XMLParser jaxbXMLParser = ParserFactory.createJAXBParser();
+    public static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();
+    public static final XmlParser abacusXMLSAXParser = ParserFactory.createAbacusXmlSAXParser();
+    public static final XmlParser abacusXMLStAXParser = ParserFactory.createAbacusXmlStAXParser();
+    public static final XmlParser abacusXMLDOMParser = ParserFactory.createAbacusXmlDOMParser();
+    public static final XmlParser xmlParser = ParserFactory.createXmlParser();
+    public static final XmlParser xmlDOMParser = ParserFactory.createXmlDOMParser();
+    protected static final XmlParser jaxbXmlParser = ParserFactory.createJAXBParser();
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
-    protected static final JSONSerializationConfig jsc = JSC.of(true, true);
+    protected static final JsonSerializationConfig jsc = JSC.of(true, true);
     protected static final XBean xBean = createXBean();
     protected static final XBean bigXBean = createXBean(100);
     static final ObjectMapper objMapper = new ObjectMapper();
     static final List<Gson> gsonPool = new ArrayList<>(100);
 
     static {
-        Beans.registerXMLBindingClass(PersonType.class);
-        Beans.registerXMLBindingClass(XBean.class);
+        Beans.registerXmlBindingClass(PersonType.class);
+        Beans.registerXmlBindingClass(XBean.class);
     }
 
     static {
         try {
             N.println("xml======================================================================");
-            N.println(abacusXMLParser.serialize(xBean));
+            N.println(abacusXmlParser.serialize(xBean));
 
             N.println("josn======================================================================");
             N.println(jsonParser.serialize(xBean, jsc));
@@ -190,7 +190,7 @@ public abstract class AbstractParserTest extends AbstractTest {
         N.println(xBean);
         N.println(xBean2);
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     @Test
@@ -208,7 +208,7 @@ public abstract class AbstractParserTest extends AbstractTest {
         parser.deserialize(is, XBean.class);
         IOUtil.close(is);
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     @Test
@@ -227,7 +227,7 @@ public abstract class AbstractParserTest extends AbstractTest {
         parser.deserialize(reader, XBean.class);
         IOUtil.close(reader);
 
-        IOUtil.deleteAllIfExists(file);
+        IOUtil.deleteRecursivelyIfExists(file);
     }
 
     protected File getFile() {

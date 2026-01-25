@@ -29,8 +29,8 @@ import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 import com.landawn.abacus.entity.extendDirty.basic.DataType;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -63,7 +63,7 @@ public class DatasetTest extends AbstractTest {
             final MutableInt id = MutableInt.of(1);
             accountList.forEach(it -> it.setId(id.incrementAndGet())
                     .setContact(createAccountContact(AccountContact.class).setAccountId(id.value()).setEmail(Strings.uuid())));
-            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::bean2FlatMap).toList();
+            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::beanToFlatMap).toList();
             final Dataset ds = CommonUtil.newDataset(mapList);
 
             ds.println();
@@ -82,7 +82,7 @@ public class DatasetTest extends AbstractTest {
             final MutableInt id = MutableInt.of(1);
             accountList.forEach(it -> it.setId(id.incrementAndGet())
                     .setContact(createAccountContact(AccountContact.class).setId(id.value() + 100).setAccountId(id.value()).setEmail(Strings.uuid())));
-            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::bean2FlatMap).toList();
+            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::beanToFlatMap).toList();
             final Dataset ds = CommonUtil.newDataset(mapList);
 
             ds.println();
@@ -101,7 +101,7 @@ public class DatasetTest extends AbstractTest {
             final MutableInt id = MutableInt.of(1);
             accountList.forEach(it -> it.setId(id.incrementAndGet())
                     .setContact(createAccountContact(AccountContact.class).setId(id.value() + 100).setAccountId(id.value()).setEmail(Strings.uuid())));
-            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::bean2FlatMap).toList();
+            final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::beanToFlatMap).toList();
             mapList.forEach(it -> Maps.replaceKeys(it, k -> k.startsWith("contact.") ? Strings.replaceFirst(k, "contact.", "ac.") : k));
             final Dataset ds = CommonUtil.newDataset(mapList);
 
@@ -256,13 +256,13 @@ public class DatasetTest extends AbstractTest {
             ds.exceptAll(emptyDS).println();
 
             N.println("===========intersection=============");
-            ds.intersection(emptyDS).println();
+            N.intersection(ds, emptyDS).println();
 
             N.println("===========difference=============");
-            ds.difference(emptyDS).println();
+            N.difference(ds, emptyDS).println();
 
             N.println("===========symmetricDifference=============");
-            ds.symmetricDifference(emptyDS).println();
+            N.symmetricDifference(ds, emptyDS).println();
         }
     }
 
@@ -271,7 +271,7 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 9);
         accountList.forEach(it -> it.setId(2));
         final Dataset ds = CommonUtil.newDataset(accountList);
-        ds.rollup(ds.columnNameList()).forEach(Dataset::println);
+        ds.rollup(ds.columnNames()).forEach(Dataset::println);
     }
 
     @Test
@@ -279,7 +279,7 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 9);
         accountList.forEach(it -> it.setId(2));
         final Dataset ds = CommonUtil.newDataset(accountList);
-        ds.cube(ds.columnNameList()).forEach(Dataset::println);
+        ds.cube(ds.columnNames()).forEach(Dataset::println);
     }
 
     @Test
@@ -407,38 +407,38 @@ public class DatasetTest extends AbstractTest {
         copy.println();
 
         copy = sheet.copy();
-        copy.sortByRow("China", Comparators.comparingCollection());
+        copy.sortColumnsByRowValues("China", Comparators.comparingCollection());
         copy.println();
 
         copy = sheet.copy();
-        copy.sortByRow("China", Comparators.<List<String>> comparingCollection().reversed());
+        copy.sortColumnsByRowValues("China", Comparators.<List<String>> comparingCollection().reversed());
         copy.println();
 
         copy = sheet.copy();
-        copy.sortByColumn(1500, Comparators.comparingCollection());
+        copy.sortRowsByColumnValues(1500, Comparators.comparingCollection());
         copy.println();
 
         copy = sheet.copy();
-        copy.sortByColumn(1500, Comparators.<List<String>> comparingCollection().reversed());
+        copy.sortRowsByColumnValues(1500, Comparators.<List<String>> comparingCollection().reversed());
         copy.println();
 
         N.println("sortByColumns" + Strings.repeat("=", 80));
         copy = sheet.copy();
         copy.println();
-        copy.sortByColumns(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()));
+        copy.sortRowsByColumnValues(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()));
         copy.println();
         copy = sheet.copy();
-        copy.sortByColumns(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
+        copy.sortRowsByColumnValues(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
         copy.println();
         N.println(Strings.repeat("=", 80));
 
         N.println("sortByRows" + Strings.repeat("=", 80));
         copy = sheet.copy();
         copy.println();
-        copy.sortByRows(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()));
+        copy.sortColumnsByRowValues(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()));
         copy.println();
         copy = sheet.copy();
-        copy.sortByRows(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
+        copy.sortColumnsByRowValues(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
         copy.println();
         N.println(Strings.repeat("=", 80));
 
@@ -516,7 +516,7 @@ public class DatasetTest extends AbstractTest {
     public void test_json_3() throws Exception {
         final List<Account> accountList = createAccountList(Account.class, 9);
 
-        final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::bean2Map).toList();
+        final List<Map<String, Object>> mapList = Stream.of(accountList).map(Beans::beanToMap).toList();
 
         mapList.get(0).remove("id");
 
@@ -550,9 +550,9 @@ public class DatasetTest extends AbstractTest {
         final MutableInt idVal = MutableInt.of(accountList.size());
         accountList.forEach(it -> it.setId(idVal.incrementAndGet() % 3));
         final Dataset ds = CommonUtil.newDataset(accountList);
-        ds.groupBy("id", ds.columnNameList(), "account", Account.class).println();
+        ds.groupBy("id", ds.columnNames(), "account", Account.class).println();
 
-        ds.groupBy(CommonUtil.asList("id", "firstName"), ds.columnNameList(), "account", Account.class).println();
+        ds.groupBy(CommonUtil.asList("id", "firstName"), ds.columnNames(), "account", Account.class).println();
 
         ds.groupBy(CommonUtil.asList("id", "firstName"), CommonUtil.asList("lastName", "firstName"), "account", it -> it.join(":"), Collectors.toList())
                 .println();
@@ -561,7 +561,7 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_toList() {
         final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("a", "b", "c"), CommonUtil.asList(CommonUtil.asList("a1", "b1", "c1")));
-        dataset.toList(dataset.columnNameList().subList(1, 3), Object[].class).forEach(Fn.println());
+        dataset.toList(dataset.columnNames().subList(1, 3), Object[].class).forEach(Fn.println());
     }
 
     @Test
@@ -612,7 +612,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals("firstName2", accounts1.get(0).getFirstName());
         assertEquals(2, accounts1.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNameList(), Account.class);
+        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(), Account.class);
         accounts2.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts2.size());
         assertEquals("firstName1", accounts2.get(0).getFirstName());
@@ -631,7 +631,7 @@ public class DatasetTest extends AbstractTest {
 
         dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
 
-        final List<Account> accounts = dataset.toEntities(dataset.columnNameList(), CommonUtil.asMap("ct", "contact"), Account.class);
+        final List<Account> accounts = dataset.toEntities(dataset.columnNames(), CommonUtil.asMap("ct", "contact"), Account.class);
         accounts.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts.size());
         assertEquals("firstName1", accounts.get(0).getFirstName());
@@ -639,7 +639,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals(1, accounts.get(0).getDevices().size());
         assertEquals(1, accounts.get(1).getDevices().size());
 
-        final List<Account> accounts1 = dataset.toMergedEntities(CommonUtil.asList("id"), dataset.columnNameList(), CommonUtil.asMap("ct", "contact"),
+        final List<Account> accounts1 = dataset.toMergedEntities(CommonUtil.asList("id"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
                 Account.class);
         accounts1.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(1, accounts1.size());
@@ -647,7 +647,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals("address2", accounts1.get(0).getContact().getAddress());
         assertEquals(2, accounts1.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNameList(),
+        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(),
                 CommonUtil.asMap("ct", "contact"), Account.class);
         accounts2.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts2.size());
@@ -719,7 +719,7 @@ public class DatasetTest extends AbstractTest {
         ds.println(outputWriter);
         N.println(outputWriter.toString());
 
-        ds.removeColumns(ds.columnNameList());
+        ds.removeColumns(ds.columnNames());
         ds.println();
     }
 
@@ -759,7 +759,7 @@ public class DatasetTest extends AbstractTest {
         ds1.unionAll(ds2).println();
 
         N.println("============================== intersection ===========================");
-        ds1.intersection(ds2).println();
+        N.intersection(ds1, ds2).println();
 
         N.println("============================== intersectAll ===========================");
         ds1.intersectAll(ds2).println();
@@ -836,13 +836,13 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds2 = ds.copy();
         ds2.println();
 
-        ds2.removeMultiRows(1, 3, 5);
+        ds2.removeRowsAt(1, 3, 5);
         ds2.println();
 
         final Dataset ds3 = ds.copy();
         ds3.println();
 
-        ds3.removeMultiRows(0, 2, 4, 5);
+        ds3.removeRowsAt(0, 2, 4, 5);
         ds3.println();
     }
 
@@ -960,13 +960,13 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds3 = CommonUtil.newDataset(CommonUtil.asList(account, account, account));
 
         assertEquals(0, ds2.except(ds1).size());
-        assertEquals(1, ds2.difference(ds1).size());
+        assertEquals(1, N.difference(ds2, ds1).size());
         assertEquals(0, ds3.except(ds1).size());
-        assertEquals(2, ds3.difference(ds1).size());
+        assertEquals(2, N.difference(ds3, ds1).size());
 
-        assertEquals(1, ds2.intersection(ds1).size());
+        assertEquals(1, N.intersection(ds2, ds1).size());
         assertEquals(2, ds2.intersectAll(ds1).size());
-        assertEquals(2, ds3.intersection(ds2).size());
+        assertEquals(2, N.intersection(ds3, ds2).size());
         assertEquals(3, ds3.intersectAll(ds2).size());
     }
 
@@ -1013,10 +1013,10 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 7);
 
         final Dataset ds = CommonUtil.newDataset(accountList);
-        ds.renameColumns(ds.columnNameList(), t -> t + "2");
+        ds.renameColumns(ds.columnNames(), t -> t + "2");
         ds.println();
 
-        ds.updateColumns(ds.columnNameList(), (i, c, v) -> CommonUtil.toString(v));
+        ds.updateColumns(ds.columnNames(), (i, c, v) -> CommonUtil.toString(v));
         ds.println();
     }
 
@@ -1058,7 +1058,7 @@ public class DatasetTest extends AbstractTest {
         Dataset ds2 = CommonUtil.newDataset(accountList2);
         ds2.removeColumn("gui");
         final Map<String, String> oldNewNames = new HashMap<>();
-        for (final String columnName : ds2.columnNameList()) {
+        for (final String columnName : ds2.columnNames()) {
             oldNewNames.put(columnName, "right" + Strings.capitalize(columnName));
         }
 
@@ -1199,7 +1199,7 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds2 = CommonUtil.newDataset(accountList2);
         ds2.removeColumn("gui");
         final Map<String, String> oldNewNames = new HashMap<>();
-        for (final String columnName : ds2.columnNameList()) {
+        for (final String columnName : ds2.columnNames()) {
             oldNewNames.put(columnName, "right" + Strings.capitalize(columnName));
         }
 
@@ -1410,14 +1410,14 @@ public class DatasetTest extends AbstractTest {
 
         final Dataset ds2 = ds.copy();
 
-        Dataset ds3 = ds.intersection(ds2);
+        Dataset ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(ds, ds3);
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1426,14 +1426,14 @@ public class DatasetTest extends AbstractTest {
 
         ds2.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1442,14 +1442,14 @@ public class DatasetTest extends AbstractTest {
 
         ds.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1466,14 +1466,14 @@ public class DatasetTest extends AbstractTest {
 
         ds.removeColumn(ds.getColumnName(2));
 
-        Dataset ds3 = ds.intersection(ds2);
+        Dataset ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(ds, ds3);
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1482,14 +1482,14 @@ public class DatasetTest extends AbstractTest {
 
         ds2.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1498,14 +1498,14 @@ public class DatasetTest extends AbstractTest {
 
         ds.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1522,14 +1522,14 @@ public class DatasetTest extends AbstractTest {
 
         ds2.removeColumn(ds2.getColumnName(2));
 
-        Dataset ds3 = ds.intersection(ds2);
+        Dataset ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(ds, ds3);
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1538,14 +1538,14 @@ public class DatasetTest extends AbstractTest {
 
         ds2.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1554,14 +1554,14 @@ public class DatasetTest extends AbstractTest {
 
         ds.clear();
 
-        ds3 = ds.intersection(ds2);
+        ds3 = N.intersection(ds, ds2);
 
         ds.println();
         ds3.println();
 
         assertEquals(0, ds3.size());
 
-        ds3 = ds.difference(ds2);
+        ds3 = N.difference(ds, ds2);
 
         ds.println();
         ds3.println();
@@ -1596,13 +1596,13 @@ public class DatasetTest extends AbstractTest {
 
         assertEquals(newValue, ds.get(1, 1));
 
-        assertFalse(ds.absolute(1).isNull(1));
-        assertFalse(ds.absolute(1).isNull(ds.getColumnName(1)));
+        assertFalse(ds.moveToRow(1).isNull(1));
+        assertFalse(ds.moveToRow(1).isNull(ds.getColumnName(1)));
 
         ds.set(1, 1, null);
 
-        assertTrue(ds.absolute(1).isNull(1));
-        assertTrue(ds.absolute(1).isNull(ds.getColumnName(1)));
+        assertTrue(ds.moveToRow(1).isNull(1));
+        assertTrue(ds.moveToRow(1).isNull(ds.getColumnName(1)));
     }
 
     @Test

@@ -709,14 +709,14 @@ public class EntryStream200Test extends TestBase {
     }
 
     @Test
-    public void testslide() {
+    public void testsliding() {
         final Map<Integer, String> map = new LinkedHashMap<>();
         map.put(1, "a");
         map.put(2, "b");
         map.put(3, "c");
         map.put(4, "d");
 
-        final List<List<Map.Entry<Integer, String>>> windows = EntryStream.of(map).slide(2).toList();
+        final List<List<Map.Entry<Integer, String>>> windows = EntryStream.of(map).sliding(2).toList();
 
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(N.newEntry(1, "a"), N.newEntry(2, "b")), windows.get(0));
@@ -1253,7 +1253,7 @@ public class EntryStream200Test extends TestBase {
         map.put(4, "d");
         map.put(5, "e");
 
-        final List<List<Map.Entry<Integer, String>>> windows = EntryStream.of(map).slide(2, 3).toList();
+        final List<List<Map.Entry<Integer, String>>> windows = EntryStream.of(map).sliding(2, 3).toList();
         assertEquals(2, windows.size());
         assertEquals(Arrays.asList(N.newEntry(1, "a"), N.newEntry(2, "b")), windows.get(0));
         assertEquals(Arrays.asList(N.newEntry(4, "d"), N.newEntry(5, "e")), windows.get(1));

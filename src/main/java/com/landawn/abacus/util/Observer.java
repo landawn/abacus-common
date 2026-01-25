@@ -56,9 +56,9 @@ import java.util.function.Predicate;
 @com.landawn.abacus.annotation.Immutable
 public abstract class Observer<T> implements Immutable {
 
-    private static final Object NONE = ClassUtil.createNullMask();
+    private static final Object NONE = ClassUtil.newNullSentinel();
 
-    private static final Object COMPLETE_FLAG = ClassUtil.createNullMask();
+    private static final Object COMPLETE_FLAG = ClassUtil.newNullSentinel();
 
     protected static final double INTERVAL_FACTOR = 3;
 

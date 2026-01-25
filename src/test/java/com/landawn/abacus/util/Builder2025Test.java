@@ -874,7 +874,7 @@ public class Builder2025Test extends TestBase {
         multimap.put("a", 1);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         assertNotNull(builder);
-        assertEquals(1, builder.val().size());
+        assertEquals(1, builder.val().totalValueCount());
     }
 
     @Test
@@ -893,7 +893,7 @@ public class Builder2025Test extends TestBase {
         map.put("b", 2);
         MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.put(map);
-        assertEquals(2, builder.val().size());
+        assertEquals(2, builder.val().totalValueCount());
     }
 
     @Test
@@ -1000,7 +1000,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         assertNotNull(builder);
-        assertEquals(2, builder.val().columnNameList().size());
+        assertEquals(2, builder.val().columnNames().size());
     }
 
     @Test
@@ -1008,7 +1008,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumn("col1", "newCol1");
-        assertTrue(builder.val().columnNameList().contains("newCol1"));
+        assertTrue(builder.val().columnNames().contains("newCol1"));
     }
 
     @Test
@@ -1019,8 +1019,8 @@ public class Builder2025Test extends TestBase {
         renames.put("col2", "newCol2");
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumns(renames);
-        assertTrue(builder.val().columnNameList().contains("newCol1"));
-        assertTrue(builder.val().columnNameList().contains("newCol2"));
+        assertTrue(builder.val().columnNames().contains("newCol1"));
+        assertTrue(builder.val().columnNames().contains("newCol2"));
     }
 
     @Test
@@ -1028,7 +1028,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumns(name -> "prefix_" + name);
-        assertTrue(builder.val().columnNameList().contains("prefix_col1"));
+        assertTrue(builder.val().columnNames().contains("prefix_col1"));
     }
 
     @Test
@@ -1036,8 +1036,8 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.renameColumns(Arrays.asList("col1"), name -> name.toUpperCase());
-        assertTrue(builder.val().columnNameList().contains("COL1"));
-        assertTrue(builder.val().columnNameList().contains("col2"));
+        assertTrue(builder.val().columnNames().contains("COL1"));
+        assertTrue(builder.val().columnNames().contains("col2"));
     }
 
     @Test
@@ -1045,7 +1045,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("col2", Arrays.asList(3, 4));
-        assertEquals(2, builder.val().columnNameList().size());
+        assertEquals(2, builder.val().columnNames().size());
     }
 
     @Test
@@ -1053,7 +1053,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "col0", Arrays.asList(0, 0));
-        assertEquals("col0", builder.val().columnNameList().get(0));
+        assertEquals("col0", builder.val().columnNames().get(0));
     }
 
     @Test
@@ -1061,7 +1061,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumn("col2");
-        assertEquals(1, builder.val().columnNameList().size());
+        assertEquals(1, builder.val().columnNames().size());
     }
 
     @Test
@@ -1069,7 +1069,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2", "col3"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumns(Arrays.asList("col2", "col3"));
-        assertEquals(1, builder.val().columnNameList().size());
+        assertEquals(1, builder.val().columnNames().size());
     }
 
     @Test
@@ -1077,7 +1077,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "temp1", "temp2"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.removeColumns(name -> name.startsWith("temp"));
-        assertEquals(1, builder.val().columnNameList().size());
+        assertEquals(1, builder.val().columnNames().size());
     }
 
     @Test
@@ -1548,34 +1548,34 @@ public class Builder2025Test extends TestBase {
         assertTrue(builder instanceof DoubleListBuilder);
     }
 
-    @Test
-    public void testBuilder_map() {
-        Builder<String> builder = Builder.of("hello");
-        Builder<Integer> mapped = builder.map(String::length);
-        assertEquals(5, mapped.val());
-    }
-
-    @Test
-    public void testBuilder_filter() {
-        Builder<String> builder = Builder.of("hello");
-        u.Optional<String> filtered = builder.filter(s -> s.length() > 3);
-        assertTrue(filtered.isPresent());
-        assertEquals("hello", filtered.get());
-    }
-
-    @Test
-    public void testBuilder_filter_notPresent() {
-        Builder<String> builder = Builder.of("hi");
-        u.Optional<String> filtered = builder.filter(s -> s.length() > 3);
-        assertFalse(filtered.isPresent());
-    }
+    //    @Test
+    //    public void testBuilder_map() {
+    //        Builder<String> builder = Builder.of("hello");
+    //        Builder<Integer> mapped = builder.map(String::length);
+    //        assertEquals(5, mapped.val());
+    //    }
+    //
+    //    @Test
+    //    public void testBuilder_filter() {
+    //        Builder<String> builder = Builder.of("hello");
+    //        u.Optional<String> filtered = builder.filter(s -> s.length() > 3);
+    //        assertTrue(filtered.isPresent());
+    //        assertEquals("hello", filtered.get());
+    //    }
+    //
+    //    @Test
+    //    public void testBuilder_filter_notPresent() {
+    //        Builder<String> builder = Builder.of("hi");
+    //        u.Optional<String> filtered = builder.filter(s -> s.length() > 3);
+    //        assertFalse(filtered.isPresent());
+    //    }
 
     @Test
     public void testDatasetBuilder_addColumn_withFunction() {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("col2", "col1", (Integer val) -> val * 2);
-        assertEquals(2, builder.val().columnNameList().size());
+        assertEquals(2, builder.val().columnNames().size());
     }
 
     @Test
@@ -1583,7 +1583,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "col0", "col1", (Integer val) -> val * 10);
-        assertEquals("col0", builder.val().columnNameList().get(0));
+        assertEquals("col0", builder.val().columnNames().get(0));
     }
 
     @Test
@@ -1593,7 +1593,7 @@ public class Builder2025Test extends TestBase {
         builder.addColumn("sum", Arrays.asList("col1", "col2"), arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
         });
-        assertEquals(3, builder.val().columnNameList().size());
+        assertEquals(3, builder.val().columnNames().size());
     }
 
     @Test
@@ -1603,7 +1603,7 @@ public class Builder2025Test extends TestBase {
         builder.addColumn(0, "sum", Arrays.asList("col1", "col2"), arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
         });
-        assertEquals("sum", builder.val().columnNameList().get(0));
+        assertEquals("sum", builder.val().columnNames().get(0));
     }
 
     @Test
@@ -1611,7 +1611,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("product", Tuple.of("col1", "col2"), (Integer a, Integer b) -> a * b);
-        assertEquals(3, builder.val().columnNameList().size());
+        assertEquals(3, builder.val().columnNames().size());
     }
 
     @Test
@@ -1619,7 +1619,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "product", Tuple.of("col1", "col2"), (Integer a, Integer b) -> a * b);
-        assertEquals("product", builder.val().columnNameList().get(0));
+        assertEquals("product", builder.val().columnNames().get(0));
     }
 
     @Test
@@ -1627,7 +1627,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn("sum", Tuple.of("a", "b", "c"), (Integer x, Integer y, Integer z) -> x + y + z);
-        assertEquals(4, builder.val().columnNameList().size());
+        assertEquals(4, builder.val().columnNames().size());
     }
 
     @Test
@@ -1635,7 +1635,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.addColumn(0, "sum", Tuple.of("a", "b", "c"), (Integer x, Integer y, Integer z) -> x + y + z);
-        assertEquals("sum", builder.val().columnNameList().get(0));
+        assertEquals("sum", builder.val().columnNames().get(0));
     }
 
     @Test
@@ -1643,7 +1643,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateColumn("col1", (Integer val) -> val * 2);
-        assertEquals(2, (Integer) builder.val().absolute(0).get("col1"));
+        assertEquals(2, (Integer) builder.val().moveToRow(0).get("col1"));
     }
 
     @Test
@@ -1651,7 +1651,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateColumns(Arrays.asList("col1", "col2"), (rowIdx, colName, val) -> ((Integer) val) * 10);
-        assertEquals(10, (Integer) builder.val().absolute(0).get("col1"));
+        assertEquals(10, (Integer) builder.val().moveToRow(0).get("col1"));
     }
 
     @Test
@@ -1659,7 +1659,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList("123")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.convertColumn("col1", Integer.class);
-        assertTrue(builder.val().absolute(0).get("col1") instanceof Integer);
+        assertTrue(builder.val().moveToRow(0).get("col1") instanceof Integer);
     }
 
     @Test
@@ -1670,7 +1670,7 @@ public class Builder2025Test extends TestBase {
         conversions.put("col2", Integer.class);
         DatasetBuilder builder = Builder.of(dataset);
         builder.convertColumns(conversions);
-        assertTrue(builder.val().absolute(0).get("col1") instanceof Integer);
+        assertTrue(builder.val().moveToRow(0).get("col1") instanceof Integer);
     }
 
     @Test
@@ -1680,7 +1680,7 @@ public class Builder2025Test extends TestBase {
         builder.combineColumns(Arrays.asList("a", "b"), "sum", arr -> {
             return ((Integer) arr.get(0)) + ((Integer) arr.get(1));
         });
-        assertTrue(builder.val().columnNameList().contains("sum"));
+        assertTrue(builder.val().columnNames().contains("sum"));
     }
 
     @Test
@@ -1688,7 +1688,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b"), Arrays.asList(Arrays.asList(1, 2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.combineColumns(Tuple.of("a", "b"), "sum", (Integer x, Integer y) -> x + y);
-        assertTrue(builder.val().columnNameList().contains("sum"));
+        assertTrue(builder.val().columnNames().contains("sum"));
     }
 
     @Test
@@ -1696,7 +1696,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("a", "b", "c"), Arrays.asList(Arrays.asList(1, 2, 3)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.combineColumns(Tuple.of("a", "b", "c"), "sum", (Integer x, Integer y, Integer z) -> x + y + z);
-        assertTrue(builder.val().columnNameList().contains("sum"));
+        assertTrue(builder.val().columnNames().contains("sum"));
     }
 
     @Test
@@ -1704,8 +1704,8 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("full"), Arrays.asList(Arrays.asList("a,b")));
         DatasetBuilder builder = Builder.of(dataset);
         builder.divideColumn("full", Arrays.asList("col1", "col2"), (String val) -> Arrays.asList(val.split(",")));
-        assertTrue(builder.val().columnNameList().contains("col1"));
-        assertTrue(builder.val().columnNameList().contains("col2"));
+        assertTrue(builder.val().columnNames().contains("col1"));
+        assertTrue(builder.val().columnNames().contains("col2"));
     }
 
     @Test
@@ -1717,7 +1717,7 @@ public class Builder2025Test extends TestBase {
             output[0] = parts[0];
             output[1] = parts[1];
         });
-        assertTrue(builder.val().columnNameList().contains("col1"));
+        assertTrue(builder.val().columnNames().contains("col1"));
     }
 
     @Test
@@ -1729,7 +1729,7 @@ public class Builder2025Test extends TestBase {
             output.setLeft(parts[0]);
             output.setRight(parts[1]);
         });
-        assertTrue(builder.val().columnNameList().contains("col1"));
+        assertTrue(builder.val().columnNames().contains("col1"));
     }
 
     @Test
@@ -1742,7 +1742,7 @@ public class Builder2025Test extends TestBase {
             output.setMiddle(parts[1]);
             output.setRight(parts[2]);
         });
-        assertTrue(builder.val().columnNameList().contains("col1"));
+        assertTrue(builder.val().columnNames().contains("col1"));
     }
 
     @Test
@@ -1750,7 +1750,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateAll((Integer val) -> val * 2);
-        assertEquals(2, (Integer) builder.val().absolute(0).get("col1"));
+        assertEquals(2, (Integer) builder.val().moveToRow(0).get("col1"));
     }
 
     @Test
@@ -1758,8 +1758,8 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.updateAll((rowIdx, colName, val) -> ((Integer) val) + rowIdx);
-        assertEquals(1, (Integer) builder.val().absolute(0).get("col1"));
-        assertEquals(3, (Integer) builder.val().absolute(1).get("col1"));
+        assertEquals(1, (Integer) builder.val().moveToRow(0).get("col1"));
+        assertEquals(3, (Integer) builder.val().moveToRow(1).get("col1"));
     }
 
     @Test
@@ -1767,7 +1767,7 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.replaceIf((Integer val) -> val == 2, 0);
-        assertEquals(0, (Integer) builder.val().absolute(1).get("col1"));
+        assertEquals(0, (Integer) builder.val().moveToRow(1).get("col1"));
     }
 
     @Test
@@ -1775,6 +1775,6 @@ public class Builder2025Test extends TestBase {
         Dataset dataset = CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)));
         DatasetBuilder builder = Builder.of(dataset);
         builder.replaceIf((rowIdx, colName, val) -> ((Integer) val) > 1, 99);
-        assertEquals(99, (Integer) builder.val().absolute(1).get("col1"));
+        assertEquals(99, (Integer) builder.val().moveToRow(1).get("col1"));
     }
 }

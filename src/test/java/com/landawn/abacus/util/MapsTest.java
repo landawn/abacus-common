@@ -22,14 +22,14 @@ import com.landawn.abacus.util.stream.Stream;
 public class MapsTest extends AbstractTest {
 
     @Test
-    public void test_bean2Map() {
+    public void test_beanToMap() {
 
         Account account1 = Beans.fill(Account.class);
-        Map<String, Object> map1 = Beans.bean2Map(account1);
+        Map<String, Object> map1 = Beans.beanToMap(account1);
         N.println(map1);
 
-        Beans.bean2Map(account1, new HashMap<String, Object>());
-        Map<String, Object> map2 = Beans.bean2Map(account1, IntFunctions.ofMap());
+        Beans.beanToMap(account1, new HashMap<String, Object>());
+        Map<String, Object> map2 = Beans.beanToMap(account1, IntFunctions.ofMap());
         N.println(map2);
     }
 
@@ -42,18 +42,18 @@ public class MapsTest extends AbstractTest {
         var mapDiff = BeanDifference.of(account1, account2);
 
         N.println(mapDiff);
-        N.println(mapDiff.inCommon());
-        N.println(mapDiff.onLeftOnly());
-        N.println(mapDiff.onRightOnly());
-        N.println(mapDiff.withDifferentValues());
+        N.println(mapDiff.common());
+        N.println(mapDiff.leftOnly());
+        N.println(mapDiff.rightOnly());
+        N.println(mapDiff.differentValues());
 
         mapDiff = BeanDifference.of(account1, account2, CommonUtil.asList("id", "firstName", "lastName2"));
 
         N.println(mapDiff);
-        N.println(mapDiff.inCommon());
-        N.println(mapDiff.onLeftOnly());
-        N.println(mapDiff.onRightOnly());
-        N.println(mapDiff.withDifferentValues());
+        N.println(mapDiff.common());
+        N.println(mapDiff.leftOnly());
+        N.println(mapDiff.rightOnly());
+        N.println(mapDiff.differentValues());
 
     }
 
@@ -153,8 +153,8 @@ public class MapsTest extends AbstractTest {
         assertEquals(1, Maps.getOrDefaultIfAbsent(map, "a", 0).intValue());
         assertEquals(0, Maps.getOrDefaultIfAbsent(map, "d", 0).intValue());
 
-        assertEquals(CommonUtil.asList(1, 0), Maps.getOrDefaultIfAbsentForEach(map, CommonUtil.asList("a", "d"), 0));
+        assertEquals(CommonUtil.asList(1, 0), Maps.getValuesOrDefault(map, CommonUtil.asList("a", "d"), 0));
 
-        assertEquals(CommonUtil.asList(1), Maps.getIfPresentForEach(map, CommonUtil.asList("a", "d")));
+        assertEquals(CommonUtil.asList(1), Maps.getValuesIfPresent(map, CommonUtil.asList("a", "d")));
     }
 }

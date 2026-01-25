@@ -25,7 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -73,7 +73,7 @@ public class ClobAsciiStreamType extends InputStreamType {
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Clob clob = rs.getClob(columnIndex);
-        return clob2AsciiStream(clob);
+        return clobToAsciiStream(clob);
     }
 
     /**
@@ -86,7 +86,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clob2AsciiStream(rs.getClob(columnLabel));
+        return clobToAsciiStream(rs.getClob(columnLabel));
     }
 
     /**
@@ -180,7 +180,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -217,7 +217,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @return An ASCII InputStream from the CLOB, or {@code null} if the CLOB is null
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
-    static InputStream clob2AsciiStream(final Clob clob) throws SQLException {
+    static InputStream clobToAsciiStream(final Clob clob) throws SQLException {
         if (clob != null) {
             return clob.getAsciiStream();
         }

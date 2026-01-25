@@ -42,7 +42,7 @@ import jakarta.xml.bind.Unmarshaller;
  * XML parser implementation using JAXB (Jakarta XML Binding) for serialization and deserialization.
  * 
  * <p>This class provides XML parsing capabilities using the JAXB framework, which maps Java objects
- * to XML representations and vice versa. It extends {@link AbstractXMLParser} and implements
+ * to XML representations and vice versa. It extends {@link AbstractXmlParser} and implements
  * all the required serialization and deserialization methods.</p>
  * 
  * <p>Key features:</p>
@@ -68,10 +68,10 @@ import jakarta.xml.bind.Unmarshaller;
  * Person restored = parser.deserialize(xml, null, Person.class);
  * }</pre>
  * 
- * @see AbstractXMLParser
+ * @see AbstractXmlParser
  * @see jakarta.xml.bind.JAXB
  */
-final class JAXBParser extends AbstractXMLParser {
+final class JAXBParser extends AbstractXmlParser {
 
     /**
      * Constructs a new JAXBParser with default configuration.
@@ -91,7 +91,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
      */
-    JAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
+    JAXBParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
         super(xsc, xdc);
     }
 
@@ -118,7 +118,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
      */
     @Override
-    public String serialize(final Object obj, final XMLSerializationConfig config) {
+    public String serialize(final Object obj, final XmlSerializationConfig config) {
         if (obj == null) {
             return Strings.EMPTY;
         }
@@ -155,7 +155,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
+    public void serialize(final Object obj, final XmlSerializationConfig config, final File output) {
         Writer writer = null;
 
         try {
@@ -195,7 +195,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -231,7 +231,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
+    public void serialize(final Object obj, final XmlSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
@@ -261,7 +261,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
      * @throws UncheckedIOException if an I/O error occurs
      */
-    void write(final Object obj, final XMLSerializationConfig config, final Writer output) {
+    void write(final Object obj, final XmlSerializationConfig config, final Writer output) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }
@@ -290,12 +290,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     @Override
-    public <T> T deserialize(final String source, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.clazz());
     }
 
     @Override
-    public <T> T deserialize(final String source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
         }
@@ -310,12 +310,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     @Override
-    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.clazz());
     }
 
     @Override
-    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         Reader reader = null;
 
         try {
@@ -328,12 +328,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     @Override
-    public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.clazz());
     }
 
     @Override
-    public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
@@ -344,22 +344,22 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     @Override
-    public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.clazz());
     }
 
     @Override
-    public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
     @Override
-    public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Class<? extends T> targetClass)
+    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Class<? extends T> targetClass)
             throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -382,7 +382,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @throws ParseException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
     @SuppressWarnings("unchecked")
-    <T> T read(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    <T> T read(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }

@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -233,7 +233,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final int[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final int[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -259,10 +259,10 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * <pre>{@code
      * Type<int[]> type = TypeFactory.getType(int[].class);
      * List<Integer> list = Arrays.asList(1, 2, 3, 4);
-     * int[] arr = type.collection2Array(list);
+     * int[] arr = type.collectionToArray(list);
      * // arr equals {1, 2, 3, 4}
      *
-     * int[] nullArr = type.collection2Array(null);
+     * int[] nullArr = type.collectionToArray(null);
      * // nullArr equals null
      * }</pre>
      *
@@ -272,7 +272,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws ClassCastException if any element in the collection is not an Integer
      */
     @Override
-    public int[] collection2Array(final Collection<?> c) {
+    public int[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -297,10 +297,10 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr = {1, 2, 3};
      * List<Integer> list = new ArrayList<>();
-     * type.array2Collection(arr, list);
+     * type.arrayToCollection(arr, list);
      * // list now contains [1, 2, 3]
      *
-     * type.array2Collection(null, list);
+     * type.arrayToCollection(null, list);
      * // list remains unchanged
      * }</pre>
      *
@@ -310,7 +310,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws ClassCastException if the output collection cannot accept Integer objects
      */
     @Override
-    public <E> void array2Collection(final int[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final int[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

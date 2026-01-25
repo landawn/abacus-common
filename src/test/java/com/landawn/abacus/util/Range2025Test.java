@@ -426,32 +426,32 @@ public class Range2025Test extends TestBase {
     @Test
     public void test_compareTo_elementBefore() {
         Range<Integer> range = Range.closed(5, 10);
-        assertEquals(1, range.compareTo(3));
+        assertEquals(1, range.positionOf(3));
     }
 
     @Test
     public void test_compareTo_elementWithin() {
         Range<Integer> range = Range.closed(5, 10);
-        assertEquals(0, range.compareTo(7));
+        assertEquals(0, range.positionOf(7));
     }
 
     @Test
     public void test_compareTo_elementAfter() {
         Range<Integer> range = Range.closed(5, 10);
-        assertEquals(-1, range.compareTo(12));
+        assertEquals(-1, range.positionOf(12));
     }
 
     @Test
     public void test_compareTo_null() {
         Range<Integer> range = Range.closed(5, 10);
-        assertThrows(IllegalArgumentException.class, () -> range.compareTo(null));
+        assertThrows(IllegalArgumentException.class, () -> range.positionOf(null));
     }
 
     @Test
     public void test_compareTo_atBoundaries() {
         Range<Integer> range = Range.closed(5, 10);
-        assertEquals(0, range.compareTo(5));
-        assertEquals(0, range.compareTo(10));
+        assertEquals(0, range.positionOf(5));
+        assertEquals(0, range.positionOf(10));
     }
 
     @Test

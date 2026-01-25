@@ -21,7 +21,7 @@ import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Transient;
-import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
@@ -125,8 +125,8 @@ public class PropInfo100Test extends TestBase {
 
     @Test
     public void testWritePropValue() throws IOException {
-        CharacterWriter writer = Objectory.createBufferedJSONWriter();
-        JSONXMLSerializationConfig<?> config = JSC.create();
+        CharacterWriter writer = Objectory.createBufferedJsonWriter();
+        JsonXmlSerializationConfig<?> config = JSC.create();
         config.setStringQuotation('"');
 
         ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
@@ -138,20 +138,20 @@ public class PropInfo100Test extends TestBase {
         Assertions.assertTrue(result.contains("TestName"));
 
         Objectory.recycle(writer);
-        writer = Objectory.createBufferedJSONWriter();
+        writer = Objectory.createBufferedJsonWriter();
         Date date = new Date();
         dateProp.writePropValue(writer, date, config);
         result = writer.toString();
         Assertions.assertNotNull(result);
 
         Objectory.recycle(writer);
-        writer = Objectory.createBufferedJSONWriter();
+        writer = Objectory.createBufferedJsonWriter();
         numberProp.writePropValue(writer, 1234.56, config);
         result = writer.toString();
         Assertions.assertTrue(result.contains("1,234.56"));
 
         Objectory.recycle(writer);
-        writer = Objectory.createBufferedJSONWriter();
+        writer = Objectory.createBufferedJsonWriter();
         nameProp.writePropValue(writer, null, config);
         result = writer.toString();
         Assertions.assertEquals("null", result);
@@ -161,8 +161,8 @@ public class PropInfo100Test extends TestBase {
 
     @Test
     public void testWritePropValueWithJsonRawValue() throws IOException {
-        CharacterWriter writer = Objectory.createBufferedJSONWriter();
-        JSONXMLSerializationConfig<?> config = JSC.create();
+        CharacterWriter writer = Objectory.createBufferedJsonWriter();
+        JsonXmlSerializationConfig<?> config = JSC.create();
 
         ParserUtil.PropInfo jsonRawProp = beanInfo.getPropInfo("jsonRawField");
 
@@ -247,7 +247,7 @@ public class PropInfo100Test extends TestBase {
         Assertions.assertEquals("id", prop.toString());
     }
 
-    @JsonXmlConfig(namingPolicy = NamingPolicy.LOWER_CAMEL_CASE)
+    @JsonXmlConfig(namingPolicy = NamingPolicy.CAMEL_CASE)
     public static class TestBean {
         @Id
         private Long id;

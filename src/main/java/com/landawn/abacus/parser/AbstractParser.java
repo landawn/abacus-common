@@ -358,7 +358,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param targetType the target array type
      * @return an array containing the collection elements, or {@code null} if the collection is {@code null}
      */
-    protected static <T> T collection2Array(final Collection<?> c, final Type<?> targetType) {
+    protected static <T> T collectionToArray(final Collection<?> c, final Type<?> targetType) {
         if (c == null) {
             return null;
         }
@@ -371,7 +371,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             for (final Object e : c) {
                 if (e != null) {
                     if (targetType.getElementType().clazz().isAssignableFrom(e.getClass())) {
-                        return (T) targetType.collection2Array(c);
+                        return (T) targetType.collectionToArray(c);
                     } else {
                         return (T) c.toArray((Object[]) N.newArray(e.getClass(), c.size()));
                     }
@@ -379,7 +379,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             }
         }
 
-        return (T) targetType.collection2Array(c);
+        return (T) targetType.collectionToArray(c);
     }
 
     /**
@@ -430,7 +430,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param bw the XML writer
      * @return {@code true} if circular reference was found and handled, {@code false} otherwise
      */
-    protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONXMLSerializationConfig<?> config,
+    protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerializationConfig<?> config,
             @SuppressWarnings("unused") final CharacterWriter bw) {
         final Type<?> type = obj == null ? null : Type.of(obj.getClass());
         if (obj != null && serializedObjects != null //

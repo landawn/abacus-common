@@ -36,21 +36,21 @@ import java.io.Writer;
  * 
  * <p>Example of how subclasses use this class:</p>
  * <pre>{@code
- * // In a subclass like BufferedJSONWriter:
+ * // In a subclass like BufferedJsonWriter:
  * char[][] replacements = new char[128][];
  * replacements['"'] = "\\\"".toCharArray();
  * replacements['\\'] = "\\\\".toCharArray();
  * // ... more replacements
  * 
- * CharacterWriter writer = new BufferedJSONWriter();
+ * CharacterWriter writer = new BufferedJsonWriter();
  * writer.writeCharacter("Hello \"World\"");   // Outputs: Hello \"World\"
  * }</pre>
  * 
- * @see BufferedJSONWriter
- * @see BufferedXMLWriter
- * @see BufferedCSVWriter
+ * @see BufferedJsonWriter
+ * @see BufferedXmlWriter
+ * @see BufferedCsvWriter
  */
-public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJSONWriter, BufferedXMLWriter, BufferedCSVWriter {
+public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJsonWriter, BufferedXmlWriter, BufferedCsvWriter {
 
     /**
      * The character replacement table used for escaping.

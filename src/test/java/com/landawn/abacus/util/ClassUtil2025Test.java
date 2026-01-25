@@ -27,27 +27,27 @@ import com.landawn.abacus.TestBase;
 public class ClassUtil2025Test extends TestBase {
 
     @Test
-    public void test_forClass() {
-        assertEquals(int.class, ClassUtil.forClass("int"));
-        assertEquals(boolean.class, ClassUtil.forClass("boolean"));
-        assertEquals(char.class, ClassUtil.forClass("char"));
-        assertEquals(byte.class, ClassUtil.forClass("byte"));
-        assertEquals(short.class, ClassUtil.forClass("short"));
-        assertEquals(long.class, ClassUtil.forClass("long"));
-        assertEquals(float.class, ClassUtil.forClass("float"));
-        assertEquals(double.class, ClassUtil.forClass("double"));
+    public void test_forName() {
+        assertEquals(int.class, ClassUtil.forName("int"));
+        assertEquals(boolean.class, ClassUtil.forName("boolean"));
+        assertEquals(char.class, ClassUtil.forName("char"));
+        assertEquals(byte.class, ClassUtil.forName("byte"));
+        assertEquals(short.class, ClassUtil.forName("short"));
+        assertEquals(long.class, ClassUtil.forName("long"));
+        assertEquals(float.class, ClassUtil.forName("float"));
+        assertEquals(double.class, ClassUtil.forName("double"));
 
-        assertEquals(Integer.class, ClassUtil.forClass("Integer"));
-        assertEquals(String.class, ClassUtil.forClass("String"));
-        assertEquals(String.class, ClassUtil.forClass("java.lang.String"));
+        assertEquals(Integer.class, ClassUtil.forName("Integer"));
+        assertEquals(String.class, ClassUtil.forName("String"));
+        assertEquals(String.class, ClassUtil.forName("java.lang.String"));
 
-        assertEquals(int[].class, ClassUtil.forClass("int[]"));
-        assertEquals(String[].class, ClassUtil.forClass("String[]"));
-        assertEquals(int[][].class, ClassUtil.forClass("int[][]"));
+        assertEquals(int[].class, ClassUtil.forName("int[]"));
+        assertEquals(String[].class, ClassUtil.forName("String[]"));
+        assertEquals(int[][].class, ClassUtil.forName("int[][]"));
 
-        assertEquals(Map.Entry.class, ClassUtil.forClass("java.util.Map.Entry"));
+        assertEquals(Map.Entry.class, ClassUtil.forName("java.util.Map.Entry"));
 
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forClass("invalid.class.Name"));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("invalid.class.Name"));
     }
 
     @Test
@@ -96,18 +96,18 @@ public class ClassUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_getClassesByPackage() {
-        List<Class<?>> classes = ClassUtil.getClassesByPackage("com.landawn.abacus.util", false, true);
+    public void test_findClassesInPackage() {
+        List<Class<?>> classes = ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true);
         assertNotNull(classes);
         assertTrue(classes.size() > 0);
         assertTrue(classes.stream().anyMatch(c -> c.getSimpleName().equals("ClassUtil")));
 
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.getClassesByPackage("invalid.package.name", false, false));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("invalid.package.name", false, false));
     }
 
     @Test
-    public void test_getClassesByPackage_withPredicate() {
-        List<Class<?>> classes = ClassUtil.getClassesByPackage("com.landawn.abacus.util", false, true, cls -> cls.getName().contains("ClassUtil"));
+    public void test_findClassesInPackage_withPredicate() {
+        List<Class<?>> classes = ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true, cls -> cls.getName().contains("ClassUtil"));
         assertNotNull(classes);
         assertTrue(classes.stream().anyMatch(c -> c.getSimpleName().equals("ClassUtil")));
     }
@@ -211,18 +211,18 @@ public class ClassUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_distanceOfInheritance() {
-        assertEquals(0, ClassUtil.distanceOfInheritance(String.class, String.class));
+    public void test_inheritanceDistance() {
+        assertEquals(0, ClassUtil.inheritanceDistance(String.class, String.class));
 
-        assertEquals(1, ClassUtil.distanceOfInheritance(String.class, Object.class));
+        assertEquals(1, ClassUtil.inheritanceDistance(String.class, Object.class));
 
-        int distance = ClassUtil.distanceOfInheritance(ArrayList.class, Object.class);
+        int distance = ClassUtil.inheritanceDistance(ArrayList.class, Object.class);
         assertTrue(distance > 0);
 
-        assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, Integer.class));
+        assertEquals(-1, ClassUtil.inheritanceDistance(String.class, Integer.class));
 
-        assertEquals(-1, ClassUtil.distanceOfInheritance(null, String.class));
-        assertEquals(-1, ClassUtil.distanceOfInheritance(String.class, null));
+        assertEquals(-1, ClassUtil.inheritanceDistance(null, String.class));
+        assertEquals(-1, ClassUtil.inheritanceDistance(String.class, null));
     }
 
     @Test
@@ -445,11 +445,11 @@ public class ClassUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_createNullMask() {
-        Object nullMask = ClassUtil.createNullMask();
+    public void test_newNullSentinel() {
+        Object nullMask = ClassUtil.newNullSentinel();
         assertNotNull(nullMask);
 
-        Object nullMask2 = ClassUtil.createNullMask();
+        Object nullMask2 = ClassUtil.newNullSentinel();
         assertNotEquals(nullMask, nullMask2);
 
         assertEquals("NULL", nullMask.toString());

@@ -1,3 +1,7 @@
+### 7.2.1
+* Naming convention improvements
+* Improvements and bug fixes
+
 ### 7.2.0
 * Rename Stream.sliding to Stream.slide
 * Add Stream.debounce

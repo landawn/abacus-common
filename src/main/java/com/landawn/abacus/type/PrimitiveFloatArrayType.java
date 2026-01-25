@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -220,7 +220,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final float[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final float[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -247,7 +247,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * <pre>{@code
      * Type<float[]> type = TypeFactory.getType(float[].class);
      * List<Float> list = Arrays.asList(1.5f, 2.7f, 3.14f);
-     * float[] array = type.collection2Array(list);
+     * float[] array = type.collectionToArray(list);
      * // Returns: {1.5f, 2.7f, 3.14f}
      * }</pre>
      *
@@ -255,7 +255,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @return a float array containing the unboxed values, or {@code null} if input is null
      */
     @Override
-    public float[] collection2Array(final Collection<?> c) {
+    public float[] collectionToArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -281,7 +281,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Type<float[]> type = TypeFactory.getType(float[].class);
      * float[] array = {1.5f, 2.7f, 3.14f};
      * List<Float> list = new ArrayList<>();
-     * type.array2Collection(array, list);
+     * type.arrayToCollection(array, list);
      * // list now contains: [1.5f, 2.7f, 3.14f]
      * }</pre>
      *
@@ -290,7 +290,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @param output the Collection to add the boxed Float values to
      */
     @Override
-    public <E> void array2Collection(final float[] x, final Collection<E> output) {
+    public <E> void arrayToCollection(final float[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

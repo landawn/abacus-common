@@ -549,12 +549,12 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void test_format_propName() {
-        String str = Strings.toLowerCaseWithUnderscore("ME_#A3C_AAA_1A2");
+        String str = Strings.toSnakeCase("ME_#A3C_AAA_1A2");
         N.println(str);
 
         assertEquals("me_#a3c_aaa_1a2", str);
 
-        str = Strings.toUpperCaseWithUnderscore("me_#a3c_aaa_1a2");
+        str = Strings.toScreamingSnakeCase("me_#a3c_aaa_1a2");
         N.println(str);
         assertEquals("ME_#A3C_AAA_1A2", str);
 
@@ -566,17 +566,17 @@ public class StringsTest extends AbstractTest {
         N.println(str);
         assertEquals("me#a3cAaa1a2", str);
 
-        assertEquals("xml_parser", Strings.toLowerCaseWithUnderscore("XMLParser"));
-        assertEquals("xml_parser", Strings.toLowerCaseWithUnderscore("xmlPARSER"));
-        assertEquals("io_error", Strings.toLowerCaseWithUnderscore("IOError"));
-        assertEquals("io_error", Strings.toLowerCaseWithUnderscore("ioERROR"));
-        assertEquals("hello_world_api", Strings.toLowerCaseWithUnderscore("helloWorldAPI"));
+        assertEquals("xml_parser", Strings.toSnakeCase("XmlParser"));
+        assertEquals("xml_parser", Strings.toSnakeCase("xmlPARSER"));
+        assertEquals("io_error", Strings.toSnakeCase("IOError"));
+        assertEquals("io_error", Strings.toSnakeCase("ioERROR"));
+        assertEquals("hello_world_api", Strings.toSnakeCase("helloWorldAPI"));
 
-        assertEquals("XML_PARSER", Strings.toUpperCaseWithUnderscore("XMLParser"));
-        assertEquals("XML_PARSER", Strings.toUpperCaseWithUnderscore("xmlPARSER"));
-        assertEquals("IO_ERROR", Strings.toUpperCaseWithUnderscore("IOError"));
-        assertEquals("IO_ERROR", Strings.toUpperCaseWithUnderscore("ioERROR"));
-        assertEquals("HELLO_WORLD_API", Strings.toUpperCaseWithUnderscore("helloWorldAPI"));
+        assertEquals("XML_PARSER", Strings.toScreamingSnakeCase("XmlParser"));
+        assertEquals("XML_PARSER", Strings.toScreamingSnakeCase("xmlPARSER"));
+        assertEquals("IO_ERROR", Strings.toScreamingSnakeCase("IOError"));
+        assertEquals("IO_ERROR", Strings.toScreamingSnakeCase("ioERROR"));
+        assertEquals("HELLO_WORLD_API", Strings.toScreamingSnakeCase("helloWorldAPI"));
     }
 
     @Test

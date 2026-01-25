@@ -888,8 +888,8 @@ public class Seq2025Test extends TestBase {
     }
 
     @Test
-    public void testslide() throws Exception {
-        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5).slide(3).toList();
+    public void testsliding() throws Exception {
+        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5).sliding(3).toList();
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(1, 2, 3), windows.get(0));
         assertEquals(Arrays.asList(2, 3, 4), windows.get(1));
@@ -898,7 +898,7 @@ public class Seq2025Test extends TestBase {
 
     @Test
     public void testSlidingWithIncrement() throws Exception {
-        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5, 6).slide(2, 2).toList();
+        List<List<Integer>> windows = Seq.of(1, 2, 3, 4, 5, 6).sliding(2, 2).toList();
         assertEquals(3, windows.size());
         assertEquals(Arrays.asList(1, 2), windows.get(0));
         assertEquals(Arrays.asList(3, 4), windows.get(1));
