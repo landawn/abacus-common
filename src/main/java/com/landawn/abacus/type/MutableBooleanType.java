@@ -132,7 +132,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains boolean value true
      * MutableBoolean mb = type.get(rs, 1);
@@ -160,7 +160,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "is_active" contains boolean value true
      * MutableBoolean mb = type.get(rs, "is_active");
@@ -188,8 +188,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO users (id, is_active) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * MutableBoolean mb = MutableBoolean.of(true);
      * type.set(stmt, 2, mb);
@@ -216,7 +215,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * MutableBoolean mb = MutableBoolean.of(true);
      * type.set(stmt, "p_is_active", mb);

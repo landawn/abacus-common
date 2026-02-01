@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -86,9 +88,9 @@ public final class OkHttpRequest {
     private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_JSON);
     private static final MediaType APPLICATION_XML_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_XML);
 
-    private static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    private static final KryoParser KRYO_PARSER = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
 
-    private static final OkHttpClient defaultClient = new OkHttpClient();
+    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient();
 
     private final String url;
     private final HttpUrl httpUrl;
@@ -96,6 +98,7 @@ public final class OkHttpRequest {
     private Object query;
 
     private final OkHttpClient httpClient;
+    private OkHttpClient.Builder httpClientBuilder;
     private final Request.Builder requestBuilder;
     private RequestBody body;
 
@@ -157,7 +160,7 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this exception by calling {@link HttpUrl#parse}; it returns {@code null} for invalid URLs.
      */
     public static OkHttpRequest url(final String url) {
-        return create(url, defaultClient);
+        return create(url, DEFAULT_CLIENT);
     }
 
     /**
@@ -168,7 +171,7 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static OkHttpRequest url(final URL url) {
-        return create(url, defaultClient);
+        return create(url, DEFAULT_CLIENT);
     }
 
     /**
@@ -178,7 +181,7 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      */
     public static OkHttpRequest url(final HttpUrl url) {
-        return create(url, defaultClient);
+        return create(url, DEFAULT_CLIENT);
     }
 
     /**
@@ -186,13 +189,13 @@ public final class OkHttpRequest {
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
      * @param url the URL string for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
      */
-    public static OkHttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+    public static OkHttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build()).closeHttpClientAfterExecution(true);
     }
@@ -202,13 +205,13 @@ public final class OkHttpRequest {
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
      * @param url the URL object for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
      */
-    public static OkHttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+    public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build()).closeHttpClientAfterExecution(true);
     }
@@ -218,19 +221,115 @@ public final class OkHttpRequest {
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
      * @param url the HttpUrl object for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
      */
-    public static OkHttpRequest url(final HttpUrl url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+    public static OkHttpRequest url(final HttpUrl url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build()).closeHttpClientAfterExecution(true);
     }
 
     OkHttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
         closeHttpClientAfterExecution = shouldClose;
+
+        return this;
+    }
+
+    /**
+     * Sets the connection timeout in milliseconds for this HTTP request.
+     * The connection timeout defines how long to wait when establishing a connection
+     * to the remote server before timing out.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest.url("https://api.example.com")
+     *     .connectTimeout(5000) // 5 seconds
+     *     .get();
+     * }</pre>
+     *
+     * @param connectTimeout The connection timeout in milliseconds. Must be non-negative.
+     * @return This OkHttpRequest instance for method chaining
+     */
+    public OkHttpRequest connectTimeout(final long connectTimeout) {
+        if (httpClientBuilder == null) {
+            httpClientBuilder = httpClient.newBuilder();
+        }
+
+        httpClientBuilder.connectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
+
+        return this;
+    }
+
+    /**
+     * Sets the connection timeout using a Duration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest.url("https://api.example.com")
+     *     .connectTimeout(Duration.ofSeconds(5))
+     *     .get();
+     * }</pre>
+     *
+     * @param connectTimeout The connection timeout as a Duration
+     * @return This OkHttpRequest instance for method chaining
+     */
+    public OkHttpRequest connectTimeout(final Duration connectTimeout) {
+        if (httpClientBuilder == null) {
+            httpClientBuilder = httpClient.newBuilder();
+        }
+
+        httpClientBuilder.connectTimeout(connectTimeout);
+
+        return this;
+    }
+
+    /**
+     * Sets the read timeout in milliseconds for this HTTP request.
+     * The read timeout defines how long to wait for data to be received from
+     * the server after the connection has been established.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest.url("https://api.example.com")
+     *     .readTimeout(10000) // 10 seconds
+     *     .get();
+     * }</pre>
+     *
+     * @param readTimeout The read timeout in milliseconds. Must be non-negative.
+     * @return This OkHttpRequest instance for method chaining
+     */
+    public OkHttpRequest readTimeout(final long readTimeout) {
+        if (httpClientBuilder == null) {
+            httpClientBuilder = httpClient.newBuilder();
+        }
+
+        httpClientBuilder.readTimeout(readTimeout, TimeUnit.MILLISECONDS);
+
+        return this;
+    }
+
+    /**
+     * Sets the read timeout using a Duration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest.url("https://api.example.com")
+     *     .readTimeout(Duration.ofSeconds(10))
+     *     .get();
+     * }</pre>
+     *
+     * @param readTimeout The read timeout as a Duration
+     * @return This OkHttpRequest instance for method chaining
+     */
+    public OkHttpRequest readTimeout(final Duration readTimeout) {
+        if (httpClientBuilder == null) {
+            httpClientBuilder = httpClient.newBuilder();
+        }
+
+        httpClientBuilder.readTimeout(readTimeout);
 
         return this;
     }
@@ -326,12 +425,12 @@ public final class OkHttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param user the username for authentication
+     * @param username the username for authentication
      * @param password the password for authentication
      * @return this OkHttpRequest instance for method chaining
      */
-    public OkHttpRequest basicAuth(final String user, final Object password) {
-        requestBuilder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
+    public OkHttpRequest basicAuth(final String username, final Object password) {
+        requestBuilder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
         return this;
     }
 
@@ -353,8 +452,8 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest header(final String name, final String value) {
-        requestBuilder.header(name, value);
+    public OkHttpRequest header(final String name, final Object value) {
+        requestBuilder.header(name, HttpHeaders.valueOf(value));
         return this;
     }
 
@@ -370,9 +469,9 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final String name1, final String value1, final String name2, final String value2) {
-        requestBuilder.header(name1, value1);
-        requestBuilder.header(name2, value2);
+    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
+        requestBuilder.header(name1, HttpHeaders.valueOf(value1));
+        requestBuilder.header(name2, HttpHeaders.valueOf(value2));
 
         return this;
     }
@@ -391,10 +490,10 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final String name1, final String value1, final String name2, final String value2, final String name3, final String value3) {
-        requestBuilder.header(name1, value1);
-        requestBuilder.header(name2, value2);
-        requestBuilder.header(name3, value3);
+    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
+        requestBuilder.header(name1, HttpHeaders.valueOf(value1));
+        requestBuilder.header(name2, HttpHeaders.valueOf(value2));
+        requestBuilder.header(name3, HttpHeaders.valueOf(value3));
 
         return this;
     }
@@ -430,7 +529,8 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this builder and adds {@code headers}.
+     * Removes all headers on this request and adds the specified headers.
+     * This method replaces all existing headers with the provided Headers instance.
      *
      * @param headers the Headers object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
@@ -452,13 +552,17 @@ public final class OkHttpRequest {
      * @see HttpHeaders
      */
     public OkHttpRequest headers(final HttpHeaders headers) {
+        final Map<String, String> map = new HashMap<>();
+
         if (headers != null && !headers.isEmpty()) {
-            for (final String headerName : headers.headerNameSet()) {
-                requestBuilder.header(headerName, HttpHeaders.valueOf(headers.get(headerName)));
+            for (String headerName : headers.headerNameSet()) {
+                map.put(headerName, N.stringOf(headers.get(headerName)));
             }
         }
 
-        return this;
+        final Headers newHeaders = Headers.of(map);
+
+        return headers(newHeaders);
     }
 
     /**
@@ -479,8 +583,8 @@ public final class OkHttpRequest {
      *             the underlying OkHttp RequestBuilder directly.
      */
     @Deprecated
-    public OkHttpRequest addHeader(final String name, final String value) {
-        requestBuilder.addHeader(name, value);
+    public OkHttpRequest addHeader(final String name, final Object value) {
+        requestBuilder.addHeader(name, HttpHeaders.valueOf(value));
         return this;
     }
 
@@ -1087,8 +1191,8 @@ public final class OkHttpRequest {
                 } else if (byte[].class.equals(resultClass)) {
                     return (T) IOUtil.readAllBytes(is);
                 } else {
-                    if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
-                        return kryoParser.deserialize(is, resultClass);
+                    if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
+                        return KRYO_PARSER.deserialize(is, resultClass);
                     } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
                         return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                     } else {
@@ -1115,7 +1219,11 @@ public final class OkHttpRequest {
 
     private Response execute(final Request request) throws IOException {
         try {
-            return httpClient.newCall(request).execute();
+            if (httpClientBuilder != null) {
+                return httpClientBuilder.build().newCall(request).execute();
+            } else {
+                return httpClient.newCall(request).execute();
+            }
         } finally {
             doAfterExecution();
         }

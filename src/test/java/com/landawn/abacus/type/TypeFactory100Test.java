@@ -247,7 +247,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isGenericType() {
+            public boolean isParameterizedType() {
                 return false;
             }
 
@@ -591,7 +591,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isGenericType() {
+            public boolean isParameterizedType() {
                 return false;
             }
 

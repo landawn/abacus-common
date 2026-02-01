@@ -149,7 +149,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return {@code true}, as HBaseColumn is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

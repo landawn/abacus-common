@@ -681,8 +681,8 @@ public class AbstractShortStream101Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).summaryStatisticsAndPercentiles();
 
         assertNotNull(result);
         ShortSummaryStatistics stats = result.left();
@@ -693,7 +693,7 @@ public class AbstractShortStream101Test extends TestBase {
 
         assertTrue(result.right().isPresent());
 
-        result = createShortStream(new short[] {}).summarizeAndPercentiles();
+        result = createShortStream(new short[] {}).summaryStatisticsAndPercentiles();
         assertEquals(0, result.left().getCount());
         assertFalse(result.right().isPresent());
     }

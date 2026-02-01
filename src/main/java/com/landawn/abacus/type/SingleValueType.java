@@ -209,7 +209,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return {@code true} if this is a generic type, {@code false} otherwise
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return isGenericType;
     }
 

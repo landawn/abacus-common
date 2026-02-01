@@ -44,7 +44,7 @@ public class NStringType extends AbstractStringType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType("NString");
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading Unicode text from NVARCHAR column
      * String name = type.get(rs, 1);
@@ -68,7 +68,7 @@ public class NStringType extends AbstractStringType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType("NString");
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading Unicode text by column name
      * String description = type.get(rs, "description");
@@ -92,8 +92,7 @@ public class NStringType extends AbstractStringType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType("NString");
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO products (id, name) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * // Setting Unicode text to NVARCHAR column
      * String productName = "产品名称";  // Chinese: "Product Name"
@@ -118,7 +117,7 @@ public class NStringType extends AbstractStringType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType("NString");
-     * CallableStatement stmt = connection.prepareCall("{call update_product(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * // Setting Unicode text using named parameter
      * String description = "日本語の説明";  // Japanese: "Japanese description"

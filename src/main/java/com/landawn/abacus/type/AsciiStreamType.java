@@ -57,7 +57,7 @@ public class AsciiStreamType extends InputStreamType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType("AsciiStream");
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * InputStream stream = type.get(rs, 1);
      * // Read ASCII text data from database column
      * String content = IOUtil.readAllToString(stream);
@@ -174,21 +174,21 @@ public class AsciiStreamType extends InputStreamType {
      * The stream is read in chunks using a buffer from the object pool for efficiency.
      *
      * @param writer the CharacterWriter to write to
-     * @param t the InputStream containing ASCII data to write, may be null
+     * @param x the InputStream containing ASCII data to write, may be null
      * @param config the serialization configuration that may specify string quotation preferences
      * @throws IOException if an I/O error occurs during the read or write operation
      * @throws UncheckedIOException wraps any IOException that occurs during stream reading
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JsonXmlSerializationConfig<?> config) throws IOException {
-        if (t == null) {
+    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerializationConfig<?> config) throws IOException {
+        if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config != null) && (config.getStringQuotation() != 0)) {
                 writer.write(config.getStringQuotation());
             }
 
-            final Reader reader = IOUtil.newInputStreamReader(t, Charsets.US_ASCII); // NOSONAR
+            final Reader reader = IOUtil.newInputStreamReader(x, Charsets.US_ASCII); // NOSONAR
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {

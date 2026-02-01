@@ -35,16 +35,16 @@ public class HttpSettings2025Test extends TestBase {
     }
 
     @Test
-    public void testGetConnectionTimeoutDefault() {
+    public void testGetconnectTimeoutDefault() {
         HttpSettings settings = HttpSettings.create();
-        assertEquals(0L, settings.getConnectionTimeout());
+        assertEquals(0L, settings.getConnectTimeout());
     }
 
     @Test
-    public void testSetConnectionTimeout() {
+    public void testSetconnectTimeout() {
         HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setConnectionTimeout(5000L);
-        assertEquals(5000L, settings.getConnectionTimeout());
+        HttpSettings result = settings.setConnectTimeout(5000L);
+        assertEquals(5000L, settings.getConnectTimeout());
         assertEquals(settings, result);   // Verify method chaining
     }
 
@@ -299,7 +299,7 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testCopy() {
         HttpSettings original = HttpSettings.create()
-                .setConnectionTimeout(5000L)
+                .setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
                 .setUseCaches(true)
                 .doInput(false)
@@ -310,7 +310,7 @@ public class HttpSettings2025Test extends TestBase {
 
         HttpSettings copy = original.copy();
         assertNotNull(copy);
-        assertEquals(5000L, copy.getConnectionTimeout());
+        assertEquals(5000L, copy.getConnectTimeout());
         assertEquals(10000L, copy.getReadTimeout());
         assertTrue(copy.getUseCaches());
         assertFalse(copy.doInput());
@@ -320,17 +320,17 @@ public class HttpSettings2025Test extends TestBase {
         assertEquals("value", copy.headers().get("X-Custom"));
 
         // Verify it's a true copy
-        copy.setConnectionTimeout(1000L);
-        assertEquals(5000L, original.getConnectionTimeout());
+        copy.setConnectTimeout(1000L);
+        assertEquals(5000L, original.getConnectTimeout());
     }
 
     @Test
     public void testCopyWithoutHeaders() {
-        HttpSettings original = HttpSettings.create().setConnectionTimeout(5000L);
+        HttpSettings original = HttpSettings.create().setConnectTimeout(5000L);
 
         HttpSettings copy = original.copy();
         assertNotNull(copy);
-        assertEquals(5000L, copy.getConnectionTimeout());
+        assertEquals(5000L, copy.getConnectTimeout());
     }
 
     @Test
@@ -356,11 +356,11 @@ public class HttpSettings2025Test extends TestBase {
 
     @Test
     public void testToString() {
-        HttpSettings settings = HttpSettings.create().setConnectionTimeout(5000L).setReadTimeout(10000L);
+        HttpSettings settings = HttpSettings.create().setConnectTimeout(5000L).setReadTimeout(10000L);
 
         String str = settings.toString();
         assertNotNull(str);
-        assertTrue(str.contains("connectionTimeout"));
+        assertTrue(str.contains("connectTimeout"));
         assertTrue(str.contains("5000"));
         assertTrue(str.contains("readTimeout"));
         assertTrue(str.contains("10000"));
@@ -369,7 +369,7 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testMethodChaining() {
         HttpSettings settings = HttpSettings.create()
-                .setConnectionTimeout(5000L)
+                .setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
                 .setUseCaches(false)
                 .doInput(true)
@@ -380,7 +380,7 @@ public class HttpSettings2025Test extends TestBase {
                 .setContentEncoding("gzip")
                 .header("Accept", "application/json");
 
-        assertEquals(5000L, settings.getConnectionTimeout());
+        assertEquals(5000L, settings.getConnectTimeout());
         assertEquals(10000L, settings.getReadTimeout());
         assertFalse(settings.getUseCaches());
         assertTrue(settings.doInput());

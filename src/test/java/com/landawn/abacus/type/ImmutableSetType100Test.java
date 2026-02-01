@@ -64,7 +64,7 @@ public class ImmutableSetType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(immutableSetType.isGenericType());
+        assertTrue(immutableSetType.isParameterizedType());
     }
 
     @Test

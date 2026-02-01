@@ -114,7 +114,7 @@ class CurlInterceptor implements Interceptor {
         final Map<String, List<String>> httpHeaders = headers.toMultimap();
 
         String bodyString = null;
-        String bodyType = null;
+        String bodyContentType = null;
 
         final RequestBody requestBody = request.body();
 
@@ -122,10 +122,10 @@ class CurlInterceptor implements Interceptor {
             Charset charset = Charset.defaultCharset();
             final String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
             //noinspection DataFlowIssue
-            bodyType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
+            bodyContentType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
 
-            if (Strings.isNotEmpty(bodyType) && bodyType.contains("charset")) {
-                charset = HttpUtil.getCharset(bodyType);
+            if (Strings.isNotEmpty(bodyContentType) && bodyContentType.contains("charset")) {
+                charset = HttpUtil.getCharset(bodyContentType);
             } else if (Strings.isNotEmpty(contentType) && contentType.contains("charset")) {
                 charset = HttpUtil.getCharset(contentType);
             }
@@ -140,7 +140,7 @@ class CurlInterceptor implements Interceptor {
             }
         }
 
-        final String curl = WebUtil.buildCurl(httpMethod, url, httpHeaders, bodyString, bodyType, quoteChar);
+        final String curl = WebUtil.buildCurl(httpMethod, url, httpHeaders, bodyString, bodyContentType, quoteChar);
 
         logHandler.accept(curl);
     }

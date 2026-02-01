@@ -264,34 +264,34 @@ public final class Holder<T> implements Mutable {
         return false;
     }
 
-    /**
-     * Sets the value to the specified new value if the given predicate returns {@code true}
-     * when tested with both the current value and the new value. If the predicate returns
-     * {@code false}, the value remains unchanged.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Holder<Integer> holder = Holder.of(5);
-     * boolean updated = holder.setIf(10, (current, newVal) -> current != null && newVal > current);
-     * // returns true, holder now contains 10
-     * }</pre>
-     *
-     * @param <E> the type of exception that the predicate may throw.
-     * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}.
-     * @param predicate the predicate that tests both the current value (first parameter) and the new value (second parameter), must not be {@code null}.
-     * @return {@code true} if the value was updated, {@code false} otherwise.
-     * @throws E if the predicate throws an exception.
-     * @deprecated use {@link #setIf(Object, Throwables.Predicate)} instead.
-     */
-    @Deprecated
-    public <E extends Exception> boolean setIf(final T newValue, final Throwables.BiPredicate<? super T, ? super T, E> predicate) throws E {
-        if (predicate.test(value, newValue)) {
-            value = newValue;
-            return true;
-        }
-
-        return false;
-    }
+    //    /**
+    //     * Sets the value to the specified new value if the given predicate returns {@code true}
+    //     * when tested with both the current value and the new value. If the predicate returns
+    //     * {@code false}, the value remains unchanged.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Holder<Integer> holder = Holder.of(5);
+    //     * boolean updated = holder.setIf(10, (current, newVal) -> current != null && newVal > current);
+    //     * // returns true, holder now contains 10
+    //     * }</pre>
+    //     *
+    //     * @param <E> the type of exception that the predicate may throw.
+    //     * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}.
+    //     * @param predicate the predicate that tests both the current value (first parameter) and the new value (second parameter), must not be {@code null}.
+    //     * @return {@code true} if the value was updated, {@code false} otherwise.
+    //     * @throws E if the predicate throws an exception.
+    //     * @deprecated use {@link #setIf(Object, Throwables.Predicate)} instead.
+    //     */
+    //    @Deprecated
+    //    public <E extends Exception> boolean setIf(final T newValue, final Throwables.BiPredicate<? super T, ? super T, E> predicate) throws E {
+    //        if (predicate.test(value, newValue)) {
+    //            value = newValue;
+    //            return true;
+    //        }
+    //
+    //        return false;
+    //    }
 
     /**
      * Checks whether the value held by this Holder is {@code null}.
@@ -316,7 +316,7 @@ public final class Holder<T> implements Mutable {
     /**
      * Checks whether the value held by this Holder is not {@code null}.
      *
-     * <p>This is the inverse of {@link #isNull()}. It provides a convenient way to check
+     * <p>This is the inverted of {@link #isNull()}. It provides a convenient way to check
      * if the Holder contains a {@code non-null} value before performing operations on it.
      *
      * <p><b>Usage Examples:</b></p>

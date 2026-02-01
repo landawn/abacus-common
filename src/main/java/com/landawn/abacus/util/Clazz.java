@@ -1539,7 +1539,7 @@ public final class Clazz {
      *
      * <p>BiMap (Bidirectional Map) is a specialized map that maintains a one-to-one correspondence
      * between keys and values. Unlike a regular map, both keys AND values must be unique. BiMap
-     * provides an {@code inverse()} view that treats values as keys and keys as values, enabling
+     * provides an {@code inverted()} view that treats values as keys and keys as values, enabling
      * efficient bidirectional lookups.</p>
      *
      * <p><b>Uniqueness Constraint:</b> If you attempt to insert a value that already exists,
@@ -1565,7 +1565,7 @@ public final class Clazz {
      * BiMap<String, Integer> userIds = BiMap.create();
      * userIds.put("alice", 101);
      * userIds.put("bob", 102);
-     * String name = userIds.inverse().get(101);   // returns "alice"
+     * String name = userIds.inverted().get(101);   // returns "alice"
      * }</pre>
      *
      * @param <K> the key type of the bimap.

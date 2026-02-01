@@ -135,7 +135,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @return {@code true}, indicating this is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

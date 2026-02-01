@@ -254,7 +254,7 @@ public enum NamingPolicy {
      * @return the converted string according to this naming policy's rules; returns {@code null} if
      *         the input is {@code null}, returns an empty string if the input is empty, otherwise
      *         returns the result of applying the policy's transformation function to the input string
-     * @see #func()
+     * @see #asFunction()
      */
     public String convert(final String str) {
         return converter.apply(str);
@@ -269,7 +269,7 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Function<String, String> converter = NamingPolicy.CAMEL_CASE.func();
+     * Function<String, String> converter = NamingPolicy.CAMEL_CASE.asFunction();
      * List<String> names = Arrays.asList("user_name", "first_name");
      * List<String> camelCaseNames = names.stream()
      *     .map(converter)
@@ -283,7 +283,7 @@ public enum NamingPolicy {
      */
     @Deprecated
     @Beta
-    public Function<String, String> func() {
+    public Function<String, String> asFunction() {
         return converter;
     }
 }

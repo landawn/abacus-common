@@ -69,7 +69,7 @@ public class SingleValueType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertFalse(singleValueType.isGenericType());
+        assertFalse(singleValueType.isParameterizedType());
     }
 
     @Test

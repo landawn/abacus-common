@@ -62,9 +62,9 @@ public class ObjectType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertFalse(objectType.isGenericType());
-        assertFalse(stringObjectType.isGenericType());
-        assertFalse(integerObjectType.isGenericType());
+        assertFalse(objectType.isParameterizedType());
+        assertFalse(stringObjectType.isParameterizedType());
+        assertFalse(integerObjectType.isParameterizedType());
     }
 
     @Test

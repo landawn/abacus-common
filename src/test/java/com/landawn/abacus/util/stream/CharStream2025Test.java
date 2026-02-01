@@ -1173,9 +1173,9 @@ public class CharStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
+    public void testsummaryStatistics() {
         CharStream stream = createCharStream('a', 'e', 'c', 'b', 'd');
-        CharSummaryStatistics stats = stream.summarize();
+        CharSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals('a', stats.getMin());
         assertEquals('e', stats.getMax());
@@ -1185,14 +1185,14 @@ public class CharStream2025Test extends TestBase {
     @Test
     public void testSummarize_EmptyStream() {
         CharStream stream = createCharStream();
-        CharSummaryStatistics stats = stream.summarize();
+        CharSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(0, stats.getCount());
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         CharStream stream = createCharStream('a', 'e', 'c', 'b', 'd');
-        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summarizeAndPercentiles();
+        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summaryStatisticsAndPercentiles();
 
         CharSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());
@@ -1204,9 +1204,9 @@ public class CharStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles_EmptyStream() {
+    public void testsummaryStatisticsAndPercentiles_EmptyStream() {
         CharStream stream = createCharStream();
-        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summarizeAndPercentiles();
+        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summaryStatisticsAndPercentiles();
         CharSummaryStatistics stats = result.left();
         assertEquals(0, stats.getCount());
         assertFalse(result.right().isPresent());

@@ -93,35 +93,56 @@ public class Triple200Test extends TestBase {
 
     @Test
     public void testConditionalSetters() throws Exception {
+        // Assume triple is Triple<String, Integer, Boolean>
         Triple<String, Integer, Boolean> triple = Triple.of("A", 1, true);
 
-        assertTrue(triple.setLeftIf("B", (t, l) -> t.middle() == 1));
+        // left depends on current middle
+        assertTrue(triple.setLeftIf("B", (l, m, r) -> m == 1));
         assertEquals("B", triple.left());
-        assertFalse(triple.setLeftIf("C", (t, l) -> t.middle() == 0));
+        assertEquals(1, triple.middle());
+        assertTrue(triple.right());
+
+        assertFalse(triple.setLeftIf("C", (l, m, r) -> m == 0));
         assertEquals("B", triple.left());
+        assertEquals(1, triple.middle());
+        assertTrue(triple.right());
 
-        assertTrue(triple.setMiddleIf(2, (t, m) -> t.right()));
+        // middle depends on current right
+        assertTrue(triple.setMiddleIf(2, (l, m, r) -> r));
+        assertEquals("B", triple.left());
         assertEquals(2, triple.middle());
-        assertFalse(triple.setMiddleIf(3, (t, m) -> !t.right()));
-        assertEquals(2, triple.middle());
+        assertTrue(triple.right());
 
-        assertTrue(triple.setRightIf(false, (t, r) -> t.left().equals("B")));
+        assertFalse(triple.setMiddleIf(3, (l, m, r) -> !r));
+        assertEquals("B", triple.left());
+        assertEquals(2, triple.middle());
+        assertTrue(triple.right());
+
+        // right depends on current left
+        assertTrue(triple.setRightIf(false, (l, m, r) -> "B".equals(l)));
+        assertEquals("B", triple.left());
+        assertEquals(2, triple.middle());
         assertFalse(triple.right());
 
-        assertTrue(triple.setIf("X", 10, true, (t, l, m, r) -> m > 5));
+        // First setIf: predicate uses current middle (2) and right (false)
+        // Make it true for the current state: m < 5
+        assertTrue(triple.setIf("X", 10, true, (l, m, r) -> m < 5));
         assertEquals("X", triple.left());
         assertEquals(10, triple.middle());
         assertTrue(triple.right());
 
-        assertTrue(triple.setIf("Y", 0, false, (t, l, m, r) -> m < 5));
+        // Second setIf: now middle is 10, so choose a predicate that’s true for m > 5
+        assertTrue(triple.setIf("Y", 0, false, (l, m, r) -> m > 5));
         assertEquals("Y", triple.left());
+        assertEquals(0, triple.middle());
+        assertFalse(triple.right());
     }
 
     @Test
     public void testUtilityAndConversionMethods() {
         Triple<String, Integer, Boolean> triple = Triple.of("A", 1, true);
 
-        Triple<Boolean, Integer, String> reversed = triple.reverse();
+        Triple<Boolean, Integer, String> reversed = triple.swap();
         assertEquals(true, reversed.left());
         assertEquals(1, reversed.middle());
         assertEquals("A", reversed.right());

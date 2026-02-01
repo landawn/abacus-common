@@ -843,14 +843,14 @@ public class ParallelIteratorStream100Test extends TestBase {
 
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR)).forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
-                assertHaveSameElements(N.repeatCollection(TEST_DATA, 2), results);
+                assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
             }
             {
                 List<Integer> results = new ArrayList<>();
 
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY)).forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
-                assertHaveSameElements(N.repeatCollection(TEST_DATA, 2), results);
+                assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
 
             }
 
@@ -860,7 +860,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR))
                         .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
-                assertHaveSameElements(N.repeatCollection(TEST_DATA, 4), results);
+                assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
             }
 
             {
@@ -869,7 +869,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY))
                         .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
-                assertHaveSameElements(N.repeatCollection(TEST_DATA, 4), results);
+                assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
             }
         }
 

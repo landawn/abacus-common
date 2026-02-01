@@ -135,49 +135,54 @@ public class Pair100Test extends TestBase {
 
     @Test
     public void testSetLeftIf() throws Exception {
-        pair.setLeft("original");
+        // assuming pair is something like Pair<String, Integer>
+        pair.set("original", 10);
 
-        boolean result = pair.setLeftIf("new", (p, newLeft) -> newLeft.length() > 2);
+        boolean result = pair.setLeftIf("new", (l, r) -> r > 5);
         assertTrue(result);
         assertEquals("new", pair.left());
+        assertEquals(10, pair.right()); // right unchanged
 
-        result = pair.setLeftIf("a", (p, newLeft) -> newLeft.length() > 2);
+        result = pair.setLeftIf("a", (l, r) -> r > 20);
         assertFalse(result);
-        assertEquals("new", pair.left());
+        assertEquals("new", pair.left()); // still "new"
+        assertEquals(10, pair.right()); // still 10
     }
 
     @Test
     public void testSetRightIf() throws Exception {
-        pair.setRight(10);
+        pair.set("Hello", 10);
 
-        boolean result = pair.setRightIf(20, (p, newRight) -> newRight > 15);
+        boolean result = pair.setRightIf(20, (l, r) -> l.length() > 3);
         assertTrue(result);
+        assertEquals("Hello", pair.left()); // left unchanged
         assertEquals(20, pair.right());
 
-        result = pair.setRightIf(5, (p, newRight) -> newRight > 15);
+        result = pair.setRightIf(5, (l, r) -> r < 10);
         assertFalse(result);
-        assertEquals(20, pair.right());
+        assertEquals("Hello", pair.left());
+        assertEquals(20, pair.right()); // unchanged because predicate was false
     }
 
     @Test
     public void testSetIf() throws Exception {
         pair.set("old", 1);
 
-        boolean result = pair.setIf("new", 2, (p, newLeft, newRight) -> newRight > 1);
+        boolean result = pair.setIf("new", 2, (l, r) -> r < 5);
         assertTrue(result);
         assertEquals("new", pair.left());
         assertEquals(2, pair.right());
 
-        result = pair.setIf("newer", 0, (p, newLeft, newRight) -> newRight > 1);
+        result = pair.setIf("newer", 0, (l, r) -> r > 10);
         assertFalse(result);
-        assertEquals("new", pair.left());
-        assertEquals(2, pair.right());
+        assertEquals("new", pair.left()); // unchanged
+        assertEquals(2, pair.right()); // unchanged
     }
 
     @Test
     public void testReverse() {
         pair.set("left", 100);
-        Pair<Integer, String> reversed = pair.reverse();
+        Pair<Integer, String> reversed = pair.swap();
 
         assertEquals(100, reversed.left());
         assertEquals("left", reversed.right());

@@ -53,7 +53,7 @@ public class RangeType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(rangeType.isGenericType());
+        assertTrue(rangeType.isParameterizedType());
     }
 
     @Test

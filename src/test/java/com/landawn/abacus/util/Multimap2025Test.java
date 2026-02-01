@@ -918,7 +918,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testInverse_EmptyMultimap() {
-        ListMultimap<Integer, String> inverse = listMultimap.inverse(N::newListMultimap);
+        ListMultimap<Integer, String> inverse = listMultimap.invert(N::newListMultimap);
         assertNotNull(inverse);
         assertTrue(inverse.isEmpty());
     }
@@ -929,7 +929,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 10);
 
-        ListMultimap<Integer, String> inverse = listMultimap.inverse(N::newListMultimap);
+        ListMultimap<Integer, String> inverse = listMultimap.invert(N::newListMultimap);
         assertEquals(2, inverse.keySet().size());
         assertEquals(2, inverse.get(10).size());
         assertTrue(inverse.get(10).contains("key1"));
@@ -1869,7 +1869,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.put("a", 2);
         listMultimap.put("b", 1);
         listMultimap.put("b", 3);
-        ListMultimap<Integer, String> inverse = listMultimap.inverse(N::newListMultimap);
+        ListMultimap<Integer, String> inverse = listMultimap.invert(N::newListMultimap);
 
         assertEquals(4, inverse.totalValueCount());
         assertEquals(2, inverse.get(1).size());

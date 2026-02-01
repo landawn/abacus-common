@@ -88,8 +88,8 @@ import com.landawn.abacus.annotation.Internal;
  * articleTags.put("article2", "advanced");
  *
  * // Finding articles with specific tags
- * SetMultimap<String, String> inverse = articleTags.inverse();
- * Set<String> javaArticles = inverse.get("java");   // ["article1", "article2"]
+ * SetMultimap<String, String> inverted = articleTags.invert();
+ * Set<String> javaArticles = inverted.get("java");   // ["article1", "article2"]
  *
  * // Filtering and transformations (stream-based)
  * SetMultimap<String, String> filtered = N.newSetMultimap();
@@ -119,7 +119,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Set-Specific Operations:</b>
  * <ul>
- *   <li>{@link #inverse()} - Invert keys and values while maintaining uniqueness</li>
+ *   <li>{@link #invert()} - Invert keys and values while maintaining uniqueness</li>
  *   <li>{@link #toImmutableMap()} - Convert to immutable representation</li>
  *   <li>{@link #copy()} - Create a deep copy of the SetMultimap</li>
  * </ul>
@@ -818,7 +818,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * becomes a key in the result, and each original key becomes a value associated with that new key.
      *
      * <p>This operation is useful for creating reverse mappings or index structures. For example, if you have
-     * a mapping of users to roles, inverse() will give you a mapping of roles to users.
+     * a mapping of users to roles, invert() will give you a mapping of roles to users.
      *
      * <p>This operation creates a new multimap and does not modify the original. The new multimap will
      * preserve the ordering characteristics of the original map.
@@ -827,13 +827,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1);
      * // original: {"a" -> [1, 2], "b" -> [1]}
-     * SetMultimap<Integer, String> inverted = original.inverse();
+     * SetMultimap<Integer, String> inverted = original.invert();
      * // inverted: {1 -> ["a", "b"], 2 -> ["a"]}
      * }</pre>
      *
      * @return a new SetMultimap where each original value is mapped to the set of keys that contained it
      */
-    public SetMultimap<E, K> inverse() {
+    public SetMultimap<E, K> invert() {
         final SetMultimap<K, E> multimap = this;
         //noinspection rawtypes
         final SetMultimap<E, K> result = new SetMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
@@ -1035,5 +1035,5 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         return ImmutableMap.wrap(map);
     }
 
-    //    public SetMultimap<E, K> inverse() {
+    //    public SetMultimap<E, K> invert() {
 }

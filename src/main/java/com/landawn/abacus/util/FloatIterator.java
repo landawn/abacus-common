@@ -656,7 +656,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @Beta
     public ObjIterator<IndexedFloat> indexed(final long startIndex) throws IllegalArgumentException {
-        N.checkArgNotNegative(startIndex, "startIndex");
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final FloatIterator iter = this;
 

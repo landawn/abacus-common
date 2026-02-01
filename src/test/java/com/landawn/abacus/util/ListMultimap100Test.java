@@ -177,7 +177,7 @@ public class ListMultimap100Test extends TestBase {
         multimap.put("b", 2);
         multimap.put("b", 3);
 
-        ListMultimap<Integer, String> inverse = multimap.inverse();
+        ListMultimap<Integer, String> inverse = multimap.invert();
         Assertions.assertEquals(Arrays.asList("a"), inverse.get(1));
         Assertions.assertEquals(Arrays.asList("a", "b"), inverse.get(2));
         Assertions.assertEquals(Arrays.asList("b"), inverse.get(3));

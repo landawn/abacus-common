@@ -68,7 +68,7 @@ public final class DoubleType extends AbstractDoubleType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Double price = type.get(rs, 1);   // retrieves Double from column 1
      * }</pre>
      *
@@ -97,7 +97,7 @@ public final class DoubleType extends AbstractDoubleType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Double price = type.get(rs, "price");   // retrieves Double from "price" column
      * }</pre>
      *

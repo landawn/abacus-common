@@ -63,8 +63,8 @@ public class PairType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(stringIntPairType.isGenericType());
-        assertTrue(doubleBoolPairType.isGenericType());
+        assertTrue(stringIntPairType.isParameterizedType());
+        assertTrue(doubleBoolPairType.isParameterizedType());
     }
 
     @Test

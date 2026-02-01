@@ -104,7 +104,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

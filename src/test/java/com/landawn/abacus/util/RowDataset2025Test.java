@@ -364,7 +364,7 @@ public class RowDataset2025Test extends TestBase {
     @Test
     public void testSwapColumnPosition() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.swapColumnPosition("id", "salary");
+        ds.swapColumns("id", "salary");
         assertEquals("salary", ds.getColumnName(0));
         assertEquals("name", ds.getColumnName(1));
         assertEquals("age", ds.getColumnName(2));
@@ -374,7 +374,7 @@ public class RowDataset2025Test extends TestBase {
     @Test
     public void testSwapColumnPositionSame() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.swapColumnPosition("id", "id");
+        ds.swapColumns("id", "id");
         assertEquals("id", ds.getColumnName(0));
     }
 
@@ -383,7 +383,7 @@ public class RowDataset2025Test extends TestBase {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         ds.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            ds.swapColumnPosition("id", "name");
+            ds.swapColumns("id", "name");
         });
     }
 
@@ -432,7 +432,7 @@ public class RowDataset2025Test extends TestBase {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         Object firstValue = ds.get(0, 1);
         Object lastValue = ds.get(4, 1);
-        ds.swapRowPosition(0, 4);
+        ds.swapRows(0, 4);
         assertEquals(lastValue, ds.get(0, 1));
         assertEquals(firstValue, ds.get(4, 1));
     }
@@ -441,7 +441,7 @@ public class RowDataset2025Test extends TestBase {
     public void testSwapRowPositionSame() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         Object value = ds.get(0, 1);
-        ds.swapRowPosition(0, 0);
+        ds.swapRows(0, 0);
         assertEquals(value, ds.get(0, 1));
     }
 

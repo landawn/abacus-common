@@ -58,7 +58,7 @@ import com.landawn.abacus.util.cs;
  *
  * // Async request with custom timeout
  * ContinuableFuture<String> future = HttpRequest.url("https://api.example.com/data")
- *     .connectionTimeout(5000)
+ *     .connectTimeout(5000)
  *     .readTimeout(10000)
  *     .asyncGet(String.class);
  * }</pre>
@@ -121,13 +121,13 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param url The target URL for the request
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -147,12 +147,12 @@ public final class HttpRequest {
      * A new HttpClient will be created internally and closed after the request execution.
      *
      * @param url The target URL for the request
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpRequest instance
      */
-    public static HttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
@@ -170,7 +170,7 @@ public final class HttpRequest {
      * <pre>{@code
      * HttpSettings settings = new HttpSettings()
      *     .header("User-Agent", "MyApp/1.0")
-     *     .setConnectionTimeout(5000);
+     *     .setConnectTimeout(5000);
      * HttpRequest.url("https://api.example.com")
      *     .settings(settings)
      *     .get();
@@ -185,7 +185,7 @@ public final class HttpRequest {
         checkSettings();
 
         if (httpSettings != null) {
-            Beans.merge(settings, httpSettings);
+            Beans.copyInto(settings, httpSettings);
         }
 
         return this;
@@ -201,17 +201,17 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param user The username for authentication
+     * @param username The username for authentication
      * @param password The password for authentication
      * @return This HttpRequest instance for method chaining
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest basicAuth(final String user, final Object password) {
+    public HttpRequest basicAuth(final String username, final Object password) {
         checkSettings();
 
-        settings.basicAuth(user, password);
+        settings.basicAuth(username, password);
 
         return this;
     }
@@ -371,17 +371,17 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com")
-     *     .connectionTimeout(5000) // 5 seconds
+     *     .connectTimeout(5000) // 5 seconds
      *     .get();
      * }</pre>
      *
-     * @param connectionTimeout The connection timeout in milliseconds. Must be non-negative.
+     * @param connectTimeout The connection timeout in milliseconds. Must be non-negative.
      * @return This HttpRequest instance for method chaining
      */
-    public HttpRequest connectionTimeout(final long connectionTimeout) {
+    public HttpRequest connectTimeout(final long connectTimeout) {
         checkSettings();
 
-        settings.setConnectionTimeout(connectionTimeout);
+        settings.setConnectTimeout(connectTimeout);
 
         return this;
     }
@@ -392,17 +392,17 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com")
-     *     .connectionTimeout(Duration.ofSeconds(5))
+     *     .connectTimeout(Duration.ofSeconds(5))
      *     .get();
      * }</pre>
      *
-     * @param connectionTimeout The connection timeout as a Duration
+     * @param connectTimeout The connection timeout as a Duration
      * @return This HttpRequest instance for method chaining
      */
-    public HttpRequest connectionTimeout(final Duration connectionTimeout) {
+    public HttpRequest connectTimeout(final Duration connectTimeout) {
         checkSettings();
 
-        settings.setConnectionTimeout(connectionTimeout.toMillis());
+        settings.setConnectTimeout(connectTimeout.toMillis());
 
         return this;
     }
@@ -1373,7 +1373,7 @@ public final class HttpRequest {
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) {
-        return asyncHead(executor, HttpResponse.class);
+        return asyncHead(HttpResponse.class, executor);
     }
 
     /**
@@ -1392,13 +1392,13 @@ public final class HttpRequest {
      *
      * <p><b>Note:</b> This method has unusual parameter ordering (executor, resultClass) compared to
      * other async methods which use (resultClass, executor). This is maintained for backward compatibility.</p>
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      *
      * @param <T> The type of the response object
-     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
      */
-    public <T> ContinuableFuture<T> asyncHead(final Executor executor, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.HEAD, resultClass, executor);
     }
 

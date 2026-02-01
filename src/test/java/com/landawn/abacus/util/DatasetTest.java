@@ -881,10 +881,10 @@ public class DatasetTest extends AbstractTest {
 
         ds1.println();
 
-        ds1.swapColumnPosition("firstName", "lastName");
+        ds1.swapColumns("firstName", "lastName");
         ds1.println();
 
-        ds1.swapRowPosition(1, 0);
+        ds1.swapRows(1, 0);
         ds1.println();
 
         ds1.clone().println();

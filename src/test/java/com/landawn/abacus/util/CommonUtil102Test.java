@@ -964,11 +964,11 @@ public class CommonUtil102Test extends TestBase {
         list.add("test1");
         list.add("test2");
 
-        List<String> cloned = Beans.clone(list);
+        List<String> cloned = Beans.deepCopy(list);
         assertNotSame(list, cloned);
         assertEquals(list, cloned);
 
-        assertNull(Beans.clone((Object) null));
+        assertNull(Beans.deepCopy((Object) null));
     }
 
     @Test
@@ -977,15 +977,15 @@ public class CommonUtil102Test extends TestBase {
         list.add("test1");
         list.add("test2");
 
-        ArrayList<String> cloned = Beans.clone(list, ArrayList.class);
+        ArrayList<String> cloned = Beans.deepCopyAs(list, ArrayList.class);
         assertNotSame(list, cloned);
         assertEquals(list, cloned);
         assertTrue(cloned instanceof ArrayList);
 
-        TestBean bean = Beans.clone(null, TestBean.class);
+        TestBean bean = Beans.deepCopyAs(null, TestBean.class);
         assertNotNull(bean);
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.clone("test", null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.deepCopyAs("test", null));
     }
 
     @Test
@@ -1038,14 +1038,14 @@ public class CommonUtil102Test extends TestBase {
         source.setName("test");
         source.setValue(123);
 
-        TestBean2 copy = Beans.copy(source, TestBean2.class);
+        TestBean2 copy = Beans.copyAs(source, TestBean2.class);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
 
-        TestBean2 nullCopy = Beans.copy(null, TestBean2.class);
+        TestBean2 nullCopy = Beans.copyAs(null, TestBean2.class);
         assertNotNull(nullCopy);
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, (Class<TestBean>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, (Class<TestBean>) null));
     }
 
     @Test
@@ -1054,17 +1054,17 @@ public class CommonUtil102Test extends TestBase {
         source.setName("test");
         source.setValue(123);
 
-        TestBean2 copy = Beans.copy(source, true, null, TestBean2.class);
+        TestBean2 copy = Beans.copyAs(source, true, null, TestBean2.class);
         assertNotNull(copy);
         assertEquals("test", copy.getName());
 
         Set<String> ignoredProps = new HashSet<>();
         ignoredProps.add("name");
-        TestBean2 copy2 = Beans.copy(source, true, ignoredProps, TestBean2.class);
+        TestBean2 copy2 = Beans.copyAs(source, true, ignoredProps, TestBean2.class);
         assertNotNull(copy2);
         assertNull(copy2.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, true, null, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, true, null, null));
     }
 
     @Test
@@ -1077,11 +1077,11 @@ public class CommonUtil102Test extends TestBase {
         target.setName("target");
         target.setValue(200);
 
-        Beans.merge(source, target);
+        Beans.copyInto(source, target);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null));
     }
 
     @Test
@@ -1095,11 +1095,11 @@ public class CommonUtil102Test extends TestBase {
         target.setValue(200);
 
         BinaryOperator<Object> mergeFunc = (src, tgt) -> src != null ? src : tgt;
-        Beans.merge(source, target, mergeFunc);
+        Beans.copyInto(source, target, mergeFunc);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, mergeFunc));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null, mergeFunc));
     }
 
     @Test
@@ -1112,11 +1112,11 @@ public class CommonUtil102Test extends TestBase {
         target.setName("target");
         target.setValue(200);
 
-        Beans.merge(source, target, Arrays.asList("name"));
+        Beans.copyInto(source, target, Arrays.asList("name"));
         assertEquals("source", target.getName());
         assertEquals(200, target.getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null, Arrays.asList("name")));
     }
 
     @Test
@@ -1130,11 +1130,11 @@ public class CommonUtil102Test extends TestBase {
         target.setValue(200);
 
         BiPredicate<String, Object> filter = (name, value) -> "name".equals(name);
-        Beans.merge(source, target, filter);
+        Beans.copyInto(source, target, filter);
         assertEquals("source", target.getName());
         assertEquals(200, target.getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, filter));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null, filter));
     }
 
     @Test
@@ -1147,7 +1147,7 @@ public class CommonUtil102Test extends TestBase {
         target.setName("target");
         target.setValue(200);
 
-        Beans.merge(source, target, true, null);
+        Beans.copyInto(source, target, true, null);
         assertEquals("source", target.getName());
         assertEquals(100, target.getValue());
 
@@ -1156,11 +1156,11 @@ public class CommonUtil102Test extends TestBase {
         TestBean target2 = new TestBean();
         target2.setName("target");
         target2.setValue(200);
-        Beans.merge(source, target2, true, ignoredProps);
+        Beans.copyInto(source, target2, true, ignoredProps);
         assertEquals("target", target2.getName());
         assertEquals(100, target2.getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null, true, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null, true, null));
     }
 
     @Test
@@ -1169,17 +1169,17 @@ public class CommonUtil102Test extends TestBase {
         bean.setName("test");
         bean.setValue(123);
 
-        Beans.erase(bean, "name");
+        Beans.clearProps(bean, "name");
         assertNull(bean.getName());
         assertEquals(123, bean.getValue());
 
         bean.setName("test");
-        Beans.erase(bean, "name", "value");
+        Beans.clearProps(bean, "name", "value");
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.erase(null, "name");
-        Beans.erase(bean);
+        Beans.clearProps(null, "name");
+        Beans.clearProps(bean);
     }
 
     @Test
@@ -1188,17 +1188,17 @@ public class CommonUtil102Test extends TestBase {
         bean.setName("test");
         bean.setValue(123);
 
-        Beans.erase(bean, Arrays.asList("name"));
+        Beans.clearProps(bean, Arrays.asList("name"));
         assertNull(bean.getName());
         assertEquals(123, bean.getValue());
 
         bean.setName("test");
-        Beans.erase(bean, Arrays.asList("name", "value"));
+        Beans.clearProps(bean, Arrays.asList("name", "value"));
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.erase(null, Arrays.asList("name"));
-        Beans.erase(bean, new ArrayList<>());
+        Beans.clearProps(null, Arrays.asList("name"));
+        Beans.clearProps(bean, new ArrayList<>());
     }
 
     @Test
@@ -1207,11 +1207,11 @@ public class CommonUtil102Test extends TestBase {
         bean.setName("test");
         bean.setValue(123);
 
-        Beans.eraseAll(bean);
+        Beans.clearAllProps(bean);
         assertNull(bean.getName());
         assertEquals(0, bean.getValue());
 
-        Beans.eraseAll(null);
+        Beans.clearAllProps(null);
     }
 
     @Test

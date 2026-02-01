@@ -87,8 +87,8 @@ import com.landawn.abacus.util.function.TriPredicate;
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
  *
  * List<String> common = diff.common();   // ["b", "c"]
- * List<String> leftOnly = diff.leftOnly();   // ["a", "b"]
- * List<String> rightOnly = diff.rightOnly();   // ["d", "c"]
+ * List<String> onlyOnLeft = diff.onlyOnLeft();   // ["a", "b"]
+ * List<String> onlyOnRight = diff.onlyOnRight();   // ["d", "c"]
  * boolean equal = diff.areEqual();   // false
  *
  * // Array comparison with primitive types
@@ -203,14 +203,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     final L common;
 
-    final L leftOnly;
+    final L onlyOnLeft;
 
-    final R rightOnly;
+    final R onlyOnRight;
 
-    Difference(final L common, final L leftOnly, final R rightOnly) {
+    Difference(final L common, final L onlyOnLeft, final R onlyOnRight) {
         this.common = common;
-        this.leftOnly = leftOnly;
-        this.rightOnly = rightOnly;
+        this.onlyOnLeft = onlyOnLeft;
+        this.onlyOnRight = onlyOnRight;
     }
 
     /**
@@ -483,8 +483,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * Difference<List<String>, List<String>> diff = Difference.of(c1, c2);
      * // Results in:
      * // common: ["b", "b"]
-     * // leftOnly: ["a", "c"]
-     * // rightOnly: ["b", "d"]
+     * // onlyOnLeft: ["a", "c"]
+     * // onlyOnRight: ["b", "d"]
      * }</pre>
      * 
      * <p>The comparison takes into account the number of occurrences of each value. For example,
@@ -511,17 +511,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
     @SuppressWarnings("unlikely-arg-type")
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final Collection<? extends T1> a, final Collection<? extends T2> b) {
         final List<T1> common = new ArrayList<>();
-        final List<T1> leftOnly = new ArrayList<>();
-        final List<T2> rightOnly = new ArrayList<>();
+        final List<T1> onlyOnLeft = new ArrayList<>();
+        final List<T2> onlyOnRight = new ArrayList<>();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly.addAll(b);
+                onlyOnRight.addAll(b);
             }
         } else if (N.isEmpty(b)) {
-            leftOnly.addAll(a);
+            onlyOnLeft.addAll(a);
         } else {
             final Multiset<T2> bOccurrences = Multiset.create(b);
 
@@ -530,13 +530,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
             for (final T2 e : b) {
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -545,7 +545,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>((L) common, (L) leftOnly, (R) rightOnly);
+        return new Difference<>((L) common, (L) onlyOnLeft, (R) onlyOnRight);
     }
 
     /**
@@ -571,17 +571,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<BooleanList, BooleanList> of(final BooleanList a, final BooleanList b) {
         final BooleanList common = new BooleanList();
-        BooleanList leftOnly = new BooleanList();
-        BooleanList rightOnly = new BooleanList();
+        BooleanList onlyOnLeft = new BooleanList();
+        BooleanList onlyOnRight = new BooleanList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Boolean> bOccurrences = b.toMultiset();
 
@@ -592,7 +592,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -600,7 +600,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -609,7 +609,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -635,17 +635,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<CharList, CharList> of(final CharList a, final CharList b) {
         final CharList common = new CharList();
-        CharList leftOnly = new CharList();
-        CharList rightOnly = new CharList();
+        CharList onlyOnLeft = new CharList();
+        CharList onlyOnRight = new CharList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Character> bOccurrences = b.toMultiset();
 
@@ -656,7 +656,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -664,7 +664,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -673,7 +673,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -699,17 +699,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<ByteList, ByteList> of(final ByteList a, final ByteList b) {
         final ByteList common = new ByteList();
-        ByteList leftOnly = new ByteList();
-        ByteList rightOnly = new ByteList();
+        ByteList onlyOnLeft = new ByteList();
+        ByteList onlyOnRight = new ByteList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Byte> bOccurrences = b.toMultiset();
 
@@ -720,7 +720,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -728,7 +728,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -737,7 +737,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -763,17 +763,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<ShortList, ShortList> of(final ShortList a, final ShortList b) {
         final ShortList common = new ShortList();
-        ShortList leftOnly = new ShortList();
-        ShortList rightOnly = new ShortList();
+        ShortList onlyOnLeft = new ShortList();
+        ShortList onlyOnRight = new ShortList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Short> bOccurrences = b.toMultiset();
 
@@ -784,7 +784,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -792,7 +792,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -801,7 +801,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -827,17 +827,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<IntList, IntList> of(final IntList a, final IntList b) {
         final IntList common = new IntList();
-        IntList leftOnly = new IntList();
-        IntList rightOnly = new IntList();
+        IntList onlyOnLeft = new IntList();
+        IntList onlyOnRight = new IntList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Integer> bOccurrences = b.toMultiset();
 
@@ -848,7 +848,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -856,7 +856,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -865,7 +865,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -891,17 +891,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<LongList, LongList> of(final LongList a, final LongList b) {
         final LongList common = new LongList();
-        LongList leftOnly = new LongList();
-        LongList rightOnly = new LongList();
+        LongList onlyOnLeft = new LongList();
+        LongList onlyOnRight = new LongList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Long> bOccurrences = b.toMultiset();
 
@@ -912,7 +912,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -920,7 +920,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -929,7 +929,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -960,17 +960,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<FloatList, FloatList> of(final FloatList a, final FloatList b) {
         final FloatList common = new FloatList();
-        FloatList leftOnly = new FloatList();
-        FloatList rightOnly = new FloatList();
+        FloatList onlyOnLeft = new FloatList();
+        FloatList onlyOnRight = new FloatList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Float> bOccurrences = b.toMultiset();
 
@@ -981,7 +981,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -989,7 +989,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -998,7 +998,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -1029,17 +1029,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static Difference<DoubleList, DoubleList> of(final DoubleList a, final DoubleList b) {
         final DoubleList common = new DoubleList();
-        DoubleList leftOnly = new DoubleList();
-        DoubleList rightOnly = new DoubleList();
+        DoubleList onlyOnLeft = new DoubleList();
+        DoubleList onlyOnRight = new DoubleList();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
-                rightOnly = b.copy();
+                onlyOnRight = b.copy();
             }
         } else if (N.isEmpty(b)) {
-            leftOnly = a.copy();
+            onlyOnLeft = a.copy();
         } else {
             final Multiset<Double> bOccurrences = b.toMultiset();
 
@@ -1050,7 +1050,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
-                    leftOnly.add(e);
+                    onlyOnLeft.add(e);
                 }
             }
 
@@ -1058,7 +1058,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 e = b.get(i);
 
                 if (bOccurrences.remove(e)) {
-                    rightOnly.add(e);
+                    onlyOnRight.add(e);
                 }
 
                 if (bOccurrences.isEmpty()) {
@@ -1067,7 +1067,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>(common, leftOnly, rightOnly);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -1098,8 +1098,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @return a collection containing elements only in the left collection. The type L is typically a List or similar collection.
      */
-    public L leftOnly() {
-        return leftOnly;
+    public L onlyOnLeft() {
+        return onlyOnLeft;
     }
 
     /**
@@ -1114,8 +1114,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @return a collection containing elements only in the right collection. The type R is typically a List or similar collection.
      */
-    public R rightOnly() {
-        return rightOnly;
+    public R onlyOnRight() {
+        return onlyOnRight;
     }
 
     /**
@@ -1123,7 +1123,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>
      * This method returns {@code true} if and only if:
      * <ul>
-     *   <li>Both leftOnly and rightOnly collections are empty</li>
+     *   <li>Both onlyOnLeft and onlyOnRight collections are empty</li>
      *   <li>All elements from both input collections are in the common elements</li>
      * </ul>
      * 
@@ -1135,9 +1135,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
-        return (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()))
-                || (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()))
-                || (leftOnly instanceof PrimitiveList && (((PrimitiveList) leftOnly).isEmpty() && ((PrimitiveList) rightOnly).isEmpty()));
+        return (onlyOnLeft instanceof Collection && (((Collection) onlyOnLeft).isEmpty() && ((Collection) onlyOnRight).isEmpty()))
+                || (onlyOnLeft instanceof Map && (((Map) onlyOnLeft).isEmpty() && ((Map) onlyOnRight).isEmpty()))
+                || (onlyOnLeft instanceof PrimitiveList && (((PrimitiveList) onlyOnLeft).isEmpty() && ((PrimitiveList) onlyOnRight).isEmpty()));
     }
 
     /**
@@ -1163,7 +1163,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         }
 
         if (obj instanceof Difference<?, ?> other) {
-            return common().equals(other.common()) && leftOnly().equals(other.leftOnly()) && rightOnly().equals(other.rightOnly());
+            return common().equals(other.common()) && onlyOnLeft().equals(other.onlyOnLeft()) && onlyOnRight().equals(other.onlyOnRight());
         }
 
         return false;
@@ -1187,8 +1187,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         final int prime = 31;
         int result = 1;
         result = prime * result + N.hashCode(common());
-        result = prime * result + N.hashCode(leftOnly());
-        return prime * result + N.hashCode(rightOnly());
+        result = prime * result + N.hashCode(onlyOnLeft());
+        return prime * result + N.hashCode(onlyOnRight());
     }
 
     /**
@@ -1202,7 +1202,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>The right-only elements</li>
      * </ul>
      * 
-     * <p>Format: {@code {areEqual=<boolean>, common=<common>, leftOnly=<leftOnly>, rightOnly=<rightOnly>}}
+     * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>}}
      * 
      * <p>This method is useful for debugging and logging purposes.
      *
@@ -1210,7 +1210,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     @Override
     public String toString() {
-        return "{areEqual=" + areEqual() + ", common=" + common + ", leftOnly=" + leftOnly + ", rightOnly=" + rightOnly + "}";
+        return "{areEqual=" + areEqual() + ", common=" + common + ", onlyOnLeft=" + onlyOnLeft + ", onlyOnRight=" + onlyOnRight + "}";
     }
 
     /**
@@ -1245,8 +1245,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         /** The different values. */
         private final D diffValues;
 
-        KeyValueDifference(final L common, final L leftOnly, final R rightOnly, final D differentValues) {
-            super(common, leftOnly, rightOnly);
+        KeyValueDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
+            super(common, onlyOnLeft, onlyOnRight);
             diffValues = differentValues;
         }
 
@@ -1285,7 +1285,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>
          * This method returns {@code true} if and only if:
          * <ul>
-         *   <li>Both structures have no entries/properties that exist only in one structure (leftOnly and rightOnly are empty)</li>
+         *   <li>Both structures have no entries/properties that exist only in one structure (onlyOnLeft and onlyOnRight are empty)</li>
          *   <li>There are no entries/properties with different values (differentValues is empty)</li>
          * </ul>
          * 
@@ -1321,7 +1321,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
 
             if (obj instanceof KeyValueDifference other) {
-                return common().equals(other.common()) && leftOnly().equals(other.leftOnly()) && rightOnly().equals(other.rightOnly())
+                return common().equals(other.common()) && onlyOnLeft().equals(other.onlyOnLeft()) && onlyOnRight().equals(other.onlyOnRight())
                         && differentValues().equals(other.differentValues());
             }
 
@@ -1346,8 +1346,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final int prime = 31;
             int result = 1;
             result = prime * result + N.hashCode(common());
-            result = prime * result + N.hashCode(leftOnly());
-            result = prime * result + N.hashCode(rightOnly());
+            result = prime * result + N.hashCode(onlyOnLeft());
+            result = prime * result + N.hashCode(onlyOnRight());
             return prime * result + N.hashCode(differentValues());
         }
 
@@ -1363,14 +1363,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>The entries/properties with different values</li>
          * </ul>
          * 
-         * <p>Format: {@code {areEqual=<boolean>, common=<common>, leftOnly=<leftOnly>, rightOnly=<rightOnly>, differentValues=<diffValues>}}
+         * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>, differentValues=<diffValues>}}
          *
          * @return a string representation of this {@code KeyValueDifference} object
          */
         @Override
         public String toString() {
-            return "{areEqual=" + areEqual() + ", common=" + common + ", leftOnly=" + leftOnly + ", rightOnly=" + rightOnly + ", differentValues=" + diffValues
-                    + "}";
+            return "{areEqual=" + areEqual() + ", common=" + common + ", onlyOnLeft=" + onlyOnLeft + ", onlyOnRight=" + onlyOnRight + ", differentValues="
+                    + diffValues + "}";
         }
     }
 
@@ -1397,8 +1397,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * MapDifference<...> diff = MapDifference.of(map1, map2);
      * 
      * // diff.common() returns {"b": 2}
-     * // diff.leftOnly() returns {"a": 1}
-     * // diff.rightOnly() returns {"d": 5}
+     * // diff.onlyOnLeft() returns {"a": 1}
+     * // diff.onlyOnRight() returns {"d": 5}
      * // diff.differentValues() returns {"c": Pair.of(3, 4)}
      * }</pre>
      *
@@ -1418,8 +1418,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static final class MapDifference<L, R, D> extends KeyValueDifference<L, R, D> {
 
-        MapDifference(final L common, final L leftOnly, final R rightOnly, final D differentValues) {
-            super(common, leftOnly, rightOnly, differentValues);
+        MapDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
+            super(common, onlyOnLeft, onlyOnRight, differentValues);
         }
 
         /**
@@ -1449,8 +1449,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(map1, map2);
          * // Results in:
          * // common: {"b": 2}
-         * // leftOnly: {"a": 1}
-         * // rightOnly: {"d": 5}
+         * // onlyOnLeft: {"a": 1}
+         * // onlyOnRight: {"d": 5}
          * // differentValues: {"c": Pair.of(3, 4)}
          * }</pre>
          *
@@ -1502,8 +1502,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(map1, map2, keys);
          * // Results in:
          * // common: {"a": 1}
-         * // leftOnly: {} (empty, since "a" and "b" exist in both, "e" doesn't exist in map1)
-         * // rightOnly: {"e": 6}
+         * // onlyOnLeft: {} (empty, since "a" and "b" exist in both, "e" doesn't exist in map1)
+         * // onlyOnRight: {"e": 6}
          * // differentValues: {"b": Pair.of(2, 5)}
          * // Note: "c" and "d" are not compared because they're not in keysToCompare
          * }</pre>
@@ -1563,8 +1563,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(map1, map2, approxEqual);
          * // Results in:
          * // common: {"a": 1.0, "b": 2.001} (both are considered equal)
-         * // leftOnly: {}
-         * // rightOnly: {}
+         * // onlyOnLeft: {}
+         * // onlyOnRight: {}
          * // differentValues: {}
          * }</pre>
          *
@@ -1638,8 +1638,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(prices1, prices2, priceEqual);
          * // Results in:
          * // common: {"gold": 1850.50} (within $5 tolerance)
-         * // leftOnly: {}
-         * // rightOnly: {}
+         * // onlyOnLeft: {}
+         * // onlyOnRight: {}
          * // differentValues: {"apple": Pair.of(1.99, 2.01)} (exceeds $0.10 tolerance)
          * }</pre>
          *
@@ -1718,8 +1718,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(config1, config2, keysToCheck, configEqual);
          * // Results in:
          * // common: {"timeout": 30, "debug": true}
-         * // leftOnly: {}
-         * // rightOnly: {}
+         * // onlyOnLeft: {}
+         * // onlyOnRight: {}
          * // differentValues: {"retries": Pair.of(3, 5)}
          * // Note: "url" and "proxy" are not compared
          * }</pre>
@@ -1756,8 +1756,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     || (map2 instanceof LinkedHashMap || map2 instanceof SortedMap);
 
             final Map<K1, V1> common = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
-            final Map<K1, V1> leftOnly = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
-            final Map<K2, V2> rightOnly = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
+            final Map<K1, V1> onlyOnLeft = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
+            final Map<K2, V2> onlyOnRight = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
             final Map<CK, Pair<V1, V2>> differentValues = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
 
             if (N.isEmpty(keysToCompare)) {
@@ -1765,10 +1765,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (N.isEmpty(map2)) {
                         // Do nothing. All empty.
                     } else {
-                        rightOnly.putAll(map2);
+                        onlyOnRight.putAll(map2);
                     }
                 } else if (N.isEmpty(map2)) {
-                    leftOnly.putAll(map1);
+                    onlyOnLeft.putAll(map1);
                 } else {
                     K1 key1 = null;
                     V1 val1 = null;
@@ -1791,7 +1791,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                                     differentValues.put(key1, Pair.of(val1, val2));
                                 }
                             } else {
-                                leftOnly.put(key1, val1);
+                                onlyOnLeft.put(key1, val1);
                             }
                         } else if (valueEquivalence.test(key1, val1, val2)) {
                             common.put(key1, val1);
@@ -1808,7 +1808,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             continue;
                         }
 
-                        rightOnly.put(key2, entry2.getValue());
+                        onlyOnRight.put(key2, entry2.getValue());
                     }
                 }
 
@@ -1817,10 +1817,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (N.isEmpty(map2)) {
                         // Do nothing. All empty.
                     } else {
-                        Maps.putIf(rightOnly, map2, keysToCompare::contains);
+                        Maps.putAllIf(onlyOnRight, map2, keysToCompare::contains);
                     }
                 } else if (N.isEmpty(map2)) {
-                    Maps.putIf(leftOnly, map1, keysToCompare::contains);
+                    Maps.putAllIf(onlyOnLeft, map1, keysToCompare::contains);
                 } else {
                     K1 key1 = null;
                     V1 val1 = null;
@@ -1848,7 +1848,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                                     differentValues.put(key1, Pair.of(val1, val2));
                                 }
                             } else {
-                                leftOnly.put(key1, val1);
+                                onlyOnLeft.put(key1, val1);
                             }
                         } else if (valueEquivalence.test(key1, val1, val2)) {
                             common.put(key1, val1);
@@ -1865,12 +1865,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             continue;
                         }
 
-                        rightOnly.put(key2, entry2.getValue());
+                        onlyOnRight.put(key2, entry2.getValue());
                     }
                 }
 
             }
-            return new MapDifference<>(common, leftOnly, rightOnly, differentValues);
+            return new MapDifference<>(common, onlyOnLeft, onlyOnRight, differentValues);
         }
 
         /**
@@ -1903,8 +1903,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(users1, users2, map -> map.get("id"));
          * // Results in:
          * // common: [] (empty, no identical maps)
-         * // leftOnly: [{"id": 2, "name": "Jane", "age": 25}]
-         * // rightOnly: [{"id": 3, "name": "Bob", "age": 28}]
+         * // onlyOnLeft: [{"id": 2, "name": "Jane", "age": 25}]
+         * // onlyOnRight: [{"id": 3, "name": "Bob", "age": 28}]
          * // differentValues: {1: MapDifference of the two "John" maps showing age difference}
          * }</pre>
          *
@@ -1956,8 +1956,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *                                            map -> map.get("id"));
          * // Results in:
          * // common: [{"id": 1, ...}] (John's record, since name and age match)
-         * // leftOnly: []
-         * // rightOnly: []
+         * // onlyOnLeft: []
+         * // onlyOnRight: []
          * // differentValues: {2: MapDifference showing age difference for Jane}
          * }</pre>
          *
@@ -2010,8 +2010,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * );
          * // Results in:
          * // common: [] (empty, different structures)
-         * // leftOnly: [{"user_id": 2, "full_name": "Jane Smith"}]
-         * // rightOnly: [{"id": 3, "firstName": "Bob", "lastName": "Johnson"}]
+         * // onlyOnLeft: [{"user_id": 2, "full_name": "Jane Smith"}]
+         * // onlyOnRight: [{"id": 3, "firstName": "Bob", "lastName": "Johnson"}]
          * // differentValues: {1: MapDifference showing structural differences}
          * }</pre>
          *
@@ -2086,8 +2086,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * );
          * // Results in:
          * // common: Maps with ID 1 (john_doe) - username matches
-         * // leftOnly: Maps with ID 2 (jane_smith)
-         * // rightOnly: Maps with ID 3 (bob_jones)
+         * // onlyOnLeft: Maps with ID 2 (jane_smith)
+         * // onlyOnRight: Maps with ID 3 (bob_jones)
          * // differentValues: {} (empty, since we're only comparing username)
          * }</pre>
          *
@@ -2115,18 +2115,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final boolean isEmptyPropNamesToCompare = N.isEmpty(keysToCompare);
 
             final List<Map<K1, V1>> common = new ArrayList<>();
-            final List<Map<K1, V1>> leftOnly = new ArrayList<>();
-            final List<Map<K2, V2>> rightOnly = new ArrayList<>();
+            final List<Map<K1, V1>> onlyOnLeft = new ArrayList<>();
+            final List<Map<K2, V2>> onlyOnRight = new ArrayList<>();
             final Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>> differentValues = new LinkedHashMap<>();
 
             if (N.isEmpty(a)) {
                 if (N.isEmpty(b)) {
                     // Do nothing. All empty.
                 } else {
-                    rightOnly.addAll(b);
+                    onlyOnRight.addAll(b);
                 }
             } else if (N.isEmpty(b)) {
-                leftOnly.addAll(a);
+                onlyOnLeft.addAll(a);
             } else {
                 final Map<K, Map<? extends K1, ? extends V1>> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(),
                         IntFunctions.ofLinkedHashMap());
@@ -2150,18 +2150,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             differentValues.put(entry.getKey(), MapDifference.of(mapA, mapB, keysToCompare));
                         }
                     } else {
-                        leftOnly.add(mapA);
+                        onlyOnLeft.add(mapA);
                     }
                 }
 
                 for (final Map.Entry<K, Map<? extends K2, ? extends V2>> entry : beanMapB.entrySet()) {
                     if (!beanMapA.containsKey(entry.getKey())) {
-                        rightOnly.add((Map<K2, V2>) entry.getValue());
+                        onlyOnRight.add((Map<K2, V2>) entry.getValue());
                     }
                 }
             }
 
-            return new MapDifference<>(common, leftOnly, rightOnly, differentValues);
+            return new MapDifference<>(common, onlyOnLeft, onlyOnRight, differentValues);
         }
     }
 
@@ -2202,8 +2202,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * 
      * BeanDifference<...> diff = BeanDifference.of(person1, person2);
      * // diff.common() returns {"name": "John"}
-     * // diff.leftOnly() returns {} (empty)
-     * // diff.rightOnly() returns {} (empty)
+     * // diff.onlyOnLeft() returns {} (empty)
+     * // diff.onlyOnRight() returns {} (empty)
      * // diff.differentValues() returns {"age": Pair.of(30, 31), "email": Pair.of("john@old.com", "john@new.com")}
      * }</pre>
      *
@@ -2217,8 +2217,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#difference(Collection, Collection)
      */
     public static final class BeanDifference<L, R, D> extends KeyValueDifference<L, R, D> {
-        BeanDifference(final L common, final L leftOnly, final R rightOnly, final D differentValues) {
-            super(common, leftOnly, rightOnly, differentValues);
+        BeanDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
+            super(common, onlyOnLeft, onlyOnRight, differentValues);
         }
 
         /**
@@ -2256,8 +2256,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * BeanDifference<...> diff = BeanDifference.of(user1, user2);
          * // Results in:
          * // common: {"name": "John"}
-         * // leftOnly: {}
-         * // rightOnly: {}
+         * // onlyOnLeft: {}
+         * // onlyOnRight: {}
          * // differentValues: {"email": Pair.of("john@old.com", "john@new.com")}
          * // Note: lastModified is ignored due to @DiffIgnore
          * }</pre>
@@ -2316,8 +2316,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * BeanDifference<...> diff = BeanDifference.of(emp1, emp2, propsToCompare);
          * // Results in:
          * // common: {"id": "E001", "name": "John"}
-         * // leftOnly: {}
-         * // rightOnly: {}
+         * // onlyOnLeft: {}
+         * // onlyOnRight: {}
          * // differentValues: {}
          * // Note: salary and department differences are ignored
          * }</pre>
@@ -2573,8 +2573,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
             final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
             final Map<String, Object> common = new LinkedHashMap<>();
-            final Map<String, Object> leftOnly = new LinkedHashMap<>();
-            final Map<String, Object> rightOnly = new LinkedHashMap<>();
+            final Map<String, Object> onlyOnLeft = new LinkedHashMap<>();
+            final Map<String, Object> onlyOnRight = new LinkedHashMap<>();
             final Map<String, Pair<Object, Object>> differentValues = new LinkedHashMap<>();
 
             if (N.isEmpty(propNamesToCompare)) {
@@ -2582,16 +2582,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Beans.beanToMap(bean2, true, Beans.getDiffIgnoredPropNames(bean2.getClass()), rightOnly);
+                        Beans.beanToMap(bean2, true, Beans.getIgnoredPropNamesForDiff(bean2.getClass()), onlyOnRight);
                     }
                 } else if (bean2 == null) {
-                    Beans.beanToMap(bean1, true, Beans.getDiffIgnoredPropNames(bean1.getClass()), leftOnly);
+                    Beans.beanToMap(bean1, true, Beans.getIgnoredPropNamesForDiff(bean1.getClass()), onlyOnLeft);
                 } else {
                     final Class<?> bean1Class = bean1.getClass();
                     final Class<?> bean2Class = bean2.getClass();
                     final Set<String> ignoredPropNamesForNullValues = new HashSet<>();
-                    final ImmutableSet<String> diffIgnoredPropNamesForBean1 = Beans.getDiffIgnoredPropNames(bean1Class);
-                    final ImmutableSet<String> diffIgnoredPropNamesForBean2 = Beans.getDiffIgnoredPropNames(bean2Class);
+                    final ImmutableSet<String> diffIgnoredPropNamesForBean1 = Beans.getIgnoredPropNamesForDiff(bean1Class);
+                    final ImmutableSet<String> diffIgnoredPropNamesForBean2 = Beans.getIgnoredPropNamesForDiff(bean2Class);
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1Class);
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2Class);
                     Object val1 = null;
@@ -2609,7 +2609,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
 
                             if (propInfo2 == null) {
-                                leftOnly.put(propInfo1.name, val1);
+                                onlyOnLeft.put(propInfo1.name, val1);
                             } else {
                                 val2 = propInfo2.getPropValue(bean2);
 
@@ -2637,7 +2637,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             continue;
                         }
 
-                        rightOnly.put(propInfo.name, propInfo.getPropValue(bean2));
+                        onlyOnRight.put(propInfo.name, propInfo.getPropValue(bean2));
                     }
                 }
 
@@ -2646,10 +2646,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Beans.beanToMap(bean2, propNamesToCompare, rightOnly);
+                        Beans.beanToMap(bean2, propNamesToCompare, onlyOnRight);
                     }
                 } else if (bean2 == null) {
-                    Beans.beanToMap(bean1, propNamesToCompare, leftOnly);
+                    Beans.beanToMap(bean1, propNamesToCompare, onlyOnLeft);
                 } else {
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
@@ -2670,7 +2670,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         propInfo2 = beanInfo2.getPropInfo(propName);
 
                         if (propInfo2 == null) {
-                            leftOnly.put(propName, val1);
+                            onlyOnLeft.put(propName, val1);
                         } else {
                             val2 = propInfo2.getPropValue(bean2);
 
@@ -2690,13 +2690,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             continue;
                         }
 
-                        rightOnly.put(propName, propInfo2.getPropValue(bean2));
+                        onlyOnRight.put(propName, propInfo2.getPropValue(bean2));
                     }
                 }
 
             }
 
-            return new BeanDifference<>(common, leftOnly, rightOnly, differentValues);
+            return new BeanDifference<>(common, onlyOnLeft, onlyOnRight, differentValues);
         }
 
         /**
@@ -2736,8 +2736,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * BeanDifference<...> diff = BeanDifference.of(team1, team2, emp -> emp.getId());
          * // Results in:
          * // common: [] (empty, as E001 has different department)
-         * // leftOnly: [Employee E002]
-         * // rightOnly: [Employee E003]
+         * // onlyOnLeft: [Employee E002]
+         * // onlyOnRight: [Employee E003]
          * // differentValues: {"E001": BeanDifference showing department change}
          * }</pre>
          *
@@ -2981,18 +2981,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final boolean isEmptyPropNamesToCompare = N.isEmpty(propNamesToCompare);
 
             final List<T1> common = new ArrayList<>();
-            final List<T1> leftOnly = new ArrayList<>();
-            final List<T2> rightOnly = new ArrayList<>();
+            final List<T1> onlyOnLeft = new ArrayList<>();
+            final List<T2> onlyOnRight = new ArrayList<>();
             final Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>> differentValues = new LinkedHashMap<>();
 
             if (N.isEmpty(a)) {
                 if (N.isEmpty(b)) {
                     // Do nothing. All empty.
                 } else {
-                    rightOnly.addAll(b);
+                    onlyOnRight.addAll(b);
                 }
             } else if (N.isEmpty(b)) {
-                leftOnly.addAll(a);
+                onlyOnLeft.addAll(a);
             } else {
                 final Map<K, T1> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
                 final Map<K, T2> beanMapB = N.toMap(b, idExtractor2, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
@@ -3013,18 +3013,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             differentValues.put(entry.getKey(), BeanDifference.of(beanA, beanB, propNamesToCompare));
                         }
                     } else {
-                        leftOnly.add(beanA);
+                        onlyOnLeft.add(beanA);
                     }
                 }
 
                 for (final Map.Entry<K, T2> entry : beanMapB.entrySet()) {
                     if (!beanMapA.containsKey(entry.getKey())) {
-                        rightOnly.add(entry.getValue());
+                        onlyOnRight.add(entry.getValue());
                     }
                 }
             }
 
-            return new BeanDifference<>((L) common, (L) leftOnly, (R) rightOnly, differentValues);
+            return new BeanDifference<>((L) common, (L) onlyOnLeft, (R) onlyOnRight, differentValues);
 
         }
     }

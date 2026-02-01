@@ -165,65 +165,65 @@ public class EmailUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_sendHTMLEmail_basicHTML() {
+    public void test_sendHtmlEmail_basicHTML() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML Email Test",
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML Email Test",
                     "<h1>Hello</h1><p>This is an <strong>HTML</strong> email.</p>", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmail_complexHTML() {
+    public void test_sendHtmlEmail_complexHTML() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             String htmlContent = "<html><body>" + "<h2>Welcome!</h2>" + "<table border='1'>" + "<tr><th>Name</th><th>Email</th></tr>"
                     + "<tr><td>John</td><td>john@example.com</td></tr>" + "</table>" + "<a href='https://example.com'>Click here</a>" + "</body></html>";
 
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "Complex HTML Email", htmlContent, "username", "password",
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Complex HTML Email", htmlContent, "username", "password",
                     props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmail_multipleRecipients() {
+    public void test_sendHtmlEmail_multipleRecipients() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmail(new String[] { "test1@example.com", "test2@example.com" }, "sender@example.com", "HTML Email to Multiple Recipients",
+            EmailUtil.sendHtmlEmail(new String[] { "test1@example.com", "test2@example.com" }, "sender@example.com", "HTML Email to Multiple Recipients",
                     "<h1>Hello All</h1><p>This is a test.</p>", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmail_withInlineCSS() {
+    public void test_sendHtmlEmail_withInlineCSS() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             String htmlWithCSS = "<html>" + "<head><style>body { font-family: Arial; } h1 { color: blue; }</style></head>"
                     + "<body><h1>Styled Email</h1><p>With CSS</p></body>" + "</html>";
 
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "Styled HTML Email", htmlWithCSS, "username", "password", props);
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Styled HTML Email", htmlWithCSS, "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmail_emptyHTML() {
+    public void test_sendHtmlEmail_emptyHTML() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty HTML", "", "username", "password", props);
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty HTML", "", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmailWithAttachment_singleAttachment() {
+    public void test_sendHtmlEmailWithAttachment_singleAttachment() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Attachment",
+            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Attachment",
                     "<h1>Invoice</h1><p>Please find the invoice attached.</p>", new String[] { tempFile.getAbsolutePath() }, "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmailWithAttachment_multipleAttachments() throws IOException {
+    public void test_sendHtmlEmailWithAttachment_multipleAttachments() throws IOException {
         File tempFile2 = File.createTempFile("email_test_3_", ".doc");
         try {
             try (FileOutputStream fos = new FileOutputStream(tempFile2)) {
@@ -231,7 +231,7 @@ public class EmailUtil2025Test extends TestBase {
             }
 
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Multiple Attachments",
+                EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Multiple Attachments",
                         "<html><body><h2>Documents</h2><p>Please review the attached documents.</p></body></html>",
                         new String[] { tempFile.getAbsolutePath(), tempFile2.getAbsolutePath() }, "username", "password", props);
             });
@@ -244,25 +244,25 @@ public class EmailUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_sendHTMLEmailWithAttachment_nullAttachments() {
+    public void test_sendHtmlEmailWithAttachment_nullAttachments() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email without Attachments",
+            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email without Attachments",
                     "<h1>Hello</h1><p>No attachments here.</p>", null, "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmailWithAttachment_emptyAttachmentsArray() {
+    public void test_sendHtmlEmailWithAttachment_emptyAttachmentsArray() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Empty Attachments",
+            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Empty Attachments",
                     "<h1>Test</h1>", new String[] {}, "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
     }
 
     @Test
-    public void test_sendHTMLEmailWithAttachment_complexHTMLAndMultipleAttachments() throws IOException {
+    public void test_sendHtmlEmailWithAttachment_complexHTMLAndMultipleAttachments() throws IOException {
         File pdfFile = File.createTempFile("report_", ".pdf");
         File excelFile = File.createTempFile("data_", ".xlsx");
 
@@ -280,7 +280,7 @@ public class EmailUtil2025Test extends TestBase {
                         + "<tr><td>Revenue</td><td>$100,000</td></tr>" + "<tr><td>Growth</td><td>15%</td></tr>" + "</table>"
                         + "<p>Best regards,<br>Management</p>" + "</body></html>";
 
-                EmailUtil.sendHTMLEmailWithAttachment(new String[] { "team@example.com", "manager@example.com" }, "reports@example.com",
+                EmailUtil.sendHtmlEmailWithAttachment(new String[] { "team@example.com", "manager@example.com" }, "reports@example.com",
                         "Monthly Report - November 2025", complexHTML, new String[] { pdfFile.getAbsolutePath(), excelFile.getAbsolutePath() }, "report_user",
                         "report_password", props);
             });
@@ -348,11 +348,11 @@ public class EmailUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_sendHTMLEmail_scriptTags() {
+    public void test_sendHtmlEmail_scriptTags() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             String htmlWithScript = "<html><body>" + "<h1>Test</h1>" + "<script>alert('test');</script>" + "<p>Content</p>" + "</body></html>";
 
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML with Script", htmlWithScript, "username", "password",
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML with Script", htmlWithScript, "username", "password",
                     props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));

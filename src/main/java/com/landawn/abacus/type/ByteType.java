@@ -67,8 +67,8 @@ public final class ByteType extends AbstractByteType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteType type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = ...;  // from SQL query
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Byte status = type.get(rs, 1);   // retrieves Byte from column 1
      * }</pre>
      *
@@ -76,6 +76,7 @@ public final class ByteType extends AbstractByteType {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return the Byte value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Byte
      */
     @Override
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -96,8 +97,8 @@ public final class ByteType extends AbstractByteType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteType type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = ...;  // from SQL query
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Byte status = type.get(rs, "status");   // retrieves Byte from "status" column
      * }</pre>
      *
@@ -105,6 +106,7 @@ public final class ByteType extends AbstractByteType {
      * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
      * @return the Byte value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Byte
      */
     @Override
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {

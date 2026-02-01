@@ -157,7 +157,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @return {@code true}, indicating that Map is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

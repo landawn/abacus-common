@@ -36,7 +36,7 @@ public class BinaryStreamType extends InputStreamType {
      * <pre>{@code
      * // Obtained via TypeFactory
      * Type<InputStream> type = TypeFactory.getType("BinaryStream");
-     * ResultSet rs = ...;
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * InputStream stream = type.get(rs, "binary_data");
      * }</pre>
      */

@@ -15,85 +15,85 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testOf_WithPredicate_ValidParameters() {
-        Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof IOException);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithPredicate_ZeroRetryTimes() {
-        Retry<Void> retry = Retry.of(0, 1000, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(0, 1000, e -> e instanceof IOException);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithPredicate_ZeroRetryInterval() {
-        Retry<Void> retry = Retry.of(3, 0, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 0, e -> e instanceof IOException);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithPredicate_NegativeRetryTimes() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(-1, 1000, e -> e instanceof IOException);
+            Retry.withFixedDelay(-1, 1000, e -> e instanceof IOException);
         });
     }
 
     @Test
     public void testOf_WithPredicate_NegativeRetryInterval() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(3, -1, e -> e instanceof IOException);
+            Retry.withFixedDelay(3, -1, e -> e instanceof IOException);
         });
     }
 
     @Test
     public void testOf_WithPredicate_NullRetryCondition() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(3, 1000, (Predicate) null);
+            Retry.withFixedDelay(3, 1000, (Predicate) null);
         });
     }
 
     @Test
     public void testOf_WithBiPredicate_ValidParameters() {
-        Retry<String> retry = Retry.of(3, 1000, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 1000, (result, ex) -> result == null || ex instanceof IOException);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithBiPredicate_ZeroRetryTimes() {
-        Retry<String> retry = Retry.of(0, 1000, (result, ex) -> result == null);
+        Retry<String> retry = Retry.withFixedDelay(0, 1000, (result, ex) -> result == null);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithBiPredicate_ZeroRetryInterval() {
-        Retry<String> retry = Retry.of(3, 0, (result, ex) -> result == null);
+        Retry<String> retry = Retry.withFixedDelay(3, 0, (result, ex) -> result == null);
         Assertions.assertNotNull(retry);
     }
 
     @Test
     public void testOf_WithBiPredicate_NegativeRetryTimes() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(-1, 1000, (result, ex) -> result == null);
+            Retry.withFixedDelay(-1, 1000, (result, ex) -> result == null);
         });
     }
 
     @Test
     public void testOf_WithBiPredicate_NegativeRetryInterval() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(3, -1, (result, ex) -> result == null);
+            Retry.withFixedDelay(3, -1, (result, ex) -> result == null);
         });
     }
 
     @Test
     public void testOf_WithBiPredicate_NullRetryCondition() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.of(3, 1000, (java.util.function.BiPredicate<String, Exception>) null);
+            Retry.withFixedDelay(3, 1000, (java.util.function.BiPredicate<String, Exception>) null);
         });
     }
 
     @Test
     public void testRun_SuccessOnFirstAttempt() throws Exception {
-        Retry<Void> retry = Retry.of(3, 100, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 100, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -105,7 +105,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_SuccessOnSecondAttempt() throws Exception {
-        Retry<Void> retry = Retry.of(3, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -120,7 +120,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_SuccessOnThirdAttempt() throws Exception {
-        Retry<Void> retry = Retry.of(3, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -135,7 +135,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_FailAfterAllRetries() {
-        Retry<Void> retry = Retry.of(2, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         IOException exception = Assertions.assertThrows(IOException.class, () -> {
@@ -151,7 +151,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_NoRetryOnNonMatchingException() {
-        Retry<Void> retry = Retry.of(3, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -167,7 +167,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_WithZeroRetryTimes() throws Exception {
-        Retry<Void> retry = Retry.of(0, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(0, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -179,7 +179,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_WithZeroRetryTimes_ThrowsException() {
-        Retry<Void> retry = Retry.of(0, 50, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(0, 50, e -> e instanceof IOException);
 
         Assertions.assertThrows(IOException.class, () -> {
             retry.run(() -> {
@@ -190,7 +190,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_WithBiPredicateRetryCondition() throws Exception {
-        Retry<Void> retry = Retry.of(3, 50, (result, ex) -> ex instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -205,7 +205,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_WithZeroRetryInterval() throws Exception {
-        Retry<Void> retry = Retry.of(2, 0, e -> e instanceof IOException);
+        Retry<Void> retry = Retry.withFixedDelay(2, 0, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         long startTime = System.currentTimeMillis();
@@ -223,7 +223,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_SuccessOnFirstAttempt() throws Exception {
-        Retry<String> retry = Retry.of(3, 100, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 100, (result, ex) -> result == null || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -237,7 +237,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_SuccessOnSecondAttempt() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -254,7 +254,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_SuccessOnThirdAttempt() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -271,7 +271,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_FailAfterAllRetries() {
-        Retry<String> retry = Retry.of(2, 50, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> result == null || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         IOException exception = Assertions.assertThrows(IOException.class, () -> {
@@ -287,7 +287,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_NoRetryOnNonMatchingException() {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -303,7 +303,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_RetryOnUnsatisfactoryResult() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> result == null || result.equals("Bad"));
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || result.equals("Bad"));
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -320,7 +320,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_RetryOnNullResult() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> result == null);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -337,7 +337,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_FailsAfterRetriesWithUnsatisfactoryResult() {
-        Retry<String> retry = Retry.of(2, 50, (result, ex) -> result == null);
+        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> result == null);
         AtomicInteger counter = new AtomicInteger(0);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -354,7 +354,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_WithZeroRetryTimes() throws Exception {
-        Retry<String> retry = Retry.of(0, 50, (result, ex) -> result == null);
+        Retry<String> retry = Retry.withFixedDelay(0, 50, (result, ex) -> result == null);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -368,7 +368,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_WithZeroRetryTimes_ThrowsException() {
-        Retry<String> retry = Retry.of(0, 50, (result, ex) -> ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(0, 50, (result, ex) -> ex instanceof IOException);
 
         Assertions.assertThrows(IOException.class, () -> {
             retry.call(() -> {
@@ -379,7 +379,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_WithPredicateRetryCondition() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (String result, Exception ex) -> ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (String result, Exception ex) -> ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -396,7 +396,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_WithZeroRetryInterval() throws Exception {
-        Retry<String> retry = Retry.of(2, 0, (result, ex) -> result == null || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> result == null || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         long startTime = System.currentTimeMillis();
@@ -416,7 +416,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_ExceptionThenSuccessfulResult() throws Exception {
-        Retry<Integer> retry = Retry.of(3, 50, (result, ex) -> (result != null && result < 100) || ex instanceof IOException);
+        Retry<Integer> retry = Retry.withFixedDelay(3, 50, (result, ex) -> (result != null && result < 100) || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         Integer result = retry.call(() -> {
@@ -436,7 +436,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_MixedExceptionAndResultRetries() throws Exception {
-        Retry<String> retry = Retry.of(5, 30, (result, ex) -> (result != null && result.startsWith("Retry")) || ex instanceof IOException);
+        Retry<String> retry = Retry.withFixedDelay(5, 30, (result, ex) -> (result != null && result.startsWith("Retry")) || ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -461,7 +461,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_ReturnNullWithNullConditionFalse() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> false);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> false);
 
         String result = retry.call(() -> null);
 
@@ -470,7 +470,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_ExceptionChangesAcrossRetries() throws Exception {
-        Retry<String> retry = Retry.of(3, 50, (result, ex) -> ex instanceof IOException || ex instanceof IllegalStateException);
+        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException || ex instanceof IllegalStateException);
         AtomicInteger counter = new AtomicInteger(0);
 
         String result = retry.call(() -> {
@@ -490,7 +490,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testRun_MultipleExceptionTypes() throws Exception {
-        Retry<Void> retry = Retry.of(3, 50, e -> e instanceof IOException || e instanceof IllegalArgumentException);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException || e instanceof IllegalArgumentException);
         AtomicInteger counter = new AtomicInteger(0);
 
         retry.run(() -> {
@@ -508,7 +508,7 @@ public class Retry2025Test extends TestBase {
 
     @Test
     public void testCall_AllRetriesThrowDifferentExceptions() {
-        Retry<String> retry = Retry.of(2, 50, (result, ex) -> ex instanceof Exception);
+        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> ex instanceof Exception);
         AtomicInteger counter = new AtomicInteger(0);
 
         Exception exception = Assertions.assertThrows(IllegalStateException.class, () -> {

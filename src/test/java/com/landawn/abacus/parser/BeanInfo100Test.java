@@ -216,7 +216,7 @@ public class BeanInfo100Test extends TestBase {
         @Id
         private Long id;
         private String simpleName;
-        @JsonXmlField(alias = { "alias1", "alias2" })
+        @JsonXmlField(aliases = { "alias1", "alias2" })
         private String aliasedField;
         private String sharedField;
         private NestedBean nestedBean;

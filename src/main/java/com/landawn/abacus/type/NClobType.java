@@ -90,6 +90,7 @@ public class NClobType extends AbstractType<NClob> {
      * @param x the NClob object to convert
      * @return the string content of the NClob, or {@code null} if the input is null
      * @throws UncheckedSQLException if a database access error occurs during extraction or freeing
+     * @throws UnsupportedOperationException if the NCLOB length exceeds {@link Integer#MAX_VALUE}
      */
     @Override
     public String stringOf(final NClob x) throws UnsupportedOperationException {

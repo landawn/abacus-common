@@ -134,7 +134,7 @@ public final class BeanType<T> extends AbstractType<T> {
      * @param str the JSON string to deserialize
      * @return a new instance of the bean type populated from the JSON data,
      *         or {@code null} if the input string is {@code null} or empty
-     * @throws com.landawn.abacus.exception.ParseException if the JSON is invalid or cannot be mapped to the bean type
+     * @throws ParseException if the JSON is invalid or cannot be mapped to the bean type
      */
     @Override
     public T valueOf(final String str) {

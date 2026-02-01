@@ -570,26 +570,26 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_formalizePropName() {
-        assertEquals("a", Beans.formalizePropName("_a"));
-        assertEquals("a", Beans.formalizePropName("_A"));
-        assertEquals("a", Beans.formalizePropName("_a_"));
-        assertEquals("a", Beans.formalizePropName("_A_"));
-        assertEquals("aB", Beans.formalizePropName("_a_b"));
-        assertEquals("aB", Beans.formalizePropName("_a__b"));
-        assertEquals("aB", Beans.formalizePropName("_a_B"));
-        assertEquals("aB", Beans.formalizePropName("_A_b"));
-        assertEquals("aB", Beans.formalizePropName("_A_B"));
-        assertEquals("aB", Beans.formalizePropName("_a_b_"));
-        assertEquals("aB", Beans.formalizePropName("_a_B_"));
-        assertEquals("aB", Beans.formalizePropName("_A_b_"));
-        assertEquals("aB", Beans.formalizePropName("_A_B_"));
-        assertEquals("aBCd", Beans.formalizePropName("_a_b_cd"));
-        assertEquals("aBCd", Beans.formalizePropName("_a_B_cd"));
-        assertEquals("aBCd", Beans.formalizePropName("_A_b_cd"));
-        assertEquals("aBCd", Beans.formalizePropName("_A_B_cd"));
-        assertEquals("aBbCd", Beans.formalizePropName("_A_bb_cd"));
-        assertEquals("aBbCd", Beans.formalizePropName("_A_Bb_cd"));
-        assertEquals("firstName", Beans.formalizePropName("_FIRST_NAME_"));
+        assertEquals("a", Beans.normalizePropName("_a"));
+        assertEquals("a", Beans.normalizePropName("_A"));
+        assertEquals("a", Beans.normalizePropName("_a_"));
+        assertEquals("a", Beans.normalizePropName("_A_"));
+        assertEquals("aB", Beans.normalizePropName("_a_b"));
+        assertEquals("aB", Beans.normalizePropName("_a__b"));
+        assertEquals("aB", Beans.normalizePropName("_a_B"));
+        assertEquals("aB", Beans.normalizePropName("_A_b"));
+        assertEquals("aB", Beans.normalizePropName("_A_B"));
+        assertEquals("aB", Beans.normalizePropName("_a_b_"));
+        assertEquals("aB", Beans.normalizePropName("_a_B_"));
+        assertEquals("aB", Beans.normalizePropName("_A_b_"));
+        assertEquals("aB", Beans.normalizePropName("_A_B_"));
+        assertEquals("aBCd", Beans.normalizePropName("_a_b_cd"));
+        assertEquals("aBCd", Beans.normalizePropName("_a_B_cd"));
+        assertEquals("aBCd", Beans.normalizePropName("_A_b_cd"));
+        assertEquals("aBCd", Beans.normalizePropName("_A_B_cd"));
+        assertEquals("aBbCd", Beans.normalizePropName("_A_bb_cd"));
+        assertEquals("aBbCd", Beans.normalizePropName("_A_Bb_cd"));
+        assertEquals("firstName", Beans.normalizePropName("_FIRST_NAME_"));
 
         assertEquals("a_bb_cd", Beans.toSnakeCase("aBBCd"));
         assertEquals("a_b_cd", Beans.toSnakeCase("aBCd"));
@@ -857,7 +857,7 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_percentiles() {
         final int[] a = Array.range(1, 101);
-        final Map<Percentage, Integer> percentiles = N.percentiles(a);
+        final Map<Percentage, Integer> percentiles = N.percentilesOfSorted(a);
         N.println(percentiles);
         percentiles.forEach(Fn.println("="));
 

@@ -185,12 +185,12 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @Subscribe(interval = 1000)  // Maximum one event per second
+     * @Subscribe(intervalMillis = 1000)  // Maximum one event per second
      * public void onSensorData(SensorEvent event) {
      *     updateDisplay(event.getValue());
      * }
      *
-     * @Subscribe(interval = 5000)  // Maximum one event per 5 seconds
+     * @Subscribe(intervalMillis = 5000)  // Maximum one event per 5 seconds
      * public void onLocationUpdate(Location location) {
      *     saveLocationToServer(location);
      * }
@@ -198,7 +198,7 @@ public @interface Subscribe {
      * 
      * @return the minimum interval between events in milliseconds, 0 for no throttling
      */
-    long interval() default 0; // Unit is milliseconds.
+    long intervalMillis() default 0; // Unit is milliseconds.
 
     /**
      * Controls whether duplicate consecutive events should be ignored.

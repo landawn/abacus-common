@@ -60,7 +60,7 @@ import javax.mail.internet.MimeMultipart;
  * );
  * 
  * // Send HTML email with attachment
- * EmailUtil.sendHTMLEmailWithAttachment(
+ * EmailUtil.sendHtmlEmailWithAttachment(
  *     new String[] {"recipient@example.com"},
  *     "sender@example.com",
  *     "HTML Email",
@@ -116,7 +116,7 @@ public final class EmailUtil {
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
-     * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
+     * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
      */
     public static void sendEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
             final String password, final Properties props) {
@@ -160,7 +160,7 @@ public final class EmailUtil {
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
-     * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
+     * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
     public static void sendEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
             final String[] attachedFiles, final String userName, final String password, final Properties props) {
@@ -178,7 +178,7 @@ public final class EmailUtil {
      *     "<a href='https://example.com'>Visit our website</a>" +
      *     "</body></html>";
      *
-     * EmailUtil.sendHTMLEmail(
+     * EmailUtil.sendHtmlEmail(
      *     new String[] {"newuser@example.com"},
      *     "noreply@example.com",
      *     "Welcome to Our Service",
@@ -206,12 +206,12 @@ public final class EmailUtil {
      *              </ul>
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
-     * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
+     * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
      */
-    public static void sendHTMLEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
+    public static void sendHtmlEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
             final String password, final Properties props) {
-        sendHTMLEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
+        sendHtmlEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
     }
 
     /**
@@ -228,7 +228,7 @@ public final class EmailUtil {
      *     "</table>" +
      *     "</body></html>";
      *
-     * EmailUtil.sendHTMLEmailWithAttachment(
+     * EmailUtil.sendHtmlEmailWithAttachment(
      *     new String[] {"customer@example.com"},
      *     "billing@example.com",
      *     "Invoice #12345",
@@ -259,10 +259,10 @@ public final class EmailUtil {
      *              </ul>
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
-     * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
+     * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
-    public static void sendHTMLEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
+    public static void sendHtmlEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
             final String[] attachedFiles, final String userName, final String password, final Properties props) {
         send(recipients, from, subject, content, attachedFiles, true, userName, password, props);
     }

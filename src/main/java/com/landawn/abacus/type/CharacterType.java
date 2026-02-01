@@ -67,7 +67,7 @@ public final class CharacterType extends AbstractCharacterType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Character initial = type.get(rs, 1);   // retrieves Character from column 1
      * }</pre>
      *
@@ -94,7 +94,7 @@ public final class CharacterType extends AbstractCharacterType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Character initial = type.get(rs, "initial");   // retrieves Character from "initial" column
      * }</pre>
      *

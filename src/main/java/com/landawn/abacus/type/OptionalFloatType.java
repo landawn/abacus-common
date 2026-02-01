@@ -148,7 +148,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains float value 3.14
      * OptionalFloat opt = type.get(rs, 1);
@@ -179,7 +179,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "temperature" contains float value 98.6
      * OptionalFloat opt = type.get(rs, "temperature");
@@ -210,8 +210,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO measurements (id, temperature) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalFloat opt = OptionalFloat.of(98.6f);
      * type.set(stmt, 2, opt);
@@ -243,7 +242,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * CallableStatement stmt = connection.prepareCall("{call record_temperature(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalFloat opt = OptionalFloat.of(37.5f);
      * type.set(stmt, "p_temperature", opt);

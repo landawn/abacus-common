@@ -503,7 +503,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetDiffIgnoredPropNames() {
-        ImmutableSet<String> ignored = Beans.getDiffIgnoredPropNames(BeanWithDiffIgnore.class);
+        ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(BeanWithDiffIgnore.class);
         assertTrue(ignored.contains("lastModified"));
         assertTrue(ignored.contains("internalFlag"));
         assertFalse(ignored.contains("name"));
@@ -629,11 +629,11 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFormalizePropName() {
-        assertEquals("userName", Beans.formalizePropName("user_name"));
-        assertEquals("firstName", Beans.formalizePropName("first_name"));
-        assertEquals("clazz", Beans.formalizePropName("class"));
-        assertEquals("id", Beans.formalizePropName("ID"));
-        assertEquals("addressLine1", Beans.formalizePropName("address_line_1"));
+        assertEquals("userName", Beans.normalizePropName("user_name"));
+        assertEquals("firstName", Beans.normalizePropName("first_name"));
+        assertEquals("clazz", Beans.normalizePropName("class"));
+        assertEquals("id", Beans.normalizePropName("ID"));
+        assertEquals("addressLine1", Beans.normalizePropName("address_line_1"));
     }
 
     @Test
@@ -669,7 +669,7 @@ public class Beans2025Test extends TestBase {
         map.put("user_name", "John");
         map.put("first_name", "Jane");
 
-        Beans.toCamelCaseKeys(map);
+        Beans.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -683,7 +683,7 @@ public class Beans2025Test extends TestBase {
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toSnakeCaseKeys(map);
+        Beans.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -696,7 +696,7 @@ public class Beans2025Test extends TestBase {
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.toScreamingSnakeCaseKeys(map);
+        Beans.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -967,22 +967,22 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testClone() {
-        SimpleBean cloned = Beans.clone(simpleBean);
+        SimpleBean cloned = Beans.deepCopy(simpleBean);
         assertNotNull(cloned);
         assertNotSame(simpleBean, cloned);
         assertEquals(simpleBean.getName(), cloned.getName());
         assertEquals(simpleBean.getAge(), cloned.getAge());
 
-        assertNull(Beans.clone(null));
+        assertNull(Beans.deepCopy(null));
 
-        SimpleBean cloned2 = Beans.clone(simpleBean, SimpleBean.class);
+        SimpleBean cloned2 = Beans.deepCopyAs(simpleBean, SimpleBean.class);
         assertNotNull(cloned2);
         assertEquals(simpleBean.getName(), cloned2.getName());
 
-        SimpleBean fromNull = Beans.clone(null, SimpleBean.class);
+        SimpleBean fromNull = Beans.deepCopyAs(null, SimpleBean.class);
         assertNotNull(fromNull);
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.clone(simpleBean, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.deepCopyAs(simpleBean, null));
     }
 
     @Test
@@ -1005,12 +1005,12 @@ public class Beans2025Test extends TestBase {
 
         EntityBean entity = new EntityBean();
         entity.setId(100L);
-        EntityBean copiedEntity = Beans.copy(entity, EntityBean.class);
+        EntityBean copiedEntity = Beans.copyAs(entity, EntityBean.class);
         assertEquals(100L, copiedEntity.getId());
 
         BeanWithSnakeCase snakeBean = new BeanWithSnakeCase();
         snakeBean.setFirstName("John");
-        copied = Beans.copy(snakeBean, (Collection<String>) null, name -> Beans.toCamelCase(name), SimpleBean.class);
+        copied = Beans.copyAs(snakeBean, (Collection<String>) null, name -> Beans.toCamelCase(name), SimpleBean.class);
         assertNotNull(copied);
     }
 
@@ -1020,14 +1020,14 @@ public class Beans2025Test extends TestBase {
         assertEquals("John", copied.getName());
         assertEquals(0, copied.getAge());
 
-        copied = Beans.copy(simpleBean, (name, value) -> true, SimpleBean.class);
+        copied = Beans.copyAs(simpleBean, (name, value) -> true, SimpleBean.class);
         assertEquals("John", copied.getName());
         assertEquals(25, copied.getAge());
     }
 
     @Test
     public void testCopyWithPropFilterAndConverter() {
-        SimpleBean copied = Beans.copy(simpleBean, (name, value) -> true, name -> name, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(simpleBean, (name, value) -> true, name -> name, SimpleBean.class);
         assertEquals("John", copied.getName());
         assertEquals(25, copied.getAge());
     }
@@ -1036,13 +1036,13 @@ public class Beans2025Test extends TestBase {
     public void testCopyWithIgnoreUnmatched() {
         SimpleBean source = new SimpleBean("John", 25);
 
-        EntityBean target = Beans.copy(source, true, null, EntityBean.class);
+        EntityBean target = Beans.copyAs(source, true, null, EntityBean.class);
         assertNotNull(target);
 
-        SimpleBean target2 = Beans.copy(source, false, null, SimpleBean.class);
+        SimpleBean target2 = Beans.copyAs(source, false, null, SimpleBean.class);
         assertEquals("John", target2.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, false, null, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, false, null, null));
     }
 
     @Test
@@ -1051,28 +1051,28 @@ public class Beans2025Test extends TestBase {
             SimpleBean source = new SimpleBean("Jane", 30);
             SimpleBean target = new SimpleBean("John", 25);
 
-            Beans.merge(source, target);
+            Beans.copyInto(source, target);
             assertEquals("Jane", target.getName());
             assertEquals(30, target.getAge());
 
             SimpleBean original = new SimpleBean("Bob", 40);
-            Beans.merge(null, original);
+            Beans.copyInto(null, original);
             assertEquals("Bob", original.getName());
         }
 
         {
             SimpleBean source = new SimpleBean("Alice", 35);
             SimpleBean target = new SimpleBean("Charlie", 28);
-            Beans.merge(source, target, Arrays.asList("age"));
+            Beans.copyInto(source, target, Arrays.asList("age"));
             assertEquals("Charlie", target.getName());
             assertEquals(35, target.getAge());
 
             source.setAge(10);
             target.setAge(20);
-            Beans.merge(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+            Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
             assertEquals(30, target.getAge());
 
-            assertThrows(IllegalArgumentException.class, () -> Beans.merge(source, null));
+            assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null));
         }
     }
 
@@ -1081,7 +1081,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.merge(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.copyInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -1093,7 +1093,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean target = new SimpleBean("John", 25);
         target.setActive(false);
 
-        Beans.merge(source, target, Fn.p((name, value) -> value instanceof String));
+        Beans.copyInto(source, target, Fn.p((name, value) -> value instanceof String));
         assertEquals("Jane", target.getName());
         assertEquals(25, target.getAge());
         assertEquals(false, target.getActive());
@@ -1101,7 +1101,7 @@ public class Beans2025Test extends TestBase {
         BeanWithSnakeCase snakeSource = new BeanWithSnakeCase();
         snakeSource.setFirstName("NewFirst");
         SimpleBean convertTarget = new SimpleBean();
-        Beans.merge(snakeSource, convertTarget, (name, value) -> true, name -> "name");
+        Beans.copyInto(snakeSource, convertTarget, (name, value) -> true, name -> "name");
         assertEquals("NewFirst", convertTarget.getName());
     }
 
@@ -1110,7 +1110,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.merge(source, target, (name, value) -> true, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.copyInto(source, target, (name, value) -> true, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -1121,12 +1121,12 @@ public class Beans2025Test extends TestBase {
         EntityBean target = new EntityBean();
         target.setId(1L);
 
-        Beans.merge(source, target, true, null);
+        Beans.copyInto(source, target, true, null);
         assertEquals(1L, target.getId());
 
         source.setAge(5);
         SimpleBean target2 = new SimpleBean("John", 10);
-        Beans.merge(source, target2, true, null, (srcVal, tgtVal) -> {
+        Beans.copyInto(source, target2, true, null, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -1140,7 +1140,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.merge(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
+        Beans.copyInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
         assertEquals("Jane", target.getName());
         assertEquals(25, target.getAge());
     }
@@ -1150,20 +1150,20 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("John", 25);
         bean.setActive(true);
 
-        Beans.erase(bean, "name", "age");
+        Beans.clearProps(bean, "name", "age");
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
         assertEquals(true, bean.getActive());
 
         bean = new SimpleBean("Jane", 30);
-        Beans.erase(bean, Arrays.asList("name"));
+        Beans.clearProps(bean, Arrays.asList("name"));
         assertNull(bean.getName());
         assertEquals(30, bean.getAge());
 
-        Beans.erase(null, "name");
+        Beans.clearProps(null, "name");
 
         bean = new SimpleBean("Bob", 35);
-        Beans.erase(bean, new String[0]);
+        Beans.clearProps(bean, new String[0]);
         assertEquals("Bob", bean.getName());
     }
 
@@ -1172,52 +1172,52 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("John", 25);
         bean.setActive(true);
 
-        Beans.eraseAll(bean);
+        Beans.clearAllProps(bean);
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
         assertNull(bean.getActive());
 
-        Beans.eraseAll(null);
+        Beans.clearAllProps(null);
     }
 
     @Test
     public void testFill() {
         SimpleBean bean = new SimpleBean();
-        Beans.fill(bean);
+        Beans.randomize(bean);
         assertNotNull(bean.getName());
         assertTrue(bean.getAge() != 0);
         assertNotNull(bean.getActive());
 
         bean = new SimpleBean();
-        Beans.fill(bean, Arrays.asList("name"));
+        Beans.randomize(bean, Arrays.asList("name"));
         assertNotNull(bean.getName());
         assertEquals(0, bean.getAge());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.fill((Object) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.randomize((Object) null));
     }
 
     @Test
     public void testFillClass() {
-        SimpleBean filled = Beans.fill(SimpleBean.class);
+        SimpleBean filled = Beans.newRandom(SimpleBean.class);
         assertNotNull(filled);
         assertNotNull(filled.getName());
 
-        List<SimpleBean> filledList = Beans.fill(SimpleBean.class, 3);
+        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, 3);
         assertEquals(3, filledList.size());
         for (SimpleBean b : filledList) {
             assertNotNull(b.getName());
         }
 
-        filled = Beans.fill(SimpleBean.class, Arrays.asList("age"));
+        filled = Beans.newRandom(SimpleBean.class, Arrays.asList("age"));
         assertTrue(filled.getAge() != 0);
         assertNull(filled.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.fill((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandom((Class<?>) null));
     }
 
     @Test
     public void testFillClassWithCount() {
-        List<SimpleBean> filledList = Beans.fill(SimpleBean.class, Arrays.asList("name", "age"), 2);
+        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name", "age"), 2);
         assertEquals(2, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -1322,23 +1322,23 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testProperties() {
-        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean).toList();
+        List<Map.Entry<String, Object>> props = Beans.stream(simpleBean).toList();
 
         assertFalse(props.isEmpty());
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey()) && "John".equals(e.getValue())));
         assertTrue(props.stream().anyMatch(e -> "age".equals(e.getKey()) && Integer.valueOf(25).equals(e.getValue())));
 
         simpleBean.setActive(null);
-        props = Beans.propertyEntries(simpleBean, (name, value) -> value != null).toList();
+        props = Beans.stream(simpleBean, (name, value) -> value != null).toList();
 
         assertFalse(props.stream().anyMatch(e -> "active".equals(e.getKey())));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.propertyEntries(null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.stream(null));
     }
 
     @Test
     public void testPropertiesWithFilter() {
-        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean, (name, value) -> value instanceof String).toList();
+        List<Map.Entry<String, Object>> props = Beans.stream(simpleBean, (name, value) -> value instanceof String).toList();
 
         assertEquals(1, props.size());
         assertEquals("name", props.get(0).getKey());
@@ -1612,17 +1612,17 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testCloneWithTargetType() {
-        SimpleBean cloned = Beans.clone(simpleBean, SimpleBean.class);
+        SimpleBean cloned = Beans.deepCopyAs(simpleBean, SimpleBean.class);
         assertNotNull(cloned);
         assertNotSame(simpleBean, cloned);
         assertEquals("John", cloned.getName());
         assertEquals(25, cloned.getAge());
 
-        SimpleBean fromNull = Beans.clone(null, SimpleBean.class);
+        SimpleBean fromNull = Beans.deepCopyAs(null, SimpleBean.class);
         assertNotNull(fromNull);
         assertNull(fromNull.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.clone(simpleBean, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.deepCopyAs(simpleBean, null));
     }
 
     @Test
@@ -1637,14 +1637,14 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testCopyWithPropNameConverter() {
-        SimpleBean copied = Beans.copy(simpleBean, (Collection<String>) null, name -> name, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(simpleBean, (Collection<String>) null, name -> name, SimpleBean.class);
         assertEquals("John", copied.getName());
         assertEquals(25, copied.getAge());
     }
 
     @Test
     public void testCopyWithSelectPropsAndConverter() {
-        SimpleBean copied = Beans.copy(simpleBean, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(simpleBean, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
         assertEquals("John", copied.getName());
         assertEquals(25, copied.getAge());
     }
@@ -1652,7 +1652,7 @@ public class Beans2025Test extends TestBase {
     @Test
     public void testMergeWithNullSource() {
         SimpleBean target = new SimpleBean("Jane", 30);
-        Beans.merge(null, target);
+        Beans.copyInto(null, target);
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -1662,7 +1662,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("John", 10);
         SimpleBean target = new SimpleBean("Jane", 20);
 
-        Beans.merge(source, target, Fn.o((srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, Fn.o((srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -1678,7 +1678,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Alice", 5);
         SimpleBean target = new SimpleBean("Bob", 10);
 
-        Beans.merge(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -1694,7 +1694,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("John", 25);
         SimpleBean target = new SimpleBean("Jane", 30);
 
-        Beans.merge(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
+        Beans.copyInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
         assertEquals("John", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -1706,7 +1706,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean target = new SimpleBean("Jane", 30);
         target.setActive(false);
 
-        Beans.merge(source, target, (name, value) -> value instanceof String, name -> name, (a, b) -> a);
+        Beans.copyInto(source, target, (name, value) -> value instanceof String, name -> name, (a, b) -> a);
 
         assertEquals("John", target.getName());
         assertEquals(30, target.getAge());
@@ -1718,7 +1718,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Alice", 10);
         SimpleBean target = new SimpleBean("Bob", 20);
 
-        Beans.merge(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+        Beans.copyInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
 
         assertEquals("Bob", target.getName());
         assertEquals(30, target.getAge());
@@ -1729,7 +1729,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("John", 25);
         bean.setActive(true);
 
-        Beans.erase(bean, Arrays.asList("name", "age"));
+        Beans.clearProps(bean, Arrays.asList("name", "age"));
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
         assertEquals(true, bean.getActive());
@@ -1737,14 +1737,14 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testEraseWithNullBean() {
-        Beans.erase(null, "name");
-        Beans.erase(null, Arrays.asList("name"));
+        Beans.clearProps(null, "name");
+        Beans.clearProps(null, Arrays.asList("name"));
     }
 
     @Test
     public void testFillWithSelectProps() {
         SimpleBean bean = new SimpleBean();
-        Beans.fill(bean, Arrays.asList("name", "age"));
+        Beans.randomize(bean, Arrays.asList("name", "age"));
         assertNotNull(bean.getName());
         assertTrue(bean.getAge() != 0);
         assertNull(bean.getActive());
@@ -1752,7 +1752,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillClassWithSelectProps() {
-        SimpleBean filled = Beans.fill(SimpleBean.class, Arrays.asList("name"));
+        SimpleBean filled = Beans.newRandom(SimpleBean.class, Arrays.asList("name"));
         assertNotNull(filled.getName());
         assertEquals(0, filled.getAge());
         assertNull(filled.getActive());
@@ -1760,7 +1760,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillClassWithSelectPropsAndCount() {
-        List<SimpleBean> filledList = Beans.fill(SimpleBean.class, Arrays.asList("name", "age"), 3);
+        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name", "age"), 3);
         assertEquals(3, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -1805,17 +1805,17 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("John", 25);
         bean.setActive(null);
 
-        List<Map.Entry<String, Object>> allProps = Beans.propertyEntries(bean).toList();
+        List<Map.Entry<String, Object>> allProps = Beans.stream(bean).toList();
         assertTrue(allProps.size() >= 3);
 
-        List<Map.Entry<String, Object>> filteredByName = Beans.propertyEntries(bean, (name, value) -> name.startsWith("n")).toList();
+        List<Map.Entry<String, Object>> filteredByName = Beans.stream(bean, (name, value) -> name.startsWith("n")).toList();
         assertEquals(1, filteredByName.size());
         assertEquals("name", filteredByName.get(0).getKey());
 
-        List<Map.Entry<String, Object>> nonNulls = Beans.propertyEntries(bean, (name, value) -> value != null).toList();
+        List<Map.Entry<String, Object>> nonNulls = Beans.stream(bean, (name, value) -> value != null).toList();
         assertFalse(nonNulls.stream().anyMatch(e -> e.getValue() == null));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.propertyEntries(null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.stream(null));
     }
 
     @Test
@@ -1930,11 +1930,11 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Transfer", 50);
         source.setActive(true);
 
-        SimpleBean target = Beans.copy(source, SimpleBean.class);
+        SimpleBean target = Beans.copyAs(source, SimpleBean.class);
         assertEquals("Transfer", target.getName());
         assertEquals(50, target.getAge());
 
-        SimpleBean filtered = Beans.copy(source, (name, value) -> value instanceof String, SimpleBean.class);
+        SimpleBean filtered = Beans.copyAs(source, (name, value) -> value instanceof String, SimpleBean.class);
         assertEquals("Transfer", filtered.getName());
         assertEquals(0, filtered.getAge());
     }
@@ -1946,15 +1946,15 @@ public class Beans2025Test extends TestBase {
         target.setId(1L);
         target.setValue("original");
 
-        Beans.merge(source, target, true, null);
+        Beans.copyInto(source, target, true, null);
         assertEquals(1L, target.getId());
         assertEquals("original", target.getValue());
     }
 
     @Test
     public void testFillWithNullBeanShouldThrow() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.fill((Object) null));
-        assertThrows(IllegalArgumentException.class, () -> Beans.fill((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.randomize((Object) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandom((Class<?>) null));
     }
 
     @Test
@@ -2104,19 +2104,19 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFormalizePropNameWithVariousCases() {
-        assertEquals("userName", Beans.formalizePropName("user_name"));
-        assertEquals("firstName", Beans.formalizePropName("first_name"));
+        assertEquals("userName", Beans.normalizePropName("user_name"));
+        assertEquals("firstName", Beans.normalizePropName("first_name"));
 
-        assertEquals("clazz", Beans.formalizePropName("class"));
+        assertEquals("clazz", Beans.normalizePropName("class"));
 
-        assertEquals("id", Beans.formalizePropName("ID"));
-        assertEquals("url", Beans.formalizePropName("URL"));
+        assertEquals("id", Beans.normalizePropName("ID"));
+        assertEquals("url", Beans.normalizePropName("URL"));
 
-        assertEquals("userIdValue", Beans.formalizePropName("user_id_value"));
-        assertEquals("addressLine1", Beans.formalizePropName("address_line_1"));
+        assertEquals("userIdValue", Beans.normalizePropName("user_id_value"));
+        assertEquals("addressLine1", Beans.normalizePropName("address_line_1"));
 
-        assertEquals("simple", Beans.formalizePropName("simple"));
-        assertEquals("alreadyCamel", Beans.formalizePropName("alreadyCamel"));
+        assertEquals("simple", Beans.normalizePropName("simple"));
+        assertEquals("alreadyCamel", Beans.normalizePropName("alreadyCamel"));
     }
 
     @Test
@@ -2184,7 +2184,7 @@ public class Beans2025Test extends TestBase {
         map.put("USER_ID", 123);
         map.put("address-line", "Main St");
 
-        Beans.toCamelCaseKeys(map);
+        Beans.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -2197,7 +2197,7 @@ public class Beans2025Test extends TestBase {
         assertFalse(map.containsKey("address-line"));
 
         Map<String, Object> emptyMap = new HashMap<>();
-        Beans.toCamelCaseKeys(emptyMap);
+        Beans.replaceKeysWithCamelCase(emptyMap);
         assertTrue(emptyMap.isEmpty());
     }
 
@@ -2209,7 +2209,7 @@ public class Beans2025Test extends TestBase {
         map.put("userId", 123);
         map.put("addressLine", "Main St");
 
-        Beans.toSnakeCaseKeys(map);
+        Beans.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -2227,7 +2227,7 @@ public class Beans2025Test extends TestBase {
         map.put("firstName", "Jane");
         map.put("userId", 123);
 
-        Beans.toScreamingSnakeCaseKeys(map);
+        Beans.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -2651,7 +2651,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean original = new SimpleBean("Original", 100);
         original.setActive(true);
 
-        SimpleBean cloned = Beans.clone(original);
+        SimpleBean cloned = Beans.deepCopy(original);
         assertNotNull(cloned);
         assertNotSame(original, cloned);
         assertEquals("Original", cloned.getName());
@@ -2664,7 +2664,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testCloneWithNullObject() {
-        SimpleBean cloned = Beans.clone(null);
+        SimpleBean cloned = Beans.deepCopy(null);
         assertNull(cloned);
     }
 
@@ -2672,7 +2672,7 @@ public class Beans2025Test extends TestBase {
     public void testCloneWithTargetTypeNotNull() {
         SimpleBean original = new SimpleBean("Test", 50);
 
-        SimpleBean cloned = Beans.clone(original, SimpleBean.class);
+        SimpleBean cloned = Beans.deepCopyAs(original, SimpleBean.class);
         assertNotNull(cloned);
         assertEquals("Test", cloned.getName());
         assertEquals(50, cloned.getAge());
@@ -2680,7 +2680,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testCloneWithNullSourceButTargetType() {
-        SimpleBean cloned = Beans.clone(null, SimpleBean.class);
+        SimpleBean cloned = Beans.deepCopyAs(null, SimpleBean.class);
         assertNotNull(cloned);
         assertNull(cloned.getName());
         assertEquals(0, cloned.getAge());
@@ -2731,7 +2731,7 @@ public class Beans2025Test extends TestBase {
     public void testCopyWithTargetTypeOnly() {
         SimpleBean original = new SimpleBean("TypeTest", 111);
 
-        SimpleBean copied = Beans.copy(original, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, SimpleBean.class);
         assertNotNull(copied);
         assertEquals("TypeTest", copied.getName());
         assertEquals(111, copied.getAge());
@@ -2741,7 +2741,7 @@ public class Beans2025Test extends TestBase {
     public void testCopyWithSelectPropsAndTargetType() {
         SimpleBean original = new SimpleBean("SelectType", 222);
 
-        SimpleBean copied = Beans.copy(original, Arrays.asList("age"), SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, Arrays.asList("age"), SimpleBean.class);
         assertNull(copied.getName());
         assertEquals(222, copied.getAge());
     }
@@ -2750,7 +2750,7 @@ public class Beans2025Test extends TestBase {
     public void testCopyWithSelectPropsConverterAndTargetType() {
         SimpleBean original = new SimpleBean("Convert", 333);
 
-        SimpleBean copied = Beans.copy(original, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
         assertEquals("Convert", copied.getName());
         assertEquals(333, copied.getAge());
     }
@@ -2760,7 +2760,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean original = new SimpleBean("FilterType", 444);
         original.setActive(true);
 
-        SimpleBean copied = Beans.copy(original, (name, value) -> value instanceof Integer, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, (name, value) -> value instanceof Integer, SimpleBean.class);
         assertNull(copied.getName());
         assertEquals(444, copied.getAge());
         assertNull(copied.getActive());
@@ -2770,7 +2770,7 @@ public class Beans2025Test extends TestBase {
     public void testCopyWithPropFilterConverterAndTargetType() {
         SimpleBean original = new SimpleBean("FilterConvert", 555);
 
-        SimpleBean copied = Beans.copy(original, (name, value) -> true, name -> name, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, (name, value) -> true, name -> name, SimpleBean.class);
         assertEquals("FilterConvert", copied.getName());
         assertEquals(555, copied.getAge());
     }
@@ -2783,7 +2783,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("active");
 
-        SimpleBean copied = Beans.copy(original, true, ignored, SimpleBean.class);
+        SimpleBean copied = Beans.copyAs(original, true, ignored, SimpleBean.class);
         assertEquals("IgnoreTest", copied.getName());
         assertEquals(666, copied.getAge());
         assertNull(copied.getActive());
@@ -2794,7 +2794,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Source", 10);
         SimpleBean target = new SimpleBean("Target", 20);
 
-        Beans.merge(source, target);
+        Beans.copyInto(source, target);
         assertEquals("Source", target.getName());
         assertEquals(10, target.getAge());
     }
@@ -2803,7 +2803,7 @@ public class Beans2025Test extends TestBase {
     public void testMergeWithNullSourceDoesNotModify() {
         SimpleBean target = new SimpleBean("Target", 30);
 
-        Beans.merge(null, target);
+        Beans.copyInto(null, target);
         assertEquals("Target", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -2813,7 +2813,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("A", 5);
         SimpleBean target = new SimpleBean("B", 10);
 
-        Beans.merge(source, target, Fn.o((srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, Fn.o((srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -2829,7 +2829,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Test", 7);
         SimpleBean target = new SimpleBean("Original", 3);
 
-        Beans.merge(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.copyInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Test", target.getName());
         assertEquals(7, target.getAge());
     }
@@ -2841,7 +2841,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean target = new SimpleBean("Old", 200);
         target.setActive(false);
 
-        Beans.merge(source, target, Arrays.asList("name"));
+        Beans.copyInto(source, target, Arrays.asList("name"));
         assertEquals("New", target.getName());
         assertEquals(200, target.getAge());
         assertEquals(false, target.getActive());
@@ -2852,7 +2852,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("X", 8);
         SimpleBean target = new SimpleBean("Y", 2);
 
-        Beans.merge(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) * ((Integer) tgtVal);
             }
@@ -2868,7 +2868,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Merge", 15);
         SimpleBean target = new SimpleBean("Base", 5);
 
-        Beans.merge(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) - ((Integer) tgtVal);
             }
@@ -2886,7 +2886,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean target = new SimpleBean("BaseTarget", 40);
         target.setActive(false);
 
-        Beans.merge(source, target, Fn.p((name, value) -> value instanceof Integer));
+        Beans.copyInto(source, target, Fn.p((name, value) -> value instanceof Integer));
         assertEquals("BaseTarget", target.getName());
         assertEquals(20, target.getAge());
         assertEquals(false, target.getActive());
@@ -2897,7 +2897,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("PropFilter", 25);
         SimpleBean target = new SimpleBean("TargetBean", 75);
 
-        Beans.merge(source, target, (name, value) -> true, name -> name);
+        Beans.copyInto(source, target, (name, value) -> true, name -> name);
         assertEquals("PropFilter", target.getName());
         assertEquals(25, target.getAge());
     }
@@ -2907,7 +2907,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Complex", 12);
         SimpleBean target = new SimpleBean("Base", 8);
 
-        Beans.merge(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+        Beans.copyInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
 
         assertEquals("Base", target.getName());
         assertEquals(20, target.getAge());
@@ -2922,7 +2922,7 @@ public class Beans2025Test extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        Beans.merge(source, target, true, ignored);
+        Beans.copyInto(source, target, true, ignored);
         assertEquals("Ignore", target.getName());
         assertEquals(60, target.getAge());
     }
@@ -2932,7 +2932,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean source = new SimpleBean("Final", 4);
         SimpleBean target = new SimpleBean("Init", 6);
 
-        Beans.merge(source, target, true, null, (srcVal, tgtVal) -> {
+        Beans.copyInto(source, target, true, null, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) * ((Integer) tgtVal);
             }
@@ -2948,12 +2948,12 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("ToErase", 123);
         bean.setActive(true);
 
-        Beans.erase(bean, "name");
+        Beans.clearProps(bean, "name");
         assertNull(bean.getName());
         assertEquals(123, bean.getAge());
         assertEquals(true, bean.getActive());
 
-        Beans.erase(bean, "age", "active");
+        Beans.clearProps(bean, "age", "active");
         assertEquals(0, bean.getAge());
         assertNull(bean.getActive());
     }
@@ -2963,7 +2963,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("Erase", 456);
         bean.setActive(false);
 
-        Beans.erase(bean, Arrays.asList("name", "age"));
+        Beans.clearProps(bean, Arrays.asList("name", "age"));
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
         assertEquals(false, bean.getActive());
@@ -2971,8 +2971,8 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testEraseWithNullBeanDoesNotThrow() {
-        Beans.erase(null, "name");
-        Beans.erase(null, Arrays.asList("name", "age"));
+        Beans.clearProps(null, "name");
+        Beans.clearProps(null, Arrays.asList("name", "age"));
     }
 
     @Test
@@ -2980,7 +2980,7 @@ public class Beans2025Test extends TestBase {
         SimpleBean bean = new SimpleBean("EraseAll", 789);
         bean.setActive(true);
 
-        Beans.eraseAll(bean);
+        Beans.clearAllProps(bean);
         assertNull(bean.getName());
         assertEquals(0, bean.getAge());
         assertNull(bean.getActive());
@@ -2988,14 +2988,14 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testEraseAllWithNullBeanDoesNotThrow() {
-        Beans.eraseAll(null);
+        Beans.clearAllProps(null);
     }
 
     @Test
     public void testFillBeanInstance() {
         SimpleBean bean = new SimpleBean();
 
-        Beans.fill(bean);
+        Beans.randomize(bean);
         assertNotNull(bean.getName());
         assertTrue(bean.getAge() != 0);
         assertNotNull(bean.getActive());
@@ -3005,7 +3005,7 @@ public class Beans2025Test extends TestBase {
     public void testFillBeanInstanceWithSelectProps() {
         SimpleBean bean = new SimpleBean();
 
-        Beans.fill(bean, Arrays.asList("name", "age"));
+        Beans.randomize(bean, Arrays.asList("name", "age"));
         assertNotNull(bean.getName());
         assertTrue(bean.getAge() != 0);
         assertNull(bean.getActive());
@@ -3013,7 +3013,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillBeanClass() {
-        SimpleBean filled = Beans.fill(SimpleBean.class);
+        SimpleBean filled = Beans.newRandom(SimpleBean.class);
         assertNotNull(filled);
         assertNotNull(filled.getName());
         assertTrue(filled.getAge() != 0);
@@ -3021,7 +3021,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillBeanClassWithCount() {
-        List<SimpleBean> filledList = Beans.fill(SimpleBean.class, 5);
+        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, 5);
         assertEquals(5, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean);
@@ -3031,7 +3031,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillBeanClassWithSelectPropsOnly() {
-        SimpleBean filled = Beans.fill(SimpleBean.class, Arrays.asList("age"));
+        SimpleBean filled = Beans.newRandom(SimpleBean.class, Arrays.asList("age"));
         assertNotNull(filled);
         assertTrue(filled.getAge() != 0);
         assertNull(filled.getName());
@@ -3039,7 +3039,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testFillBeanClassWithSelectPropsAndCount() {
-        List<SimpleBean> filledList = Beans.fill(SimpleBean.class, Arrays.asList("name"), 3);
+        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name"), 3);
         assertEquals(3, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -3151,7 +3151,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamBasic() {
-        List<Map.Entry<String, Object>> props = Beans.propertyEntries(simpleBean).toList();
+        List<Map.Entry<String, Object>> props = Beans.stream(simpleBean).toList();
 
         assertFalse(props.isEmpty());
         assertTrue(props.stream().anyMatch(e -> "name".equals(e.getKey())));
@@ -3162,7 +3162,7 @@ public class Beans2025Test extends TestBase {
     public void testPropertiesStreamWithFilter() {
         simpleBean.setActive(null);
 
-        List<Map.Entry<String, Object>> nonNullProps = Beans.propertyEntries(simpleBean, (name, value) -> value != null).toList();
+        List<Map.Entry<String, Object>> nonNullProps = Beans.stream(simpleBean, (name, value) -> value != null).toList();
 
         assertTrue(nonNullProps.stream().noneMatch(e -> e.getValue() == null));
         assertTrue(nonNullProps.stream().anyMatch(e -> "name".equals(e.getKey())));
@@ -3171,7 +3171,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamWithTypeFilter() {
-        List<Map.Entry<String, Object>> stringProps = Beans.propertyEntries(simpleBean, (name, value) -> value instanceof String).toList();
+        List<Map.Entry<String, Object>> stringProps = Beans.stream(simpleBean, (name, value) -> value instanceof String).toList();
 
         assertEquals(1, stringProps.size());
         assertEquals("name", stringProps.get(0).getKey());
@@ -3179,7 +3179,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testPropertiesStreamWithNameFilter() {
-        List<Map.Entry<String, Object>> filteredProps = Beans.propertyEntries(simpleBean, (name, value) -> name.startsWith("a")).toList();
+        List<Map.Entry<String, Object>> filteredProps = Beans.stream(simpleBean, (name, value) -> name.startsWith("a")).toList();
 
         assertTrue(filteredProps.stream().allMatch(e -> e.getKey().startsWith("a")));
         assertTrue(filteredProps.stream().anyMatch(e -> "age".equals(e.getKey())));
@@ -3270,7 +3270,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testGetDiffIgnoredPropNamesWithAnnotation() {
-        ImmutableSet<String> ignored = Beans.getDiffIgnoredPropNames(BeanWithDiffIgnore.class);
+        ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(BeanWithDiffIgnore.class);
         assertNotNull(ignored);
         assertEquals(2, ignored.size());
         assertTrue(ignored.contains("lastModified"));

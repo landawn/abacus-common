@@ -135,15 +135,15 @@ public class HttpRequest100Test extends TestBase {
     }
 
     @Test
-    public void testConnectionTimeoutMillis() {
+    public void testconnectTimeoutMillis() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        request.connectionTimeout(5000L);
+        request.connectTimeout(5000L);
     }
 
     @Test
-    public void testConnectionTimeoutDuration() {
+    public void testconnectTimeoutDuration() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        request.connectionTimeout(Duration.ofSeconds(5));
+        request.connectTimeout(Duration.ofSeconds(5));
     }
 
     @Test

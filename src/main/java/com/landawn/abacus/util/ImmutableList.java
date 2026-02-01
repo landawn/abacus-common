@@ -45,7 +45,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * 
  * <p>Additional features:
  * <ul>
- *   <li>{@link #reverse()} - returns a reversed view of the list</li>
+ *   <li>{@link #reversed()} - returns a reversed view of the list</li>
  *   <li>{@link #subList(int, int)} - returns an immutable view of a portion of the list</li>
  * </ul>
  * 
@@ -699,26 +699,26 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
     /**
      * Returns a view of this immutable list in reverse order. For example,
-     * {@code ImmutableList.of(1, 2, 3).reverse()} returns a list containing {@code [3, 2, 1]}.
+     * {@code ImmutableList.of(1, 2, 3).reversed()} returns a list containing {@code [3, 2, 1]}.
      * The returned list is backed by this list, so it's still immutable and reflects the
      * current state of this list. The reverse operation is efficient and does not copy elements.
      * 
      * <p>If this list has one or zero elements, this same instance is returned.
-     * Calling reverse() on an already reversed list returns the original list.
+     * Calling reversed() on an already reversed list returns the original list.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> original = ImmutableList.of("a", "b", "c");
-     * ImmutableList<String> reversed = original.reverse();
+     * ImmutableList<String> reversed = original.reversed();
      * // reversed contains ["c", "b", "a"]
      * 
-     * ImmutableList<String> backToOriginal = reversed.reverse();
+     * ImmutableList<String> backToOriginal = reversed.reversed();
      * // backToOriginal is the same instance as original
      * }</pre>
      *
      * @return an immutable view of this list with elements in reverse order.
      */
-    public ImmutableList<E> reverse() {
+    public ImmutableList<E> reversed() {
         return (size() <= 1) ? this : new ReverseImmutableList<>(this);
     }
 
@@ -734,7 +734,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         }
 
         @Override
-        public ImmutableList<E> reverse() {
+        public ImmutableList<E> reversed() {
             return forwardList;
         }
 
@@ -763,7 +763,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, size());
 
-            return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reverse();
+            return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reversed();
         }
 
         @Override

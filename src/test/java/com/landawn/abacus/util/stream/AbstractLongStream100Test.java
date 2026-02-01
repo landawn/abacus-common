@@ -712,9 +712,9 @@ public class AbstractLongStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         stream = createLongStream(new long[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = stream.summarizeAndPercentiles();
+        Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = stream.summaryStatisticsAndPercentiles();
 
         LongSummaryStatistics stats = result.left();
         assertEquals(10, stats.getCount());
@@ -728,7 +728,7 @@ public class AbstractLongStream100Test extends TestBase {
         assertTrue(percentiles.containsKey(Percentage._50));
 
         stream = createLongStream(new long[] {});
-        result = stream.summarizeAndPercentiles();
+        result = stream.summaryStatisticsAndPercentiles();
         assertEquals(0, result.left().getCount());
         assertFalse(result.right().isPresent());
     }

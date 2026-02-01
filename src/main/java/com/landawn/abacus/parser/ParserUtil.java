@@ -57,7 +57,7 @@ import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.JsonXmlField.Expose;
+import com.landawn.abacus.annotation.JsonXmlField.Direction;
 import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -635,8 +635,8 @@ public final class ParserUtil {
         String[] alias = null;
 
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notEmpty(field.getAnnotation(JsonXmlField.class).alias())) {
-                alias = field.getAnnotation(JsonXmlField.class).alias();
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notEmpty(field.getAnnotation(JsonXmlField.class).aliases())) {
+                alias = field.getAnnotation(JsonXmlField.class).aliases();
             } else {
                 if (N.isEmpty(alias)) {
                     try {
@@ -1108,7 +1108,7 @@ public final class ParserUtil {
             jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.CAMEL_CASE : jsonXmlConfig.namingPolicy();
             jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
-            final String name = Beans.formalizePropName(simpleClassName);
+            final String name = Beans.normalizePropName(simpleClassName);
             jsonNameTags = getJsonNameTags(name);
             xmlNameTags = getXmlNameTags(name, typeName, true);
 
@@ -1197,7 +1197,7 @@ public final class ParserUtil {
                 }
 
                 if (!isJsonXmlSerializable(propInfo.field, jsonXmlConfig)) {
-                    if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH) {
                         throw new IllegalArgumentException(
                                 "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
                     }
@@ -1207,7 +1207,7 @@ public final class ParserUtil {
                     seriPropInfoList.add(propInfo);
 
                     if (propInfo.isTransient) {
-                        if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
+                        if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH) {
                             throw new IllegalArgumentException(
                                     "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
                         }
@@ -1373,8 +1373,8 @@ public final class ParserUtil {
                         }
                     }
 
-                    if ((propInfoOpt == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                        propInfo = getPropInfo(Beans.formalizePropName(propName));
+                    if ((propInfoOpt == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                        propInfo = getPropInfo(Beans.normalizePropName(propName));
 
                         if (propInfo != null) {
                             propInfoOpt = Optional.of(propInfo);
@@ -2189,7 +2189,7 @@ public final class ParserUtil {
          * The JSON/XML exposure setting for this property.
          * Controls when this property should be included in serialization/deserialization.
          */
-        public final Expose jsonXmlExpose;
+        public final Direction jsonXmlExpose;
 
         /**
          * Indicates whether this property is marked as an identifier (primary key).
@@ -2359,8 +2359,8 @@ public final class ParserUtil {
 
             hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
 
-            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
-                    : JsonXmlField.Expose.DEFAULT;
+            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).direction()
+                    : JsonXmlField.Direction.BOTH;
 
             boolean tmpIsMarkedToId = annotations.containsKey(Id.class) || annotations.containsKey(ReadOnlyId.class) || idPropNames.contains(propName);
 

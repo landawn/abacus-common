@@ -240,7 +240,7 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testSwapColumnPosition() {
         Dataset ds = dataset.copy();
-        ds.swapColumnPosition("id", "salary");
+        ds.swapColumns("id", "salary");
         assertEquals("salary", ds.getColumnName(0));
         assertEquals("name", ds.getColumnName(1));
         assertEquals("age", ds.getColumnName(2));
@@ -270,7 +270,7 @@ public class Dataset2025Test extends TestBase {
     @Test
     public void testSwapRowPosition() {
         Dataset ds = dataset.copy();
-        ds.swapRowPosition(0, 3);
+        ds.swapRows(0, 3);
         assertEquals(Integer.valueOf(4), ds.get(0, 0));
         assertEquals(Integer.valueOf(2), ds.get(1, 0));
         assertEquals(Integer.valueOf(3), ds.get(2, 0));

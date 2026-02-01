@@ -1084,8 +1084,8 @@ public class LongStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        LongSummaryStatistics stats = LongStream.of(1L, 2L, 3L, 4L, 5L).summarize();
+    public void testsummaryStatistics() {
+        LongSummaryStatistics stats = LongStream.of(1L, 2L, 3L, 4L, 5L).summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(1L, stats.getMin());
         assertEquals(5L, stats.getMax());
@@ -1095,13 +1095,13 @@ public class LongStream2025Test extends TestBase {
 
     @Test
     public void testSummarizeEmpty() {
-        LongSummaryStatistics stats = LongStream.empty().summarize();
+        LongSummaryStatistics stats = LongStream.empty().summaryStatistics();
         assertEquals(0, stats.getCount());
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = LongStream.of(1L, 2L, 3L, 4L, 5L).summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = LongStream.of(1L, 2L, 3L, 4L, 5L).summaryStatisticsAndPercentiles();
 
         assertNotNull(result);
         assertEquals(5, result.left().getCount());

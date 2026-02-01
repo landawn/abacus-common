@@ -516,14 +516,14 @@ public class IteratorCharStream200Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        CharSummaryStatistics stats = createCharStream(new char[] { 'z', 'y', 'x', 'w' }).summarize();
+    public void testsummaryStatistics() {
+        CharSummaryStatistics stats = createCharStream(new char[] { 'z', 'y', 'x', 'w' }).summaryStatistics();
         assertEquals(4, stats.getCount());
         assertEquals('w', stats.getMin());
         assertEquals('z', stats.getMax());
         assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum().intValue());
 
-        stats = createCharStream(new char[] {}).summarize();
+        stats = createCharStream(new char[] {}).summaryStatistics();
         assertEquals(0, stats.getCount());
     }
 

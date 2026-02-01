@@ -564,8 +564,8 @@ public class TypeInterface100Test extends TestBase {
     @Test
     @DisplayName("Test isGenericType()")
     public void testIsGenericType() {
-        assertTrue(listType.isGenericType());
-        assertFalse(stringType.isGenericType());
+        assertTrue(listType.isParameterizedType());
+        assertFalse(stringType.isParameterizedType());
     }
 
     @Test

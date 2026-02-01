@@ -65,6 +65,8 @@ public class UncheckedIOException extends UncheckedException {
     @Serial
     private static final long serialVersionUID = -8702336402043331418L;
 
+    private final IOException cause;
+
     /**
      * Constructs a new {@code UncheckedIOException} by wrapping the specified {@link IOException}.
      *
@@ -85,6 +87,7 @@ public class UncheckedIOException extends UncheckedException {
      */
     public UncheckedIOException(final IOException cause) {
         super(cause);
+        this.cause = cause;
     }
 
     /**
@@ -111,5 +114,11 @@ public class UncheckedIOException extends UncheckedException {
      */
     public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);
+        this.cause = cause;
+    }
+
+    @Override
+    public synchronized IOException getCause() {
+        return cause;
     }
 }

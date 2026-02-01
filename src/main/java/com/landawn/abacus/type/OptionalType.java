@@ -112,7 +112,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @return {@code true}, indicating this is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 
@@ -185,7 +185,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * PreparedStatement stmt = connection.prepareStatement("SELECT name FROM users WHERE id = ?");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * stmt.setInt(1, 123);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {

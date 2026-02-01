@@ -116,7 +116,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Configuration Management:</b> Type-safe configuration parsing and validation</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic type retrieval
  * Type<String> stringType = TypeFactory.getType(String.class);
@@ -518,7 +518,7 @@ public final class TypeFactory {
                 continue;
             }
 
-            if (type.isGenericType()) {
+            if (type.isParameterizedType()) {
                 continue;
             }
 
@@ -1119,7 +1119,7 @@ public final class TypeFactory {
 
                         if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
                             try {
-                                if ((val.isGenericType() || N.notEmpty(typeParameters) || N.notEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
+                                if ((val.isParameterizedType() || N.notEmpty(typeParameters) || N.notEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
                                     final Constructor<? extends Type> constructor = ClassUtil.getDeclaredConstructor(val.getClass(), String.class);
 
                                     if (constructor != null) {
@@ -1265,14 +1265,14 @@ public final class TypeFactory {
      * it extracts the type information including type parameters and creates the appropriate
      * Type object. Results are cached for performance.
      * </p>
-     * <p>
-     * Examples:
-     * <ul>
-     *   <li>For List&lt;String&gt; - returns a CollectionType with String element type</li>
-     *   <li>For Map&lt;String, Integer&gt; - returns a MapType with String key and Integer value types</li>
-     *   <li>For String.class - returns StringType</li>
-     * </ul>
-     * </p>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.lang.reflect.Type listType = new TypeReference<List<String>>() {}.getType();
+     * Type<List<String>> strings = TypeFactory.getType(listType);
+     *
+     * java.lang.reflect.Type mapType = new TypeReference<Map<String, Integer>>() {}.getType();
+     * Type<Map<String, Integer>> mapping = TypeFactory.getType(mapType);
+     * }</pre>
      *
      * @param <T> the type parameter
      * @param javaType the java.lang.reflect.Type to convert, can be a Class or ParameterizedType

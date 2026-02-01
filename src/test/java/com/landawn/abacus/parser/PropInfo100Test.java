@@ -202,7 +202,7 @@ public class PropInfo100Test extends TestBase {
 
         JsonXmlField jsonXmlField = aliasedProp.getAnnotation(JsonXmlField.class);
         Assertions.assertNotNull(jsonXmlField);
-        Assertions.assertEquals(2, jsonXmlField.alias().length);
+        Assertions.assertEquals(2, jsonXmlField.aliases().length);
     }
 
     @Test
@@ -269,7 +269,7 @@ public class PropInfo100Test extends TestBase {
         @Transient
         private String transientField;
 
-        @JsonXmlField(alias = { "alias1", "alias2" })
+        @JsonXmlField(aliases = { "alias1", "alias2" })
         private String aliasedField;
 
         @JsonXmlField(isJsonRawValue = true)

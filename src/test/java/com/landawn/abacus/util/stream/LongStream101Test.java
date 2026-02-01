@@ -254,9 +254,9 @@ public class LongStream101Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = createLongStream(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
-                .summarizeAndPercentiles();
+                .summaryStatisticsAndPercentiles();
 
         LongSummaryStatistics stats = result.left();
         assertEquals(10, stats.getCount());

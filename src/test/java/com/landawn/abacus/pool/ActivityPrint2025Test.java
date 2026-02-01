@@ -57,7 +57,7 @@ public class ActivityPrint2025Test extends TestBase {
 
     @Test
     public void testValueOfFactoryMethod() {
-        ActivityPrint print = ActivityPrint.valueOf(10000, 5000);
+        ActivityPrint print = ActivityPrint.of(10000, 5000);
 
         assertNotNull(print);
         assertEquals(10000, print.getLiveTime());
@@ -66,8 +66,8 @@ public class ActivityPrint2025Test extends TestBase {
 
     @Test
     public void testValueOfWithInvalidValues() {
-        assertThrows(IllegalArgumentException.class, () -> ActivityPrint.valueOf(0, 5000));
-        assertThrows(IllegalArgumentException.class, () -> ActivityPrint.valueOf(10000, 0));
+        assertThrows(IllegalArgumentException.class, () -> ActivityPrint.of(0, 5000));
+        assertThrows(IllegalArgumentException.class, () -> ActivityPrint.of(10000, 0));
     }
 
     @Test

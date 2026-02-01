@@ -92,7 +92,7 @@ public class AddrUtil100Test extends TestBase {
     @Test
     public void testGetAddressFromURL() throws Exception {
         URL url = new URL("http://example.com:8080/path");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals("example.com", addr.getHostName());
         Assertions.assertEquals(8080, addr.getPort());
     }
@@ -100,7 +100,7 @@ public class AddrUtil100Test extends TestBase {
     @Test
     public void testGetAddressListFromURL() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("http://server2.com:9090"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
         Assertions.assertEquals(9090, addrs.get(1).getPort());
@@ -108,13 +108,13 @@ public class AddrUtil100Test extends TestBase {
 
     @Test
     public void testGetAddressListFromURLWithNull() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(null);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(null);
         Assertions.assertTrue(addrs.isEmpty());
     }
 
     @Test
     public void testGetAddressListFromURLWithEmpty() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<>());
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(new ArrayList<>());
         Assertions.assertTrue(addrs.isEmpty());
     }
 }

@@ -416,7 +416,7 @@ public final class HttpClient {
 
     private final int _maxConnection; //NOSONAR
 
-    private final long _connectionTimeoutInMillis; //NOSONAR
+    private final long _connectTimeoutInMillis; //NOSONAR
 
     private final long _readTimeoutInMillis; //NOSONAR
 
@@ -428,24 +428,24 @@ public final class HttpClient {
 
     private final AtomicInteger _activeConnectionCounter; //NOSONAR
 
-    private HttpClient(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    private HttpClient(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
-        this(null, url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
+        this(null, url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
-    private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url cannot be null or empty");
 
-        if ((maxConnection < 0) || (connectionTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
-            throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis cannot be less than 0:" + maxConnection + ", "
-                    + connectionTimeoutInMillis + ", " + readTimeoutInMillis);
+        if ((maxConnection < 0) || (connectTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
+            throw new IllegalArgumentException("maxConnection, connectTimeoutInMillis or readTimeoutInMillis cannot be less than 0:" + maxConnection + ", "
+                    + connectTimeoutInMillis + ", " + readTimeoutInMillis);
         }
 
         _netURL = netUrl == null ? createNetUrl(url) : netUrl;
         _url = Strings.isEmpty(url) ? _netURL.toString() : url;
         _maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
-        _connectionTimeoutInMillis = (connectionTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeoutInMillis;
+        _connectTimeoutInMillis = (connectTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectTimeoutInMillis;
         _readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
         _settings = settings == null ? HttpSettings.create() : settings;
 
@@ -516,13 +516,13 @@ public final class HttpClient {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or timeouts are negative
      */
-    public static HttpClient create(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
+    public static HttpClient create(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
@@ -535,13 +535,13 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
     }
 
     /**
@@ -557,16 +557,16 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, etc.)
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
     }
 
     /**
@@ -584,16 +584,16 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
     }
 
     /**
@@ -609,15 +609,15 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, null, executor);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, null, executor);
     }
 
     /**
@@ -635,7 +635,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param executor Custom executor for asynchronous operations
@@ -643,9 +643,9 @@ public final class HttpClient {
      * @throws UncheckedIOException if an I/O error occurs
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws UncheckedIOException {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
     }
 
     /**
@@ -664,7 +664,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections per client
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds (0 uses default)
+     * @param connectTimeoutInMillis Connection timeout in milliseconds (0 uses default)
      * @param readTimeoutInMillis Read timeout in milliseconds (0 uses default)
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
@@ -672,9 +672,9 @@ public final class HttpClient {
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
-        return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
+        return new HttpClient(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
     /**
@@ -725,13 +725,13 @@ public final class HttpClient {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or timeouts are negative
      */
-    public static HttpClient create(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
+    public static HttpClient create(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
@@ -745,13 +745,13 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
     }
 
     /**
@@ -768,16 +768,16 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
     }
 
     /**
@@ -796,16 +796,16 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple clients
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
     }
 
     /**
@@ -822,15 +822,15 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, null, executor);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, null, executor);
     }
 
     /**
@@ -849,7 +849,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param executor Custom executor for asynchronous operations
@@ -857,9 +857,9 @@ public final class HttpClient {
      * @throws UncheckedIOException if an I/O error occurs
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws UncheckedIOException {
-        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
+        return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
     }
 
     /**
@@ -879,7 +879,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
-     * @param connectionTimeoutInMillis Connection timeout in milliseconds (0 uses default)
+     * @param connectTimeoutInMillis Connection timeout in milliseconds (0 uses default)
      * @param readTimeoutInMillis Read timeout in milliseconds (0 uses default)
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
@@ -887,9 +887,9 @@ public final class HttpClient {
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
-        return new HttpClient(url, null, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
+        return new HttpClient(url, null, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
     /**
@@ -1636,14 +1636,14 @@ public final class HttpClient {
                 }
             }
 
-            int connectionTimeoutInMillis = _connectionTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeoutInMillis;
+            int connectTimeoutInMillis = _connectTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectTimeoutInMillis;
 
-            if (settings != null && settings.getConnectionTimeout() > 0) {
-                connectionTimeoutInMillis = Numbers.toIntExact(settings.getConnectionTimeout());
+            if (settings != null && settings.getConnectTimeout() > 0) {
+                connectTimeoutInMillis = Numbers.toIntExact(settings.getConnectTimeout());
             }
 
-            if (connectionTimeoutInMillis > 0) {
-                connection.setConnectTimeout(connectionTimeoutInMillis);
+            if (connectTimeoutInMillis > 0) {
+                connection.setConnectTimeout(connectTimeoutInMillis);
             }
 
             int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
@@ -1862,7 +1862,7 @@ public final class HttpClient {
      * Map<String, Object> params = Map.of("page", 1, "size", 20);
      * HttpSettings settings = HttpSettings.create()
      *     .header("Authorization", "Bearer token123")
-     *     .setConnectionTimeout(10000);
+     *     .setConnectTimeout(10000);
      * client.asyncGet(params, settings, UserList.class)
      *     .thenAccept(users -> users.forEach(u -> System.out.println(u.getName())));
      * }</pre>

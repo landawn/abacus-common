@@ -95,7 +95,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
         byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertTrue(digest.length() > 0);
@@ -111,8 +111,8 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
         byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
 
-        String digest1 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
-        String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest1 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertEquals(digest1, digest2, "Same inputs should produce same password digest");
     }
@@ -123,7 +123,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(null, created, password);
+            WSSecurityUtil.computePasswordDigest(null, created, password);
         });
     }
 
@@ -133,7 +133,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(nonce, null, password);
+            WSSecurityUtil.computePasswordDigest(nonce, null, password);
         });
     }
 
@@ -143,7 +143,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(nonce, created, null);
+            WSSecurityUtil.computePasswordDigest(nonce, created, null);
         });
     }
 
@@ -153,7 +153,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] created = new byte[0];
         byte[] password = new byte[0];
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertTrue(digest.length() > 0);
@@ -165,7 +165,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         String created = "2024-01-01T12:00:00Z";
         String password = "secretPassword";
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertTrue(digest.length() > 0);
@@ -181,8 +181,8 @@ public class WSSecurityUtil2025Test extends TestBase {
         String created = "2024-01-01T12:00:00Z";
         String password = "secretPassword";
 
-        String digest1 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
-        String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest1 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertEquals(digest1, digest2, "Same inputs should produce same password digest");
     }
@@ -193,7 +193,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         String password = "secretPassword";
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(null, created, password);
+            WSSecurityUtil.computePasswordDigest(null, created, password);
         });
     }
 
@@ -203,7 +203,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         String password = "secretPassword";
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(nonce, null, password);
+            WSSecurityUtil.computePasswordDigest(nonce, null, password);
         });
     }
 
@@ -213,7 +213,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         String created = "2024-01-01T12:00:00Z";
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            WSSecurityUtil.doPasswordDigest(nonce, created, null);
+            WSSecurityUtil.computePasswordDigest(nonce, created, null);
         });
     }
 
@@ -223,7 +223,7 @@ public class WSSecurityUtil2025Test extends TestBase {
         String created = "";
         String password = "";
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertTrue(digest.length() > 0);
@@ -235,10 +235,10 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] created = "created".getBytes(StandardCharsets.UTF_8);
         byte[] password = "password".getBytes(StandardCharsets.UTF_8);
 
-        String correctDigest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String correctDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
-        String wrongOrderDigest1 = WSSecurityUtil.doPasswordDigest(created, nonce, password);
-        String wrongOrderDigest2 = WSSecurityUtil.doPasswordDigest(password, created, nonce);
+        String wrongOrderDigest1 = WSSecurityUtil.computePasswordDigest(created, nonce, password);
+        String wrongOrderDigest2 = WSSecurityUtil.computePasswordDigest(password, created, nonce);
 
         Assertions.assertNotEquals(correctDigest, wrongOrderDigest1);
         Assertions.assertNotEquals(correctDigest, wrongOrderDigest2);
@@ -254,8 +254,8 @@ public class WSSecurityUtil2025Test extends TestBase {
         byte[] createdBytes = createdStr.getBytes(Charsets.DEFAULT);
         byte[] passwordBytes = passwordStr.getBytes(Charsets.DEFAULT);
 
-        String digestFromString = WSSecurityUtil.doPasswordDigest(nonceStr, createdStr, passwordStr);
-        String digestFromBytes = WSSecurityUtil.doPasswordDigest(nonceBytes, createdBytes, passwordBytes);
+        String digestFromString = WSSecurityUtil.computePasswordDigest(nonceStr, createdStr, passwordStr);
+        String digestFromBytes = WSSecurityUtil.computePasswordDigest(nonceBytes, createdBytes, passwordBytes);
 
         Assertions.assertEquals(digestFromString, digestFromBytes, "String and byte array versions should produce same digest");
     }

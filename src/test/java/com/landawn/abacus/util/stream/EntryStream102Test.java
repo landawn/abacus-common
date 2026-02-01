@@ -347,7 +347,7 @@ public class EntryStream102Test extends TestBase {
                 .filterByValue(v -> v <= 4)
                 .mapKey(Fn.toUpperCase())
                 .flatMapValue(v -> Stream.range(1, v + 1))
-                .inversed()
+                .invert()
                 .groupTo();
 
         assertEquals(4, result.size());

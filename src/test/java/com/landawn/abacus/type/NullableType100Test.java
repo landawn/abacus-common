@@ -70,8 +70,8 @@ public class NullableType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(nullableStringType.isGenericType());
-        assertTrue(nullableIntType.isGenericType());
+        assertTrue(nullableStringType.isParameterizedType());
+        assertTrue(nullableIntType.isParameterizedType());
     }
 
     @Test

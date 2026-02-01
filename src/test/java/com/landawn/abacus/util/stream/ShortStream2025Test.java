@@ -1027,8 +1027,8 @@ public class ShortStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        ShortSummaryStatistics stats = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4).summarize();
+    public void testsummaryStatistics() {
+        ShortSummaryStatistics stats = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4).summaryStatistics();
         assertNotNull(stats);
         assertEquals(4, stats.getCount());
         assertEquals(10, stats.getSum());
@@ -1039,15 +1039,15 @@ public class ShortStream2025Test extends TestBase {
 
     @Test
     public void testSummarizeEmpty() {
-        ShortSummaryStatistics stats = ShortStream.empty().summarize();
+        ShortSummaryStatistics stats = ShortStream.empty().summaryStatistics();
         assertNotNull(stats);
         assertEquals(0, stats.getCount());
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .summarizeAndPercentiles();
+                .summaryStatisticsAndPercentiles();
 
         assertNotNull(result.left());
         assertEquals(5, result.left().getCount());

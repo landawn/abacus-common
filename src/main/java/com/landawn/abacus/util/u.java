@@ -6239,15 +6239,14 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code Optional} to be returned
          * @return this {@code Optional} if a value is present, otherwise the {@code Optional} produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
          */
-        public Optional<T> or(final Supplier<Optional<T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, cs.Supplier);
-
+        public Optional<T> or(final Supplier<? extends Optional<? extends T>> supplier) throws IllegalArgumentException {
             if (isPresent()) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                final Optional<T> ret = (Optional<T>) supplier.get();
+                return Objects.requireNonNull(ret);
             }
         }
 
@@ -7386,15 +7385,14 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a {@code Nullable} to be returned
          * @return this {@code Nullable} if a value is present, otherwise the {@code Nullable} produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
          */
-        public Nullable<T> or(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, cs.Supplier);
-
+        public Nullable<T> or(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
             if (isPresent()) {
                 return this;
             } else {
-                return Objects.requireNonNull((Nullable<T>) supplier.get());
+                final Nullable<T> ret = (Nullable<T>) supplier.get();
+                return Objects.requireNonNull(ret);
             }
         }
 

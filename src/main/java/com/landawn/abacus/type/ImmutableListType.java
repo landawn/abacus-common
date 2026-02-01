@@ -120,7 +120,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

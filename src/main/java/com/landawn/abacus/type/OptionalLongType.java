@@ -148,7 +148,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains long value 123456789
      * OptionalLong opt = type.get(rs, 1);
@@ -179,7 +179,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "user_id" contains long value 987654321
      * OptionalLong opt = type.get(rs, "user_id");
@@ -210,9 +210,8 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * Connection connection = ...;  // obtained from database connection
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO transactions (id, user_id) VALUES (?, ?)");
+     * Connection connection = org.mockito.Mockito.mock(Connection.class);
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(123456789L);
      * type.set(stmt, 2, opt);
@@ -244,8 +243,8 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * Connection connection = ...;  // obtained from database connection
-     * CallableStatement stmt = connection.prepareCall("{call update_user_id(?, ?)}");
+     * Connection connection = org.mockito.Mockito.mock(Connection.class);
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(987654321L);
      * type.set(stmt, "p_user_id", opt);

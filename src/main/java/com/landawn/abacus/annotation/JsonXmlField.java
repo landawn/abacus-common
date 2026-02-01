@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,7 +44,7 @@ import com.landawn.abacus.util.EnumType;
  *     @JsonXmlField(name = "user_id")
  *     private Long id;
  *
- *     @JsonXmlField(name = "full_name", alias = {"name", "userName"})
+ *     @JsonXmlField(name = "full_name", aliases = {"name", "userName"})
  *     private String fullName;
  *
  *     @JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
@@ -61,6 +62,7 @@ import com.landawn.abacus.util.EnumType;
  * @see JsonXmlCreator
  * @see JsonXmlValue
  */
+@Documented
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlField {
@@ -85,14 +87,14 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @JsonXmlField(name = "full_name", alias = {"name", "userName", "user_name"})
+     * @JsonXmlField(name = "full_name", aliases = {"name", "userName", "user_name"})
      * private String fullName;
      * // Can be deserialized from any of: "full_name", "name", "userName", "user_name"
      * }</pre>
      * 
      * @return array of alias names for deserialization
      */
-    String[] alias() default {};
+    String[] aliases() default {};
 
     /**
      * Specifies the explicit type for field serialization/deserialization.
@@ -107,26 +109,6 @@ public @interface JsonXmlField {
      * @return the explicit type string, empty string for automatic type detection
      */
     String type() default "";
-
-    /**
-     * Specifies how enum values are serialized and deserialized for this field.
-     * 
-     * <p><b>Options:</b></p>
-     * <ul>
-     *   <li>EnumType.NAME (default) - Use the enum constant name</li>
-     *   <li>EnumType.ORDINAL - Use the enum ordinal value</li>
-     *   <li>EnumType.CODE - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
-     * </ul>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * @JsonXmlField(enumerated = EnumType.ORDINAL)
-     * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
-     * }</pre>
-     * 
-     * @return the enum serialization strategy
-     */
-    EnumType enumerated() default EnumType.NAME;
 
     /**
      * Specifies the date format pattern for date/time field serialization.
@@ -182,6 +164,26 @@ public @interface JsonXmlField {
     String numberFormat() default "";
 
     /**
+     * Specifies how enum values are serialized and deserialized for this field.
+     * 
+     * <p><b>Options:</b></p>
+     * <ul>
+     *   <li>EnumType.NAME (default) - Use the enum constant name</li>
+     *   <li>EnumType.ORDINAL - Use the enum ordinal value</li>
+     *   <li>EnumType.CODE - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
+     * </ul>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * @JsonXmlField(enumerated = EnumType.ORDINAL)
+     * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
+     * }</pre>
+     * 
+     * @return the enum serialization strategy
+     */
+    EnumType enumerated() default EnumType.NAME;
+
+    /**
      * Specifies whether this field should be completely ignored during serialization and deserialization.
      * When set to {@code true}, the field will be excluded from JSON/XML processing.
      * 
@@ -231,7 +233,7 @@ public @interface JsonXmlField {
      * 
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>DEFAULT - Include in both serialization and deserialization (default)</li>
+     *   <li>BOTH - Include in both serialization and deserialization (default)</li>
      *   <li>SERIALIZE_ONLY - Include only when writing JSON/XML output</li>
      *   <li>DESERIALIZE_ONLY - Include only when reading from JSON/XML input</li>
      * </ul>
@@ -239,17 +241,17 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class User {
-     *     @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+     *     @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
      *     private String displayName;  // Written to JSON but not read from it
      *     
-     *     @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+     *     @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
      *     private String tempPassword;  // Read from JSON but not written to it
      * }
      * }</pre>
      * 
      * @return the exposure mode for this field
      */
-    Expose expose() default Expose.DEFAULT;
+    Direction direction() default Direction.BOTH;
 
     /**
      * Defines the exposure levels for field serialization and deserialization operations.
@@ -262,24 +264,24 @@ public @interface JsonXmlField {
      *     private String username;
      *
      *     // Read-only: included in responses but not accepted in requests
-     *     @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+     *     @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
      *     private String userId;
      *
      *     // Write-only: accepted in requests but never in responses
-     *     @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+     *     @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
      *     private String password;
      * }
      * }</pre>
      */
-    enum Expose {
+    enum Direction {
         /**
          * The field participates in both serialization and deserialization operations.
          * This is the standard behavior for most fields.
          *
-         * @deprecated don't need to set it. It's {@code DEFAULT} by default.
+         * @deprecated don't need to set it. It's {@code BOTH} by default.
          */
         @Deprecated
-        DEFAULT,
+        BOTH,
 
         /**
          * The field is only included during serialization (object to JSON/XML).
@@ -294,10 +296,10 @@ public @interface JsonXmlField {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+         * @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
          * private String displayName;  // Computed from firstName + lastName
          *
-         * @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+         * @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
          * private Long userId;  // Auto-generated ID
          * }</pre>
          */
@@ -310,17 +312,17 @@ public @interface JsonXmlField {
          * <p>Use this for:</p>
          * <ul>
          *   <li>Input-only fields like passwords or temporary data</li>
-         *   <li>Fields that should accept values but never expose them</li>
+         *   <li>Fields that should accept values but never direction them</li>
          *   <li>Configuration fields that are needed for setup but not for output</li>
          * </ul>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+         * @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
          * private String password;  // Accepted but never returned
          *
-         * @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
-         * private String resetToken;  // Used for validation, not exposed
+         * @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
+         * private String resetToken;  // Used for validation, not direction
          * }</pre>
          */
         DESERIALIZE_ONLY

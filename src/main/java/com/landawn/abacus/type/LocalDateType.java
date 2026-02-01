@@ -120,7 +120,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * @param str The string to parse
      * @return The parsed LocalDate object, or {@code null} if the input is {@code null} or empty
-     * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDate
+     * @throws DateTimeParseException if the string cannot be parsed as a LocalDate
      */
     @Override
     public LocalDate valueOf(final String str) {
@@ -215,7 +215,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * }</pre>
      *
      * @param rs The ResultSet containing the data
-     * @param columnName The name of the column to retrieve the value from
+     * @param columnName the column label (or name if no label was specified) to retrieve the value from
      * @return The LocalDate value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column name is not found
      */
@@ -275,16 +275,16 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
-     * @param columnName The name of the parameter to set
+     * @param parameterName The name of the parameter to set
      * @param x The LocalDate value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final LocalDate x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final LocalDate x) throws SQLException {
         try {
-            stmt.setObject(columnName, x);
+            stmt.setObject(parameterName, x);
         } catch (final SQLException e) {
-            stmt.setDate(columnName, x == null ? null : Date.valueOf(x));
+            stmt.setDate(parameterName, x == null ? null : Date.valueOf(x));
         }
     }
 }

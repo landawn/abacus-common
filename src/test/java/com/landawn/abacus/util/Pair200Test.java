@@ -90,28 +90,38 @@ public class Pair200Test extends TestBase {
     public void testConditionalSetters() throws Exception {
         Pair<String, Integer> pair = Pair.of("left", 1);
 
-        boolean leftSet = pair.setLeftIf("newLeft", (p, newL) -> p.right() == 1);
+        // left depends on current right == 1
+        boolean leftSet = pair.setLeftIf("newLeft", (l, r) -> r == 1);
         assertTrue(leftSet);
         assertEquals("newLeft", pair.left());
+        assertEquals(1, pair.right()); // right unchanged
 
-        boolean leftNotSet = pair.setLeftIf("anotherLeft", (p, newL) -> p.right() == 0);
+        // predicate is false: right is still 1, not 0
+        boolean leftNotSet = pair.setLeftIf("anotherLeft", (l, r) -> r == 0);
         assertFalse(leftNotSet);
         assertEquals("newLeft", pair.left());
+        assertEquals(1, pair.right());
 
-        boolean rightSet = pair.setRightIf(100, (p, newR) -> newR > 50);
+        // right depends on current left value
+        boolean rightSet = pair.setRightIf(100, (l, r) -> "newLeft".equals(l));
         assertTrue(rightSet);
+        assertEquals("newLeft", pair.left());
         assertEquals(100, pair.right());
 
-        boolean rightNotSet = pair.setRightIf(10, (p, newR) -> newR > 50);
+        // predicate is false: right is 100, not < 50
+        boolean rightNotSet = pair.setRightIf(10, (l, r) -> r < 50);
         assertFalse(rightNotSet);
+        assertEquals("newLeft", pair.left());
         assertEquals(100, pair.right());
 
-        boolean bothSet = pair.setIf("finalLeft", 999, (p, nL, nR) -> nL.length() > 5 && nR > 900);
+        // both set if current right == 100
+        boolean bothSet = pair.setIf("finalLeft", 999, (l, r) -> r == 100);
         assertTrue(bothSet);
         assertEquals("finalLeft", pair.left());
         assertEquals(999, pair.right());
 
-        boolean bothNotSet = pair.setIf("short", 0, (p, nL, nR) -> nL.length() > 5 && nR > 900);
+        // predicate always false here
+        boolean bothNotSet = pair.setIf("short", 0, (l, r) -> r < 0);
         assertFalse(bothNotSet);
         assertEquals("finalLeft", pair.left());
         assertEquals(999, pair.right());
@@ -121,7 +131,7 @@ public class Pair200Test extends TestBase {
     public void testUtilityAndConversionMethods() {
         Pair<String, Integer> pair = Pair.of("A", 1);
 
-        Pair<Integer, String> reversed = pair.reverse();
+        Pair<Integer, String> reversed = pair.swap();
         assertEquals(1, reversed.left());
         assertEquals("A", reversed.right());
 

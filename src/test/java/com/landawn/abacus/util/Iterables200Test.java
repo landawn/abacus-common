@@ -1026,15 +1026,15 @@ public class Iterables200Test extends TestBase {
     public void testCopyListList() {
         List<String> src = list("a", "b");
         List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z"));
-        Iterables.copy(src, dest);
+        Iterables.copyInto(src, dest);
         assertEquals(list("a", "b", "z"), dest);
 
         List<String> emptySrc = list();
         List<String> dest2 = new ArrayList<>(Arrays.asList("x", "y"));
-        Iterables.copy(emptySrc, dest2);
+        Iterables.copyInto(emptySrc, dest2);
         assertEquals(list("x", "y"), dest2);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copy(list("a", "b", "c"), list("x", "y")));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyInto(list("a", "b", "c"), list("x", "y")));
     }
 
     @Test
@@ -1042,22 +1042,22 @@ public class Iterables200Test extends TestBase {
         List<String> src = list("s1", "s2", "s3", "s4");
         List<String> dest = new ArrayList<>(Arrays.asList("d1", "d2", "d3", "d4", "d5"));
 
-        Iterables.copy(src, 1, dest, 2, 2);
+        Iterables.copyRange(src, 1, dest, 2, 2);
         assertEquals(list("d1", "d2", "s2", "s3", "d5"), dest);
 
         List<String> destNonRandom = new LinkedList<>(Arrays.asList("d1", "d2", "d3", "d4", "d5"));
-        Iterables.copy(src, 1, destNonRandom, 2, 2);
+        Iterables.copyRange(src, 1, destNonRandom, 2, 2);
         assertEquals(list("d1", "d2", "s2", "s3", "d5"), destNonRandom);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copy(src, 0, dest, 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copy(src, 3, dest, 3, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copy(src, 0, dest, 4, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyRange(src, 0, dest, 0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyRange(src, 3, dest, 3, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyRange(src, 0, dest, 4, 2));
     }
 
     @Test
     public void testReverse() {
         List<String> original = list("a", "b", "c");
-        List<String> reversed = Iterables.reverse(original);
+        List<String> reversed = Iterables.asReversed(original);
         assertEquals(list("c", "b", "a"), reversed);
         assertEquals(3, reversed.size());
         assertEquals("c", reversed.get(0));
@@ -1075,12 +1075,12 @@ public class Iterables200Test extends TestBase {
         assertEquals(list("b", "a", "y"), reversed);
 
         List<String> empty = list();
-        List<String> reversedEmpty = Iterables.reverse(empty);
+        List<String> reversedEmpty = Iterables.asReversed(empty);
         assertTrue(reversedEmpty.isEmpty());
 
         List<String> original2 = list("1", "2");
-        List<String> reversed2 = Iterables.reverse(original2);
-        List<String> rereversed2 = Iterables.reverse(reversed2);
+        List<String> reversed2 = Iterables.asReversed(original2);
+        List<String> rereversed2 = Iterables.asReversed(reversed2);
         assertEquals(original2, rereversed2);
         assertSame(original2, rereversed2);
     }
@@ -1088,7 +1088,7 @@ public class Iterables200Test extends TestBase {
     @Test
     public void testReverseListIterator() {
         List<String> original = list("a", "b", "c", "d");
-        List<String> reversed = Iterables.reverse(original);
+        List<String> reversed = Iterables.asReversed(original);
         ListIterator<String> iter = reversed.listIterator();
 
         assertTrue(iter.hasNext());

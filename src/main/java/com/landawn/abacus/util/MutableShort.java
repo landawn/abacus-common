@@ -132,10 +132,10 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * num.setValue((short)20);   // value is now 20
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final short value) {
-        this.value = value;
+    public void setValue(final short newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -148,12 +148,12 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * short old = num.getAndSet((short)20);   // returns 10, value is now 20
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the value before it was updated
      */
-    public short getAndSet(final short value) {
+    public short getAndSet(final short newValue) {
         final short result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -167,11 +167,11 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * short newVal = num.setAndGet((short)20);   // returns 20, value is now 20
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value after it has been set
      */
-    public short setAndGet(final short value) {
-        this.value = value;
+    public short setAndGet(final short newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -234,7 +234,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      * Note: short overflow will wrap around.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -243,14 +243,14 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * num.add((short)5);   // value is now 15
      * }</pre>
      * 
-     * @param operand the value to add
+     * @param delta the value to add
      */
-    public void add(final short operand) {
-        value += operand;
+    public void add(final short delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      * Note: short underflow will wrap around.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -259,10 +259,10 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * num.subtract((short)3);   // value is now 7
      * }</pre>
      * 
-     * @param operand the value to subtract
+     * @param delta the value to subtract
      */
-    public void subtract(final short operand) {
-        value -= operand;
+    public void subtract(final short delta) {
+        value -= delta;
     }
 
     /**

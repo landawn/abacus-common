@@ -141,10 +141,10 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * ch.setValue('B');   // value is now 'B'
      * }</pre>
      *
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final char value) {
-        this.value = value;
+    public void setValue(final char newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -160,12 +160,12 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * System.out.println(ch.value());   // prints 'B'
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the previous value before the update
      */
-    public char getAndSet(final char value) {
+    public char getAndSet(final char newValue) {
         final char result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -181,11 +181,11 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * System.out.println(newVal);        // prints 'B'
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value after it has been set
      */
-    public char setAndGet(final char value) {
-        this.value = value;
+    public char setAndGet(final char newValue) {
+        this.value = newValue;
         return this.value;
     }
 

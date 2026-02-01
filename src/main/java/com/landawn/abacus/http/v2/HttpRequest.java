@@ -163,12 +163,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param url the URL string for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new HttpRequest instance
      */
-    public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(url, null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(url, null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
                 java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
@@ -188,12 +188,12 @@ public final class HttpRequest {
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
      * @param url the URL object for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new HttpRequest instance
      */
-    public static HttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(url.toString(), null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+    public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(url.toString(), null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
                 java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
@@ -213,12 +213,12 @@ public final class HttpRequest {
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
      * @param uri the URI object for the request
-     * @param connectionTimeoutInMillis the connection timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new HttpRequest instance
      */
-    public static HttpRequest url(final URI uri, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(null, uri, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+    public static HttpRequest url(final URI uri, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(null, uri, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
                 java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
@@ -346,15 +346,15 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param user the username for authentication
+     * @param username the username for authentication
      * @param password the password for authentication
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest basicAuth(final String user, final Object password) {
-        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
+    public HttpRequest basicAuth(final String username, final Object password) {
+        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
 
         return this;
     }

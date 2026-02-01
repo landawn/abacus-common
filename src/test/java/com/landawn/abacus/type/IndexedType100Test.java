@@ -57,7 +57,7 @@ public class IndexedType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(indexedType.isGenericType());
+        assertTrue(indexedType.isParameterizedType());
     }
 
     @Test

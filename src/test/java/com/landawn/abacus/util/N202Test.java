@@ -947,27 +947,27 @@ public class N202Test extends TestBase {
     @Test
     public void testPercentilesIntArray() {
         int[] sorted = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        Map<Percentage, Integer> p = N.percentiles(sorted);
+        Map<Percentage, Integer> p = N.percentilesOfSorted(sorted);
         assertEquals(Integer.valueOf(6), p.get(Percentage._50));
         assertEquals(Integer.valueOf(10), p.get(Percentage._90));
         assertEquals(Integer.valueOf(1), p.get(Percentage._1));
         assertEquals(Integer.valueOf(10), p.get(Percentage._99));
 
         int[] single = { 5 };
-        Map<Percentage, Integer> pSingle = N.percentiles(single);
+        Map<Percentage, Integer> pSingle = N.percentilesOfSorted(single);
         assertEquals(Integer.valueOf(5), pSingle.get(Percentage._50));
 
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(new int[] {}));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(new int[] {}));
     }
 
     @Test
     public void testPercentilesGenericList() {
         List<String> sorted = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
-        Map<Percentage, String> p = N.percentiles(sorted);
+        Map<Percentage, String> p = N.percentilesOfSorted(sorted);
         assertEquals("f", p.get(Percentage._50));
         assertEquals("j", p.get(Percentage._90));
 
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(Collections.<String> emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(Collections.<String> emptyList()));
 
     }
 

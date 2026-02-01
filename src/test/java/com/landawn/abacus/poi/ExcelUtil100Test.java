@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -27,11 +28,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowExtractors;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
 import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions;
 import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
@@ -116,29 +119,29 @@ public class ExcelUtil100Test extends TestBase {
     }
 
     @Test
-    public void testCELL2STRING() throws IOException {
+    public void testCELL_TO_STRING() throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
             Row row = sheet.createRow(0);
 
             Cell stringCell = row.createCell(0);
             stringCell.setCellValue("test");
-            assertEquals("test", ExcelUtil.CELL2STRING.apply(stringCell));
+            assertEquals("test", ExcelUtil.CELL_TO_STRING.apply(stringCell));
 
             Cell numericCell = row.createCell(1);
             numericCell.setCellValue(42.5);
-            assertEquals("42.5", ExcelUtil.CELL2STRING.apply(numericCell));
+            assertEquals("42.5", ExcelUtil.CELL_TO_STRING.apply(numericCell));
 
             Cell booleanCell = row.createCell(2);
             booleanCell.setCellValue(true);
-            assertEquals("true", ExcelUtil.CELL2STRING.apply(booleanCell));
+            assertEquals("true", ExcelUtil.CELL_TO_STRING.apply(booleanCell));
 
             Cell formulaCell = row.createCell(3);
             formulaCell.setCellFormula("A1");
-            assertEquals("A1", ExcelUtil.CELL2STRING.apply(formulaCell));
+            assertEquals("A1", ExcelUtil.CELL_TO_STRING.apply(formulaCell));
 
             Cell blankCell = row.createCell(4);
-            assertEquals("", ExcelUtil.CELL2STRING.apply(blankCell));
+            assertEquals("", ExcelUtil.CELL_TO_STRING.apply(blankCell));
         }
     }
 
@@ -164,7 +167,7 @@ public class ExcelUtil100Test extends TestBase {
         TriConsumer<String[], Row, Object[]> customExtractor = (headers, row, output) -> {
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = row.getCell(i);
-                output[i] = cell == null ? null : ExcelUtil.CELL2STRING.apply(cell);
+                output[i] = cell == null ? null : ExcelUtil.CELL_TO_STRING.apply(cell);
             }
         };
 
@@ -211,7 +214,7 @@ public class ExcelUtil100Test extends TestBase {
     public void testReadSheet_FileIndexSkipMapper() {
         Function<Row, String> rowToString = row -> {
             StringBuilder sb = new StringBuilder();
-            row.forEach(cell -> sb.append(ExcelUtil.CELL2STRING.apply(cell)).append(","));
+            row.forEach(cell -> sb.append(ExcelUtil.CELL_TO_STRING.apply(cell)).append(","));
             return sb.toString();
         };
 
@@ -365,20 +368,24 @@ public class ExcelUtil100Test extends TestBase {
     }
 
     @Test
-    public void testSaveSheetAsCsv_IndexWithHeaders() {
+    public void testSaveSheetAsCsv_IndexWithHeaders() throws UncheckedIOException, IOException {
         List<String> customHeaders = Arrays.asList("CustomName", "CustomAge", "CustomActive", "CustomScore");
 
-        ExcelUtil.saveSheetAsCsv(testExcelFile, 0, customHeaders, outputCsvFile, StandardCharsets.UTF_8);
+        try (FileWriter fileWriter = IOUtil.newFileWriter(outputCsvFile, StandardCharsets.UTF_8)) {
+            ExcelUtil.saveSheetAsCsv(testExcelFile, 0, customHeaders, fileWriter);
+        }
 
         assertTrue(outputCsvFile.exists());
         assertTrue(outputCsvFile.length() > 0);
     }
 
     @Test
-    public void testSaveSheetAsCsv_NameWithHeaders() {
+    public void testSaveSheetAsCsv_NameWithHeaders() throws UncheckedIOException, IOException {
         List<String> customHeaders = Arrays.asList("H1", "H2", "H3", "H4");
 
-        ExcelUtil.saveSheetAsCsv(testExcelFile, "TestSheet", customHeaders, outputCsvFile, StandardCharsets.ISO_8859_1);
+        try (FileWriter fileWriter = IOUtil.newFileWriter(outputCsvFile, StandardCharsets.ISO_8859_1)) {
+            ExcelUtil.saveSheetAsCsv(testExcelFile, "TestSheet", customHeaders, fileWriter);
+        }
 
         assertTrue(outputCsvFile.exists());
         assertTrue(outputCsvFile.length() > 0);
@@ -428,7 +435,7 @@ public class ExcelUtil100Test extends TestBase {
             row.createCell(0).setCellValue("X");
             row.createCell(1).setCellValue(99);
 
-            Function<Row, String> mapper = RowMappers.toString("|");
+            Function<Row, String> mapper = RowMappers.toDelimitedString("|");
             String result = mapper.apply(row);
 
             assertEquals("X|99.0", result);
@@ -447,10 +454,10 @@ public class ExcelUtil100Test extends TestBase {
                 if (cell.getCellType() == CellType.NUMERIC) {
                     return String.format("%.1f", cell.getNumericCellValue());
                 }
-                return ExcelUtil.CELL2STRING.apply(cell);
+                return ExcelUtil.CELL_TO_STRING.apply(cell);
             };
 
-            Function<Row, String> mapper = RowMappers.toString(",", cellMapper);
+            Function<Row, String> mapper = RowMappers.toDelimitedString(",", cellMapper);
             String result = mapper.apply(row);
 
             assertEquals("test,123.5", result);
@@ -466,7 +473,7 @@ public class ExcelUtil100Test extends TestBase {
             row.createCell(1).setCellValue(1.5);
             row.createCell(2).setCellValue(true);
 
-            Function<Cell, String> cellToString = ExcelUtil.CELL2STRING;
+            Function<Cell, String> cellToString = ExcelUtil.CELL_TO_STRING;
             Function<Row, List<String>> mapper = RowMappers.toList(cellToString);
 
             List<String> result = mapper.apply(row);
@@ -506,7 +513,7 @@ public class ExcelUtil100Test extends TestBase {
             row.createCell(0).setCellValue("test");
             row.createCell(1).setCellValue(42);
 
-            Function<Cell, String> upperCaseMapper = cell -> ExcelUtil.CELL2STRING.apply(cell).toUpperCase();
+            Function<Cell, String> upperCaseMapper = cell -> ExcelUtil.CELL_TO_STRING.apply(cell).toUpperCase();
 
             TriConsumer<String[], Row, Object[]> extractor = RowExtractors.create(upperCaseMapper);
 

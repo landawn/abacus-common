@@ -754,7 +754,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesChar() {
         char[] sorted = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' };
-        Map<Percentage, Character> percentiles = N.percentiles(sorted);
+        Map<Percentage, Character> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
         assertTrue(percentiles.containsKey(Percentage._0_1));
@@ -766,7 +766,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesByte() {
         byte[] sorted = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        Map<Percentage, Byte> percentiles = N.percentiles(sorted);
+        Map<Percentage, Byte> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -774,7 +774,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesShort() {
         short[] sorted = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        Map<Percentage, Short> percentiles = N.percentiles(sorted);
+        Map<Percentage, Short> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -785,7 +785,7 @@ public class N105Test extends TestBase {
         for (int i = 0; i < 100; i++) {
             sorted[i] = i + 1;
         }
-        Map<Percentage, Integer> percentiles = N.percentiles(sorted);
+        Map<Percentage, Integer> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
         assertEquals(Integer.valueOf(2), percentiles.get(Percentage._1));
@@ -796,7 +796,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesLong() {
         long[] sorted = { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L };
-        Map<Percentage, Long> percentiles = N.percentiles(sorted);
+        Map<Percentage, Long> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -804,7 +804,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesFloat() {
         float[] sorted = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f };
-        Map<Percentage, Float> percentiles = N.percentiles(sorted);
+        Map<Percentage, Float> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -812,7 +812,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesDouble() {
         double[] sorted = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
-        Map<Percentage, Double> percentiles = N.percentiles(sorted);
+        Map<Percentage, Double> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -820,7 +820,7 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesGeneric() {
         String[] sorted = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
-        Map<Percentage, String> percentiles = N.percentiles(sorted);
+        Map<Percentage, String> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
@@ -828,24 +828,24 @@ public class N105Test extends TestBase {
     @Test
     public void testPercentilesList() {
         List<Integer> sorted = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Map<Percentage, Integer> percentiles = N.percentiles(sorted);
+        Map<Percentage, Integer> percentiles = N.percentilesOfSorted(sorted);
         assertNotNull(percentiles);
         assertEquals(Percentage.values().length, percentiles.size());
     }
 
     @Test
     public void testPercentilesEmptyArray() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(new int[] {}));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(new int[] {}));
     }
 
     @Test
     public void testPercentilesNullArray() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles((int[]) null));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted((int[]) null));
     }
 
     @Test
     public void testPercentilesEmptyList() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(Collections.emptyList()));
     }
 
     public static class Person implements Comparable<Person> {

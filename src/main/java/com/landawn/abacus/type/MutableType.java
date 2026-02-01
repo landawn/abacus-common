@@ -46,7 +46,7 @@ import com.landawn.abacus.util.Mutable;
  *   <li>Supporting ORM frameworks with mutable entity properties</li>
  * </ul>
  *
- * <p><b>Example Implementations:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Example mutable type handler
  * public class MutableIntType extends MutableType<MutableInt> {

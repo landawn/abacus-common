@@ -24,7 +24,7 @@ import java.io.Serializable;
  * A mutable wrapper for a {@code boolean} value, providing methods to modify the wrapped value.
  * 
  * <p>This class is useful in scenarios where you need to pass a boolean by reference,
- * toggle flags in lambda expressions, or store changing boolean values in collections
+ * negate flags in lambda expressions, or store changing boolean values in collections
  * without creating new Boolean objects.</p>
  * 
  * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
@@ -141,10 +141,10 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * flag.setValue(true);   // value is now true
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final boolean value) {
-        this.value = value;
+    public void setValue(final boolean newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -157,12 +157,12 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * boolean old = flag.getAndSet(false);   // returns true, value is now false
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the value before it was updated
      */
-    public boolean getAndSet(final boolean value) { // NOSONAR
+    public boolean getAndSet(final boolean newValue) { // NOSONAR
         final boolean result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -176,11 +176,11 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * boolean newVal = flag.setAndGet(true);   // returns true, value is now true
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value after it has been set
      */
-    public boolean setAndGet(final boolean value) {
-        this.value = value;
+    public boolean setAndGet(final boolean newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -311,11 +311,11 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
-     * flag.invert();   // value is now false
-     * flag.invert();   // value is now true again
+     * flag.negate();   // value is now false
+     * flag.negate();   // value is now true again
      * }</pre>
      */
-    public void invert() {
+    public void negate() {
         value = !value;
     }
 

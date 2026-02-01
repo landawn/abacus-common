@@ -129,7 +129,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
  *   <li><b>Java Interop:</b> {@code jr2r()}, {@code r2jr()}, {@code jc2c()}, {@code c2jc()}</li>
  *   <li><b>Null Safety:</b> {@code isNull()}, {@code notNull()}, {@code isNullOrEmpty()}</li>
- *   <li><b>Map Operations:</b> {@code key()}, {@code value()}, {@code inverse()}</li>
+ *   <li><b>Map Operations:</b> {@code key()}, {@code value()}, {@code invert()}</li>
  *   <li><b>Utility Functions:</b> {@code length()}, {@code size()}, {@code pair()}, {@code triple()}</li>
  * </ul>
  *
@@ -614,19 +614,19 @@ public final class Fnn {
      * Returns a Function that inverts a {@link Map.Entry} by swapping its key and value.
      * The returned function transforms {@code Entry<K, V>} into {@code Entry<V, K>}, creating
      * a new entry where the original value becomes the key and the original key becomes the value.
-     * This is useful for reversing map relationships or creating inverse indices.
+     * This is useful for reversing map relationships or creating inverted indices.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create inverse map
+     * // Create inverted map
      * Map<String, Integer> original = ...;
-     * Map<Integer, String> inverse = original.entrySet().stream()
-     *     .map(Fnn.inverse())
+     * Map<Integer, String> inverted = original.entrySet().stream()
+     *     .map(Fnn.invert())
      *     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
      *
      * // Reverse lookup
      * Seq<Entry<UserId, UserName>, Exception> entries = ...;
-     * Seq<Entry<UserName, UserId>, Exception> reversed = entries.map(Fnn.inverse());
+     * Seq<Entry<UserName, UserId>, Exception> inverted = entries.map(Fnn.invert());
      * }</pre>
      *
      * @param <K> the type of keys in the original entry (becomes value type in result)
@@ -638,8 +638,8 @@ public final class Fnn {
      * @see #value()
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
-        return (Throwables.Function) Fn.INVERSE;
+    public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> invert() {
+        return (Throwables.Function) Fn.INVERT;
     }
 
     /**

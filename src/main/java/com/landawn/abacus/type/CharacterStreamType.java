@@ -37,7 +37,7 @@ public class CharacterStreamType extends ReaderType {
      * <pre>{@code
      * // Obtained via TypeFactory
      * Type<Reader> type = TypeFactory.getType("CharacterStream");
-     * ResultSet rs = ...;
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Reader stream = type.get(rs, "text_data");
      * }</pre>
      */

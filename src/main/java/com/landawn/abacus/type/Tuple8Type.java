@@ -140,7 +140,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @return {@code true} always, as Tuple8 is a parameterized type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

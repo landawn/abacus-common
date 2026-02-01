@@ -186,14 +186,14 @@ public class Maps2025Test extends TestBase {
 
     @Test
     public void testKeys() {
-        Set<String> keys = Maps.keys(testMap);
+        Set<String> keys = Maps.keySet(testMap);
         assertEquals(3, keys.size());
         assertTrue(keys.contains("key1"));
         assertTrue(keys.contains("key2"));
         assertTrue(keys.contains("key3"));
 
-        assertTrue(Maps.keys(null).isEmpty());
-        assertTrue(Maps.keys(new HashMap<>()).isEmpty());
+        assertTrue(Maps.keySet(null).isEmpty());
+        assertTrue(Maps.keySet(new HashMap<>()).isEmpty());
     }
 
     @Test
@@ -219,33 +219,33 @@ public class Maps2025Test extends TestBase {
 
     @Test
     public void testGet() {
-        Nullable<String> result = Maps.get(testMap, "key1");
+        Nullable<String> result = Maps.getIfExists(testMap, "key1");
         assertTrue(result.isPresent());
         assertEquals("value1", result.get());
 
-        Nullable<String> missing = Maps.get(testMap, "missing");
+        Nullable<String> missing = Maps.getIfExists(testMap, "missing");
         assertFalse(missing.isPresent());
 
         objectMap.put("nullKey", null);
-        Nullable<Object> nullResult = Maps.get(objectMap, "nullKey");
+        Nullable<Object> nullResult = Maps.getIfExists(objectMap, "nullKey");
         assertTrue(nullResult.isPresent());
         assertNull(nullResult.get());
 
-        assertFalse(Maps.get(null, "key").isPresent());
-        assertFalse(Maps.get(new HashMap<>(), "key").isPresent());
+        assertFalse(Maps.getIfExists(null, "key").isPresent());
+        assertFalse(Maps.getIfExists(new HashMap<>(), "key").isPresent());
     }
 
     @Test
     public void testGetNested() {
-        Nullable<String> result = Maps.get(nestedMap, "outer1", "innerKey1");
+        Nullable<String> result = Maps.getIfExists(nestedMap, "outer1", "innerKey1");
         assertTrue(result.isPresent());
         assertEquals("innerValue1", result.get());
 
-        assertFalse(Maps.get(nestedMap, "missing", "innerKey1").isPresent());
+        assertFalse(Maps.getIfExists(nestedMap, "missing", "innerKey1").isPresent());
 
-        assertFalse(Maps.get(nestedMap, "outer1", "missing").isPresent());
+        assertFalse(Maps.getIfExists(nestedMap, "outer1", "missing").isPresent());
 
-        assertFalse(Maps.get(null, "key", "key2").isPresent());
+        assertFalse(Maps.getIfExists(null, "key", "key2").isPresent());
     }
 
     @Test
@@ -253,7 +253,7 @@ public class Maps2025Test extends TestBase {
         assertEquals("value1", Maps.getOrDefaultIfAbsent(testMap, "key1", "default"));
         assertEquals("default", Maps.getOrDefaultIfAbsent(testMap, "missing", "default"));
 
-        assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(testMap, "key1", null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(testMap, "key1", (String) null));
     }
 
     @Test
@@ -305,219 +305,219 @@ public class Maps2025Test extends TestBase {
         objectMap.put("falseString", "false");
         objectMap.put("boolTrue", Boolean.TRUE);
 
-        OptionalBoolean result1 = Maps.getBoolean(objectMap, "boolean");
+        OptionalBoolean result1 = Maps.getAsBoolean(objectMap, "boolean");
         assertTrue(result1.isPresent());
         assertTrue(result1.get());
 
-        OptionalBoolean result2 = Maps.getBoolean(objectMap, "trueString");
+        OptionalBoolean result2 = Maps.getAsBoolean(objectMap, "trueString");
         assertTrue(result2.isPresent());
         assertTrue(result2.get());
 
-        OptionalBoolean result3 = Maps.getBoolean(objectMap, "falseString");
+        OptionalBoolean result3 = Maps.getAsBoolean(objectMap, "falseString");
         assertTrue(result3.isPresent());
         assertFalse(result3.get());
 
-        assertFalse(Maps.getBoolean(objectMap, "missing").isPresent());
-        assertFalse(Maps.getBoolean(null, "key").isPresent());
+        assertFalse(Maps.getAsBoolean(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsBoolean(null, "key").isPresent());
     }
 
     @Test
     public void testGetBooleanWithDefault() {
-        assertTrue(Maps.getBoolean(objectMap, "boolean", false));
-        assertTrue(Maps.getBoolean(objectMap, "missing", true));
-        assertFalse(Maps.getBoolean(objectMap, "missing", false));
-        assertFalse(Maps.getBoolean(null, "key", false));
+        assertTrue(Maps.getAsBooleanOrDefault(objectMap, "boolean", false));
+        assertTrue(Maps.getAsBooleanOrDefault(objectMap, "missing", true));
+        assertFalse(Maps.getAsBooleanOrDefault(objectMap, "missing", false));
+        assertFalse(Maps.getAsBooleanOrDefault(null, "key", false));
     }
 
     @Test
     public void testGetChar() {
         objectMap.put("charString", "B");
 
-        OptionalChar result1 = Maps.getChar(objectMap, "char");
+        OptionalChar result1 = Maps.getAsChar(objectMap, "char");
         assertTrue(result1.isPresent());
         assertEquals('A', result1.get());
 
-        OptionalChar result2 = Maps.getChar(objectMap, "charString");
+        OptionalChar result2 = Maps.getAsChar(objectMap, "charString");
         assertTrue(result2.isPresent());
         assertEquals('B', result2.get());
 
-        assertFalse(Maps.getChar(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsChar(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetCharWithDefault() {
-        assertEquals('A', Maps.getChar(objectMap, "char", 'Z'));
-        assertEquals('Z', Maps.getChar(objectMap, "missing", 'Z'));
+        assertEquals('A', Maps.getAsCharOrDefault(objectMap, "char", 'Z'));
+        assertEquals('Z', Maps.getAsCharOrDefault(objectMap, "missing", 'Z'));
     }
 
     @Test
     public void testGetByte() {
         objectMap.put("byteString", "20");
 
-        OptionalByte result1 = Maps.getByte(objectMap, "byte");
+        OptionalByte result1 = Maps.getAsByte(objectMap, "byte");
         assertTrue(result1.isPresent());
         assertEquals(10, result1.get());
 
-        OptionalByte result2 = Maps.getByte(objectMap, "byteString");
+        OptionalByte result2 = Maps.getAsByte(objectMap, "byteString");
         assertTrue(result2.isPresent());
         assertEquals(20, result2.get());
 
-        assertFalse(Maps.getByte(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsByte(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetByteWithDefault() {
-        assertEquals(10, Maps.getByte(objectMap, "byte", (byte) 99));
-        assertEquals(99, Maps.getByte(objectMap, "missing", (byte) 99));
+        assertEquals(10, Maps.getAsByteOrDefault(objectMap, "byte", (byte) 99));
+        assertEquals(99, Maps.getAsByteOrDefault(objectMap, "missing", (byte) 99));
     }
 
     @Test
     public void testGetShort() {
         objectMap.put("shortString", "200");
 
-        OptionalShort result1 = Maps.getShort(objectMap, "short");
+        OptionalShort result1 = Maps.getAsShort(objectMap, "short");
         assertTrue(result1.isPresent());
         assertEquals(100, result1.get());
 
-        OptionalShort result2 = Maps.getShort(objectMap, "shortString");
+        OptionalShort result2 = Maps.getAsShort(objectMap, "shortString");
         assertTrue(result2.isPresent());
         assertEquals(200, result2.get());
 
-        assertFalse(Maps.getShort(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsShort(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetShortWithDefault() {
-        assertEquals(100, Maps.getShort(objectMap, "short", (short) 999));
-        assertEquals(999, Maps.getShort(objectMap, "missing", (short) 999));
+        assertEquals(100, Maps.getAsShortOrDefault(objectMap, "short", (short) 999));
+        assertEquals(999, Maps.getAsShortOrDefault(objectMap, "missing", (short) 999));
     }
 
     @Test
     public void testGetInt() {
-        OptionalInt result = Maps.getInt(objectMap, "integer");
+        OptionalInt result = Maps.getAsInt(objectMap, "integer");
         assertTrue(result.isPresent());
         assertEquals(123, result.getAsInt());
 
         objectMap.put("intString", "456");
-        OptionalInt result2 = Maps.getInt(objectMap, "intString");
+        OptionalInt result2 = Maps.getAsInt(objectMap, "intString");
         assertTrue(result2.isPresent());
         assertEquals(456, result2.getAsInt());
 
-        assertFalse(Maps.getInt(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsInt(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetIntWithDefault() {
-        assertEquals(123, Maps.getInt(objectMap, "integer", 999));
-        assertEquals(999, Maps.getInt(objectMap, "missing", 999));
+        assertEquals(123, Maps.getAsIntOrDefault(objectMap, "integer", 999));
+        assertEquals(999, Maps.getAsIntOrDefault(objectMap, "missing", 999));
     }
 
     @Test
     public void testGetLong() {
         objectMap.put("longString", "987654321");
 
-        OptionalLong result1 = Maps.getLong(objectMap, "long");
+        OptionalLong result1 = Maps.getAsLong(objectMap, "long");
         assertTrue(result1.isPresent());
         assertEquals(123456789L, result1.getAsLong());
 
-        OptionalLong result2 = Maps.getLong(objectMap, "longString");
+        OptionalLong result2 = Maps.getAsLong(objectMap, "longString");
         assertTrue(result2.isPresent());
         assertEquals(987654321L, result2.getAsLong());
 
-        assertFalse(Maps.getLong(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsLong(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetLongWithDefault() {
-        assertEquals(123456789L, Maps.getLong(objectMap, "long", 999L));
-        assertEquals(999L, Maps.getLong(objectMap, "missing", 999L));
+        assertEquals(123456789L, Maps.getAsLongOrDefault(objectMap, "long", 999L));
+        assertEquals(999L, Maps.getAsLongOrDefault(objectMap, "missing", 999L));
     }
 
     @Test
     public void testGetFloat() {
         objectMap.put("floatString", "56.78");
 
-        OptionalFloat result1 = Maps.getFloat(objectMap, "float");
+        OptionalFloat result1 = Maps.getAsFloat(objectMap, "float");
         assertTrue(result1.isPresent());
         assertEquals(12.34f, result1.get(), 0.001f);
 
-        OptionalFloat result2 = Maps.getFloat(objectMap, "floatString");
+        OptionalFloat result2 = Maps.getAsFloat(objectMap, "floatString");
         assertTrue(result2.isPresent());
         assertEquals(56.78f, result2.get(), 0.001f);
 
-        assertFalse(Maps.getFloat(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsFloat(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetFloatWithDefault() {
-        assertEquals(12.34f, Maps.getFloat(objectMap, "float", 99.99f), 0.001f);
-        assertEquals(99.99f, Maps.getFloat(objectMap, "missing", 99.99f), 0.001f);
+        assertEquals(12.34f, Maps.getAsFloatOrDefault(objectMap, "float", 99.99f), 0.001f);
+        assertEquals(99.99f, Maps.getAsFloatOrDefault(objectMap, "missing", 99.99f), 0.001f);
     }
 
     @Test
     public void testGetDouble() {
-        OptionalDouble result = Maps.getDouble(objectMap, "double");
+        OptionalDouble result = Maps.getAsDouble(objectMap, "double");
         assertTrue(result.isPresent());
         assertEquals(45.67, result.getAsDouble(), 0.001);
 
         objectMap.put("doubleString", "89.12");
-        OptionalDouble result2 = Maps.getDouble(objectMap, "doubleString");
+        OptionalDouble result2 = Maps.getAsDouble(objectMap, "doubleString");
         assertTrue(result2.isPresent());
         assertEquals(89.12, result2.getAsDouble(), 0.001);
 
-        assertFalse(Maps.getDouble(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsDouble(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetDoubleWithDefault() {
-        assertEquals(45.67, Maps.getDouble(objectMap, "double", 99.99), 0.001);
-        assertEquals(99.99, Maps.getDouble(objectMap, "missing", 99.99), 0.001);
+        assertEquals(45.67, Maps.getAsDoubleOrDefault(objectMap, "double", 99.99), 0.001);
+        assertEquals(99.99, Maps.getAsDoubleOrDefault(objectMap, "missing", 99.99), 0.001);
     }
 
     @Test
     public void testGetString() {
-        Optional<String> result = Maps.getString(objectMap, "string");
+        Optional<String> result = Maps.getAsString(objectMap, "string");
         assertTrue(result.isPresent());
         assertEquals("test", result.get());
 
-        Optional<String> intAsString = Maps.getString(objectMap, "integer");
+        Optional<String> intAsString = Maps.getAsString(objectMap, "integer");
         assertTrue(intAsString.isPresent());
         assertEquals("123", intAsString.get());
 
-        assertFalse(Maps.getString(objectMap, "missing").isPresent());
+        assertFalse(Maps.getAsString(objectMap, "missing").isPresent());
     }
 
     @Test
     public void testGetStringWithDefault() {
-        assertEquals("test", Maps.getString(objectMap, "string", "default"));
-        assertEquals("default", Maps.getString(objectMap, "missing", "default"));
+        assertEquals("test", Maps.getAsStringOrDefault(objectMap, "string", "default"));
+        assertEquals("default", Maps.getAsStringOrDefault(objectMap, "missing", "default"));
 
-        assertThrows(IllegalArgumentException.class, () -> Maps.getString(objectMap, "missing", null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsStringOrDefault(objectMap, "missing", null));
     }
 
     @Test
     public void testGetNonNullWithClass() {
-        Optional<Integer> result = Maps.getNonNull(objectMap, "integer", Integer.class);
+        Optional<Integer> result = Maps.getAs(objectMap, "integer", Integer.class);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(123), result.get());
 
         objectMap.put("stringInt", "456");
-        Optional<Integer> converted = Maps.getNonNull(objectMap, "stringInt", Integer.class);
+        Optional<Integer> converted = Maps.getAs(objectMap, "stringInt", Integer.class);
         assertTrue(converted.isPresent());
         assertEquals(Integer.valueOf(456), converted.get());
 
-        assertFalse(Maps.getNonNull(objectMap, "missing", Integer.class).isPresent());
+        assertFalse(Maps.getAs(objectMap, "missing", Integer.class).isPresent());
     }
 
     @Test
     public void testGetNonNullWithDefault() {
-        Integer result = Maps.getNonNull(objectMap, "integer", 999);
+        Integer result = Maps.getAsOrDefault(objectMap, "integer", 999);
         assertEquals(Integer.valueOf(123), result);
 
-        Integer defaultResult = Maps.getNonNull(objectMap, "missing", 999);
+        Integer defaultResult = Maps.getAsOrDefault(objectMap, "missing", 999);
         assertEquals(Integer.valueOf(999), defaultResult);
 
-        assertThrows(IllegalArgumentException.class, () -> Maps.getNonNull(objectMap, "missing", (Integer) null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefault(objectMap, "missing", (Integer) null));
     }
 
     @Test
@@ -633,10 +633,10 @@ public class Maps2025Test extends TestBase {
         Map<String, Object> map = new HashMap<>();
         map.put("int", "123");
 
-        Integer result = Maps.getByPath(map, "int", Integer.class);
+        Integer result = Maps.getByPathAs(map, "int", Integer.class);
         assertEquals(Integer.valueOf(123), result);
 
-        assertNull(Maps.getByPath(map, "missing", String.class));
+        assertNull(Maps.getByPathAs(map, "missing", String.class));
     }
 
     @Test
@@ -644,8 +644,8 @@ public class Maps2025Test extends TestBase {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
 
-        assertEquals("value", Maps.getByPath(map, "key", "default"));
-        assertEquals("default", Maps.getByPath(map, "missing", "default"));
+        assertEquals("value", Maps.getByPathOrDefault(map, "key", "default"));
+        assertEquals("default", Maps.getByPathOrDefault(map, "missing", "default"));
     }
 
     @Test
@@ -658,7 +658,7 @@ public class Maps2025Test extends TestBase {
         assertTrue(result.isPresent());
         assertEquals("value", result.get());
 
-        Nullable<Integer> result2 = Maps.getByPathIfExists(map, "key2.kk2", int.class);
+        Nullable<Integer> result2 = Maps.getByPathAsIfExists(map, "key2.kk2", int.class);
         assertTrue(result2.isPresent());
         assertEquals(123, result2.get());
 
@@ -821,14 +821,14 @@ public class Maps2025Test extends TestBase {
 
         Map<String, String> target = new HashMap<>();
 
-        boolean changed = Maps.putIf(target, source, key -> !key.equals("b"));
+        boolean changed = Maps.putAllIf(target, source, key -> !key.equals("b"));
         assertTrue(changed);
         assertEquals(2, target.size());
         assertEquals("1", target.get("a"));
         assertNull(target.get("b"));
         assertEquals("3", target.get("c"));
 
-        assertFalse(Maps.putIf(target, new HashMap<>(), key -> true));
+        assertFalse(Maps.putAllIf(target, new HashMap<>(), key -> true));
     }
 
     @Test
@@ -840,7 +840,7 @@ public class Maps2025Test extends TestBase {
 
         Map<String, Integer> target = new HashMap<>();
 
-        boolean changed = Maps.putIf(target, source, (key, value) -> value > 1);
+        boolean changed = Maps.putAllIf(target, source, (key, value) -> value > 1);
         assertTrue(changed);
         assertEquals(2, target.size());
         assertNull(target.get("a"));
@@ -1198,15 +1198,15 @@ public class Maps2025Test extends TestBase {
         mapWithNulls.put("key1", null);
         mapWithNulls.put("key2", "value2");
 
-        Nullable<String> result1 = Maps.get(mapWithNulls, "key1");
+        Nullable<String> result1 = Maps.getIfExists(mapWithNulls, "key1");
         assertTrue(result1.isPresent());
         assertNull(result1.get());
 
-        Nullable<String> result2 = Maps.get(mapWithNulls, "key2");
+        Nullable<String> result2 = Maps.getIfExists(mapWithNulls, "key2");
         assertTrue(result2.isPresent());
         assertEquals("value2", result2.get());
 
-        Nullable<String> result3 = Maps.get(mapWithNulls, "missing");
+        Nullable<String> result3 = Maps.getIfExists(mapWithNulls, "missing");
         assertFalse(result3.isPresent());
     }
 
@@ -1260,8 +1260,8 @@ public class Maps2025Test extends TestBase {
     public void testNullMapHandling() {
         Map<String, String> nullMap = null;
 
-        assertFalse(Maps.get(nullMap, "key").isPresent());
-        assertTrue(Maps.keys(nullMap).isEmpty());
+        assertFalse(Maps.getIfExists(nullMap, "key").isPresent());
+        assertTrue(Maps.keySet(nullMap).isEmpty());
         assertTrue(Maps.values(nullMap).isEmpty());
         assertTrue(Maps.entrySet(nullMap).isEmpty());
         assertTrue(Maps.filter(nullMap, e -> true).isEmpty());
@@ -1281,13 +1281,13 @@ public class Maps2025Test extends TestBase {
         edgeCaseMap.put("infinity", Double.POSITIVE_INFINITY);
         edgeCaseMap.put("nan", Double.NaN);
 
-        assertEquals(Long.MAX_VALUE, Maps.getLong(edgeCaseMap, "maxLong", 0L));
-        assertEquals(Long.MIN_VALUE, Maps.getLong(edgeCaseMap, "minLong", 0L));
-        assertTrue(Double.isInfinite(Maps.getDouble(edgeCaseMap, "infinity", 0.0)));
-        assertTrue(Double.isNaN(Maps.getDouble(edgeCaseMap, "nan", 0.0)));
+        assertEquals(Long.MAX_VALUE, Maps.getAsLongOrDefault(edgeCaseMap, "maxLong", 0L));
+        assertEquals(Long.MIN_VALUE, Maps.getAsLongOrDefault(edgeCaseMap, "minLong", 0L));
+        assertTrue(Double.isInfinite(Maps.getAsDoubleOrDefault(edgeCaseMap, "infinity", 0.0)));
+        assertTrue(Double.isNaN(Maps.getAsDoubleOrDefault(edgeCaseMap, "nan", 0.0)));
 
         edgeCaseMap.put("scientific", "1.23e4");
-        assertEquals(12300.0, Maps.getDouble(edgeCaseMap, "scientific", 0.0), 0.001);
+        assertEquals(12300.0, Maps.getAsDoubleOrDefault(edgeCaseMap, "scientific", 0.0), 0.001);
     }
 
     @Test
@@ -1316,7 +1316,7 @@ public class Maps2025Test extends TestBase {
     @Test
     public void testGetNonNullWithType() {
         com.landawn.abacus.type.Type<Integer> intType = com.landawn.abacus.type.Type.of(Integer.class);
-        Optional<Integer> result = Maps.getNonNull(objectMap, "integer", intType);
+        Optional<Integer> result = Maps.getAs(objectMap, "integer", intType);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(123), result.get());
     }

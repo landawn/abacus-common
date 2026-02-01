@@ -48,22 +48,22 @@ public class Iterators101Test extends TestBase {
     public void testGet() {
         Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
 
-        assertEquals("a", Iterators.get(iter, 0).get());
+        assertEquals("a", Iterators.elementAt(iter, 0).get());
 
         iter = Arrays.asList("a", "b", "c").iterator();
-        assertEquals("b", Iterators.get(iter, 1).get());
+        assertEquals("b", Iterators.elementAt(iter, 1).get());
 
         iter = Arrays.asList("a", "b", "c").iterator();
-        assertFalse(Iterators.get(iter, 5).isPresent());
+        assertFalse(Iterators.elementAt(iter, 5).isPresent());
 
-        assertTrue(Iterators.get(null, 0).isEmpty());
+        assertTrue(Iterators.elementAt(null, 0).isEmpty());
 
-        assertTrue(Iterators.get(Collections.emptyIterator(), 0).isEmpty());
+        assertTrue(Iterators.elementAt(Collections.emptyIterator(), 0).isEmpty());
     }
 
     @Test
     public void testGetNegativeIndex() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.get(testIterator, -1));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.elementAt(testIterator, -1));
     }
 
     @Test
@@ -127,15 +127,15 @@ public class Iterators101Test extends TestBase {
     public void testElementsEqual() {
         Iterator<String> iter1 = Arrays.asList("a", "b", "c").iterator();
         Iterator<String> iter2 = Arrays.asList("a", "b", "c").iterator();
-        assertTrue(Iterators.elementsEqual(iter1, iter2));
+        assertTrue(Iterators.equalsInOrder(iter1, iter2));
 
         iter1 = Arrays.asList("a", "b", "c").iterator();
         iter2 = Arrays.asList("a", "b", "d").iterator();
-        assertFalse(Iterators.elementsEqual(iter1, iter2));
+        assertFalse(Iterators.equalsInOrder(iter1, iter2));
 
         iter1 = Arrays.asList("a", "b").iterator();
         iter2 = Arrays.asList("a", "b", "c").iterator();
-        assertFalse(Iterators.elementsEqual(iter1, iter2));
+        assertFalse(Iterators.equalsInOrder(iter1, iter2));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class Iterators101Test extends TestBase {
     @Test
     public void testRepeatCollection() {
         Collection<String> collection = Arrays.asList("a", "b");
-        ObjIterator<String> iter = Iterators.repeatCollection(collection, 2);
+        ObjIterator<String> iter = Iterators.cycle(collection, 2);
 
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -207,7 +207,7 @@ public class Iterators101Test extends TestBase {
     @Test
     public void testRepeatCollectionToSize() {
         Collection<String> collection = Arrays.asList("a", "b");
-        ObjIterator<String> iter = Iterators.repeatCollectionToSize(collection, 5);
+        ObjIterator<String> iter = Iterators.cycleToSize(collection, 5);
 
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());

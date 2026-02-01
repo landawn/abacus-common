@@ -234,7 +234,7 @@ public class AbstractType100Test extends TestBase {
     @Test
     @DisplayName("Test isGenericType()")
     public void testIsGenericType() {
-        assertFalse(stringType.isGenericType());
+        assertFalse(stringType.isParameterizedType());
     }
 
     @Test

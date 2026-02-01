@@ -300,7 +300,7 @@ public final class Median {
      * char medianValue = median.left;  // 'm'
      * }</pre>
      *
-     * @param a the array of characters to find the median from. Must not be {@code null} or empty.
+     * @param source the array of characters to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -310,10 +310,10 @@ public final class Median {
      * @see OptionalChar
      * @see N#median(char[])
      */
-    public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty"); //NOSONAR
+    public static Pair<Character, OptionalChar> of(final char... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty"); //NOSONAR
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -336,7 +336,7 @@ public final class Median {
      * // Considers only 'a' and 'm', returns ['a', OptionalChar.of('m')]
      * }</pre>
      *
-     * @param a the array of characters to find the median from. Must not be {@code null}.
+     * @param source the array of characters to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -345,39 +345,39 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(char...)
      * @see N#median(char[], int, int)
      */
-    public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Character, OptionalChar> of(final char[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty"); //NOSONAR
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalChar.empty());
+            return Pair.of(source[fromIndex], OptionalChar.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalChar.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalChar.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalChar.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalChar.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalChar.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalChar.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Character> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -411,7 +411,7 @@ public final class Median {
      * byte medianValue = median.left;  // 10
      * }</pre>
      *
-     * @param a the array of bytes to find the median from. Must not be {@code null} or empty.
+     * @param source the array of bytes to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -420,10 +420,10 @@ public final class Median {
      * @see Pair
      * @see OptionalByte
      */
-    public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Byte, OptionalByte> of(final byte... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -447,7 +447,7 @@ public final class Median {
      * // Considers only bytes[1] and bytes[2]: 10, 20. Returns [10, OptionalByte.of(20)]
      * }</pre>
      *
-     * @param a the array of bytes to find the median from. Must not be {@code null}.
+     * @param source the array of bytes to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -456,38 +456,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(byte...)
      */
-    public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Byte, OptionalByte> of(final byte[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalByte.empty());
+            return Pair.of(source[fromIndex], OptionalByte.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalByte.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalByte.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalByte.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalByte.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalByte.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalByte.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Byte> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -521,7 +521,7 @@ public final class Median {
      * short medianValue = median.left;  // 100
      * }</pre>
      *
-     * @param a the array of short integers to find the median from. Must not be {@code null} or empty.
+     * @param source the array of short integers to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -530,10 +530,10 @@ public final class Median {
      * @see Pair
      * @see OptionalShort
      */
-    public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Short, OptionalShort> of(final short... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -557,7 +557,7 @@ public final class Median {
      * // Considers only values[1] and values[2]: 100, 200. Returns [100, OptionalShort.of(200)]
      * }</pre>
      *
-     * @param a the array of short integers to find the median from. Must not be {@code null}.
+     * @param source the array of short integers to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -566,38 +566,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(short...)
      */
-    public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Short, OptionalShort> of(final short[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalShort.empty());
+            return Pair.of(source[fromIndex], OptionalShort.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalShort.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalShort.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalShort.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalShort.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalShort.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalShort.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Short> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -632,7 +632,7 @@ public final class Median {
      * int upperMedian = median.right.get();   // 15
      * }</pre>
      *
-     * @param a the array of integers to find the median from. Must not be {@code null} or empty.
+     * @param source the array of integers to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -641,10 +641,10 @@ public final class Median {
      * @see Pair
      * @see OptionalInt
      */
-    public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Integer, OptionalInt> of(final int... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -668,7 +668,7 @@ public final class Median {
      * // Considers only numbers[1], numbers[2], numbers[3]: 50, 75, 25. Returns [50, OptionalInt.empty()]
      * }</pre>
      *
-     * @param a the array of integers to find the median from. Must not be {@code null}.
+     * @param source the array of integers to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -677,38 +677,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(int...)
      */
-    public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Integer, OptionalInt> of(final int[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalInt.empty());
+            return Pair.of(source[fromIndex], OptionalInt.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalInt.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalInt.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalInt.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalInt.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalInt.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalInt.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Integer> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -743,7 +743,7 @@ public final class Median {
      * long upperMedian = median.right.get();   // 1000
      * }</pre>
      *
-     * @param a the array of long integers to find the median from. Must not be {@code null} or empty.
+     * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -752,10 +752,10 @@ public final class Median {
      * @see Pair
      * @see OptionalLong
      */
-    public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Long, OptionalLong> of(final long... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -779,7 +779,7 @@ public final class Median {
      * // Considers values[1], values[2], values[3]: 1000, 2000, 4000. Returns [2000, OptionalLong.empty()]
      * }</pre>
      *
-     * @param a the array of long integers to find the median from. Must not be {@code null}.
+     * @param source the array of long integers to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -788,38 +788,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(long...)
      */
-    public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Long, OptionalLong> of(final long[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalLong.empty());
+            return Pair.of(source[fromIndex], OptionalLong.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalLong.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalLong.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalLong.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalLong.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalLong.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalLong.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Long> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -855,7 +855,7 @@ public final class Median {
      * float medianValue = median.left;  // 10.5f
      * }</pre>
      *
-     * @param a the array of float values to find the median from. Must not be {@code null} or empty.
+     * @param source the array of float values to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -864,10 +864,10 @@ public final class Median {
      * @see Pair
      * @see OptionalFloat
      */
-    public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Float, OptionalFloat> of(final float... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -892,7 +892,7 @@ public final class Median {
      * // Considers values[1] and values[2]: 10.2f, 20.8f. Returns [10.2f, OptionalFloat.of(20.8f)]
      * }</pre>
      *
-     * @param a the array of float values to find the median from. Must not be {@code null}.
+     * @param source the array of float values to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -901,38 +901,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(float...)
      */
-    public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Float, OptionalFloat> of(final float[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalFloat.empty());
+            return Pair.of(source[fromIndex], OptionalFloat.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalFloat.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalFloat.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalFloat.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalFloat.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalFloat.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalFloat.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Float> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -969,7 +969,7 @@ public final class Median {
      * double upperMedian = median.right.get();   // 15.1
      * }</pre>
      *
-     * @param a the array of double values to find the median from. Must not be {@code null} or empty.
+     * @param source the array of double values to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -978,10 +978,10 @@ public final class Median {
      * @see Pair
      * @see OptionalDouble
      */
-    public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static Pair<Double, OptionalDouble> of(final double... source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -1006,7 +1006,7 @@ public final class Median {
      * // Considers values[1], values[2], values[3]: 10.2, 20.8, 40.1. Returns [20.8, OptionalDouble.empty()]
      * }</pre>
      *
-     * @param a the array of double values to find the median from. Must not be {@code null}.
+     * @param source the array of double values to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1015,38 +1015,38 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(double...)
      */
-    public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static Pair<Double, OptionalDouble> of(final double[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], OptionalDouble.empty());
+            return Pair.of(source[fromIndex], OptionalDouble.empty());
         } else if (len == 2) {
-            return a[fromIndex] <= a[fromIndex + 1] ? Pair.of(a[fromIndex], OptionalDouble.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], OptionalDouble.of(a[fromIndex]));
+            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalDouble.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], OptionalDouble.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex), OptionalDouble.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex), OptionalDouble.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Double> queue = new PriorityQueue<>(k);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (a[i] > queue.peek()) {
+                    if (source[i] > queue.peek()) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -1083,7 +1083,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array., which must implement Comparable.
-     * @param a the array of Comparable objects to find the median from. Must not be {@code null} or empty.
+     * @param source the array of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1091,10 +1091,10 @@ public final class Median {
      * @see #of(Comparable[], int, int)
      * @see #of(Object[], Comparator)
      */
-    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] source) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length);
+        return of(source, 0, source.length);
     }
 
     /**
@@ -1119,7 +1119,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array., which must implement Comparable.
-     * @param a the array of Comparable objects to find the median from. Must not be {@code null}.
+     * @param source the array of Comparable objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1128,13 +1128,13 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Comparable[])
      * @see #of(Object[], int, int, Comparator)
      */
-    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex) {
-        return of(a, fromIndex, toIndex, Comparators.naturalOrder());
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex) {
+        return of(source, fromIndex, toIndex, Comparators.naturalOrder());
     }
 
     /**
@@ -1164,7 +1164,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array.
-     * @param a the array of objects to find the median from. Must not be {@code null} or empty.
+     * @param source the array of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, natural ordering is used.
      *            The comparator must be consistent with equals for predictable results.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -1174,10 +1174,10 @@ public final class Median {
      * @see #of(Object[], int, int, Comparator)
      * @see #of(Comparable[])
      */
-    public static <T> Pair<T, Optional<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotEmpty(a, "The specified array 'a' cannot be null or empty");
+    public static <T> Pair<T, Optional<T>> of(final T[] source, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
 
-        return of(a, 0, a.length, cmp);
+        return of(source, 0, source.length, cmp);
     }
 
     /**
@@ -1209,7 +1209,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array.
-     * @param a the array of objects to find the median from. Must not be {@code null}.
+     * @param source the array of objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1220,41 +1220,42 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Optional<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
-        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
+    public static <T> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array cannot be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a.length);
+        N.checkFromToIndex(fromIndex, toIndex, source.length);
 
         cmp = cmp == null ? (Comparator) Comparators.naturalOrder() : cmp;
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
-            return Pair.of(a[fromIndex], Optional.empty());
+            return Pair.of(source[fromIndex], Optional.empty());
         } else if (len == 2) {
-            return cmp.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? Pair.of(a[fromIndex], Optional.of(a[fromIndex + 1]))
-                    : Pair.of(a[fromIndex + 1], Optional.of(a[fromIndex]));
+            return cmp.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Optional.of(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], Optional.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(a, fromIndex, toIndex, cmp), Optional.empty());
+            return Pair.of(N.median(source, fromIndex, toIndex, cmp), Optional.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (queue.size() < k) {
-                    queue.add(a[i]);
+                    queue.add(source[i]);
                 } else {
-                    if (cmp.compare(a[i], queue.peek()) > 0) {
+                    if (cmp.compare(source[i], queue.peek()) > 0) {
                         queue.remove();
-                        queue.add(a[i]);
+                        queue.add(source[i]);
                     }
                 }
             }
@@ -1290,7 +1291,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable.
-     * @param c the collection of Comparable objects to find the median from. Must not be {@code null} or empty.
+     * @param source the collection of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1298,8 +1299,8 @@ public final class Median {
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      */
-    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> c) {
-        return of(c, Comparators.naturalOrder());
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> source) {
+        return of(source, Comparators.naturalOrder());
     }
 
     /**
@@ -1332,7 +1333,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
-     * @param c the collection of objects to find the median from. Must not be {@code null} or empty.
+     * @param source the collection of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, natural ordering is used.
      *            The comparator must be consistent with equals for predictable results.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
@@ -1343,29 +1344,29 @@ public final class Median {
      * @see #of(Collection, int, int, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
-        if (N.isEmpty(c)) {
+    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, Comparator<? super T> cmp) {
+        if (N.isEmpty(source)) {
             throw new IllegalArgumentException("The size of collection cannot be null or empty");
         }
 
         cmp = cmp == null ? (Comparator) Comparators.naturalOrder() : cmp;
 
-        final int len = c.size();
+        final int len = source.size();
 
         if (len == 1) {
-            return Pair.of(c.iterator().next(), Optional.empty());
+            return Pair.of(source.iterator().next(), Optional.empty());
         } else if (len == 2) {
-            final Iterator<? extends T> iter = c.iterator();
+            final Iterator<? extends T> iter = source.iterator();
             final T first = iter.next();
             final T second = iter.next();
             return cmp.compare(first, second) <= 0 ? Pair.of(first, Optional.of(second)) : Pair.of(second, Optional.of(first));
         } else if (len == 3) {
-            return Pair.of(N.median(c, cmp), Optional.empty());
+            return Pair.of(N.median(source, cmp), Optional.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
 
-            for (final T e : c) {
+            for (final T e : source) {
                 if (queue.size() < k) {
                     queue.add(e);
                 } else {
@@ -1410,7 +1411,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable.
-     * @param c the collection of Comparable objects to find the median from. Must not be {@code null}.
+     * @param source the collection of Comparable objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
@@ -1419,13 +1420,13 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
      */
-    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-        return of(c, fromIndex, toIndex, Comparators.naturalOrder());
+    public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex) {
+        return of(source, fromIndex, toIndex, Comparators.naturalOrder());
     }
 
     /**
@@ -1458,7 +1459,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
-     * @param c the collection of objects to find the median from. Must not be {@code null}.
+     * @param source the collection of objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
@@ -1469,18 +1470,18 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than 
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      */
-    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if (N.isEmpty(c) || toIndex - fromIndex < 1) {
+    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, c.size());
+        N.checkFromToIndex(fromIndex, toIndex, source.size());
 
-        return of(N.slice(c, fromIndex, toIndex), cmp);
+        return of(N.slice(source, fromIndex, toIndex), cmp);
     }
 }

@@ -54,18 +54,18 @@ public class HttpUtil2025Test extends TestBase {
 
     @Test
     public void testReadHttpHeadValue() {
-        assertNull(HttpUtil.readHttpHeadValue(null));
-        assertEquals("value", HttpUtil.readHttpHeadValue("value"));
-        assertEquals("123", HttpUtil.readHttpHeadValue(123));
+        assertNull(HttpUtil.readHttpHeaderValue(null));
+        assertEquals("value", HttpUtil.readHttpHeaderValue("value"));
+        assertEquals("123", HttpUtil.readHttpHeaderValue(123));
 
         List<String> list = Arrays.asList("val1", "val2", "val3");
-        assertEquals("val1,val2,val3", HttpUtil.readHttpHeadValue(list));
+        assertEquals("val1,val2,val3", HttpUtil.readHttpHeaderValue(list));
 
         List<String> emptyList = Arrays.asList();
-        assertEquals("", HttpUtil.readHttpHeadValue(emptyList));
+        assertEquals("", HttpUtil.readHttpHeaderValue(emptyList));
 
         List<String> singleList = Arrays.asList("single");
-        assertEquals("single", HttpUtil.readHttpHeadValue(singleList));
+        assertEquals("single", HttpUtil.readHttpHeaderValue(singleList));
     }
 
     @Test
@@ -352,10 +352,10 @@ public class HttpUtil2025Test extends TestBase {
     @Test
     public void testReadHttpHeadValueWithMultipleValues() {
         List<Integer> numbers = Arrays.asList(1, 2, 3);
-        assertEquals("1,2,3", HttpUtil.readHttpHeadValue(numbers));
+        assertEquals("1,2,3", HttpUtil.readHttpHeaderValue(numbers));
 
         List<Object> mixed = Arrays.asList("str", 123, true);
-        assertEquals("str,123,true", HttpUtil.readHttpHeadValue(mixed));
+        assertEquals("str,123,true", HttpUtil.readHttpHeaderValue(mixed));
     }
 
     @Test

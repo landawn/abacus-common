@@ -154,7 +154,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @return {@code true}, indicating that Multimap is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

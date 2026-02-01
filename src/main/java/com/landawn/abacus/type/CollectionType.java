@@ -206,7 +206,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @return true
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

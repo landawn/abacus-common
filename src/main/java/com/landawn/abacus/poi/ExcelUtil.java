@@ -22,7 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,9 +43,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.landawn.abacus.exception.UncheckedException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedCsvWriter;
-import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CsvUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.IOUtil;
@@ -113,33 +114,33 @@ import lombok.Data;
  *   </tr>
  *   <tr>
  *     <td>Data Loading</td>
- *     <td>loadSheet(), loadWorkbook()</td>
+ *     <td>loadSheet()</td>
  *     <td>Medium to High</td>
- *     <td>Reading Excel data into memory</td>
+ *     <td>Reading Excel data into Dataset</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Row Reading</td>
+ *     <td>readSheet()</td>
+ *     <td>Medium</td>
+ *     <td>Reading Excel rows with custom mapping</td>
  *   </tr>
  *   <tr>
  *     <td>Data Writing</td>
- *     <td>writeSheet(), writeWorkbook()</td>
+ *     <td>writeSheet()</td>
  *     <td>Medium</td>
  *     <td>Creating Excel files from data</td>
  *   </tr>
  *   <tr>
  *     <td>Format Conversion</td>
- *     <td>toCsv(), fromCsv()</td>
+ *     <td>saveSheetAsCsv()</td>
  *     <td>Low to Medium</td>
- *     <td>Excel-CSV interoperability</td>
+ *     <td>Excel to CSV conversion</td>
  *   </tr>
  *   <tr>
  *     <td>Stream Processing</td>
- *     <td>stream(), streamRows()</td>
+ *     <td>streamSheet()</td>
  *     <td>Low</td>
- *     <td>Processing large Excel files</td>
- *   </tr>
- *   <tr>
- *     <td>Object Mapping</td>
- *     <td>toObjects(), toBeans()</td>
- *     <td>Medium</td>
- *     <td>Type-safe Excel to object conversion</td>
+ *     <td>Memory-efficient processing of large Excel files</td>
  *   </tr>
  * </table>
  *
@@ -156,36 +157,39 @@ import lombok.Data;
  * <pre>{@code
  * // Load Excel file into Dataset for analysis
  * Dataset dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
- * Dataset filtered = dataset.filter("amount", Fn.gt(1000));
  *
  * // Load specific worksheet by name
- * Dataset dataset = ExcelUtil.loadSheet(new File("report.xlsx"), "Q1_Sales");
+ * Dataset dataset = ExcelUtil.loadSheet(
+ *     new File("report.xlsx"), "Q1_Sales", RowExtractors.DEFAULT);
  *
  * // Write Dataset to Excel file
  * ExcelUtil.writeSheet("Sales Report", dataset, new File("output.xlsx"));
  *
  * // Convert Excel to CSV
- * ExcelUtil.toCsv(new File("data.xlsx"), new File("data.csv"));
+ * ExcelUtil.saveSheetAsCsv(new File("data.xlsx"), 0, new File("data.csv"));
  *
- * // Process Excel data with custom cell handling
- * Dataset dataset = ExcelUtil.loadSheet(
- *     new File("data.xlsx"),
- *     0,  // First sheet
- *     Arrays.asList("Name", "Age", "Salary"),  // Column selection
- *     (row, cell) -> {
- *         // Custom cell processing logic
- *         if (cell.getCellType() == CellType.FORMULA) {
- *             return cell.getCachedFormulaResultType() == CellType.NUMERIC ?
+ * // Process Excel data with custom row extractor
+ * TriConsumer<String[], Row, Object[]> customExtractor = (headers, row, output) -> {
+ *     for (int i = 0; i < headers.length; i++) {
+ *         Cell cell = row.getCell(i);
+ *         if (cell != null && cell.getCellType() == CellType.FORMULA) {
+ *             output[i] = cell.getCachedFormulaResultType() == CellType.NUMERIC ?
  *                 cell.getNumericCellValue() : cell.getStringCellValue();
+ *         } else {
+ *             output[i] = cell != null ? ExcelUtil.CELL_GETTER.apply(cell) : null;
  *         }
- *         return ExcelUtil.getDefaultCellValue(cell);
  *     }
- * );
+ * };
+ * Dataset dataset = ExcelUtil.loadSheet(new File("data.xlsx"), 0, customExtractor);
  *
- * // Type-safe object mapping from Excel
- * List<Employee> employees = ExcelUtil.loadSheet(
- *     new File("employees.xlsx"),
- *     Employee.class
+ * // Row-based data extraction with custom mapping
+ * Function<Row, Employee> employeeMapper = row -> new Employee(
+ *     row.getCell(0).getStringCellValue(),   // name
+ *     (int) row.getCell(1).getNumericCellValue(),  // age
+ *     row.getCell(2).getStringCellValue()    // department
+ * );
+ * List<Employee> employees = ExcelUtil.readSheet(
+ *     new File("employees.xlsx"), 0, true, employeeMapper
  * );
  * }</pre>
  *
@@ -216,13 +220,14 @@ import lombok.Data;
  *     public Map<String, Dataset> processWorkbook(File excelFile) {
  *         Map<String, Dataset> sheets = new HashMap<>();
  *
- *         try (Workbook workbook = ExcelUtil.loadWorkbook(excelFile)) {
+ *         try (InputStream is = new FileInputStream(excelFile);
+ *              Workbook workbook = WorkbookFactory.create(is)) {
  *             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
  *                 Sheet sheet = workbook.getSheetAt(i);
  *                 String sheetName = sheet.getSheetName();
  *
  *                 if (!isSkippableSheet(sheetName)) {
- *                     Dataset dataset = ExcelUtil.loadSheet(excelFile, i);
+ *                     Dataset dataset = ExcelUtil.loadSheet(excelFile, i, RowExtractors.DEFAULT);
  *                     sheets.put(sheetName, dataset);
  *                 }
  *             }
@@ -233,83 +238,73 @@ import lombok.Data;
  *         return sheets;
  *     }
  *
- *     // Dynamic report generation to Excel
+ *     // Dynamic report generation to Excel (single sheet per file)
  *     public void generateExcelReport(ReportCriteria criteria, File outputFile) {
- *         try (Workbook workbook = new XSSFWorkbook()) {
- *             // Summary sheet
- *             Dataset summaryData = generateSummaryData(criteria);
- *             ExcelUtil.writeSheet(workbook, "Summary", summaryData);
+ *         Dataset summaryData = generateSummaryData(criteria);
  *
- *             // Detail sheets by category
- *             Map<String, Dataset> categoryData = generateDetailData(criteria);
- *             for (Map.Entry<String, Dataset> entry : categoryData.entrySet()) {
- *                 ExcelUtil.writeSheet(workbook, entry.getKey(), entry.getValue());
- *             }
+ *         SheetCreateOptions options = SheetCreateOptions.builder()
+ *             .autoSizeColumn(true)
+ *             .freezeFirstRow(true)
+ *             .autoFilterByFirstRow(true)
+ *             .build();
  *
- *             // Write workbook to file
- *             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
- *                 workbook.write(fos);
- *             }
- *         } catch (IOException e) {
- *             throw new RuntimeException("Failed to generate Excel report", e);
- *         }
+ *         ExcelUtil.writeSheet("Summary", summaryData, options, outputFile);
  *     }
  * }
  * }</pre>
  *
- * <p><b>Type Safety and Object Mapping:</b>
+ * <p><b>Type Safety and Cell Processing:</b>
  * <ul>
- *   <li><b>Automatic Type Conversion:</b> Intelligent mapping from Excel cells to Java types</li>
- *   <li><b>Bean Mapping:</b> Reflection-based mapping to POJOs with field name matching</li>
- *   <li><b>Custom Converters:</b> Support for custom cell value conversion functions</li>
- *   <li><b>Annotation Support:</b> {@code @Column}, {@code @ExcelColumn} annotations for mapping control</li>
- *   <li><b>Null Handling:</b> Configurable null value processing and empty cell handling</li>
- *   <li><b>Date Formatting:</b> Automatic detection and conversion of Excel date cells</li>
+ *   <li><b>Automatic Type Preservation:</b> Cell values are extracted preserving their Excel types (String, Double, Boolean)</li>
+ *   <li><b>Custom Cell Processors:</b> Support for custom cell value conversion via {@code CELL_GETTER} and {@code CELL_TO_STRING}</li>
+ *   <li><b>Row Extractors:</b> Pluggable row extraction functions via {@link RowExtractors}</li>
+ *   <li><b>Row Mappers:</b> Flexible row-to-object mapping via {@link RowMappers}</li>
+ *   <li><b>Null Handling:</b> Configurable empty cell handling through custom extractors</li>
+ *   <li><b>Formula Support:</b> Access to formula text from formula cells</li>
  * </ul>
  *
- * <p><b>Performance Optimization Features:</b>
+ * <p><b>Performance Considerations:</b>
  * <ul>
- *   <li><b>Memory Efficiency:</b> Optimized memory usage for large Excel files</li>
- *   <li><b>Streaming Support:</b> Stream-based processing for memory-constrained environments</li>
- *   <li><b>Lazy Loading:</b> On-demand sheet loading for multi-sheet workbooks</li>
- *   <li><b>Buffer Management:</b> Configurable buffer sizes for optimal I/O performance</li>
- *   <li><b>Resource Cleanup:</b> Automatic resource management with proper disposal</li>
+ *   <li><b>Streaming Support:</b> Use {@code streamSheet()} for memory-efficient row-by-row processing</li>
+ *   <li><b>Resource Cleanup:</b> Stream methods include proper resource cleanup via {@code onClose()}</li>
+ *   <li><b>Direct Loading:</b> Use {@code loadSheet()} for smaller files that fit in memory</li>
+ *   <li><b>Workbook Format:</b> XLSX files generally perform better than XLS for large datasets</li>
+ *   <li><b>Auto-sizing Impact:</b> Disable {@code autoSizeColumn} for large sheets to improve write performance</li>
  * </ul>
  *
- * <p><b>Error Handling and Validation:</b>
+ * <p><b>Error Handling:</b>
  * <ul>
- *   <li><b>File Format Validation:</b> Automatic detection and validation of Excel file formats</li>
- *   <li><b>Cell Error Handling:</b> Graceful handling of formula errors and invalid cell values</li>
- *   <li><b>Data Validation:</b> Built-in validation for data integrity and type consistency</li>
- *   <li><b>Exception Recovery:</b> Configurable error recovery for corrupted or malformed files</li>
- *   <li><b>Detailed Error Reporting:</b> Comprehensive error messages with cell and row context</li>
+ *   <li><b>File Format Detection:</b> Apache POI automatically detects XLS vs XLSX format</li>
+ *   <li><b>Unchecked Exceptions:</b> I/O errors wrapped in {@link UncheckedException} for cleaner code</li>
+ *   <li><b>Sheet Validation:</b> {@code IllegalArgumentException} thrown for missing sheet names</li>
+ *   <li><b>Cell Type Errors:</b> {@code RuntimeException} thrown for unsupported cell types</li>
+ *   <li><b>Resource Safety:</b> Proper resource cleanup even when exceptions occur</li>
  * </ul>
  *
- * <p><b>Integration with Data Processing Frameworks:</b>
+ * <p><b>Integration with Abacus Framework:</b>
  * <ul>
- *   <li><b>Dataset Integration:</b> Seamless conversion to/from Dataset objects for analysis</li>
- *   <li><b>CSV Interoperability:</b> Bidirectional conversion between Excel and CSV formats</li>
- *   <li><b>Stream API:</b> Integration with Java 8+ Stream API for functional processing</li>
- *   <li><b>Spring Framework:</b> Compatible with Spring Batch and Spring Boot applications</li>
- *   <li><b>Database Integration:</b> Direct import/export capabilities with database systems</li>
+ *   <li><b>Dataset Integration:</b> Direct loading into Dataset objects via {@code loadSheet()}</li>
+ *   <li><b>CSV Interoperability:</b> Export Excel sheets to CSV format via {@code saveSheetAsCsv()}</li>
+ *   <li><b>Stream API:</b> Memory-efficient streaming via {@code streamSheet()} with proper resource cleanup</li>
+ *   <li><b>CsvUtil Compatibility:</b> Works alongside {@link CsvUtil} for comprehensive data format support</li>
  * </ul>
  *
- * <p><b>Excel-Specific Features:</b>
+ * <p><b>Excel Cell Type Support:</b>
  * <ul>
- *   <li><b>Formula Evaluation:</b> Support for reading calculated formula results</li>
- *   <li><b>Cell Formatting:</b> Preservation of basic cell formatting during read operations</li>
- *   <li><b>Merged Cells:</b> Proper handling of merged cell regions</li>
- *   <li><b>Hidden Sheets:</b> Access to hidden worksheets and visibility control</li>
- *   <li><b>Named Ranges:</b> Support for Excel named ranges and defined names</li>
+ *   <li><b>STRING:</b> Text values extracted as Java String</li>
+ *   <li><b>NUMERIC:</b> Numbers extracted as Java Double</li>
+ *   <li><b>BOOLEAN:</b> Boolean values extracted as Java Boolean</li>
+ *   <li><b>FORMULA:</b> Formula text extracted (not evaluated result)</li>
+ *   <li><b>BLANK:</b> Empty cells extracted as empty string</li>
  * </ul>
  *
- * <p><b>CSV Conversion Capabilities:</b>
+ * <p><b>CSV Export Capabilities:</b>
  * <ul>
- *   <li><b>Excel to CSV:</b> Convert Excel sheets to CSV format with configurable options</li>
- *   <li><b>CSV to Excel:</b> Import CSV data into Excel worksheets with formatting</li>
- *   <li><b>Multi-Sheet CSV:</b> Handle multiple sheets during CSV conversion operations</li>
- *   <li><b>Encoding Support:</b> Proper character encoding handling during conversion</li>
- *   <li><b>Delimiter Options:</b> Configurable CSV delimiters and quote characters</li>
+ *   <li><b>Excel to CSV:</b> Convert Excel sheets to CSV format via {@code saveSheetAsCsv()}</li>
+ *   <li><b>Sheet Selection:</b> Export specific sheets by index or name</li>
+ *   <li><b>Custom Headers:</b> Replace Excel headers with custom CSV headers</li>
+ *   <li><b>Encoding Support:</b> Proper character encoding handling via Writer parameter</li>
+ *   <li><b>Standard Format:</b> Uses comma delimiter with proper CSV escaping</li>
  * </ul>
  *
  * <p><b>Advanced Configuration Options:</b>
@@ -328,38 +323,32 @@ import lombok.Data;
  *         case BOOLEAN:
  *             return cell.getBooleanCellValue();
  *         case FORMULA:
- *             return evaluateFormula(cell);
+ *             return cell.getCellFormula();
  *         default:
  *             return null;
  *     }
  * };
  *
- * // Load with custom configuration
- * Dataset dataset = ExcelUtil.loadSheet(
- *     new File("data.xlsx"),
- *     0,  // Sheet index
- *     Arrays.asList("Name", "Age", "Department"),  // Columns
- *     customProcessor  // Custom cell processor
- * );
+ * // Load with custom row extractor using the custom processor
+ * TriConsumer<String[], Row, Object[]> customExtractor = RowExtractors.create(customProcessor);
+ * Dataset dataset = ExcelUtil.loadSheet(new File("data.xlsx"), 0, customExtractor);
  *
- * // Advanced Excel writing with formatting
- * ExcelWriteConfig config = ExcelWriteConfig.builder()
- *     .sheetName("Employee Report")
- *     .includeHeader(true)
- *     .autoSizeColumns(true)
- *     .dateFormat("yyyy-MM-dd")
- *     .numberFormat("#,##0.00")
+ * // Advanced Excel writing with formatting options
+ * SheetCreateOptions options = SheetCreateOptions.builder()
+ *     .autoSizeColumn(true)
+ *     .freezeFirstRow(true)
+ *     .autoFilterByFirstRow(true)
  *     .build();
  *
- * ExcelUtil.writeSheet(dataset, new File("report.xlsx"), config);
+ * ExcelUtil.writeSheet("Employee Report", dataset, options, new File("report.xlsx"));
  * }</pre>
  *
- * <p><b>Memory Management and Resource Cleanup:</b>
+ * <p><b>Resource Management:</b>
  * <ul>
- *   <li><b>Automatic Cleanup:</b> Proper disposal of POI resources and workbook objects</li>
- *   <li><b>Memory Optimization:</b> Efficient memory usage patterns for large Excel files</li>
- *   <li><b>Resource Monitoring:</b> Built-in monitoring for memory usage and resource allocation</li>
- *   <li><b>Garbage Collection:</b> GC-friendly design with minimal object retention</li>
+ *   <li><b>Automatic Cleanup:</b> {@code loadSheet()}, {@code readSheet()}, and {@code writeSheet()} methods handle resource cleanup internally</li>
+ *   <li><b>Stream Cleanup:</b> {@code streamSheet()} returns streams with {@code onClose()} handlers - always use try-with-resources</li>
+ *   <li><b>File Handles:</b> All file operations properly close input/output streams after completion</li>
+ *   <li><b>Workbook Resources:</b> Apache POI Workbook objects are closed automatically after processing</li>
  * </ul>
  *
  * <p><b>Best Practices and Recommendations:</b>
@@ -404,14 +393,15 @@ import lombok.Data;
  *
  * @see Dataset
  * @see CsvUtil
+ * @see RowMappers
+ * @see RowExtractors
+ * @see SheetCreateOptions
+ * @see FreezePane
  * @see org.apache.poi.ss.usermodel.Workbook
  * @see org.apache.poi.ss.usermodel.Sheet
  * @see org.apache.poi.ss.usermodel.Row
  * @see org.apache.poi.ss.usermodel.Cell
- * @see com.landawn.abacus.util.stream.Stream
- * @see com.landawn.abacus.annotation.Column
  * @see <a href="https://poi.apache.org/components/spreadsheet/">Apache POI Spreadsheet API</a>
- * @see <a href="https://docs.microsoft.com/en-us/office/open-xml/working-with-spreadsheets">Excel File Formats</a>
  */
 public final class ExcelUtil {
 
@@ -461,14 +451,14 @@ public final class ExcelUtil {
      * <pre>{@code
      * // Use directly on a cell
      * Cell cell = row.getCell(0);
-     * String stringValue = CELL2STRING.apply(cell);
+     * String stringValue = CELL_TO_STRING.apply(cell);
      *
      * // Use with row mapper to get all values as strings
-     * Function<Row, List<String>> stringMapper = RowMappers.toList(CELL2STRING);
+     * Function<Row, List<String>> stringMapper = RowMappers.toList(CELL_TO_STRING);
      * List<List<String>> rows = ExcelUtil.readSheet(file, 0, true, stringMapper);
      * }</pre>
      */
-    public static final Function<Cell, String> CELL2STRING = cell -> switch (cell.getCellType()) {
+    public static final Function<Cell, String> CELL_TO_STRING = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
         case NUMERIC -> String.valueOf(cell.getNumericCellValue());
         case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
@@ -605,7 +595,7 @@ public final class ExcelUtil {
         final String[] headers = new String[columnCount];
 
         for (int i = 0; i < columnCount; i++) {
-            headers[i] = CELL2STRING.apply(headerRow.getCell(i));
+            headers[i] = CELL_TO_STRING.apply(headerRow.getCell(i));
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
@@ -904,7 +894,7 @@ public final class ExcelUtil {
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
-    public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows, final File outputExcelFile) {
+    public static void writeSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows, final File outputExcelFile) {
         writeSheet(sheetName, headers, rows, (SheetCreateOptions) null, outputExcelFile);
     }
 
@@ -941,7 +931,7 @@ public final class ExcelUtil {
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
-    public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows,
+    public static void writeSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
         final int columnCount = headers.size();
 
@@ -1004,7 +994,7 @@ public final class ExcelUtil {
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
      */
-    public static void writeSheet(final String sheetName, final List<Object> headers, final List<? extends Collection<?>> rows,
+    public static void writeSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         try (Workbook workbook = newWorkbookForOutput(outputExcelFile)) {
             Sheet sheet = workbook.createSheet(sheetName);
@@ -1170,6 +1160,10 @@ public final class ExcelUtil {
             cell.setCellValue(val);
         } else if (cellValue instanceof java.util.Date val) {
             cell.setCellValue(val);
+        } else if (cellValue instanceof LocalDate val) {
+            cell.setCellValue(val);
+        } else if (cellValue instanceof LocalDateTime val) {
+            cell.setCellValue(val);
         } else if (cellValue instanceof java.util.Calendar val) {
             cell.setCellValue(val);
         } else if (cellValue instanceof Integer val) {
@@ -1219,8 +1213,12 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
      *                            or if the sheet index is out of bounds
      */
-    public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, File outputCsvFile) {
-        saveSheetAsCsv(excelFile, sheetIndex, null, outputCsvFile, Charsets.DEFAULT);
+    public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, final File outputCsvFile) {
+        try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
+            saveSheetAsCsv(excelFile, sheetIndex, null, writer);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -1248,8 +1246,12 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
      *                            or if the sheet name is not found in the workbook
      */
-    public static void saveSheetAsCsv(final File excelFile, final String sheetName, File outputCsvFile) {
-        saveSheetAsCsv(excelFile, sheetName, null, outputCsvFile, Charsets.DEFAULT);
+    public static void saveSheetAsCsv(final File excelFile, final String sheetName, final File outputCsvFile) {
+        try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
+            saveSheetAsCsv(excelFile, sheetName, null, writer);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -1270,25 +1272,23 @@ public final class ExcelUtil {
      *     new File("products.xlsx"),
      *     0,
      *     customHeaders,
-     *     new File("products.csv"),
-     *     StandardCharsets.UTF_8
+     *     IOUtil.newFileWriter(new File("products.csv"))
      * );
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
-     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @param charset the character encoding to use for the CSV file (e.g., UTF-8, ISO-8859-1)
+     * @param outputWriter the CSV file to write to (will be created or overwritten) 
      * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
      *                            or if the sheet index is out of bounds
      */
-    public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, List<String> csvHeaders, File outputCsvFile, Charset charset) {
+    public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, final List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
 
-            saveSheetAsCsv(sheet, csvHeaders, outputCsvFile, charset);
+            saveSheetAsCsv(sheet, csvHeaders, outputWriter);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -1313,87 +1313,83 @@ public final class ExcelUtil {
      *     new File("productos.xlsx"),
      *     "Inventario",
      *     headers,
-     *     new File("productos.csv"),
-     *     Charset.forName("ISO-8859-1")
+     *     IOUtil.newFileWriter(new File("productos.csv"))
      * );
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetName the name of the sheet to convert, case-sensitive
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
-     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @param charset the character encoding to use for the CSV file (e.g., UTF-8, ISO-8859-1)
+     * @param outputWriter the CSV writer to write to (will be created or overwritten) 
      * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
      *                            or if the sheet name is not found in the workbook
      */
-    public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, File outputCsvFile, Charset charset) {
+    public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
 
-            saveSheetAsCsv(sheet, csvHeaders, outputCsvFile, charset);
+            saveSheetAsCsv(sheet, csvHeaders, outputWriter);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
     }
 
-    private static void saveSheetAsCsv(final Sheet sheet, List<String> csvHeaders, File outputCsvFile, Charset charset) {
+    private static void saveSheetAsCsv(final Sheet sheet, List<String> csvHeaders, final Writer output) throws IOException {
         final Type<Object> strType = Type.of(String.class);
         final char separator = WD._COMMA;
 
-        try (Writer writer = IOUtil.newFileWriter(outputCsvFile, charset)) {
-            final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(writer);
+        final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(output);
 
-            try {
-                if (N.notEmpty(csvHeaders)) {
-                    int idx = 0;
+        try {
+            if (N.notEmpty(csvHeaders)) {
+                int idx = 0;
 
-                    for (String csvHeader : csvHeaders) {
-                        if (idx++ > 0) {
-                            bw.write(separator);
-                        }
-
-                        CsvUtil.writeField(bw, strType, csvHeader);
+                for (String csvHeader : csvHeaders) {
+                    if (idx++ > 0) {
+                        bw.write(separator);
                     }
 
+                    CsvUtil.writeField(bw, strType, csvHeader);
                 }
 
-                boolean skipFirstRow = N.notEmpty(csvHeaders);
-                int rowIndex = skipFirstRow ? 1 : 0;
-
-                for (Row row : sheet) {
-                    if (skipFirstRow) {
-                        skipFirstRow = false;
-                        continue;
-                    }
-
-                    if (rowIndex++ > 0) {
-                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
-                    }
-
-                    int idx = 0;
-
-                    for (Cell cell : row) {
-                        if (idx++ > 0) {
-                            bw.write(separator);
-                        }
-
-                        switch (cell.getCellType()) {
-                            case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
-                            case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
-                            case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
-                            case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
-                            case BLANK -> CsvUtil.writeField(bw, strType, "");
-                            default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
-                        }
-                    }
-                }
-
-            } finally {
-                Objectory.recycle(bw);
             }
-        } catch (IOException e) {
-            throw new UncheckedException(e);
+
+            boolean skipFirstRow = N.notEmpty(csvHeaders);
+            int rowIndex = skipFirstRow ? 1 : 0;
+
+            for (Row row : sheet) {
+                if (skipFirstRow) {
+                    skipFirstRow = false;
+                    continue;
+                }
+
+                if (rowIndex++ > 0) {
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
+                }
+
+                int idx = 0;
+
+                for (Cell cell : row) {
+                    if (idx++ > 0) {
+                        bw.write(separator);
+                    }
+
+                    switch (cell.getCellType()) {
+                        case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
+                        case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
+                        case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
+                        case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
+                        case BLANK -> CsvUtil.writeField(bw, strType, "");
+                        default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
+                    }
+                }
+            }
+
+            bw.flush();
+
+        } finally {
+            Objectory.recycle(bw);
         }
     }
 
@@ -1448,8 +1444,8 @@ public final class ExcelUtil {
      *
      * @see #DEFAULT
      * @see #ROW2STRING
-     * @see #toString(String)
-     * @see #toString(String, Function)
+     * @see #toDelimitedString(String)
+     * @see #toDelimitedString(String, Function)
      * @see #toList(Function)
      */
     public static final class RowMappers {
@@ -1513,21 +1509,21 @@ public final class ExcelUtil {
          * rowStrings.forEach(System.out::println);
          * }</pre>
          */
-        public static final Function<Row, String> ROW2STRING = toString(Strings.ELEMENT_SEPARATOR);
+        public static final Function<Row, String> ROW2STRING = toDelimitedString(Strings.ELEMENT_SEPARATOR);
 
         /**
          * Creates a row mapper that converts rows to delimited strings with a custom separator.
-         * Each cell is converted to its string representation using the default CELL2STRING mapper
+         * Each cell is converted to its string representation using the default CELL_TO_STRING mapper
          * and the resulting strings are joined together with the specified separator. Useful for
          * creating custom text representations of Excel rows.
          *
-         * <p>This method uses CELL2STRING for cell conversion, which handles all cell types
+         * <p>This method uses CELL_TO_STRING for cell conversion, which handles all cell types
          * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK) and converts them to appropriate string
          * representations.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Function<Row, String> pipeMapper = RowMappers.toString("|");
+         * Function<Row, String> pipeMapper = RowMappers.toDelimitedString("|");
          * List<String> rows = ExcelUtil.readSheet(file, 0, true, pipeMapper);
          * // Results in rows like: "John|30|New York"
          * }</pre>
@@ -1535,8 +1531,8 @@ public final class ExcelUtil {
          * @param cellSeparator the string to use as separator between cell values
          * @return a Function that converts Row to delimited String
          */
-        public static Function<Row, String> toString(final String cellSeparator) {
-            return toString(cellSeparator, CELL2STRING);
+        public static Function<Row, String> toDelimitedString(final String cellSeparator) {
+            return toDelimitedString(cellSeparator, CELL_TO_STRING);
         }
 
         /**
@@ -1554,16 +1550,16 @@ public final class ExcelUtil {
          * Function<Cell, String> customCellMapper = cell ->
          *     cell.getCellType() == CellType.NUMERIC
          *         ? String.format("%.2f", cell.getNumericCellValue())
-         *         : CELL2STRING.apply(cell);
+         *         : CELL_TO_STRING.apply(cell);
          *
-         * Function<Row, String> mapper = RowMappers.toString(",", customCellMapper);
+         * Function<Row, String> mapper = RowMappers.toDelimitedString(",", customCellMapper);
          * }</pre>
          *
          * @param cellSeparator the string to use as separator between cell values
          * @param cellMapper custom function to convert each cell to a string
          * @return a Function that converts Row to delimited String
          */
-        public static Function<Row, String> toString(final String cellSeparator, final Function<Cell, String> cellMapper) {
+        public static Function<Row, String> toDelimitedString(final String cellSeparator, final Function<Cell, String> cellMapper) {
             return row -> {
                 final StringBuilder sb = Objectory.createStringBuilder();
                 boolean first = true;
@@ -1723,7 +1719,7 @@ public final class ExcelUtil {
          * // Extract all values as strings, with empty string for null cells
          * TriConsumer<String[], Row, Object[]> stringExtractor =
          *     RowExtractors.create(cell ->
-         *         cell == null ? "" : CELL2STRING.apply(cell)
+         *         cell == null ? "" : CELL_TO_STRING.apply(cell)
          *     );
          *
          * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", stringExtractor);

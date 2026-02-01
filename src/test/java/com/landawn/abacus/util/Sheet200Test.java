@@ -672,7 +672,7 @@ public class Sheet200Test extends TestBase {
             List<Object> r2Data = new ArrayList<>(sheet.rowValues("R2"));
             List<Object> r3Data = new ArrayList<>(sheet.rowValues("R3"));
 
-            sheet.swapRowPosition("R1", "R2");
+            sheet.swapRows("R1", "R2");
 
             assertEquals(Arrays.asList("R2", "R1", "R3"), new ArrayList<>(sheet.rowKeySet()));
             assertEquals(r2Data, new ArrayList<>(sheet.rowValues("R2")));
@@ -683,7 +683,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testSwapRowPosition_frozen() {
             sheet.freeze();
-            assertThrows(IllegalStateException.class, () -> sheet.swapRowPosition("R1", "R2"));
+            assertThrows(IllegalStateException.class, () -> sheet.swapRows("R1", "R2"));
         }
 
         @Test
@@ -929,7 +929,7 @@ public class Sheet200Test extends TestBase {
             List<Object> c2Data = new ArrayList<>(sheet.columnValues("C2"));
             List<Object> c3Data = new ArrayList<>(sheet.columnValues("C3"));
 
-            sheet.swapColumnPosition("C1", "C2");
+            sheet.swapColumns("C1", "C2");
 
             assertEquals(Arrays.asList("C2", "C1", "C3"), new ArrayList<>(sheet.columnKeySet()));
             assertEquals(c2Data, new ArrayList<>(sheet.columnValues("C2")));
@@ -940,7 +940,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testSwapColumnPosition_frozen() {
             sheet.freeze();
-            assertThrows(IllegalStateException.class, () -> sheet.swapColumnPosition("C1", "C2"));
+            assertThrows(IllegalStateException.class, () -> sheet.swapColumns("C1", "C2"));
         }
 
         @Test

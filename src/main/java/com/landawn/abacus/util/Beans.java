@@ -83,9 +83,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Property Discovery:</b> {@link #getPropNameList(Class)}, {@link #getPropNames(Object, boolean)} for introspection</li>
  *   <li><b>Property Access:</b> {@link #getPropValue(Object, String)}, {@link #setPropValue(Object, Method, Object)} with type-safe operations</li>
  *   <li><b>Object Conversion:</b> {@link #beanToMap(Object)}, {@link #mapToBean(Map, Class)} with deep and shallow conversion options</li>
- *   <li><b>Object Lifecycle:</b> {@link #newBean(Class)}, {@link #copy(Object, Class)}, {@link #clone(Object)}, {@link #merge(Object, Object)} for object management</li>
+ *   <li><b>Object Lifecycle:</b> {@link #newBean(Class)}, {@link #copyAs(Object, Class)}, {@link #deepCopy(Object)}, {@link #copyInto(Object, Object)} for object management</li>
  *   <li><b>Comparison Operations:</b> {@link #equalsByProps(Object, Object, Collection)}, {@link #compareByProps(Object, Object, Collection)} with configurable properties</li>
- *   <li><b>Transformation:</b> {@link #fill(Object)} for object manipulation</li>
+ *   <li><b>Transformation:</b> {@link #randomize(Object)} for object manipulation</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -104,7 +104,8 @@ import com.landawn.abacus.util.stream.Stream;
  * // Bean validation and introspection
  * boolean isBean = Beans.isBeanClass(User.class);                // Check if class follows bean pattern
  * List<String> properties = Beans.getPropNameList(User.class);   // Get all property names
- * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class);   // Get builder info
+ * Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo =
+ *         Beans.getBuilderInfo(User.class);   // Get builder info
  *
  * // Property access operations
  * User user = new User();
@@ -113,8 +114,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Object creation and instantiation
  * User newUser = Beans.newBean(User.class);     // Create new instance
- * User copied = Beans.copy(user, User.class);   // Create copy with type conversion
- * User cloned = Beans.clone(user);              // Deep clone existing object
+ * User copied = Beans.copyAs(user, User.class);   // Create copy with type conversion
+ * User cloned = Beans.deepCopy(user);              // Deep clone existing object
  *
  * // Bean to Map conversion (various formats)
  * Map<String, Object> flatMap = Beans.beanToMap(user);       // Map conversion
@@ -129,8 +130,8 @@ import com.landawn.abacus.util.stream.Stream;
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.merge(source, target);   // Merge source into target
- * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
+ * Beans.copyInfo(source, target);   // Merge source into target
+ * Beans.copyInfo(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
  *
  * // Object comparison operations
  * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // Equality check by props
@@ -235,7 +236,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Bean Validation:</b> {@code if (Beans.isBeanClass(clazz)) { ... }}</li>
  *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getPropValue(bean, propName);}</li>
- *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copy(entity, DTO.class);}</li>
+ *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copyAs(entity, DTO.class);}</li>
  *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.mapToBean(properties, Config.class);}</li>
  * </ul>
  *
@@ -279,16 +280,16 @@ import com.landawn.abacus.util.stream.Stream;
  * Map<String, Object> filteredMap = Beans.beanToMap(user, Arrays.asList("name", "age"));   // Only name and age
  *
  * // Advanced copying with transformations
- * UserDTO dto = Beans.copy(user, UserDTO.class);   // Convert to DTO
- * User cloned = Beans.clone(user);   // Deep clone
- * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class);   // Partial copy
+ * UserDTO dto = Beans.copyAs(user, UserDTO.class);   // Convert to DTO
+ * User cloned = Beans.deepCopy(user);   // Deep clone
+ * User partial = Beans.copyAs(user, Arrays.asList("name", "age"), User.class);   // Partial copy
  *
  * // Merging with different strategies
  * User updates = new User();
  * updates.setName("Jane Doe");
  *
- * Beans.merge(updates, user);   // Merge updates into user
- * Beans.merge(updates, user, (source, target) ->
+ * Beans.copyInfo(updates, user);   // Merge updates into user
+ * Beans.copyInfo(updates, user, (source, target) ->
  *     source != null && !source.equals("") ? source : target);   // Custom merge logic
  *
  * // Validation and comparison
@@ -468,10 +469,10 @@ public final class Beans {
      *
      * <p>A class is considered a bean class if it:</p>
      * <ul>
-     *   <li>Is annotated with {@code @Entity}</li>
-     *   <li>Is a record class (Java 14+) or annotated with {@code @Record}</li>
-     *   <li>Has at least one property with getter/setter methods</li>
-     *   <li>Is not a CharSequence, Number, or Map.Entry implementation</li>
+     *   <li>Is annotated with {@code @Entity}, or</li>
+     *   <li>Is a record class (Java 14+) or annotated with {@code @Record}, or</li>
+     *   <li>Has at least one property with getter/setter methods and is not a
+     *       {@link CharSequence}, {@link Number}, or {@link Map.Entry} implementation</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -587,7 +588,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo =
+     * Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo =
      *     Beans.getBuilderInfo(Person.class);
      * if (builderInfo != null) {
      *     Object builder = builderInfo._2.get();   // Create builder
@@ -774,8 +775,8 @@ public final class Beans {
 
     /**
      * Registers a property get/set method for the specified property name.
-     * This allows manual registration of methods as property accessors that might
-     * not follow standard JavaBean naming conventions.
+     * The method must be a getter or setter recognized by {@code Beans} (for example,
+     * a method whose name starts with {@code get/is/has/set}, or a field-named accessor).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -947,7 +948,7 @@ public final class Beans {
                 }
 
                 if (Strings.isEmpty(propName)) {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), Beans.formalizePropName(newName));
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), Beans.normalizePropName(newName));
 
                     if (field != null && field.getType().isAssignableFrom(targetType)) {
                         propName = field.getName();
@@ -955,7 +956,7 @@ public final class Beans {
                 }
 
                 if (Strings.isEmpty(propName) && Strings.isNotEmpty(newName) && newName.charAt(0) != '_') {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + Beans.formalizePropName(newName));
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + Beans.normalizePropName(newName));
 
                     if (field != null && field.getType().isAssignableFrom(targetType)) {
                         propName = field.getName();
@@ -963,7 +964,7 @@ public final class Beans {
                 }
 
                 if (Strings.isEmpty(propName)) {
-                    propName = Beans.formalizePropName(newName);
+                    propName = Beans.normalizePropName(newName);
                 }
             }
 
@@ -1188,7 +1189,7 @@ public final class Beans {
      *     private Date lastModified;
      * }
      *
-     * ImmutableSet<String> ignored = Beans.getDiffIgnoredPropNames(User.class);
+     * ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(User.class);
      * // Returns ["lastModified"]
      * }</pre>
      *
@@ -1197,7 +1198,7 @@ public final class Beans {
      * @see com.landawn.abacus.util.Difference.MapDifference
      * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
      */
-    public static ImmutableSet<String> getDiffIgnoredPropNames(final Class<?> cls) {
+    public static ImmutableSet<String> getIgnoredPropNamesForDiff(final Class<?> cls) {
         ImmutableSet<String> propNames = beanDiffIgnoredPropNamesPool.get(cls);
 
         if (propNames == null) {
@@ -1708,8 +1709,8 @@ public final class Beans {
                     }
                 }
 
-                if ((field == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                    field = getPropField(cls, Beans.formalizePropName(propName));
+                if ((field == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                    field = getPropField(cls, Beans.normalizePropName(propName));
                 }
 
                 // set method mask to avoid a query next time.
@@ -1760,8 +1761,8 @@ public final class Beans {
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
      *
-     * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
-     * getter/setter method for the class/bean generated/wrote by JAXB specification</p>
+     * <p>Call {@link #registerXmlBindingClass(Class)} first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1799,8 +1800,8 @@ public final class Beans {
                     }
                 }
 
-                if ((method == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                    method = getPropGetter(cls, Beans.formalizePropName(propName));
+                if ((method == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                    method = getPropGetter(cls, Beans.normalizePropName(propName));
                 }
 
                 // set method mask to avoid query next time.
@@ -1818,7 +1819,7 @@ public final class Beans {
     /**
      * Retrieves an immutable map of property get methods for the specified class.
      *
-     * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * <p>Call {@link #registerXmlBindingClass(Class)} first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1846,7 +1847,7 @@ public final class Beans {
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
      *
-     * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * <p>Call {@link #registerXmlBindingClass(Class)} first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1885,8 +1886,8 @@ public final class Beans {
                     }
                 }
 
-                if ((method == null) && !propName.equalsIgnoreCase(Beans.formalizePropName(propName))) {
-                    method = getPropSetter(cls, Beans.formalizePropName(propName));
+                if ((method == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                    method = getPropSetter(cls, Beans.normalizePropName(propName));
                 }
 
                 // set method mask to avoid a query next time.
@@ -1904,7 +1905,7 @@ public final class Beans {
     /**
      * Retrieves an immutable map of property set methods for the specified class.
      *
-     * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * <p>Call {@link #registerXmlBindingClass(Class)} first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1978,6 +1979,10 @@ public final class Beans {
      * If the property cannot be found and ignoreUnmatchedProperty is {@code true}, it returns {@code null}.
      *
      * <p>This method also supports nested properties using dot notation.</p>
+     *
+     * <p>For nested paths, if an intermediate property resolves to {@code null}, this method returns
+     * the default value of the final getter's return type (for example {@code 0} for primitives),
+     * not {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2194,6 +2199,7 @@ public final class Beans {
      * Sets the property value by invoking the getter method on the provided bean.
      * The returned type of the get method should be {@code Collection} or {@code Map}. 
      * And the specified property value and the returned value must be the same type.
+     * If {@code propValue} is {@code null}, this method does nothing.
      *
      * <p>This method is particularly useful for JAXB-style beans where collections
      * are exposed only through getter methods without corresponding setters.</p>
@@ -2232,7 +2238,7 @@ public final class Beans {
     }
 
     /**
-     * Formalizes the given property name by converting it to camel case and
+     * Normalizes the given property name by converting it to camel case and
      * replacing any reserved keywords with their mapped values.
      * This method is designed for field/method/class/column/table names,
      * and both source and target strings are cached for performance.
@@ -2245,15 +2251,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String formal = Beans.formalizePropName("user_name");     // Returns "userName"
-     * String formal2 = Beans.formalizePropName("first_name");   // Returns "firstName"
-     * String formal3 = Beans.formalizePropName("class");        // Returns "clazz"
+     * String formal = Beans.normalizePropName("user_name");     // Returns "userName"
+     * String formal2 = Beans.normalizePropName("first_name");   // Returns "firstName"
+     * String formal3 = Beans.normalizePropName("class");        // Returns "clazz"
      * }</pre>
      *
      * @param str the property name to be formalized.
      * @return the formalized property name.
      */
-    public static String formalizePropName(final String str) {
+    public static String normalizePropName(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
         }
@@ -2363,93 +2369,181 @@ public final class Beans {
     }
 
     /**
-     * Converts the keys in the provided map to camel case.
-     * This method modifies the map in-place.
+     * Converts the keys in the provided map from snake_case (or other delimited formats) to camelCase.
+     * This method modifies the map in-place by delegating to {@link Maps#replaceKeys(Map, Function)}
+     * with {@link Fn#toCamelCase()}.
+     *
+     * <p>The conversion splits keys on underscores, hyphens, or other common delimiters (as defined by
+     * {@link RegExUtil#CAMEL_CASE_SEPARATOR}), then joins them in camelCase format where the first word
+     * is lowercase and subsequent words start with an uppercase letter.</p>
+     *
+     * <p><b>Conversion Examples:</b></p>
+     * <ul>
+     *   <li>{@code "user_name"} → {@code "userName"}</li>
+     *   <li>{@code "first_name"} → {@code "firstName"}</li>
+     *   <li>{@code "USER_NAME"} → {@code "userName"}</li>
+     *   <li>{@code "user-name"} → {@code "userName"}</li>
+     *   <li>{@code "userName"} → {@code "username"} (already camelCase but re-processed)</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Convert snake_case keys to camelCase
      * Map<String, Object> map = new HashMap<>();
      * map.put("user_name", "John");
      * map.put("first_name", "Jane");
+     * map.put("email_address", "john@example.com");
      *
-     * Beans.toCamelCaseKeys(map);
-     * // map now contains: {"userName": "John", "firstName": "Jane"}
+     * Beans.replaceKeysWithCamelCase(map);
+     * // map now contains: {userName=John, firstName=Jane, emailAddress=john@example.com}
+     *
+     * // Useful when converting database column names to Java property names
+     * Map<String, Object> dbRow = queryRow("SELECT user_id, created_at FROM users");
+     * Beans.replaceKeysWithCamelCase(dbRow);
+     * // dbRow now contains: {userId=..., createdAt=...}
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to camel case.
+     * <p><b>Notes:</b></p>
+     * <ul>
+     *   <li>If the map is {@code null} or empty, this method returns immediately without any action.</li>
+     *   <li>Keys that are already in camelCase may still be modified (e.g., {@code "userName"} becomes
+     *       {@code "username"} if no delimiter is found but the string is re-lowercased).</li>
+     *   <li>If multiple keys convert to the same camelCase key, an {@link IllegalStateException} is thrown
+     *       before any modifications are made (e.g., {@code "user_name"} and {@code "USER_NAME"} both
+     *       convert to {@code "userName"}).</li>
+     * </ul>
+     *
+     * @param props the map whose keys are to be converted to camelCase; modified in-place.
+     *              If {@code null} or empty, no action is taken.
+     * @throws IllegalStateException if the converted keys contain duplicates
+     * @see Maps#replaceKeys(Map, Function)
+     * @see Fn#toCamelCase()
+     * @see Strings#toCamelCase(String)
+     * @see #replaceKeysWithSnakeCase(Map)
+     * @see #replaceKeysWithScreamingSnakeCase(Map)
      */
-    @SuppressWarnings("deprecation")
-    public static void toCamelCaseKeys(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(Beans.toCamelCase(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
+    public static void replaceKeysWithCamelCase(final Map<String, Object> props) {
+        Maps.replaceKeys(props, Fn.toCamelCase());
     }
 
     /**
-     * Converts the keys in the provided map to lower case with underscores.
-     * This method modifies the map in-place.
+     * Converts the keys in the provided map from camelCase to snake_case (lowercase with underscores).
+     * This method modifies the map in-place by delegating to {@link Maps#replaceKeys(Map, Function)}
+     * with {@link Fn#toSnakeCase()}.
+     *
+     * <p>The conversion inserts an underscore before each uppercase letter (when preceded by a lowercase
+     * letter or followed by a lowercase letter) and converts the entire string to lowercase.</p>
+     *
+     * <p><b>Conversion Examples:</b></p>
+     * <ul>
+     *   <li>{@code "userName"} → {@code "user_name"}</li>
+     *   <li>{@code "firstName"} → {@code "first_name"}</li>
+     *   <li>{@code "emailAddress"} → {@code "email_address"}</li>
+     *   <li>{@code "userID"} → {@code "user_id"}</li>
+     *   <li>{@code "XMLParser"} → {@code "xml_parser"}</li>
+     *   <li>{@code "user_name"} → {@code "user_name"} (already snake_case, unchanged)</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Convert camelCase keys to snake_case
      * Map<String, Object> map = new HashMap<>();
      * map.put("userName", "John");
      * map.put("firstName", "Jane");
+     * map.put("emailAddress", "john@example.com");
      *
-     * Beans.toSnakeCase(map);
-     * // map now contains: {"user_name": "John", "first_name": "Jane"}
+     * Beans.replaceKeysWithSnakeCase(map);
+     * // map now contains: {user_name=John, first_name=Jane, email_address=john@example.com}
+     *
+     * // Useful when converting Java bean properties to database column names
+     * Map<String, Object> beanProps = Beans.beanToMap(user);
+     * Beans.replaceKeysWithSnakeCase(beanProps);
+     * // Ready for database insertion with snake_case column names
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to lower case with underscores.
+     * <p><b>Notes:</b></p>
+     * <ul>
+     *   <li>If the map is {@code null} or empty, this method returns immediately without any action.</li>
+     *   <li>Keys that are already in snake_case remain unchanged (no double underscores are introduced).</li>
+     *   <li>Consecutive uppercase letters are handled intelligently: {@code "userID"} becomes {@code "user_id"},
+     *       not {@code "user_i_d"}.</li>
+     *   <li>If multiple keys convert to the same snake_case key, an {@link IllegalStateException} is thrown
+     *       before any modifications are made (e.g., {@code "userName"} and {@code "UserName"} both
+     *       convert to {@code "user_name"}).</li>
+     * </ul>
+     *
+     * @param props the map whose keys are to be converted to snake_case; modified in-place.
+     *              If {@code null} or empty, no action is taken.
+     * @throws IllegalStateException if the converted keys contain duplicates
+     * @see Maps#replaceKeys(Map, Function)
+     * @see Fn#toSnakeCase()
+     * @see Strings#toSnakeCase(String)
+     * @see #replaceKeysWithCamelCase(Map)
+     * @see #replaceKeysWithScreamingSnakeCase(Map)
      */
-    @SuppressWarnings("deprecation")
-    public static void toSnakeCaseKeys(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(Beans.toSnakeCase(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
+    public static void replaceKeysWithSnakeCase(final Map<String, Object> props) {
+        Maps.replaceKeys(props, Fn.toSnakeCase());
     }
 
     /**
-     * Converts the keys in the provided map to upper case with underscores.
-     * This method modifies the map in-place.
+     * Converts the keys in the provided map from camelCase to SCREAMING_SNAKE_CASE (uppercase with underscores).
+     * This method modifies the map in-place by delegating to {@link Maps#replaceKeys(Map, Function)}
+     * with {@link Fn#toScreamingSnakeCase()}.
+     *
+     * <p>The conversion inserts an underscore before each uppercase letter (when preceded by a lowercase
+     * letter or followed by a lowercase letter) and converts the entire string to uppercase. This naming
+     * convention is commonly used for constants in Java and environment variables.</p>
+     *
+     * <p><b>Conversion Examples:</b></p>
+     * <ul>
+     *   <li>{@code "userName"} → {@code "USER_NAME"}</li>
+     *   <li>{@code "firstName"} → {@code "FIRST_NAME"}</li>
+     *   <li>{@code "emailAddress"} → {@code "EMAIL_ADDRESS"}</li>
+     *   <li>{@code "userID"} → {@code "USER_ID"}</li>
+     *   <li>{@code "XMLParser"} → {@code "XML_PARSER"}</li>
+     *   <li>{@code "maxRetryCount"} → {@code "MAX_RETRY_COUNT"}</li>
+     *   <li>{@code "USER_NAME"} → {@code "USER_NAME"} (already SCREAMING_SNAKE_CASE, unchanged)</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Convert camelCase keys to SCREAMING_SNAKE_CASE
      * Map<String, Object> map = new HashMap<>();
      * map.put("userName", "John");
      * map.put("firstName", "Jane");
+     * map.put("maxRetryCount", 3);
      *
-     * Beans.toScreamingSnakeCase(map);
-     * // map now contains: {"USER_NAME": "John", "FIRST_NAME": "Jane"}
+     * Beans.replaceKeysWithScreamingSnakeCase(map);
+     * // map now contains: {USER_NAME=John, FIRST_NAME=Jane, MAX_RETRY_COUNT=3}
+     *
+     * // Useful when converting configuration properties to environment variable format
+     * Map<String, Object> config = loadConfig();
+     * Beans.replaceKeysWithScreamingSnakeCase(config);
+     * // Keys now match environment variable naming convention
      * }</pre>
      *
-     * @param props the map whose keys are to be converted to upper case with underscores.
+     * <p><b>Notes:</b></p>
+     * <ul>
+     *   <li>If the map is {@code null} or empty, this method returns immediately without any action.</li>
+     *   <li>Keys that are already in SCREAMING_SNAKE_CASE remain unchanged.</li>
+     *   <li>Consecutive uppercase letters are handled intelligently: {@code "userID"} becomes {@code "USER_ID"},
+     *       not {@code "USER_I_D"}.</li>
+     *   <li>If multiple keys convert to the same SCREAMING_SNAKE_CASE key, an {@link IllegalStateException}
+     *       is thrown before any modifications are made (e.g., {@code "userName"} and {@code "UserName"}
+     *       both convert to {@code "USER_NAME"}).</li>
+     * </ul>
+     *
+     * @param props the map whose keys are to be converted to SCREAMING_SNAKE_CASE; modified in-place.
+     *              If {@code null} or empty, no action is taken.
+     * @throws IllegalStateException if the converted keys contain duplicates
+     * @see Maps#replaceKeys(Map, Function)
+     * @see Fn#toScreamingSnakeCase()
+     * @see Strings#toScreamingSnakeCase(String)
+     * @see #replaceKeysWithCamelCase(Map)
+     * @see #replaceKeysWithSnakeCase(Map)
      */
-    @SuppressWarnings("deprecation")
-    public static void toScreamingSnakeCaseKeys(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(Beans.toScreamingSnakeCase(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
+    public static void replaceKeysWithScreamingSnakeCase(final Map<String, Object> props) {
+        Maps.replaceKeys(props, Fn.toScreamingSnakeCase());
     }
 
     /**
@@ -2565,7 +2659,8 @@ public final class Beans {
      * Converts a map into a bean object of the specified type, including only selected properties.
      * This method takes a map where the keys are the property names and the values are the corresponding property values,
      * and transforms it into a bean object of the specified type.
-     * Only the properties specified in selectPropNames will be set on the bean.
+     * Only the properties specified in selectPropNames will be set on the bean. If
+     * {@code selectPropNames} is empty, no properties are set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2589,7 +2684,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the resulting bean objects.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class or a selected property does not exist
      */
     @MayReturnNull
     public static <T> T mapToBean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -2734,7 +2829,8 @@ public final class Beans {
      *
      * @param <T> the type of the bean objects to be returned.
      * @param mList the collection of maps to be converted into bean objects.
-     * @param selectPropNames a collection of property names to be included in the resulting bean objects. If this is empty, all properties are included.
+     * @param selectPropNames a collection of property names to be included in the resulting bean objects.
+     *        If this is empty, no properties are set; use the non-select overload to include all properties.
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
@@ -2755,6 +2851,8 @@ public final class Beans {
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The resulting map is a LinkedHashMap to preserve the order of properties.
+     * By default, properties with {@code null} values are omitted; use
+     * {@link #beanToMap(Object, boolean)} with {@code ignoreNullProperty=false} to include them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2779,6 +2877,7 @@ public final class Beans {
      * Converts a bean object into a map using the provided map supplier.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The map supplier function determines the type of the map to be returned.
+     * By default, properties with {@code null} values are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2809,6 +2908,7 @@ public final class Beans {
      * Converts a bean object into a map, selecting only the properties specified in the provided collection.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      * The resulting map is a LinkedHashMap to preserve the order of properties.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2828,8 +2928,10 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean object to be converted into a map.
-     * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @param selectPropNames a collection of property names to be included in the map.
+     *        If this is {@code null} or empty, all non-{@code null} properties are included.
      * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static Map<String, Object> beanToMap(final Object bean, final Collection<String> selectPropNames) {
         return beanToMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
@@ -2839,6 +2941,7 @@ public final class Beans {
      * Converts a bean object into a map, selecting only the properties specified in the provided collection.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      * The map supplier function determines the type of the map to be returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2857,9 +2960,11 @@ public final class Beans {
      *
      * @param <M> the type of the resulting Map.
      * @param bean the bean object to be converted into a map.
-     * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @param selectPropNames a collection of property names to be included in the map.
+     *        If this is {@code null} or empty, all non-{@code null} properties are included.
      * @param mapSupplier a function that generates a new Map instance.
      * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -2869,6 +2974,7 @@ public final class Beans {
     /**
      * Converts a bean object into a map, selecting only the properties specified.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      * The keys are named according to the provided naming policy.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2894,6 +3000,7 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to be used for the keys in the map.
      * @param mapSupplier the supplier function to create a new instance of the map.
      * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
@@ -2911,7 +3018,7 @@ public final class Beans {
     /**
      * Converts a bean object into the provided output map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * All properties of the bean are included in the map.
+     * By default, only non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2939,6 +3046,7 @@ public final class Beans {
      * Converts a bean object into the provided output map, selecting only specified properties.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the selectPropNames collection are added to the map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2959,8 +3067,10 @@ public final class Beans {
      *
      * @param <M> the type of the map to be filled.
      * @param bean the bean object to be converted into a map.
-     * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @param selectPropNames a collection of property names to be included in the map.
+     *        If this is {@code null} or empty, all non-{@code null} properties are included.
      * @param output the map into which the bean's properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
         beanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, output);
@@ -2969,6 +3079,7 @@ public final class Beans {
     /**
      * Converts a bean object into a map, selecting only the properties specified.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
      *
@@ -2992,6 +3103,7 @@ public final class Beans {
      * @param selectPropNames the set of property names to be included during the conversion.
      * @param keyNamingPolicy the naming policy to be used for the keys in the map.
      * @param output the map into which the bean's properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
@@ -3342,6 +3454,7 @@ public final class Beans {
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The resulting map uses LinkedHashMap to preserve property order.
+     * By default, properties with {@code null} values are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3373,6 +3486,7 @@ public final class Beans {
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The map type is determined by the provided mapSupplier.
+     * By default, properties with {@code null} values are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3404,7 +3518,8 @@ public final class Beans {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * Only properties specified in selectPropNames are included.
+     * Only properties specified in selectPropNames are included. If {@code selectPropNames} is
+     * {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3428,6 +3543,7 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @return a Map representation of the provided bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final Collection<String> selectPropNames) {
@@ -3438,6 +3554,7 @@ public final class Beans {
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included, and the map type is determined by mapSupplier.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3462,6 +3579,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map representation of the provided bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -3472,6 +3590,7 @@ public final class Beans {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      * The keys in the map are transformed according to the specified naming policy.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3499,6 +3618,7 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
      * @return a Map representation of the provided bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3516,7 +3636,7 @@ public final class Beans {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * All properties are included and stored in the provided output map.
+     * By default, only non-{@code null} properties are included and stored in the provided output map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3551,6 +3671,7 @@ public final class Beans {
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included and stored in the provided output map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3576,6 +3697,7 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param output the map into which the bean's properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -3586,6 +3708,7 @@ public final class Beans {
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included, keys are transformed according to the naming policy, and results are stored in the output map.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3612,6 +3735,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
      * @param output the map into which the bean's properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -3661,7 +3785,7 @@ public final class Beans {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * Properties with {@code null} values will be included in the resulting Map.
+     * Whether {@code null} values are included is controlled by {@code ignoreNullProperty}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3936,7 +4060,7 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation where nested properties are represented with dot notation.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * All properties from the bean are included in the result.
+     * By default, properties with {@code null} values are omitted from the result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3965,7 +4089,7 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation where nested properties are represented with dot notation.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * The type of Map returned can be customized using the mapSupplier.
+     * The type of Map returned can be customized using the mapSupplier. By default, properties with {@code null} values are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3989,7 +4113,8 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation with only selected properties.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Only properties specified in selectPropNames are included in the result.
+     * Only properties specified in selectPropNames are included in the result. If {@code selectPropNames} is {@code null} or empty,
+     * all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4008,6 +4133,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param selectPropNames a collection of property names to be included in the resulting map. Nested properties of selected beans are automatically included.
      * @return a map with only the selected properties flattened.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final Collection<String> selectPropNames) {
         return beanToFlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
@@ -4016,7 +4142,8 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation with only selected properties and custom Map type.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Combines property selection with Map type customization.
+     * Combines property selection with Map type customization. If {@code selectPropNames} is {@code null} or empty,
+     * all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4034,6 +4161,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the resulting map.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with selected properties flattened.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
@@ -4045,6 +4173,7 @@ public final class Beans {
      * Converts a bean object into a flat map representation with selected properties and a specified naming policy.
      * This method takes a bean object and transforms it into a map where the keys are the property names of the bean and the values are the corresponding property values.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
+     * If {@code selectPropNames} is {@code null} or empty, all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4062,10 +4191,12 @@ public final class Beans {
      *
      * @param <M> the type of the map to be returned.
      * @param bean the bean object to be converted into a flat map.
-     * @param selectPropNames a collection of property names to be included in the resulting map. If this is empty, all properties are included.
+     * @param selectPropNames a collection of property names to be included in the resulting map.
+     *        If this is empty, all non-{@code null} properties are included.
      * @param keyNamingPolicy the naming policy for the keys in the resulting map.
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
+     * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -4083,7 +4214,7 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation and stores the result in the provided Map instance.
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * All properties from the bean are included in the output.
+     * By default, only non-{@code null} properties from the bean are included in the output.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4108,7 +4239,8 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation with selected properties and stores the result in the provided Map instance.
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Only properties specified in selectPropNames are included.
+     * Only properties specified in selectPropNames are included. If {@code selectPropNames} is {@code null} or empty,
+     * all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4127,6 +4259,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param selectPropNames a collection of property names to be included in the output map.
      * @param output the Map instance into which the flattened bean properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -4136,7 +4269,8 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation with full customization options and stores the result in the provided Map instance.
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Provides control over property selection and key naming policy.
+     * Provides control over property selection and key naming policy. If {@code selectPropNames} is {@code null} or empty,
+     * all non-{@code null} properties are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4156,6 +4290,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the output map.
      * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
      * @param output the Map instance into which the flattened bean properties will be put.
+     * @throws IllegalArgumentException if a selected property does not exist
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
@@ -4205,7 +4340,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Include null properties
-     * User user = new User("John", null, new Address("NYC", null));
+     * User user = new User("John", null, new Address("NYC", (String) null));
      * Map<String, Object> withNulls = beanToFlatMap(user, false);
      * // withNulls: {name=John, age=null, address.city=NYC, address.zipCode=null}
      *
@@ -4532,36 +4667,36 @@ public final class Beans {
     /**
      * Creates a deep clone of the given object using serialization.
      *
-     * <p>This method performs a deep copy by serializing the object to Kryo or JSON format
+     * <p>This method performs a deep copy by serializing the object to Kryo or XML format
      * and then deserializing it back to create a new instance. This ensures that all nested
      * objects are also cloned, not just the top-level object.</p>
      *
-     * <p>The object must be serializable through either Kryo or JSON. If Kryo serialization
-     * fails, the method automatically falls back to JSON serialization.</p>
+     * <p>The object must be serializable through either Kryo or XML. If Kryo serialization
+     * fails, the method automatically falls back to XML serialization.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User originalUser = new User("John", 25);
      * originalUser.setAddress(new Address("123 Main St"));
      *
-     * User clonedUser = Beans.clone(originalUser);
+     * User clonedUser = Beans.deepCopy(originalUser);
      * // clonedUser is a deep copy - modifying it won't affect originalUser
      * clonedUser.getAddress().setStreet("456 Oak St");
      * // originalUser.getAddress().getStreet() is still "123 Main St"
      * }</pre>
      *
      * @param <T> the type of the object to be cloned
-     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON.
+     * @param obj a Java object which must be serializable and deserializable through Kryo or XML.
      * @return a deep clone of the object, or {@code null} if the input is {@code null}.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final T obj) {
+    public static <T> T deepCopy(final T obj) {
         if (obj == null) {
             return null; // NOSONAR
         }
 
-        return (T) clone(obj, obj.getClass());
+        return (T) deepCopyAs(obj, obj.getClass());
     }
 
     /**
@@ -4571,34 +4706,35 @@ public final class Beans {
      * as an instance of the target type. This is useful for creating type-converted copies
      * or for ensuring type safety when cloning objects.</p>
      *
-     * <p>If the source object is {@code null}, the method will create a new instance of the
-     * target type using its default constructor if it's a bean class, or return the default
-     * value for the type.</p>
+     * <p>If the source object is {@code null}, the method creates a new instance of the
+     * target type by calling {@link #copyAs(Object, Class)} for bean targets or
+     * {@link N#newInstance(Class)} for non-bean targets (which requires an accessible no-arg
+     * constructor).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserDTO userDTO = new UserDTO("John", 25);
      *
      * // Clone and convert to User entity
-     * User user = Beans.clone(userDTO, User.class);
+     * User user = Beans.deepCopyAs(userDTO, User.class);
      *
      * // Clone null object - creates new instance
-     * User emptyUser = Beans.clone(null, User.class);
+     * User emptyUser = Beans.deepCopyAs(null, User.class);
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param obj a Java object which must be serializable and deserializable through Kryo or JSON.
+     * @param obj a Java object which must be serializable and deserializable through Kryo or XML.
      * @param targetType the class of the target type to create.
      * @return a new instance of the target type with properties cloned from the source object.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T deepCopyAs(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (obj == null) {
             if (isBeanClass(targetType)) {
-                return copy(null, targetType);
+                return copyAs(null, targetType);
             } else {
                 return N.newInstance(targetType);
             }
@@ -4629,7 +4765,7 @@ public final class Beans {
      * Creates a shallow copy of the given source bean.
      *
      * <p>This method creates a new instance of the same class as the source bean and copies
-     * all property values from the source to the new instance. Unlike {@link #clone(Object)},
+     * all property values from the source to the new instance. Unlike {@link #deepCopy(Object)},
      * this method performs a shallow copy - nested objects are not cloned but referenced.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4655,7 +4791,7 @@ public final class Beans {
             return null; // NOSONAR
         }
 
-        return copy(sourceBean, (Class<T>) sourceBean.getClass());
+        return copyAs(sourceBean, (Class<T>) sourceBean.getClass());
     }
 
     /**
@@ -4690,7 +4826,7 @@ public final class Beans {
             return null; // NOSONAR
         }
 
-        return copy(sourceBean, selectPropNames, (Class<T>) sourceBean.getClass());
+        return copyAs(sourceBean, selectPropNames, (Class<T>) sourceBean.getClass());
     }
 
     /**
@@ -4730,7 +4866,7 @@ public final class Beans {
             return null; // NOSONAR
         }
 
-        return copy(sourceBean, propFilter, (Class<T>) sourceBean.getClass());
+        return copyAs(sourceBean, propFilter, (Class<T>) sourceBean.getClass());
     }
 
     /**
@@ -4745,7 +4881,7 @@ public final class Beans {
      * UserEntity entity = new UserEntity("John", 25, "john@example.com");
      *
      * // Convert entity to DTO
-     * UserDTO dto = Beans.copy(entity, UserDTO.class);
+     * UserDTO dto = Beans.copyAs(entity, UserDTO.class);
      * // dto will have matching properties copied from entity
      * }</pre>
      *
@@ -4755,8 +4891,8 @@ public final class Beans {
      * @return a new instance of the target type with properties copied from the source.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
-        return copy(sourceBean, (Collection<String>) null, targetType);
+    public static <T> T copyAs(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
+        return copyAs(sourceBean, (Collection<String>) null, targetType);
     }
 
     /**
@@ -4771,7 +4907,7 @@ public final class Beans {
      * UserEntity entity = new UserEntity("John", 25, "john@example.com", "password123");
      *
      * // Convert to DTO excluding sensitive data
-     * UserDTO dto = Beans.copy(entity,
+     * UserDTO dto = Beans.copyAs(entity,
      *     Arrays.asList("name", "age", "email"),
      *     UserDTO.class);
      * // dto will have name, age, and email but not password
@@ -4784,9 +4920,9 @@ public final class Beans {
      * @return a new instance of the target type with selected properties copied.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
+    public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
-        return copy(sourceBean, selectPropNames, Fn.identity(), targetType);
+        return copyAs(sourceBean, selectPropNames, Fn.identity(), targetType);
     }
 
     /**
@@ -4804,7 +4940,7 @@ public final class Beans {
      * entity.setFirstName("John");
      * entity.setLastName("Doe");
      *
-     * UserDTO dto = Beans.copy(entity,
+     * UserDTO dto = Beans.copyAs(entity,
      *     Arrays.asList("firstName", "lastName"),
      *     propName -> Strings.toSnakeCase(propName),  // Convert camelCase to snake_case
      *     UserDTO.class);
@@ -4824,7 +4960,7 @@ public final class Beans {
      * @see Fn#selectFirst()
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
+    public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -4850,7 +4986,7 @@ public final class Beans {
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
-            merge(sourceBean, result, selectPropNames, propNameConverter, Fn.selectFirst(), targetBeanInfo);
+            copyInto(sourceBean, result, selectPropNames, propNameConverter, Fn.selectFirst(), targetBeanInfo);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -4869,7 +5005,7 @@ public final class Beans {
      * UserEntity entity = new UserEntity("John", 25, null, "password123");
      *
      * // Copy only non-null and non-sensitive properties
-     * UserDTO dto = Beans.copy(entity,
+     * UserDTO dto = Beans.copyAs(entity,
      *     (propName, propValue) -> propValue != null && !propName.equals("password"),
      *     UserDTO.class);
      * // dto will have name and age but not email (null) or password
@@ -4885,9 +5021,9 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
+    public static <T> T copyAs(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
             throws IllegalArgumentException {
-        return copy(sourceBean, propFilter, Fn.identity(), targetType);
+        return copyAs(sourceBean, propFilter, Fn.identity(), targetType);
     }
 
     /**
@@ -4905,7 +5041,7 @@ public final class Beans {
      * entity.setPassword("secret");
      *
      * // Copy non-sensitive properties with name conversion
-     * UserDTO dto = Beans.copy(entity,
+     * UserDTO dto = Beans.copyAs(entity,
      *     (propName, propValue) -> !propName.equals("password"),
      *     propName -> Strings.toSnakeCase(propName),
      *     UserDTO.class);
@@ -4925,7 +5061,7 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
+    public static <T> T copyAs(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
             final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -4951,7 +5087,7 @@ public final class Beans {
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
-            merge(sourceBean, result, propFilter, propNameConverter, Fn.selectFirst(), targetBeanInfo);
+            copyInto(sourceBean, result, propFilter, propNameConverter, Fn.selectFirst(), targetBeanInfo);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -4972,7 +5108,7 @@ public final class Beans {
      * UserEntity entity = new UserEntity("John", 25, "john@example.com", "password123");
      *
      * // Copy all properties except sensitive ones
-     * UserDTO dto = Beans.copy(entity,
+     * UserDTO dto = Beans.copyAs(entity,
      *     true,  // Ignore properties that don't exist in DTO
      *     N.asSet("password", "internalId"),
      *     UserDTO.class);
@@ -4988,7 +5124,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or if unmatched properties found when not ignoring
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+    public static <T> T copyAs(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -5014,7 +5150,7 @@ public final class Beans {
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
-            merge(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
+            copyInto(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -5037,7 +5173,7 @@ public final class Beans {
      * User updates = new User("John", 26);
      * updates.setEmail("john@example.com");
      *
-     * Beans.merge(updates, existingUser);
+     * Beans.copyInto(updates, existingUser);
      * // existingUser now has age=26 and email="john@example.com"
      * }</pre>
      *
@@ -5047,8 +5183,8 @@ public final class Beans {
      * @return the same target bean instance with merged properties
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null);
+    public static <T> T copyInto(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, (Collection<String>) null);
     }
 
     /**
@@ -5065,7 +5201,7 @@ public final class Beans {
      * updates.setScore(50);
      *
      * // Merge using max value for numeric properties
-     * Beans.merge(updates, existingUser,
+     * Beans.copyInto(updates, existingUser,
      *     (sourceVal, targetVal) -> {
      *         if (sourceVal instanceof Integer && targetVal instanceof Integer) {
      *             return Math.max((Integer) sourceVal, (Integer) targetVal);
@@ -5085,8 +5221,8 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
+    public static <T> T copyInto(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
     }
 
     /**
@@ -5103,7 +5239,7 @@ public final class Beans {
      * source.setFirstName("John");
      * TargetBean target = new TargetBean();
      *
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     propName -> Strings.toSnakeCase(propName),
      *     (srcVal, tgtVal) -> srcVal != null ? srcVal : tgtVal);
      * // target.first_name is now "John"
@@ -5120,9 +5256,9 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null, propNameConverter, mergeFunc);
+    public static <T> T copyInto(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, (Collection<String>) null, propNameConverter, mergeFunc);
     }
 
     /**
@@ -5137,7 +5273,7 @@ public final class Beans {
      * User updates = new User("Jane", 30, "jane@new.com");
      *
      * // Only update email
-     * Beans.merge(updates, existingUser, Arrays.asList("email"));
+     * Beans.copyInto(updates, existingUser, Arrays.asList("email"));
      * // existingUser still has name="John", age=25, but email="jane@new.com"
      * }</pre>
      *
@@ -5148,8 +5284,9 @@ public final class Beans {
      * @return the same target bean instance with selected properties merged
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, selectPropNames, Fn.identity());
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames)
+            throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, selectPropNames, Fn.identity());
     }
 
     /**
@@ -5166,7 +5303,7 @@ public final class Beans {
      * updates.setScore(200);
      *
      * // Only merge age and score, keeping the higher score
-     * Beans.merge(updates, existingUser,
+     * Beans.copyInto(updates, existingUser,
      *     Arrays.asList("age", "score"),
      *     (srcVal, tgtVal) -> {
      *         if ("score".equals(currentPropName) && srcVal instanceof Integer) {
@@ -5188,9 +5325,9 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, selectPropNames, Fn.identity(), mergeFunc);
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, selectPropNames, Fn.identity(), mergeFunc);
     }
 
     /**
@@ -5208,7 +5345,7 @@ public final class Beans {
      * TargetBean target = new TargetBean();
      *
      * // Merge only firstName, converting to snake_case
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     Arrays.asList("firstName"),
      *     propName -> Strings.toSnakeCase(propName));
      * // target.first_name is now "John"
@@ -5225,11 +5362,11 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
-        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, DEFAULT_MERGE_FUNC, ParserUtil.getBeanInfo(targetBean.getClass()));
+        return copyInto(sourceBean, targetBean, selectPropNames, propNameConverter, DEFAULT_MERGE_FUNC, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
     /**
@@ -5248,7 +5385,7 @@ public final class Beans {
      * TargetBean target = new TargetBean();
      * target.setTotal_amount(100);
      *
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     Arrays.asList("firstName", "totalAmount"),
      *     propName -> Strings.toSnakeCase(propName),
      *     (srcVal, tgtVal) -> {
@@ -5274,13 +5411,13 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
-        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, mergeFunc, targetBeanInfo);
+        return copyInto(sourceBean, targetBean, selectPropNames, propNameConverter, mergeFunc, targetBeanInfo);
     }
 
     /**
@@ -5295,7 +5432,7 @@ public final class Beans {
      * User target = new User("Jane", 25, "jane@example.com");
      *
      * // Only merge non-null and non-zero values
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     (propName, propValue) -> propValue != null &&
      *         !(propValue instanceof Number && ((Number) propValue).intValue() == 0));
      * // target keeps age=25 and email="jane@example.com" but name becomes "John"
@@ -5311,8 +5448,8 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, DEFAULT_MERGE_FUNC);
+    public static <T> T copyInto(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, propFilter, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -5328,7 +5465,7 @@ public final class Beans {
      * Product target = new Product("Old Name", 100, 5);
      *
      * // Merge numeric properties by adding them, others by replacing
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     (propName, propValue) -> propValue != null,
      *     (srcVal, tgtVal) -> {
      *         if (srcVal instanceof Number && tgtVal instanceof Number) {
@@ -5350,9 +5487,9 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, Fn.identity(), mergeFunc);
+        return copyInto(sourceBean, targetBean, propFilter, Fn.identity(), mergeFunc);
     }
 
     /**
@@ -5371,7 +5508,7 @@ public final class Beans {
      * TargetBean target = new TargetBean();
      *
      * // Only merge non-empty strings, converting to snake_case
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     (propName, propValue) -> propValue instanceof String && !((String) propValue).isEmpty(),
      *     propName -> Strings.toSnakeCase(propName));
      * // target.first_name = "John", last_name is not merged
@@ -5388,9 +5525,9 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, propNameConverter, DEFAULT_MERGE_FUNC);
+        return copyInto(sourceBean, targetBean, propFilter, propNameConverter, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -5410,7 +5547,7 @@ public final class Beans {
      * TargetBean target = new TargetBean();
      * target.setTotal_count(5);
      *
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     // Only merge non-null values
      *     (propName, propValue) -> propValue != null,
      *     // Convert camelCase to snake_case
@@ -5440,13 +5577,13 @@ public final class Beans {
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
-        return merge(sourceBean, targetBean, propFilter, propNameConverter, mergeFunc, targetBeanInfo);
+        return copyInto(sourceBean, targetBean, propFilter, propNameConverter, mergeFunc, targetBeanInfo);
     }
 
     /**
@@ -5462,7 +5599,7 @@ public final class Beans {
      * User target = new User("Jane", 25, "jane@example.com", "oldpass");
      *
      * // Merge all except password
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     true,  // Ignore if source has properties not in target
      *     N.asSet("password"));
      * // target: name="John", age=30, email="john@example.com", password="oldpass"
@@ -5476,9 +5613,9 @@ public final class Beans {
      * @return the same target bean instance with properties merged except ignored ones
      * @throws IllegalArgumentException if {@code targetBean} is {@code null} or if unmatched properties found when not ignoring
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
-            throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, DEFAULT_MERGE_FUNC);
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
+            final Set<String> ignoredPropNames) throws IllegalArgumentException {
+        return copyInto(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, DEFAULT_MERGE_FUNC);
     }
 
     /**
@@ -5494,7 +5631,7 @@ public final class Beans {
      * Product target = new Product("Old Product", 150, 10, "2023-01-01");
      *
      * // Merge all except createdDate, using custom logic for quantities
-     * Beans.merge(source, target,
+     * Beans.copyInto(source, target,
      *     true,
      *     N.asSet("createdDate"),
      *     (srcVal, tgtVal) -> {
@@ -5516,8 +5653,8 @@ public final class Beans {
      * @return the same target bean instance with properties merged using custom logic
      * @throws IllegalArgumentException if {@code targetBean} is {@code null} or if unmatched properties found when not ignoring
      */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+    public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
+            final Set<String> ignoredPropNames, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
@@ -5550,8 +5687,8 @@ public final class Beans {
     }
 
     @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BeanInfo targetBeanInfo) throws IllegalArgumentException {
+    private static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
+            final Set<String> ignoredPropNames, final BeanInfo targetBeanInfo) throws IllegalArgumentException {
         if (sourceBean == null) {
             return targetBean;
         }
@@ -5573,7 +5710,7 @@ public final class Beans {
         return targetBean;
     }
 
-    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames,
+    private static <T> T copyInto(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
         if (sourceBean == null) {
             return targetBean;
@@ -5649,7 +5786,7 @@ public final class Beans {
         return targetBean;
     }
 
-    private static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter,
+    private static <T> T copyInto(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
         if (sourceBean == null) {
             return targetBean;
@@ -5706,7 +5843,7 @@ public final class Beans {
      * User user = new User("John", 25, "john@example.com");
      *
      * // Clear sensitive data
-     * Beans.erase(user, "email", "password");
+     * Beans.clearProps(user, "email", "password");
      * // user.getEmail() returns null
      * // user.getPassword() returns null
      * // user.getName() still returns "John"
@@ -5715,7 +5852,7 @@ public final class Beans {
      * @param bean the bean object whose properties are to be erased
      * @param propNames the names of the properties to be erased
      */
-    public static void erase(final Object bean, final String... propNames) {
+    public static void clearProps(final Object bean, final String... propNames) {
         if (bean == null || N.isEmpty(propNames)) {
             return;
         }
@@ -5738,7 +5875,7 @@ public final class Beans {
      * User user = new User("John", 25, "john@example.com");
      *
      * List<String> propsToErase = Arrays.asList("age", "email", "phone");
-     * Beans.erase(user, propsToErase);
+     * Beans.clearProps(user, propsToErase);
      * // user.getAge() returns 0
      * // user.getEmail() returns null
      * // user.getPhone() returns null
@@ -5747,7 +5884,7 @@ public final class Beans {
      * @param bean the bean object whose properties are to be erased
      * @param propNames the collection of property names to be erased
      */
-    public static void erase(final Object bean, final Collection<String> propNames) {
+    public static void clearProps(final Object bean, final Collection<String> propNames) {
         if (bean == null || N.isEmpty(propNames)) {
             return;
         }
@@ -5775,7 +5912,7 @@ public final class Beans {
      * user.setPhone("123-456-7890");
      *
      * // Clear all data
-     * Beans.eraseAll(user);
+     * Beans.clearAllProps(user);
      * // All properties are now set to default values
      * // user.getName() returns null
      * // user.getAge() returns 0
@@ -5785,7 +5922,7 @@ public final class Beans {
      *
      * @param bean the bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      */
-    public static void eraseAll(final Object bean) {
+    public static void clearAllProps(final Object bean) {
         if (bean == null) {
             return;
         }
@@ -5817,7 +5954,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
-     * Beans.fill(person);
+     * Beans.randomize(person);
      * // person now has all properties filled with random values
      * System.out.println(person.getName());   // e.g., "a1b2c3d4-e5f6-78"
      * }</pre>
@@ -5825,13 +5962,13 @@ public final class Beans {
      * @param bean a bean object with getter/setter methods
      * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
      */
-    public static void fill(final Object bean) throws IllegalArgumentException {
+    public static void randomize(final Object bean) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
 
         final Class<?> beanClass = bean.getClass();
         checkBeanClass(beanClass);
 
-        fill(bean, Beans.getPropNameList(beanClass));
+        randomize(bean, Beans.getPropNameList(beanClass));
     }
 
     /**
@@ -5843,7 +5980,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
-     * Beans.fill(user, Arrays.asList("username", "email"));
+     * Beans.randomize(user, Arrays.asList("username", "email"));
      * // Only username and email are filled, other properties remain unchanged
      * }</pre>
      *
@@ -5851,11 +5988,11 @@ public final class Beans {
      * @param propNamesToFill collection of property names to fill
      * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
      */
-    public static void fill(final Object bean, final Collection<String> propNamesToFill) {
+    public static void randomize(final Object bean, final Collection<String> propNamesToFill) {
         N.checkArgNotNull(bean, cs.bean);
         checkBeanClass(bean.getClass());
 
-        fill(ParserUtil.getBeanInfo(bean.getClass()), bean, propNamesToFill);
+        populateWithRandomValues(ParserUtil.getBeanInfo(bean.getClass()), bean, propNamesToFill);
     }
 
     /**
@@ -5866,7 +6003,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a fully populated test object
-     * Customer customer = Beans.fill(Customer.class);
+     * Customer customer = Beans.newRandom(Customer.class);
      * // Use the customer object in tests
      * assertNotNull(customer.getName());
      * assertNotNull(customer.getAddress());
@@ -5877,11 +6014,41 @@ public final class Beans {
      * @return a new instance with all properties filled with random values
      * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
      */
-    public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
+    public static <T> T newRandom(final Class<? extends T> beanClass) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
 
-        return fill(beanClass, Beans.getPropNameList(beanClass));
+        return newRandom(beanClass, Beans.getPropNameList(beanClass));
+    }
+
+    /**
+     * Creates a new instance of the specified bean class and fills only the specified properties.
+     *
+     * <p>Properties not included in the collection will retain their default values.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a user with only required fields filled
+     * User user = Beans.newRandom(User.class, Arrays.asList("id", "username", "email"));
+     * // Other fields like address, phone, etc. remain null/default
+     * }</pre>
+     *
+     * @param <T> the type of the bean
+     * @param beanClass bean class with getter/setter methods
+     * @param propNamesToFill collection of property names to fill
+     * @return a new instance with specified properties filled with random values
+     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
+     */
+    public static <T> T newRandom(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
+        N.checkArgNotNull(beanClass, cs.beanClass);
+        checkBeanClass(beanClass);
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
+        final Object result = beanInfo.createBeanResult();
+
+        populateWithRandomValues(beanInfo, result, propNamesToFill);
+
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
@@ -5893,7 +6060,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate 50 test users
-     * List<User> testUsers = Beans.fill(User.class, 50);
+     * List<User> testUsers = Beans.newRandomList(User.class, 50);
      * // Use in batch operations or performance tests
      * userService.saveAll(testUsers);
      * }</pre>
@@ -5904,41 +6071,11 @@ public final class Beans {
      * @return a list containing the specified number of filled bean instances
      * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
      */
-    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
+    public static <T> List<T> newRandomList(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
 
-        return fill(beanClass, Beans.getPropNameList(beanClass), count);
-    }
-
-    /**
-     * Creates a new instance of the specified bean class and fills only the specified properties.
-     *
-     * <p>Properties not included in the collection will retain their default values.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Create a user with only required fields filled
-     * User user = Beans.fill(User.class, Arrays.asList("id", "username", "email"));
-     * // Other fields like address, phone, etc. remain null/default
-     * }</pre>
-     *
-     * @param <T> the type of the bean
-     * @param beanClass bean class with getter/setter methods
-     * @param propNamesToFill collection of property names to fill
-     * @return a new instance with specified properties filled with random values
-     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
-     */
-    public static <T> T fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
-        N.checkArgNotNull(beanClass, cs.beanClass);
-        checkBeanClass(beanClass);
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
-        final Object result = beanInfo.createBeanResult();
-
-        fill(beanInfo, result, propNamesToFill);
-
-        return beanInfo.finishBeanResult(result);
+        return newRandomList(beanClass, Beans.getPropNameList(beanClass), count);
     }
 
     /**
@@ -5949,7 +6086,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create test data with only essential fields
-     * List<Product> products = Beans.fill(
+     * List<Product> products = Beans.newRandomList(
      *     Product.class,
      *     Arrays.asList("id", "name", "price"),
      *     100
@@ -5964,7 +6101,7 @@ public final class Beans {
      * @return a list containing the specified number of partially filled bean instances
      * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
      */
-    public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
+    public static <T> List<T> newRandomList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
@@ -5977,7 +6114,7 @@ public final class Beans {
         for (int i = 0; i < count; i++) {
             result = beanInfo.createBeanResult();
 
-            fill(beanInfo, result, propNamesToFill);
+            populateWithRandomValues(beanInfo, result, propNamesToFill);
 
             resultList.add(beanInfo.finishBeanResult(result));
         }
@@ -5985,7 +6122,7 @@ public final class Beans {
         return resultList;
     }
 
-    private static void fill(final BeanInfo beanInfo, final Object bean, final Collection<String> propNamesToFill) {
+    private static void populateWithRandomValues(final BeanInfo beanInfo, final Object bean, final Collection<String> propNamesToFill) {
         PropInfo propInfo = null;
         Type<Object> type = null;
         Class<?> parameterClass = null;
@@ -6024,7 +6161,7 @@ public final class Beans {
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(System.currentTimeMillis()));
             } else if (Beans.isBeanClass(parameterClass)) {
-                propValue = fill(parameterClass);
+                propValue = newRandom(parameterClass);
             } else {
                 propValue = type.defaultValue();
             }
@@ -6170,7 +6307,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
-     * Beans.propertyEntries(user)
+     * Beans.stream(user)
      *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
      * // Outputs: name: John, age: 25, email: john@example.com
      * }</pre>
@@ -6179,7 +6316,7 @@ public final class Beans {
      * @return a stream of Map.Entry objects containing property names and values
      * @throws IllegalArgumentException if bean is null
      */
-    public static Stream<Map.Entry<String, Object>> propertyEntries(final Object bean) {
+    public static Stream<Map.Entry<String, Object>> stream(final Object bean) {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -6190,14 +6327,14 @@ public final class Beans {
     /**
      * Creates a filtered stream of property name-value pairs from the specified bean.
      *
-     * <p>This method is similar to {@link #propertyEntries(Object)} but allows filtering
+     * <p>This method is similar to {@link #stream(Object)} but allows filtering
      * of properties based on a predicate. Only properties that match the predicate
      * criteria are included in the returned stream.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, null);
-     * Beans.propertyEntries(user, (name, value) -> value != null)
+     * Beans.stream(user, (name, value) -> value != null)
      *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
      * // Only outputs non-null properties: name: John, age: 25
      * }</pre>
@@ -6207,7 +6344,7 @@ public final class Beans {
      * @return a stream of Map.Entry objects containing filtered property names and values
      * @throws IllegalArgumentException if bean is null
      */
-    public static Stream<Map.Entry<String, Object>> propertyEntries(final Object bean, final BiPredicate<String, Object> propFilter) {
+    public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<String, Object> propFilter) {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());

@@ -144,7 +144,7 @@ public class NTest2 extends AbstractParserTest {
 
     @Test
     public void test_formatJSON_formatXml() {
-        final Account account = Beans.fill(Account.class);
+        final Account account = Beans.newRandom(Account.class);
 
         N.println(N.formatJson(N.toJson(account)));
 

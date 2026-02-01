@@ -148,7 +148,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains short value 100
      * OptionalShort opt = type.get(rs, 1);
@@ -179,7 +179,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "quantity" contains short value 50
      * OptionalShort opt = type.get(rs, "quantity");
@@ -210,8 +210,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO inventory (id, quantity) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalShort opt = OptionalShort.of((short) 50);
      * type.set(stmt, 2, opt);
@@ -243,7 +242,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_quantity(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalShort opt = OptionalShort.of((short) 75);
      * type.set(stmt, "p_quantity", opt);

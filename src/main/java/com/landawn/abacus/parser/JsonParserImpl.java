@@ -878,7 +878,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             propInfo = element;
             propName = propInfo.name;
 
-            if (propInfo.jsonXmlExpose == JsonXmlField.Expose.DESERIALIZE_ONLY
+            if (propInfo.jsonXmlExpose == JsonXmlField.Direction.DESERIALIZE_ONLY
                     || ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(propName))) {
                 continue;
             }
@@ -2405,7 +2405,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             }
                         }
                     } else {
-                        if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                        if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                 || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                             // ignore.
                         } else {
@@ -2457,7 +2457,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         isPropName = true;
 
                         if (jr.hasText()) {
-                            if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                            if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
                             } else {
@@ -2475,7 +2475,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     }
 
-                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                         readMap(jr, defaultJsonDeserializationConfig, null, false, Map.class, null, null);
                     } else {
@@ -2527,7 +2527,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     }
 
-                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                         readCollection(jr, defaultJsonDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null, null);
                     } else {
@@ -2582,7 +2582,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
                     } else {
                         if (jr.hasText()) {
-                            if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                            if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
                             } else {

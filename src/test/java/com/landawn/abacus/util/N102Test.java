@@ -1437,20 +1437,20 @@ public class N102Test extends TestBase {
 
     @Test
     public void testPercentiles_primitives() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(new char[] {}));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(new char[] {}));
 
         char[] sortedChars = { 'a', 'b', 'c', 'd', 'e' };
-        Map<Percentage, Character> charPercentiles = N.percentiles(sortedChars);
+        Map<Percentage, Character> charPercentiles = N.percentilesOfSorted(sortedChars);
         assertNotNull(charPercentiles);
         assertEquals(Percentage.values().length, charPercentiles.size());
 
         byte[] sortedBytes = { 1, 2, 3, 4, 5 };
-        Map<Percentage, Byte> bytePercentiles = N.percentiles(sortedBytes);
+        Map<Percentage, Byte> bytePercentiles = N.percentilesOfSorted(sortedBytes);
         assertNotNull(bytePercentiles);
         assertEquals(Percentage.values().length, bytePercentiles.size());
 
         short[] sortedShorts = { 1, 2, 3, 4, 5 };
-        Map<Percentage, Short> shortPercentiles = N.percentiles(sortedShorts);
+        Map<Percentage, Short> shortPercentiles = N.percentilesOfSorted(sortedShorts);
         assertNotNull(shortPercentiles);
         assertEquals(Percentage.values().length, shortPercentiles.size());
 
@@ -1458,44 +1458,44 @@ public class N102Test extends TestBase {
         for (int i = 0; i < 100; i++) {
             sortedInts[i] = i + 1;
         }
-        Map<Percentage, Integer> intPercentiles = N.percentiles(sortedInts);
+        Map<Percentage, Integer> intPercentiles = N.percentilesOfSorted(sortedInts);
         assertNotNull(intPercentiles);
         assertEquals(2, intPercentiles.get(Percentage._1).intValue());
         assertEquals(51, intPercentiles.get(Percentage._50).intValue());
         assertEquals(100, intPercentiles.get(Percentage._99).intValue());
 
         long[] sortedLongs = { 1L, 2L, 3L, 4L, 5L };
-        Map<Percentage, Long> longPercentiles = N.percentiles(sortedLongs);
+        Map<Percentage, Long> longPercentiles = N.percentilesOfSorted(sortedLongs);
         assertNotNull(longPercentiles);
         assertEquals(Percentage.values().length, longPercentiles.size());
 
         float[] sortedFloats = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        Map<Percentage, Float> floatPercentiles = N.percentiles(sortedFloats);
+        Map<Percentage, Float> floatPercentiles = N.percentilesOfSorted(sortedFloats);
         assertNotNull(floatPercentiles);
         assertEquals(Percentage.values().length, floatPercentiles.size());
 
         double[] sortedDoubles = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        Map<Percentage, Double> doublePercentiles = N.percentiles(sortedDoubles);
+        Map<Percentage, Double> doublePercentiles = N.percentilesOfSorted(sortedDoubles);
         assertNotNull(doublePercentiles);
         assertEquals(Percentage.values().length, doublePercentiles.size());
     }
 
     @Test
     public void testPercentiles_generic() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(new String[] {}));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(new String[] {}));
 
         String[] sortedStrings = { "a", "b", "c", "d", "e" };
-        Map<Percentage, String> stringPercentiles = N.percentiles(sortedStrings);
+        Map<Percentage, String> stringPercentiles = N.percentilesOfSorted(sortedStrings);
         assertNotNull(stringPercentiles);
         assertEquals(Percentage.values().length, stringPercentiles.size());
     }
 
     @Test
     public void testPercentiles_list() {
-        assertThrows(IllegalArgumentException.class, () -> N.percentiles(Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.percentilesOfSorted(Collections.emptyList()));
 
         List<String> sortedList = Arrays.asList("a", "b", "c", "d", "e");
-        Map<Percentage, String> listPercentiles = N.percentiles(sortedList);
+        Map<Percentage, String> listPercentiles = N.percentilesOfSorted(sortedList);
         assertNotNull(listPercentiles);
         assertEquals(Percentage.values().length, listPercentiles.size());
     }

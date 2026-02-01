@@ -43,12 +43,12 @@ public class WSSecurityUtil100Test extends TestBase {
         byte[] created = "created".getBytes(StandardCharsets.UTF_8);
         byte[] password = "password".getBytes(StandardCharsets.UTF_8);
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertFalse(digest.isEmpty());
 
-        String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
         Assertions.assertEquals(digest, digest2);
     }
 
@@ -58,12 +58,12 @@ public class WSSecurityUtil100Test extends TestBase {
         String created = "created";
         String password = "password";
 
-        String digest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
 
         Assertions.assertNotNull(digest);
         Assertions.assertFalse(digest.isEmpty());
 
-        String digest2 = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password);
         Assertions.assertEquals(digest, digest2);
     }
 }

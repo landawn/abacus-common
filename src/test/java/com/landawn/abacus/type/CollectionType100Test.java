@@ -92,9 +92,9 @@ public class CollectionType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        Assertions.assertTrue(listType.isGenericType());
-        Assertions.assertTrue(setType.isGenericType());
-        Assertions.assertTrue(queueType.isGenericType());
+        Assertions.assertTrue(listType.isParameterizedType());
+        Assertions.assertTrue(setType.isParameterizedType());
+        Assertions.assertTrue(queueType.isParameterizedType());
     }
 
     @Test

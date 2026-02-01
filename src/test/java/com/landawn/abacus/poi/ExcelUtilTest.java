@@ -1,4 +1,4 @@
-package com.landawn.abacus.util;
+package com.landawn.abacus.poi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,10 +10,16 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.poi.ExcelUtil;
 import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
 import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions;
+import com.landawn.abacus.util.Charsets;
+import com.landawn.abacus.util.CsvUtil;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.Fn;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 @Tag("old-test")
 public class ExcelUtilTest extends AbstractTest {
@@ -37,9 +43,8 @@ public class ExcelUtilTest extends AbstractTest {
         rowList.forEach(Fn.println());
 
         File csvOutputFile = new File("./src/test/resources/test_03.csv");
-
-        try (FileWriter writer = IOUtil.newFileWriter(csvOutputFile, Charsets.UTF_8)) {
-            ExcelUtil.saveSheetAsCsv(outputExcelFile, 0, null, writer);
+        try (FileWriter newFileWriter = IOUtil.newFileWriter(csvOutputFile, Charsets.UTF_8)) {
+            ExcelUtil.saveSheetAsCsv(outputExcelFile, 0, null, newFileWriter);
         }
 
         N.println(Strings.repeat("=", 80));
@@ -54,8 +59,7 @@ public class ExcelUtilTest extends AbstractTest {
 
     @Test
     public void test_loadSheet() {
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"),
-                CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
+        final Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
         dataset.println();
 
         File outputExcelFile = new File("./src/test/resources/test_excel_02.xlsx");

@@ -1293,14 +1293,14 @@ public class MoreStreamTest {
     }
 
     @Test
-    public void test_summarize() {
-        CharSummaryStatistics result = CharStream.of('a', 'b', 'c').summarize();
+    public void test_summaryStatistics() {
+        CharSummaryStatistics result = CharStream.of('a', 'b', 'c').summaryStatistics();
         N.println(result);
 
-        result = Stream.of('a', 'b', 'c').mapToChar(i -> i).summarize();
+        result = Stream.of('a', 'b', 'c').mapToChar(i -> i).summaryStatistics();
         N.println(result);
 
-        final IntSummaryStatistics result2 = Stream.of('a', 'b', 'c').mapToInt(i -> i).summarize();
+        final IntSummaryStatistics result2 = Stream.of('a', 'b', 'c').mapToInt(i -> i).summaryStatistics();
         N.println(result2);
     }
 

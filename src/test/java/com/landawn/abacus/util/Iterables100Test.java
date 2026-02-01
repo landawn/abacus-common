@@ -594,7 +594,7 @@ public class Iterables100Test extends TestBase {
         List<String> src = Arrays.asList("a", "b", "c");
         List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z", "w"));
 
-        Iterables.copy(src, dest);
+        Iterables.copyInto(src, dest);
 
         assertEquals("a", dest.get(0));
         assertEquals("b", dest.get(1));
@@ -607,7 +607,7 @@ public class Iterables100Test extends TestBase {
         List<String> src = Arrays.asList("a", "b", "c", "d", "e");
         List<String> dest = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6"));
 
-        Iterables.copy(src, 1, dest, 2, 3);
+        Iterables.copyRange(src, 1, dest, 2, 3);
 
         assertEquals("1", dest.get(0));
         assertEquals("2", dest.get(1));
@@ -620,7 +620,7 @@ public class Iterables100Test extends TestBase {
     @Test
     public void testReverse() {
         List<Integer> original = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> reversed = Iterables.reverse(original);
+        List<Integer> reversed = Iterables.asReversed(original);
 
         assertEquals(5, reversed.size());
         assertEquals(Integer.valueOf(5), reversed.get(0));
@@ -631,7 +631,7 @@ public class Iterables100Test extends TestBase {
 
         original = new ArrayList<>(original);
         original.set(0, 10);
-        reversed = Iterables.reverse(original);
+        reversed = Iterables.asReversed(original);
         assertEquals(Integer.valueOf(10), reversed.get(4));
     }
 

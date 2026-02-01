@@ -51,7 +51,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractStringType type = ...;  // concrete String type instance
+     * Type<String> type = TypeFactory.getType(String.class);
      * Class<?> clazz = type.clazz();   // returns String.class
      * }</pre>
      *
@@ -195,7 +195,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * String name = type.get(rs, 1);   // retrieves String from column 1
      * }</pre>
      *
@@ -215,7 +215,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * String name = type.get(rs, "name");   // retrieves String from "name" column
      * }</pre>
      *

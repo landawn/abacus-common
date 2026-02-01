@@ -90,11 +90,11 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new ObjectPool instance with the specified capacity and eviction delay
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay) {
-        return new GenericObjectPool<>(capacity, evictDelay, EvictionPolicy.LAST_ACCESS_TIME);
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis) {
+        return new GenericObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
     /**
@@ -102,12 +102,12 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @return a new ObjectPool instance with the specified configuration
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
-        return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy);
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+        return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
     /**
@@ -116,15 +116,15 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of pool elements
      * @return a new ObjectPool instance with memory constraints
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
-        return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, maxMemorySize, memoryMeasure);
+        return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
     /**
@@ -133,15 +133,15 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing (typically 0.1 to 0.5)
      * @return a new ObjectPool instance with custom balancing configuration
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor) {
-        return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
+        return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
     /**
@@ -150,7 +150,7 @@ public abstract class PoolFactory { //NOSONAR
      *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5
@@ -158,9 +158,9 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure the function to calculate memory size of pool elements, or {@code null} if not using memory limits
      * @return a new ObjectPool instance with full configuration
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
-        return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
+        return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 
     /**
@@ -183,11 +183,11 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay) {
-        return new GenericKeyedObjectPool<>(capacity, evictDelay, EvictionPolicy.LAST_ACCESS_TIME);
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis) {
+        return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
     /**
@@ -196,13 +196,13 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @return a new KeyedObjectPool instance with the specified configuration
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy) {
-        return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy);
+        return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
     /**
@@ -212,15 +212,15 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of key-value pairs
      * @return a new KeyedObjectPool instance with memory constraints
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
-        return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, maxMemorySize, memoryMeasure);
+        return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
     /**
@@ -230,15 +230,15 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing (typically 0.1 to 0.5)
      * @return a new KeyedObjectPool instance with custom balancing configuration
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) {
-        return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
+        return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict (default: LAST_ACCESS_TIME)
      * @param autoBalance whether to automatically remove entries when the pool is full (default: true)
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
@@ -272,9 +272,9 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure the function to calculate memory size of key-value pairs, or {@code null} if not using memory limits
      * @return a new KeyedObjectPool instance with full configuration
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
-        return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
+        return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 }

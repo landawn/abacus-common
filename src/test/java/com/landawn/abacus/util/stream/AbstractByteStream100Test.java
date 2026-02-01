@@ -625,8 +625,8 @@ public class AbstractByteStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summaryStatisticsAndPercentiles();
 
         ByteSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

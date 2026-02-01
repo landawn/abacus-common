@@ -935,7 +935,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testSummarize_BasicSummary() {
-        IntSummaryStatistics stats = IntStream.of(1, 2, 3, 4, 5).summarize();
+        IntSummaryStatistics stats = IntStream.of(1, 2, 3, 4, 5).summaryStatistics();
         assertNotNull(stats);
         assertEquals(5, stats.getCount());
         assertEquals(15, stats.getSum());
@@ -946,7 +946,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testSummarize_EmptyStream() {
-        IntSummaryStatistics stats = IntStream.empty().summarize();
+        IntSummaryStatistics stats = IntStream.empty().summaryStatistics();
         assertNotNull(stats);
         assertEquals(0, stats.getCount());
     }

@@ -107,7 +107,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
      * @return {@code true} always, as Tuple2 is a parameterized type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

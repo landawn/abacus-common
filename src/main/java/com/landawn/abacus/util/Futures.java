@@ -416,7 +416,7 @@ public final class Futures {
      * @see ContinuableFuture
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet) {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, ? extends Exception> zipFunctionForGet) {
         return compose(cf1, cf2, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2));
     }
 
@@ -518,8 +518,8 @@ public final class Futures {
      * @see TimeUnit
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, ? extends Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1)),
@@ -602,7 +602,7 @@ public final class Futures {
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet) {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, ? extends Exception> zipFunctionForGet) {
         return compose(cf1, cf2, cf3, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2, t._3));
     }
 
@@ -716,8 +716,8 @@ public final class Futures {
      * @see TimeUnit
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, ? extends Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1), (Future<T3>) c.get(2)),
@@ -829,7 +829,7 @@ public final class Futures {
      * @see #combine(Collection, Throwables.Function)
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
+            final Throwables.Function<? super FC, ? extends R, ? extends Exception> zipFunctionForGet) {
         return compose(cfs, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1));
     }
 
@@ -970,11 +970,15 @@ public final class Futures {
      * @see TimeUnit
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
+            final Throwables.Function<? super FC, ? extends R, ? extends Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, ? extends Exception> zipFunctionTimeoutGet)
+            throws IllegalArgumentException {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
+
+        final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGetToUse = (Throwables.Function<? super FC, ? extends R, Exception>) zipFunctionForGet;
+        final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGetToUse = (Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception>) zipFunctionTimeoutGet;
 
         return ContinuableFuture.wrap(new Future<>() {
             @Override
@@ -1026,8 +1030,8 @@ public final class Futures {
             @Override
             public R get() throws InterruptedException, ExecutionException {
                 try {
-                    return zipFunctionForGet.apply(cfs);
-                } catch (InterruptedException | ExecutionException e) {
+                    return zipFunctionForGetToUse.apply(cfs);
+                } catch (final InterruptedException | ExecutionException e) {
                     throw e;
                 } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
@@ -1039,8 +1043,8 @@ public final class Futures {
                 final Tuple3<FC, Long, TimeUnit> t = Tuple.of(cfs, timeout, unit);
 
                 try {
-                    return zipFunctionTimeoutGet.apply(t);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    return zipFunctionTimeoutGetToUse.apply(t);
+                } catch (final InterruptedException | ExecutionException | TimeoutException e) {
                     throw e;
                 } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e, true);

@@ -437,7 +437,7 @@ public class Multimap100Test extends TestBase {
         multimap.put("b", 1);
         multimap.put("a", 2);
 
-        ListMultimap<Integer, String> inverted = multimap.inverse(IntFunctions.ofListMultimap());
+        ListMultimap<Integer, String> inverted = multimap.invert(IntFunctions.ofListMultimap());
 
         assertEquals(3, inverted.totalValueCount());
         assertTrue(inverted.get(1).contains("a"));

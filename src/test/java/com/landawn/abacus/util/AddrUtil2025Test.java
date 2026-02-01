@@ -310,7 +310,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressFromURL_Basic() throws Exception {
         URL url = new URL("http://example.com:8080/path");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals("example.com", addr.getHostName());
         Assertions.assertEquals(8080, addr.getPort());
     }
@@ -318,7 +318,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressFromURL_WithoutPort() throws Exception {
         URL url = new URL("https://example.com/path");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals("example.com", addr.getHostName());
         Assertions.assertEquals(443, addr.getPort());
     }
@@ -326,7 +326,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressFromURL_HTTPS() throws Exception {
         URL url = new URL("https://secure.example.com:443/api");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals("secure.example.com", addr.getHostName());
         Assertions.assertEquals(443, addr.getPort());
     }
@@ -334,7 +334,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressFromURL_IPv4() throws Exception {
         URL url = new URL("http://192.168.1.1:8080/path");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals("192.168.1.1", addr.getHostName());
         Assertions.assertEquals(8080, addr.getPort());
     }
@@ -342,21 +342,21 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressFromURL_DifferentPort() throws Exception {
         URL url = new URL("http://localhost:3000");
-        InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
+        InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
         Assertions.assertEquals(3000, addr.getPort());
     }
 
     @Test
     public void testGetAddressFromURL_Null() {
         Assertions.assertThrows(NullPointerException.class, () -> {
-            AddrUtil.getAddressFromURL(null);
+            AddrUtil.getAddressFromUrl(null);
         });
     }
 
     @Test
     public void testGetAddressListFromURL_Basic() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("http://server2.com:9090"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
         Assertions.assertEquals(9090, addrs.get(1).getPort());
@@ -365,7 +365,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressListFromURL_SingleURL() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://example.com:7070"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(1, addrs.size());
         Assertions.assertEquals(7070, addrs.get(0).getPort());
     }
@@ -373,7 +373,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressListFromURL_MultipleURLs() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("http://server2.com:9090"), new URL("http://server3.com:10000"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(3, addrs.size());
         Assertions.assertEquals("server1.com", addrs.get(0).getHostName());
         Assertions.assertEquals("server2.com", addrs.get(1).getHostName());
@@ -383,7 +383,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressListFromURL_WithoutPorts() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://server1.com"), new URL("http://server2.com"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(80, addrs.get(0).getPort());
         Assertions.assertEquals(80, addrs.get(1).getPort());
@@ -391,14 +391,14 @@ public class AddrUtil2025Test extends TestBase {
 
     @Test
     public void testGetAddressListFromURL_Null() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(null);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(null);
         Assertions.assertNotNull(addrs);
         Assertions.assertTrue(addrs.isEmpty());
     }
 
     @Test
     public void testGetAddressListFromURL_EmptyList() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(new ArrayList<>());
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(new ArrayList<>());
         Assertions.assertNotNull(addrs);
         Assertions.assertTrue(addrs.isEmpty());
     }
@@ -406,7 +406,7 @@ public class AddrUtil2025Test extends TestBase {
     @Test
     public void testGetAddressListFromURL_MixedProtocols() throws Exception {
         List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("https://server2.com:443"), new URL("ftp://server3.com:21"));
-        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromURL(urls);
+        List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrl(urls);
         Assertions.assertEquals(3, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
         Assertions.assertEquals(443, addrs.get(1).getPort());

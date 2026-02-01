@@ -118,7 +118,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

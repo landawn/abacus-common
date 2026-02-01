@@ -84,7 +84,7 @@ public class HttpClient2025Test extends TestBase {
     }
 
     @Test
-    public void testCreateWithStringMaxConnectionTimeoutsAndSettings() {
+    public void testCreateWithStringMaxconnectTimeoutsAndSettings() {
         HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, settings);
         assertNotNull(client);

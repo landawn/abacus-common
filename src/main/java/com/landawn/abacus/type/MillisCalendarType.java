@@ -46,7 +46,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
      * Calendar cal = type.get(rs, 1);
@@ -77,7 +77,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "created_date" contains milliseconds value 1609459200000
      * Calendar cal = type.get(rs, "created_date");
@@ -108,8 +108,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO events (id, event_date) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * Calendar cal = Calendar.getInstance();
      * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021
@@ -138,7 +137,7 @@ public class MillisCalendarType extends CalendarType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * CallableStatement stmt = connection.prepareCall("{call set_event(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * Calendar cal = Calendar.getInstance();
      * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021

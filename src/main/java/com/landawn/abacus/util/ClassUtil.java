@@ -730,10 +730,11 @@ public final class ClassUtil {
     // ----------------------------------------------------------------------
 
     /**
-     * Gets the source code location of the specified class.
-     * This method returns the file system path where the class was loaded from.
+     * Gets the code-source location of the specified class.
+     * This method returns the file system path (classes directory or JAR) where the class was loaded from.
      * URLs with %20 encoding for spaces are automatically decoded.
-     * 
+     * Returns {@code null} if the code source or location is unavailable.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String location = ClassUtil.getClassLocation(MyClass.class);
@@ -741,7 +742,8 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param clazz the class whose source code location is to be retrieved
-     * @return the path to the source code location of the specified class, with URL encoding removed
+     * @return the path to the code-source location of the specified class, with URL encoding removed,
+     *         or {@code null} if unavailable
      */
     public static String getClassLocation(final Class<?> clazz) {
         final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
@@ -1062,11 +1064,9 @@ public final class ClassUtil {
      * essential for framework development, plugin systems, and dynamic class discovery scenarios in
      * enterprise applications requiring runtime class enumeration and analysis.
      *
-     * <p>This method performs sophisticated classpath scanning to discover all classes within the specified
-     * package hierarchy, supporting both JAR-based and file system-based class discovery mechanisms. It
-     * handles complex scenarios including nested JAR files, custom class loaders, and mixed deployment
-     * environments commonly found in enterprise application servers and modular application architectures
-     * where dynamic class discovery is critical for plugin loading and configuration management.</p>
+     * <p>This method performs classpath scanning to discover classes within the specified package hierarchy.
+     * It scans file system directories and top-level JARs located via {@code ClassUtil.class.getClassLoader()}
+     * and the system class loader.</p>
      *
      * <p><b>⚠️ IMPORTANT - JDK Package Limitation:</b>
      * This method does not work for JDK core packages (e.g., java.lang, java.util, javax.*) as these
@@ -1198,7 +1198,7 @@ public final class ClassUtil {
      *
      * <p><b>Security and ClassLoader Considerations:</b>
      * <ul>
-     *   <li><b>ClassLoader Context:</b> Uses current thread's context class loader for resource discovery</li>
+     *   <li><b>ClassLoader Context:</b> Uses {@code ClassUtil.class.getClassLoader()} first, then the system class loader</li>
      *   <li><b>Security Manager:</b> Respects security manager restrictions on class loading</li>
      *   <li><b>Package Access:</b> May fail for packages with restricted access permissions</li>
      *   <li><b>Module System:</b> Limited compatibility with Java 9+ module system restrictions</li>
@@ -1223,8 +1223,8 @@ public final class ClassUtil {
      *                  this predicate returns {@code true} are included in the result list. Must not be null.
      *                  Use {@code Fn.alwaysTrue()} to include all discovered classes without filtering.
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
-     *         Returns an empty list if no matching classes are found. The list is modifiable and contains
-     *         no duplicate classes. Classes are returned in the order they are discovered during scanning.
+     *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
+     *         discovery order; duplicate classes may appear if multiple resources overlap.
      * @throws IllegalArgumentException if {@code pkgName} is null, empty, or if no classpath resources are found
      *                                  for the specified package (e.g., package does not exist, typo in package name,
      *                                  or attempting to scan JDK packages which are not supported).
@@ -1839,7 +1839,7 @@ public final class ClassUtil {
      *     <td>Interface prefix removal</td>
      *   </tr>
      *   <tr>
-     *     <td>[Ljava.lang.String;</td>
+     *     <td>class [Ljava.lang.String;</td>
      *     <td>String[]</td>
      *     <td>Array notation conversion</td>
      *   </tr>
@@ -1886,18 +1886,12 @@ public final class ClassUtil {
      *
      * <p><b>Array Type Handling:</b>
      * <ul>
-     *   <li><b>Primitive Arrays:</b> Converts internal representations like "[I" to "int[]"</li>
-     *   <li><b>Object Arrays:</b> Transforms "[Ljava.lang.String;" to "java.lang.String[]"</li>
-     *   <li><b>Multi-dimensional Arrays:</b> Handles nested array notation correctly</li>
-     *   <li><b>Generic Array Types:</b> Preserves generic information in array element types</li>
+     *   <li><b>Object Arrays:</b> Normalizes Class.toString() forms like "class [Ljava.lang.String;" to "String[]"</li>
      * </ul>
      *
      * <p><b>Inner Class and Nested Type Processing:</b>
      * <ul>
      *   <li><b>Dollar Sign Conversion:</b> Transforms '$' to '.' for improved readability</li>
-     *   <li><b>Anonymous Class Handling:</b> Processes anonymous class type representations</li>
-     *   <li><b>Local Class Support:</b> Handles local class naming conventions</li>
-     *   <li><b>Static Nested Classes:</b> Maintains proper nested class hierarchy notation</li>
      * </ul>
      *
      * <p><b>Comparison and Compatibility:</b>
@@ -1926,13 +1920,19 @@ public final class ClassUtil {
      *   <li>Document the expected input format when integrating with external systems</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String name1 = ClassUtil.formatParameterizedTypeName("class java.lang.String");   // "String"
+     * String name2 = ClassUtil.formatParameterizedTypeName("java.util.List<java.lang.Integer>");   // "java.util.List<Integer>"
+     * }</pre>
+     *
      * @param parameterizedTypeName the raw parameterized type name to format, typically obtained from
      *                              {@code Type.getTypeName()}, {@code Class.getTypeName()}, or reflection
      *                              operations. May contain prefixes like "class " or "interface ", array
      *                              notation, generic type parameters, and inner class '$' notation.
      *                              Null values are handled gracefully.
      * @return a formatted, human-readable type name with prefixes removed, array notation normalized,
-     *         inner class notation converted to dot notation, and built-in type mappings applied.
+     *         inner class notation converted to dot notation (when applicable), and built-in type mappings applied.
      *         Returns null if the input is null, or an appropriately formatted string representation
      *         that is suitable for display, logging, documentation, or user interface purposes.
      *
@@ -2003,12 +2003,16 @@ public final class ClassUtil {
     /**
      * Returns the number of inheritance hops between two classes.
      * This method calculates the distance in the inheritance hierarchy from
-     * a child class to a parent class.
+     * a child class to a parent class. This method follows the superclass chain only;
+     * interfaces are not considered.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int distance = ClassUtil.inheritanceDistance(ArrayList.class, List.class);
-     * // Returns 1 (ArrayList directly implements List)
+     * int distance = ClassUtil.inheritanceDistance(ArrayList.class, AbstractList.class);
+     * // Returns 1 (ArrayList directly extends AbstractList)
+     *
+     * distance = ClassUtil.inheritanceDistance(ArrayList.class, List.class);
+     * // Returns -1 (interfaces are not considered)
      * 
      * distance = ClassUtil.inheritanceDistance(String.class, Object.class);
      * // Returns 1 (String directly extends Object)
@@ -2331,6 +2335,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a bean class.
+     * Returns {@code false} if {@code cls} is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean isBean = ClassUtil.isBeanClass(User.class);        // true for typical POJO
+     * boolean isNotBean = ClassUtil.isBeanClass(String.class);   // false
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a bean class, {@code false} otherwise
@@ -2343,6 +2354,13 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a record class.
+     * Returns {@code false} if {@code cls} is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * record Point(int x, int y) {}
+     * boolean isRecord = ClassUtil.isRecordClass(Point.class);   // true
+     * }</pre>
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a record class, {@code false} otherwise

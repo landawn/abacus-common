@@ -42,7 +42,7 @@ public class Subscribe2025Test extends TestBase {
         public void handleStrict(String event) {
         }
 
-        @Subscribe(interval = 1000)
+        @Subscribe(intervalMillis = 1000)
         public void handleWithInterval(String event) {
         }
 
@@ -50,7 +50,7 @@ public class Subscribe2025Test extends TestBase {
         public void handleDeduplicate(String event) {
         }
 
-        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, eventId = "testId", sticky = true, strictEventType = true, interval = 5000, deduplicate = true)
+        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, eventId = "testId", sticky = true, strictEventType = true, intervalMillis = 5000, deduplicate = true)
         public void handleAll(String event) {
         }
     }
@@ -70,7 +70,7 @@ public class Subscribe2025Test extends TestBase {
         assertFalse(annotation.strictEventType());
         assertFalse(annotation.sticky());
         assertEquals("", annotation.eventId());
-        assertEquals(0, annotation.interval());
+        assertEquals(0, annotation.intervalMillis());
         assertFalse(annotation.deduplicate());
     }
 
@@ -106,7 +106,7 @@ public class Subscribe2025Test extends TestBase {
     public void testInterval() throws NoSuchMethodException {
         Method method = TestHandler.class.getDeclaredMethod("handleWithInterval", String.class);
         Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertEquals(1000, annotation.interval());
+        assertEquals(1000, annotation.intervalMillis());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class Subscribe2025Test extends TestBase {
         assertEquals("testId", annotation.eventId());
         assertTrue(annotation.sticky());
         assertTrue(annotation.strictEventType());
-        assertEquals(5000, annotation.interval());
+        assertEquals(5000, annotation.intervalMillis());
         assertTrue(annotation.deduplicate());
     }
 

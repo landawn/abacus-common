@@ -51,7 +51,7 @@ public class MapEntryType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        boolean isGeneric = mapEntryType.isGenericType();
+        boolean isGeneric = mapEntryType.isParameterizedType();
         Assertions.assertTrue(isGeneric);
     }
 

@@ -57,7 +57,7 @@ public class TripleType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(tripleType.isGenericType());
+        assertTrue(tripleType.isParameterizedType());
     }
 
     @Test

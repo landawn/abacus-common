@@ -2243,7 +2243,7 @@ public class Fn103Test extends TestBase {
 
             @Test
             public void testInverse() throws Exception {
-                Throwables.Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>, Exception> function = Fnn.inverse();
+                Throwables.Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>, Exception> function = Fnn.invert();
 
                 Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
                 Map.Entry<Integer, String> inverted = function.apply(entry);

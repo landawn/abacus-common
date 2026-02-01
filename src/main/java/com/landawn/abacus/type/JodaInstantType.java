@@ -245,7 +245,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnName the column name to retrieve the value from
+     * @param columnName the column label (or name if no label was specified) to retrieve the value from
      * @return an Instant instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column name is invalid
      */
@@ -297,13 +297,13 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
-     * @param columnName the name of the parameter to set
+     * @param parameterName the name of the parameter to set
      * @param x the Instant value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final Instant x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(final CallableStatement stmt, final String parameterName, final Instant x) throws SQLException {
+        stmt.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
     }
 
     /**

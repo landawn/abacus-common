@@ -774,8 +774,8 @@ public class CharStream101Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        CharSummaryStatistics stats = createCharStream('a', 'b', 'c').summarize();
+    public void testsummaryStatistics() {
+        CharSummaryStatistics stats = createCharStream('a', 'b', 'c').summaryStatistics();
         assertThat(stats.getCount()).isEqualTo(3);
         assertThat(stats.getMin()).isEqualTo('a');
         assertThat(stats.getMax()).isEqualTo('c');

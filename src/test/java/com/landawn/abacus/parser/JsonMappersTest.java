@@ -17,7 +17,7 @@ class JsonMappersTest {
 
     @Test
     public void test_01() {
-        final List<XBean> bigXBean = Beans.fill(XBean.class, 10000);
+        final List<XBean> bigXBean = Beans.newRandomList(XBean.class, 10000);
         File outputFile = new File("./src/test/resources/test.json");
         N.toJson(bigXBean, outputFile);
 

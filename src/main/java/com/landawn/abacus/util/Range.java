@@ -537,23 +537,27 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
-     * Checks whether all elements in the specified collection are contained within this range.
-     * Returns {@code true} if the collection is empty or if every {@code non-null} element in the collection
-     * is within the range bounds.
+     * Determines whether this range contains <em>all</em> elements in the specified collection.
+     *
+     * <p>This method iterates over the given collection and checks each element using
+     * {@link #contains(Object)}. The evaluation short-circuits and returns {@code false}
+     * as soon as an element is found that is not contained within this range.</p>
+     *
+     * <p>An empty or {@code null} collection is considered trivially satisfied and
+     * results in {@code true}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 10);
-     * List<Integer> values = Arrays.asList(2, 5, 8);
-     * range.containsAll(values);   // returns true
      *
-     * values = Arrays.asList(2, 5, 15);
-     * range.containsAll(values);   // returns {@code false} (15 is outside range)
+     * range.containsAll(Arrays.asList(2, 5, 8));    // true
+     * range.containsAll(Arrays.asList(2, 5, 15));   // false (15 is outside the range)
+     * range.containsAll(Collections.emptyList());  // true
      * }</pre>
      *
-     * @param c the collection of elements to check, may be {@code null} or empty.
-     * @return {@code true} if all elements in the collection are contained within this range,
-     *         {@code true} if the collection is {@code null} or empty, {@code false} otherwise.
+     * @param c the collection of elements to test; may be {@code null} or empty
+     * @return {@code true} if every element in {@code c} is contained within this range,
+     *         or if {@code c} is {@code null} or empty; {@code false} otherwise
      */
     public boolean containsAll(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -567,6 +571,42 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         }
 
         return true;
+    }
+
+    /**
+     * Determines whether this range contains <em>any</em> element in the specified collection.
+     *
+     * <p>This method iterates over the given collection and checks each element using
+     * {@link #contains(Object)}. The evaluation short-circuits and returns {@code true}
+     * as soon as a contained element is found.</p>
+     *
+     * <p>If the collection is {@code null} or empty, this method returns {@code false}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Range<Integer> range = Range.closed(1, 10);
+     *
+     * range.containsAny(Arrays.asList(15, 20, 8));  // true (8 is within the range)
+     * range.containsAny(Arrays.asList(15, 20));     // false
+     * range.containsAny(Collections.emptyList());  // false
+     * }</pre>
+     *
+     * @param c the collection of elements to test; may be {@code null} or empty
+     * @return {@code true} if at least one element in {@code c} is contained within this range;
+     *         {@code false} if none are contained or if {@code c} is {@code null} or empty
+     */
+    public boolean containsAny(final Collection<? extends T> c) {
+        if (N.isEmpty(c)) {
+            return false;
+        }
+
+        for (final T e : c) {
+            if (contains(e)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

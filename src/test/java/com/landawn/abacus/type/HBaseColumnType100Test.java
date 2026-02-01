@@ -50,7 +50,7 @@ public class HBaseColumnType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(hbaseColumnType.isGenericType());
+        assertTrue(hbaseColumnType.isParameterizedType());
     }
 
     @Test

@@ -232,6 +232,7 @@ public abstract class AbstractLogger implements Logger {
      * @param template the message template
      * @param args the arguments to be substituted in the template
      */
+    @Deprecated
     @Override
     public void trace(final String template, final Object... args) {
         if (isTraceEnabled()) {
@@ -505,6 +506,7 @@ public abstract class AbstractLogger implements Logger {
      * @param template the message template
      * @param args the arguments to be substituted in the template
      */
+    @Deprecated
     @Override
     public void debug(final String template, final Object... args) {
         if (isDebugEnabled()) {
@@ -756,6 +758,7 @@ public abstract class AbstractLogger implements Logger {
      * @param template the message template
      * @param args the arguments to be substituted in the template
      */
+    @Deprecated
     @Override
     public void info(final String template, final Object... args) {
         if (isInfoEnabled()) {
@@ -1007,6 +1010,7 @@ public abstract class AbstractLogger implements Logger {
      * @param template the message template
      * @param args the arguments to be substituted in the template
      */
+    @Deprecated
     @Override
     public void warn(final String template, final Object... args) {
         if (isWarnEnabled()) {
@@ -1258,6 +1262,7 @@ public abstract class AbstractLogger implements Logger {
      * @param template the message template
      * @param args the arguments to be substituted in the template
      */
+    @Deprecated
     @Override
     public void error(final String template, final Object... args) {
         if (isErrorEnabled()) {

@@ -425,16 +425,16 @@ public final class HARUtil {
         final HttpHeaders httpHeaders = getHeadersByRequestEntry(requestEntry);
 
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");
-        final String bodyType = Maps.getByPath(requestEntry, "postData.mimeType");
+        final String bodyContentType = Maps.getByPath(requestEntry, "postData.mimeType");
 
         if (Strings.isNotEmpty(requestBody)) {
-            WebUtil.setContentTypeByRequestBodyType(bodyType, httpHeaders);
+            WebUtil.setContentTypeByRequestBodyType(bodyContentType, httpHeaders);
         }
 
         final Tuple3<Boolean, Character, Consumer<? super String>> tp = logRequestCurlForHARRequest_TL.get();
 
         if (tp._1 && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
-            tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyType, tp._2));
+            tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyContentType, tp._2));
         }
 
         return HttpRequest.url(url).headers(httpHeaders).body(requestBody).execute(httpMethod, responseClass);
@@ -584,9 +584,9 @@ public final class HARUtil {
      */
     public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) {
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");
-        final String bodyType = Maps.getByPath(requestEntry, "postData.mimeType");
+        final String bodyContentType = Maps.getByPath(requestEntry, "postData.mimeType");
 
-        return Tuple.of(requestBody, bodyType);
+        return Tuple.of(requestBody, bodyContentType);
     }
 
     private HARUtil() {

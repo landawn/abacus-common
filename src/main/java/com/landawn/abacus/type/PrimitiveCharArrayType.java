@@ -171,6 +171,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param obj the object to convert (can be a Clob or other type)
      * @return the char array representation of the object, or {@code null} if input is null
+     * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
+     * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}
      */
     @SuppressFBWarnings
     @Override

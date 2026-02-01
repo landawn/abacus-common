@@ -736,7 +736,7 @@ public class Iterables101Test extends TestBase {
         @Test
         public void testReverseList() {
             List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-            List<String> reversed = Iterables.reverse(list);
+            List<String> reversed = Iterables.asReversed(list);
 
             assertEquals(Arrays.asList("c", "b", "a"), reversed);
 
@@ -749,7 +749,7 @@ public class Iterables101Test extends TestBase {
         @Test
         public void testReverseRandomAccessList() {
             List<String> list = Arrays.asList("a", "b", "c");
-            List<String> reversed = Iterables.reverse(list);
+            List<String> reversed = Iterables.asReversed(list);
 
             assertEquals(Arrays.asList("c", "b", "a"), reversed);
             assertTrue(reversed instanceof RandomAccess);
@@ -758,7 +758,7 @@ public class Iterables101Test extends TestBase {
         @Test
         public void testReverseEmptyList() {
             List<String> emptyList = new ArrayList<>();
-            List<String> reversed = Iterables.reverse(emptyList);
+            List<String> reversed = Iterables.asReversed(emptyList);
 
             assertTrue(reversed.isEmpty());
         }
@@ -766,7 +766,7 @@ public class Iterables101Test extends TestBase {
         @Test
         public void testReverseDoubleReverse() {
             List<String> list = Arrays.asList("a", "b", "c");
-            List<String> doubleReversed = Iterables.reverse(Iterables.reverse(list));
+            List<String> doubleReversed = Iterables.asReversed(Iterables.asReversed(list));
 
             assertEquals(list, doubleReversed);
         }

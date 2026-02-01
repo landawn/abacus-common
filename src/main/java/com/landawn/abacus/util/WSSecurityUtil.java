@@ -46,7 +46,7 @@ import java.security.SecureRandom;
  * 
  * // Create WS-Security password digest
  * String timestamp = getCurrentTimestamp();
- * String passwordDigest = WSSecurityUtil.doPasswordDigest(
+ * String passwordDigest = WSSecurityUtil.computePasswordDigest(
  *     nonce, timestamp.getBytes(), password.getBytes()
  * );
  * }</pre>
@@ -189,7 +189,7 @@ public final class WSSecurityUtil {
      * byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
      *
      * // Create digest
-     * String passwordDigest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+     * String passwordDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
      * }</pre>
      *
      * @param nonce the nonce byte array, a cryptographically random value that should only
@@ -200,11 +200,11 @@ public final class WSSecurityUtil {
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
      * @throws RuntimeException if an unexpected error occurs during the digest operation
-     * @see #doPasswordDigest(String, String, String)
+     * @see #computePasswordDigest(String, String, String)
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
      */
-    public static String doPasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
+    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -234,7 +234,7 @@ public final class WSSecurityUtil {
      * method that converts the string parameters to bytes using the default charset before
      * processing them with the WS-Security password digest algorithm.
      *
-     * <p>This method internally calls {@link #doPasswordDigest(byte[], byte[], byte[])} after
+     * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[])} after
      * converting all string parameters to byte arrays using the default charset. The resulting
      * digest follows the WS-Security UsernameToken specification.</p>
      *
@@ -253,7 +253,7 @@ public final class WSSecurityUtil {
      * String created = Instant.now().toString();
      * String password = "secretPassword";
      *
-     * String passwordDigest = WSSecurityUtil.doPasswordDigest(nonce, created, password);
+     * String passwordDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
      *
      * // Use in WS-Security header
      * wsSecurityHeader.setPasswordDigest(passwordDigest);
@@ -267,11 +267,11 @@ public final class WSSecurityUtil {
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
      * @throws RuntimeException if an unexpected error occurs during the digest operation
-     * @see #doPasswordDigest(byte[], byte[], byte[])
+     * @see #computePasswordDigest(byte[], byte[], byte[])
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
      */
-    public static String doPasswordDigest(final String nonce, final String created, final String password) {
+    public static String computePasswordDigest(final String nonce, final String created, final String password) {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -282,6 +282,6 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Password cannot be null");
         }
 
-        return doPasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));
+        return computePasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));
     }
 }

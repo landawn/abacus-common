@@ -129,7 +129,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @return {@code true}, indicating this is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

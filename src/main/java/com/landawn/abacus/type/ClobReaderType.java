@@ -43,7 +43,7 @@ public class ClobReaderType extends ReaderType {
      * <pre>{@code
      * // Obtained via TypeFactory
      * Type<Reader> type = TypeFactory.getType("ClobReader");
-     * ResultSet rs = ...;
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Reader clobReader = type.get(rs, "document");
      * String content = IOUtil.readAllToString(clobReader);
      * }</pre>

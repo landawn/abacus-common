@@ -120,7 +120,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

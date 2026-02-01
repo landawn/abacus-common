@@ -257,14 +257,14 @@ public class Dataset112Test extends TestBase {
     @Test
     public void testSwapColumnPosition() {
         Dataset dataset = testDataset.copy();
-        dataset.swapColumnPosition("id", "salary");
+        dataset.swapColumns("id", "salary");
         assertEquals("salary", dataset.getColumnName(0));
         assertEquals("name", dataset.getColumnName(1));
         assertEquals("age", dataset.getColumnName(2));
         assertEquals("id", dataset.getColumnName(3));
 
         assertThrows(IllegalArgumentException.class, () -> {
-            dataset.swapColumnPosition("nonexistent", "id");
+            dataset.swapColumns("nonexistent", "id");
         });
     }
 
@@ -307,14 +307,14 @@ public class Dataset112Test extends TestBase {
         dataset.moveToRow(1);
         int secondId = dataset.getInt("id");
 
-        dataset.swapRowPosition(0, 1);
+        dataset.swapRows(0, 1);
         dataset.moveToRow(0);
         assertEquals(secondId, dataset.getInt("id"));
         dataset.moveToRow(1);
         assertEquals(firstId, dataset.getInt("id"));
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataset.swapRowPosition(-1, 0);
+            dataset.swapRows(-1, 0);
         });
     }
 

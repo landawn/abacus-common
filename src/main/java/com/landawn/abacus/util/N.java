@@ -147,7 +147,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Array Operations:</b> occurrencesOf, contains, indexOf, concat, split, add, remove, reverse, rotate, shuffle, sort, etc.</li>
  *   <li><b>Collection Operations:</b> groupBy, partition, toMap, intersection, union, difference, etc.</li>
  *   <li><b>String Operations:</b> String manipulation, parsing, formatting, and validation utilities</li>
- *   <li><b>Math Operations:</b> min, max, sum, average, median, percentiles for arrays and collections</li>
+ *   <li><b>Math Operations:</b> min, max, sum, average, median, percentilesOfSorted for arrays and collections</li>
  *   <li><b>Functional Operations:</b> forEach, map, filter, reduce operations with exception handling support</li>
  *   <li><b>Null-Safe Operations:</b> Comprehensive null-safe methods for common operations</li>
  *   <li><b>Type Conversion:</b> Safe conversion between primitive types and objects</li>
@@ -24496,7 +24496,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * char[] grades = {'A', 'A', 'B', 'B', 'C', 'C', 'D', 'F'};
      * Arrays.sort(grades);   // Ensure sorted
-     * Map<Percentage, Character> percentiles = N.percentiles(grades);
+     * Map<Percentage, Character> percentiles = N.percentilesOfSorted(grades);
      *
      * // Access specific percentiles
      * char median = percentiles.get(Percentage.P50);   // 'B' or 'C'
@@ -24506,10 +24506,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of characters for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding characters from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
+     * @see #percentilesOfSorted(int[])
      * @see Percentage
      */
-    public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Character> percentilesOfSorted(final char[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty"); //NOSONAR
 
         final int len = sortedArray.length;
@@ -24534,7 +24534,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * byte[] scores = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
      * Arrays.sort(scores);   // Ensure sorted
-     * Map<Percentage, Byte> percentiles = N.percentiles(scores);
+     * Map<Percentage, Byte> percentiles = N.percentilesOfSorted(scores);
      *
      * // Find percentile thresholds
      * byte median = percentiles.get(Percentage.P50);   // Returns 50
@@ -24545,10 +24545,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of bytes for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding bytes from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
+     * @see #percentilesOfSorted(int[])
      * @see Percentage
      */
-    public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Byte> percentilesOfSorted(final byte[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24573,7 +24573,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * short[] responseTimes = {100, 150, 200, 250, 300, 350, 400, 450, 500};
      * Arrays.sort(responseTimes);
-     * Map<Percentage, Short> percentiles = N.percentiles(responseTimes);
+     * Map<Percentage, Short> percentiles = N.percentilesOfSorted(responseTimes);
      *
      * // Analyze response time distribution
      * short p50 = percentiles.get(Percentage.P50);   // Median: 300ms
@@ -24584,10 +24584,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of shorts for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding shorts from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
+     * @see #percentilesOfSorted(int[])
      * @see Percentage
      */
-    public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Short> percentilesOfSorted(final short[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24606,7 +24606,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final int[] sortedArray = Array.range(1, 101);
-     * final Map<Percentage, Integer> percentiles = N.percentiles(sortedArray);
+     * final Map<Percentage, Integer> percentiles = N.percentilesOfSorted(sortedArray);
      * percentiles.forEach(Fn.println("="));
      *                     0.0001%=1
      *                     0.001%=1
@@ -24649,7 +24649,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a map where the keys are the percentiles and the values are the corresponding integers from the array.
      * @throws IllegalArgumentException if the provided array is empty.
      */
-    public static Map<Percentage, Integer> percentiles(final int[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Integer> percentilesOfSorted(final int[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24680,7 +24680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * long[] timestamps = {1000000L, 2000000L, 3000000L, 4000000L, 5000000L};
      * Arrays.sort(timestamps);
-     * Map<Percentage, Long> percentiles = N.percentiles(timestamps);
+     * Map<Percentage, Long> percentiles = N.percentilesOfSorted(timestamps);
      *
      * // Analyze timestamp distribution
      * long median = percentiles.get(Percentage.P50);   // Middle timestamp
@@ -24690,10 +24690,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of longs for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding longs from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
+     * @see #percentilesOfSorted(int[])
      * @see Percentage
      */
-    public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Long> percentilesOfSorted(final long[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24727,7 +24727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * float[] prices = {19.99f, 29.99f, 39.99f, 49.99f, 59.99f, 69.99f};
      * Arrays.sort(prices);
-     * Map<Percentage, Float> percentiles = N.percentiles(prices);
+     * Map<Percentage, Float> percentiles = N.percentilesOfSorted(prices);
      *
      * // Analyze price distribution
      * float medianPrice = percentiles.get(Percentage.P50);   // Middle price point
@@ -24738,11 +24738,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of floats for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding floats from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
-     * @see #percentiles(double[])
+     * @see #percentilesOfSorted(int[])
+     * @see #percentilesOfSorted(double[])
      * @see Percentage
      */
-    public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Float> percentilesOfSorted(final float[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24776,7 +24776,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * double[] measurements = {10.5, 20.3, 30.7, 40.2, 50.9, 60.1, 70.4, 80.8, 90.6};
      * Arrays.sort(measurements);
-     * Map<Percentage, Double> percentiles = N.percentiles(measurements);
+     * Map<Percentage, Double> percentiles = N.percentilesOfSorted(measurements);
      *
      * // Statistical analysis
      * double median = percentiles.get(Percentage.P50);    // 50th percentile (median)
@@ -24789,11 +24789,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array of doubles for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding doubles from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
-     * @see #percentiles(float[])
+     * @see #percentilesOfSorted(int[])
+     * @see #percentilesOfSorted(float[])
      * @see Percentage
      */
-    public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
+    public static Map<Percentage, Double> percentilesOfSorted(final double[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24825,7 +24825,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie", "David", "Eve", "Frank"};
      * Arrays.sort(names);
-     * Map<Percentage, String> percentiles = N.percentiles(names);
+     * Map<Percentage, String> percentiles = N.percentilesOfSorted(names);
      *
      * // Find percentile values in sorted data
      * String median = percentiles.get(Percentage.P50);   // Middle name alphabetically
@@ -24834,7 +24834,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // With custom objects
      * Person[] people = {new Person("Alice", 25), new Person("Bob", 30)};
      * Arrays.sort(people, Comparator.comparing(Person::getAge));
-     * Map<Percentage, Person> agePercentiles = N.percentiles(people);
+     * Map<Percentage, Person> agePercentiles = N.percentilesOfSorted(people);
      * Person medianAge = agePercentiles.get(Percentage.P50);
      * }</pre>
      *
@@ -24842,11 +24842,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray the sorted array for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding elements from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty
-     * @see #percentiles(int[])
-     * @see #percentiles(List)
+     * @see #percentilesOfSorted(int[])
+     * @see #percentilesOfSorted(List)
      * @see Percentage
      */
-    public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
+    public static <T> Map<Percentage, T> percentilesOfSorted(final T[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
 
         final int len = sortedArray.length;
@@ -24881,7 +24881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<Integer> scores = Arrays.asList(65, 70, 75, 80, 85, 90, 95, 100);
      * Collections.sort(scores);
-     * Map<Percentage, Integer> percentiles = N.percentiles(scores);
+     * Map<Percentage, Integer> percentiles = N.percentilesOfSorted(scores);
      *
      * // Analyze test score distribution
      * int median = percentiles.get(Percentage.P50);      // 80 (median score)
@@ -24890,7 +24890,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Useful for SLA calculations
      * List<Double> latencies = getResponseLatencies();   // Pre-sorted
-     * Map<Percentage, Double> latencyPercentiles = N.percentiles(latencies);
+     * Map<Percentage, Double> latencyPercentiles = N.percentilesOfSorted(latencies);
      * double sla = latencyPercentiles.get(Percentage.P99);   // 99th percentile for SLA
      * }</pre>
      *
@@ -24898,11 +24898,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedList the sorted list for which to calculate the percentiles
      * @return a map where the keys are the percentiles and the values are the corresponding elements from the list.
      * @throws IllegalArgumentException if the provided list is {@code null} or empty
-     * @see #percentiles(int[])
-     * @see #percentiles(Object[])
+     * @see #percentilesOfSorted(int[])
+     * @see #percentilesOfSorted(Object[])
      * @see Percentage
      */
-    public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
+    public static <T> Map<Percentage, T> percentilesOfSorted(final List<T> sortedList) throws IllegalArgumentException {
         checkArgNotEmpty(sortedList, "The specified 'sortedList' cannot be null or empty");
 
         final int size = sortedList.size();
@@ -27845,14 +27845,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of the elements in the returned list
      * @param a the array
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @return a new list containing all elements from all nested mapped collections (empty if array is {@code null}/empty)
      * @see #flatMap(Object[], Function, Function, IntFunction)
      */
     public static <T, U, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends U>> mapper,
-            final Function<? super U, ? extends Collection<? extends R>> mapper2) {
+            final Function<? super U, ? extends Collection<? extends R>> secondMapper) {
 
-        return flatMap(a, mapper, mapper2, IntFunctions.ofList());
+        return flatMap(a, mapper, secondMapper, IntFunctions.ofList());
     }
 
     /**
@@ -27876,13 +27876,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param a the array
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing all elements from all nested mapped collections (empty if array is {@code null}/empty)
      * @see #flatMap(Object[], Function, Function)
      */
     public static <T, U, R, C extends Collection<R>> C flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends U>> mapper,
-            final Function<? super U, ? extends Collection<? extends R>> mapper2, final IntFunction<? extends C> supplier) {
+            final Function<? super U, ? extends Collection<? extends R>> secondMapper, final IntFunction<? extends C> supplier) {
         if (isEmpty(a)) {
             return supplier.apply(0);
         }
@@ -27895,7 +27895,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             if (notEmpty(c1)) {
                 for (final U e2 : c1) {
-                    final Collection<? extends R> c2 = mapper2.apply(e2);
+                    final Collection<? extends R> c2 = secondMapper.apply(e2);
 
                     if (notEmpty(c2)) {
                         result.addAll(c2);
@@ -27926,14 +27926,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of the elements in the returned list
      * @param c the iterable
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @return a new list containing all elements from all nested mapped collections (empty if iterable is {@code null}/empty)
      * @see #flatMap(Iterable, Function, Function, IntFunction)
      */
     public static <T, U, R> List<R> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends U>> mapper,
-            final Function<? super U, ? extends Collection<? extends R>> mapper2) {
+            final Function<? super U, ? extends Collection<? extends R>> secondMapper) {
 
-        return flatMap(c, mapper, mapper2, IntFunctions.ofList());
+        return flatMap(c, mapper, secondMapper, IntFunctions.ofList());
     }
 
     /**
@@ -27957,13 +27957,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param c the iterable
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing all elements from all nested mapped collections (empty if iterable is {@code null}/empty)
      * @see #flatMap(Iterable, Function, Function)
      */
     public static <T, U, R, C extends Collection<R>> C flatMap(final Iterable<? extends T> c,
-            final Function<? super T, ? extends Collection<? extends U>> mapper, final Function<? super U, ? extends Collection<? extends R>> mapper2,
+            final Function<? super T, ? extends Collection<? extends U>> mapper, final Function<? super U, ? extends Collection<? extends R>> secondMapper,
             final IntFunction<? extends C> supplier) {
         if (isEmptyCollection(c)) {
             return supplier.apply(0);
@@ -27976,7 +27976,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             if (notEmpty(c1)) {
                 for (final U e2 : c1) {
-                    final Collection<? extends R> c2 = mapper2.apply(e2);
+                    final Collection<? extends R> c2 = secondMapper.apply(e2);
 
                     if (notEmpty(c2)) {
                         result.addAll(c2);
@@ -28007,14 +28007,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of the elements in the returned list
      * @param iter the iterator
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @return a new list containing all elements from all nested mapped collections (empty if iterator is {@code null} or has no elements)
      * @see #flatMap(Iterator, Function, Function, IntFunction)
      */
     public static <T, U, R> List<R> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper,
-            final Function<? super U, ? extends Collection<? extends R>> mapper2) {
+            final Function<? super U, ? extends Collection<? extends R>> secondMapper) {
 
-        return flatMap(iter, mapper, mapper2, IntFunctions.ofList());
+        return flatMap(iter, mapper, secondMapper, IntFunctions.ofList());
     }
 
     /**
@@ -28038,13 +28038,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param iter the iterator
      * @param mapper the function to transform each element to a collection of intermediate type
-     * @param mapper2 the function to transform each intermediate element to a collection of final type
+     * @param secondMapper the function to transform each intermediate element to a collection of final type
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing all elements from all nested mapped collections (empty if iterator is {@code null} or has no elements)
      * @see #flatMap(Iterator, Function, Function)
      */
     public static <T, U, R, C extends Collection<R>> C flatMap(final Iterator<? extends T> iter,
-            final Function<? super T, ? extends Collection<? extends U>> mapper, final Function<? super U, ? extends Collection<? extends R>> mapper2,
+            final Function<? super T, ? extends Collection<? extends U>> mapper, final Function<? super U, ? extends Collection<? extends R>> secondMapper,
             final IntFunction<? extends C> supplier) {
         if (iter == null) {
             return supplier.apply(0);
@@ -28057,7 +28057,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             if (notEmpty(c1)) {
                 for (final U e2 : c1) {
-                    final Collection<? extends R> c2 = mapper2.apply(e2);
+                    final Collection<? extends R> c2 = secondMapper.apply(e2);
 
                     if (notEmpty(c2)) {
                         result.addAll(c2);
@@ -37277,7 +37277,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
             final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
         return ASYNC_EXECUTOR.execute(() -> {
-            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
+            Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
             return null;
         });
     }
@@ -37312,7 +37312,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return ASYNC_EXECUTOR.execute(() -> {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
+            final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(cmd);
         });
     }
@@ -37760,12 +37760,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws RuntimeException if execution fails and no more retries are allowed
      * @see #callWithRetry(Callable, int, long, BiPredicate)
      * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
-     * @see Retry#of(int, long, Predicate)
+     * @see Retry#withFixedDelay(int, long, Predicate)
      */
     public static void runWithRetry(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
         try {
-            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
+            Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
         } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -37794,12 +37794,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws RuntimeException if execution fails and no more retries are allowed
      * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
      * @see #asyncExecute(Callable, int, long, BiPredicate)
-     * @see Retry#of(int, long, BiPredicate)
+     * @see Retry#withFixedDelay(int, long, BiPredicate)
      */
     public static <R> R callWithRetry(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         try {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
+            final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(cmd);
         } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e, true);

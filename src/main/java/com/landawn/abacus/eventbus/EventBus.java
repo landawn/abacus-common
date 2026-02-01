@@ -767,7 +767,7 @@ public class EventBus {
      * @return {@code true} if the event was removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final Object event) {
-        return removeStickyEvent(event, null);
+        return removeStickyEvent(null, event);
     }
 
     /**
@@ -779,12 +779,12 @@ public class EventBus {
      * Configuration config = getConfiguration();
      * eventBus.removeStickyEvent(config, "appConfig");
      * }</pre>
-     *
-     * @param event the sticky event to remove
      * @param eventId the event ID the sticky event was posted with
+     * @param event the sticky event to remove
+     *
      * @return {@code true} if the event was removed, {@code false} otherwise
      */
-    public boolean removeStickyEvent(final Object event, final String eventId) {
+    public boolean removeStickyEvent(final String eventId, final Object event) {
         synchronized (stickyEventMap) {
             final String val = stickyEventMap.get(event);
 
@@ -1149,7 +1149,7 @@ public class EventBus {
             threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
             strictEventType = subscribe != null && subscribe.strictEventType();
             sticky = subscribe != null && subscribe.sticky();
-            intervalInMillis = subscribe == null ? 0 : subscribe.interval();
+            intervalInMillis = subscribe == null ? 0 : subscribe.intervalMillis();
             deduplicate = subscribe != null && subscribe.deduplicate();
 
             isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")

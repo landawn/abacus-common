@@ -58,7 +58,7 @@ public class TupleType102Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(tuple3Type.isGenericType());
+        assertTrue(tuple3Type.isParameterizedType());
     }
 
     @Test

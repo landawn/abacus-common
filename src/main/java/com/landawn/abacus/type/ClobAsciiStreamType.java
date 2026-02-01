@@ -53,7 +53,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * <pre>{@code
      * // Obtained via TypeFactory
      * Type<InputStream> type = TypeFactory.getType("ClobAsciiStream");
-     * ResultSet rs = ...;
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * InputStream asciiStream = type.get(rs, "text_document");
      * String content = IOUtil.readAllToString(asciiStream);
      * }</pre>
@@ -175,20 +175,20 @@ public class ClobAsciiStreamType extends InputStreamType {
      * If serialization config specifies string quotation, the content is wrapped in quotes.
      *
      * @param writer the CharacterWriter to write to
-     * @param t the ASCII InputStream to write. Can be {@code null}.
+     * @param x the ASCII InputStream to write. Can be {@code null}.
      * @param config the serialization configuration for quotation settings. Can be {@code null}.
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JsonXmlSerializationConfig<?> config) throws IOException {
-        if (t == null) {
+    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerializationConfig<?> config) throws IOException {
+        if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config != null) && (config.getStringQuotation() != 0)) {
                 writer.write(config.getStringQuotation());
             }
 
-            final Reader reader = IOUtil.newInputStreamReader(t, Charsets.US_ASCII); // NOSONAR
+            final Reader reader = IOUtil.newInputStreamReader(x, Charsets.US_ASCII); // NOSONAR
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {

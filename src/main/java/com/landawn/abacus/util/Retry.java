@@ -64,7 +64,7 @@ public final class Retry<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retry up to 3 times with 1 second interval on IOException or TimeoutException
-     * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof java.io.IOException || e instanceof java.util.concurrent.TimeoutException);
+     * Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof java.io.IOException || e instanceof java.util.concurrent.TimeoutException);
      * retry.run(() -> sendNotification());
      * }</pre>
      *
@@ -74,7 +74,7 @@ public final class Retry<T> {
      * @return a new {@code Retry<Void>} instance configured with the specified parameters.
      * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
-    public static Retry<Void> of(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
+    public static Retry<Void> withFixedDelay(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, "retryTimes");
         N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
@@ -100,7 +100,7 @@ public final class Retry<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retry up to 3 times with 500ms interval on 503 status or SocketTimeoutException
-     * Retry<Response> retry = Retry.of(3, 500, (result, ex) ->
+     * Retry<Response> retry = Retry.withFixedDelay(3, 500, (result, ex) ->
      *     (result != null && result.getStatusCode() == 503) || ex instanceof java.net.SocketTimeoutException);
      * Response response = retry.call(() -> httpClient.get(url));
      * }</pre>
@@ -114,8 +114,8 @@ public final class Retry<T> {
      * @return a new {@code Retry<T>} instance configured with the specified parameters.
      * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
-    public static <T> Retry<T> of(final int retryTimes, final long retryIntervalInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
-            throws IllegalArgumentException {
+    public static <T> Retry<T> withFixedDelay(final int retryTimes, final long retryIntervalInMillis,
+            final BiPredicate<? super T, ? super Exception> retryCondition) throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, "retryTimes");
         N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
         N.checkArgNotNull(retryCondition, "retryCondition");
@@ -142,7 +142,7 @@ public final class Retry<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retry up to 3 times with 1 second interval on IOException
-     * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof java.io.IOException);
+     * Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof java.io.IOException);
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
@@ -212,7 +212,7 @@ public final class Retry<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retry up to 3 times with 1 second interval if result is null or TimeoutException occurs
-     * Retry<String> retry = Retry.of(3, 1000, (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
+     * Retry<String> retry = Retry.withFixedDelay(3, 1000, (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *

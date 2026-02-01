@@ -50,7 +50,7 @@ public class GuavaMultisetType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(multisetType.isGenericType());
+        assertTrue(multisetType.isParameterizedType());
     }
 
     @Test

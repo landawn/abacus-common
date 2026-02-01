@@ -351,7 +351,7 @@ public final class Iterators {
      * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable.empty()} if the index is out of bounds.
      * @throws IllegalArgumentException if {@code index} is negative.
      */
-    public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
+    public static <T> Nullable<T> elementAt(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         if (iter == null) {
@@ -570,12 +570,12 @@ public final class Iterators {
      * <pre>{@code
      * Iterator<String> iter1 = Arrays.asList("A", "B", "C").iterator();
      * Iterator<String> iter2 = Arrays.asList("A", "B", "C").iterator();
-     * boolean equal = Iterators.elementsEqual(iter1, iter2);
+     * boolean equal = Iterators.equalsInOrder(iter1, iter2);
      * // equal => true
      *
      * Iterator<Integer> iter3 = Arrays.asList(1, 2, 3).iterator();
      * Iterator<Integer> iter4 = Arrays.asList(1, 2, 4).iterator();
-     * boolean notEqual = Iterators.elementsEqual(iter3, iter4);
+     * boolean notEqual = Iterators.equalsInOrder(iter3, iter4);
      * // notEqual => false
      * }</pre>
      *
@@ -583,7 +583,7 @@ public final class Iterators {
      * @param iterator2 the second iterator to compare.
      * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise.
      */
-    public static boolean elementsEqual(final Iterator<?> iterator1, final Iterator<?> iterator2) {
+    public static boolean equalsInOrder(final Iterator<?> iterator1, final Iterator<?> iterator2) {
         final boolean isIterator1Empty = N.isEmpty(iterator1);
         final boolean isIterator2Empty = N.isEmpty(iterator2);
 
@@ -622,6 +622,8 @@ public final class Iterators {
      * @param n the number of times to repeat the element. Must be non-negative.
      * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is {@code 0}.
      * @throws IllegalArgumentException if {@code n} is negative.
+     * @see #repeat(Object, long)
+     * @see #cycle(Object...)
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
@@ -668,6 +670,8 @@ public final class Iterators {
      * @param n the number of times to repeat the element. Must be non-negative.
      * @return an {@code ObjIterator} that returns the element {@code n} times, or an empty iterator if {@code n} is {@code 0}.
      * @throws IllegalArgumentException if {@code n} is negative.
+     * @see #repeat(Object, int)
+     * @see #cycle(Object...)
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
@@ -715,9 +719,12 @@ public final class Iterators {
      * @param n the number of times the collection's elements are to be repeated.
      * @return an {@code ObjIterator} over the elements in the collection, repeated {@code n} times.
      * @throws IllegalArgumentException if {@code c} is {@code null} or empty when {@code n} > 0, or if {@code n} is negative.
+     * @see #cycle(Object...)
+     * @see #cycle(Iterable)
+     * @see #repeatElementsToSize(Collection, long)
      * @see N#repeatElements(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> repeatElements(final Iterable<? extends T> c, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' cannot be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -753,84 +760,6 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the entire collection {@code n} times.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("A", "B");
-     * ObjIterator<String> iter = Iterators.repeatCollection(list, 3);
-     * // Yields: "A", "B", "A", "B", "A", "B"
-     *
-     * List<Integer> numbers = Arrays.asList(1, 2, 3);
-     * ObjIterator<Integer> iter2 = Iterators.repeatCollection(numbers, 2);
-     * // Yields: 1, 2, 3, 1, 2, 3
-     * }</pre>
-     *
-     * <p><b>Preconditions:</b></p>
-     * <ul>
-     *   <li>If {@code n} > 0, then {@code c} must not be {@code null} or empty</li>
-     *   <li>If {@code n} == 0, {@code c} can be anything (result is empty iterator)</li>
-     * </ul>
-     *
-     * <p><b>Common Mistakes:</b></p>
-     * <pre>{@code
-     * // DON'T: Pass empty collection with n > 0
-     * Iterators.repeatCollection(Collections.emptyList(), 5);   // IllegalArgumentException!
-     *
-     * // DO: Ensure collection has elements
-     * if (N.notEmpty(collection)) {
-     *     Iterator<T> it = Iterators.repeatCollection(collection, n);
-     * }
-     *
-     * // DON'T: Pass null collection with n > 0
-     * Iterators.repeatCollection(null, 3);   // IllegalArgumentException!
-     *
-     * // DO: Check for null first
-     * if (collection != null && !collection.isEmpty()) {
-     *     Iterator<T> it = Iterators.repeatCollection(collection, n);
-     * }
-     * }</pre>
-     *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection to be repeated; must not be empty if {@code n} > 0.
-     * @param n the number of times the collection is to be repeated.
-     * @return an {@code ObjIterator} over the collection, repeated {@code n} times.
-     * @throws IllegalArgumentException if {@code c} is {@code null} or empty when {@code n} > 0, or if {@code n} is negative.
-     * @see N#repeatCollection(Collection, int)
-     */
-    public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n);
-
-        if (n == 0 || N.isEmpty(c)) {
-            return ObjIterator.empty();
-        }
-
-        return new ObjIterator<>() {
-            private Iterator<? extends T> iter = null;
-            private long cnt = n;
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0 || (iter != null && iter.hasNext());
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                if (iter == null || !iter.hasNext()) {
-                    iter = c.iterator();
-                    cnt--;
-                }
-
-                return iter.next();
-            }
-        };
-    }
-
-    /**
      * Repeats each element in the specified Collection a calculated number of times until the specified total size is reached.
      * Elements are repeated in order, with some elements potentially repeated more times than others to reach exactly the target size.
      *
@@ -851,6 +780,8 @@ public final class Iterators {
      * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
      * @return an {@code ObjIterator} that repeats each element until {@code size} elements have been produced.
      * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
+     * @see #repeatElements(Iterable, long)
+     * @see #cycleToSize(Collection, long)
      * @see N#repeatElementsToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
@@ -896,62 +827,6 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the entire specified Collection cyclically until the specified total size is reached.
-     * The collection is repeated as a whole, cycling through it multiple times if necessary.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("A", "B");
-     * ObjIterator<String> iter = Iterators.repeatCollectionToSize(list, 5);
-     * // Yields: "A", "B", "A", "B", "A"
-     *
-     * List<Integer> numbers = Arrays.asList(1, 2, 3);
-     * ObjIterator<Integer> iter2 = Iterators.repeatCollectionToSize(numbers, 7);
-     * // Yields: 1, 2, 3, 1, 2, 3, 1
-     * }</pre>
-     *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
-     * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
-     * @return an {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
-     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
-     * @see N#repeatCollectionToSize(Collection, int)
-     */
-    public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
-        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
-        N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
-
-        if (N.isEmpty(c) || size == 0) {
-            return ObjIterator.empty();
-        }
-
-        return new ObjIterator<>() {
-            private Iterator<? extends T> iter = null;
-            private long cnt = size;
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0;
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                if (iter == null || !iter.hasNext()) {
-                    iter = c.iterator();
-                }
-
-                cnt--;
-
-                return iter.next();
-            }
-        };
-    }
-
-    /**
      * Returns an infinite iterator cycling over the provided elements.
      * However, if the provided elements are empty, an empty iterator will be returned.
      *
@@ -967,6 +842,8 @@ public final class Iterators {
      * @param <T> the type of elements in the array.
      * @param elements the array whose elements are to be cycled over.
      * @return an iterator cycling over the elements of the array.
+     * @see #repeat(Object, int)
+     * @see #repeat(Object, long)
      */
     @SafeVarargs
     public static <T> ObjIterator<T> cycle(final T... elements) {
@@ -1015,6 +892,11 @@ public final class Iterators {
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over.
      * @return an iterator cycling over the elements of the iterable.
+     * @see #cycle(Object...)
+     * @see #cycle(Iterable, long)
+     * @see #cycleToSize(Collection, long)
+     * @see #repeatElements(Iterable, long)
+     * @see N#cycle(Collection, int)
      */
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable) {
         if (N.isEmpty(iterable)) {
@@ -1083,6 +965,10 @@ public final class Iterators {
      * @param rounds the number of times to cycle over the iterable's elements.
      * @return an {@code ObjIterator} cycling over the elements of the iterable for the specified number of rounds.
      * @throws IllegalArgumentException if {@code rounds} is negative.
+     * @see #cycle(Object...)
+     * @see #cycle(Iterable)
+     * @see #cycleToSize(Collection, long)
+     * @see N#cycle(Collection, int)
      */
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable, final long rounds) {
         N.checkArgNotNegative(rounds, cs.rounds);
@@ -1137,6 +1023,65 @@ public final class Iterators {
                 }
 
                 return a[cursor++];
+            }
+        };
+    }
+
+    /**
+     * Repeats the entire specified Collection cyclically until the specified total size is reached.
+     * The collection is repeated as a whole, cycling through it multiple times if necessary.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B");
+     * ObjIterator<String> iter = Iterators.cycleToSize(list, 5);
+     * // Yields: "A", "B", "A", "B", "A"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2, 3);
+     * ObjIterator<Integer> iter2 = Iterators.cycleToSize(numbers, 7);
+     * // Yields: 1, 2, 3, 1, 2, 3, 1
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
+     * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
+     * @return an {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
+     * @see #cycle(Iterable)
+     * @see #cycle(Iterable, long)
+     * @see #repeatElementsToSize(Collection, long)
+     * @see N#cycleToSize(Collection, int)
+     */
+    public static <T> ObjIterator<T> cycleToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
+        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
+        N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
+
+        if (N.isEmpty(c) || size == 0) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private Iterator<? extends T> iter = null;
+            private long cnt = size;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (iter == null || !iter.hasNext()) {
+                    iter = c.iterator();
+                }
+
+                cnt--;
+
+                return iter.next();
             }
         };
     }

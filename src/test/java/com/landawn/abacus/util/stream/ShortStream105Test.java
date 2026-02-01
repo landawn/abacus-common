@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -946,7 +946,7 @@ public class ShortStream105Test extends TestBase {
     @Test
     @DisplayName("Test summarize() method")
     public void testSummarize() {
-        ShortSummaryStatistics stats = stream.summarize();
+        ShortSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(1, stats.getMin());
         assertEquals(5, stats.getMax());
@@ -955,9 +955,9 @@ public class ShortStream105Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test summarizeAndPercentiles() method")
+    @DisplayName("Test summaryStatisticsAndPercentiles() method")
     public void testSummarizeAndPercentiles() {
-        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = stream.summarizeAndPercentiles();
+        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = stream.summaryStatisticsAndPercentiles();
 
         ShortSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

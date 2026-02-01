@@ -308,25 +308,25 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testInvert_fromTrue() {
         MutableBoolean mb = MutableBoolean.of(true);
-        mb.invert();
+        mb.negate();
         assertFalse(mb.value());
     }
 
     @Test
     public void testInvert_fromFalse() {
         MutableBoolean mb = MutableBoolean.of(false);
-        mb.invert();
+        mb.negate();
         assertTrue(mb.value());
     }
 
     @Test
     public void testInvert_multiple() {
         MutableBoolean mb = MutableBoolean.of(true);
-        mb.invert();
+        mb.negate();
         assertFalse(mb.value());
-        mb.invert();
+        mb.negate();
         assertTrue(mb.value());
-        mb.invert();
+        mb.negate();
         assertFalse(mb.value());
     }
 

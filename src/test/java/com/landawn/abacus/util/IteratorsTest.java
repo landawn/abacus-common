@@ -190,15 +190,15 @@ public class IteratorsTest {
     @Test
     public void test_repeat() throws Exception {
         Stream.of(Iterators.repeatElements(CommonUtil.asList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.repeatCollection(CommonUtil.asList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.cycle(CommonUtil.asList(1, 2, 3), 3)).println();
         Stream.of(Iterators.repeatElementsToSize(CommonUtil.asList(1, 2, 3), 7)).println();
-        Stream.of(Iterators.repeatCollectionToSize(CommonUtil.asList(1, 2, 3), 5)).println();
+        Stream.of(Iterators.cycleToSize(CommonUtil.asList(1, 2, 3), 5)).println();
 
         assertEquals(3, CommonUtil.repeatElementsToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 3).size());
         assertEquals(8, CommonUtil.repeatElementsToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 8).size());
 
-        assertEquals(3, CommonUtil.repeatCollectionToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, CommonUtil.repeatCollectionToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 8).size());
+        assertEquals(3, CommonUtil.cycleToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, CommonUtil.cycleToSize(CommonUtil.asList(1, 2, 3, 4, 5, 6), 8).size());
     }
 
     @Test

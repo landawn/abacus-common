@@ -468,10 +468,10 @@ public class FloatStream102Test extends TestBase {
         }
 
         @Test
-        @DisplayName("summarize() should return summary statistics")
-        public void testSummarize() {
+        @DisplayName("summaryStatistics() should return summary statistics")
+        public void testsummaryStatistics() {
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-            FloatSummaryStatistics stats = stream.summarize();
+            FloatSummaryStatistics stats = stream.summaryStatistics();
             assertEquals(5, stats.getCount());
             assertEquals(1.0f, stats.getMin(), 0.001);
             assertEquals(5.0f, stats.getMax(), 0.001);

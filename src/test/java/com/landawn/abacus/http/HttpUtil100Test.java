@@ -74,19 +74,19 @@ public class HttpUtil100Test extends TestBase {
 
     @Test
     public void testReadHttpHeadValue() {
-        assertEquals("value", HttpUtil.readHttpHeadValue("value"));
-        assertNull(HttpUtil.readHttpHeadValue(null));
-        assertEquals("123", HttpUtil.readHttpHeadValue(123));
+        assertEquals("value", HttpUtil.readHttpHeaderValue("value"));
+        assertNull(HttpUtil.readHttpHeaderValue(null));
+        assertEquals("123", HttpUtil.readHttpHeaderValue(123));
 
         // Test with Collection
         List<String> values = Arrays.asList("value1", "value2", "value3");
-        assertEquals("value1,value2,value3", HttpUtil.readHttpHeadValue(values));
+        assertEquals("value1,value2,value3", HttpUtil.readHttpHeaderValue(values));
 
         // Test with empty Collection
-        assertEquals("", HttpUtil.readHttpHeadValue(new ArrayList<>()));
+        assertEquals("", HttpUtil.readHttpHeaderValue(new ArrayList<>()));
 
         // Test with single-element Collection
-        assertEquals("single", HttpUtil.readHttpHeadValue(Arrays.asList("single")));
+        assertEquals("single", HttpUtil.readHttpHeaderValue(Arrays.asList("single")));
     }
 
     @Test

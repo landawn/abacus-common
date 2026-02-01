@@ -95,9 +95,9 @@ public class JsonParserImpl100Test extends TestBase {
     public static class PersonWithTransient {
         private String name;
         private transient String secret;
-        @JsonXmlField(expose = JsonXmlField.Expose.SERIALIZE_ONLY)
+        @JsonXmlField(direction = JsonXmlField.Direction.SERIALIZE_ONLY)
         private String writeOnly;
-        @JsonXmlField(expose = JsonXmlField.Expose.DESERIALIZE_ONLY)
+        @JsonXmlField(direction = JsonXmlField.Direction.DESERIALIZE_ONLY)
         private String readOnly;
 
         public String getName() {

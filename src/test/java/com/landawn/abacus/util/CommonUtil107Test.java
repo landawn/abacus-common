@@ -636,19 +636,19 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testFillBean() {
         TestBean bean = new TestBean();
-        Beans.fill(bean);
+        Beans.randomize(bean);
         Assertions.assertNotNull(bean);
     }
 
     @Test
     public void testFillBeanClass() {
-        TestBean bean = Beans.fill(TestBean.class);
+        TestBean bean = Beans.newRandom(TestBean.class);
         Assertions.assertNotNull(bean);
     }
 
     @Test
     public void testFillBeanClassWithCount() {
-        List<TestBean> beans = Beans.fill(TestBean.class, 3);
+        List<TestBean> beans = Beans.newRandomList(TestBean.class, 3);
         Assertions.assertEquals(3, beans.size());
         for (TestBean bean : beans) {
             Assertions.assertNotNull(bean);
@@ -770,7 +770,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollection() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = CommonUtil.repeatCollection(input, 2);
+        List<String> result = CommonUtil.cycle(input, 2);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c"), result);
     }
@@ -778,14 +778,14 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = CommonUtil.repeatCollection(input, 0);
+        List<String> result = CommonUtil.cycle(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRepeatCollectionEmpty() {
         List<String> input = new ArrayList<>();
-        List<String> result = CommonUtil.repeatCollection(input, 3);
+        List<String> result = CommonUtil.cycle(input, 3);
         Assertions.assertTrue(result.isEmpty());
     }
 
@@ -815,7 +815,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionToSize() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = CommonUtil.repeatCollectionToSize(input, 7);
+        List<String> result = CommonUtil.cycleToSize(input, 7);
         Assertions.assertEquals(7, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c", "a"), result);
     }
@@ -823,7 +823,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionToSizeExact() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = CommonUtil.repeatCollectionToSize(input, 6);
+        List<String> result = CommonUtil.cycleToSize(input, 6);
         Assertions.assertEquals(6, result.size());
         Assertions.assertEquals(Arrays.asList("a", "b", "c", "a", "b", "c"), result);
     }
@@ -831,7 +831,7 @@ public class CommonUtil107Test extends TestBase {
     @Test
     public void testRepeatCollectionToSizeZero() {
         List<String> input = Arrays.asList("a", "b", "c");
-        List<String> result = CommonUtil.repeatCollectionToSize(input, 0);
+        List<String> result = CommonUtil.cycleToSize(input, 0);
         Assertions.assertTrue(result.isEmpty());
     }
 

@@ -121,7 +121,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Byte[] data = type.get(rs, 1);
      * // Converts database byte[] to Byte[]
      * }</pre>

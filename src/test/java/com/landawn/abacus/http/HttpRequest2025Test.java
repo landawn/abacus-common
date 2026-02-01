@@ -582,9 +582,9 @@ public class HttpRequest2025Test extends TestBase {
     }
 
     @Test
-    public void testConnectionTimeoutZero() {
+    public void testconnectTimeoutZero() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.connectionTimeout(0L);
+        HttpRequest result = request.connectTimeout(0L);
         assertNotNull(result);
     }
 
@@ -606,7 +606,7 @@ public class HttpRequest2025Test extends TestBase {
 
     @Test
     public void testChainedMethodCalls() {
-        HttpRequest request = HttpRequest.url(baseUrl).header("Accept", "application/json").connectionTimeout(5000L).readTimeout(10000L).useCaches(false);
+        HttpRequest request = HttpRequest.url(baseUrl).header("Accept", "application/json").connectTimeout(5000L).readTimeout(10000L).useCaches(false);
         assertNotNull(request);
     }
 

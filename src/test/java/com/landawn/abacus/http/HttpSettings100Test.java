@@ -27,7 +27,7 @@ public class HttpSettings100Test extends TestBase {
     public void testCreate() {
         HttpSettings settings = HttpSettings.create();
         assertNotNull(settings);
-        assertEquals(0, settings.getConnectionTimeout());
+        assertEquals(0, settings.getConnectTimeout());
         assertEquals(0, settings.getReadTimeout());
         assertFalse(settings.getUseCaches());
         assertTrue(settings.doInput());
@@ -39,20 +39,20 @@ public class HttpSettings100Test extends TestBase {
     }
 
     @Test
-    public void testGetConnectionTimeout() {
+    public void testGetconnectTimeout() {
         HttpSettings settings = new HttpSettings();
-        assertEquals(0, settings.getConnectionTimeout());
+        assertEquals(0, settings.getConnectTimeout());
 
-        settings.setConnectionTimeout(5000L);
-        assertEquals(5000L, settings.getConnectionTimeout());
+        settings.setConnectTimeout(5000L);
+        assertEquals(5000L, settings.getConnectTimeout());
     }
 
     @Test
-    public void testSetConnectionTimeout() {
+    public void testSetconnectTimeout() {
         HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.setConnectionTimeout(3000L);
+        HttpSettings result = settings.setConnectTimeout(3000L);
         assertSame(settings, result);
-        assertEquals(3000L, settings.getConnectionTimeout());
+        assertEquals(3000L, settings.getConnectTimeout());
     }
 
     @Test
@@ -348,7 +348,7 @@ public class HttpSettings100Test extends TestBase {
     @Test
     public void testCopy() {
         HttpSettings original = new HttpSettings();
-        original.setConnectionTimeout(5000L)
+        original.setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
                 .setUseCaches(true)
                 .doInput(false)
@@ -371,7 +371,7 @@ public class HttpSettings100Test extends TestBase {
 
         HttpSettings copy = original.copy();
 
-        assertEquals(original.getConnectionTimeout(), copy.getConnectionTimeout());
+        assertEquals(original.getConnectTimeout(), copy.getConnectTimeout());
         assertEquals(original.getReadTimeout(), copy.getReadTimeout());
         assertEquals(original.getSSLSocketFactory(), copy.getSSLSocketFactory());
         assertEquals(original.getProxy(), copy.getProxy());
@@ -389,10 +389,10 @@ public class HttpSettings100Test extends TestBase {
     @Test
     public void testCopyWithNullHeaders() {
         HttpSettings original = new HttpSettings();
-        original.setConnectionTimeout(5000L);
+        original.setConnectTimeout(5000L);
 
         HttpSettings copy = original.copy();
-        assertEquals(5000L, copy.getConnectionTimeout());
+        assertEquals(5000L, copy.getConnectTimeout());
         assertNotNull(copy.headers());
         assertTrue(copy.headers().isEmpty());
     }
@@ -400,11 +400,11 @@ public class HttpSettings100Test extends TestBase {
     @Test
     public void testToString() {
         HttpSettings settings = new HttpSettings();
-        settings.setConnectionTimeout(5000L).setReadTimeout(10000L).setUseCaches(true).setContentFormat(ContentFormat.JSON).header("Header1", "value1");
+        settings.setConnectTimeout(5000L).setReadTimeout(10000L).setUseCaches(true).setContentFormat(ContentFormat.JSON).header("Header1", "value1");
 
         String str = settings.toString();
         assertNotNull(str);
-        assertTrue(str.contains("connectionTimeout=5000"));
+        assertTrue(str.contains("connectTimeout=5000"));
         assertTrue(str.contains("readTimeout=10000"));
         assertTrue(str.contains("useCaches=true"));
         assertTrue(str.contains("contentFormat=JSON"));

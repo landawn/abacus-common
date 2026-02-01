@@ -132,10 +132,10 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * num.setValue(20);   // value is now 20
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final int value) {
-        this.value = value;
+    public void setValue(final int newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -148,12 +148,12 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * int old = num.getAndSet(20);   // returns 10, value is now 20
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the value before it was updated
      */
-    public int getAndSet(final int value) {
+    public int getAndSet(final int newValue) {
         final int result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -167,11 +167,11 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * int newVal = num.setAndGet(20);   // returns 20, value is now 20
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value after it has been set
      */
-    public int setAndGet(final int value) {
-        this.value = value;
+    public int setAndGet(final int newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -232,7 +232,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -240,14 +240,14 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * num.add(5);   // value is now 15
      * }</pre>
      * 
-     * @param operand the value to add
+     * @param delta the value to add
      */
-    public void add(final int operand) {
-        value += operand;
+    public void add(final int delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -255,10 +255,10 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * num.subtract(3);   // value is now 7
      * }</pre>
      * 
-     * @param operand the value to subtract
+     * @param delta the value to subtract
      */
-    public void subtract(final int operand) {
-        value -= operand;
+    public void subtract(final int delta) {
+        value -= delta;
     }
 
     /**

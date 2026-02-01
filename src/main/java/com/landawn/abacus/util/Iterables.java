@@ -914,7 +914,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Comparable...)
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
@@ -934,7 +934,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Object[], Comparator)
      */
     public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
@@ -954,7 +954,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterable)
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final Iterable<? extends T> c) {
@@ -974,7 +974,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterable, Comparator)
      */
     public static <T> Nullable<T> min(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
@@ -994,7 +994,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterator)
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final Iterator<? extends T> iter) {
@@ -1014,7 +1014,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterator, Comparator)
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
@@ -1079,7 +1079,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
@@ -1101,7 +1101,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#min(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
@@ -1122,7 +1122,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the minimum extracted integer value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#minIntOrDefaultIfEmpty(Object[], ToIntFunction, int)
      */
     @Beta
@@ -1158,7 +1158,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the minimum extracted integer value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#minIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
      */
     @Beta
@@ -1183,7 +1183,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the minimum extracted integer value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#minIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
      */
     @Beta
@@ -1219,7 +1219,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the minimum extracted long value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#minLongOrDefaultIfEmpty(Object[], ToLongFunction, long)
      */
     @Beta
@@ -1255,7 +1255,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the minimum extracted long value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#minLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
      */
     @Beta
@@ -1280,7 +1280,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the minimum extracted long value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#minLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
      */
     @Beta
@@ -1316,7 +1316,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the minimum extracted double value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#minDoubleOrDefaultIfEmpty(Object[], ToDoubleFunction, double)
      */
     @Beta
@@ -1352,7 +1352,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the minimum extracted double value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#minDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
      */
     @Beta
@@ -1377,7 +1377,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the minimum extracted double value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#minDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
      */
     @Beta
@@ -1411,7 +1411,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of characters to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalChar} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalChar}.
      * @see N#max(char...)
      */
     public static OptionalChar max(final char... a) {
@@ -1429,7 +1429,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of bytes to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalByte} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}.
      * @see N#max(byte...)
      */
     public static OptionalByte max(final byte... a) {
@@ -1447,7 +1447,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of shorts to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalShort} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalShort}.
      * @see N#max(short...)
      */
     public static OptionalShort max(final short... a) {
@@ -1465,7 +1465,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of integers to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#max(int...)
      */
     public static OptionalInt max(final int... a) {
@@ -1483,7 +1483,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of longs to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#max(long...)
      */
     public static OptionalLong max(final long... a) {
@@ -1501,7 +1501,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of floats to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalFloat} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}.
      * @see N#max(float...)
      */
     public static OptionalFloat max(final float... a) {
@@ -1519,7 +1519,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param a the array of doubles to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#max(double...)
      */
     public static OptionalDouble max(final double... a) {
@@ -1539,7 +1539,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Comparable...)
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
@@ -1559,7 +1559,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Object[], Comparator)
      */
     public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
@@ -1579,7 +1579,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterable)
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Iterable<? extends T> c) {
@@ -1599,7 +1599,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterable, Comparator)
      */
     public static <T> Nullable<T> max(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
@@ -1619,7 +1619,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterator)
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Iterator<? extends T> iter) {
@@ -1639,7 +1639,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterator, Comparator)
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
@@ -1682,7 +1682,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Object[], Comparator)
      */
     @SuppressWarnings("rawtypes")
@@ -1704,7 +1704,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
@@ -1726,7 +1726,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#max(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
@@ -1747,7 +1747,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the maximum extracted integer value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#maxIntOrDefaultIfEmpty(Object[], ToIntFunction, int)
      */
     @Beta
@@ -1783,7 +1783,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the maximum extracted integer value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#maxIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
      */
     @Beta
@@ -1808,7 +1808,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the maximum extracted integer value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#maxIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
      */
     @Beta
@@ -1844,7 +1844,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the maximum extracted long value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#maxLongOrDefaultIfEmpty(Object[], ToLongFunction, long)
      */
     @Beta
@@ -1880,7 +1880,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the maximum extracted long value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#maxLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
      */
     @Beta
@@ -1905,7 +1905,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the maximum extracted long value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#maxLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
      */
     @Beta
@@ -1941,7 +1941,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the maximum extracted double value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#maxDoubleOrDefaultIfEmpty(Object[], ToDoubleFunction, double)
      */
     @Beta
@@ -1977,7 +1977,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the maximum extracted double value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#maxDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
      */
     @Beta
@@ -2002,7 +2002,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the maximum extracted double value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#maxDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
      */
     @Beta
@@ -2038,7 +2038,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the array is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Comparable...)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final T[] a) {
@@ -2059,7 +2059,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the array is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Object[], Comparator)
      */
     public static <T> Optional<Pair<T, T>> minMax(final T[] a, final Comparator<? super T> cmp) {
@@ -2079,7 +2079,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c) {
@@ -2102,7 +2102,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Iterable, Comparator)
      */
     public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
@@ -2124,7 +2124,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Iterator)
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter) {
@@ -2145,7 +2145,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#minMax(Iterator, Comparator)
      */
     public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, final Comparator<? super T> cmp) {
@@ -2170,7 +2170,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of values to find the median of.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#median(Comparable...)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
@@ -2198,7 +2198,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of values to find the median of.
      * @param cmp the comparator to determine the order of the values.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#median(Object[], Comparator)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
@@ -2225,7 +2225,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the collection of values to find the median of.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#median(Collection)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
@@ -2253,7 +2253,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the collection of values to find the median of.
      * @param cmp the comparator to determine the order of the values.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @see N#median(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
@@ -2275,7 +2275,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param k the position of the largest element to find (1-based index).
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
      * @see N#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
@@ -2296,7 +2296,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param k the position of the largest element to find (1-based index).
      * @param cmp the comparator to determine the order of the elements.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
@@ -2316,7 +2316,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param k the position of the largest element to find (1-based index).
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code Nullable} containing the k-th largest value if the collection is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
      * @see N#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
@@ -2356,7 +2356,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#sumInt(Iterable)
      */
     public static <T extends Number> OptionalInt sumInt(final Iterable<? extends T> c) {
@@ -2376,7 +2376,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @see N#sumInt(Iterable, ToIntFunction)
      */
     public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
@@ -2401,7 +2401,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumIntToLong(Iterable)
      */
     public static <T extends Number> OptionalLong sumIntToLong(final Iterable<? extends T> c) {
@@ -2421,7 +2421,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumIntToLong(Iterable, ToIntFunction)
      */
     public static <T> OptionalLong sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
@@ -2446,7 +2446,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumLong(Iterable)
      */
     public static <T extends Number> OptionalLong sumLong(final Iterable<? extends T> c) {
@@ -2466,7 +2466,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumLong(Iterable, ToLongFunction)
      */
     public static <T> OptionalLong sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
@@ -2491,7 +2491,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#sumDouble(Iterable)
      */
     public static <T extends Number> OptionalDouble sumDouble(final Iterable<? extends T> c) {
@@ -2511,7 +2511,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#sumDouble(Iterable, ToDoubleFunction)
      */
     public static <T> OptionalDouble sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
@@ -2535,7 +2535,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param c the iterable of BigInteger elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigInteger>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#sumBigInteger(Iterable)
      */
     public static Optional<BigInteger> sumBigInteger(final Iterable<? extends BigInteger> c) {
@@ -2555,7 +2555,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigInteger value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigInteger>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#sumBigInteger(Iterable, Function)
      */
     public static <T> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
@@ -2579,7 +2579,7 @@ public final class Iterables {
      * }</pre>
      *
      * @param c the iterable of BigDecimal elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#sumBigDecimal(Iterable)
      */
     public static Optional<BigDecimal> sumBigDecimal(final Iterable<? extends BigDecimal> c) {
@@ -2599,7 +2599,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigDecimal value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#sumBigDecimal(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
@@ -2769,7 +2769,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageInt(Iterable)
      */
     public static <T extends Number> OptionalDouble averageInt(final Iterable<? extends T> c) {
@@ -2796,7 +2796,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageInt(Iterable, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
@@ -2815,7 +2815,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageLong(Number[])
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a) {
@@ -2845,7 +2845,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param func the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageLong(Object[], ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final T[] a, final ToLongFunction<? super T> func) {
@@ -2936,7 +2936,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageLong(Iterable)
      */
     public static <T extends Number> OptionalDouble averageLong(final Iterable<? extends T> c) {
@@ -2959,7 +2959,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a long value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageLong(Iterable, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
@@ -2978,7 +2978,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageDouble(Number[])
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a) {
@@ -3008,7 +3008,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param func the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageDouble(Object[], ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final T[] a, final ToDoubleFunction<? super T> func) {
@@ -3130,7 +3130,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageDouble(Iterable)
      */
     public static <T extends Number> OptionalDouble averageDouble(final Iterable<? extends T> c) {
@@ -3157,7 +3157,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a double value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageDouble(Iterable, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
@@ -3179,7 +3179,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigInteger(Iterable)
      */
     public static Optional<BigDecimal> averageBigInteger(final Iterable<? extends BigInteger> c) {
@@ -3193,7 +3193,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigInteger value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigInteger(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
@@ -3211,7 +3211,7 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * @param c the iterable of elements to evaluate.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigDecimal(Iterable)
      */
     public static Optional<BigDecimal> averageBigDecimal(final Iterable<? extends BigDecimal> c) {
@@ -3225,7 +3225,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigDecimal value from each element.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigDecimal(Iterable, Function)
      */
     public static <T> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
@@ -3254,7 +3254,7 @@ public final class Iterables {
      *
      * @param a the array of elements to evaluate.
      * @param valueToFind the value to find in the array.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#indexOf(Object[], Object)
      * @see Index#of(Object[], Object)
      */
@@ -3278,7 +3278,7 @@ public final class Iterables {
      *
      * @param c the collection of elements to evaluate.
      * @param valueToFind the value to find in the collection.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#indexOf(Collection, Object)
      * @see Index#of(Collection, Object)
      */
@@ -3302,7 +3302,7 @@ public final class Iterables {
      *
      * @param a the array of elements to evaluate.
      * @param valueToFind the value to find in the array.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the index of the last occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#lastIndexOf(Object[], Object)
      * @see Index#last(Object[], Object)
      */
@@ -3326,7 +3326,7 @@ public final class Iterables {
      *
      * @param c the collection of elements to evaluate.
      * @param valueToFind the value to find in the collection.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return an {@code OptionalInt} containing the index of the last occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#lastIndexOf(Collection, Object)
      * @see Index#last(Collection, Object)
      */
@@ -3767,24 +3767,24 @@ public final class Iterables {
      * <pre>{@code
      * List<String> src = Arrays.asList("a", "b", "c");
      * List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z", "w"));
-     * Iterables.copy(src, dest);
+     * Iterables.copyInto(src, dest);
      * // dest => ["a", "b", "c", "w"]
      *
      * List<Integer> numbers = Arrays.asList(1, 2, 3);
      * List<Integer> target = new ArrayList<>(Arrays.asList(0, 0, 0));
-     * Iterables.copy(numbers, target);
+     * Iterables.copyInto(numbers, target);
      * // target => [1, 2, 3]
      * }</pre>
      *
      * @param <T> the type of the elements.
      * @param src the source list from which elements are to be copied.
      * @param dest the destination list to which elements are to be copied.
-     * @see #copy(List, int, List, int, int)
+     * @see #copyRange(List, int, List, int, int)
      * @see java.util.Collections#copy(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
      */
     // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
-    public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
+    public static <T> void copyInto(final List<? extends T> src, final List<? super T> dest) {
         if (CommonUtil.isEmpty(src)) {
             return;
         }
@@ -3804,12 +3804,12 @@ public final class Iterables {
      * <pre>{@code
      * List<String> src = Arrays.asList("a", "b", "c", "d", "e");
      * List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z", "w", "v"));
-     * Iterables.copy(src, 1, dest, 2, 3);
+     * Iterables.copyRange(src, 1, dest, 2, 3);
      * // dest => ["x", "y", "b", "c", "d"]
      *
      * List<Integer> numbers = Arrays.asList(10, 20, 30, 40);
      * List<Integer> target = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0));
-     * Iterables.copy(numbers, 0, target, 1, 2);
+     * Iterables.copyRange(numbers, 0, target, 1, 2);
      * // target => [0, 10, 20, 0, 0]
      * }</pre>
      *
@@ -3820,12 +3820,12 @@ public final class Iterables {
      * @param destPos the starting position in the destination list.
      * @param length the number of elements to be copied.
      * @throws IndexOutOfBoundsException if the indexes are out of bounds.
-     * @see #copy(List, List)
+     * @see #copyInto(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
      * @see Collections#copy(List, List)
      */
     // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
-    public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
+    public static <T> void copyRange(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
         CommonUtil.checkFromToIndex(srcPos, srcPos + length, CommonUtil.size(src));
         CommonUtil.checkFromToIndex(destPos, destPos + length, CommonUtil.size(dest));
@@ -3865,7 +3865,7 @@ public final class Iterables {
      * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
      *
      * Returns a reversed view of the specified list. For example, {@code
-     * reverse(Arrays.asList(1, 2, 3))} returns a list containing {@code 3, 2, 1}. The returned
+     * asReversed(Arrays.asList(1, 2, 3))} returns a list containing {@code 3, 2, 1}. The returned
      * list is backed by this list, so changes in the returned list are reflected in this list, and
      * vice versa. The returned list supports all the optional list operations supported by this
      * list.
@@ -3875,31 +3875,31 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-     * List<Integer> reversed = Iterables.reverse(numbers);
+     * List<Integer> reversed = Iterables.asReversed(numbers);
      * // reversed => [5, 4, 3, 2, 1]
      *
      * List<String> words = Arrays.asList("hello", "world", "java");
-     * List<String> reversedWords = Iterables.reverse(words);
+     * List<String> reversedWords = Iterables.asReversed(words);
      * // reversedWords => ["java", "world", "hello"]
      *
      * // The returned list is a view - changes are reflected in both lists
      * List<Integer> mutable = new ArrayList<>(Arrays.asList(1, 2, 3));
-     * List<Integer> reversedView = Iterables.reverse(mutable);
+     * List<Integer> reversedView = Iterables.asReversed(mutable);
      * reversedView.set(0, 99);
      * // mutable => [1, 2, 99], reversedView => [99, 2, 1]
      * }</pre>
      *
      * @param <T> the type of the elements.
      * @param list the list to be reversed.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a reversed view of the specified list.
      * @see N#reverse(List)
      * @see N#reverse(Collection)
      * @see N#reverseToList(Collection)
      */
-    public static <T> List<T> reverse(final List<T> list) {
+    public static <T> List<T> asReversed(final List<T> list) {
         if (list instanceof ImmutableList) {
             // Avoid nullness warnings.
-            final List<?> reversed = ((ImmutableList<?>) list).reverse();
+            final List<?> reversed = ((ImmutableList<?>) list).reversed();
             return (List<T>) reversed;
         } else if (list instanceof ReverseList) {
             return ((ReverseList<T>) list).getForwardList();
@@ -3972,7 +3972,7 @@ public final class Iterables {
         @Override
         public List<T> subList(final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, size());
-            return reverse(forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)));
+            return asReversed(forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)));
         }
 
         @Override
@@ -4659,7 +4659,7 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param c the original collection from which to generate the rollup.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return a {@code List} of {@code List}s representing the rollup of the collection, starting with an empty list and progressively including more elements.
      */
     public static <T> List<List<T>> rollup(final Collection<? extends T> c) {
         final List<List<T>> res = new ArrayList<>();
@@ -4917,7 +4917,7 @@ public final class Iterables {
      *
      * @param a the first collection.
      * @param b the second collection.
-     * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @return {@code true} if the second collection is a permutation of the first, {@code false} otherwise.
      */
     private static boolean isPermutations(final Collection<?> a, final Collection<?> b) {
         if (a.size() != b.size()) {
@@ -5193,7 +5193,7 @@ public final class Iterables {
         * @param <E> the type of the elements.
          * @param sortedInputList the sorted input list.
          * @param comparator the comparator to determine the order of the elements.
-        * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+         * @return the number of permutations, or {@code Integer.MAX_VALUE} if the number is too large.
          */
         private static <E> int calculateSize(final List<E> sortedInputList, final Comparator<? super E> comparator) {
             long permutations = 1;
@@ -5265,7 +5265,7 @@ public final class Iterables {
         /**
          *
          * @param index the index of the element to return.
-        * @return a {@code Nullable} containing the minimum value if the array/iterable/iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+         * @return the element at the specified index in this Cartesian product list.
          */
         @Override
         public List<E> get(final int index) throws IndexOutOfBoundsException {
@@ -5430,7 +5430,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param arg the iterable to check.
      * @param argNameOrErrorMsg the parameter name or error message.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return an {@code Iterator} over the elements of the specified iterable.
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     static <T> Iterator<T> iterateNonEmpty(final Iterable<T> arg, final String argNameOrErrorMsg) {

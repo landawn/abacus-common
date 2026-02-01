@@ -132,10 +132,10 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * num.setValue(20.7);   // value is now 20.7
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final double value) {
-        this.value = value;
+    public void setValue(final double newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -148,12 +148,12 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * double old = num.getAndSet(20.7);   // returns 10.5, value is now 20.7
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the value before it was updated
      */
-    public double getAndSet(final double value) {
+    public double getAndSet(final double newValue) {
         final double result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -168,11 +168,11 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * double newVal = num.setAndGet(20.7);   // returns 20.7, value is now 20.7
      * }</pre>
      * 
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the newly set value
      */
-    public double setAndGet(final double value) {
-        this.value = value;
+    public double setAndGet(final double newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -265,7 +265,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -273,14 +273,14 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * num.add(5.5);   // value is now 15.5
      * }</pre>
      * 
-     * @param operand the value to add to the current value
+     * @param delta the value to add to the current value
      */
-    public void add(final double operand) {
-        value += operand;
+    public void add(final double delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -288,10 +288,10 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * num.subtract(3.5);   // value is now 6.5
      * }</pre>
      * 
-     * @param operand the value to subtract from the current value
+     * @param delta the value to subtract from the current value
      */
-    public void subtract(final double operand) {
-        value -= operand;
+    public void subtract(final double delta) {
+        value -= delta;
     }
 
     /**

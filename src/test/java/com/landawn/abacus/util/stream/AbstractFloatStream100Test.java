@@ -558,8 +558,8 @@ public class AbstractFloatStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> result = stream.summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> result = stream.summaryStatisticsAndPercentiles();
 
         FloatSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

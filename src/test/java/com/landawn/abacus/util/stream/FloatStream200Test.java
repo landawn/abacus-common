@@ -261,8 +261,8 @@ public class FloatStream200Test extends TestBase {
         }
 
         @Test
-        public void testSummarize() {
-            FloatSummaryStatistics stats = FloatStream.of(1f, 2f, 3f, 4f, 5f).summarize();
+        public void testsummaryStatistics() {
+            FloatSummaryStatistics stats = FloatStream.of(1f, 2f, 3f, 4f, 5f).summaryStatistics();
             assertEquals(5, stats.getCount());
             assertEquals(15.0, stats.getSum(), DELTA);
             assertEquals(1.0f, stats.getMin(), DELTA);

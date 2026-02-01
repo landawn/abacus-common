@@ -471,7 +471,7 @@ public final class Fn {
 
     private static final Function<Pair<Object, Object>, Object> RIGHT = Pair::right;
 
-    static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = t -> new ImmutableEntry<>(t.getValue(), t.getKey());
+    static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERT = t -> new ImmutableEntry<>(t.getValue(), t.getKey());
 
     static final BiFunction<Object, Object, Map.Entry<Object, Object>> ENTRY = ImmutableEntry::new;
 
@@ -1318,16 +1318,6 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts strings to camel case.
-     *
-     * @return a UnaryOperator that converts strings to camel case
-     * @see Strings#toCamelCase(String)
-     */
-    public static UnaryOperator<String> toCamelCase() {
-        return TO_CAMEL_CASE;
-    }
-
-    /**
      * Returns a UnaryOperator that converts strings to lower case.
      *
      * @return a UnaryOperator that converts strings to lower case
@@ -1338,16 +1328,6 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts strings to lower case with underscores.
-     *
-     * @return a UnaryOperator that converts strings to lower case with underscores
-     * @see Strings#toSnakeCase(String)
-     */
-    public static UnaryOperator<String> toSnakeCase() {
-        return TO_SNAKE_CASE;
-    }
-
-    /**
      * Returns a UnaryOperator that converts strings to upper case.
      *
      * @return a UnaryOperator that converts strings to upper case
@@ -1355,6 +1335,26 @@ public final class Fn {
      */
     public static UnaryOperator<String> toUpperCase() {
         return TO_UPPER_CASE;
+    }
+
+    /**
+     * Returns a UnaryOperator that converts strings to camel case.
+     *
+     * @return a UnaryOperator that converts strings to camel case
+     * @see Strings#toCamelCase(String)
+     */
+    public static UnaryOperator<String> toCamelCase() {
+        return TO_CAMEL_CASE;
+    }
+
+    /**
+     * Returns a UnaryOperator that converts strings to lower case with underscores.
+     *
+     * @return a UnaryOperator that converts strings to lower case with underscores
+     * @see Strings#toSnakeCase(String)
+     */
+    public static UnaryOperator<String> toSnakeCase() {
+        return TO_SNAKE_CASE;
     }
 
     /**
@@ -1545,8 +1545,8 @@ public final class Fn {
      * @return a Function that inverts Map.Entry objects
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<Entry<K, V>, Entry<V, K>> inverse() {
-        return (Function) INVERSE;
+    public static <K, V> Function<Entry<K, V>, Entry<V, K>> invert() {
+        return (Function) INVERT;
     }
 
     /**

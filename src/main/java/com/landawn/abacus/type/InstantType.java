@@ -202,7 +202,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Instant instant = type.get(rs, 1);
      * // Returns: Instant value from column 1
      * }</pre>
@@ -226,15 +226,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Instant instant = type.get(rs, "created_at");
      * // Returns: Instant value from "created_at" column
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnName the name of the column to read
+     * @param columnName the column label (or name if no label was specified) to read
      * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
@@ -250,8 +250,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO events (id, created_at) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * Instant now = Instant.now();
      * type.set(stmt, 2, now);
      * // Sets parameter to current instant
@@ -274,20 +273,20 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_event(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      * Instant now = Instant.now();
      * type.set(stmt, "created_at", now);
      * // Sets parameter to current instant
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
-     * @param columnName the name of the parameter to set
+     * @param parameterName the name of the parameter to set
      * @param x the Instant to set, or null
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final Instant x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : Timestamp.from(x));
+    public void set(final CallableStatement stmt, final String parameterName, final Instant x) throws SQLException {
+        stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x));
     }
 
     /**

@@ -160,8 +160,8 @@ public class DoubleStream200Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        DoubleSummaryStatistics stats = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).summarize();
+    public void testsummaryStatistics() {
+        DoubleSummaryStatistics stats = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(15.0, stats.getSum());
         assertEquals(1.0, stats.getMin());

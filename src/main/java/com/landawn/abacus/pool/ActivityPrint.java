@@ -117,7 +117,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ActivityPrint activity = ActivityPrint.valueOf(3600000, 300000);
+     * ActivityPrint activity = ActivityPrint.of(3600000, 300000);
      * }</pre>
      *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
@@ -125,7 +125,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return a new ActivityPrint instance
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
-    public static ActivityPrint valueOf(final long liveTime, final long maxIdleTime) {
+    public static ActivityPrint of(final long liveTime, final long maxIdleTime) {
         return new ActivityPrint(liveTime, maxIdleTime);
     }
 

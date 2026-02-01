@@ -499,7 +499,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             propInfo = element;
             propName = propInfo.name;
 
-            if (propInfo.jsonXmlExpose == JsonXmlField.Expose.DESERIALIZE_ONLY
+            if (propInfo.jsonXmlExpose == JsonXmlField.Direction.DESERIALIZE_ONLY
                     || ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(propName))) {
                 continue;
             }
@@ -1670,7 +1670,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         && (isTagByPropertyName ? xmlReader.getLocalName().equals(propName)
                                                 : xmlReader.getLocalName().equals(XmlConstants.PROPERTY))) {
                                     //noinspection StatementWithEmptyBody
-                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                             || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                         // ignore.
                                     } else {
@@ -1713,7 +1713,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
                                 //noinspection StatementWithEmptyBody
-                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
@@ -1733,7 +1733,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                 return beanInfo.finishBeanResult(result);
                             } else {
                                 //noinspection StatementWithEmptyBody
-                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                         || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
@@ -2395,7 +2395,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                 inputType);
                     }
 
-                    if (propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.SERIALIZE_ONLY) {
                         propInfo.setPropValue(result, propValue);
                     }
                 }
@@ -2750,8 +2750,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
             }
 
-            if ((nodeClass == null) && !nodeName.equalsIgnoreCase(Beans.formalizePropName(nodeName))) {
-                nodeClass = getClassByNodeName(Beans.formalizePropName(nodeName), cls);
+            if ((nodeClass == null) && !nodeName.equalsIgnoreCase(Beans.normalizePropName(nodeName))) {
+                nodeClass = getClassByNodeName(Beans.normalizePropName(nodeName), cls);
             }
 
             if (nodeClass == null) {
@@ -3327,7 +3327,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     propInfo = beanInfo.getPropInfo(beanOrPropName);
 
                     // for propInfo is null if it's unknown property
-                    if (propInfo != null && propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
+                    if (propInfo != null && propInfo.jsonXmlExpose != JsonXmlField.Direction.SERIALIZE_ONLY) {
                         if (eleValue == null) {
                             if (isNull) {
                                 propInfo.setPropValue(bean, null);

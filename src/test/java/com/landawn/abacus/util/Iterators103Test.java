@@ -32,26 +32,26 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testGet() {
-        Nullable<String> result = Iterators.get(null, 0);
+        Nullable<String> result = Iterators.elementAt(null, 0);
         assertFalse(result.isPresent());
 
         Iterator<String> emptyIter = Collections.<String> emptyIterator();
-        result = Iterators.get(emptyIter, 0);
+        result = Iterators.elementAt(emptyIter, 0);
         assertFalse(result.isPresent());
 
         List<String> list = Arrays.asList("a", "b", "c", "d");
-        result = Iterators.get(list.iterator(), 0);
+        result = Iterators.elementAt(list.iterator(), 0);
         assertTrue(result.isPresent());
         assertEquals("a", result.get());
 
-        result = Iterators.get(list.iterator(), 2);
+        result = Iterators.elementAt(list.iterator(), 2);
         assertTrue(result.isPresent());
         assertEquals("c", result.get());
 
-        result = Iterators.get(list.iterator(), 4);
+        result = Iterators.elementAt(list.iterator(), 4);
         assertFalse(result.isPresent());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.get(list.iterator(), -1));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.elementAt(list.iterator(), -1));
     }
 
     @Test
@@ -135,23 +135,23 @@ public class Iterators103Test extends TestBase {
     public void testElementsEqual() {
         Iterator<String> iter1 = null;
         Iterator<String> iter2 = null;
-        assertTrue(Iterators.elementsEqual(iter1, iter2));
+        assertTrue(Iterators.equalsInOrder(iter1, iter2));
 
-        assertTrue(Iterators.elementsEqual(Collections.emptyIterator(), Collections.emptyIterator()));
+        assertTrue(Iterators.equalsInOrder(Collections.emptyIterator(), Collections.emptyIterator()));
 
         List<String> list1 = Arrays.asList("a", "b", "c");
         List<String> list2 = Arrays.asList("a", "b", "c");
-        assertTrue(Iterators.elementsEqual(list1.iterator(), list2.iterator()));
+        assertTrue(Iterators.equalsInOrder(list1.iterator(), list2.iterator()));
 
         List<String> list3 = Arrays.asList("a", "b");
-        assertFalse(Iterators.elementsEqual(list1.iterator(), list3.iterator()));
+        assertFalse(Iterators.equalsInOrder(list1.iterator(), list3.iterator()));
 
         List<String> list4 = Arrays.asList("a", "b", "d");
-        assertFalse(Iterators.elementsEqual(list1.iterator(), list4.iterator()));
+        assertFalse(Iterators.equalsInOrder(list1.iterator(), list4.iterator()));
 
         List<String> listWithNull1 = Arrays.asList("a", null, "c");
         List<String> listWithNull2 = Arrays.asList("a", null, "c");
-        assertTrue(Iterators.elementsEqual(listWithNull1.iterator(), listWithNull2.iterator()));
+        assertTrue(Iterators.equalsInOrder(listWithNull1.iterator(), listWithNull2.iterator()));
     }
 
     @Test
@@ -220,20 +220,20 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testRepeatCollection() {
-        ObjIterator<String> iter = Iterators.repeatCollection(Collections.emptyList(), 3L);
+        ObjIterator<String> iter = Iterators.cycle(Collections.emptyList(), 3L);
         assertFalse(iter.hasNext());
 
-        iter = Iterators.repeatCollection(Arrays.asList("a", "b"), 0L);
+        iter = Iterators.cycle(Arrays.asList("a", "b"), 0L);
         assertFalse(iter.hasNext());
 
-        iter = Iterators.repeatCollection(Arrays.asList("a", "b"), 2L);
+        iter = Iterators.cycle(Arrays.asList("a", "b"), 2L);
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
         assertFalse(iter.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatCollection(Arrays.asList("a"), -1L));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycle(Arrays.asList("a"), -1L));
     }
 
     @Test
@@ -263,12 +263,12 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testRepeatCollectionToSize() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatCollectionToSize(Collections.emptyList(), 5L));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(Collections.emptyList(), 5L));
 
-        ObjIterator<String> iter = Iterators.repeatCollectionToSize(Arrays.asList("a"), 0L);
+        ObjIterator<String> iter = Iterators.cycleToSize(Arrays.asList("a"), 0L);
         assertFalse(iter.hasNext());
 
-        iter = Iterators.repeatCollectionToSize(Arrays.asList("a", "b"), 5L);
+        iter = Iterators.cycleToSize(Arrays.asList("a", "b"), 5L);
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
         assertEquals("a", iter.next());
@@ -276,7 +276,7 @@ public class Iterators103Test extends TestBase {
         assertEquals("a", iter.next());
         assertFalse(iter.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatCollectionToSize(Arrays.asList("a"), -1L));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(Arrays.asList("a"), -1L));
     }
 
     @Test

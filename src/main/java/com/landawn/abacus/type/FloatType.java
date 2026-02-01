@@ -68,7 +68,7 @@ public final class FloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Float temperature = type.get(rs, 1);   // retrieves Float from column 1
      * }</pre>
      *
@@ -97,7 +97,7 @@ public final class FloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Float temperature = type.get(rs, "temperature");   // retrieves Float from "temperature" column
      * }</pre>
      *

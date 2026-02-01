@@ -46,7 +46,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading NCLOB content from database
      * Reader reader = type.get(rs, 1);
@@ -74,7 +74,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading NCLOB by column name
      * Reader reader = type.get(rs, "document_content");
@@ -105,8 +105,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO documents (id, content) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * // Setting NCLOB from Reader
      * String content = "Large document content...";
@@ -132,7 +131,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * CallableStatement stmt = connection.prepareCall("{call save_document(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * // Setting NCLOB using named parameter
      * String content = "Document content...";
@@ -158,8 +157,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO summaries (id, summary) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * // Setting NCLOB with specific length
      * String longText = "Very long text content...";
@@ -186,7 +184,7 @@ public class NClobReaderType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * CallableStatement stmt = connection.prepareCall("{call add_summary(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * // Setting NCLOB with specific length using named parameter
      * String text = "Summary text...";

@@ -232,43 +232,43 @@ public class NamingPolicy2025Test extends TestBase {
 
     @Test
     public void test_camelCase_func_returnsFunction() {
-        Function<String, String> converter = NamingPolicy.CAMEL_CASE.func();
+        Function<String, String> converter = NamingPolicy.CAMEL_CASE.asFunction();
         assertNotNull(converter);
         assertEquals("userName", converter.apply("user_name"));
     }
 
     @Test
     public void test_upperCamelCase_func_returnsFunction() {
-        Function<String, String> converter = NamingPolicy.UPPER_CAMEL_CASE.func();
+        Function<String, String> converter = NamingPolicy.UPPER_CAMEL_CASE.asFunction();
         assertNotNull(converter);
         assertEquals("UserName", converter.apply("user_name"));
     }
 
     @Test
     public void test_snakeCase_func_returnsFunction() {
-        Function<String, String> converter = NamingPolicy.SNAKE_CASE.func();
+        Function<String, String> converter = NamingPolicy.SNAKE_CASE.asFunction();
         assertNotNull(converter);
         assertEquals("user_name", converter.apply("userName"));
     }
 
     @Test
     public void test_screamingSnakeCase_func_returnsFunction() {
-        Function<String, String> converter = NamingPolicy.SCREAMING_SNAKE_CASE.func();
+        Function<String, String> converter = NamingPolicy.SCREAMING_SNAKE_CASE.asFunction();
         assertNotNull(converter);
         assertEquals("USER_NAME", converter.apply("userName"));
     }
 
     @Test
     public void test_noChange_func_returnsFunction() {
-        Function<String, String> converter = NamingPolicy.NO_CHANGE.func();
+        Function<String, String> converter = NamingPolicy.NO_CHANGE.asFunction();
         assertNotNull(converter);
         assertEquals("userName", converter.apply("userName"));
     }
 
     @Test
     public void test_func_returnsSameInstanceOnMultipleCalls() {
-        Function<String, String> converter1 = NamingPolicy.CAMEL_CASE.func();
-        Function<String, String> converter2 = NamingPolicy.CAMEL_CASE.func();
+        Function<String, String> converter1 = NamingPolicy.CAMEL_CASE.asFunction();
+        Function<String, String> converter2 = NamingPolicy.CAMEL_CASE.asFunction();
         assertSame(converter1, converter2);
     }
 

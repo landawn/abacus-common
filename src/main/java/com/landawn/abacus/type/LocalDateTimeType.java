@@ -128,7 +128,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * @param str The string to parse
      * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
-     * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDateTime
+     * @throws DateTimeParseException if the string cannot be parsed as a LocalDateTime
      */
     @Override
     public LocalDateTime valueOf(final String str) {
@@ -231,7 +231,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * }</pre>
      *
      * @param rs The ResultSet containing the data
-     * @param columnName The name of the column to retrieve the value from
+     * @param columnName the column label (or name if no label was specified) to retrieve the value from
      * @return The LocalDateTime value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column name is not found
      */
@@ -297,16 +297,16 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
-     * @param columnName The name of the parameter to set
+     * @param parameterName The name of the parameter to set
      * @param x The LocalDateTime value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final LocalDateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final LocalDateTime x) throws SQLException {
         try {
-            stmt.setObject(columnName, x);
+            stmt.setObject(parameterName, x);
         } catch (final SQLException e) {
-            stmt.setTimestamp(columnName, x == null ? null : Timestamp.valueOf(x));
+            stmt.setTimestamp(parameterName, x == null ? null : Timestamp.valueOf(x));
         }
     }
 }

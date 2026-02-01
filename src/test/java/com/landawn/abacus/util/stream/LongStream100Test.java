@@ -450,8 +450,8 @@ public class LongStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        LongSummaryStatistics stats = createLongStream(1L, 2L, 3L, 4L, 5L).summarize();
+    public void testsummaryStatistics() {
+        LongSummaryStatistics stats = createLongStream(1L, 2L, 3L, 4L, 5L).summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(1L, stats.getMin());
         assertEquals(5L, stats.getMax());

@@ -1727,7 +1727,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
      * @throws IndexOutOfBoundsException if newRowIndex &lt; 0 or newRowIndex &gt;= rowLength()
-     * @see #swapRowPosition(Object, Object)
+     * @see #swapRows(Object, Object)
      * @see #moveColumn(Object, int)
      * @see #addRow(int, Object, Collection)
      */
@@ -1769,7 +1769,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      * 
      * // Swap row1 and row3
-     * sheet.swapRowPosition("row1", "row3");
+     * sheet.swapRows("row1", "row3");
      * // Row order is now: ["row3", "row2", "row1"]
      * // Data follows the rows: {{5, 6}, {3, 4}, {1, 2}}
      * }</pre>
@@ -1779,9 +1779,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if either row key does not exist in this Sheet
      * @see #moveRow(Object, int)
-     * @see #swapColumnPosition(Object, Object)
+     * @see #swapColumns(Object, Object)
      */
-    public void swapRowPosition(final R rowKeyA, final R rowKeyB) throws IllegalStateException, IllegalArgumentException {
+    public void swapRows(final R rowKeyA, final R rowKeyB) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
         final int rowIndexA = this.getRowIndex(rowKeyA);
@@ -2326,7 +2326,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
      * @throws IndexOutOfBoundsException if newColumnIndex &lt; 0 or newColumnIndex &gt;= columnLength()
-     * @see #swapColumnPosition(Object, Object)
+     * @see #swapColumns(Object, Object)
      * @see #moveRow(Object, int)
      * @see #addColumn(int, Object, Collection)
      */
@@ -2366,7 +2366,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Swap col1 and col3
-     * sheet.swapColumnPosition("col1", "col3");
+     * sheet.swapColumns("col1", "col3");
      * // Column order is now: ["col3", "col2", "col1"]
      * // Data follows the columns: {{3, 2, 1}, {6, 5, 4}, {9, 8, 7}}
      * }</pre>
@@ -2376,9 +2376,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if either column key does not exist in this Sheet
      * @see #moveColumn(Object, int)
-     * @see #swapRowPosition(Object, Object)
+     * @see #swapRows(Object, Object)
      */
-    public void swapColumnPosition(final C columnKeyA, final C columnKeyB) throws IllegalStateException, IllegalArgumentException {
+    public void swapColumns(final C columnKeyA, final C columnKeyB) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
         final int columnIndexA = getColumnIndex(columnKeyA);

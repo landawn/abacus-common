@@ -681,7 +681,7 @@ public class Multimap200Test extends TestBase {
         mm.put("b", 1);
 
         IntFunction<ListMultimap<Integer, String>> supplier = size -> CommonUtil.newListMultimap();
-        Multimap<Integer, String, List<String>> inverted = mm.inverse(supplier);
+        Multimap<Integer, String, List<String>> inverted = mm.invert(supplier);
 
         assertTrue(inverted.containsEntry(1, "a"));
         assertTrue(inverted.containsEntry(1, "b"));
@@ -690,7 +690,7 @@ public class Multimap200Test extends TestBase {
         assertEquals(1, inverted.get(2).size());
 
         Multimap<String, Integer, List<Integer>> emptyMm = getTestMultimap();
-        Multimap<Integer, String, List<String>> invertedEmpty = emptyMm.inverse(supplier);
+        Multimap<Integer, String, List<String>> invertedEmpty = emptyMm.invert(supplier);
         assertTrue(invertedEmpty.isEmpty());
     }
 
@@ -1298,7 +1298,7 @@ public class Multimap200Test extends TestBase {
         listMultimap.put("k1", 200);
         listMultimap.put("k2", 100);
 
-        ListMultimap<Integer, String> inverted = listMultimap.inverse();
+        ListMultimap<Integer, String> inverted = listMultimap.invert();
         assertEquals(3, inverted.totalValueCount());
         assertEquals(Arrays.asList("k1", "k2"), inverted.get(100));
         assertEquals(Arrays.asList("k1"), inverted.get(200));
@@ -1476,7 +1476,7 @@ public class Multimap200Test extends TestBase {
         setMultimap.put("k2", 100);
         setMultimap.put("k1", 100);
 
-        SetMultimap<Integer, String> inverted = setMultimap.inverse();
+        SetMultimap<Integer, String> inverted = setMultimap.invert();
         assertEquals(3, inverted.totalValueCount());
         assertEquals(CommonUtil.asSet("k1", "k2"), inverted.get(100));
         assertEquals(CommonUtil.asSet("k1"), inverted.get(200));

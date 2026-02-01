@@ -293,17 +293,17 @@ public final class HttpUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Single value
-     * String header1 = HttpUtil.readHttpHeadValue("text/plain");
+     * String header1 = HttpUtil.readHttpHeaderValue("text/plain");
      * 
      * // Multiple values
      * List<String> values = Arrays.asList("gzip", "deflate");
-     * String header2 = HttpUtil.readHttpHeadValue(values);   // "gzip,deflate"
+     * String header2 = HttpUtil.readHttpHeaderValue(values);   // "gzip,deflate"
      * }</pre>
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} if value is null
      */
-    public static String readHttpHeadValue(final Object value) {
+    public static String readHttpHeaderValue(final Object value) {
         if (value == null) {
             return null;
         }
@@ -354,7 +354,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -382,7 +382,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -458,7 +458,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -486,7 +486,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -562,7 +562,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -590,7 +590,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -666,7 +666,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -694,7 +694,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -770,7 +770,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**
@@ -798,7 +798,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
         }
 
-        return readHttpHeadValue(value);
+        return readHttpHeaderValue(value);
     }
 
     /**

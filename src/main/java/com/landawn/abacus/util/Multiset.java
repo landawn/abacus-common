@@ -222,12 +222,30 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("a"));   // Prints: 3
      * }</pre>
      *
-     * @param c the collection whose elements are to be placed into this multiset.
+     * @param iterable the collection whose elements are to be placed into this multiset.
      */
-    public Multiset(final Collection<? extends E> c) {
-        this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
+    public Multiset(final Iterable<? extends E> iterable) {
+        this(initCapacity(iterable));
 
-        addAll(c);
+        if (iterable instanceof Collection c) {
+            addAll(c);
+        } else {
+            if (iterable != null) {
+                for (E e : iterable) {
+                    add(e);
+                }
+            }
+        }
+    }
+
+    private static int initCapacity(final Iterable<?> iterable) {
+        if (iterable instanceof Set set) {
+            return set.size();
+        } else if (iterable instanceof Collection c) {
+            return c.size() / 2;
+        } else {
+            return 9;
+        }
     }
 
     /**
@@ -314,7 +332,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param coll the collection whose elements are to be placed into the multiset.
      * @return a new multiset containing the elements of the specified collection.
      */
-    public static <T> Multiset<T> create(final Collection<? extends T> coll) {
+    public static <T> Multiset<T> create(final Iterable<? extends T> coll) {
         return new Multiset<>(coll);
     }
 

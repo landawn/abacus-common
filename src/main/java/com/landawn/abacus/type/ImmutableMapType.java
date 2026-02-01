@@ -108,7 +108,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @return {@code true}, indicating that ImmutableMap is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

@@ -462,8 +462,8 @@ public class ShortStream201Test extends TestBase {
         }
 
         @Test
-        public void testSummarize() {
-            ShortSummaryStatistics stats = multiElementStream.summarize();
+        public void testsummaryStatistics() {
+            ShortSummaryStatistics stats = multiElementStream.summaryStatistics();
             assertEquals(5, stats.getCount());
             assertEquals(15, stats.getSum());
             assertEquals(1, stats.getMin());

@@ -380,7 +380,7 @@ public class ListMultimap2025Test extends TestBase {
     @Test
     public void testInverse() {
         ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 1);
-        ListMultimap<Integer, String> inverted = multimap.inverse();
+        ListMultimap<Integer, String> inverted = multimap.invert();
 
         Assertions.assertEquals(3, inverted.totalValueCount());
         Assertions.assertEquals(2, inverted.get(1).size());
@@ -393,7 +393,7 @@ public class ListMultimap2025Test extends TestBase {
     @Test
     public void testInverse_EmptyMultimap() {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
-        ListMultimap<Integer, String> inverted = multimap.inverse();
+        ListMultimap<Integer, String> inverted = multimap.invert();
         Assertions.assertTrue(inverted.isEmpty());
     }
 
@@ -582,7 +582,7 @@ public class ListMultimap2025Test extends TestBase {
     //    @Test
     //    public void testInverse_SingleValue() {
     //        ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "b", 2, "c", 3);
-    //        ListMultimap<Integer, String> inverted = multimap.inverse();
+    //        ListMultimap<Integer, String> inverted = multimap.invert();
     //
     //        Assertions.assertEquals(3, inverted.size());
     //        Assertions.assertEquals(1, inverted.get(1).size());

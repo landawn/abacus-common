@@ -114,7 +114,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>List-Specific Operations:</b>
  * <ul>
- *   <li>{@link #inverse()} - Invert keys and values while preserving order</li>
+ *   <li>{@link #invert()} - Invert keys and values while preserving order</li>
  *   <li>{@link #toImmutableMap()} - Convert to immutable representation</li>
  * </ul>
  *
@@ -879,7 +879,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 1);
-     * ListMultimap<Integer, String> inverted = multimap.inverse();
+     * ListMultimap<Integer, String> inverted = multimap.invert();
      * // inverted contains: {1: ["a", "b"], 2: ["a"]}
      *
      * // Demonstrating preservation of order
@@ -887,7 +887,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * tags.put("color", "red");
      * tags.put("color", "blue");
      * tags.put("size", "large");
-     * ListMultimap<String, String> byValue = tags.inverse();
+     * ListMultimap<String, String> byValue = tags.invert();
      * // byValue contains: {"red": ["color"], "blue": ["color"], "large": ["size"]}
      * }</pre>
      *
@@ -895,7 +895,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @see #copy()
      * @see #toImmutableMap()
      */
-    public ListMultimap<E, K> inverse() {
+    public ListMultimap<E, K> invert() {
         final ListMultimap<K, E> multimap = this;
         //noinspection rawtypes
         final ListMultimap<E, K> result = new ListMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
@@ -930,7 +930,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * }</pre>
      *
      * @return a new ListMultimap containing all the key-value pairs of this ListMultimap
-     * @see #inverse()
+     * @see #invert()
      * @see #toImmutableMap()
      */
     @Override
@@ -1105,5 +1105,5 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return ImmutableMap.wrap(map);
     }
 
-    //    public ListMultimap<E, K> inverse() {
+    //    public ListMultimap<E, K> invert() {
 }

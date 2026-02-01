@@ -2217,16 +2217,16 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to split
      * @param toIndex the ending index (exclusive) of the range to split
-     * @param size the desired size of each subsequence. Must be positive.
+     * @param chunkSize the desired size of each subsequence. Must be positive.
      * @return a List of ShortList instances containing the split subsequences
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws IllegalArgumentException if size &lt;= 0
      */
     @Override
-    public List<ShortList> split(final int fromIndex, final int toIndex, final int size) throws IndexOutOfBoundsException {
+    public List<ShortList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<short[]> list = N.split(elementData, fromIndex, toIndex, size);
+        final List<short[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
         @SuppressWarnings("rawtypes")
         final List<ShortList> result = (List) list;
 

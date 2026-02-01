@@ -585,14 +585,14 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * dataset.swapColumnPosition("name", "age");   // swaps "name" and "age" positions
+     * dataset.swapColumns("name", "age");   // swaps "name" and "age" positions
      * }</pre>
      *
      * @param columnNameA the name of the first column to be swapped.
      * @param columnNameB the name of the second column to be swapped.
      * @throws IllegalArgumentException if either of the specified column names does not exist in the Dataset.
      */
-    void swapColumnPosition(String columnNameA, String columnNameB) throws IllegalArgumentException;
+    void swapColumns(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
     /**
      * Repositions a row within the {@code Dataset} from one index to another.  
@@ -636,14 +636,14 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
-     * dataset.swapRowPosition(0, 1);   // swaps row 0 and row 1
+     * dataset.swapRows(0, 1);   // swaps row 0 and row 1
      * }</pre>
      *
      * @param rowIndexA the index of the first row to be swapped.
      * @param rowIndexB the index of the second row to be swapped.
      * @throws IndexOutOfBoundsException if either of the specified row indexes is out of bounds.
      */
-    void swapRowPosition(int rowIndexA, int rowIndexB) throws IndexOutOfBoundsException;
+    void swapRows(int rowIndexA, int rowIndexB) throws IndexOutOfBoundsException;
 
     /**
      * Retrieves the value at the specified row and column index in the Dataset.

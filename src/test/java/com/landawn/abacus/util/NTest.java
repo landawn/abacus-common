@@ -453,8 +453,8 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_clone_01() {
-        Beans.clone(u.Optional.of("a"));
-        Beans.clone(u.Nullable.of("a"));
+        Beans.deepCopy(u.Optional.of("a"));
+        Beans.deepCopy(u.Nullable.of("a"));
     }
 
     @Test
@@ -634,7 +634,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_001() {
-        final Account account = Beans.fill(Account.class);
+        final Account account = Beans.newRandom(Account.class);
         N.println(account);
     }
 
@@ -754,11 +754,11 @@ public class NTest extends AbstractParserTest {
     public void test_copy_2() {
         final List<Integer> list1 = CommonUtil.asList(1, 2, 3);
         List<Integer> list2 = CommonUtil.asList(4, 5, 6);
-        Iterables.copy(list1, list2);
+        Iterables.copyInto(list1, list2);
         assertEquals(list1, list2);
 
         list2 = CommonUtil.asList(4, 5, 6);
-        Iterables.copy(list1, 1, list2, 2, 1);
+        Iterables.copyRange(list1, 1, list2, 2, 1);
         assertEquals(CommonUtil.asList(4, 5, 2), list2);
     }
 
@@ -2391,26 +2391,26 @@ public class NTest extends AbstractParserTest {
         account.setLastName("lastName");
 
         N.println(account);
-        Beans.eraseAll(account);
+        Beans.clearAllProps(account);
         N.println(account);
 
         account = new Account();
         account.setFirstName("firstName");
         account.setLastName("lastName");
-        Beans.erase(account, "firstName");
+        Beans.clearProps(account, "firstName");
         N.println(account);
         assertNull(account.getFirstName());
 
         account = new Account();
         account.setFirstName("firstName");
         account.setLastName("lastName");
-        Beans.erase(account, CommonUtil.asList("firstName", "lastName"));
+        Beans.clearProps(account, CommonUtil.asList("firstName", "lastName"));
         assertNull(account.getFirstName());
         assertNull(account.getLastName());
 
         final PersonType personType = new PersonType();
         personType.setBirthday(Dates.currentDate());
-        Beans.eraseAll(personType);
+        Beans.clearAllProps(personType);
         assertNull(personType.getBirthday());
     }
 
@@ -2424,7 +2424,7 @@ public class NTest extends AbstractParserTest {
         account2.setId(2);
         account2.setFirstName("firstName2");
 
-        Beans.merge(account2, account1);
+        Beans.copyInto(account2, account1);
         N.println(account1);
         assertEquals("firstName2", account1.getFirstName());
 
@@ -2435,7 +2435,7 @@ public class NTest extends AbstractParserTest {
         personType2.setId(2);
         personType2.setFirstName("firstName");
 
-        Beans.merge(personType2, personType1);
+        Beans.copyInto(personType2, personType1);
         N.println(personType1);
         assertEquals("firstName", personType1.getFirstName());
 
@@ -2444,7 +2444,7 @@ public class NTest extends AbstractParserTest {
 
         final PersonsType personsType2 = new PersonsType();
         personsType2.getPerson().add(personType2);
-        Beans.merge(personsType2, personsType1);
+        Beans.copyInto(personsType2, personsType1);
         N.println(personsType1);
 
         assertEquals(1, personsType1.getPerson().size());
@@ -2455,7 +2455,7 @@ public class NTest extends AbstractParserTest {
         final JAXBean jaxBean2 = new JAXBean();
         jaxBean2.getCityList().add("b");
 
-        Beans.merge(jaxBean1, jaxBean2);
+        Beans.copyInto(jaxBean1, jaxBean2);
 
         assertEquals("a", jaxBean2.getCityList().get(0));
     }
@@ -3060,11 +3060,11 @@ public class NTest extends AbstractParserTest {
         account2.setLastName("ln2");
         account2.setBirthDate(Dates.currentTimestamp());
 
-        Beans.merge(account, account2);
+        Beans.copyInto(account, account2);
         println(account);
         println(account2);
 
-        Beans.eraseAll(account);
+        Beans.clearAllProps(account);
         N.println(account);
 
     }
@@ -3074,7 +3074,7 @@ public class NTest extends AbstractParserTest {
         final Account account = createAccount(Account.class);
         final Account account2 = createAccount(Account.class);
 
-        Beans.merge(account, account2);
+        Beans.copyInto(account, account2);
         println(account);
         println(account2);
     }
@@ -3112,7 +3112,7 @@ public class NTest extends AbstractParserTest {
         account.setId(1000);
         account.setBirthDate(Dates.currentTimestamp());
 
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copy(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
         println(account);
         println(copy);
         println(CommonUtil.stringOf(account));
@@ -3128,7 +3128,7 @@ public class NTest extends AbstractParserTest {
         account.setLastName("ln1");
         account.setId(1000);
 
-        final Account copy = Beans.clone(account);
+        final Account copy = Beans.deepCopy(account);
         println(copy);
         assertEquals(account, copy);
     }
@@ -3145,39 +3145,39 @@ public class NTest extends AbstractParserTest {
         final Map<Integer, Object> typeMap = CommonUtil.asMap(1, "2", 1, "2");
         xBean.setTypeMap(typeMap);
 
-        final XBean xBean2 = Beans.clone(xBean);
+        final XBean xBean2 = Beans.deepCopy(xBean);
         assertEquals(xBean, xBean2);
     }
 
     @Test
     public void testCopy_1() {
         final Account account = createAccountWithContact(Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copy(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
         println(copy);
     }
 
     @Test
     public void testCopy_2() {
         final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copy(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
         println(copy);
     }
 
     @Test
     public void testMerge_1() {
         final Account account = createAccountWithContact(Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copy(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
 
-        Beans.merge(copy, account);
+        Beans.copyInto(copy, account);
         println(account);
     }
 
     @Test
     public void testMerge_2() {
         final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copy(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
 
-        Beans.merge(copy, account);
+        Beans.copyInto(copy, account);
         println(account);
     }
 

@@ -523,7 +523,7 @@ public class Dataset100Test extends TestBase {
 
     @Test
     public void testSwapColumnPosition() {
-        dataset.swapColumnPosition("id", "salary");
+        dataset.swapColumns("id", "salary");
         assertEquals(0, dataset.getColumnIndex("salary"));
         assertEquals(3, dataset.getColumnIndex("id"));
     }
@@ -540,7 +540,7 @@ public class Dataset100Test extends TestBase {
         Object row0Name = dataset.get(0, 1);
         Object row2Name = dataset.get(2, 1);
 
-        dataset.swapRowPosition(0, 2);
+        dataset.swapRows(0, 2);
         assertEquals(row2Name, dataset.get(0, 1));
         assertEquals(row0Name, dataset.get(2, 1));
     }

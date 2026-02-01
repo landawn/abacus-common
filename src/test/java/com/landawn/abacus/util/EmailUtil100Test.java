@@ -44,7 +44,7 @@ public class EmailUtil100Test extends TestBase {
     @Test
     public void testSendHTMLEmail() {
         try {
-            EmailUtil.sendHTMLEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
                     props);
         } catch (RuntimeException e) {
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
@@ -54,7 +54,7 @@ public class EmailUtil100Test extends TestBase {
     @Test
     public void testSendHTMLEmailWithAttachment() {
         try {
-            EmailUtil.sendHTMLEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>",
+            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>",
                     new String[] { "test.txt" }, "username", "password", props);
         } catch (RuntimeException e) {
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));

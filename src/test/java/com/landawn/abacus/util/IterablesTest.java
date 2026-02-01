@@ -19,7 +19,7 @@ public class IterablesTest extends AbstractTest {
 
         {
             final List<Integer> list = CommonUtil.asList(1, 2, 3, 4, 5);
-            final List<Integer> reversed = Iterables.reverse(list);
+            final List<Integer> reversed = Iterables.asReversed(list);
             assertEquals(CommonUtil.asList(5, 4, 3, 2, 1), reversed);
 
             reversed.add(6);

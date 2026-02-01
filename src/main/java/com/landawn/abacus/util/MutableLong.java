@@ -133,10 +133,10 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * num.setValue(20L);   // value is now 20L
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final long value) {
-        this.value = value;
+    public void setValue(final long newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -149,12 +149,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * long old = num.getAndSet(20L);   // returns 10L, value is now 20L
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the previous value before it was updated
      */
-    public long getAndSet(final long value) {
+    public long getAndSet(final long newValue) {
         final long result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -168,11 +168,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * long newVal = num.setAndGet(20L);   // returns 20L, value is now 20L
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value that was set
      */
-    public long setAndGet(final long value) {
-        this.value = value;
+    public long setAndGet(final long newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -233,7 +233,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -241,14 +241,14 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * num.add(5L);   // value is now 15L
      * }</pre>
      *
-     * @param operand the value to add to the current value
+     * @param delta the value to add to the current value
      */
-    public void add(final long operand) {
-        value += operand;
+    public void add(final long delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -256,10 +256,10 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * num.subtract(3L);   // value is now 7L
      * }</pre>
      *
-     * @param operand the value to subtract from the current value
+     * @param delta the value to subtract from the current value
      */
-    public void subtract(final long operand) {
-        value -= operand;
+    public void subtract(final long delta) {
+        value -= delta;
     }
 
     /**

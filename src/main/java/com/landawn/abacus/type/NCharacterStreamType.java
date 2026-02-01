@@ -44,7 +44,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading Unicode text from NCLOB column
      * Reader reader = type.get(rs, 1);
@@ -71,7 +71,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Reading Unicode text from NCLOB column by name
      * Reader reader = type.get(rs, "description");
@@ -102,8 +102,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO documents (id, content) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * // Setting Unicode text to NCLOB column
      * String unicodeText = "Unicode content: 中文";
@@ -129,7 +128,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_document(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * // Setting Unicode text to named parameter
      * String unicodeText = "Content: 日本語";
@@ -155,8 +154,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO documents (id, summary) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * // Setting Unicode text with specific length
      * String longText = "Very long Unicode text...";
@@ -183,7 +181,7 @@ public class NCharacterStreamType extends ReaderType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = connection.prepareCall("{call add_summary(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * // Setting Unicode text with specific length to named parameter
      * String text = "Summary text in Unicode...";

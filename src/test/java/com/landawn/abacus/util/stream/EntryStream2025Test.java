@@ -306,7 +306,7 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testInversed() {
-        Map<Integer, String> inversed = EntryStream.of(testMap).inversed().toMap();
+        Map<Integer, String> inversed = EntryStream.of(testMap).invert().toMap();
         assertEquals("one", inversed.get(1));
         assertEquals("two", inversed.get(2));
     }

@@ -299,7 +299,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testSwapColumnPosition() {
-        dataset.swapColumnPosition("id", "score");
+        dataset.swapColumns("id", "score");
         List<String> names = dataset.columnNames();
         Assertions.assertEquals("score", names.get(0));
         Assertions.assertEquals("name", names.get(1));
@@ -309,7 +309,7 @@ public class RowDataset100Test extends TestBase {
 
     @Test
     public void testSwapColumnPositionWithSameColumn() {
-        dataset.swapColumnPosition("id", "id");
+        dataset.swapColumns("id", "id");
         List<String> names = dataset.columnNames();
         Assertions.assertEquals("id", names.get(0));
     }
@@ -333,7 +333,7 @@ public class RowDataset100Test extends TestBase {
         Object row0Name = dataset.get(0, 1);
         Object row2Name = dataset.get(2, 1);
 
-        dataset.swapRowPosition(0, 2);
+        dataset.swapRows(0, 2);
         Assertions.assertEquals(row2Name, dataset.get(0, 1));
         Assertions.assertEquals(row0Name, dataset.get(2, 1));
     }
@@ -341,7 +341,7 @@ public class RowDataset100Test extends TestBase {
     @Test
     public void testSwapRowPositionWithSameRow() {
         Object row0Name = dataset.get(0, 1);
-        dataset.swapRowPosition(0, 0);
+        dataset.swapRows(0, 0);
         Assertions.assertEquals(row0Name, dataset.get(0, 1));
     }
 

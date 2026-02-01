@@ -338,7 +338,7 @@ public class Sheet100Test extends TestBase {
         sheet.set("R1", "C1", 1);
         sheet.set("R2", "C1", 2);
 
-        sheet.swapRowPosition("R1", "R2");
+        sheet.swapRows("R1", "R2");
 
         assertEquals(Integer.valueOf(1), sheet.get("R1", "C1"));
         assertEquals(Integer.valueOf(2), sheet.get("R2", "C1"));
@@ -464,7 +464,7 @@ public class Sheet100Test extends TestBase {
 
         sheet.println();
 
-        sheet.swapColumnPosition("C1", "C2");
+        sheet.swapColumns("C1", "C2");
 
         sheet.println();
 
@@ -476,7 +476,7 @@ public class Sheet100Test extends TestBase {
                     new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } });
             sheetA.println();
 
-            sheetA.swapColumnPosition("col1", "col3");
+            sheetA.swapColumns("col1", "col3");
 
             sheetA.println();
         }
@@ -1798,10 +1798,10 @@ public class Sheet100Test extends TestBase {
 
         sheet.addRow("R4", Arrays.asList(10, 20, 30));
         sheet.addColumn("C4", Arrays.asList(4, 8, 12, 16));
-        sheet.swapRowPosition("R1", "R4");
+        sheet.swapRows("R1", "R4");
 
         sheet.println();
-        sheet.swapColumnPosition("C1", "C4");
+        sheet.swapColumns("C1", "C4");
 
         sheet.println();
         assertEquals(4, sheet.rowCount());

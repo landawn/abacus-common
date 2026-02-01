@@ -95,7 +95,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

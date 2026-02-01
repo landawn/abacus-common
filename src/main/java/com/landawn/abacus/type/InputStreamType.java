@@ -174,7 +174,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * InputStream stream1 = type.valueOf("Hello");
      *
      * // From Blob (in database context)
-     * Blob blob = ...;  // from database
+     * Blob blob = new javax.sql.rowset.serial.SerialBlob(new byte[] { 1, 2, 3 });
      * InputStream stream2 = type.valueOf(blob);
      * // Returns the blob's binary stream
      * }</pre>
@@ -206,7 +206,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * ResultSet rs = ...;  // from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * InputStream stream = type.get(rs, 1);
      * // Returns binary stream from column 1
      * }</pre>
@@ -228,7 +228,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * ResultSet rs = ...;  // from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * InputStream stream = type.get(rs, "file_content");
      * // Returns binary stream from "file_content" column
      * }</pre>
@@ -250,8 +250,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO files (id, content) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * InputStream stream = new ByteArrayInputStream("Hello".getBytes());
      * type.set(stmt, 2, stream);
      * stmt.executeUpdate();
@@ -274,7 +273,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * CallableStatement stmt = connection.prepareCall("{call save_file(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      * InputStream stream = new FileInputStream("document.pdf");
      * type.set(stmt, "file_content", stream);
      * stmt.execute();
@@ -297,8 +296,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO files (id, content) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * InputStream stream = new FileInputStream("document.pdf");
      * type.set(stmt, 2, stream, 1024);  // read up to 1024 bytes
      * stmt.executeUpdate();
@@ -322,7 +320,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * CallableStatement stmt = connection.prepareCall("{call save_file(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      * InputStream stream = new FileInputStream("document.pdf");
      * type.set(stmt, "file_content", stream, 2048);  // read up to 2048 bytes
      * stmt.execute();
@@ -392,20 +390,20 @@ public class InputStreamType extends AbstractType<InputStream> {
      * }</pre>
      *
      * @param writer the CharacterWriter to write to
-     * @param t the InputStream to write
+     * @param x the InputStream to write
      * @param config the serialization configuration to use
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JsonXmlSerializationConfig<?> config) throws IOException {
-        if (t == null) {
+    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerializationConfig<?> config) throws IOException {
+        if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config == null) || (config.getStringQuotation() == 0)) {
-                writer.write(stringOf(t));
+                writer.write(stringOf(x));
             } else {
                 writer.write(config.getStringQuotation());
-                writer.write(stringOf(t));
+                writer.write(stringOf(x));
                 writer.write(config.getStringQuotation());
             }
         }

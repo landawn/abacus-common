@@ -149,7 +149,7 @@ public class NTest3 {
     @Test
     public void copyEntitiesWithDiffFieldName() {
         A a = A.builder().fieldA1("aa").fieldA2(111).build();
-        B b = Beans.copy(a, B.class);
+        B b = Beans.copyAs(a, B.class);
         N.println(a);
         N.println(b);
     }
@@ -157,7 +157,7 @@ public class NTest3 {
     @Builder
     @Data
     public static class A {
-        @JsonXmlField(alias = { "fieldB1" })
+        @JsonXmlField(aliases = { "fieldB1" })
         private String fieldA1;
         private int fieldA2;
     }
@@ -166,7 +166,7 @@ public class NTest3 {
     @Data
     public static class B {
         private String fieldB1;
-        @JsonXmlField(alias = { "fieldA2" })
+        @JsonXmlField(aliases = { "fieldA2" })
         private int fieldB2;
     }
 

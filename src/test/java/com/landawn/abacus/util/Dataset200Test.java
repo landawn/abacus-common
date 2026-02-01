@@ -234,16 +234,16 @@ public class Dataset200Test extends TestBase {
     }
 
     @Test
-    public void swapColumnPosition() {
-        sampleDataset.swapColumnPosition("ID", "Age");
+    public void swapColumns() {
+        sampleDataset.swapColumns("ID", "Age");
         assertEquals(Arrays.asList("Age", "Name", "ID"), sampleDataset.columnNames());
         assertEquals((Integer) 30, sampleDataset.moveToRow(0).get("Age"));
         assertEquals((Integer) 1, sampleDataset.moveToRow(0).get("ID"));
 
-        sampleDataset.swapColumnPosition("Name", "Name");
+        sampleDataset.swapColumns("Name", "Name");
         assertEquals(Arrays.asList("Age", "Name", "ID"), sampleDataset.columnNames());
 
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.swapColumnPosition("ID", "NonExistent"));
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.swapColumns("ID", "NonExistent"));
     }
 
     @Test

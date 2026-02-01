@@ -10162,7 +10162,7 @@ sealed class CommonUtil permits N {
 
         if (targetType.isBean()) {
             if (srcType.isBean()) {
-                return Beans.copy(srcObj, targetType.clazz());
+                return Beans.copyAs(srcObj, targetType.clazz());
             } else if (srcType.isMap()) {
                 return Beans.mapToBean((Map<String, Object>) srcObj, targetType.clazz());
             }
@@ -10571,7 +10571,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * ImmutableBiMap<DayOfWeek, String> dayMap = N.enumMapOf(DayOfWeek.class);
      * // dayMap.get(DayOfWeek.MONDAY) returns "MONDAY"
-     * // dayMap.inverse().get("MONDAY") returns DayOfWeek.MONDAY
+     * // dayMap.inverted().get("MONDAY") returns DayOfWeek.MONDAY
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
@@ -12246,7 +12246,7 @@ sealed class CommonUtil permits N {
      * biMap.put("one", 1);
      * biMap.put("two", 2);
      * biMap.get("one");          // returns 1
-     * biMap.inverse().get(1);   // returns "one"
+     * biMap.inverted().get(1);   // returns "one"
      * }</pre>
      *
      * @param <K> the type of keys maintained by this map
@@ -25230,46 +25230,46 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     * Fills the properties of the specified bean with random values.
-     *
-     * @param bean the bean object with getter/setter methods to be filled with random values
-     * @throws IllegalArgumentException if the specified bean is {@code null} or the bean class is not a valid JavaBean
-     * @deprecated Use {@link Beans#fill(Object)} instead
-     */
-    @Deprecated
-    public static void fill(final Object bean) throws IllegalArgumentException {
-        Beans.fill(bean);
-    }
-
-    /**
-     * Fills the properties of a new instance of the specified bean class with random values.
-     *
-     * @param <T> the type of the bean
-     * @param beanClass the class of the bean to be filled
-     * @return a new instance of the specified bean class with properties filled with random values
-     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
-     * @deprecated Use {@link Beans#fill(Class<? extends T>)} instead
-     */
-    @Deprecated
-    public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
-        return Beans.fill(beanClass);
-    }
-
-    /**
-     * Returns a list of new instances of the specified bean class with properties filled with random values.
-     *
-     * @param <T> the type of the bean
-     * @param beanClass the class of the bean to be filled
-     * @param count the number of instances to create and fill
-     * @return a list of new instances of the specified bean class with properties filled with random values
-     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
-     * @deprecated Use {@link Beans#fill(Class, int)} instead
-     */
-    @Deprecated
-    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
-        return Beans.fill(beanClass, count);
-    }
+    //    /**
+    //     * Fills the properties of the specified bean with random values.
+    //     *
+    //     * @param bean the bean object with getter/setter methods to be filled with random values
+    //     * @throws IllegalArgumentException if the specified bean is {@code null} or the bean class is not a valid JavaBean
+    //     * @deprecated Use {@link Beans#randomize(Object)} instead
+    //     */
+    //    @Deprecated
+    //    public static void fill(final Object bean) throws IllegalArgumentException {
+    //        Beans.randomize(bean);
+    //    }
+    //
+    //    /**
+    //     * Fills the properties of a new instance of the specified bean class with random values.
+    //     *
+    //     * @param <T> the type of the bean
+    //     * @param beanClass the class of the bean to be filled
+    //     * @return a new instance of the specified bean class with properties filled with random values
+    //     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
+    //     * @deprecated Use {@link Beans#newRandom(Class)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
+    //        return Beans.newRandom(beanClass);
+    //    }
+    //
+    //    /**
+    //     * Returns a list of new instances of the specified bean class with properties filled with random values.
+    //     *
+    //     * @param <T> the type of the bean
+    //     * @param beanClass the class of the bean to be filled
+    //     * @param count the number of instances to create and fill
+    //     * @return a list of new instances of the specified bean class with properties filled with random values
+    //     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
+    //     * @deprecated Use {@link Beans#newRandomList(Class, int)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
+    //        return Beans.newRandomList(beanClass, count);
+    //    }
 
     /**
      * Appends the provided object to the beginning of the list till the list has at least the specified minimum size.
@@ -25377,7 +25377,7 @@ sealed class CommonUtil permits N {
      * @param n the number of times to repeat the elements; must not be negative
      * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
      * @throws IllegalArgumentException if the specified number of repetitions is negative
-     * @see Iterators#repeatElements(Collection, long)
+     * @see Iterators#repeatElements(Iterable, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, cs.n);
@@ -25392,38 +25392,6 @@ sealed class CommonUtil permits N {
             for (int i = 0; i < n; i++) {
                 result.add(e);
             }
-        }
-
-        return result;
-    }
-
-    /**
-     * Repeats the entire specified collection {@code n} times.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Integer> result = repeatCollection(asList(1, 2, 3), 2);
-     * // result => [1, 2, 3, 1, 2, 3]
-     * }</pre>
-     *
-     * @param <T> the type of the elements in the collection
-     * @param c the collection whose elements are to be repeated; may be {@code null} or empty
-     * @param n the number of times to repeat the elements; must not be negative
-     * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
-     * @throws IllegalArgumentException if the specified number of repetitions is negative
-     * @see Iterators#repeatCollection(Collection, long)
-     */
-    public static <T> List<T> repeatCollection(final Collection<T> c, final int n) throws IllegalArgumentException {
-        checkArgNotNegative(n, cs.n);
-
-        if (n == 0 || isEmpty(c)) {
-            return new ArrayList<>();
-        }
-
-        final List<T> result = new ArrayList<>(c.size() * n);
-
-        for (int i = 0; i < n; i++) {
-            result.addAll(c);
         }
 
         return result;
@@ -25472,11 +25440,43 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Repeats the entire specified collection {@code n} times.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> result = cycle(asList(1, 2, 3), 2);
+     * // result => [1, 2, 3, 1, 2, 3]
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the collection
+     * @param c the collection whose elements are to be repeated; may be {@code null} or empty
+     * @param n the number of times to repeat the elements; must not be negative
+     * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified number of repetitions is negative
+     * @see Iterators#cycle(Iterable, long)
+     */
+    public static <T> List<T> cycle(final Collection<T> c, final int n) throws IllegalArgumentException {
+        checkArgNotNegative(n, cs.n);
+
+        if (n == 0 || isEmpty(c)) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(c.size() * n);
+
+        for (int i = 0; i < n; i++) {
+            result.addAll(c);
+        }
+
+        return result;
+    }
+
+    /**
      * Repeats the entire specified Collection {@code n} times till reach the specified size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> result = repeatCollectionToSize(asList(1, 2, 3), 5);
+     * List<Integer> result = cycleToSize(asList(1, 2, 3), 5);
      * // result => [1, 2, 3, 1, 2]
      * }</pre>
      *
@@ -25485,9 +25485,9 @@ sealed class CommonUtil permits N {
      * @param size the target size of the resulting list
      * @return a list containing the repeated elements
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
-     * @see Iterators#repeatCollectionToSize(Collection, long)
+     * @see Iterators#cycleToSize(Collection, long)
      */
-    public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
+    public static <T> List<T> cycleToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
         checkArgument(size == 0 || notEmpty(c), "Collection cannot be empty or null when size > 0");
         checkArgNotNegative(size, cs.size);
 

@@ -58,7 +58,7 @@ public class ImmutableMapEntryType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(immutableMapEntryType.isGenericType());
+        assertTrue(immutableMapEntryType.isParameterizedType());
     }
 
     @Test

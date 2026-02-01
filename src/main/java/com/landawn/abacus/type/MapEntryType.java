@@ -133,7 +133,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @return {@code true}, indicating that Map.Entry is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

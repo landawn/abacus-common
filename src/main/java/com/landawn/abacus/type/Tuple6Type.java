@@ -129,7 +129,7 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, 
      * @return {@code true} always, as Tuple6 is a parameterized type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

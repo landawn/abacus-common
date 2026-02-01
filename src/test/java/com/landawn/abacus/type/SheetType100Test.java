@@ -44,7 +44,7 @@ public class SheetType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(sheetType.isGenericType());
+        assertTrue(sheetType.isParameterizedType());
     }
 
     @Test

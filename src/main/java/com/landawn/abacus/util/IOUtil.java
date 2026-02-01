@@ -375,9 +375,9 @@ public final class IOUtil {
     private static final Splitter pathSplitter = Splitter.with('/').trimResults();
 
     /**
-     * The file copy buffer size (32 MB).
+     * The file copy buffer size (8 MB).
      */
-    private static final int FILE_COPY_BUFFER_SIZE = (1024 * 1024) * 32;
+    private static final int FILE_COPY_BUFFER_SIZE = 8 * (1024 * 1024);
 
     static final Method stringEncodeMethod;
 
@@ -7690,7 +7690,7 @@ public final class IOUtil {
      * @param source            the {@code URL} to copy bytes from, must not be {@code null}.
      * @param destination       the non-directory {@code File} to write bytes to.
      *                          (possibly overwriting), must not be {@code null}
-     * @param connectionTimeout the number of milliseconds until this method.
+     * @param connectTimeout    the number of milliseconds until this method.
      *                          will timeout if no connection could be established to the {@code source}
      * @param readTimeout       the number of milliseconds until this method will.
      *                          timeout if no data could be read from the {@code source}
@@ -7703,12 +7703,12 @@ public final class IOUtil {
      * }</pre>
      * @throws IOException if an IO error occurs during copying.
      */
-    public static void copyURLToFile(final URL source, final File destination, final int connectionTimeout, final int readTimeout) throws IOException {
+    public static void copyURLToFile(final URL source, final File destination, final int connectTimeout, final int readTimeout) throws IOException {
         InputStream is = null;
         URLConnection connection = null;
         try {
             connection = source.openConnection();
-            connection.setConnectTimeout(connectionTimeout);
+            connection.setConnectTimeout(connectTimeout);
             connection.setReadTimeout(readTimeout);
             is = connection.getInputStream();
 

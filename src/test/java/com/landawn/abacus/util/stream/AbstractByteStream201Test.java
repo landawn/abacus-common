@@ -184,15 +184,15 @@ public class AbstractByteStream201Test extends TestBase {
     }
 
     @Test
-    public void summarize() {
-        ByteSummaryStatistics stats = stream.summarize();
+    public void summaryStatistics() {
+        ByteSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(15, stats.getSum());
         assertEquals(1, stats.getMin());
         assertEquals(5, stats.getMax());
         assertEquals(3.0, stats.getAverage(), 0.001);
 
-        ByteSummaryStatistics emptyStats = emptyStream.summarize();
+        ByteSummaryStatistics emptyStats = emptyStream.summaryStatistics();
         assertEquals(0, emptyStats.getCount());
         assertEquals(0, emptyStats.getSum());
         assertEquals(Byte.MAX_VALUE, emptyStats.getMin());

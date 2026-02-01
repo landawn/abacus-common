@@ -65,7 +65,7 @@ public class ImmutableListType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(immutableListType.isGenericType());
+        assertTrue(immutableListType.isParameterizedType());
     }
 
     @Test

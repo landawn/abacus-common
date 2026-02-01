@@ -145,7 +145,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains boolean value true
      * OptionalBoolean opt = type.get(rs, 1);
@@ -175,7 +175,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "is_active" contains boolean value true
      * OptionalBoolean opt = type.get(rs, "is_active");
@@ -205,8 +205,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO users (id, is_active) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalBoolean opt = OptionalBoolean.of(true);
      * type.set(stmt, 2, opt);
@@ -238,7 +237,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalBoolean opt = OptionalBoolean.of(true);
      * type.set(stmt, "p_is_active", opt);

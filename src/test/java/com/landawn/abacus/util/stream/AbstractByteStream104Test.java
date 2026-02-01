@@ -672,8 +672,8 @@ public class AbstractByteStream104Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summaryStatisticsAndPercentiles();
 
         ByteSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());
@@ -685,7 +685,7 @@ public class AbstractByteStream104Test extends TestBase {
         assertNotNull(result.right().get().get(Percentage._50));
 
         stream = createByteStream(new byte[0]);
-        result = stream.summarizeAndPercentiles();
+        result = stream.summaryStatisticsAndPercentiles();
         assertEquals(0, result.left().getCount());
         assertFalse(result.right().isPresent());
     }

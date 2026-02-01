@@ -147,13 +147,16 @@ public class Triple2025Test extends TestBase {
 
     @Test
     public void testSetLeftIf() throws Exception {
+        // Assume triple is Triple<String, Integer, Boolean>
         triple.setLeft("original");
 
-        boolean result = triple.setLeftIf("new", (t, newLeft) -> newLeft.length() > 2);
+        // First update: predicate true when left is "original"
+        boolean result = triple.setLeftIf("new", (l, m, r) -> "original".equals(l));
         assertTrue(result);
         assertEquals("new", triple.left());
 
-        result = triple.setLeftIf("a", (t, newLeft) -> newLeft.length() > 2);
+        // Second update: predicate false now that left != "original"
+        result = triple.setLeftIf("a", (l, m, r) -> "original".equals(l));
         assertFalse(result);
         assertEquals("new", triple.left());
     }
@@ -162,11 +165,13 @@ public class Triple2025Test extends TestBase {
     public void testSetMiddleIf() throws Exception {
         triple.setMiddle(10);
 
-        boolean result = triple.setMiddleIf(20, (t, newMiddle) -> newMiddle > 15);
+        // First update: predicate true when middle is 10
+        boolean result = triple.setMiddleIf(20, (l, m, r) -> m == 10);
         assertTrue(result);
         assertEquals(20, triple.middle());
 
-        result = triple.setMiddleIf(5, (t, newMiddle) -> newMiddle > 15);
+        // Second update: predicate false now that middle != 10
+        result = triple.setMiddleIf(5, (l, m, r) -> m == 10);
         assertFalse(result);
         assertEquals(20, triple.middle());
     }
@@ -175,11 +180,13 @@ public class Triple2025Test extends TestBase {
     public void testSetRightIf() throws Exception {
         triple.setRight(true);
 
-        boolean result = triple.setRightIf(false, (t, newRight) -> !newRight);
+        // First update: predicate true when right is true
+        boolean result = triple.setRightIf(false, (l, m, r) -> r);
         assertTrue(result);
         assertEquals(false, triple.right());
 
-        result = triple.setRightIf(true, (t, newRight) -> !newRight);
+        // Second update: predicate false now that right is false
+        result = triple.setRightIf(true, (l, m, r) -> r);
         assertFalse(result);
         assertEquals(false, triple.right());
     }
@@ -188,13 +195,15 @@ public class Triple2025Test extends TestBase {
     public void testSetIf() throws Exception {
         triple.set("old", 1, true);
 
-        boolean result = triple.setIf("new", 2, false, (t, newLeft, newMiddle, newRight) -> newMiddle > 1);
+        // First update: predicate true for the initial state
+        boolean result = triple.setIf("new", 2, false, (l, m, r) -> m > 0 && r);
         assertTrue(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
         assertEquals(false, triple.right());
 
-        result = triple.setIf("newer", 0, true, (t, newLeft, newMiddle, newRight) -> newMiddle > 1);
+        // Second update: predicate false for the new state
+        result = triple.setIf("newer", 0, true, (l, m, r) -> m > 0 && r);
         assertFalse(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
@@ -204,7 +213,7 @@ public class Triple2025Test extends TestBase {
     @Test
     public void testReverse() {
         triple.set("left", 42, true);
-        Triple<Boolean, Integer, String> reversed = triple.reverse();
+        Triple<Boolean, Integer, String> reversed = triple.swap();
 
         assertEquals(true, reversed.left());
         assertEquals(42, reversed.middle());

@@ -50,17 +50,17 @@ public class Iterators100Test extends TestBase {
     public void testGet() {
         Iterator<String> iter = Arrays.asList("a", "b", "c", "d").iterator();
 
-        Nullable<String> result = Iterators.get(iter, 2);
+        Nullable<String> result = Iterators.elementAt(iter, 2);
         assertTrue(result.isPresent());
         assertEquals("c", result.get());
 
-        result = Iterators.get(iter, 10);
+        result = Iterators.elementAt(iter, 10);
         assertFalse(result.isPresent());
 
-        result = Iterators.get(null, 0);
+        result = Iterators.elementAt(null, 0);
         assertFalse(result.isPresent());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.get(intList.iterator(), -1));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.elementAt(intList.iterator(), -1));
     }
 
     @Test
@@ -114,10 +114,10 @@ public class Iterators100Test extends TestBase {
         List<Integer> list2 = Arrays.asList(1, 2, 3);
         List<Integer> list3 = Arrays.asList(1, 2, 4);
 
-        assertTrue(Iterators.elementsEqual(list1.iterator(), list2.iterator()));
-        assertFalse(Iterators.elementsEqual(list1.iterator(), list3.iterator()));
+        assertTrue(Iterators.equalsInOrder(list1.iterator(), list2.iterator()));
+        assertFalse(Iterators.equalsInOrder(list1.iterator(), list3.iterator()));
 
-        assertFalse(Iterators.elementsEqual(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2, 3).iterator()));
+        assertFalse(Iterators.equalsInOrder(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2, 3).iterator()));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class Iterators100Test extends TestBase {
     @Test
     public void testRepeatCollection() {
         List<String> list = Arrays.asList("a", "b");
-        ObjIterator<String> iter = Iterators.repeatCollection(list, 2L);
+        ObjIterator<String> iter = Iterators.cycle(list, 2L);
 
         assertEquals("a", iter.next());
         assertEquals("b", iter.next());
@@ -191,7 +191,7 @@ public class Iterators100Test extends TestBase {
     @Test
     public void testRepeatCollectionToSize() {
         List<String> list = Arrays.asList("a", "b", "c");
-        ObjIterator<String> iter = Iterators.repeatCollectionToSize(list, 7L);
+        ObjIterator<String> iter = Iterators.cycleToSize(list, 7L);
 
         List<String> result = new ArrayList<>();
         while (iter.hasNext()) {

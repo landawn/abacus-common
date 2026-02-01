@@ -430,8 +430,8 @@ public class ShortStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        ShortSummaryStatistics stats = createShortStream((short) 1, (short) 2, (short) 3, (short) 4).summarize();
+    public void testsummaryStatistics() {
+        ShortSummaryStatistics stats = createShortStream((short) 1, (short) 2, (short) 3, (short) 4).summaryStatistics();
         assertEquals(4, stats.getCount());
         assertEquals(10, stats.getSum());
         assertEquals(1, stats.getMin());
@@ -611,9 +611,9 @@ public class ShortStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .summarizeAndPercentiles();
+                .summaryStatisticsAndPercentiles();
 
         assertNotNull(result);
         assertEquals(5, result.left().getCount());

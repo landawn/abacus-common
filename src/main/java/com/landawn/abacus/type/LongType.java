@@ -68,7 +68,7 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Long userId = type.get(rs, 1);   // retrieves Long from column 1
      * }</pre>
      *
@@ -76,6 +76,7 @@ public final class LongType extends AbstractLongType {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return the Long value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Long
      */
     @Override
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -99,7 +100,7 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Long userId = type.get(rs, "user_id");   // retrieves Long from "user_id" column
      * }</pre>
      *
@@ -107,6 +108,7 @@ public final class LongType extends AbstractLongType {
      * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
      * @return the Long value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Long
      */
     @Override
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {

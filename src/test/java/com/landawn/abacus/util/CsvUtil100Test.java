@@ -477,7 +477,7 @@ public class CsvUtil100Test extends TestBase {
     @Test
     @DisplayName("Test jsonToCsv")
     public void test_jsonToCsv() {
-        List<TestBean> testBeans = Beans.fill(TestBean.class, 999999);
+        List<TestBean> testBeans = Beans.newRandomList(TestBean.class, 999999);
         File jsonFile = tempDir.resolve("test001.json").toFile();
 
         N.toJson(testBeans, jsonFile);

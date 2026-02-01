@@ -93,7 +93,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

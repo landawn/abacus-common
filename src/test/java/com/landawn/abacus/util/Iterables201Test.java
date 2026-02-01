@@ -1293,7 +1293,7 @@ public class Iterables201Test extends TestBase {
     @Test
     public void testReverseList() {
         List<Integer> original = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
-        List<Integer> reversed = Iterables.reverse(original);
+        List<Integer> reversed = Iterables.asReversed(original);
 
         assertEquals(Arrays.asList(4, 3, 2, 1), reversed);
         assertEquals(4, reversed.size());
@@ -1312,13 +1312,13 @@ public class Iterables201Test extends TestBase {
         assertEquals(Arrays.asList(20, 10, 3, 2, 1, 0), reversed);
 
         List<Integer> single = new ArrayList<>(Collections.singletonList(1));
-        assertEquals(Collections.singletonList(1), Iterables.reverse(single));
+        assertEquals(Collections.singletonList(1), Iterables.asReversed(single));
 
         List<Integer> empty = new ArrayList<>();
-        assertEquals(Collections.emptyList(), Iterables.reverse(empty));
+        assertEquals(Collections.emptyList(), Iterables.asReversed(empty));
 
         List<Integer> randomAccessOriginal = Arrays.asList(5, 6, 7);
-        List<Integer> randomAccessReversed = Iterables.reverse(randomAccessOriginal);
+        List<Integer> randomAccessReversed = Iterables.asReversed(randomAccessOriginal);
         assertEquals(Arrays.asList(7, 6, 5), randomAccessReversed);
         assertThrows(UnsupportedOperationException.class, () -> randomAccessReversed.add(33));
         randomAccessReversed.set(0, 77);

@@ -128,7 +128,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * BigDecimal price = type.get(rs, 1);   // retrieves BigDecimal from column 1
      * }</pre>
      *
@@ -148,7 +148,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * BigDecimal price = type.get(rs, "price");   // retrieves BigDecimal from "price" column
      * }</pre>
      *

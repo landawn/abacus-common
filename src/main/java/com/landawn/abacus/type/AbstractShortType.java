@@ -73,7 +73,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * Short value1 = type.valueOf("32767");   // returns 32767 (max short value)
      * Short value2 = type.valueOf("100");     // returns 100
      * Short value3 = type.valueOf("42L");     // returns 42 (suffix stripped)
@@ -112,7 +112,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * char[] buffer = "1000".toCharArray();
      * Short value = type.valueOf(buffer, 0, 4);   // returns 1000
      * }</pre>
@@ -144,7 +144,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * if (type.isShort()) {
      *     // Handle short type specific logic
      *     System.out.println("This is a short type");
@@ -166,11 +166,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive short types
-     * PrimitiveShortType type = TypeFactory.getType(short.class);
+     * Type<Short> type = TypeFactory.getType(short.class);
      * short value = type.get(rs, 1);   // Returns 0 for SQL NULL
      *
      * // For wrapper Short types
-     * ShortType type = TypeFactory.getType(Short.class);
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * Short value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
@@ -192,11 +192,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive short types
-     * PrimitiveShortType type = TypeFactory.getType(short.class);
+     * Type<Short> type = TypeFactory.getType(short.class);
      * short value = type.get(rs, "port");   // Returns 0 for SQL NULL
      *
      * // For wrapper Short types
-     * ShortType type = TypeFactory.getType(Short.class);
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * Short value = type.get(rs, "port");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *

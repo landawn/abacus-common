@@ -59,14 +59,14 @@ public class Maps200Test extends TestBase {
 
     @Test
     public void testKeys() {
-        assertTrue(Maps.keys(null).isEmpty());
-        assertTrue(Maps.keys(new HashMap<>()).isEmpty());
+        assertTrue(Maps.keySet(null).isEmpty());
+        assertTrue(Maps.keySet(new HashMap<>()).isEmpty());
 
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
-        assertEquals(map.keySet(), Maps.keys(map));
-        Set<String> emptyKeys = Maps.keys(null);
+        assertEquals(map.keySet(), Maps.keySet(map));
+        Set<String> emptyKeys = Maps.keySet(null);
         assertThrows(UnsupportedOperationException.class, () -> emptyKeys.add("new"));
     }
 
@@ -188,10 +188,10 @@ public class Maps200Test extends TestBase {
         map.put("a", "apple");
         map.put("b", null);
 
-        assertEquals(Nullable.of("apple"), Maps.get(map, "a"));
-        assertEquals(Nullable.of(null), Maps.get(map, "b"));
-        assertEquals(Nullable.empty(), Maps.get(map, "c"));
-        assertEquals(Nullable.empty(), Maps.get(null, "a"));
+        assertEquals(Nullable.of("apple"), Maps.getIfExists(map, "a"));
+        assertEquals(Nullable.of(null), Maps.getIfExists(map, "b"));
+        assertEquals(Nullable.empty(), Maps.getIfExists(map, "c"));
+        assertEquals(Nullable.empty(), Maps.getIfExists(null, "a"));
     }
 
     @Test
@@ -202,11 +202,11 @@ public class Maps200Test extends TestBase {
         innerMap.put("y", null);
         map.put("outer", innerMap);
 
-        assertEquals(Nullable.of(10), Maps.get(map, "outer", "x"));
-        assertEquals(Nullable.of(null), Maps.get(map, "outer", "y"));
-        assertEquals(Nullable.empty(), Maps.get(map, "outer", "z"));
-        assertEquals(Nullable.empty(), Maps.get(map, "otherOuter", "x"));
-        assertEquals(Nullable.empty(), Maps.get(null, "outer", "x"));
+        assertEquals(Nullable.of(10), Maps.getIfExists(map, "outer", "x"));
+        assertEquals(Nullable.of(null), Maps.getIfExists(map, "outer", "y"));
+        assertEquals(Nullable.empty(), Maps.getIfExists(map, "outer", "z"));
+        assertEquals(Nullable.empty(), Maps.getIfExists(map, "otherOuter", "x"));
+        assertEquals(Nullable.empty(), Maps.getIfExists(null, "outer", "x"));
     }
 
     @Test
@@ -220,7 +220,7 @@ public class Maps200Test extends TestBase {
         assertEquals(defaultVal, Maps.getOrDefaultIfAbsent(map, "b", defaultVal));
         assertEquals(defaultVal, Maps.getOrDefaultIfAbsent(map, "c", defaultVal));
         assertEquals(defaultVal, Maps.getOrDefaultIfAbsent(null, "a", defaultVal));
-        assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(map, "a", null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(map, "a", (String) null));
     }
 
     @Test
@@ -262,16 +262,16 @@ public class Maps200Test extends TestBase {
         map.put("f", false);
         map.put("s_t", "true");
         map.put("n", null);
-        assertEquals(OptionalBoolean.of(true), Maps.getBoolean(map, "t"));
-        assertEquals(OptionalBoolean.of(false), Maps.getBoolean(map, "f"));
-        assertEquals(OptionalBoolean.of(true), Maps.getBoolean(map, "s_t"));
-        assertEquals(OptionalBoolean.empty(), Maps.getBoolean(map, "n"));
-        assertEquals(OptionalBoolean.empty(), Maps.getBoolean(map, "missing"));
+        assertEquals(OptionalBoolean.of(true), Maps.getAsBoolean(map, "t"));
+        assertEquals(OptionalBoolean.of(false), Maps.getAsBoolean(map, "f"));
+        assertEquals(OptionalBoolean.of(true), Maps.getAsBoolean(map, "s_t"));
+        assertEquals(OptionalBoolean.empty(), Maps.getAsBoolean(map, "n"));
+        assertEquals(OptionalBoolean.empty(), Maps.getAsBoolean(map, "missing"));
 
-        assertTrue(Maps.getBoolean(map, "t", false));
-        assertFalse(Maps.getBoolean(map, "f", true));
-        assertTrue(Maps.getBoolean(map, "missing", true));
-        assertFalse(Maps.getBoolean(map, "n", false));
+        assertTrue(Maps.getAsBooleanOrDefault(map, "t", false));
+        assertFalse(Maps.getAsBooleanOrDefault(map, "f", true));
+        assertTrue(Maps.getAsBooleanOrDefault(map, "missing", true));
+        assertFalse(Maps.getAsBooleanOrDefault(map, "n", false));
     }
 
     @Test
@@ -280,15 +280,15 @@ public class Maps200Test extends TestBase {
         map.put("s", "hello");
         map.put("n", null);
         map.put("i", 123);
-        assertEquals(Optional.of("hello"), Maps.getString(map, "s"));
-        assertEquals(Optional.empty(), Maps.getString(map, "n"));
-        assertEquals(Optional.of("123"), Maps.getString(map, "i"));
-        assertEquals(Optional.empty(), Maps.getString(map, "missing"));
+        assertEquals(Optional.of("hello"), Maps.getAsString(map, "s"));
+        assertEquals(Optional.empty(), Maps.getAsString(map, "n"));
+        assertEquals(Optional.of("123"), Maps.getAsString(map, "i"));
+        assertEquals(Optional.empty(), Maps.getAsString(map, "missing"));
 
-        assertEquals("hello", Maps.getString(map, "s", "default"));
-        assertEquals("default", Maps.getString(map, "n", "default"));
-        assertEquals("123", Maps.getString(map, "i", "default"));
-        assertThrows(IllegalArgumentException.class, () -> Maps.getString(map, "s", null));
+        assertEquals("hello", Maps.getAsStringOrDefault(map, "s", "default"));
+        assertEquals("default", Maps.getAsStringOrDefault(map, "n", "default"));
+        assertEquals("123", Maps.getAsStringOrDefault(map, "i", "default"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsStringOrDefault(map, "s", null));
     }
 
     @Test
@@ -299,12 +299,12 @@ public class Maps200Test extends TestBase {
         map.put("d", 123.45);
         map.put("n", null);
 
-        assertEquals(Optional.of("text"), Maps.getNonNull(map, "s", String.class));
-        assertEquals(Optional.of(123), Maps.getNonNull(map, "i", Integer.class));
-        assertEquals(Optional.of(123.45), Maps.getNonNull(map, "d", Double.class));
-        assertEquals(Optional.of("123"), Maps.getNonNull(map, "i", String.class));
-        assertEquals(Optional.empty(), Maps.getNonNull(map, "n", String.class));
-        assertEquals(Optional.empty(), Maps.getNonNull(map, "missing", String.class));
+        assertEquals(Optional.of("text"), Maps.getAs(map, "s", String.class));
+        assertEquals(Optional.of(123), Maps.getAs(map, "i", Integer.class));
+        assertEquals(Optional.of(123.45), Maps.getAs(map, "d", Double.class));
+        assertEquals(Optional.of("123"), Maps.getAs(map, "i", String.class));
+        assertEquals(Optional.empty(), Maps.getAs(map, "n", String.class));
+        assertEquals(Optional.empty(), Maps.getAs(map, "missing", String.class));
     }
 
     @Test
@@ -316,12 +316,12 @@ public class Maps200Test extends TestBase {
         String defaultStr = "default";
         Integer defaultInt = 999;
 
-        assertEquals("text", Maps.getNonNull(map, "s", defaultStr));
-        assertEquals(Integer.valueOf(123), Maps.getNonNull(map, "i", defaultInt));
-        assertEquals("123", Maps.getNonNull(map, "i", defaultStr));
-        assertEquals(defaultStr, Maps.getNonNull(map, "n", defaultStr));
-        assertEquals(defaultStr, Maps.getNonNull(map, "missing", defaultStr));
-        assertThrows(IllegalArgumentException.class, () -> Maps.getNonNull(map, "s", (String) null));
+        assertEquals("text", Maps.getAsOrDefault(map, "s", defaultStr));
+        assertEquals(Integer.valueOf(123), Maps.getAsOrDefault(map, "i", defaultInt));
+        assertEquals("123", Maps.getAsOrDefault(map, "i", defaultStr));
+        assertEquals(defaultStr, Maps.getAsOrDefault(map, "n", defaultStr));
+        assertEquals(defaultStr, Maps.getAsOrDefault(map, "missing", defaultStr));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefault(map, "s", (String) null));
     }
 
     @Test
@@ -413,15 +413,15 @@ public class Maps200Test extends TestBase {
     @Test
     public void testGetByPath_withTargetType() {
         Map<String, Object> map = Map.of("count", "123");
-        assertEquals(Integer.valueOf(123), Maps.getByPath(map, "count", Integer.class));
+        assertEquals(Integer.valueOf(123), Maps.getByPathAs(map, "count", Integer.class));
     }
 
     @Test
     public void testGetByPath_withDefaultValue() {
         Map<String, Object> map = Map.of("name", "Test");
-        assertEquals("Test", Maps.getByPath(map, "name", "Default"));
-        assertEquals("Default", Maps.getByPath(map, "address", "Default"));
-        assertEquals(Integer.valueOf(123), Maps.getByPath(map, "name_no", 123));
+        assertEquals("Test", Maps.getByPathOrDefault(map, "name", "Default"));
+        assertEquals("Default", Maps.getByPathOrDefault(map, "address", "Default"));
+        assertEquals(Integer.valueOf(123), Maps.getByPathOrDefault(map, "name_no", 123));
     }
 
     @Test
@@ -523,10 +523,10 @@ public class Maps200Test extends TestBase {
         Map<String, Integer> source = Map.of("b", 2, "c", 3, "aa", 4);
         Predicate<String> keyFilter = k -> k.length() == 1;
 
-        assertTrue(Maps.putIf(target, source, keyFilter));
+        assertTrue(Maps.putAllIf(target, source, keyFilter));
         assertEquals(Map.of("a", 1, "b", 2, "c", 3), target);
 
-        assertFalse(Maps.putIf(target, Map.of("bb", 5), keyFilter));
+        assertFalse(Maps.putAllIf(target, Map.of("bb", 5), keyFilter));
     }
 
     @Test
@@ -535,10 +535,10 @@ public class Maps200Test extends TestBase {
         Map<String, Integer> source = Map.of("b", 20, "c", 3, "d", 40);
         BiPredicate<String, Integer> entryFilter = (k, v) -> v < 10;
 
-        assertTrue(Maps.putIf(target, source, entryFilter));
+        assertTrue(Maps.putAllIf(target, source, entryFilter));
         assertEquals(Map.of("a", 1, "c", 3), target);
 
-        assertFalse(Maps.putIf(target, Map.of("e", 50), entryFilter));
+        assertFalse(Maps.putAllIf(target, Map.of("e", 50), entryFilter));
     }
 
     @Test

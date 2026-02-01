@@ -194,7 +194,7 @@ public class Dataset113Test extends TestBase {
     @Test
     public void testSwapColumnPosition() {
         Dataset ds = dataset.copy();
-        ds.swapColumnPosition("id", "name");
+        ds.swapColumns("id", "name");
         assertEquals("name", ds.getColumnName(0));
         assertEquals("id", ds.getColumnName(1));
     }
@@ -224,7 +224,7 @@ public class Dataset113Test extends TestBase {
         Dataset ds = dataset.copy();
         Object[] originalRow0 = ds.getRow(0);
         Object[] originalRow1 = ds.getRow(1);
-        ds.swapRowPosition(0, 1);
+        ds.swapRows(0, 1);
         assertEquals(originalRow1[1], ds.get(0, 1));
         assertEquals(originalRow0[1], ds.get(1, 1));
     }

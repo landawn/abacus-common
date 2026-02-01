@@ -573,7 +573,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testInverse() {
-        Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>> inverse = Fn.inverse();
+        Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>> inverse = Fn.invert();
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
         Map.Entry<Integer, String> inverted = inverse.apply(entry);
         assertEquals(123, inverted.getKey());

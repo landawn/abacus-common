@@ -49,7 +49,7 @@ public class MultimapType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        boolean isGeneric = listMultimapType.isGenericType();
+        boolean isGeneric = listMultimapType.isParameterizedType();
         Assertions.assertTrue(isGeneric);
     }
 

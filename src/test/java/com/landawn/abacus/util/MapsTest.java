@@ -24,7 +24,7 @@ public class MapsTest extends AbstractTest {
     @Test
     public void test_beanToMap() {
 
-        Account account1 = Beans.fill(Account.class);
+        Account account1 = Beans.newRandom(Account.class);
         Map<String, Object> map1 = Beans.beanToMap(account1);
         N.println(map1);
 
@@ -35,24 +35,24 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_MapDifference() {
-        Account account1 = Beans.fill(Account.class);
-        Account account2 = Beans.fill(Account.class);
+        Account account1 = Beans.newRandom(Account.class);
+        Account account2 = Beans.newRandom(Account.class);
         account2.setFirstName(account1.getFirstName());
 
         var mapDiff = BeanDifference.of(account1, account2);
 
         N.println(mapDiff);
         N.println(mapDiff.common());
-        N.println(mapDiff.leftOnly());
-        N.println(mapDiff.rightOnly());
+        N.println(mapDiff.onlyOnLeft());
+        N.println(mapDiff.onlyOnRight());
         N.println(mapDiff.differentValues());
 
         mapDiff = BeanDifference.of(account1, account2, CommonUtil.asList("id", "firstName", "lastName2"));
 
         N.println(mapDiff);
         N.println(mapDiff.common());
-        N.println(mapDiff.leftOnly());
-        N.println(mapDiff.rightOnly());
+        N.println(mapDiff.onlyOnLeft());
+        N.println(mapDiff.onlyOnRight());
         N.println(mapDiff.differentValues());
 
     }

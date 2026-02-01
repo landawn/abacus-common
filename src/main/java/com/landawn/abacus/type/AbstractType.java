@@ -520,7 +520,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return {@code true} if this type has type parameters, {@code false} otherwise
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return N.notEmpty(getParameterTypes());
     }
 

@@ -397,7 +397,7 @@ public class AsyncExecutor {
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
         return execute(() -> {
-            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(action);
+            Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(action);
             return null;
         });
     }
@@ -432,7 +432,7 @@ public class AsyncExecutor {
     public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return execute(() -> {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
+            final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(action);
         });
     }

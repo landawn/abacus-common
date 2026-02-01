@@ -264,7 +264,7 @@ public class EntryStream200Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
-        Map<Integer, String> inversedMap = EntryStream.of(map).inversed().toMap();
+        Map<Integer, String> inversedMap = EntryStream.of(map).invert().toMap();
         assertEquals("a", inversedMap.get(1));
         assertEquals("b", inversedMap.get(2));
     }

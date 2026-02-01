@@ -1,8 +1,9 @@
-package com.landawn.abacus.util;
+package com.landawn.abacus.poi;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,11 +22,15 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
-import com.landawn.abacus.poi.ExcelUtil;
 import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowExtractors;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
 import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions;
+import com.landawn.abacus.util.Charsets;
+import com.landawn.abacus.util.CsvUtil;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -82,7 +87,7 @@ public class ExcelUtil2025Test extends TestBase {
     }
 
     @Test
-    public void test_CELL2STRING() throws Exception {
+    public void test_CELL_TO_STRING() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Text", "Number", "Bool");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Hello", 42.5, true));
@@ -112,7 +117,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_loadSheet_File_SheetName_RowExtractor() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("col1", "col2"), CommonUtil.asList(CommonUtil.asList("a", "b"), CommonUtil.asList("c", "d")));
+        Dataset dataset = N.newDataset(N.asList("col1", "col2"), N.asList(N.asList("a", "b"), N.asList("c", "d")));
         ExcelUtil.writeSheet("TestSheet", dataset, tempFile);
 
         Dataset loaded = ExcelUtil.loadSheet(tempFile, "TestSheet", RowExtractors.DEFAULT);
@@ -312,8 +317,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_WithDataset() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"),
-                CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
+        Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
 
         ExcelUtil.writeSheet("DatasetSheet", dataset, tempFile);
 
@@ -325,7 +329,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("A", "B"), CommonUtil.asList(CommonUtil.asList(1, 2)));
+        Dataset dataset = N.newDataset(N.asList("A", "B"), N.asList(N.asList(1, 2)));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
 
@@ -338,7 +342,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("C"), CommonUtil.asList(CommonUtil.asList(3)));
+        Dataset dataset = N.newDataset(N.asList("C"), N.asList(N.asList(3)));
 
         Consumer<Sheet> setter = sheet -> sheet.setDefaultRowHeight((short) 400);
 
@@ -441,9 +445,8 @@ public class ExcelUtil2025Test extends TestBase {
 
         File csvFile = createTempFile(".csv");
         List<String> customHeaders = Arrays.asList("Column1", "Column2");
-
-        try (FileWriter writer = IOUtil.newFileWriter(csvFile, Charsets.UTF_8)) {
-            ExcelUtil.saveSheetAsCsv(excelFile, 0, customHeaders, writer);
+        try (FileWriter newFileWriter = IOUtil.newFileWriter(csvFile, StandardCharsets.UTF_8)) {
+            ExcelUtil.saveSheetAsCsv(excelFile, 0, customHeaders, newFileWriter);
         }
 
         String content = IOUtil.readAllToString(csvFile);
@@ -460,8 +463,8 @@ public class ExcelUtil2025Test extends TestBase {
 
         File csvFile = createTempFile(".csv");
         List<String> customHeaders = Arrays.asList("Custom");
-        try (FileWriter writer = IOUtil.newFileWriter(csvFile, Charsets.UTF_8)) {
-            ExcelUtil.saveSheetAsCsv(excelFile, "TestSheet", customHeaders, writer);
+        try (FileWriter newFileWriter = IOUtil.newFileWriter(csvFile, Charsets.UTF_8)) {
+            ExcelUtil.saveSheetAsCsv(excelFile, "TestSheet", customHeaders, newFileWriter);
         }
 
         String content = IOUtil.readAllToString(csvFile);
@@ -721,8 +724,8 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_RoundTrip_WriteAndLoad() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset original = CommonUtil.newDataset(CommonUtil.asList("name", "value", "flag"),
-                CommonUtil.asList(CommonUtil.asList("A", 10, true), CommonUtil.asList("B", 20, false), CommonUtil.asList("C", 30, true)));
+        Dataset original = N.newDataset(N.asList("name", "value", "flag"),
+                N.asList(N.asList("A", 10, true), N.asList("B", 20, false), N.asList("C", 30, true)));
 
         ExcelUtil.writeSheet("Data", original, tempFile);
         Dataset loaded = ExcelUtil.loadSheet(tempFile);

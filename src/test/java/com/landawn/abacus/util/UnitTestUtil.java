@@ -68,7 +68,7 @@ public final class UnitTestUtil {
                 propInfo.setPropValue(bean, typeValues.get(propInfo.clazz));
             }
         } else {
-            Beans.fill(bean);
+            Beans.randomize(bean);
         }
 
         return bean;

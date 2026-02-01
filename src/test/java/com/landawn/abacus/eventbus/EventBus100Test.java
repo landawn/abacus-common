@@ -256,10 +256,10 @@ public class EventBus100Test extends TestBase {
         String event = "Sticky Event";
         eventBus.postSticky("eventId", event);
 
-        boolean removed = eventBus.removeStickyEvent(event, "eventId");
+        boolean removed = eventBus.removeStickyEvent("eventId", event);
         Assertions.assertTrue(removed);
 
-        removed = eventBus.removeStickyEvent(event, "wrongId");
+        removed = eventBus.removeStickyEvent("wrongId", event);
         Assertions.assertFalse(removed);
     }
 
@@ -399,7 +399,7 @@ public class EventBus100Test extends TestBase {
         AtomicInteger eventCount = new AtomicInteger(0);
 
         Object subscriber = new Object() {
-            @Subscribe(interval = 100)
+            @Subscribe(intervalMillis = 100)
             public void onEvent(String event) {
                 eventCount.incrementAndGet();
             }

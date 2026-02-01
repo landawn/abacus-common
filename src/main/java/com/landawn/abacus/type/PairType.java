@@ -118,7 +118,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @return {@code true}, as PairType is always a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

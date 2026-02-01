@@ -1429,7 +1429,7 @@ public class Fn107Test extends TestBase {
         @Test
         public void testInverse() {
             Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
-            Throwables.Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>, RuntimeException> inverseFunc = Fnn.inverse();
+            Throwables.Function<Map.Entry<String, Integer>, Map.Entry<Integer, String>, RuntimeException> inverseFunc = Fnn.invert();
             Map.Entry<Integer, String> inverted = inverseFunc.apply(entry);
             Assertions.assertEquals(100, inverted.getKey());
             Assertions.assertEquals("key", inverted.getValue());

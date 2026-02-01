@@ -85,7 +85,7 @@ import com.landawn.abacus.util.TypeReference;
  *   <li><b>Generic Programming:</b> Runtime type information for generic operations</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic type operations
  * Type<String> stringType = Type.of(String.class);
@@ -1045,7 +1045,7 @@ public interface Type<T> {
      *
      * @return {@code true} if this is a generic type, {@code false} otherwise
      */
-    default boolean isGenericType() {
+    default boolean isParameterizedType() {
         return false; // Default implementation, can be overridden by specific types
     }
 

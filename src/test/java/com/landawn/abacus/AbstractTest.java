@@ -206,7 +206,7 @@ public abstract class AbstractTest {
         aclUser.setName(name);
         aclUser.setDescription(ACL_DESCRIPTION);
 
-        return Beans.copy(aclUser, cls);
+        return Beans.copyAs(aclUser, cls);
     }
 
     public static <T> T createAclGroup(final Class<T> cls) {
@@ -219,7 +219,7 @@ public abstract class AbstractTest {
         aclGroup.setName(name);
         aclGroup.setDescription(ACL_DESCRIPTION);
 
-        return Beans.copy(aclGroup, cls);
+        return Beans.copyAs(aclGroup, cls);
     }
 
     public static <T> T createAclUserWithAclGroup(final Class<T> cls) {

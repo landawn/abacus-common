@@ -1025,21 +1025,21 @@ public class CharStream200Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        CharSummaryStatistics stats = createCharStream(new char[] { 'z', 'y', 'x', 'w' }).summarize();
+    public void testsummaryStatistics() {
+        CharSummaryStatistics stats = createCharStream(new char[] { 'z', 'y', 'x', 'w' }).summaryStatistics();
         assertEquals(4, stats.getCount());
         assertEquals('w', stats.getMin());
         assertEquals('z', stats.getMax());
         assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum().intValue());
 
-        stats = createCharStream(new char[] {}).summarize();
+        stats = createCharStream(new char[] {}).summaryStatistics();
         assertEquals(0, stats.getCount());
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> summary = createCharStream(new char[] { '1', '2', '3', '4', '5' })
-                .summarizeAndPercentiles();
+                .summaryStatisticsAndPercentiles();
         CharSummaryStatistics stats = summary.left();
         Optional<Map<Percentage, Character>> percentiles = summary.right();
 
@@ -1049,7 +1049,7 @@ public class CharStream200Test extends TestBase {
         assertEquals((int) '1' + (int) '2' + (int) '3' + (int) '4' + (int) '5', stats.getSum().intValue());
         assertTrue(percentiles.isPresent());
 
-        summary = createCharStream(new char[] {}).summarizeAndPercentiles();
+        summary = createCharStream(new char[] {}).summaryStatisticsAndPercentiles();
         stats = summary.left();
         percentiles = summary.right();
         assertEquals(0, stats.getCount());

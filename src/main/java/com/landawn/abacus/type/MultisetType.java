@@ -133,7 +133,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @return {@code true}, indicating that Multiset is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

@@ -541,9 +541,9 @@ public class ByteStream201Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
+    public void testsummaryStatistics() {
         byteStream = createByteStream(new byte[] { 1, 5, 2, 8, 3 });
-        ByteSummaryStatistics stats = byteStream.summarize();
+        ByteSummaryStatistics stats = byteStream.summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(1, stats.getMin());
         assertEquals(8, stats.getMax());
@@ -551,14 +551,14 @@ public class ByteStream201Test extends TestBase {
         assertEquals(3.8, stats.getAverage(), 0.001);
 
         byteStream = createByteStream(new byte[] {});
-        stats = byteStream.summarize();
+        stats = byteStream.summaryStatistics();
         assertEquals(0, stats.getCount());
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         byteStream = createByteStream(new byte[] { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 });
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = byteStream.summarizeAndPercentiles();
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = byteStream.summaryStatisticsAndPercentiles();
 
         ByteSummaryStatistics stats = result.left();
         assertEquals(10, stats.getCount());

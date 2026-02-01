@@ -413,7 +413,7 @@ public class U101Test extends TestBase {
             assertTrue(result2.isPresent());
             assertEquals("second", result2.get());
 
-            assertThrows(IllegalArgumentException.class, () -> empty.or(null));
+            assertThrows(NullPointerException.class, () -> empty.or(null));
 
             assertThrows(NullPointerException.class, () -> empty.or(() -> null));
         }

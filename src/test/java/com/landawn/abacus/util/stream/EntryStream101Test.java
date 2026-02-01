@@ -515,13 +515,13 @@ public class EntryStream101Test extends TestBase {
     }
 
     @Test
-    public void testInversedToDisposableEntry() {
+    public void testinvertToDisposableEntry() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2);
         map.put("c", 3);
 
-        Map<Integer, String> inversed = EntryStream.of(map).inversedToDisposableEntry().toMap();
+        Map<Integer, String> inversed = EntryStream.of(map).invertToDisposableEntry().toMap();
 
         assertEquals("a", inversed.get(1));
         assertEquals("b", inversed.get(2));

@@ -632,8 +632,8 @@ public class LongStream200Test extends TestBase {
         }
 
         @Test
-        public void testSummarize() {
-            LongSummaryStatistics stats = LongStream.of(1, 2, 3, 4, 5).summarize();
+        public void testsummaryStatistics() {
+            LongSummaryStatistics stats = LongStream.of(1, 2, 3, 4, 5).summaryStatistics();
             assertEquals(5, stats.getCount());
             assertEquals(15, stats.getSum());
             assertEquals(1, stats.getMin());
@@ -642,8 +642,8 @@ public class LongStream200Test extends TestBase {
         }
 
         @Test
-        public void testSummarizeAndPercentiles() {
-            Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = LongStream.of(1, 2, 3, 4, 5).summarizeAndPercentiles();
+        public void testsummaryStatisticsAndPercentiles() {
+            Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = LongStream.of(1, 2, 3, 4, 5).summaryStatisticsAndPercentiles();
 
             LongSummaryStatistics stats = result.left();
             assertEquals(5, stats.getCount());

@@ -32,14 +32,14 @@ public class Subscribe100Test extends TestBase {
         Assertions.assertFalse(annotation.strictEventType());
         Assertions.assertFalse(annotation.sticky());
         Assertions.assertEquals("", annotation.eventId());
-        Assertions.assertEquals(0, annotation.interval());
+        Assertions.assertEquals(0, annotation.intervalMillis());
         Assertions.assertFalse(annotation.deduplicate());
     }
 
     @Test
     public void testCustomValues() throws NoSuchMethodException {
         class TestClass {
-            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, strictEventType = true, sticky = true, eventId = "testEvent", interval = 1000, deduplicate = true)
+            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, strictEventType = true, sticky = true, eventId = "testEvent", intervalMillis = 1000, deduplicate = true)
             public void onEvent(String event) {
             }
         }
@@ -52,7 +52,7 @@ public class Subscribe100Test extends TestBase {
         Assertions.assertTrue(annotation.strictEventType());
         Assertions.assertTrue(annotation.sticky());
         Assertions.assertEquals("testEvent", annotation.eventId());
-        Assertions.assertEquals(1000, annotation.interval());
+        Assertions.assertEquals(1000, annotation.intervalMillis());
         Assertions.assertTrue(annotation.deduplicate());
     }
 
@@ -165,7 +165,7 @@ public class Subscribe100Test extends TestBase {
         AtomicInteger eventCount = new AtomicInteger(0);
 
         class TestClass {
-            @Subscribe(interval = 80)
+            @Subscribe(intervalMillis = 80)
             public void onEvent(String event) {
                 eventCount.incrementAndGet();
             }
@@ -221,7 +221,7 @@ public class Subscribe100Test extends TestBase {
         CountDownLatch latch = new CountDownLatch(1);
 
         class TestClass {
-            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, eventId = "combined", interval = 50, deduplicate = true)
+            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, eventId = "combined", intervalMillis = 50, deduplicate = true)
             public void onEvent(String event) {
                 eventCount.incrementAndGet();
                 latch.countDown();

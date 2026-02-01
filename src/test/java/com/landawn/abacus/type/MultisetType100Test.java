@@ -50,7 +50,7 @@ public class MultisetType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        boolean isGeneric = multisetType.isGenericType();
+        boolean isGeneric = multisetType.isParameterizedType();
         Assertions.assertTrue(isGeneric);
     }
 

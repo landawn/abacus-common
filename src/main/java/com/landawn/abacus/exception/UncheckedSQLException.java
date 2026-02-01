@@ -87,7 +87,7 @@ public class UncheckedSQLException extends UncheckedException {
      * The wrapped SQLException that caused this unchecked exception.
      * Contains the original SQL error details including SQL state and error code.
      */
-    private final SQLException sqlException;
+    private final SQLException cause;
 
     /**
      * Constructs a new {@code UncheckedSQLException} by wrapping the specified {@link SQLException}.
@@ -109,7 +109,7 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final SQLException cause) {
         super(cause);
-        sqlException = cause;
+        this.cause = cause;
     }
 
     /**
@@ -136,7 +136,7 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final String message, final SQLException cause) {
         super(message, cause);
-        sqlException = cause;
+        this.cause = cause;
     }
 
     /**
@@ -168,7 +168,7 @@ public class UncheckedSQLException extends UncheckedException {
      */
     @MayReturnNull
     public String getSQLState() {
-        return sqlException.getSQLState();
+        return cause.getSQLState();
     }
 
     /**
@@ -206,7 +206,11 @@ public class UncheckedSQLException extends UncheckedException {
      * @see SQLException#getErrorCode()
      */
     public int getErrorCode() {
-        return sqlException.getErrorCode();
+        return cause.getErrorCode();
     }
 
+    @Override
+    public synchronized SQLException getCause() {
+        return cause;
+    }
 }

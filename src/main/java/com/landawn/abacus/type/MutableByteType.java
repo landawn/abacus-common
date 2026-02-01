@@ -116,7 +116,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains byte value 42
      * MutableByte mb = type.get(rs, 1);
@@ -144,7 +144,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "status_code" contains byte value 1
      * MutableByte mb = type.get(rs, "status_code");
@@ -172,8 +172,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO settings (id, status) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * MutableByte mb = MutableByte.of((byte) 1);
      * type.set(stmt, 2, mb);
@@ -200,7 +199,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * MutableByte mb = MutableByte.of((byte) 1);
      * type.set(stmt, "p_status", mb);

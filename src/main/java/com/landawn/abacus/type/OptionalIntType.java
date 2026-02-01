@@ -148,7 +148,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains integer value 42
      * OptionalInt opt = type.get(rs, 1);
@@ -179,7 +179,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "age" contains integer value 25
      * OptionalInt opt = type.get(rs, "age");
@@ -210,9 +210,8 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = ...;  // obtained from database connection
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO users (id, age) VALUES (?, ?)");
+     * Connection connection = org.mockito.Mockito.mock(Connection.class);
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(25);
      * type.set(stmt, 2, opt);
@@ -244,8 +243,8 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = ...;  // obtained from database connection
-     * CallableStatement stmt = connection.prepareCall("{call update_age(?, ?)}");
+     * Connection connection = org.mockito.Mockito.mock(Connection.class);
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(30);
      * type.set(stmt, "p_age", opt);

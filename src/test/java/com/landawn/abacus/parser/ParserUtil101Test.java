@@ -81,7 +81,7 @@ public class ParserUtil101Test extends TestBase {
         @Transient
         private String transientField;
 
-        @JsonXmlField(alias = { "alias1", "alias2" })
+        @JsonXmlField(aliases = { "alias1", "alias2" })
         private String aliasedField;
 
         @JsonXmlField(numberFormat = "#,##0.00")

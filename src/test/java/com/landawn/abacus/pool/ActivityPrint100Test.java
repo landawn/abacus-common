@@ -52,7 +52,7 @@ public class ActivityPrint100Test extends TestBase {
 
     @Test
     public void testValueOf() {
-        ActivityPrint ap = ActivityPrint.valueOf(LIVE_TIME, MAX_IDLE_TIME);
+        ActivityPrint ap = ActivityPrint.of(LIVE_TIME, MAX_IDLE_TIME);
         assertNotNull(ap);
         assertEquals(LIVE_TIME, ap.getLiveTime());
         assertEquals(MAX_IDLE_TIME, ap.getMaxIdleTime());

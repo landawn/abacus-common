@@ -93,9 +93,9 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<String, Integer, Boolean> consumer = (s, i, b) -> { ... };
-     * var throwableConsumer =
-     *     consumer.toThrowable();
+     * TriConsumer<String, Integer, Boolean> consumer =
+     *     (s, i, b) -> System.out.println(s + ":" + i + ":" + b);
+     * var throwableConsumer = consumer.toThrowable();
      * }</pre>
      *
      * @param <E> the type of exception that the returned consumer may throw

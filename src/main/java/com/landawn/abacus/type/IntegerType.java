@@ -68,7 +68,7 @@ public final class IntegerType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Integer age = type.get(rs, 1);   // retrieves Integer from column 1
      * }</pre>
      *
@@ -76,6 +76,7 @@ public final class IntegerType extends AbstractIntegerType {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return the Integer value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Integer
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -99,7 +100,7 @@ public final class IntegerType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Integer age = type.get(rs, "age");   // retrieves Integer from "age" column
      * }</pre>
      *
@@ -107,6 +108,7 @@ public final class IntegerType extends AbstractIntegerType {
      * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
      * @return the Integer value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to Integer
      */
     @Override
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {

@@ -103,9 +103,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #curlToOkHttpRequest(String)
+     * @see #convertCurlToOkHttpRequest(String)
      */
-    public static String curlToHttpRequest(final String curl) {
+    public static String convertCurlToHttpRequest(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
@@ -196,10 +196,10 @@ public final class WebUtil {
      *
      * <p>This method parses a cURL command and generates the equivalent Java code
      * using the OkHttpRequest API. It handles the same cURL options as
-     * {@link #curlToHttpRequest(String)} but generates code specifically for the
+     * {@link #convertCurlToHttpRequest(String)} but generates code specifically for the
      * OkHttp client library.</p>
      *
-     * <p>Key differences from {@link #curlToHttpRequest(String)}:</p>
+     * <p>Key differences from {@link #convertCurlToHttpRequest(String)}:</p>
      * <ul>
      *   <li>Creates {@code RequestBody} with {@code MediaType} when body is present</li>
      *   <li>Automatically extracts {@code MediaType} from Content-Type header</li>
@@ -214,7 +214,7 @@ public final class WebUtil {
      *   <li>Appropriate HTTP method call ({@code get()}, {@code post()}, {@code put()}, {@code delete()}, or {@code execute()})</li>
      * </ul>
      *
-     * <p>HTTP Method Detection follows the same rules as {@link #curlToHttpRequest(String)}:</p>
+     * <p>HTTP Method Detection follows the same rules as {@link #convertCurlToHttpRequest(String)}:</p>
      * <ul>
      *   <li>If {@code -X} is specified, uses that method</li>
      *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
@@ -245,9 +245,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #curlToHttpRequest(String)
+     * @see #convertCurlToHttpRequest(String)
      */
-    public static String curlToOkHttpRequest(final String curl) {
+    public static String convertCurlToOkHttpRequest(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
@@ -529,8 +529,8 @@ public final class WebUtil {
      * <p>Special handling:</p>
      * <ul>
      *   <li>If {@code body} is not empty but Content-Type header is not present in {@code headers},
-     *       and {@code bodyType} is specified, the Content-Type header is automatically added</li>
-     *   <li>Header values are read using {@link HttpUtil#readHttpHeadValue(Object)} to handle
+     *       and {@code bodyContentType} is specified, the Content-Type header is automatically added</li>
+     *   <li>Header values are read using {@link HttpUtil#readHttpHeaderValue(Object)} to handle
      *       various value types (String, List, etc.)</li>
      *   <li>Quote characters within strings are properly escaped using
      *       {@link Strings#quoteEscaped(String, char)}</li>
@@ -564,18 +564,18 @@ public final class WebUtil {
      * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be null
      * @param url the target URL, must not be null
      * @param headers map of HTTP headers where values can be String or other types that
-     *                {@link HttpUtil#readHttpHeadValue(Object)} can handle (can be {@code null} or empty)
+     *                {@link HttpUtil#readHttpHeaderValue(Object)} can handle (can be {@code null} or empty)
      * @param body the request body string (can be {@code null} or empty for requests without a body)
-     * @param bodyType the MIME type of the body (e.g., "application/json"), used to add
+     * @param bodyContentType the MIME type of the body (e.g., "application/json"), used to add
      *                 Content-Type header if not already present in headers (can be null)
      * @param quoteChar the character to use for quoting values in the cURL command,
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
      * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is {@code null}
-     * @see HttpUtil#readHttpHeadValue(Object)
+     * @see HttpUtil#readHttpHeaderValue(Object)
      * @see Strings#quoteEscaped(String, char)
      */
-    public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyType,
+    public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
             final char quoteChar) {
         final StringBuilder sb = Objectory.createStringBuilder();
 
@@ -587,7 +587,7 @@ public final class WebUtil {
                 String headerValue = null;
 
                 for (final Map.Entry<String, ?> e : headers.entrySet()) {
-                    headerValue = HttpUtil.readHttpHeadValue(e.getValue());
+                    headerValue = HttpUtil.readHttpHeaderValue(e.getValue());
 
                     sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(Strings.quoteEscaped(headerValue, quoteChar)).append(quoteChar);
                 }
@@ -596,12 +596,12 @@ public final class WebUtil {
             if (Strings.isNotEmpty(body)) {
                 final String contentType = N.isEmpty(headers) ? null : HttpUtil.getContentType(headers);
 
-                if (Strings.isEmpty(contentType) && Strings.isNotEmpty(bodyType)) {
+                if (Strings.isEmpty(contentType) && Strings.isNotEmpty(bodyContentType)) {
                     sb.append(" -H ")
                             .append(quoteChar)
                             .append(HttpHeaders.Names.CONTENT_TYPE)
                             .append(": ")
-                            .append(Strings.quoteEscaped(bodyType, quoteChar))
+                            .append(Strings.quoteEscaped(bodyContentType, quoteChar))
                             .append(quoteChar);
                 }
 

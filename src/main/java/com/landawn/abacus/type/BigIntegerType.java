@@ -100,7 +100,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * BigInteger largeId = type.get(rs, 1);   // retrieves BigInteger from column 1
      * }</pre>
      *
@@ -122,7 +122,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * BigInteger largeId = type.get(rs, "large_id");   // retrieves BigInteger from "large_id" column
      * }</pre>
      *

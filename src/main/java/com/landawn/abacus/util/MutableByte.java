@@ -135,10 +135,10 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * num.setValue((byte)20);   // value is now 20
      * }</pre>
      * 
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final byte value) {
-        this.value = value;
+    public void setValue(final byte newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -151,12 +151,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * byte old = num.getAndSet((byte)20);   // returns 10, value is now 20
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the previous value before it was updated
      */
-    public byte getAndSet(final byte value) {
+    public byte getAndSet(final byte newValue) {
         final byte result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -171,11 +171,11 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * byte newVal = num.setAndGet((byte)20);   // returns 20, value is now 20
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value that was just set
      */
-    public byte setAndGet(final byte value) {
-        this.value = value;
+    public byte setAndGet(final byte newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -240,7 +240,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      *
      * <p><b>Note:</b> Byte overflow will wrap around.</p>
      *
@@ -250,14 +250,14 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * num.add((byte)5);   // value is now 15
      * }</pre>
      *
-     * @param operand the value to add to the current value
+     * @param delta the value to add to the current value
      */
-    public void add(final byte operand) {
-        value += operand;
+    public void add(final byte delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      *
      * <p><b>Note:</b> Byte underflow will wrap around.</p>
      *
@@ -267,10 +267,10 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * num.subtract((byte)3);   // value is now 7
      * }</pre>
      *
-     * @param operand the value to subtract from the current value
+     * @param delta the value to subtract from the current value
      */
-    public void subtract(final byte operand) {
-        value -= operand;
+    public void subtract(final byte delta) {
+        value -= delta;
     }
 
     /**

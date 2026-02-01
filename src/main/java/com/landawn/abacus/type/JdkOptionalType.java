@@ -93,7 +93,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @return {@code true}, indicating this is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

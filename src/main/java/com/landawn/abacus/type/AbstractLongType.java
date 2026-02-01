@@ -83,7 +83,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * Long value1 = type.valueOf(new Date());      // returns timestamp in milliseconds
      * Long value2 = type.valueOf(Instant.now());   // returns epoch milliseconds
      * Long value3 = type.valueOf("1234567890");    // returns 1234567890L
@@ -124,7 +124,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * Long value1 = type.valueOf("1234567890");    // returns 1234567890L
      * Long value2 = type.valueOf("9999999999L");   // returns 9999999999L (suffix stripped)
      * Long value3 = type.valueOf("42");            // returns 42L
@@ -162,7 +162,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * char[] buffer = "9876543210".toCharArray();
      * Long value = type.valueOf(buffer, 0, 10);   // returns 9876543210L
      * }</pre>
@@ -183,7 +183,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * if (type.isLong()) {
      *     // Handle long type specific logic
      *     System.out.println("This is a long type");
@@ -205,11 +205,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive long types
-     * PrimitiveLongType type = TypeFactory.getType(long.class);
+     * Type<Long> type = TypeFactory.getType(long.class);
      * long value = type.get(rs, 1);   // Returns 0L for SQL NULL
      *
      * // For wrapper Long types
-     * LongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * Long value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
@@ -231,11 +231,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive long types
-     * PrimitiveLongType type = TypeFactory.getType(long.class);
+     * Type<Long> type = TypeFactory.getType(long.class);
      * long value = type.get(rs, "timestamp");   // Returns 0L for SQL NULL
      *
      * // For wrapper Long types
-     * LongType type = TypeFactory.getType(Long.class);
+     * Type<Long> type = TypeFactory.getType(Long.class);
      * Long value = type.get(rs, "timestamp");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *

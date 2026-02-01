@@ -376,32 +376,36 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets the left element to the specified value if and only if the given predicate
-     * evaluates to {@code true}. The predicate receives both the current pair and the new value
-     * as parameters for evaluation.
+     * Conditionally sets the left element to the specified value.
      *
-     * <p>This method is useful for conditional updates where you want to change
-     * the left value only when certain conditions are met.</p>
+     * <p>The given predicate is evaluated against the <em>current</em> left and right
+     * values of this pair. If the predicate returns {@code true}, the left element
+     * is updated to {@code newLeft}; otherwise this pair remains unchanged.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>The predicate is evaluated at most once. If it throws an exception,
+     * the left element is not modified and the exception is propagated.</p>
+     *
+     * <p><b>Usage examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
-     * boolean updated = pair.setLeftIf("World", (p, newVal) -> p.right() > 5);
-     * // updated is true, pair.left() returns "World" because 10 > 5
      *
-     * updated = pair.setLeftIf("Test", (p, newVal) -> p.right() > 20);
-     * // updated is false, pair.left() still returns "World" because 10 is not > 20
+     * boolean updated = pair.setLeftIf("World", (l, r) -> r > 5);
+     * // updated == true, pair.left() == "World" because 10 > 5
+     *
+     * updated = pair.setLeftIf("Test", (l, r) -> r > 20);
+     * // updated == false, pair.left() is still "World" because 10 is not > 20
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw.
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
-     * @param predicate the condition to test; receives the current pair as the first parameter.
-     *                  and the new left value as the second parameter
-     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise.
-     * @throws E if the predicate throws an exception.
+     * @param <E> the type of exception that the predicate may throw
+     * @param newLeft the new value to assign to the left element if the predicate passes;
+     *                may be {@code null}
+     * @param predicate the condition to evaluate against the current left and right values;
+     *                  must not be {@code null}
+     * @return {@code true} if the left element was updated, {@code false} otherwise
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
-        if (predicate.test(this, newLeft)) {
+    public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
+        if (predicate.test(left, right)) {
             setLeft(newLeft);
             return true;
         }
@@ -410,32 +414,36 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets the right element to the specified value if and only if the given predicate
-     * evaluates to {@code true}. The predicate receives both the current pair and the new value
-     * as parameters for evaluation.
+     * Conditionally sets the right element to the specified value.
      *
-     * <p>This method is useful for conditional updates where you want to change
-     * the right value only when certain conditions are met.</p>
+     * <p>The given predicate is evaluated against the <em>current</em> left and right
+     * values of this pair. If the predicate returns {@code true}, the right element
+     * is updated to {@code newRight}; otherwise this pair remains unchanged.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>The predicate is evaluated at most once. If it throws an exception,
+     * the right element is not modified and the exception is propagated.</p>
+     *
+     * <p><b>Usage examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
-     * boolean updated = pair.setRightIf(20, (p, newVal) -> p.left().length() > 3);
-     * // updated is true, pair.right() returns 20 because "Hello".length() > 3
      *
-     * updated = pair.setRightIf(30, (p, newVal) -> newVal < p.right());
-     * // updated is false, pair.right() still returns 20 because 30 is not < 20
+     * boolean updated = pair.setRightIf(20, (l, r) -> l.length() > 3);
+     * // updated == true, pair.right() == 20 because "Hello".length() > 3
+     *
+     * updated = pair.setRightIf(30, (l, r) -> r < 10);
+     * // updated == false, pair.right() is still 20 because 20 is not < 10
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw.
-     * @param newRight the new value to potentially set for the right element, may be {@code null}.
-     * @param predicate the condition to test; receives the current pair as the first parameter.
-     *                  and the new right value as the second parameter
-     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise.
-     * @throws E if the predicate throws an exception.
+     * @param <E> the type of exception that the predicate may throw
+     * @param newRight the new value to assign to the right element if the predicate passes;
+     *                 may be {@code null}
+     * @param predicate the condition to evaluate against the current left and right values;
+     *                  must not be {@code null}
+     * @return {@code true} if the right element was updated, {@code false} otherwise
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
-        if (predicate.test(this, newRight)) {
+    public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
+        if (predicate.test(left, right)) {
             setRight(newRight);
             return true;
         }
@@ -444,38 +452,43 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets both the left and right elements to the specified values if and only if
-     * the given predicate evaluates to {@code true}. The predicate receives the current pair,
-     * the new left value, and the new right value as parameters for evaluation.
+     * Conditionally sets both the left and right elements to the specified values.
      *
-     * <p>This method is useful for conditional updates where you want to change
-     * both values atomically only when certain conditions are met. If the predicate
-     * returns {@code false}, neither value is changed.</p>
+     * <p>The given predicate is evaluated against the <em>current</em> left and right
+     * values of this pair. If the predicate returns {@code true}, both elements are
+     * updated to {@code newLeft} and {@code newRight} respectively. If the predicate
+     * returns {@code false}, this pair remains unchanged.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>From the caller's perspective, the update of left and right is atomic:
+     * either both values are changed, or neither is. The predicate is evaluated at
+     * most once. If it throws an exception, neither element is modified and the
+     * exception is propagated.</p>
+     *
+     * <p><b>Usage examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
+     *
      * boolean updated = pair.setIf("World", 20,
-     *     (p, newL, newR) -> p.left().length() + p.right() < 20);
-     * // updated is true, pair is now ("World", 20) because 5 + 10 < 20
+     *         (l, r) -> l.length() + r < 20);
+     * // updated == true, pair is now ("World", 20) because 5 + 10 < 20
      *
      * updated = pair.setIf("Test", 5,
-     *     (p, newL, newR) -> newL.length() > newR);
-     * // updated is false, pair remains ("World", 20) because 4 is not > 5
+     *         (l, r) -> l.length() > r);
+     * // updated == false, pair remains ("World", 20) because 4 is not > 20
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw.
-     * @param newLeft the new value to potentially set for the left element, may be {@code null}.
-     * @param newRight the new value to potentially set for the right element, may be {@code null}.
-     * @param predicate the condition to test; receives the current pair as the first parameter,.
-     *                  the new left value as the second parameter, and the new right value as
-     *                  the third parameter
-     * @return {@code true} if both values were updated (predicate returned true), {@code false} otherwise.
-     * @throws E if the predicate throws an exception.
+     * @param <E> the type of exception that the predicate may throw
+     * @param newLeft  the new value to assign to the left element if the predicate passes;
+     *                 may be {@code null}
+     * @param newRight the new value to assign to the right element if the predicate passes;
+     *                 may be {@code null}
+     * @param predicate the condition to evaluate against the current left and right values;
+     *                  must not be {@code null}
+     * @return {@code true} if both elements were updated, {@code false} otherwise
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
-            final Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate) throws E {
-        if (predicate.test(this, newLeft, newRight)) {
+    public <E extends Exception> boolean setIf(final L newLeft, final R newRight, final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
+        if (predicate.test(left, right)) {
             setLeft(newLeft);
             setRight(newRight);
             return true;
@@ -492,15 +505,15 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> original = Pair.of("Hello", 42);
-     * Pair<Integer, String> reversed = original.reverse();
-     * // reversed.left returns 42, reversed.right returns "Hello"
+     * Pair<Integer, String> swapped = original.swap();
+     * // swapped.left() returns 42, reversed.right returns "Hello"
      * // original remains unchanged
      * }</pre>
      *
      * @return a new Pair with the right element as the left and the left element as the right.
      */
     @Beta
-    public Pair<R, L> reverse() {
+    public Pair<R, L> swap() {
         return new Pair<>(right, left);
     }
 

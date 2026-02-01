@@ -64,28 +64,28 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *   <li>Other strings are parsed using {@link Boolean#valueOf(String)}</li>
      * </ul>
      *
-     * @param src the source object to convert
+     * @param obj the source object to convert
      * @return the Boolean value, or default value if input is {@code null}
      */
     @Override
-    public Boolean valueOf(final Object src) {
-        if (src == null) {
+    public Boolean valueOf(final Object obj) {
+        if (obj == null) {
             return defaultValue();
         }
 
-        if (src instanceof Boolean b) {
+        if (obj instanceof Boolean b) {
             return b;
         }
 
-        if (src instanceof Number num) {
+        if (obj instanceof Number num) {
             return num.longValue() > 0;
         }
 
-        if (src instanceof CharSequence) {
-            return parseBoolean(src.toString());
+        if (obj instanceof CharSequence) {
+            return parseBoolean(obj.toString());
         }
 
-        return Boolean.valueOf(src.toString());
+        return Boolean.valueOf(obj.toString());
     }
 
     /**

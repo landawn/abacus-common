@@ -134,10 +134,10 @@ public class MutableBoolean100Test extends TestBase {
     @Test
     public void testInvert() {
         MutableBoolean mutableBoolean = MutableBoolean.of(true);
-        mutableBoolean.invert();
+        mutableBoolean.negate();
         Assertions.assertFalse(mutableBoolean.value());
 
-        mutableBoolean.invert();
+        mutableBoolean.negate();
         Assertions.assertTrue(mutableBoolean.value());
     }
 

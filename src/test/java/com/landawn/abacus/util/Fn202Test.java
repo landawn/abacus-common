@@ -421,7 +421,7 @@ public class Fn202Test extends TestBase {
     @Test
     public void testInverse() {
         Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 123);
-        Map.Entry<Integer, String> inverted = Fn.<String, Integer> inverse().apply(entry);
+        Map.Entry<Integer, String> inverted = Fn.<String, Integer> invert().apply(entry);
         assertEquals(123, inverted.getKey());
         assertEquals("key", inverted.getValue());
     }

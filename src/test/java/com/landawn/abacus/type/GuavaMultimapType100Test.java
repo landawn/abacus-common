@@ -45,7 +45,7 @@ public class GuavaMultimapType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(multimapType.isGenericType());
+        assertTrue(multimapType.isParameterizedType());
     }
 
     @Test

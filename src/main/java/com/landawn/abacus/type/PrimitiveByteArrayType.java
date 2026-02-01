@@ -154,6 +154,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param obj the object to convert (can be a Blob or other type)
      * @return the byte array representation of the object, or {@code null} if input is null
+     * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
      */
     @SuppressFBWarnings
     @Override

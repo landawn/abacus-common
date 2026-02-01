@@ -73,7 +73,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
      * Byte value1 = type.valueOf("42");    // returns 42
      * Byte value2 = type.valueOf("127");   // returns 127
      * Byte value3 = type.valueOf("42L");   // returns 42 (suffix stripped)
@@ -112,7 +112,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
      * char[] buffer = "100".toCharArray();
      * Byte value = type.valueOf(buffer, 0, 3);   // returns 100
      * }</pre>
@@ -144,7 +144,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
      * if (type.isByte()) {
      *     // Handle byte type specific logic
      *     System.out.println("This is a byte type");
@@ -166,11 +166,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive byte types
-     * PrimitiveByteType type = TypeFactory.getType(byte.class);
+     * Type<Byte> type = TypeFactory.getType(byte.class);
      * byte value = type.get(rs, 1);   // Returns 0 for SQL NULL
      *
      * // For wrapper Byte types
-     * ByteType type = TypeFactory.getType(Byte.class);
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
      * Byte value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
@@ -192,11 +192,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive byte types
-     * PrimitiveByteType type = TypeFactory.getType(byte.class);
+     * Type<Byte> type = TypeFactory.getType(byte.class);
      * byte value = type.get(rs, "status");   // Returns 0 for SQL NULL
      *
      * // For wrapper Byte types
-     * ByteType type = TypeFactory.getType(Byte.class);
+     * Type<Byte> type = TypeFactory.getType(Byte.class);
      * Byte value = type.get(rs, "status");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *

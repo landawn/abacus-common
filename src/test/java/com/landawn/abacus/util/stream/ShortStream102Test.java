@@ -944,9 +944,9 @@ public class ShortStream102Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test summarize() method")
-    public void testSummarize() {
-        ShortSummaryStatistics stats = stream.summarize();
+    @DisplayName("Test summaryStatistics() method")
+    public void testsummaryStatistics() {
+        ShortSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(1, stats.getMin());
         assertEquals(5, stats.getMax());
@@ -955,9 +955,9 @@ public class ShortStream102Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test summarizeAndPercentiles() method")
-    public void testSummarizeAndPercentiles() {
-        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = stream.summarizeAndPercentiles();
+    @DisplayName("Test summaryStatisticsAndPercentiles() method")
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> result = stream.summaryStatisticsAndPercentiles();
 
         ShortSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

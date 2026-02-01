@@ -75,8 +75,8 @@ public class CommonUtil104Test extends TestBase {
         private final long delayTime;
         private final long startTime;
 
-        public DelayedElement(long delayMillis) {
-            this.delayTime = delayMillis;
+        public DelayedElement(long delayInMillis) {
+            this.delayTime = delayInMillis;
             this.startTime = System.currentTimeMillis();
         }
 

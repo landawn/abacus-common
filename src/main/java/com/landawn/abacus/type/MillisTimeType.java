@@ -46,7 +46,7 @@ public class MillisTimeType extends TimeType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains milliseconds value 3600000 (01:00:00)
      * Time time = type.get(rs, 1);
@@ -77,7 +77,7 @@ public class MillisTimeType extends TimeType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "start_time" contains milliseconds value 3600000 (01:00:00)
      * Time time = type.get(rs, "start_time");
@@ -108,8 +108,7 @@ public class MillisTimeType extends TimeType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO schedule (id, start_time) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * Time time = new Time(3600000L);   // 01:00:00
      * type.set(stmt, 2, time);
@@ -137,7 +136,7 @@ public class MillisTimeType extends TimeType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
-     * CallableStatement stmt = connection.prepareCall("{call set_schedule(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * Time time = new Time(3600000L);   // 01:00:00
      * type.set(stmt, "p_start_time", time);

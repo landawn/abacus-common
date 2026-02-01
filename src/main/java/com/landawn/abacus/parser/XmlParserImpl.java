@@ -464,7 +464,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             propInfo = element;
             propName = propInfo.name;
 
-            if (propInfo.jsonXmlExpose == JsonXmlField.Expose.DESERIALIZE_ONLY
+            if (propInfo.jsonXmlExpose == JsonXmlField.Direction.DESERIALIZE_ONLY
                     || ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(propName))) {
                 continue;
             }
@@ -1687,7 +1687,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 }
 
                                 if (xmlReader.getEventType() == XMLStreamConstants.END_ELEMENT && xmlReader.getLocalName().equals(propName)) {
-                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                             || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                         // ignore.
                                     } else {
@@ -1730,7 +1730,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 propValue = propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text);
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
-                                    if (propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                    if (propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                         // ignore;
                                     } else {
@@ -1750,7 +1750,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                             if (propName == null) {
                                 return beanInfo.finishBeanResult(result);
                             } else {
-                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                         || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
@@ -2432,7 +2432,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
                             inputType);
 
-                    if (propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.SERIALIZE_ONLY) {
                         propInfo.setPropValue(result, propValue);
                     }
                 }

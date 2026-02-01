@@ -74,7 +74,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractFloatType type = TypeFactory.getType(Float.class);
+     * Type<Float> type = TypeFactory.getType(Float.class);
      * Float value1 = type.valueOf("3.14");     // returns 3.14f
      * Float value2 = type.valueOf("100.5f");   // returns 100.5f (suffix stripped)
      * Float value3 = type.valueOf("42.0F");    // returns 42.0f (suffix stripped)
@@ -113,7 +113,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractFloatType type = TypeFactory.getType(Float.class);
+     * Type<Float> type = TypeFactory.getType(Float.class);
      * if (type.isFloat()) {
      *     // Handle float type specific logic
      *     System.out.println("This is a float type");
@@ -135,11 +135,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive float types
-     * PrimitiveFloatType type = TypeFactory.getType(float.class);
+     * Type<Float> type = TypeFactory.getType(float.class);
      * float value = type.get(rs, 1);   // Returns 0.0f for SQL NULL
      *
      * // For wrapper Float types
-     * FloatType type = TypeFactory.getType(Float.class);
+     * Type<Float> type = TypeFactory.getType(Float.class);
      * Float value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
@@ -161,11 +161,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive float types
-     * PrimitiveFloatType type = TypeFactory.getType(float.class);
+     * Type<Float> type = TypeFactory.getType(float.class);
      * float value = type.get(rs, "ratio");   // Returns 0.0f for SQL NULL
      *
      * // For wrapper Float types
-     * FloatType type = TypeFactory.getType(Float.class);
+     * Type<Float> type = TypeFactory.getType(Float.class);
      * Float value = type.get(rs, "ratio");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *

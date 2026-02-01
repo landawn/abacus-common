@@ -334,12 +334,12 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testFormalizePropName() {
-        assertEquals("userName", Beans.formalizePropName("user_name"));
-        assertEquals("firstName", Beans.formalizePropName("first_name"));
-        assertEquals("id", Beans.formalizePropName("id"));
+        assertEquals("userName", Beans.normalizePropName("user_name"));
+        assertEquals("firstName", Beans.normalizePropName("first_name"));
+        assertEquals("id", Beans.normalizePropName("id"));
 
-        assertEquals("clazz", Beans.formalizePropName("class"));
-        assertEquals("clazz", Beans.formalizePropName("CLASS"));
+        assertEquals("clazz", Beans.normalizePropName("class"));
+        assertEquals("clazz", Beans.normalizePropName("CLASS"));
     }
 
     @Test
@@ -752,7 +752,7 @@ public class ClassUtil100Test extends TestBase {
 
     @Test
     public void testGetDiffIgnoredPropNames() {
-        ImmutableSet<String> ignoredProps = Beans.getDiffIgnoredPropNames(DiffBean.class);
+        ImmutableSet<String> ignoredProps = Beans.getIgnoredPropNamesForDiff(DiffBean.class);
         assertNotNull(ignoredProps);
         assertTrue(ignoredProps.contains("ignoredField"));
         assertFalse(ignoredProps.contains("name"));
@@ -1023,7 +1023,7 @@ public class ClassUtil100Test extends TestBase {
         map.put("first_name", "Doe");
         map.put("age_value", 30);
 
-        Beans.toCamelCaseKeys(map);
+        Beans.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -1044,7 +1044,7 @@ public class ClassUtil100Test extends TestBase {
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.toSnakeCaseKeys(map);
+        Beans.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -1065,7 +1065,7 @@ public class ClassUtil100Test extends TestBase {
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.toScreamingSnakeCaseKeys(map);
+        Beans.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));

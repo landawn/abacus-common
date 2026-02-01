@@ -142,7 +142,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @return {@code true}, as Multimap is a generic type
      */
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

@@ -4386,7 +4386,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testRepeatCollection() {
         List<String> list = Arrays.asList("a", "b");
-        List<String> repeated = CommonUtil.repeatCollection(list, 3);
+        List<String> repeated = CommonUtil.cycle(list, 3);
         assertEquals(6, repeated.size());
         assertEquals("a", repeated.get(0));
         assertEquals("b", repeated.get(1));
@@ -4396,7 +4396,7 @@ public class CommonUtil2025Test extends TestBase {
     @Test
     public void testRepeatCollectionToSize() {
         List<String> list = Arrays.asList("a", "b");
-        List<String> repeated = CommonUtil.repeatCollectionToSize(list, 5);
+        List<String> repeated = CommonUtil.cycleToSize(list, 5);
         assertEquals(5, repeated.size());
         assertEquals("a", repeated.get(0));
         assertEquals("b", repeated.get(1));

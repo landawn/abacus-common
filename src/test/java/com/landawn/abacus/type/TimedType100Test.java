@@ -49,7 +49,7 @@ public class TimedType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(timedType.isGenericType());
+        assertTrue(timedType.isParameterizedType());
     }
 
     @Test

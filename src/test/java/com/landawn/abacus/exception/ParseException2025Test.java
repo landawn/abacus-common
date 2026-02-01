@@ -19,7 +19,7 @@ public class ParseException2025Test extends TestBase {
         assertNotNull(exception);
         assertNull(exception.getMessage());
         assertNull(exception.getCause());
-        assertEquals(-2, exception.getToken());
+        assertEquals(-2, exception.getErrorToken());
     }
 
     @Test
@@ -29,7 +29,7 @@ public class ParseException2025Test extends TestBase {
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
-        assertEquals(-2, exception.getToken());
+        assertEquals(-2, exception.getErrorToken());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class ParseException2025Test extends TestBase {
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
-        assertEquals(token, exception.getToken());
+        assertEquals(token, exception.getErrorToken());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class ParseException2025Test extends TestBase {
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertEquals(cause, exception.getCause());
-        assertEquals(-2, exception.getToken());
+        assertEquals(-2, exception.getErrorToken());
     }
 
     @Test
@@ -61,17 +61,17 @@ public class ParseException2025Test extends TestBase {
         assertNotNull(exception);
         assertEquals(cause.toString(), exception.getMessage());
         assertEquals(cause, exception.getCause());
-        assertEquals(-2, exception.getToken());
+        assertEquals(-2, exception.getErrorToken());
     }
 
     @Test
     public void testGetToken() {
         ParseException exception1 = new ParseException();
-        assertEquals(-2, exception1.getToken());
+        assertEquals(-2, exception1.getErrorToken());
 
         int customToken = 100;
         ParseException exception2 = new ParseException(customToken, "Error");
-        assertEquals(customToken, exception2.getToken());
+        assertEquals(customToken, exception2.getErrorToken());
     }
 
     @Test
@@ -98,13 +98,13 @@ public class ParseException2025Test extends TestBase {
     public void testNegativeToken() {
         int negativeToken = -100;
         ParseException exception = new ParseException(negativeToken, "Error");
-        assertEquals(negativeToken, exception.getToken());
+        assertEquals(negativeToken, exception.getErrorToken());
     }
 
     @Test
     public void testZeroToken() {
         int zeroToken = 0;
         ParseException exception = new ParseException(zeroToken, "Error");
-        assertEquals(zeroToken, exception.getToken());
+        assertEquals(zeroToken, exception.getErrorToken());
     }
 }

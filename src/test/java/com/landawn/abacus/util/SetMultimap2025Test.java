@@ -347,9 +347,9 @@ public class SetMultimap2025Test extends TestBase {
     }
 
     @Test
-    public void test_inverse() {
+    public void test_invert() {
         SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1, "c", 3);
-        SetMultimap<Integer, String> inverted = original.inverse();
+        SetMultimap<Integer, String> inverted = original.invert();
 
         assertEquals(4, inverted.totalValueCount());
         assertTrue(inverted.containsKey(1));
@@ -370,7 +370,7 @@ public class SetMultimap2025Test extends TestBase {
     @Test
     public void test_inverse_emptyMap() {
         SetMultimap<String, Integer> original = CommonUtil.newSetMultimap();
-        SetMultimap<Integer, String> inverted = original.inverse();
+        SetMultimap<Integer, String> inverted = original.invert();
         assertEquals(0, inverted.totalValueCount());
     }
 
@@ -883,7 +883,7 @@ public class SetMultimap2025Test extends TestBase {
         original.put("b", 2);
         original.put("b", 3);
 
-        SetMultimap<Integer, String> inverted = original.inverse();
+        SetMultimap<Integer, String> inverted = original.invert();
 
         assertEquals(5, inverted.totalValueCount());
         assertEquals(1, inverted.get(1).size());
@@ -940,7 +940,7 @@ public class SetMultimap2025Test extends TestBase {
         SetMultimap<String, Integer> copy = map.copy();
         assertTrue(copy.isEmpty());
 
-        SetMultimap<Integer, String> inverted = map.inverse();
+        SetMultimap<Integer, String> inverted = map.invert();
         assertTrue(inverted.isEmpty());
     }
 

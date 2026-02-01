@@ -504,8 +504,8 @@ public class IntStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
-        IntSummaryStatistics stats = createIntStream(1, 2, 3, 4, 5).summarize();
+    public void testsummaryStatistics() {
+        IntSummaryStatistics stats = createIntStream(1, 2, 3, 4, 5).summaryStatistics();
         assertEquals(5, stats.getCount());
         assertEquals(15, stats.getSum());
         assertEquals(1, stats.getMin());

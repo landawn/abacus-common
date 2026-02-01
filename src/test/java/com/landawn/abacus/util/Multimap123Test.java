@@ -862,7 +862,7 @@ public class Multimap123Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 10);
 
-        ListMultimap<Integer, String> inverse = listMultimap.inverse(N::newListMultimap);
+        ListMultimap<Integer, String> inverse = listMultimap.invert(N::newListMultimap);
 
         assertTrue(inverse.containsEntry(10, "key1"));
         assertTrue(inverse.containsEntry(10, "key2"));

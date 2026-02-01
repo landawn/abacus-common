@@ -139,10 +139,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * num.setValue(Float.POSITIVE_INFINITY);
      * }</pre>
      *
-     * @param value the value to set
+     * @param newValue the value to set
      */
-    public void setValue(final float value) {
-        this.value = value;
+    public void setValue(final float newValue) {
+        this.value = newValue;
     }
 
     /**
@@ -166,12 +166,12 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * float delta = temperature.value() - previousTemp;  // 0.5f
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the value before it was updated
      */
-    public float getAndSet(final float value) {
+    public float getAndSet(final float newValue) {
         final float result = this.value;
-        this.value = value;
+        this.value = newValue;
         return result;
     }
 
@@ -195,11 +195,11 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * float result = score.setAndGet(100.0f) * 0.9f;  // Sets to 100.0f and calculates
      * }</pre>
      *
-     * @param value the new value to set
+     * @param newValue the new value to set
      * @return the new value after it has been set
      */
-    public float setAndGet(final float value) {
-        this.value = value;
+    public float setAndGet(final float newValue) {
+        this.value = newValue;
         return this.value;
     }
 
@@ -307,7 +307,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     //-----------------------------------------------------------------------
 
     /**
-     * Adds the specified operand to the current value.
+     * Adds the specified delta to the current value.
      *
      * <p>Note: Float addition may result in precision loss or overflow to infinity.
      * This operation follows standard IEEE 754 floating-point arithmetic rules.</p>
@@ -328,14 +328,14 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * large.add(Float.MAX_VALUE);   // Results in POSITIVE_INFINITY
      * }</pre>
      *
-     * @param operand the value to add
+     * @param delta the value to add
      */
-    public void add(final float operand) {
-        value += operand;
+    public void add(final float delta) {
+        value += delta;
     }
 
     /**
-     * Subtracts the specified operand from the current value.
+     * Subtracts the specified delta from the current value.
      *
      * <p>Note: Float subtraction may result in precision loss or underflow to negative infinity.
      * This operation follows standard IEEE 754 floating-point arithmetic rules.</p>
@@ -354,10 +354,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * small.subtract(Float.MAX_VALUE);   // Results in NEGATIVE_INFINITY
      * }</pre>
      *
-     * @param operand the value to subtract
+     * @param delta the value to subtract
      */
-    public void subtract(final float operand) {
-        value -= operand;
+    public void subtract(final float delta) {
+        value -= delta;
     }
 
     /**

@@ -633,9 +633,9 @@ public class ByteStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
+    public void testsummaryStatistics() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteSummaryStatistics stats = stream.summarize();
+        ByteSummaryStatistics stats = stream.summaryStatistics();
         assertNotNull(stats);
         assertEquals(5, stats.getCount());
         assertEquals(15, stats.getSum());
@@ -645,9 +645,9 @@ public class ByteStream2025Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summarizeAndPercentiles();
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summaryStatisticsAndPercentiles();
         assertNotNull(result);
         assertNotNull(result.left());
         assertEquals(5, result.left().getCount());

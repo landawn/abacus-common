@@ -606,9 +606,9 @@ public class AbstractCharStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         CharStream stream = createCharStream(new char[] { 'a', 'e', 'c', 'b', 'd' });
-        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summarizeAndPercentiles();
+        Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> result = stream.summaryStatisticsAndPercentiles();
 
         CharSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());
@@ -619,7 +619,7 @@ public class AbstractCharStream100Test extends TestBase {
         assertTrue(percentiles.isPresent());
 
         stream = createCharStream(new char[] {});
-        result = stream.summarizeAndPercentiles();
+        result = stream.summaryStatisticsAndPercentiles();
         stats = result.left();
         assertEquals(0, stats.getCount());
         assertFalse(result.right().isPresent());

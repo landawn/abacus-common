@@ -4277,7 +4277,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The resulting collections are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
      *
-     * <p>This method is equivalent to: {@code skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2)}.</p>
+     * <p>This method is equivalent to: {@code skipNulls().flatmap(mapper).skipNulls().flatmap(secondMapper)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4299,16 +4299,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <U> the type of the intermediate elements in the new sequence
      * @param <R> the type of the final elements in the new sequence
      * @param mapper the function to apply to each {@code non-null} element, which returns a collection of intermediate elements
-     * @param mapper2 the function to apply to each intermediate element, which returns a collection of final elements
+     * @param secondMapper the function to apply to each intermediate element, which returns a collection of final elements
      * @return a new sequence containing the flattened elements
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
     @IntermediateOp
     public <U, R> Seq<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) throws IllegalStateException {
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> secondMapper) throws IllegalStateException {
         //noinspection resource
-        return skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2);
+        return skipNulls().flatmap(mapper).skipNulls().flatmap(secondMapper);
     }
 
     /**
@@ -6804,15 +6804,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Second sequence: [4, 5]
      * }</pre>
      *
-     * @param where the position at which to split the sequence
+     * @param position the position at which to split the sequence
      * @return a new Seq containing two subsequences split at the specified position
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified position less than 0
      */
     @IntermediateOp
-    public Seq<Seq<T, E>, E> splitAt(final int where) throws IllegalStateException, IllegalArgumentException {
+    public Seq<Seq<T, E>, E> splitAt(final int position) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNegative(where, cs.where);
+        checkArgNotNegative(position, cs.where);
 
         final Throwables.Iterator<T, E> iter = elements;
 
@@ -6836,7 +6836,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     final List<T> list = new ArrayList<>();
                     int cnt = 0;
 
-                    while (cnt < where && iter.hasNext()) {
+                    while (cnt < position && iter.hasNext()) {
                         list.add(iter.next());
                         cnt++;
                     }
@@ -6863,7 +6863,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (n <= 0) {
                     return;
                 } else if ((n == 1) && (cursor == 0)) {
-                    iter.advance(where);
+                    iter.advance(position);
                 } else {
                     iter.advance(Long.MAX_VALUE);
                 }
@@ -10713,9 +10713,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns an {@code Optional} containing a map of percentile values and their corresponding elements from this sequence.
-     * The percentiles calculated are the standard quartiles and other key percentiles (0th, 25th, 50th, 75th, 100th, etc.).
-     * All elements will be loaded into memory and sorted using natural ordering.
+     * Calculates the percentiles of the elements in the sequence.
+     * All elements will be loaded into memory and sorted if not yet.
+     * The returned map contains the percentile values as keys and the corresponding elements as values.
+     * This is a terminal operation and can only be processed sequentially.
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
@@ -10731,7 +10732,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         corresponding elements at those percentiles, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
-     * @see N#percentiles(int[])
+     * @see N#percentilesOfSorted(int[])
      */
     public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
         assertNotClosed();
@@ -10744,17 +10745,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return Optional.empty();
             }
 
-            return Optional.of((Map<Percentage, T>) N.percentiles(a));
+            return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
         } finally {
             close();
         }
     }
 
     /**
-     * Returns an {@code Optional} containing a map of percentile values and their corresponding elements from this sequence
-     * according to the provided comparator.
-     * The percentiles calculated are the standard quartiles and other key percentiles (0th, 25th, 50th, 75th, 100th, etc.).
-     * All elements will be loaded into memory and sorted.
+     * Calculates the percentiles of the elements in the sequence according to the provided comparator.
+     * All elements will be loaded into memory and sorted if not yet.
+     * The returned map contains the percentile values as keys and the corresponding elements as values.
+     * This is a terminal operation and can only be processed sequentially.
      * 
      * <p>This is a <b>terminal operation</b>.</p>
      * 
@@ -10771,7 +10772,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws IllegalArgumentException if the specified comparator is {@code null}
      * @throws E if an exception occurs during iteration
-     * @see N#percentiles(int[])
+     * @see N#percentilesOfSorted(int[])
      */
     @TerminalOp
     public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
@@ -10786,7 +10787,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return Optional.empty();
             }
 
-            return Optional.of((Map<Percentage, T>) N.percentiles(a));
+            return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
         } finally {
             close();
         }

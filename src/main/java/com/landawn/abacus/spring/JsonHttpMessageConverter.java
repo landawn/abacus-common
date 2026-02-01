@@ -20,6 +20,8 @@ import java.lang.reflect.Type;
 
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
 
+import com.landawn.abacus.parser.JsonDeserializationConfig;
+import com.landawn.abacus.parser.JsonSerializationConfig;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.N;
 
@@ -67,10 +69,15 @@ import com.landawn.abacus.util.N;
  * </ul>
  * 
  * @see AbstractJsonHttpMessageConverter
- * @see N#fromJson(Reader, com.landawn.abacus.type.Type)
- * @see N#toJson(Object, Writer)
+ * @see N#fromJson(Reader, JsonDeserializationConfig, com.landawn.abacus.type.Type)
+ * @see N#toJson(Object, JsonSerializationConfig, Writer)
+ * @see JsonSerializationConfig
+ * @see JsonDeserializationConfig
  */
 public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
+
+    private final JsonSerializationConfig jsc;
+    private final JsonDeserializationConfig jdc;
 
     /**
      * Constructs a new JsonHttpMessageConverter with default configuration.
@@ -104,14 +111,78 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * restTemplate.getMessageConverters().add(0, new JsonHttpMessageConverter());
      * }</pre>
      */
-    public JsonHttpMessageConverter() { //NOSONAR
+    public JsonHttpMessageConverter() {
+        this(new JsonSerializationConfig(), new JsonDeserializationConfig());
+    }
+
+    /**
+     * Constructs a new JsonHttpMessageConverter with custom serialization and deserialization configurations.
+     * This constructor allows fine-grained control over JSON processing behavior, including field exclusion,
+     * date formatting, null handling, and other serialization/deserialization options.
+     *
+     * <p>Use this constructor when you need to customize the JSON processing behavior beyond the defaults.
+     * Common customizations include:</p>
+     * <ul>
+     *   <li>Excluding null or default values from serialization output</li>
+     *   <li>Customizing date/time formatting patterns</li>
+     *   <li>Ignoring unknown properties during deserialization</li>
+     *   <li>Specifying property inclusion/exclusion rules</li>
+     * </ul>
+     *
+     * <p><b>Example with custom configurations:</b></p>
+     * <pre>{@code
+     * // Configure serialization to exclude null values
+     * JsonSerializationConfig serConfig = new JsonSerializationConfig()
+     *     .setExclusion(Exclusion.NULL)
+     *     .skipTransientField(true);
+     *
+     * // Configure deserialization to ignore unknown properties
+     * JsonDeserializationConfig deserConfig = new JsonDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     *
+     * JsonHttpMessageConverter converter = new JsonHttpMessageConverter(serConfig, deserConfig);
+     *
+     * // Use in Spring configuration
+     * restTemplate.getMessageConverters().add(0, converter);
+     * }</pre>
+     *
+     * <p><b>Example in Spring MVC configuration:</b></p>
+     * <pre>{@code
+     * @Configuration
+     * public class WebConfig implements WebMvcConfigurer {
+     *     @Override
+     *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+     *         JsonSerializationConfig jsc = new JsonSerializationConfig()
+     *             .setExclusion(Exclusion.NULL);
+     *         JsonDeserializationConfig jdc = new JsonDeserializationConfig()
+     *             .ignoreUnmatchedProperty(true);
+     *
+     *         converters.add(new JsonHttpMessageConverter(jsc, jdc));
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param jsc the serialization configuration controlling how Java objects are converted to JSON.
+     *            Must not be {@code null}. Use {@link JsonSerializationConfig} to customize serialization behavior.
+     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects.
+     *            Must not be {@code null}. Use {@link JsonDeserializationConfig} to customize deserialization behavior.
+     * @see JsonSerializationConfig
+     * @see JsonDeserializationConfig
+     * @see com.landawn.abacus.parser.Exclusion
+     */
+    public JsonHttpMessageConverter(final JsonSerializationConfig jsc, final JsonDeserializationConfig jdc) {
+        N.checkArgNotNull(jsc, "jsc");
+        N.checkArgNotNull(jdc, "jdc");
+
+        this.jsc = jsc;
+        this.jdc = jdc;
     }
 
     /**
      * Reads JSON content from the provided Reader and deserializes it into an object of the specified type.
      * This method is called by Spring's HTTP message conversion framework when processing incoming JSON requests.
      *
-     * <p>The method uses Abacus's JSON deserialization capabilities through {@link N#fromJson(Reader, com.landawn.abacus.type.Type)}
+     * <p>The method uses Abacus's JSON deserialization capabilities through {@link N#fromJson(Reader, JsonDeserializationConfig, com.landawn.abacus.type.Type)}
      * to convert the JSON content into the appropriate Java object. The TypeFactory is used to handle complex
      * generic types properly, ensuring that parameterized types (such as {@code List<User>} or {@code Map<String, Object>})
      * are correctly deserialized with their full type information preserved.</p>
@@ -156,14 +227,14 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      */
     @Override
     protected Object readInternal(final Type resolvedType, final Reader reader) {
-        return N.fromJson(reader, TypeFactory.getType(resolvedType));
+        return N.fromJson(reader, jdc, TypeFactory.getType(resolvedType));
     }
 
     /**
      * Serializes the given object to JSON and writes it to the provided Writer.
      * This method is called by Spring's HTTP message conversion framework when producing JSON responses.
      *
-     * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, Writer)}
+     * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, JsonSerializationConfig, Writer)}
      * to convert Java objects into JSON format. The serialization process automatically handles circular
      * references, custom date formats, and complex nested object graphs.</p>
      *
@@ -228,6 +299,6 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      */
     @Override
     protected void writeInternal(final Object obj, final Type type, final Writer writer) {
-        N.toJson(obj, writer);
+        N.toJson(obj, jsc, writer);
     }
 }

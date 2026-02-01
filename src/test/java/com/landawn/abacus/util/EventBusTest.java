@@ -21,7 +21,7 @@ public class EventBusTest extends AbstractTest {
         };
 
         final Object anySubscriber_2 = new Object() {
-            @Subscribe(threadMode = ThreadMode.DEFAULT, interval = 1000)
+            @Subscribe(threadMode = ThreadMode.DEFAULT, intervalMillis = 1000)
             public void anyMethod(Object event) {
                 System.out.println("Subscriber: anySubscriber_2, event: " + event);
             }

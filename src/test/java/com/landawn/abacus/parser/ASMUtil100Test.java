@@ -8,7 +8,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.entity.XBean;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Profiler;
 
 @Tag("new-test")
@@ -33,7 +33,7 @@ public class ASMUtil100Test extends TestBase {
 
     @Test
     public void test_performance() {
-        XBean xbean = N.fill(XBean.class);
+        XBean xbean = Beans.newRandom(XBean.class);
 
         {
             BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);

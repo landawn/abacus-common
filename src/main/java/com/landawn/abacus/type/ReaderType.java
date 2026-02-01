@@ -315,7 +315,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * Reader reader = new StringReader("Large text content");
      * type.set(stmt, 1, reader);
      * stmt.executeUpdate();
@@ -338,7 +338,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      * Reader reader = new StringReader("Updated content");
      * type.set(stmt, "content", reader);
      * stmt.execute();
@@ -361,7 +361,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      * String text = "Fixed length content";
      * Reader reader = new StringReader(text);
      * type.set(stmt, 1, reader, text.length());
@@ -386,7 +386,7 @@ public class ReaderType extends AbstractType<Reader> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      * String text = "Content with known length";
      * Reader reader = new StringReader(text);
      * type.set(stmt, "content", reader, text.length());

@@ -606,7 +606,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void swapColumnPosition(final String columnNameA, final String columnNameB) {
+    public void swapColumns(final String columnNameA, final String columnNameB) {
         checkFrozen();
 
         final int columnIndexA = checkColumnName(columnNameA);
@@ -687,7 +687,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public void swapRowPosition(final int rowIndexA, final int rowIndexB) {
+    public void swapRows(final int rowIndexA, final int rowIndexB) {
         checkFrozen();
 
         checkRowIndex(rowIndexA);

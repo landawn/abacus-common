@@ -1895,7 +1895,7 @@ public class Collectors101Test extends TestBase {
         BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc").collect(Collectors.toBiMap(String::length, e -> e));
 
         Assertions.assertEquals("a", biMap.get(1));
-        Assertions.assertEquals(1, biMap.inverse().get("a"));
+        Assertions.assertEquals(1, biMap.inverted().get("a"));
     }
 
     @Test

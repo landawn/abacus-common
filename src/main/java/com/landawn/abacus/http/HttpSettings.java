@@ -33,7 +33,7 @@ import com.landawn.abacus.util.Strings;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpSettings settings = HttpSettings.create()
- *     .setConnectionTimeout(5000)
+ *     .setConnectTimeout(5000)
  *     .setReadTimeout(10000)
  *     .header("Authorization", "Bearer token123")
  *     .header("Accept", "application/json")
@@ -54,7 +54,7 @@ import com.landawn.abacus.util.Strings;
  */
 public final class HttpSettings {
 
-    private long connectionTimeout;
+    private long connectTimeout;
 
     private long readTimeout;
 
@@ -87,7 +87,7 @@ public final class HttpSettings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
-     *     .setConnectionTimeout(5000)
+     *     .setConnectTimeout(5000)
      *     .header("Accept", "application/json");
      * }</pre>
      *
@@ -102,10 +102,10 @@ public final class HttpSettings {
      * The connection timeout is the time to wait for a connection to be established.
      *
      * @return the connection timeout in milliseconds, or 0 if not set
-     * @see #setConnectionTimeout(long)
+     * @see #setConnectTimeout(long)
      */
-    public long getConnectionTimeout() {
-        return connectionTimeout;
+    public long getConnectTimeout() {
+        return connectTimeout;
     }
 
     /**
@@ -131,18 +131,18 @@ public final class HttpSettings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Set 5 second connection timeout
-     * settings.setConnectionTimeout(5000);
+     * settings.setConnectTimeout(5000);
      *
      * // Set different timeouts for connection and read operations
-     * settings.setConnectionTimeout(5000)   // 5s to establish connection
+     * settings.setConnectTimeout(5000)   // 5s to establish connection
      *         .setReadTimeout(10000);   // 10s to read response
      * }</pre>
      *
-     * @param connectionTimeout the connection timeout in milliseconds (0 = infinite)
+     * @param connectTimeout the connection timeout in milliseconds (0 = infinite)
      * @return this HttpSettings instance for method chaining
      */
-    public HttpSettings setConnectionTimeout(final long connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public HttpSettings setConnectTimeout(final long connectTimeout) {
+        this.connectTimeout = connectTimeout;
 
         return this;
     }
@@ -492,13 +492,13 @@ public final class HttpSettings {
      * // This sets the header: "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ="
      * }</pre>
      *
-     * @param user the username for authentication
+     * @param username the username for authentication
      * @param password the password for authentication
      * @return this HttpSettings instance for method chaining
      */
     @SuppressWarnings("UnusedReturnValue")
-    public HttpSettings basicAuth(final String user, final Object password) {
-        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
+    public HttpSettings basicAuth(final String username, final Object password) {
+        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
     }
 
     /**
@@ -635,7 +635,7 @@ public final class HttpSettings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings original = HttpSettings.create()
-     *     .setConnectionTimeout(5000)
+     *     .setConnectTimeout(5000)
      *     .header("Authorization", "Bearer token");
      *
      * HttpSettings copy = original.copy();
@@ -645,7 +645,7 @@ public final class HttpSettings {
      * @return a new HttpSettings instance with the same configuration
      */
     public HttpSettings copy() {
-        final HttpSettings copy = new HttpSettings().setConnectionTimeout(connectionTimeout)
+        final HttpSettings copy = new HttpSettings().setConnectTimeout(connectTimeout)
                 .setReadTimeout(readTimeout)
                 .setSSLSocketFactory(sslSocketFactory)
                 .setProxy(proxy)
@@ -670,7 +670,7 @@ public final class HttpSettings {
      */
     @Override
     public String toString() {
-        return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy
+        return "{connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy
                 + ", useCaches=" + useCaches + ", doInput=" + doInput + ", doOutput=" + doOutput + ", isOneWayRequest=" + isOneWayRequest + ", contentFormat="
                 + contentFormat + ", headers=" + headers + "}";
     }

@@ -102,7 +102,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     @Override
-    public boolean isGenericType() {
+    public boolean isParameterizedType() {
         return true;
     }
 

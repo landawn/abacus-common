@@ -236,14 +236,14 @@ public class Properties<K, V> implements Map<K, V> {
      * Integer old = props.put("count", 20);   // Returns 10
      * }</pre>
      *
-     * @param key the key with which the specified value is to be associated
-     * @param value the value to be associated with the specified key
+     * @param propName the key with which the specified value is to be associated
+     * @param propValue the value to be associated with the specified key
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see #set(Object, Object)
      */
     @Override
-    public V put(final K key, final V value) {
-        return values.put(key, value);
+    public V put(final K propName, final V propValue) {
+        return values.put(propName, propValue);
     }
 
     /**
@@ -281,16 +281,16 @@ public class Properties<K, V> implements Map<K, V> {
      * String v2 = props.putIfAbsent("age", "30");      // Returns null, adds age=30
      * }</pre>
      *
-     * @param key the key with which the specified value is to be associated
-     * @param value the value to be associated with the specified key
+     * @param propName the key with which the specified value is to be associated
+     * @param propValue the value to be associated with the specified key
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      */
     @Override
-    public V putIfAbsent(final K key, final V value) {
-        V v = get(key);
+    public V putIfAbsent(final K propName, final V propValue) {
+        V v = get(propName);
 
         if (v == null) {
-            put(key, value);
+            put(propName, propValue);
         }
 
         return v;
@@ -306,12 +306,12 @@ public class Properties<K, V> implements Map<K, V> {
      * Object removed = props.remove("temp");   // Returns "value"
      * }</pre>
      *
-     * @param key key whose mapping is to be removed from the map
+     * @param propName key whose mapping is to be removed from the map
      * @return the previous value associated with key, or {@code null} if there was no mapping for key
      */
     @Override
-    public V remove(final Object key) {
-        return values.remove(key);
+    public V remove(final Object propName) {
+        return values.remove(propName);
     }
 
     /**
@@ -327,19 +327,19 @@ public class Properties<K, V> implements Map<K, V> {
      * boolean removed2 = props.remove("status", "active");     // Returns true
      * }</pre>
      *
-     * @param key key with which the specified value is associated
-     * @param value value expected to be associated with the specified key
+     * @param propName key with which the specified value is associated
+     * @param propValue value expected to be associated with the specified key
      * @return {@code true} if the value was removed
      */
     @Override
-    public boolean remove(final Object key, final Object value) {
-        final Object curValue = get(key);
+    public boolean remove(final Object propName, final Object propValue) {
+        final Object curValue = get(propName);
 
-        if (!Objects.equals(curValue, value) || (curValue == null && !containsKey(key))) {
+        if (!Objects.equals(curValue, propValue) || (curValue == null && !containsKey(propName))) {
             return false;
         }
 
-        remove(key);
+        remove(propName);
 
         return true;
     }
@@ -357,17 +357,19 @@ public class Properties<K, V> implements Map<K, V> {
      * Integer none = props.replace("missing", 3);   // Returns null, no change
      * }</pre>
      *
-     * @param key key with which the specified value is associated
-     * @param value value to be associated with the specified key
+     * @param propName key with which the specified value is associated
+     * @param propValue value to be associated with the specified key
      * @return the previous value associated with the specified key, or
      *         {@code null} if there was no mapping for the key
      */
     @Override
-    public V replace(final K key, final V value) {
+    public V replace(final K propName, final V propValue) {
         V curValue = null;
-        if (((curValue = get(key)) != null) || containsKey(key)) {
-            curValue = put(key, value);
+
+        if (((curValue = get(propName)) != null) || containsKey(propName)) {
+            curValue = put(propName, propValue);
         }
+
         return curValue;
     }
 
@@ -384,18 +386,21 @@ public class Properties<K, V> implements Map<K, V> {
      * boolean replaced2 = props.replace("status", "draft", "published");      // Returns true
      * }</pre>
      *
-     * @param key key with which the specified value is associated
-     * @param oldValue value expected to be associated with the specified key
-     * @param newValue value to be associated with the specified key
+     * @param propName key with which the specified value is associated
+     * @param oldPropValue value expected to be associated with the specified key
+     * @param newPropValue value to be associated with the specified key
      * @return {@code true} if the value was replaced
      */
     @Override
-    public boolean replace(final K key, final V oldValue, final V newValue) {
-        final Object curValue = get(key);
-        if (!Objects.equals(curValue, oldValue) || (curValue == null && !containsKey(key))) {
+    public boolean replace(final K propName, final V oldPropValue, final V newPropValue) {
+        final Object curValue = get(propName);
+
+        if (!Objects.equals(curValue, oldPropValue) || (curValue == null && !containsKey(propName))) {
             return false;
         }
-        put(key, newValue);
+
+        put(propName, newPropValue);
+
         return true;
     }
 

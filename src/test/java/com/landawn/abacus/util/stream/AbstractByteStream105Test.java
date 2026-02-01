@@ -23,8 +23,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -673,7 +673,7 @@ public class AbstractByteStream105Test extends TestBase {
 
     @Test
     public void testSummarizeAndPercentiles() {
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summarizeAndPercentiles();
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summaryStatisticsAndPercentiles();
 
         ByteSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());
@@ -685,7 +685,7 @@ public class AbstractByteStream105Test extends TestBase {
         assertNotNull(result.right().get().get(Percentage._50));
 
         stream = createByteStream(new byte[0]);
-        result = stream.summarizeAndPercentiles();
+        result = stream.summaryStatisticsAndPercentiles();
         assertEquals(0, result.left().getCount());
         assertFalse(result.right().isPresent());
     }

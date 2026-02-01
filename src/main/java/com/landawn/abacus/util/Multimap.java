@@ -2258,7 +2258,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * original.put("group3", 1);
      * 
      * // Invert: numbers become keys, groups become values
-     * ListMultimap<Integer, String> inverted = original.inverse(N::newListMultimap);
+     * ListMultimap<Integer, String> inverted = original.invert(N::newListMultimap);
      * // Result:
      * // 1 -> ["group1", "group3"]
      * // 2 -> ["group1", "group2"]
@@ -2266,7 +2266,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // 4 -> ["group2"]
      * 
      * // Different Multimap types
-     * SetMultimap<Integer, String> invertedSet = original.inverse(N::newSetMultimap);
+     * SetMultimap<Integer, String> invertedSet = original.invert(N::newSetMultimap);
      * }</pre>
      *
      * <p><b>Performance:</b> This operation has O(n) complexity where n is the total number
@@ -2279,7 +2279,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return a new inverted Multimap with keys and values swapped
      * @see #copy()
      */
-    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
+    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M invert(final IntFunction<? extends M> multimapSupplier) {
         final Multimap<K, E, V> multimap = this;
         final M res = multimapSupplier.apply(multimap.totalValueCount());
 
@@ -2322,7 +2322,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }</pre>
      *
      * @return a new Multimap containing the same key-value mappings as this one
-     * @see #inverse(IntFunction)
+     * @see #invert(IntFunction)
      */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);

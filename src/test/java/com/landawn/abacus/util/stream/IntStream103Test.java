@@ -326,8 +326,8 @@ public class IntStream103Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
-        Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> result = IntStream.range(1, 101).summarizeAndPercentiles();
+    public void testsummaryStatisticsAndPercentiles() {
+        Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> result = IntStream.range(1, 101).summaryStatisticsAndPercentiles();
 
         IntSummaryStatistics stats = result.left();
         assertEquals(100, stats.getCount());

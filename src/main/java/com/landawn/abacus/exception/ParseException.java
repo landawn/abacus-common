@@ -96,7 +96,7 @@ public class ParseException extends RuntimeException {
      * }</pre>
      *
      * @param errorToken an integer value representing the token, position, or error code where the parsing failed.
-     *                   This value can be retrieved later using {@link #getToken()}.
+     *                   This value can be retrieved later using {@link #getErrorToken()}.
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      */
@@ -167,13 +167,13 @@ public class ParseException extends RuntimeException {
      * try {
      *     parseExpression(input);
      * } catch (ParseException e) {
-     *     System.err.println("Parse error at token: " + e.getToken());
+     *     System.err.println("Parse error at token: " + e.getErrorToken());
      * }
      * }</pre>
      *
      * @return the token value where the parsing error occurred, or -2 if not specified
      */
-    public int getToken() {
+    public int getErrorToken() {
         return errorToken;
     }
 }

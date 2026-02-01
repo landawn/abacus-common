@@ -121,7 +121,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * AtomicInteger counter = type.get(rs, 1);   // retrieves AtomicInteger from column 1
      * int value = counter.get();  // get the underlying int value
      * }</pre>
@@ -143,7 +143,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * AtomicInteger counter = type.get(rs, "counter");   // retrieves AtomicInteger from "counter" column
      * int value = counter.get();  // get the underlying int value
      * }</pre>

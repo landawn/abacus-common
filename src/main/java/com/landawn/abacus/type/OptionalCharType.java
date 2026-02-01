@@ -136,7 +136,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column contains character 'A'
      * OptionalChar opt = type.get(rs, 1);
@@ -180,7 +180,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = ...;  // obtained from database query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      *
      * // Column "grade" contains character 'A'
      * OptionalChar opt = type.get(rs, "grade");
@@ -225,8 +225,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * PreparedStatement stmt = connection.prepareStatement(
-     *     "INSERT INTO students (id, grade) VALUES (?, ?)");
+     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalChar opt = OptionalChar.of('A');
      * type.set(stmt, 2, opt);
@@ -264,7 +263,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * CallableStatement stmt = connection.prepareCall("{call update_grade(?, ?)}");
+     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalChar opt = OptionalChar.of('B');
      * type.set(stmt, "p_grade", opt);

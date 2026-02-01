@@ -745,9 +745,9 @@ public class ByteStream102Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
+    public void testsummaryStatistics() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4);
-        ByteSummaryStatistics stats = stream.summarize();
+        ByteSummaryStatistics stats = stream.summaryStatistics();
         assertEquals(4, stats.getCount());
         assertEquals(10, stats.getSum());
         assertEquals(1, stats.getMin());
@@ -756,9 +756,9 @@ public class ByteStream102Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summarizeAndPercentiles();
+        Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> result = stream.summaryStatisticsAndPercentiles();
 
         ByteSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

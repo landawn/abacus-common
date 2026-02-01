@@ -8461,7 +8461,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.toBiMap(
      *         String::length,
      *         Function.identity()));
-     * // Can retrieve key by value: result.inverse().get("apple") returns 5
+     * // Can retrieve key by value: result.inverted().get("apple") returns 5
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -9330,14 +9330,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to sum
-         * @param mapper2 a function extracting the second integer property to sum
+         * @param firstMapper a function extracting the first integer property to sum
+         * @param secondMapper a function extracting the second integer property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
          */
-        public static <T> Collector<T, ?, Tuple2<Integer, Integer>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper) {
             final BiConsumer<int[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsInt(t);
-                a[1] += mapper2.applyAsInt(t);
+                a[0] += firstMapper.applyAsInt(t);
+                a[1] += secondMapper.applyAsInt(t);
             };
 
             return create(SummingInt_Supplier_2, accumulator, SummingInt_Combiner_2, SummingInt_Finisher_2, CH_UNORDERED_NOID);
@@ -9368,17 +9369,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to sum
-         * @param mapper2 a function extracting the second integer property to sum
-         * @param mapper3 a function extracting the third integer property to sum
+         * @param firstMapper a function extracting the first integer property to sum
+         * @param secondMapper a function extracting the second integer property to sum
+         * @param thirdMapper a function extracting the third integer property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
          */
-        public static <T> Collector<T, ?, Tuple3<Integer, Integer, Integer>> summingInt(final ToIntFunction<? super T> mapper1,
-                final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Integer, Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
             final BiConsumer<int[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsInt(t);
-                a[1] += mapper2.applyAsInt(t);
-                a[2] += mapper3.applyAsInt(t);
+                a[0] += firstMapper.applyAsInt(t);
+                a[1] += secondMapper.applyAsInt(t);
+                a[2] += thirdMapper.applyAsInt(t);
             };
 
             return create(SummingInt_Supplier_3, accumulator, SummingInt_Combiner_3, SummingInt_Finisher_3, CH_UNORDERED_NOID);
@@ -9407,14 +9408,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to sum
-         * @param mapper2 a function extracting the second integer property to sum
+         * @param firstMapper a function extracting the first integer property to sum
+         * @param secondMapper a function extracting the second integer property to sum
          * @return a {@code Collector} that produces a tuple of the two sums as longs
          */
-        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingIntToLong(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsInt(t);
-                a[1] += mapper2.applyAsInt(t);
+                a[0] += firstMapper.applyAsInt(t);
+                a[1] += secondMapper.applyAsInt(t);
             };
 
             return create(SummingIntToLong_Supplier_2, accumulator, SummingIntToLong_Combiner_2, SummingIntToLong_Finisher_2, CH_UNORDERED_NOID);
@@ -9444,17 +9446,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to sum
-         * @param mapper2 a function extracting the second integer property to sum
-         * @param mapper3 a function extracting the third integer property to sum
+         * @param firstMapper a function extracting the first integer property to sum
+         * @param secondMapper a function extracting the second integer property to sum
+         * @param thirdMapper a function extracting the third integer property to sum
          * @return a {@code Collector} that produces a tuple of the three sums as longs
          */
-        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingIntToLong(final ToIntFunction<? super T> mapper1,
-                final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsInt(t);
-                a[1] += mapper2.applyAsInt(t);
-                a[2] += mapper3.applyAsInt(t);
+                a[0] += firstMapper.applyAsInt(t);
+                a[1] += secondMapper.applyAsInt(t);
+                a[2] += thirdMapper.applyAsInt(t);
             };
 
             return create(SummingIntToLong_Supplier_3, accumulator, SummingIntToLong_Combiner_3, SummingIntToLong_Finisher_3, CH_UNORDERED_NOID);
@@ -9484,14 +9486,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first long property to sum
-         * @param mapper2 a function extracting the second long property to sum
+         * @param firstMapper a function extracting the first long property to sum
+         * @param secondMapper a function extracting the second long property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
          */
-        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingLong(final ToLongFunction<? super T> mapper1, final ToLongFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
+                final ToLongFunction<? super T> secondMapper) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsLong(t);
-                a[1] += mapper2.applyAsLong(t);
+                a[0] += firstMapper.applyAsLong(t);
+                a[1] += secondMapper.applyAsLong(t);
             };
 
             return create(SummingLong_Supplier_2, accumulator, SummingLong_Combiner_2, SummingLong_Finisher_2, CH_UNORDERED_NOID);
@@ -9522,17 +9525,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first long property to sum
-         * @param mapper2 a function extracting the second long property to sum
-         * @param mapper3 a function extracting the third long property to sum
+         * @param firstMapper a function extracting the first long property to sum
+         * @param secondMapper a function extracting the second long property to sum
+         * @param thirdMapper a function extracting the third long property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
          */
-        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingLong(final ToLongFunction<? super T> mapper1,
-                final ToLongFunction<? super T> mapper2, final ToLongFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
+                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
-                a[0] += mapper1.applyAsLong(t);
-                a[1] += mapper2.applyAsLong(t);
-                a[2] += mapper3.applyAsLong(t);
+                a[0] += firstMapper.applyAsLong(t);
+                a[1] += secondMapper.applyAsLong(t);
+                a[2] += thirdMapper.applyAsLong(t);
             };
 
             return create(SummingLong_Supplier_3, accumulator, SummingLong_Combiner_3, SummingLong_Finisher_3, CH_UNORDERED_NOID);
@@ -9562,15 +9565,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first double property to sum
-         * @param mapper2 a function extracting the second double property to sum
+         * @param firstMapper a function extracting the first double property to sum
+         * @param secondMapper a function extracting the second double property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
          */
-        public static <T> Collector<T, ?, Tuple2<Double, Double>> summingDouble(final ToDoubleFunction<? super T> mapper1,
-                final ToDoubleFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
+                final ToDoubleFunction<? super T> secondMapper) {
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
-                a[0].add(mapper1.applyAsDouble(t));
-                a[1].add(mapper2.applyAsDouble(t));
+                a[0].add(firstMapper.applyAsDouble(t));
+                a[1].add(secondMapper.applyAsDouble(t));
             };
 
             return create(SummingDouble_Supplier_2, accumulator, SummingDouble_Combiner_2, SummingDouble_Finisher_2, CH_UNORDERED_NOID);
@@ -9601,17 +9604,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first double property to sum
-         * @param mapper2 a function extracting the second double property to sum
-         * @param mapper3 a function extracting the third double property to sum
+         * @param firstMapper a function extracting the first double property to sum
+         * @param secondMapper a function extracting the second double property to sum
+         * @param thirdMapper a function extracting the third double property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
          */
-        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> summingDouble(final ToDoubleFunction<? super T> mapper1,
-                final ToDoubleFunction<? super T> mapper2, final ToDoubleFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
+                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
-                a[0].add(mapper1.applyAsDouble(t));
-                a[1].add(mapper2.applyAsDouble(t));
-                a[2].add(mapper3.applyAsDouble(t));
+                a[0].add(firstMapper.applyAsDouble(t));
+                a[1].add(secondMapper.applyAsDouble(t));
+                a[2].add(thirdMapper.applyAsDouble(t));
             };
 
             return create(SummingDouble_Supplier_3, accumulator, SummingDouble_Combiner_3, SummingDouble_Finisher_3, CH_UNORDERED_NOID);
@@ -9640,15 +9643,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first BigInteger property to sum
-         * @param mapper2 a function extracting the second BigInteger property to sum
+         * @param firstMapper a function extracting the first BigInteger property to sum
+         * @param secondMapper a function extracting the second BigInteger property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
          */
-        public static <T> Collector<T, ?, Tuple2<BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> mapper1,
-                final Function<? super T, BigInteger> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
+                final Function<? super T, BigInteger> secondMapper) {
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
-                a[0] = a[0].add(mapper1.apply(t));
-                a[1] = a[1].add(mapper2.apply(t));
+                a[0] = a[0].add(firstMapper.apply(t));
+                a[1] = a[1].add(secondMapper.apply(t));
             };
 
             return create(SummingBigInteger_Supplier_2, accumulator, SummingBigInteger_Combiner_2, SummingBigInteger_Finisher_2, CH_UNORDERED_NOID);
@@ -9678,17 +9681,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first BigInteger property to sum
-         * @param mapper2 a function extracting the second BigInteger property to sum
-         * @param mapper3 a function extracting the third BigInteger property to sum
+         * @param firstMapper a function extracting the first BigInteger property to sum
+         * @param secondMapper a function extracting the second BigInteger property to sum
+         * @param thirdMapper a function extracting the third BigInteger property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
          */
-        public static <T> Collector<T, ?, Tuple3<BigInteger, BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> mapper1,
-                final Function<? super T, BigInteger> mapper2, final Function<? super T, BigInteger> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<BigInteger, BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
+                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
-                a[0] = a[0].add(mapper1.apply(t));
-                a[1] = a[1].add(mapper2.apply(t));
-                a[2] = a[2].add(mapper3.apply(t));
+                a[0] = a[0].add(firstMapper.apply(t));
+                a[1] = a[1].add(secondMapper.apply(t));
+                a[2] = a[2].add(thirdMapper.apply(t));
             };
 
             return create(SummingBigInteger_Supplier_3, accumulator, SummingBigInteger_Combiner_3, SummingBigInteger_Finisher_3, CH_UNORDERED_NOID);
@@ -9717,15 +9720,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first BigDecimal property to sum
-         * @param mapper2 a function extracting the second BigDecimal property to sum
+         * @param firstMapper a function extracting the first BigDecimal property to sum
+         * @param secondMapper a function extracting the second BigDecimal property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
          */
-        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> mapper1,
-                final Function<? super T, BigDecimal> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
+                final Function<? super T, BigDecimal> secondMapper) {
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
-                a[0] = a[0].add(mapper1.apply(t));
-                a[1] = a[1].add(mapper2.apply(t));
+                a[0] = a[0].add(firstMapper.apply(t));
+                a[1] = a[1].add(secondMapper.apply(t));
             };
 
             return create(SummingBigDecimal_Supplier_2, accumulator, SummingBigDecimal_Combiner_2, SummingBigDecimal_Finisher_2, CH_UNORDERED_NOID);
@@ -9756,17 +9759,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first BigDecimal property to sum
-         * @param mapper2 a function extracting the second BigDecimal property to sum
-         * @param mapper3 a function extracting the third BigDecimal property to sum
+         * @param firstMapper a function extracting the first BigDecimal property to sum
+         * @param secondMapper a function extracting the second BigDecimal property to sum
+         * @param thirdMapper a function extracting the third BigDecimal property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
          */
-        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> mapper1,
-                final Function<? super T, BigDecimal> mapper2, final Function<? super T, BigDecimal> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
+                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
-                a[0] = a[0].add(mapper1.apply(t));
-                a[1] = a[1].add(mapper2.apply(t));
-                a[2] = a[2].add(mapper3.apply(t));
+                a[0] = a[0].add(firstMapper.apply(t));
+                a[1] = a[1].add(secondMapper.apply(t));
+                a[2] = a[2].add(thirdMapper.apply(t));
             };
 
             return create(SummingBigDecimal_Supplier_3, accumulator, SummingBigDecimal_Combiner_3, SummingBigDecimal_Finisher_3, CH_UNORDERED_NOID);
@@ -9796,14 +9799,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to average
-         * @param mapper2 a function extracting the second integer property to average
+         * @param firstMapper a function extracting the first integer property to average
+         * @param secondMapper a function extracting the second integer property to average
          * @return a {@code Collector} that produces a tuple of the two averages
          */
-        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper) {
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] += mapper1.applyAsInt(t);
-                a.left()[1] += mapper2.applyAsInt(t);
+                a.left()[0] += firstMapper.applyAsInt(t);
+                a.left()[1] += secondMapper.applyAsInt(t);
                 a.right()[0] += 1;
                 a.right()[1] += 1;
             };
@@ -9836,17 +9840,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first integer property to average
-         * @param mapper2 a function extracting the second integer property to average
-         * @param mapper3 a function extracting the third integer property to average
+         * @param firstMapper a function extracting the first integer property to average
+         * @param secondMapper a function extracting the second integer property to average
+         * @param thirdMapper a function extracting the third integer property to average
          * @return a {@code Collector} that produces a tuple of the three averages
          */
-        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingInt(final ToIntFunction<? super T> mapper1,
-                final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] += mapper1.applyAsInt(t);
-                a.left()[1] += mapper2.applyAsInt(t);
-                a.left()[2] += mapper3.applyAsInt(t);
+                a.left()[0] += firstMapper.applyAsInt(t);
+                a.left()[1] += secondMapper.applyAsInt(t);
+                a.left()[2] += thirdMapper.applyAsInt(t);
                 a.right()[0] += 1;
                 a.right()[1] += 1;
                 a.right()[2] += 1;
@@ -9879,15 +9883,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first long property to average
-         * @param mapper2 a function extracting the second long property to average
+         * @param firstMapper a function extracting the first long property to average
+         * @param secondMapper a function extracting the second long property to average
          * @return a {@code Collector} that produces a tuple of the two averages
          */
-        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingLong(final ToLongFunction<? super T> mapper1,
-                final ToLongFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
+                final ToLongFunction<? super T> secondMapper) {
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] += mapper1.applyAsLong(t);
-                a.left()[1] += mapper2.applyAsLong(t);
+                a.left()[0] += firstMapper.applyAsLong(t);
+                a.left()[1] += secondMapper.applyAsLong(t);
                 a.right()[0] += 1;
                 a.right()[1] += 1;
             };
@@ -9920,17 +9924,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first long property to average
-         * @param mapper2 a function extracting the second long property to average
-         * @param mapper3 a function extracting the third long property to average
+         * @param firstMapper a function extracting the first long property to average
+         * @param secondMapper a function extracting the second long property to average
+         * @param thirdMapper a function extracting the third long property to average
          * @return a {@code Collector} that produces a tuple of the three averages
          */
-        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingLong(final ToLongFunction<? super T> mapper1,
-                final ToLongFunction<? super T> mapper2, final ToLongFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
+                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] += mapper1.applyAsLong(t);
-                a.left()[1] += mapper2.applyAsLong(t);
-                a.left()[2] += mapper3.applyAsLong(t);
+                a.left()[0] += firstMapper.applyAsLong(t);
+                a.left()[1] += secondMapper.applyAsLong(t);
+                a.left()[2] += thirdMapper.applyAsLong(t);
                 a.right()[0] += 1;
                 a.right()[1] += 1;
                 a.right()[2] += 1;
@@ -9962,15 +9966,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first double property to average
-         * @param mapper2 a function extracting the second double property to average
+         * @param firstMapper a function extracting the first double property to average
+         * @param secondMapper a function extracting the second double property to average
          * @return a {@code Collector} that produces a tuple of the two averages
          */
-        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingDouble(final ToDoubleFunction<? super T> mapper1,
-                final ToDoubleFunction<? super T> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
+                final ToDoubleFunction<? super T> secondMapper) {
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
-                a[0].add(mapper1.applyAsDouble(t));
-                a[1].add(mapper2.applyAsDouble(t));
+                a[0].add(firstMapper.applyAsDouble(t));
+                a[1].add(secondMapper.applyAsDouble(t));
             };
 
             return create(AveragingDouble_Supplier_2, accumulator, AveragingDouble_Combiner_2, AveragingDouble_Finisher_2, CH_UNORDERED_NOID);
@@ -10000,17 +10004,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first double property to average
-         * @param mapper2 a function extracting the second double property to average
-         * @param mapper3 a function extracting the third double property to average
+         * @param firstMapper a function extracting the first double property to average
+         * @param secondMapper a function extracting the second double property to average
+         * @param thirdMapper a function extracting the third double property to average
          * @return a {@code Collector} that produces a tuple of the three averages
          */
-        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingDouble(final ToDoubleFunction<? super T> mapper1,
-                final ToDoubleFunction<? super T> mapper2, final ToDoubleFunction<? super T> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
+                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
-                a[0].add(mapper1.applyAsDouble(t));
-                a[1].add(mapper2.applyAsDouble(t));
-                a[2].add(mapper3.applyAsDouble(t));
+                a[0].add(firstMapper.applyAsDouble(t));
+                a[1].add(secondMapper.applyAsDouble(t));
+                a[2].add(thirdMapper.applyAsDouble(t));
             };
 
             return create(AveragingDouble_Supplier_3, accumulator, AveragingDouble_Combiner_3, AveragingDouble_Finisher_3, CH_UNORDERED_NOID);
@@ -10041,16 +10045,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first {@code BigInteger} value from an element
-         * @param mapper2 a function extracting the second {@code BigInteger} value from an element
+         * @param firstMapper a function extracting the first {@code BigInteger} value from an element
+         * @param secondMapper a function extracting the second {@code BigInteger} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple2<BigDecimal, BigDecimal>}
          */
-        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper1,
-                final Function<? super T, BigInteger> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
+                final Function<? super T, BigInteger> secondMapper) {
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] = a.left()[0].add(mapper1.apply(t));
-                a.left()[1] = a.left()[1].add(mapper2.apply(t));
+                a.left()[0] = a.left()[0].add(firstMapper.apply(t));
+                a.left()[1] = a.left()[1].add(secondMapper.apply(t));
                 a.right()[0] += 1;
                 a.right()[1] += 1;
             };
@@ -10084,18 +10088,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first {@code BigInteger} value from an element
-         * @param mapper2 a function extracting the second {@code BigInteger} value from an element
-         * @param mapper3 a function extracting the third {@code BigInteger} value from an element
+         * @param firstMapper a function extracting the first {@code BigInteger} value from an element
+         * @param secondMapper a function extracting the second {@code BigInteger} value from an element
+         * @param thirdMapper a function extracting the third {@code BigInteger} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple3<BigDecimal, BigDecimal, BigDecimal>}
          */
-        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper1,
-                final Function<? super T, BigInteger> mapper2, final Function<? super T, BigInteger> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
+                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] = a.left()[0].add(mapper1.apply(t));
-                a.left()[1] = a.left()[1].add(mapper2.apply(t));
-                a.left()[2] = a.left()[2].add(mapper3.apply(t));
+                a.left()[0] = a.left()[0].add(firstMapper.apply(t));
+                a.left()[1] = a.left()[1].add(secondMapper.apply(t));
+                a.left()[2] = a.left()[2].add(thirdMapper.apply(t));
                 a.right()[0] += 1;
                 a.right()[1] += 1;
                 a.right()[2] += 1;
@@ -10129,16 +10133,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first {@code BigDecimal} value from an element
-         * @param mapper2 a function extracting the second {@code BigDecimal} value from an element
+         * @param firstMapper a function extracting the first {@code BigDecimal} value from an element
+         * @param secondMapper a function extracting the second {@code BigDecimal} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple2<BigDecimal, BigDecimal>}
          */
-        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper1,
-                final Function<? super T, BigDecimal> mapper2) {
+        public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
+                final Function<? super T, BigDecimal> secondMapper) {
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] = a.left()[0].add(mapper1.apply(t));
-                a.left()[1] = a.left()[1].add(mapper2.apply(t));
+                a.left()[0] = a.left()[0].add(firstMapper.apply(t));
+                a.left()[1] = a.left()[1].add(secondMapper.apply(t));
                 a.right()[0] += 1;
                 a.right()[1] += 1;
             };
@@ -10172,18 +10176,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param mapper1 a function extracting the first {@code BigDecimal} value from an element
-         * @param mapper2 a function extracting the second {@code BigDecimal} value from an element
-         * @param mapper3 a function extracting the third {@code BigDecimal} value from an element
+         * @param firstMapper a function extracting the first {@code BigDecimal} value from an element
+         * @param secondMapper a function extracting the second {@code BigDecimal} value from an element
+         * @param thirdMapper a function extracting the third {@code BigDecimal} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple3<BigDecimal, BigDecimal, BigDecimal>}
          */
-        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper1,
-                final Function<? super T, BigDecimal> mapper2, final Function<? super T, BigDecimal> mapper3) {
+        public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
+                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
-                a.left()[0] = a.left()[0].add(mapper1.apply(t));
-                a.left()[1] = a.left()[1].add(mapper2.apply(t));
-                a.left()[2] = a.left()[2].add(mapper3.apply(t));
+                a.left()[0] = a.left()[0].add(firstMapper.apply(t));
+                a.left()[1] = a.left()[1].add(secondMapper.apply(t));
+                a.left()[2] = a.left()[2].add(thirdMapper.apply(t));
                 a.right()[0] += 1;
                 a.right()[1] += 1;
                 a.right()[2] += 1;

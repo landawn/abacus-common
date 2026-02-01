@@ -775,10 +775,10 @@ public class AbstractDoubleStream100Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
 
-        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summarizeAndPercentiles();
+        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summaryStatisticsAndPercentiles();
 
         DoubleSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

@@ -627,9 +627,9 @@ public class DoubleStream103Test extends TestBase {
     }
 
     @Test
-    public void testSummarize() {
+    public void testsummaryStatistics() {
         DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0);
-        DoubleSummaryStatistics stats = stream.summarize();
+        DoubleSummaryStatistics stats = stream.summaryStatistics();
 
         assertEquals(5, stats.getCount());
         assertEquals(1.0, stats.getMin(), 0.0001);
@@ -639,9 +639,9 @@ public class DoubleStream103Test extends TestBase {
     }
 
     @Test
-    public void testSummarizeAndPercentiles() {
+    public void testsummaryStatisticsAndPercentiles() {
         DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0);
-        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summarizeAndPercentiles();
+        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summaryStatisticsAndPercentiles();
 
         DoubleSummaryStatistics stats = result.left();
         assertEquals(5, stats.getCount());

@@ -192,8 +192,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void inverse() {
-        assertThat(Fn.inverse().apply(Fn.entry().apply("a", 1)).getKey()).isEqualTo(1);
+    public void invert() {
+        assertThat(Fn.invert().apply(Fn.entry().apply("a", 1)).getKey()).isEqualTo(1);
     }
 
     @Test

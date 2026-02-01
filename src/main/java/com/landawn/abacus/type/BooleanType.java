@@ -69,7 +69,7 @@ public final class BooleanType extends AbstractBooleanType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType(Boolean.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Boolean isActive = type.get(rs, 1);   // retrieves Boolean from column 1
      * }</pre>
      *
@@ -97,7 +97,7 @@ public final class BooleanType extends AbstractBooleanType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType(Boolean.class);
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Boolean isActive = type.get(rs, "is_active");   // retrieves Boolean from "is_active" column
      * }</pre>
      *

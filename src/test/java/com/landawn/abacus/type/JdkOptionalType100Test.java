@@ -66,7 +66,7 @@ public class JdkOptionalType100Test extends TestBase {
 
     @Test
     public void testIsGenericType() {
-        assertTrue(optionalStringType.isGenericType());
+        assertTrue(optionalStringType.isParameterizedType());
     }
 
     @Test

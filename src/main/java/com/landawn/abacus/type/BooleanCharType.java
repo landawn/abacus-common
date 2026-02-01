@@ -124,7 +124,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Boolean isActive = type.get(rs, 1);   // retrieves Boolean from column 1 ('Y' -> true, 'N' -> false)
      * }</pre>
      *
@@ -145,7 +145,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = ...;  // from SQL query
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
      * Boolean isActive = type.get(rs, "is_active");   // retrieves Boolean from "is_active" column
      * }</pre>
      *

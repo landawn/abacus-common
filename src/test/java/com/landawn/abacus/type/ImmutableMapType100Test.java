@@ -73,7 +73,7 @@ public class ImmutableMapType100Test extends TestBase {
     @Test
     @DisplayName("Test isGenericType() returns true")
     public void testIsGenericType() {
-        assertTrue(immutableMapType.isGenericType());
+        assertTrue(immutableMapType.isParameterizedType());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class ImmutableMapType100Test extends TestBase {
     @DisplayName("Test with Object,Object generic types")
     public void testObjectObjectMapType() {
         assertTrue(objectMapType.isMap());
-        assertTrue(objectMapType.isGenericType());
+        assertTrue(objectMapType.isParameterizedType());
         assertFalse(objectMapType.isSerializable());
         assertEquals(SerializationType.MAP, objectMapType.getSerializationType());
     }

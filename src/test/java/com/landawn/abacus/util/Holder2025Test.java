@@ -198,21 +198,21 @@ public class Holder2025Test extends TestBase {
         assertEquals("new", holder.value());
     }
 
-    @Test
-    public void test_setIf_BiPredicateTrue() throws Exception {
-        Holder<Integer> holder = Holder.of(5);
-        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
-        assertTrue(result);
-        assertEquals(10, holder.value());
-    }
-
-    @Test
-    public void test_setIf_BiPredicateFalse() throws Exception {
-        Holder<Integer> holder = Holder.of(15);
-        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
-        assertFalse(result);
-        assertEquals(15, holder.value());
-    }
+    //    @Test
+    //    public void test_setIf_BiPredicateTrue() throws Exception {
+    //        Holder<Integer> holder = Holder.of(5);
+    //        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
+    //        assertTrue(result);
+    //        assertEquals(10, holder.value());
+    //    }
+    //
+    //    @Test
+    //    public void test_setIf_BiPredicateFalse() throws Exception {
+    //        Holder<Integer> holder = Holder.of(15);
+    //        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
+    //        assertFalse(result);
+    //        assertEquals(15, holder.value());
+    //    }
 
     @Test
     public void test_isNull_True() {

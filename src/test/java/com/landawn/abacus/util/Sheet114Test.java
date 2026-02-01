@@ -739,7 +739,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testSwapRowPosition() {
-        sheet.swapRowPosition("row1", "row3");
+        sheet.swapRows("row1", "row3");
 
         List<String> expectedOrder = Arrays.asList("row3", "row2", "row1");
         List<String> actualOrder = new ArrayList<>(sheet.rowKeySet());
@@ -752,7 +752,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testSwapRowPositionInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.swapRowPosition("row1", "invalidRow");
+            sheet.swapRows("row1", "invalidRow");
         });
     }
 
@@ -760,7 +760,7 @@ public class Sheet114Test extends TestBase {
     public void testSwapRowPositionOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.swapRowPosition("row1", "row2");
+            sheet.swapRows("row1", "row2");
         });
     }
 
@@ -1017,7 +1017,7 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testSwapColumnPosition() {
-        sheet.swapColumnPosition("col1", "col3");
+        sheet.swapColumns("col1", "col3");
 
         List<String> expectedOrder = Arrays.asList("col3", "col2", "col1");
         List<String> actualOrder = new ArrayList<>(sheet.columnKeySet());
@@ -1030,7 +1030,7 @@ public class Sheet114Test extends TestBase {
     @Test
     public void testSwapColumnPositionInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.swapColumnPosition("col1", "invalidCol");
+            sheet.swapColumns("col1", "invalidCol");
         });
     }
 
@@ -1038,7 +1038,7 @@ public class Sheet114Test extends TestBase {
     public void testSwapColumnPositionOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.swapColumnPosition("col1", "col2");
+            sheet.swapColumns("col1", "col2");
         });
     }
 

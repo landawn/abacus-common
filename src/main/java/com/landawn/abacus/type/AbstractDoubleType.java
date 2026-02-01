@@ -72,7 +72,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractDoubleType type = TypeFactory.getType(Double.class);
+     * Type<Double> type = TypeFactory.getType(Double.class);
      * Double value1 = type.valueOf("3.14159");   // returns 3.14159
      * Double value2 = type.valueOf("100.5D");    // returns 100.5 (suffix stripped)
      * Double value3 = type.valueOf("42.0f");     // returns 42.0 (suffix stripped)
@@ -111,7 +111,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AbstractDoubleType type = TypeFactory.getType(Double.class);
+     * Type<Double> type = TypeFactory.getType(Double.class);
      * if (type.isDouble()) {
      *     // Handle double type specific logic
      *     System.out.println("This is a double type");
@@ -133,11 +133,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive double types
-     * PrimitiveDoubleType type = TypeFactory.getType(double.class);
+     * Type<Double> type = TypeFactory.getType(double.class);
      * double value = type.get(rs, 1);   // Returns 0.0 for SQL NULL
      *
      * // For wrapper Double types
-     * DoubleType type = TypeFactory.getType(Double.class);
+     * Type<Double> type = TypeFactory.getType(Double.class);
      * Double value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
@@ -159,11 +159,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For primitive double types
-     * PrimitiveDoubleType type = TypeFactory.getType(double.class);
+     * Type<Double> type = TypeFactory.getType(double.class);
      * double value = type.get(rs, "price");   // Returns 0.0 for SQL NULL
      *
      * // For wrapper Double types
-     * DoubleType type = TypeFactory.getType(Double.class);
+     * Type<Double> type = TypeFactory.getType(Double.class);
      * Double value = type.get(rs, "price");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *

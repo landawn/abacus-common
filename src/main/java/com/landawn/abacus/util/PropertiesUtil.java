@@ -221,7 +221,7 @@ public final class PropertiesUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> paths = Configuration.getCommonConfigPath();
+     * List<String> paths = Configuration.getCommonConfigPaths();
      * for (String path : paths) {
      *     System.out.println("Config path: " + path);
      * }
@@ -229,7 +229,7 @@ public final class PropertiesUtil {
      *
      * @return a list of absolute paths to existing configuration directories
      */
-    public static List<String> getCommonConfigPath() {
+    public static List<String> getCommonConfigPaths() {
         String currentLocation = getCurrentSourceCodeLocation().getAbsolutePath();
 
         if (logger.isInfoEnabled()) {
@@ -404,7 +404,7 @@ public final class PropertiesUtil {
             foundDir = N.newHashSet();
         }
 
-        for (final String configPath : getCommonConfigPath()) {
+        for (final String configPath : getCommonConfigPaths()) {
             configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, new File(configPath), isDir, foundDir);
 
             if (configurationFile != null && configurationFile.exists()) {
@@ -441,7 +441,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File mainConfig = new File("/app/config/main.xml");
-     * File dbConfig = Configuration.findFileByFile(mainConfig, "database.xml");
+     * File dbConfig = Configuration.findFileRelativeTo(mainConfig, "database.xml");
      * // First looks in /app/config/, then searches common paths
      * }</pre>
      *
@@ -450,7 +450,7 @@ public final class PropertiesUtil {
      * @return the found file, or {@code null} if not found
      */
     @MayReturnNull
-    public static File findFileByFile(final File srcFile, final String targetFileName) {
+    public static File findFileRelativeTo(final File srcFile, final String targetFileName) {
         File targetFile = new File(targetFileName);
 
         if (!targetFile.exists()) {
@@ -990,7 +990,7 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = Beans.formalizePropName(propNode.getNodeName());
+            propName = Beans.normalizePropName(propNode.getNodeName());
             newKeySet.add(propName);
 
             typeAttr = XmlUtil.getAttribute(propNode, TYPE);
@@ -1562,7 +1562,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = Beans.formalizePropName(childNode.getNodeName());
+                propName = Beans.normalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName)) {
                     continue;
@@ -1584,7 +1584,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = Beans.formalizePropName(childNode.getNodeName());
+                propName = Beans.normalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName)) {
                     continue;
@@ -1644,7 +1644,7 @@ public final class PropertiesUtil {
                     continue;
                 }
 
-                propName = Beans.formalizePropName(childNode.getNodeName());
+                propName = Beans.normalizePropName(childNode.getNodeName());
 
                 if (propNameSet.contains(propName) || Strings.isNotEmpty(XmlUtil.getAttribute(childNode, TYPE))) {
                     continue;
@@ -1796,7 +1796,7 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = Beans.formalizePropName(childNode.getNodeName());
+            propName = Beans.normalizePropName(childNode.getNodeName());
 
             if (propNameSet.contains(propName) || ((childNode.getChildNodes().getLength() > 1) && hasDuplicatedPropName(childNode))) {
                 return true;
@@ -1828,7 +1828,7 @@ public final class PropertiesUtil {
                 continue;
             }
 
-            propName = Beans.formalizePropName(childNode.getNodeName());
+            propName = Beans.normalizePropName(childNode.getNodeName());
 
             if (propNameSet.contains(propName)) {
                 duplicatedPropNameSet.add(propName);
