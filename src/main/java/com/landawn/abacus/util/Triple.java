@@ -450,24 +450,24 @@ public final class Triple<L, M, R> implements Mutable {
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
     *
-    * boolean wasSet = triple.setLeftIf("new",
-    *         (l, m, r) -> m > 40 && r);
+    * boolean wasSet = triple.setLeftIf((l, m, r) -> m > 40 && r,
+    *         "new");
     * // wasSet == true, triple.left() == "new" because 42 > 40 and true
     *
-    * wasSet = triple.setLeftIf("another",
-    *         (l, m, r) -> m < 0);
+    * wasSet = triple.setLeftIf((l, m, r) -> m < 0,
+    *         "another");
     * // wasSet == false, triple.left() is still "new" because 42 is not < 0
     * }</pre>
     *
     * @param <E> the type of exception that the predicate may throw
-    * @param newLeft the new value to assign to the left element if the predicate passes;
-    *                may be {@code null}
     * @param predicate a tri-predicate evaluated against the current left, middle and right
     *                  values; if it returns {@code true}, the left element is updated
+    * @param newLeft the new value to assign to the left element if the predicate passes;
+    *                may be {@code null}
     * @return {@code true} if the left element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
     */
-    public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setLeftIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft) throws E {
         if (predicate.test(left, middle, right)) {
             setLeft(newLeft);
             return true;
@@ -490,24 +490,24 @@ public final class Triple<L, M, R> implements Mutable {
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
     *
-    * boolean wasSet = triple.setMiddleIf(100,
-    *         (l, m, r) -> r && m < 50);
+    * boolean wasSet = triple.setMiddleIf((l, m, r) -> r && m < 50,
+    *         100);
     * // wasSet == true, triple.middle() == 100 because true && 42 < 50
     *
-    * wasSet = triple.setMiddleIf(200,
-    *         (l, m, r) -> m > 1000);
+    * wasSet = triple.setMiddleIf((l, m, r) -> m > 1000,
+    *         200);
     * // wasSet == false, triple.middle() is still 100 because 100 is not > 1000
     * }</pre>
     *
     * @param <E> the type of exception that the predicate may throw
-    * @param newMiddle the new value to assign to the middle element if the predicate passes;
-    *                  may be {@code null}
     * @param predicate a tri-predicate evaluated against the current left, middle and right
     *                  values; if it returns {@code true}, the middle element is updated
+    * @param newMiddle the new value to assign to the middle element if the predicate passes;
+    *                  may be {@code null}
     * @return {@code true} if the middle element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
     */
-    public <E extends Exception> boolean setMiddleIf(final M newMiddle, final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setMiddleIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final M newMiddle) throws E {
         if (predicate.test(left, middle, right)) {
             setMiddle(newMiddle);
             return true;
@@ -530,24 +530,24 @@ public final class Triple<L, M, R> implements Mutable {
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
     *
-    * boolean wasSet = triple.setRightIf(false,
-    *         (l, m, r) -> r && m > 40);
+    * boolean wasSet = triple.setRightIf((l, m, r) -> r && m > 40,
+    *         false);
     * // wasSet == true, triple.right() == false because true && 42 > 40
     *
-    * wasSet = triple.setRightIf(true,
-    *         (l, m, r) -> m < 0);
+    * wasSet = triple.setRightIf((l, m, r) -> m < 0,
+    *         true);
     * // wasSet == false, triple.right() is still false because 42 is not < 0
     * }</pre>
     *
     * @param <E> the type of exception that the predicate may throw
-    * @param newRight the new value to assign to the right element if the predicate passes;
-    *                 may be {@code null}
     * @param predicate a tri-predicate evaluated against the current left, middle and right
     *                  values; if it returns {@code true}, the right element is updated
+    * @param newRight the new value to assign to the right element if the predicate passes;
+    *                 may be {@code null}
     * @return {@code true} if the right element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
     */
-    public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setRightIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final R newRight) throws E {
         if (predicate.test(left, middle, right)) {
             setRight(newRight);
             return true;
@@ -573,29 +573,29 @@ public final class Triple<L, M, R> implements Mutable {
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
     *
-    * boolean wasSet = triple.setIf("new", 100, false,
-    *         (l, m, r) -> m < 50 && r);
+    * boolean wasSet = triple.setIf((l, m, r) -> m < 50 && r,
+    *         "new", 100, false);
     * // wasSet == true, triple is now ("new", 100, false)
     *
-    * wasSet = triple.setIf("another", 1, true,
-    *         (l, m, r) -> m > 1000);
+    * wasSet = triple.setIf((l, m, r) -> m > 1000,
+    *         "another", 1, true);
     * // wasSet == false, triple remains ("new", 100, false)
     * }</pre>
     *
     * @param <E> the type of exception that the predicate may throw
+    * @param predicate a tri-predicate evaluated against the current left, middle and right
+    *                  values; if it returns {@code true}, all three elements are updated
     * @param newLeft   the new value to assign to the left element if the predicate passes;
     *                  may be {@code null}
     * @param newMiddle the new value to assign to the middle element if the predicate passes;
     *                  may be {@code null}
     * @param newRight  the new value to assign to the right element if the predicate passes;
     *                  may be {@code null}
-    * @param predicate a tri-predicate evaluated against the current left, middle and right
-    *                  values; if it returns {@code true}, all three elements are updated
     * @return {@code true} if all three elements were updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
     */
-    public <E extends Exception> boolean setIf(final L newLeft, final M newMiddle, final R newRight,
-            final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft, final M newMiddle,
+            final R newRight) throws E {
         if (predicate.test(left, middle, right)) {
             setLeft(newLeft);
             setMiddle(newMiddle);

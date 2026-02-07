@@ -97,42 +97,42 @@ public class Triple200Test extends TestBase {
         Triple<String, Integer, Boolean> triple = Triple.of("A", 1, true);
 
         // left depends on current middle
-        assertTrue(triple.setLeftIf("B", (l, m, r) -> m == 1));
+        assertTrue(triple.setLeftIf((l, m, r) -> m == 1, "B"));
         assertEquals("B", triple.left());
         assertEquals(1, triple.middle());
         assertTrue(triple.right());
 
-        assertFalse(triple.setLeftIf("C", (l, m, r) -> m == 0));
+        assertFalse(triple.setLeftIf((l, m, r) -> m == 0, "C"));
         assertEquals("B", triple.left());
         assertEquals(1, triple.middle());
         assertTrue(triple.right());
 
         // middle depends on current right
-        assertTrue(triple.setMiddleIf(2, (l, m, r) -> r));
+        assertTrue(triple.setMiddleIf((l, m, r) -> r, 2));
         assertEquals("B", triple.left());
         assertEquals(2, triple.middle());
         assertTrue(triple.right());
 
-        assertFalse(triple.setMiddleIf(3, (l, m, r) -> !r));
+        assertFalse(triple.setMiddleIf((l, m, r) -> !r, 3));
         assertEquals("B", triple.left());
         assertEquals(2, triple.middle());
         assertTrue(triple.right());
 
         // right depends on current left
-        assertTrue(triple.setRightIf(false, (l, m, r) -> "B".equals(l)));
+        assertTrue(triple.setRightIf((l, m, r) -> "B".equals(l), false));
         assertEquals("B", triple.left());
         assertEquals(2, triple.middle());
         assertFalse(triple.right());
 
         // First setIf: predicate uses current middle (2) and right (false)
         // Make it true for the current state: m < 5
-        assertTrue(triple.setIf("X", 10, true, (l, m, r) -> m < 5));
+        assertTrue(triple.setIf((l, m, r) -> m < 5, "X", 10, true));
         assertEquals("X", triple.left());
         assertEquals(10, triple.middle());
         assertTrue(triple.right());
 
         // Second setIf: now middle is 10, so choose a predicate that’s true for m > 5
-        assertTrue(triple.setIf("Y", 0, false, (l, m, r) -> m > 5));
+        assertTrue(triple.setIf((l, m, r) -> m > 5, "Y", 0, false));
         assertEquals("Y", triple.left());
         assertEquals(0, triple.middle());
         assertFalse(triple.right());

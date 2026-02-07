@@ -236,13 +236,13 @@ public class JUDateType extends AbstractDateType<Date> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label to retrieve the value from
+     * @param columnName the column label to retrieve the value from
      * @return a Date instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public Date get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return (ts == null) ? null : new Date(ts.getTime());
     }

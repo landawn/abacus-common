@@ -188,13 +188,13 @@ public class RowIdType extends AbstractType<RowId> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @param columnName the label of the column to retrieve (column name or alias)
      * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public RowId get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getRowId(columnLabel);
+    public RowId get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getRowId(columnName);
     }
 
     /**

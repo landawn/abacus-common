@@ -652,10 +652,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * @param startIndex the starting index value
      * @return an ObjIterator of IndexedFloat objects
-     * @throws IllegalArgumentException if startIndex is negative
      */
     @Beta
-    public ObjIterator<IndexedFloat> indexed(final long startIndex) throws IllegalArgumentException {
+    public ObjIterator<IndexedFloat> indexed(final long startIndex) {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final FloatIterator iter = this;

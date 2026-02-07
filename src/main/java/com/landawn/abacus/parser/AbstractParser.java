@@ -37,7 +37,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -292,7 +292,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param propClass the declared property class from the target bean (may be {@code null})
      * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a new instance of the appropriate type
-     * @throws ParseException if no suitable type is available or instantiation fails
+     * @throws ParsingException if no suitable type is available or instantiation fails
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
@@ -311,7 +311,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return (T) N.newInstance(propClass);
         }
 
-        throw new ParseException("Failed to create property instance with property class by attribute " + attributeTypeClass);
+        throw new ParsingException("Failed to create property instance with property class by attribute " + attributeTypeClass);
     }
 
     /**
@@ -437,7 +437,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {
             if (serializedObjects.contains(obj)) {
                 if (config == null || !config.supportCircularReference()) {
-                    throw new ParseException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
+                    throw new ParsingException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
                 }
 
                 // bw.write("null");

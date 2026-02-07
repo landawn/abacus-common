@@ -52,18 +52,18 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
- * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+ * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users")
  *     .header("Accept", "application/json")
  *     .get();
  *
  * // POST request with JSON body
  * User user = new User("John", "Doe");
- * User createdUser = HttpRequest.url("https://api.example.com/users")
+ * User createdUser = HttpRequest.url("http://localhost:18080/users")
  *     .jsonBody(user)
  *     .post(User.class);
  *
  * // Asynchronous request
- * CompletableFuture<String> future = HttpRequest.url("https://api.example.com/data")
+ * CompletableFuture<String> future = HttpRequest.url("http://localhost:18080/data")
  *     .asyncGet(String.class);
  * }</pre>
  *
@@ -142,7 +142,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest request = HttpRequest.url("https://api.example.com/users");
+     * HttpRequest request = HttpRequest.url("http://localhost:18080/users");
      * }</pre>
      *
      * @param url the URL string for the request
@@ -159,7 +159,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest request = HttpRequest.url("https://api.example.com/data", 5000, 30000);
+     * HttpRequest request = HttpRequest.url("http://localhost:18080/data", 5000, 30000);
      * }</pre>
      *
      * @param url the URL string for the request
@@ -236,7 +236,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .connectTimeout(Duration.ofSeconds(10))
      *     .get();
      * }</pre>
@@ -290,7 +290,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/slow-endpoint")
+     * HttpRequest.url("http://localhost:18080/slow-endpoint")
      *     .readTimeout(Duration.ofSeconds(60))
      *     .get();
      * }</pre>
@@ -319,7 +319,7 @@ public final class HttpRequest {
      *     }
      * };
      *
-     * HttpRequest.url("https://api.example.com/secure")
+     * HttpRequest.url("http://localhost:18080/secure")
      *     .authenticator(auth)
      *     .get();
      * }</pre>
@@ -341,7 +341,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/secure")
+     * HttpRequest.url("http://localhost:18080/secure")
      *     .basicAuth("username", "password")
      *     .get();
      * }</pre>
@@ -365,7 +365,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .header("Accept", "application/json")
      *     .header("User-Agent", "MyApp/1.0")
      *     .get();
@@ -391,7 +391,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .headers("Accept", "application/json", "User-Agent", "MyApp/1.0")
      *     .get();
      * }</pre>
@@ -416,7 +416,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .headers("Accept", "application/json",
      *              "User-Agent", "MyApp/1.0",
      *              "X-Custom-Header", "custom-value")
@@ -448,13 +448,13 @@ public final class HttpRequest {
      * headers.put("Accept", "application/json");
      * headers.put("Authorization", "Bearer token123");
      * 
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .headers(headers)
      *     .get();
      * }</pre>
      *
-     * @param headers a map containing header names and values
-     * @return this HttpRequest instance for method chaining
+     * @param headers A map containing header names and values
+     * @return This HttpRequest instance for method chaining
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -481,7 +481,7 @@ public final class HttpRequest {
     //     * headers.set("Accept", "application/json");
     //     * headers.set("Authorization", "Bearer token123");
     //     *
-    //     * HttpRequest.url("https://api.example.com/data")
+    //     * HttpRequest.url("http://localhost:18080/data")
     //     *     .headers(headers)
     //     *     .get();
     //     * }</pre>
@@ -509,7 +509,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/search")
+     * HttpRequest.url("http://localhost:18080/search")
      *     .query("q=java&limit=10")
      *     .get();
      * }</pre>
@@ -533,13 +533,13 @@ public final class HttpRequest {
      * params.put("q", "java programming");
      * params.put("limit", 10);
      * 
-     * HttpRequest.url("https://api.example.com/search")
+     * HttpRequest.url("http://localhost:18080/search")
      *     .query(params)
      *     .get();
      * }</pre>
      *
-     * @param queryParams a map containing query parameter names and values
-     * @return this HttpRequest instance for method chaining
+     * @param queryParams A map containing query parameter names and values
+     * @return This HttpRequest instance for method chaining
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
         query = queryParams;
@@ -553,7 +553,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(json)
      *     .post();
      * }</pre>
@@ -576,7 +576,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(user)
      *     .post();
      * }</pre>
@@ -599,7 +599,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<user><name>John</name><age>30</age></user>";
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(xml)
      *     .post();
      * }</pre>
@@ -624,7 +624,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(user)
      *     .post();
      * }</pre>
@@ -651,13 +651,13 @@ public final class HttpRequest {
      * formData.put("username", "john_doe");
      * formData.put("password", "secret123");
      * 
-     * HttpRequest.url("https://api.example.com/login")
+     * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
      *     .post();
      * }</pre>
      *
-     * @param formBodyByMap a map containing form field names and values
-     * @return this HttpRequest instance for method chaining
+     * @param formBodyByMap A map containing form field names and values
+     * @return This HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -677,7 +677,7 @@ public final class HttpRequest {
      * login.setUsername("john_doe");
      * login.setPassword("secret123");
      * 
-     * HttpRequest.url("https://api.example.com/login")
+     * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(login)
      *     .post();
      * }</pre>
@@ -705,7 +705,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BodyPublisher publisher = BodyPublishers.ofFile(Paths.get("data.bin"));
-     * HttpRequest.url("https://api.example.com/upload")
+     * HttpRequest.url("http://localhost:18080/upload")
      *     .header("Content-Type", "application/octet-stream")
      *     .body(publisher)
      *     .post();
@@ -726,7 +726,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users")
      *     .header("Accept", "application/json")
      *     .get();
      * 
@@ -749,7 +749,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<byte[]> response = HttpRequest.url("https://api.example.com/image.png")
+     * HttpResponse<byte[]> response = HttpRequest.url("http://localhost:18080/image.png")
      *     .get(BodyHandlers.ofByteArray());
      * byte[] imageData = response.body();
      * }</pre>
@@ -769,7 +769,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = HttpRequest.url("https://api.example.com/users")
+     * List<User> users = HttpRequest.url("http://localhost:18080/users")
      *     .get(new TypeToken<List<User>>(){}.getType());
      * }</pre>
      *
@@ -790,7 +790,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .post();
      * }</pre>
@@ -809,7 +809,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<InputStream> response = HttpRequest.url("https://api.example.com/data")
+     * HttpResponse<InputStream> response = HttpRequest.url("http://localhost:18080/data")
      *     .jsonBody(requestData)
      *     .post(BodyHandlers.ofInputStream());
      * }</pre>
@@ -830,7 +830,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
-     * User createdUser = HttpRequest.url("https://api.example.com/users")
+     * User createdUser = HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .post(User.class);
      * }</pre>
@@ -853,7 +853,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put();
      * }</pre>
@@ -873,7 +873,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path outputPath = Paths.get("response.json");
-     * HttpResponse<Path> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<Path> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put(BodyHandlers.ofFile(outputPath));
      * }</pre>
@@ -896,7 +896,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
-     * User result = HttpRequest.url("https://api.example.com/users/123")
+     * User result = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put(User.class);
      * }</pre>
@@ -921,7 +921,7 @@ public final class HttpRequest {
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("email", "newemail@example.com");
      *
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updates)
      *     .patch();
      * }</pre>
@@ -943,7 +943,7 @@ public final class HttpRequest {
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("status", "active");
      *
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updates)
      *     .patch(BodyHandlers.ofString());
      * }</pre>
@@ -968,7 +968,7 @@ public final class HttpRequest {
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("email", "newemail@example.com");
      *
-     * User result = HttpRequest.url("https://api.example.com/users/123")
+     * User result = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updates)
      *     .patch(User.class);
      * }</pre>
@@ -989,7 +989,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .delete();
      * }</pre>
      *
@@ -1007,7 +1007,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<Void> response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse<Void> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .delete(BodyHandlers.discarding());
      * System.out.println("Deleted with status: " + response.statusCode());
      * }</pre>
@@ -1029,7 +1029,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DeleteResponse result = HttpRequest.url("https://api.example.com/users/123")
+     * DeleteResponse result = HttpRequest.url("http://localhost:18080/users/123")
      *     .delete(DeleteResponse.class);
      * }</pre>
      *
@@ -1051,7 +1051,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<Void> response = HttpRequest.url("https://api.example.com/large-file.zip")
+     * HttpResponse<Void> response = HttpRequest.url("http://localhost:18080/large-file.zip")
      *     .head();
      * long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(0);
      * System.out.println("File size: " + contentLength + " bytes");
@@ -1082,7 +1082,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<String> response = HttpRequest.url("https://api.example.com/data")
+     * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/data")
      *     .execute(HttpMethod.GET);
      * }</pre>
      *
@@ -1103,7 +1103,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse<byte[]> response = HttpRequest.url("https://api.example.com/image")
+     * HttpResponse<byte[]> response = HttpRequest.url("http://localhost:18080/image")
      *     .execute(HttpMethod.GET, BodyHandlers.ofByteArray());
      * }</pre>
      *
@@ -1138,7 +1138,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = HttpRequest.url("https://api.example.com/users/123")
+     * User user = HttpRequest.url("http://localhost:18080/users/123")
      *     .execute(HttpMethod.GET, User.class);
      * }</pre>
      *
@@ -1196,7 +1196,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("https://api.example.com/users")
+     * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("http://localhost:18080/users")
      *     .asyncGet();
      * 
      * future.thenAccept(response -> {
@@ -1219,7 +1219,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<byte[]>> future =
-     *     HttpRequest.url("https://api.example.com/large-file")
+     *     HttpRequest.url("http://localhost:18080/large-file")
      *         .asyncGet(BodyHandlers.ofByteArray());
      *
      * future.thenAccept(response -> {
@@ -1241,7 +1241,7 @@ public final class HttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CompletableFuture<List<User>> future = HttpRequest.url("https://api.example.com/users")
+     * CompletableFuture<List<User>> future = HttpRequest.url("http://localhost:18080/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());
      * 
      * future.thenAccept(users -> {
@@ -1269,7 +1269,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/page")
+     *     HttpRequest.url("http://localhost:18080/page")
      *         .asyncGet(BodyHandlers.ofString(), pushHandler);
      * }</pre>
      *
@@ -1292,7 +1292,7 @@ public final class HttpRequest {
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users")
+     *     HttpRequest.url("http://localhost:18080/users")
      *         .jsonBody(newUser)
      *         .asyncPost();
      *
@@ -1315,7 +1315,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<Path>> future =
-     *     HttpRequest.url("https://api.example.com/report")
+     *     HttpRequest.url("http://localhost:18080/report")
      *         .jsonBody(reportRequest)
      *         .asyncPost(BodyHandlers.ofFile(Paths.get("report.pdf")));
      * }</pre>
@@ -1338,7 +1338,7 @@ public final class HttpRequest {
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * CompletableFuture<User> future =
-     *     HttpRequest.url("https://api.example.com/users")
+     *     HttpRequest.url("http://localhost:18080/users")
      *         .jsonBody(newUser)
      *         .asyncPost(User.class);
      *
@@ -1367,7 +1367,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/submit")
+     *     HttpRequest.url("http://localhost:18080/submit")
      *         .jsonBody(data)
      *         .asyncPost(BodyHandlers.ofString(), pushHandler);
      * }</pre>
@@ -1391,7 +1391,7 @@ public final class HttpRequest {
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
      *         .asyncPut();
      * }</pre>
@@ -1410,7 +1410,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
      *         .asyncPut(BodyHandlers.ofString());
      *
@@ -1437,7 +1437,7 @@ public final class HttpRequest {
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * CompletableFuture<User> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
      *         .asyncPut(User.class);
      *
@@ -1466,7 +1466,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
      *         .asyncPut(BodyHandlers.ofString(), pushHandler);
      * }</pre>
@@ -1492,7 +1492,7 @@ public final class HttpRequest {
      * updates.put("email", "newemail@example.com");
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updates)
      *         .asyncPatch();
      *
@@ -1518,7 +1518,7 @@ public final class HttpRequest {
      * updates.put("status", "active");
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updates)
      *         .asyncPatch(BodyHandlers.ofString());
      *
@@ -1547,7 +1547,7 @@ public final class HttpRequest {
      * updates.put("email", "newemail@example.com");
      *
      * CompletableFuture<User> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updates)
      *         .asyncPatch(User.class);
      *
@@ -1576,7 +1576,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updates)
      *         .asyncPatch(BodyHandlers.ofString(), pushHandler);
      * }</pre>
@@ -1599,7 +1599,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .asyncDelete();
      *
      * future.thenAccept(response -> {
@@ -1621,7 +1621,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<Void>> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .asyncDelete(BodyHandlers.discarding());
      *
      * future.thenAccept(response -> {
@@ -1646,7 +1646,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<DeleteResponse> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .asyncDelete(DeleteResponse.class);
      *
      * future.thenAccept(result -> {
@@ -1674,7 +1674,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .asyncDelete(BodyHandlers.ofString(), pushHandler);
      * }</pre>
      *
@@ -1698,7 +1698,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<Void>> future =
-     *     HttpRequest.url("https://api.example.com/large-file.zip")
+     *     HttpRequest.url("http://localhost:18080/large-file.zip")
      *         .asyncHead();
      *
      * future.thenAccept(response -> {
@@ -1732,7 +1732,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://api.example.com/data")
+     *     HttpRequest.url("http://localhost:18080/data")
      *         .asyncExecute(HttpMethod.GET);
      *
      * future.thenAccept(response -> {
@@ -1756,7 +1756,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<byte[]>> future =
-     *     HttpRequest.url("https://api.example.com/image")
+     *     HttpRequest.url("http://localhost:18080/image")
      *         .asyncExecute(HttpMethod.GET, BodyHandlers.ofByteArray());
      *
      * future.thenAccept(response -> {
@@ -1796,7 +1796,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<User> future =
-     *     HttpRequest.url("https://api.example.com/users/123")
+     *     HttpRequest.url("http://localhost:18080/users/123")
      *         .asyncExecute(HttpMethod.GET, User.class);
      *
      * future.thenAccept(user -> {
@@ -1835,7 +1835,7 @@ public final class HttpRequest {
      * };
      *
      * CompletableFuture<HttpResponse<String>> future =
-     *     HttpRequest.url("https://http2.example.com/page")
+     *     HttpRequest.url("http://localhost:18080/page")
      *         .asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), pushHandler);
      * }</pre>
      *

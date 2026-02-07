@@ -191,13 +191,13 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return an OptionalLong containing the long value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public OptionalLong get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public OptionalLong get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalLong.empty()
                 : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));

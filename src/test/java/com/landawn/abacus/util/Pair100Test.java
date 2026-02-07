@@ -138,12 +138,12 @@ public class Pair100Test extends TestBase {
         // assuming pair is something like Pair<String, Integer>
         pair.set("original", 10);
 
-        boolean result = pair.setLeftIf("new", (l, r) -> r > 5);
+        boolean result = pair.setLeftIf((l, r) -> r > 5, "new");
         assertTrue(result);
         assertEquals("new", pair.left());
         assertEquals(10, pair.right()); // right unchanged
 
-        result = pair.setLeftIf("a", (l, r) -> r > 20);
+        result = pair.setLeftIf((l, r) -> r > 20, "a");
         assertFalse(result);
         assertEquals("new", pair.left()); // still "new"
         assertEquals(10, pair.right()); // still 10
@@ -153,12 +153,12 @@ public class Pair100Test extends TestBase {
     public void testSetRightIf() throws Exception {
         pair.set("Hello", 10);
 
-        boolean result = pair.setRightIf(20, (l, r) -> l.length() > 3);
+        boolean result = pair.setRightIf((l, r) -> l.length() > 3, 20);
         assertTrue(result);
         assertEquals("Hello", pair.left()); // left unchanged
         assertEquals(20, pair.right());
 
-        result = pair.setRightIf(5, (l, r) -> r < 10);
+        result = pair.setRightIf((l, r) -> r < 10, 5);
         assertFalse(result);
         assertEquals("Hello", pair.left());
         assertEquals(20, pair.right()); // unchanged because predicate was false
@@ -168,12 +168,12 @@ public class Pair100Test extends TestBase {
     public void testSetIf() throws Exception {
         pair.set("old", 1);
 
-        boolean result = pair.setIf("new", 2, (l, r) -> r < 5);
+        boolean result = pair.setIf((l, r) -> r < 5, "new", 2);
         assertTrue(result);
         assertEquals("new", pair.left());
         assertEquals(2, pair.right());
 
-        result = pair.setIf("newer", 0, (l, r) -> r > 10);
+        result = pair.setIf((l, r) -> r > 10, "newer", 0);
         assertFalse(result);
         assertEquals("new", pair.left()); // unchanged
         assertEquals(2, pair.right()); // unchanged

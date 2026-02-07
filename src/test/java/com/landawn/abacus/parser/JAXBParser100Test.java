@@ -27,7 +27,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 
@@ -246,7 +246,7 @@ public class JAXBParser100Test extends TestBase {
         ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
         config.setIgnoredPropNames(ignoredProps);
 
-        assertThrows(ParseException.class, () -> parser.serialize(person, config));
+        assertThrows(ParsingException.class, () -> parser.serialize(person, config));
     }
 
     @Test
@@ -257,7 +257,7 @@ public class JAXBParser100Test extends TestBase {
         ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
         config.setIgnoredPropNames(ignoredProps);
 
-        assertThrows(ParseException.class, () -> parser.deserialize(xml, config, Person.class));
+        assertThrows(ParsingException.class, () -> parser.deserialize(xml, config, Person.class));
     }
 
     @Test

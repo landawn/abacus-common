@@ -215,13 +215,13 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * The method attempts to convert the retrieved value to the element type if necessary.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return an Optional containing the retrieved value, or empty Optional if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public Optional<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final T result = getColumnValue(rs, columnLabel, elementType.clazz());
+    public Optional<T> get(final ResultSet rs, final String columnName) throws SQLException {
+        final T result = getColumnValue(rs, columnName, elementType.clazz());
 
         return result == null ? (Optional<T>) Optional.empty()
                 : Optional.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));

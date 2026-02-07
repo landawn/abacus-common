@@ -29,9 +29,9 @@ import java.io.Serial;
  *   <li>Simplifying error handling in parsing-heavy code</li>
  * </ul>
  * 
- * <p>Note the distinction between this class and {@link com.landawn.abacus.exception.ParseException}:</p>
+ * <p>Note the distinction between this class and {@link com.landawn.abacus.exception.ParsingException}:</p>
  * <ul>
- *   <li>{@link com.landawn.abacus.exception.ParseException} - A runtime exception for general parsing errors</li>
+ *   <li>{@link com.landawn.abacus.exception.ParsingException} - A runtime exception for general parsing errors</li>
  *   <li>{@code UncheckedParseException} - Specifically wraps {@link java.text.ParseException}</li>
  * </ul>
  * 
@@ -62,7 +62,7 @@ import java.io.Serial;
  * 
  * @see UncheckedException
  * @see java.text.ParseException
- * @see com.landawn.abacus.exception.ParseException
+ * @see com.landawn.abacus.exception.ParsingException
  */
 public class UncheckedParseException extends UncheckedException {
 

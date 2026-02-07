@@ -212,7 +212,7 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         // Predicate is evaluated on current (left, right)
-        boolean updated = pair.setLeftIf("World", (l, r) -> r > 5);
+        boolean updated = pair.setLeftIf((l, r) -> r > 5, "World");
 
         assertTrue(updated);
         assertEquals("World", pair.left());
@@ -222,7 +222,7 @@ public class Pair2025Test extends TestBase {
     public void testSetLeftIf_predicateFalse() throws Exception {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
-        boolean updated = pair.setLeftIf("World", (l, r) -> r > 20);
+        boolean updated = pair.setLeftIf((l, r) -> r > 20, "World");
 
         assertFalse(updated);
         assertEquals("Hello", pair.left());
@@ -233,9 +233,9 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         assertThrows(RuntimeException.class, () -> {
-            pair.setLeftIf("World", (l, r) -> {
+            pair.setLeftIf((l, r) -> {
                 throw new RuntimeException("Test exception");
-            });
+            }, "World");
         });
 
         // state should remain unchanged after exception
@@ -247,7 +247,7 @@ public class Pair2025Test extends TestBase {
     public void testSetRightIf_predicateTrue() throws Exception {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
-        boolean updated = pair.setRightIf(20, (l, r) -> l.length() > 3);
+        boolean updated = pair.setRightIf((l, r) -> l.length() > 3, 20);
 
         assertTrue(updated);
         assertEquals(20, pair.right());
@@ -258,7 +258,7 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         // make predicate clearly false for the current state
-        boolean updated = pair.setRightIf(30, (l, r) -> r < 0);
+        boolean updated = pair.setRightIf((l, r) -> r < 0, 30);
 
         assertFalse(updated);
         assertEquals(10, pair.right());
@@ -268,9 +268,9 @@ public class Pair2025Test extends TestBase {
     public void testSetRightIf_withException() {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
         assertThrows(RuntimeException.class, () -> {
-            pair.setRightIf(20, (p, newVal) -> {
+            pair.setRightIf((p, newVal) -> {
                 throw new RuntimeException("Test exception");
-            });
+            }, 20);
         });
     }
 
@@ -279,7 +279,7 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         // Predicate is evaluated on current left/right: ("Hello", 10)
-        boolean updated = pair.setIf("World", 20, (l, r) -> l.length() + r < 20); // 5 + 10 < 20 => true
+        boolean updated = pair.setIf((l, r) -> l.length() + r < 20, "World", 20); // 5 + 10 < 20 => true
 
         assertTrue(updated);
         assertEquals("World", pair.left());
@@ -291,7 +291,7 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         // Make the predicate false for the current state ("Hello", 10)
-        boolean updated = pair.setIf("World", 20, (l, r) -> r < 0); // 10 < 0 => false
+        boolean updated = pair.setIf((l, r) -> r < 0, "World", 20); // 10 < 0 => false
 
         assertFalse(updated);
         assertEquals("Hello", pair.left());
@@ -303,9 +303,9 @@ public class Pair2025Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("Hello", 10);
 
         assertThrows(RuntimeException.class, () -> {
-            pair.setIf("World", 20, (l, r) -> {
+            pair.setIf((l, r) -> {
                 throw new RuntimeException("Test exception");
-            });
+            }, "World", 20);
         });
 
         // Optional but good to assert state is unchanged after exception

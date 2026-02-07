@@ -42,10 +42,10 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * collector.accept((short) 10);
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(short t);
+    void accept(short value);
 
     /**
      * Returns a composed {@code ShortConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -64,9 +64,9 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * @return a composed {@code ShortConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortConsumer andThen(final ShortConsumer after) {
-        return t -> {
-            accept(t);
-            after.accept(t);
+        return value -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

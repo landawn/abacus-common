@@ -604,7 +604,7 @@ public class U102Test extends TestBase {
         public void testMapToInt() throws Exception {
             u.OptionalChar optional = u.OptionalChar.of('A');
 
-            u.OptionalInt mapped = optional.mapToInt(value -> (int) value);
+            u.OptionalInt mapped = optional.mapToInt(v -> (int) v);
             assertTrue(mapped.isPresent());
             assertEquals(65, mapped.get());
 
@@ -2218,7 +2218,7 @@ public class U102Test extends TestBase {
         public void testMapToInt() throws Exception {
             u.OptionalLong optional = u.OptionalLong.of(42L);
 
-            u.OptionalInt mapped = optional.mapToInt(value -> value.intValue());
+            u.OptionalInt mapped = optional.mapToInt(v -> v.intValue());
             assertTrue(mapped.isPresent());
             assertEquals(42, mapped.get());
 
@@ -3033,7 +3033,7 @@ public class U102Test extends TestBase {
         public void testMapToInt() throws Exception {
             u.OptionalDouble optional = u.OptionalDouble.of(42.5);
 
-            u.OptionalInt mapped = optional.mapToInt(value -> value.intValue());
+            u.OptionalInt mapped = optional.mapToInt(v -> v.intValue());
             assertTrue(mapped.isPresent());
             assertEquals(42, mapped.get());
 
@@ -3046,7 +3046,7 @@ public class U102Test extends TestBase {
         public void testMapToLong() throws Exception {
             u.OptionalDouble optional = u.OptionalDouble.of(42.5);
 
-            u.OptionalLong mapped = optional.mapToLong(value -> value.longValue());
+            u.OptionalLong mapped = optional.mapToLong(v -> v.longValue());
             assertTrue(mapped.isPresent());
             assertEquals(42L, mapped.get());
 

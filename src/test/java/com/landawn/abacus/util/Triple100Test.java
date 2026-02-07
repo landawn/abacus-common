@@ -137,14 +137,14 @@ public class Triple100Test extends TestBase {
         triple.set("original", 1, 0.1);
 
         // Predicate uses current (left, middle, right)
-        boolean result = triple.setLeftIf("new", (l, m, r) -> l.equals("original"));
+        boolean result = triple.setLeftIf((l, m, r) -> l.equals("original"), "new");
         assertTrue(result);
         assertEquals("new", triple.left());
         assertEquals(1, triple.middle());
         assertEquals(0.1, triple.right(), 0.0);
 
         // Now left is "new", so predicate should be false
-        result = triple.setLeftIf("another", (l, m, r) -> l.equals("original"));
+        result = triple.setLeftIf((l, m, r) -> l.equals("original"), "another");
         assertFalse(result);
         assertEquals("new", triple.left());
         assertEquals(1, triple.middle());
@@ -155,14 +155,14 @@ public class Triple100Test extends TestBase {
     public void testSetMiddleIf() throws Exception {
         triple.set("left", 10, 0.1);
 
-        boolean result = triple.setMiddleIf(20, (l, m, r) -> m == 10);
+        boolean result = triple.setMiddleIf((l, m, r) -> m == 10, 20);
         assertTrue(result);
         assertEquals("left", triple.left());
         assertEquals(20, triple.middle());
         assertEquals(0.1, triple.right(), 0.0);
 
         // Now middle is 20, so this should not update
-        result = triple.setMiddleIf(5, (l, m, r) -> m == 10);
+        result = triple.setMiddleIf((l, m, r) -> m == 10, 5);
         assertFalse(result);
         assertEquals("left", triple.left());
         assertEquals(20, triple.middle());
@@ -173,14 +173,14 @@ public class Triple100Test extends TestBase {
     public void testSetRightIf() throws Exception {
         triple.set("left", 1, 1.0);
 
-        boolean result = triple.setRightIf(2.0, (l, m, r) -> r == 1.0);
+        boolean result = triple.setRightIf((l, m, r) -> r == 1.0, 2.0);
         assertTrue(result);
         assertEquals("left", triple.left());
         assertEquals(1, triple.middle());
         assertEquals(2.0, triple.right(), 0.0);
 
         // Now right is 2.0, so this should not update
-        result = triple.setRightIf(0.5, (l, m, r) -> r == 1.0);
+        result = triple.setRightIf((l, m, r) -> r == 1.0, 0.5);
         assertFalse(result);
         assertEquals("left", triple.left());
         assertEquals(1, triple.middle());
@@ -191,14 +191,14 @@ public class Triple100Test extends TestBase {
     public void testSetIf() throws Exception {
         triple.set("old", 1, 0.1);
 
-        boolean result = triple.setIf("new", 2, 0.2, (l, m, r) -> m == 1 && r == 0.1);
+        boolean result = triple.setIf((l, m, r) -> m == 1 && r == 0.1, "new", 2, 0.2);
         assertTrue(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
         assertEquals(0.2, triple.right(), 0.0);
 
         // Now middle/right changed, so predicate should fail
-        result = triple.setIf("newer", 0, 0.0, (l, m, r) -> m == 1 && r == 0.1);
+        result = triple.setIf((l, m, r) -> m == 1 && r == 0.1, "newer", 0, 0.0);
         assertFalse(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
@@ -462,7 +462,7 @@ public class Triple100Test extends TestBase {
         // Assume triple is Triple<String, Integer, Double>
         triple.set("abc", 3, 3.0);
 
-        boolean result = triple.setIf("defgh", 5, 5.0, (l, m, r) -> l.length() == m && m == r.intValue() && "defgh".length() > l.length());
+        boolean result = triple.setIf((l, m, r) -> l.length() == m && m == r.intValue() && "defgh".length() > l.length(), "defgh", 5, 5.0);
         // For the initial state: "abc", 3, 3.0
         // l.length() == 3, m == 3, r.intValue() == 3, and "defgh".length() == 5 > 3
         // => predicate is true, so the update should happen.

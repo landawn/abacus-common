@@ -117,7 +117,7 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_setIf_conditionTrue() throws Exception {
         MutableLong ml = MutableLong.of(10L);
-        boolean updated = ml.setIf(20L, v -> v < 15L);
+        boolean updated = ml.setIf(v -> v < 15L, 20L);
         assertTrue(updated);
         assertEquals(20L, ml.value());
     }
@@ -125,7 +125,7 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_setIf_conditionFalse() throws Exception {
         MutableLong ml = MutableLong.of(10L);
-        boolean updated = ml.setIf(20L, v -> v > 15L);
+        boolean updated = ml.setIf(v -> v > 15L, 20L);
         assertFalse(updated);
         assertEquals(10L, ml.value());
     }
@@ -133,10 +133,10 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_setIf_multipleConditions() throws Exception {
         MutableLong ml = MutableLong.of(10L);
-        ml.setIf(20L, v -> v < 15L);
+        ml.setIf(v -> v < 15L, 20L);
         assertEquals(20L, ml.value());
 
-        boolean updated = ml.setIf(30L, v -> v < 15L);
+        boolean updated = ml.setIf(v -> v < 15L, 30L);
         assertFalse(updated);
         assertEquals(20L, ml.value());
     }
@@ -144,7 +144,7 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_setIf_equalityCondition() throws Exception {
         MutableLong ml = MutableLong.of(10L);
-        boolean updated = ml.setIf(20L, v -> v == 10L);
+        boolean updated = ml.setIf(v -> v == 10L, 20L);
         assertTrue(updated);
         assertEquals(20L, ml.value());
     }
@@ -671,9 +671,9 @@ public class MutableLong2025Test extends TestBase {
     @Test
     public void test_combinedOperations_setIfChain() throws Exception {
         MutableLong ml = MutableLong.of(0L);
-        ml.setIf(10L, v -> v == 0L);
-        ml.setIf(20L, v -> v == 10L);
-        ml.setIf(30L, v -> v < 25L);
+        ml.setIf(v -> v == 0L, 10L);
+        ml.setIf(v -> v == 10L, 20L);
+        ml.setIf(v -> v < 25L, 30L);
 
         assertEquals(30L, ml.value());
     }

@@ -951,9 +951,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      */
     @Beta
     public ObjIterator<Indexed<T>> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ObjIterator<T> iter = this;
 

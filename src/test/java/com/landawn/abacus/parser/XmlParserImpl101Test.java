@@ -27,7 +27,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
@@ -458,7 +458,7 @@ public class XmlParserImpl101Test extends TestBase {
     public void testSerializeEmptyBean() {
         EmptyBean bean = new EmptyBean();
 
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.serialize(bean);
         });
 
@@ -668,7 +668,7 @@ public class XmlParserImpl101Test extends TestBase {
     public void testDeserializeWithIgnoreUnmatchedProperty() {
         String xml = "<TestBean><name>John</name><age>30</age><unknownProp>value</unknownProp></TestBean>";
 
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.deserialize(xml, XDC.create().ignoreUnmatchedProperty(false), TestBean.class);
         });
 
@@ -810,7 +810,7 @@ public class XmlParserImpl101Test extends TestBase {
         nodeClasses.put("bean", Type.of(TestBean.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.deserialize(bais, null, nodeClasses);
         });
     }
@@ -821,7 +821,7 @@ public class XmlParserImpl101Test extends TestBase {
         Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.deserialize(bais, null, nodeClasses);
         });
     }
@@ -953,7 +953,7 @@ public class XmlParserImpl101Test extends TestBase {
     public void testDeserializeUnsupportedClass() {
         String xml = "<AtomicInteger>123</AtomicInteger>";
 
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.deserialize(xml, null, AtomicInteger.class);
         });
     }

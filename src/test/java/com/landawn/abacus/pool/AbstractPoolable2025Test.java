@@ -173,10 +173,10 @@ public class AbstractPoolable2025Test extends TestBase {
     public void testDestroyWithOtherOuterCaller() {
         TestPoolable poolable = new TestPoolable(10000, 5000);
 
-        poolable.destroy(Caller.OTHER_OUTER);
+        poolable.destroy(Caller.OTHER_EXTERNAL);
 
         assertTrue(poolable.isDestroyed());
-        assertEquals(Caller.OTHER_OUTER, poolable.getDestroyedBy());
+        assertEquals(Caller.OTHER_EXTERNAL, poolable.getDestroyedBy());
     }
 
     @Test

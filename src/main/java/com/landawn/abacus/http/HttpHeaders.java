@@ -95,9 +95,9 @@ public final class HttpHeaders {
 
         /** The HTTP {@code Content-Encoding} header field name. */
         public static final String CONTENT_ENCODING = "Content-Encoding";
-        /** The HTTP {@code Content-Type} header field name. */
+        /** The HTTP {@code Content-Type} header field name in lowercase. */
         static final String L_CONTENT_TYPE = "content-type";
-        /** The HTTP {@code Content-Encoding} header field name. */
+        /** The HTTP {@code Content-Encoding} header field name in lowercase. */
         static final String L_CONTENT_ENCODING = "content-encoding";
 
         /** The HTTP {@code Date} header field name. */
@@ -113,11 +113,11 @@ public final class HttpHeaders {
 
         /** The HTTP {@code Accept} header field name. */
         public static final String ACCEPT = "Accept";
-        /** The HTTP {@code Accept} header field name. */
+        /** The HTTP {@code Accept} header field name in lowercase. */
         static final String L_ACCEPT = "accept";
         /** The HTTP {@code Accept-Encoding} header field name. */
         public static final String ACCEPT_ENCODING = "Accept-Encoding";
-        /** The HTTP {@code Accept-Encoding} header field name. */
+        /** The HTTP {@code Accept-Encoding} header field name in lowercase. */
         static final String L_ACCEPT_ENCODING = "accept-encoding";
         /** The HTTP {@code Accept-Charset} header field name. */
         public static final String ACCEPT_CHARSET = "Accept-Charset";
@@ -957,11 +957,11 @@ public final class HttpHeaders {
      * headers.setAcceptEncoding("*");
      * }</pre>
      *
-     * @param contentEncoding The acceptable encodings (e.g., "gzip, deflate", "br")
+     * @param acceptEncoding The acceptable encodings (e.g., "gzip, deflate", "br")
      * @return This HttpHeaders instance for method chaining
      */
-    public HttpHeaders setAcceptEncoding(final String contentEncoding) {
-        set(Names.ACCEPT_ENCODING, contentEncoding);
+    public HttpHeaders setAcceptEncoding(final String acceptEncoding) {
+        set(Names.ACCEPT_ENCODING, acceptEncoding);
 
         return this;
     }

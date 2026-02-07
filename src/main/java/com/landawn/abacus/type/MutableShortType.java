@@ -134,13 +134,13 @@ public class MutableShortType extends NumberType<MutableShort> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return a MutableShort containing the short value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public MutableShort get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return MutableShort.of(rs.getShort(columnLabel));
+    public MutableShort get(final ResultSet rs, final String columnName) throws SQLException {
+        return MutableShort.of(rs.getShort(columnName));
     }
 
     /**

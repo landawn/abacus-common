@@ -1582,85 +1582,85 @@ public class Iterables101Test extends TestBase {
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
-        String result = Iterables.firstNonNullOrDefault((Iterable<String>) null, "default");
+        String result = CommonUtil.firstNonNullOrDefault((Iterable<String>) null, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_EmptyReturnsDefault() {
         List<String> list = Collections.emptyList();
-        String result = Iterables.firstNonNullOrDefault(list, "default");
+        String result = CommonUtil.firstNonNullOrDefault(list, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_AllNullReturnsDefault() {
         List<String> list = Arrays.asList(null, null, null);
-        String result = Iterables.firstNonNullOrDefault(list, "default");
+        String result = CommonUtil.firstNonNullOrDefault(list, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_FirstNonNull() {
         List<String> list = Arrays.asList("first", null, null);
-        String result = Iterables.firstNonNullOrDefault(list, "default");
+        String result = CommonUtil.firstNonNullOrDefault(list, "default");
         Assertions.assertEquals("first", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_MiddleNonNull() {
         List<String> list = Arrays.asList(null, null, "middle", null);
-        String result = Iterables.firstNonNullOrDefault(list, "default");
+        String result = CommonUtil.firstNonNullOrDefault(list, "default");
         Assertions.assertEquals("middle", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterable_NullDefaultThrowsException() {
         List<String> list = Arrays.asList("test");
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            Iterables.firstNonNullOrDefault(list, null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            CommonUtil.firstNonNullOrDefault(list, null);
         });
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
-        String result = Iterables.firstNonNullOrDefault((Iterator<String>) null, "default");
+        String result = CommonUtil.firstNonNullOrDefault((Iterator<String>) null, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_EmptyReturnsDefault() {
         Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        String result = CommonUtil.firstNonNullOrDefault(iter, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_AllNullReturnsDefault() {
         Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        String result = CommonUtil.firstNonNullOrDefault(iter, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_FirstNonNull() {
         Iterator<String> iter = Arrays.asList("first", null, null).iterator();
-        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        String result = CommonUtil.firstNonNullOrDefault(iter, "default");
         Assertions.assertEquals("first", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_MiddleNonNull() {
         Iterator<String> iter = Arrays.asList(null, null, "middle", null).iterator();
-        String result = Iterables.firstNonNullOrDefault(iter, "default");
+        String result = CommonUtil.firstNonNullOrDefault(iter, "default");
         Assertions.assertEquals("middle", result);
     }
 
     @Test
     public void testFirstNonNullOrDefault_Iterator_NullDefaultThrowsException() {
         Iterator<String> iter = Arrays.asList("test").iterator();
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            Iterables.firstNonNullOrDefault(iter, null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            CommonUtil.firstNonNullOrDefault(iter, null);
         });
     }
 
@@ -1874,85 +1874,85 @@ public class Iterables101Test extends TestBase {
 
     @Test
     public void testLastNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
-        String result = Iterables.lastNonNullOrDefault((Iterable<String>) null, "default");
+        String result = CommonUtil.lastNonNullOrDefault((Iterable<String>) null, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterable_EmptyReturnsDefault() {
         List<String> list = Collections.emptyList();
-        String result = Iterables.lastNonNullOrDefault(list, "default");
+        String result = CommonUtil.lastNonNullOrDefault(list, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterable_AllNullReturnsDefault() {
         List<String> list = Arrays.asList(null, null, null);
-        String result = Iterables.lastNonNullOrDefault(list, "default");
+        String result = CommonUtil.lastNonNullOrDefault(list, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterable_LastNonNull() {
         List<String> list = Arrays.asList(null, null, "last");
-        String result = Iterables.lastNonNullOrDefault(list, "default");
+        String result = CommonUtil.lastNonNullOrDefault(list, "default");
         Assertions.assertEquals("last", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterable_MiddleNonNull() {
         List<String> list = Arrays.asList(null, "middle", null, null);
-        String result = Iterables.lastNonNullOrDefault(list, "default");
+        String result = CommonUtil.lastNonNullOrDefault(list, "default");
         Assertions.assertEquals("middle", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterable_NullDefaultThrowsException() {
         List<String> list = Arrays.asList("test");
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            Iterables.lastNonNullOrDefault(list, null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            CommonUtil.lastNonNullOrDefault(list, null);
         });
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
-        String result = Iterables.lastNonNullOrDefault((Iterator<String>) null, "default");
+        String result = CommonUtil.lastNonNullOrDefault((Iterator<String>) null, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_EmptyReturnsDefault() {
         Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        String result = CommonUtil.lastNonNullOrDefault(iter, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_AllNullReturnsDefault() {
         Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        String result = CommonUtil.lastNonNullOrDefault(iter, "default");
         Assertions.assertEquals("default", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_LastNonNull() {
         Iterator<String> iter = Arrays.asList(null, null, "last").iterator();
-        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        String result = CommonUtil.lastNonNullOrDefault(iter, "default");
         Assertions.assertEquals("last", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_MiddleNonNull() {
         Iterator<String> iter = Arrays.asList(null, "middle", null, null).iterator();
-        String result = Iterables.lastNonNullOrDefault(iter, "default");
+        String result = CommonUtil.lastNonNullOrDefault(iter, "default");
         Assertions.assertEquals("middle", result);
     }
 
     @Test
     public void testLastNonNullOrDefault_Iterator_NullDefaultThrowsException() {
         Iterator<String> iter = Arrays.asList("test").iterator();
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            Iterables.lastNonNullOrDefault(iter, null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            CommonUtil.lastNonNullOrDefault(iter, null);
         });
     }
 

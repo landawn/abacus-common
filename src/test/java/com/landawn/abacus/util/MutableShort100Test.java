@@ -54,11 +54,11 @@ public class MutableShort100Test extends TestBase {
     public void testSetIf() throws Exception {
         MutableShort mutableShort = MutableShort.of((short) 10);
 
-        boolean updated = mutableShort.setIf((short) 20, v -> v < 15);
+        boolean updated = mutableShort.setIf(v -> v < 15, (short) 20);
         Assertions.assertTrue(updated);
         Assertions.assertEquals((short) 20, mutableShort.value());
 
-        updated = mutableShort.setIf((short) 30, v -> v < 15);
+        updated = mutableShort.setIf(v -> v < 15, (short) 30);
         Assertions.assertFalse(updated);
         Assertions.assertEquals((short) 20, mutableShort.value());
     }

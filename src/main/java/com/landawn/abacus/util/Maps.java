@@ -1778,7 +1778,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Boolean type, underlying conversion will be executed.
      *
@@ -1796,18 +1796,18 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the key is not found or value is null.
-     * @return the boolean value mapped to the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the key is not found or value is null.
+     * @return the boolean value mapped to the key, or defaultValue if not found.
      */
-    public static <K> boolean getAsBooleanOrDefault(final Map<? super K, ?> map, final K key, final boolean defaultForNull) {
+    public static <K> boolean getAsBooleanOrDefault(final Map<? super K, ?> map, final K key, final boolean defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Boolean) {
             return (Boolean) val;
         } else {
@@ -1855,7 +1855,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Character type, underlying conversion will be executed.
      *
@@ -1873,18 +1873,18 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the key is not found or value is null.
-     * @return the character value mapped to the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the key is not found or value is null.
+     * @return the character value mapped to the key, or defaultValue if not found.
      */
-    public static <K> char getAsCharOrDefault(final Map<? super K, ?> map, final K key, final char defaultForNull) {
+    public static <K> char getAsCharOrDefault(final Map<? super K, ?> map, final K key, final char defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Character) {
             return (Character) val;
         } else {
@@ -1932,7 +1932,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Byte/Number type, underlying conversion will be executed.
      *
@@ -1950,18 +1950,18 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the key is not found or value is null.
-     * @return the byte value mapped to the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the key is not found or value is null.
+     * @return the byte value mapped to the key, or defaultValue if not found.
      */
-    public static <K> byte getAsByteOrDefault(final Map<? super K, ?> map, final K key, final byte defaultForNull) {
+    public static <K> byte getAsByteOrDefault(final Map<? super K, ?> map, final K key, final byte defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Number) {
             return ((Number) val).byteValue();
         } else {
@@ -2009,7 +2009,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Short/Number type, underlying conversion will be executed.
      *
@@ -2027,18 +2027,18 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the key is not found or value is null.
-     * @return the short value mapped to the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the key is not found or value is null.
+     * @return the short value mapped to the key, or defaultValue if not found.
      */
-    public static <K> short getAsShortOrDefault(final Map<? super K, ?> map, final K key, final short defaultForNull) {
+    public static <K> short getAsShortOrDefault(final Map<? super K, ?> map, final K key, final short defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Number) {
             return ((Number) val).shortValue();
         } else {
@@ -2086,7 +2086,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Integer/Number type, underlying conversion will be executed.
      *
@@ -2104,18 +2104,18 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the key is not found or value is null.
-     * @return the integer value mapped to the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the key is not found or value is null.
+     * @return the integer value mapped to the key, or defaultValue if not found.
      */
-    public static <K> int getAsIntOrDefault(final Map<? super K, ?> map, final K key, final int defaultForNull) {
+    public static <K> int getAsIntOrDefault(final Map<? super K, ?> map, final K key, final int defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Number) {
             return ((Number) val).intValue();
         } else {
@@ -2166,7 +2166,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Long/Number type, underlying conversion will be executed.
      * 
@@ -2189,18 +2189,18 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the value is {@code null} or not found.
-     * @return the long value associated with the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the value is {@code null} or not found.
+     * @return the long value associated with the key, or defaultValue if not found.
      */
-    public static <K> long getAsLongOrDefault(final Map<? super K, ?> map, final K key, final long defaultForNull) {
+    public static <K> long getAsLongOrDefault(final Map<? super K, ?> map, final K key, final long defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof Number) {
             return ((Number) val).longValue();
         } else {
@@ -2249,7 +2249,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Float/Number type, underlying conversion will be executed.
      * 
@@ -2272,18 +2272,18 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the value is {@code null} or not found.
-     * @return the float value associated with the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the value is {@code null} or not found.
+     * @return the float value associated with the key, or defaultValue if not found.
      */
-    public static <K> float getAsFloatOrDefault(final Map<? super K, ?> map, final K key, final float defaultForNull) {
+    public static <K> float getAsFloatOrDefault(final Map<? super K, ?> map, final K key, final float defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else {
             return Numbers.toFloat(val);
         }
@@ -2330,7 +2330,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Double/Number type, underlying conversion will be executed.
      * 
@@ -2353,18 +2353,18 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the value is {@code null} or not found.
-     * @return the double value associated with the key, or defaultForNull if not found.
+     * @param defaultValue the default value to return if the value is {@code null} or not found.
+     * @return the double value associated with the key, or defaultValue if not found.
      */
-    public static <K> double getAsDoubleOrDefault(final Map<? super K, ?> map, final K key, final double defaultForNull) {
+    public static <K> double getAsDoubleOrDefault(final Map<? super K, ?> map, final K key, final double defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else {
             return Numbers.toDouble(val);
         }
@@ -2414,7 +2414,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified key is found if the value is not {@code null},
-     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of String type, underlying conversion will be executed by {@code N.stringOf(value)}.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -2436,21 +2436,21 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
-     * @return the value mapped by the specified key, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null.
-     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}.
+     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
+     * @return the value mapped by the specified key, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
+     * @throws IllegalArgumentException if the specified {@code defaultValue} is {@code null}.
      */
-    public static <K> String getAsStringOrDefault(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
+    public static <K> String getAsStringOrDefault(final Map<? super K, ?> map, final K key, final String defaultValue) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
 
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
+            return defaultValue;
         } else if (val instanceof String) {
             return (String) val;
         } else {
@@ -2550,7 +2550,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified {@code key} is mapped if the value is not {@code null},
-     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of type {@code T}, an underlying conversion will be executed.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -2573,28 +2573,28 @@ public final class Maps {
      * @param <T> the type of the value.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
-     * @return the value to which the specified key is found, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null.
-     * @throws IllegalArgumentException if {@code defaultForNull} is null.
+     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
+     * @return the value to which the specified key is found, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
+     * @throws IllegalArgumentException if {@code defaultValue} is null.
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
-    public static <K, T> T getAsOrDefault(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
+    public static <K, T> T getAsOrDefault(final Map<? super K, ?> map, final K key, final T defaultValue) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
 
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return defaultForNull;
-        } else if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
+            return defaultValue;
+        } else if (defaultValue.getClass().isAssignableFrom(val.getClass())) {
             return (T) val;
         } else {
-            return (T) N.convert(val, defaultForNull.getClass());
+            return (T) N.convert(val, defaultValue.getClass());
         }
     }
 
@@ -3118,11 +3118,12 @@ public final class Maps {
      * @param <V> the value type.
      * @param targetMap the target map to which entries will be added.
      * @param sourceMap the source map from which entries will be taken.
-     * @param filter a predicate that filters keys and values to be added to the target map.
+     * @param entryFilter a predicate that filters keys and values to be added to the target map.
      * @return {@code true} if any entries were added, {@code false} otherwise.
      */
     @Beta
-    public static <K, V> boolean putAllIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap, BiPredicate<? super K, ? super V> filter) {
+    public static <K, V> boolean putAllIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap,
+            BiPredicate<? super K, ? super V> entryFilter) {
         if (N.isEmpty(sourceMap)) {
             return false;
         }
@@ -3130,7 +3131,7 @@ public final class Maps {
         boolean changed = false;
 
         for (Map.Entry<? extends K, ? extends V> entry : sourceMap.entrySet()) {
-            if (filter.test(entry.getKey(), entry.getValue())) {
+            if (entryFilter.test(entry.getKey(), entry.getValue())) {
                 targetMap.put(entry.getKey(), entry.getValue());
                 changed = true;
             }

@@ -38,10 +38,10 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * printer.accept(3.14f);   // Prints: Value: 3.14
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(float t);
+    void accept(float value);
 
     /**
      * Returns a composed {@code FloatConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -60,9 +60,9 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * @return a composed {@code FloatConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default FloatConsumer andThen(final FloatConsumer after) {
-        return t -> {
-            accept(t);
-            after.accept(t);
+        return value -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

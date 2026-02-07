@@ -169,13 +169,13 @@ public class URIType extends AbstractType<URI> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column containing the URI value
+     * @param columnName the label of the column containing the URI value
      * @return the URI value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public URI get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return valueOf(rs.getString(columnLabel));
+    public URI get(final ResultSet rs, final String columnName) throws SQLException {
+        return valueOf(rs.getString(columnName));
     }
 
     /**

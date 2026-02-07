@@ -126,7 +126,7 @@ public class MutableChar2025Test extends TestBase {
     @Test
     public void test_setIf_conditionTrue() {
         MutableChar mc = MutableChar.of('A');
-        boolean updated = mc.setIf('Z', c -> c < 'M');
+        boolean updated = mc.setIf(c -> c < 'M', 'Z');
         assertTrue(updated);
         assertEquals('Z', mc.value());
     }
@@ -134,7 +134,7 @@ public class MutableChar2025Test extends TestBase {
     @Test
     public void test_setIf_conditionFalse() {
         MutableChar mc = MutableChar.of('Z');
-        boolean updated = mc.setIf('A', c -> c < 'M');
+        boolean updated = mc.setIf(c -> c < 'M', 'A');
         assertFalse(updated);
         assertEquals('Z', mc.value());
     }
@@ -142,7 +142,7 @@ public class MutableChar2025Test extends TestBase {
     @Test
     public void test_setIf_alwaysTrue() {
         MutableChar mc = MutableChar.of('B');
-        boolean updated = mc.setIf('C', c -> true);
+        boolean updated = mc.setIf(c -> true, 'C');
         assertTrue(updated);
         assertEquals('C', mc.value());
     }
@@ -150,7 +150,7 @@ public class MutableChar2025Test extends TestBase {
     @Test
     public void test_setIf_alwaysFalse() {
         MutableChar mc = MutableChar.of('B');
-        boolean updated = mc.setIf('C', c -> false);
+        boolean updated = mc.setIf(c -> false, 'C');
         assertFalse(updated);
         assertEquals('B', mc.value());
     }
@@ -158,7 +158,7 @@ public class MutableChar2025Test extends TestBase {
     @Test
     public void test_setIf_predicateWithNullChar() {
         MutableChar mc = MutableChar.of('\0');
-        boolean updated = mc.setIf('A', c -> c == '\0');
+        boolean updated = mc.setIf(c -> c == '\0', 'A');
         assertTrue(updated);
         assertEquals('A', mc.value());
     }

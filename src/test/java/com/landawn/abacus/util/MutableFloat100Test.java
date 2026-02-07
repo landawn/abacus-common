@@ -65,7 +65,7 @@ public class MutableFloat100Test extends TestBase {
     @Test
     public void testSetIfTrue() throws Exception {
         MutableFloat mf = MutableFloat.of(10.5f);
-        boolean updated = mf.setIf(20.5f, v -> v < 15.0f);
+        boolean updated = mf.setIf(v -> v < 15.0f, 20.5f);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20.5f, mf.value());
     }
@@ -73,7 +73,7 @@ public class MutableFloat100Test extends TestBase {
     @Test
     public void testSetIfFalse() throws Exception {
         MutableFloat mf = MutableFloat.of(20.5f);
-        boolean updated = mf.setIf(30.5f, v -> v < 15.0f);
+        boolean updated = mf.setIf(v -> v < 15.0f, 30.5f);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20.5f, mf.value());
     }

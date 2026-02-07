@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 @Tag("2025")
@@ -212,7 +212,7 @@ public class PropertiesUtil2025Test extends TestBase {
 
     @Test
     public void testLoadFromXmlFileInvalid() {
-        assertThrows(ParseException.class, () -> {
+        assertThrows(ParsingException.class, () -> {
             PropertiesUtil.loadFromXml(testInvalidXmlFile);
         });
     }
@@ -247,7 +247,7 @@ public class PropertiesUtil2025Test extends TestBase {
     public void testLoadFromXmlInputStreamInvalid() throws IOException {
         String invalidXml = "<?xml version=\"1.0\"?><root><unclosed></root>";
         try (InputStream is = new ByteArrayInputStream(invalidXml.getBytes())) {
-            assertThrows(ParseException.class, () -> {
+            assertThrows(ParsingException.class, () -> {
                 PropertiesUtil.loadFromXml(is);
             });
         }

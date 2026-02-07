@@ -149,14 +149,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public AtomicInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return new AtomicInteger(rs.getInt(columnLabel));
+    public AtomicInteger get(final ResultSet rs, final String columnName) throws SQLException {
+        return new AtomicInteger(rs.getInt(columnName));
     }
 
     /**

@@ -151,12 +151,12 @@ public class Triple2025Test extends TestBase {
         triple.setLeft("original");
 
         // First update: predicate true when left is "original"
-        boolean result = triple.setLeftIf("new", (l, m, r) -> "original".equals(l));
+        boolean result = triple.setLeftIf((l, m, r) -> "original".equals(l), "new");
         assertTrue(result);
         assertEquals("new", triple.left());
 
         // Second update: predicate false now that left != "original"
-        result = triple.setLeftIf("a", (l, m, r) -> "original".equals(l));
+        result = triple.setLeftIf((l, m, r) -> "original".equals(l), "a");
         assertFalse(result);
         assertEquals("new", triple.left());
     }
@@ -166,12 +166,12 @@ public class Triple2025Test extends TestBase {
         triple.setMiddle(10);
 
         // First update: predicate true when middle is 10
-        boolean result = triple.setMiddleIf(20, (l, m, r) -> m == 10);
+        boolean result = triple.setMiddleIf((l, m, r) -> m == 10, 20);
         assertTrue(result);
         assertEquals(20, triple.middle());
 
         // Second update: predicate false now that middle != 10
-        result = triple.setMiddleIf(5, (l, m, r) -> m == 10);
+        result = triple.setMiddleIf((l, m, r) -> m == 10, 5);
         assertFalse(result);
         assertEquals(20, triple.middle());
     }
@@ -181,12 +181,12 @@ public class Triple2025Test extends TestBase {
         triple.setRight(true);
 
         // First update: predicate true when right is true
-        boolean result = triple.setRightIf(false, (l, m, r) -> r);
+        boolean result = triple.setRightIf((l, m, r) -> r, false);
         assertTrue(result);
         assertEquals(false, triple.right());
 
         // Second update: predicate false now that right is false
-        result = triple.setRightIf(true, (l, m, r) -> r);
+        result = triple.setRightIf((l, m, r) -> r, true);
         assertFalse(result);
         assertEquals(false, triple.right());
     }
@@ -196,14 +196,14 @@ public class Triple2025Test extends TestBase {
         triple.set("old", 1, true);
 
         // First update: predicate true for the initial state
-        boolean result = triple.setIf("new", 2, false, (l, m, r) -> m > 0 && r);
+        boolean result = triple.setIf((l, m, r) -> m > 0 && r, "new", 2, false);
         assertTrue(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());
         assertEquals(false, triple.right());
 
         // Second update: predicate false for the new state
-        result = triple.setIf("newer", 0, true, (l, m, r) -> m > 0 && r);
+        result = triple.setIf((l, m, r) -> m > 0 && r, "newer", 0, true);
         assertFalse(result);
         assertEquals("new", triple.left());
         assertEquals(2, triple.middle());

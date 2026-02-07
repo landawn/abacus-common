@@ -19,7 +19,7 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -113,16 +113,16 @@ class JsonStringReader extends AbstractJsonReader {
         this(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly(str), beginIndex, toIndex, cbuf, null);
     }
 
-    JsonStringReader(final char[] strValue, final int beginIndex, final int endIndex, final char[] cbuf, final Reader reader) {
-        if (beginIndex < 0 || endIndex < 0 || endIndex < beginIndex) {
-            throw new IllegalArgumentException("Invalid beginIndex or endIndex: " + beginIndex + ", " + endIndex);
+    JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) {
+        if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex) {
+            throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
         }
 
         this.reader = reader;
 
         this.strValue = strValue;
         strBeginIndex = beginIndex;
-        strEndIndex = endIndex;
+        strEndIndex = toIndex;
         this.cbuf = cbuf;
         cbufLen = this.cbuf.length;
     }
@@ -159,12 +159,12 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param str the JSON string
      * @param beginIndex the starting index (inclusive)
-     * @param endIndex the ending index (exclusive)
+     * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
      * @return a new JsonReader instance
      */
-    public static JsonReader parse(final String str, final int beginIndex, final int endIndex, final char[] cbuf) {
-        return new JsonStringReader(str, beginIndex, endIndex, cbuf);
+    public static JsonReader parse(final String str, final int beginIndex, final int toIndex, final char[] cbuf) {
+        return new JsonStringReader(str, beginIndex, toIndex, cbuf);
     }
 
     /**
@@ -511,7 +511,7 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     protected void throwExceptionDueToUnexpectedNonStringToken() {
-        throw new ParseException(
+        throw new ParsingException(
                 "\"false\", \"true\", \"null\" or a number is expected in or before \"" + (nextChar > 0 ? String.valueOf(cbuf, 0, N.min(32, nextChar))
                         : String.valueOf(strValue, strBeginIndex - 1, N.min(32, strEndIndex - strBeginIndex + 1))));
     }
@@ -642,7 +642,7 @@ class JsonStringReader extends AbstractJsonReader {
      */
     protected char readEscapeCharacter() {
         if (strBeginIndex >= strEndIndex) {
-            throw new ParseException("Incomplete escape sequence at end of input");
+            throw new ParsingException("Incomplete escape sequence at end of input");
         }
 
         final int escaped = strValue[strBeginIndex++];
@@ -655,7 +655,7 @@ class JsonStringReader extends AbstractJsonReader {
 
                 for (int i = 0, c = 0; i < 4; i++) {
                     if (strBeginIndex >= strEndIndex) {
-                        throw new ParseException("Incomplete unicode escape sequence: expected 4 hex digits");
+                        throw new ParsingException("Incomplete unicode escape sequence: expected 4 hex digits");
                     }
 
                     c = strValue[strBeginIndex++];
@@ -669,7 +669,7 @@ class JsonStringReader extends AbstractJsonReader {
                     } else if ((c >= 'A') && (c <= 'F')) {
                         result += (char) (c - 'A' + 10);
                     } else {
-                        throw new ParseException("Number format exception: \\u" + String.valueOf(cbuf));
+                        throw new ParsingException("Number format exception: \\u" + String.valueOf(cbuf));
                     }
                 }
 

@@ -134,13 +134,13 @@ public class MutableLongType extends NumberType<MutableLong> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return a MutableLong containing the long value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public MutableLong get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return MutableLong.of(rs.getLong(columnLabel));
+    public MutableLong get(final ResultSet rs, final String columnName) throws SQLException {
+        return MutableLong.of(rs.getLong(columnName));
     }
 
     /**

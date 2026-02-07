@@ -111,11 +111,11 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      * @return a PoolableWrapper containing the source object
      */
-    static <T> PoolableWrapper<T> wrap(final T srcObject) {
-        return PoolableWrapper.of(srcObject);
+    static <T> PoolableWrapper<T> wrap(final T value) {
+        return PoolableWrapper.of(value);
     }
 
     /**
@@ -131,14 +131,14 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      * @param liveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
      * @return a PoolableWrapper containing the source object with the specified expiration settings
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
-    static <T> PoolableWrapper<T> wrap(final T srcObject, final long liveTime, final long maxIdleTime) {
-        return PoolableWrapper.of(srcObject, liveTime, maxIdleTime);
+    static <T> PoolableWrapper<T> wrap(final T value, final long liveTime, final long maxIdleTime) {
+        return PoolableWrapper.of(value, liveTime, maxIdleTime);
     }
 
     /**
@@ -181,7 +181,7 @@ public interface Poolable {
          * The object is being destroyed for some other external reason.
          * This can be used for custom destruction scenarios.
          */
-        OTHER_OUTER(5);
+        OTHER_EXTERNAL(5);
 
         private final int value;
 

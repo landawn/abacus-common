@@ -24,7 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 
 @Tag("2025")
@@ -327,7 +327,7 @@ public class XmlParser2025Test extends TestBase {
         Map<String, Type<?>> nodeClasses = new HashMap<>();
         XmlDeserializationConfig config = new XmlDeserializationConfig();
 
-        assertThrows(ParseException.class, () -> parser.deserialize(inputStream, config, nodeClasses));
+        assertThrows(ParsingException.class, () -> parser.deserialize(inputStream, config, nodeClasses));
     }
 
     @Test
@@ -509,7 +509,7 @@ public class XmlParser2025Test extends TestBase {
         Map<String, Type<?>> nodeClasses = new HashMap<>();
         XmlDeserializationConfig config = new XmlDeserializationConfig();
 
-        assertThrows(ParseException.class, () -> parser.deserialize(node, config, nodeClasses));
+        assertThrows(ParsingException.class, () -> parser.deserialize(node, config, nodeClasses));
     }
 
     @Test

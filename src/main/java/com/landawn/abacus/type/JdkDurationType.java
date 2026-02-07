@@ -106,13 +106,13 @@ public class JdkDurationType extends AbstractType<Duration> {
      * and converts it to a Duration.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return the Duration value created from the milliseconds in the column
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Duration get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return Duration.ofMillis(rs.getLong(columnLabel));
+    public Duration get(final ResultSet rs, final String columnName) throws SQLException {
+        return Duration.ofMillis(rs.getLong(columnName));
     }
 
     /**

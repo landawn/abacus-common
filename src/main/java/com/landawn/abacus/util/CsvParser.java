@@ -19,7 +19,7 @@ package com.landawn.abacus.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 
 /**
  * A very simple CSV parser released under a commercial-friendly license.
@@ -378,9 +378,9 @@ public class CsvParser {
      *
      * @param nextLine the line to be parsed
      * @return a List of String values, or an empty list if nextLine is null
-     * @throws ParseException if the line contains an unterminated quoted field
+     * @throws ParsingException if the line contains an unterminated quoted field
      */
-    public List<String> parseLine(final String nextLine) throws ParseException {
+    public List<String> parseLine(final String nextLine) throws ParsingException {
         return parseLine(nextLine, null);
     }
 
@@ -397,9 +397,9 @@ public class CsvParser {
      *
      * @param nextLine the line to be parsed
      * @return an array of String values, or an empty array if nextLine is null
-     * @throws ParseException if the line contains an unterminated quoted field
+     * @throws ParsingException if the line contains an unterminated quoted field
      */
-    public String[] parseLineToArray(final String nextLine) throws ParseException {
+    public String[] parseLineToArray(final String nextLine) throws ParsingException {
         final List<String> ret = parseLine(nextLine, null);
 
         return ret.toArray(new String[0]);
@@ -420,10 +420,10 @@ public class CsvParser {
      *
      * @param nextLine the line to be parsed
      * @param output the pre-allocated array to fill with parsed values
-     * @throws ParseException if the line contains an unterminated quoted field
+     * @throws ParsingException if the line contains an unterminated quoted field
      * @throws IllegalArgumentException if output is null
      */
-    public void parseLineToArray(final String nextLine, final String[] output) throws ParseException {
+    public void parseLineToArray(final String nextLine, final String[] output) throws ParsingException {
         N.checkArgNotNull(output, "output");
 
         parseLine(nextLine, output);
@@ -434,9 +434,9 @@ public class CsvParser {
      *
      * @param nextLine The string to parse
      * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
-     * @throws ParseException If bad things happen during the read
+     * @throws ParsingException If bad things happen during the read
      */
-    protected List<String> parseLine(final String nextLine, final String[] output) throws ParseException {
+    protected List<String> parseLine(final String nextLine, final String[] output) throws ParsingException {
         if (nextLine == null) {
             return N.emptyList();
         }
@@ -514,7 +514,7 @@ public class CsvParser {
                     // Tested with: new CsvParser().parseLine("a,  b  ,  \"c\" "); 
                     sb.setLength(lastQuoteIndex); // remove the last quote character
                 } else {
-                    throw new ParseException("Un-terminated quoted field at end of CSV line");
+                    throw new ParsingException("Un-terminated quoted field at end of CSV line");
                 }
             }
 

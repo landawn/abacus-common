@@ -186,17 +186,17 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
-     * boolean updated = num.setIf((byte)20, v -> v < 15);   // returns true, value is now 20
-     * updated = num.setIf((byte)30, v -> v < 15);           // returns false, value remains 20
+     * boolean updated = num.setIf(v -> v < 15, (byte)20);   // returns true, value is now 20
+     * updated = num.setIf(v -> v < 15, (byte)30);           // returns false, value remains 20
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
-     * @param newValue the new value to set if the predicate returns {@code true}
      * @param predicate the predicate to test the current value; receives current value as parameter
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the predicate returned {@code true} and the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final byte newValue, final Throwables.BytePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

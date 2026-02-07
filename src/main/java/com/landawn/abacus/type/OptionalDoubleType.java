@@ -192,13 +192,13 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public OptionalDouble get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalDouble.empty()
                 : OptionalDouble

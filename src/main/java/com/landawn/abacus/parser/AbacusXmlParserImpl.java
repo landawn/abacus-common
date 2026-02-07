@@ -46,7 +46,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -197,7 +197,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @return the XML string representation; returns empty string if {@code obj} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization
-     * @throws ParseException if the object type is not supported for serialization
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public String serialize(final Object obj, final XmlSerializationConfig config) {
@@ -241,7 +241,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the file to write the XML content to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations
-     * @throws ParseException if the object type is not supported for serialization
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final File output) {
@@ -285,7 +285,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the output stream to write the XML content to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during stream operations
-     * @throws ParseException if the object type is not supported for serialization
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
@@ -325,7 +325,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the writer to write the XML content to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during write operations
-     * @throws ParseException if the object type is not supported for serialization
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final Writer output) {
@@ -402,7 +402,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 break;
 
             default:
-                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
                         + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
 
@@ -421,7 +421,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
 
         if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
-            throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
+            throw new ParsingException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
         final boolean tagByPropertyName = config.tagByPropertyName();
@@ -951,7 +951,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}; returns default value if source is empty
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(String source, XmlDeserializationConfig config, Type<? extends T> targetType) {
@@ -987,7 +987,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}; returns default value if source is empty
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1013,7 +1013,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(File source, XmlDeserializationConfig config, Type<? extends T> targetType) {
@@ -1054,7 +1054,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1081,7 +1081,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(InputStream source, XmlDeserializationConfig config, Type<? extends T> targetType) {
@@ -1123,7 +1123,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1150,7 +1150,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(Reader source, XmlDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
@@ -1185,7 +1185,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1212,7 +1212,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws ParseException if the XML structure doesn't match the target type
+     * @throws ParsingException if the XML structure doesn't match the target type
      */
     @Override
     public <T> T deserialize(Node source, XmlDeserializationConfig config, Type<? extends T> targetType) {
@@ -1246,7 +1246,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws ParseException if the XML structure doesn't match the target type
+     * @throws ParsingException if the XML structure doesn't match the target type
      */
     @Override
     public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1278,7 +1278,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
@@ -1318,7 +1318,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
-     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
@@ -1356,7 +1356,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
@@ -1389,7 +1389,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws ParseException if no matching type is found in nodeTypes or XML structure is invalid
+     * @throws ParsingException if no matching type is found in nodeTypes or XML structure is invalid
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -1403,7 +1403,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         final Type<?> targetType = nodeTypes.get(nodeName);
 
         if (targetType == null) {
-            throw new ParseException("No target class is specified");
+            throw new ParsingException("No target class is specified");
         }
 
         return (T) readByDOMParser(source, config, targetType);
@@ -1424,7 +1424,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     saxParser.parse(new InputSource(source), dh);
                     result = dh.resultHolder.value();
                 } catch (final SAXException e) {
-                    throw new ParseException(e);
+                    throw new ParsingException(e);
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
@@ -1458,12 +1458,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParseException("No target type is specified");
+                        throw new ParsingException("No target type is specified");
                     }
 
                     return readByStreamParser(xmlReader, configToUse, targetType);
                 } catch (final XMLStreamException e) {
-                    throw new ParseException(e);
+                    throw new ParsingException(e);
                 }
 
             case DOM: //NOSONAR
@@ -1484,12 +1484,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParseException("No target class is specified");
+                        throw new ParsingException("No target class is specified");
                     }
 
                     return readByDOMParser(node, configToUse, targetType);
                 } catch (final SAXException e) {
-                    throw new ParseException(e);
+                    throw new ParsingException(e);
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
@@ -1497,7 +1497,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
             default:
-                throw new ParseException("Unsupported parser: " + parserType);
+                throw new ParsingException("Unsupported parser: " + parserType);
         }
     }
 
@@ -1612,7 +1612,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     if (ignoreUnmatchedProperty) {
                                         continue;
                                     } else {
-                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass); //NOSONAR
+                                        throw new ParsingException("Unknown property element: " + propName + " for class: " + targetClass); //NOSONAR
                                     }
                                 }
 
@@ -1681,7 +1681,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     propValue = null;
                                     propInfo = null;
                                 } else {
-                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName());
+                                    throw new ParsingException("Unknown parser error at element: " + xmlReader.getLocalName());
                                 }
                             }
 
@@ -1753,7 +1753,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error"); //NOSONAR
+                throw new ParsingException("Unknown parser error"); //NOSONAR
             }
 
             case MAP: {
@@ -1955,7 +1955,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error");
+                throw new ParsingException("Unknown parser error");
             }
 
             case ARRAY: {
@@ -2105,7 +2105,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error");
+                throw new ParsingException("Unknown parser error");
             }
 
             case COLLECTION: {
@@ -2252,11 +2252,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error");
+                throw new ParsingException("Unknown parser error");
             }
 
             default:
-                throw new ParseException("Unsupported class type: " + targetClass + ". Only object array, collection, map and bean types are supported");
+                throw new ParsingException("Unsupported class type: " + targetClass + ". Only object array, collection, map and bean types are supported");
         }
     }
 
@@ -2373,7 +2373,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         if (ignoreUnmatchedProperty) {
                             continue;
                         } else {
-                            throw new ParseException("Unknown property element: " + propName + " for class: " + ClassUtil.getCanonicalClassName(targetClass));
+                            throw new ParsingException("Unknown property element: " + propName + " for class: " + ClassUtil.getCanonicalClassName(targetClass));
                         }
                     }
 
@@ -2666,14 +2666,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             }
 
             default:
-                throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
+                throw new ParsingException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
                         + ". Only object array, collection, map and bean types are supported");
         }
     }
 
     private static void checkBeanType(final Class<?> targetClass, final String nodeName, final Class<?> inputClass) {
         if (!Beans.isBeanClass(targetClass)) {
-            throw new ParseException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+            throw new ParsingException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
         }
     }
 
@@ -2914,7 +2914,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 if (inputType == null) {
-                    throw new ParseException("No input class found for node: " + nodeName);
+                    throw new ParsingException("No input class found for node: " + nodeName);
                 }
 
                 targetType = inputType;
@@ -3173,7 +3173,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         if (ignoreUnmatchedProperty) {
                             break;
                         } else {
-                            throw new ParseException("Unknown property element: " + beanOrPropName + " for class: " + beanClass.getCanonicalName());
+                            throw new ParsingException("Unknown property element: " + beanOrPropName + " for class: " + beanClass.getCanonicalName());
                         }
                     }
 
@@ -3245,11 +3245,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 default:
-                    throw new ParseException("only array, collection, map and bean nodes are supported"); //NOSONAR
+                    throw new ParsingException("only array, collection, map and bean nodes are supported"); //NOSONAR
             }
 
             if (isFirstCall) {
-                throw new ParseException("only array, collection, map and bean nodes are supported");
+                throw new ParsingException("only array, collection, map and bean nodes are supported");
             }
 
             nodeTypeQueue.add(nodeType);
@@ -3422,7 +3422,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     break;
 
                 default:
-                    throw new ParseException("only array, collection, map and bean nodes are supported");
+                    throw new ParsingException("only array, collection, map and bean nodes are supported");
             }
         }
 

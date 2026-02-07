@@ -40,10 +40,10 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      * collector.accept(false);
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(boolean t);
+    void accept(boolean value);
 
     /**
      * Returns a composed {@code BooleanConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -62,9 +62,9 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      * @return a composed {@code BooleanConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default BooleanConsumer andThen(final BooleanConsumer after) {
-        return t -> {
-            accept(t);
-            after.accept(t);
+        return value -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

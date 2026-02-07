@@ -84,11 +84,11 @@ public class MutableBoolean100Test extends TestBase {
     public void testSetIf() throws Exception {
         MutableBoolean mutableBoolean = MutableBoolean.of(false);
 
-        boolean updated = mutableBoolean.setIf(true, v -> !v);
+        boolean updated = mutableBoolean.setIf(v -> !v, true);
         Assertions.assertTrue(updated);
         Assertions.assertTrue(mutableBoolean.value());
 
-        updated = mutableBoolean.setIf(false, v -> !v);
+        updated = mutableBoolean.setIf(v -> !v, false);
         Assertions.assertFalse(updated);
         Assertions.assertTrue(mutableBoolean.value());
     }

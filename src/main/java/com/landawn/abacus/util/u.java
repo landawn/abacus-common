@@ -361,15 +361,15 @@ public class u { // NOSONAR
          * OptionalBoolean.ofNullable(trueValue);   // returns OptionalBoolean with true
          * }</pre>
          *
-         * @param val the possibly-null value to describe
+         * @param value the possibly-null value to describe
          * @return an {@code OptionalBoolean} with a present value if the specified value
          *         is {@code non-null}, otherwise an empty {@code OptionalBoolean}
          */
-        public static OptionalBoolean ofNullable(final Boolean val) {
-            if (val == null) {
+        public static OptionalBoolean ofNullable(final Boolean value) {
+            if (value == null) {
                 return empty();
             } else {
-                return of(val);
+                return of(value);
             }
         }
 
@@ -712,20 +712,20 @@ public class u { // NOSONAR
          * If a value is present, returns the value, otherwise returns the result
          * produced by the supplying function.
          *
-         * @param other a {@code BooleanSupplier} whose result is returned if no value
+         * @param supplier a {@code BooleanSupplier} whose result is returned if no value
          *        is present
          * @return the value, if present, otherwise the result produced by the
          *         supplying function
          * @throws IllegalArgumentException if no value is present and the supplying
          *         function is null
          */
-        public boolean orElseGet(final BooleanSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public boolean orElseGet(final BooleanSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsBoolean();
+                return supplier.getAsBoolean();
             }
         }
 
@@ -1109,15 +1109,15 @@ public class u { // NOSONAR
          * OptionalChar.ofNullable('B');        // returns OptionalChar with 'B'
          * }</pre>
          *
-         * @param val the possibly-null value to describe
+         * @param value the possibly-null value to describe
          * @return an {@code OptionalChar} with a present value if the specified value
          *         is {@code non-null}, otherwise an empty {@code OptionalChar}
          */
-        public static OptionalChar ofNullable(final Character val) {
-            if (val == null) {
+        public static OptionalChar ofNullable(final Character value) {
+            if (value == null) {
                 return empty();
             } else {
-                return of(val);
+                return of(value);
             }
         }
 
@@ -1435,20 +1435,20 @@ public class u { // NOSONAR
          * If a value is present, returns the value, otherwise returns the result
          * produced by the supplying function.
          *
-         * @param other a {@code CharSupplier} whose result is returned if no value
+         * @param supplier a {@code CharSupplier} whose result is returned if no value
          *        is present
          * @return the value, if present, otherwise the result produced by the
          *         supplying function
          * @throws IllegalArgumentException if no value is present and the supplying
          *         function is null
          */
-        public char orElseGet(final CharSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public char orElseGet(final CharSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent()) {
                 return value;
             } else {
-                return other.getAsChar();
+                return supplier.getAsChar();
             }
         }
 
@@ -1826,15 +1826,15 @@ public class u { // NOSONAR
          * Returns an {@code OptionalByte} describing the specified value, if {@code non-null},
          * otherwise returns an empty {@code OptionalByte}.
          *
-         * @param val the possibly-null value to describe
+         * @param value the possibly-null value to describe
          * @return an {@code OptionalByte} with a present value if the specified value
          *         is {@code non-null}, otherwise an empty {@code OptionalByte}
          */
-        public static OptionalByte ofNullable(final Byte val) {
-            if (val == null) {
+        public static OptionalByte ofNullable(final Byte value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalByte.of(val);
+                return OptionalByte.of(value);
             }
         }
 
@@ -2119,17 +2119,17 @@ public class u { // NOSONAR
          * Returns the value if present, otherwise returns the result produced by the
          * supplying function.
          *
-         * @param other a supplying function to be invoked to produce a value to be returned
+         * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is null
+         * @throws IllegalArgumentException if {@code supplier} is null
          */
-        public byte orElseGet(final ByteSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public byte orElseGet(final ByteSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsByte();
+                return supplier.getAsByte();
             }
         }
 
@@ -2527,15 +2527,15 @@ public class u { // NOSONAR
          * Returns an {@code OptionalShort} describing the specified value, if {@code non-null},
          * otherwise returns an empty {@code OptionalShort}.
          *
-         * @param val the possibly-null value to describe
+         * @param value the possibly-null value to describe
          * @return an {@code OptionalShort} with a present value if the specified value
          *         is {@code non-null}, otherwise an empty {@code OptionalShort}
          */
-        public static OptionalShort ofNullable(final Short val) {
-            if (val == null) {
+        public static OptionalShort ofNullable(final Short value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalShort.of(val);
+                return OptionalShort.of(value);
             }
         }
 
@@ -2787,17 +2787,17 @@ public class u { // NOSONAR
          * Returns the value if present, otherwise returns the result produced by the
          * supplying function.
          *
-         * @param other a supplying function to be invoked to produce a value to be returned
+         * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is null
+         * @throws IllegalArgumentException if {@code supplier} is null
          */
-        public short orElseGet(final ShortSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public short orElseGet(final ShortSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsShort();
+                return supplier.getAsShort();
             }
         }
 
@@ -3172,28 +3172,28 @@ public class u { // NOSONAR
          * OptionalInt.ofNullable(100);       // returns OptionalInt with 100
          * }</pre>
          *
-         * @param val the possibly-null value to describe
+         * @param value the possibly-null value to describe
          * @return an {@code OptionalInt} with a present value if the specified value
          *         is {@code non-null}, otherwise an empty {@code OptionalInt}
          */
-        public static OptionalInt ofNullable(final Integer val) {
-            if (val == null) {
+        public static OptionalInt ofNullable(final Integer value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalInt.of(val);
+                return OptionalInt.of(value);
             }
         }
 
         /**
          * Returns an {@code OptionalInt} from the specified {@code java.util.OptionalInt}.
          * 
-         * @param op the {@code java.util.OptionalInt} to convert
+         * @param optional the {@code java.util.OptionalInt} to convert
          * @return an {@code OptionalInt} with a present value if the specified
          *         {@code java.util.OptionalInt} is present, otherwise an empty {@code OptionalInt}
          */
-        public static OptionalInt from(final java.util.OptionalInt op) {
-            if (op.isPresent()) {
-                return of(op.getAsInt());
+        public static OptionalInt from(final java.util.OptionalInt optional) {
+            if (optional.isPresent()) {
+                return of(optional.getAsInt());
             } else {
                 return empty();
             }
@@ -3523,17 +3523,17 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result of the supplying function.
          *
-         * @param other the supplying function that produces a value to be returned
+         * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
          * @throws IllegalArgumentException if other is null
          */
-        public int orElseGet(final IntSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public int orElseGet(final IntSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsInt();
+                return supplier.getAsInt();
             }
         }
 
@@ -3898,14 +3898,14 @@ public class u { // NOSONAR
         /**
          * Returns an OptionalLong describing the given value, if {@code non-null}, otherwise returns an empty OptionalLong.
          *
-         * @param val the possibly-null value
+         * @param value the possibly-null value
          * @return an OptionalLong with a present value if the specified value is {@code non-null}, otherwise an empty OptionalLong
          */
-        public static OptionalLong ofNullable(final Long val) {
-            if (val == null) {
+        public static OptionalLong ofNullable(final Long value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalLong.of(val);
+                return OptionalLong.of(value);
             }
         }
 
@@ -3913,12 +3913,12 @@ public class u { // NOSONAR
          * Returns an OptionalLong with the value from the specified java.util.OptionalLong if present,
          * otherwise returns an empty OptionalLong.
          *
-         * @param op the java.util.OptionalLong to convert
+         * @param optional the java.util.OptionalLong to convert
          * @return an OptionalLong with the value if present, otherwise an empty OptionalLong
          */
-        public static OptionalLong from(final java.util.OptionalLong op) {
-            if (op.isPresent()) {
-                return of(op.getAsLong());
+        public static OptionalLong from(final java.util.OptionalLong optional) {
+            if (optional.isPresent()) {
+                return of(optional.getAsLong());
             } else {
                 return empty();
             }
@@ -4181,17 +4181,17 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result of the supplying function.
          *
-         * @param other the supplying function that produces a value to be returned
+         * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
          * @throws IllegalArgumentException if other is null
          */
-        public long orElseGet(final LongSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public long orElseGet(final LongSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsLong();
+                return supplier.getAsLong();
             }
         }
 
@@ -4543,14 +4543,14 @@ public class u { // NOSONAR
         /**
          * Returns an OptionalFloat describing the given value, if {@code non-null}, otherwise returns an empty OptionalFloat.
          *
-         * @param val the possibly-null value
+         * @param value the possibly-null value
          * @return an OptionalFloat with a present value if the specified value is {@code non-null}, otherwise an empty OptionalFloat
          */
-        public static OptionalFloat ofNullable(final Float val) {
-            if (val == null) {
+        public static OptionalFloat ofNullable(final Float value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalFloat.of(val);
+                return OptionalFloat.of(value);
             }
         }
 
@@ -4809,17 +4809,17 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result produced by the supplying function.
          *
-         * @param other a {@code FloatSupplier} whose result is returned if no value is present
+         * @param supplier a {@code FloatSupplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public float orElseGet(final FloatSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public float orElseGet(final FloatSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsFloat();
+                return supplier.getAsFloat();
             }
         }
 
@@ -5148,26 +5148,26 @@ public class u { // NOSONAR
         /**
          * Returns an {@code OptionalDouble} containing the specified {@code Double} value, or an empty {@code OptionalDouble} if the value is {@code null}.
          *
-         * @param val the {@code Double} value to store, possibly {@code null}
+         * @param value the {@code Double} value to store, possibly {@code null}
          * @return an {@code OptionalDouble} containing the specified value if {@code non-null}, otherwise an empty {@code OptionalDouble}
          */
-        public static OptionalDouble ofNullable(final Double val) {
-            if (val == null) {
+        public static OptionalDouble ofNullable(final Double value) {
+            if (value == null) {
                 return empty();
             } else {
-                return OptionalDouble.of(val);
+                return OptionalDouble.of(value);
             }
         }
 
         /**
          * Returns an {@code OptionalDouble} containing the value from the specified {@code java.util.OptionalDouble} if present, otherwise returns an empty {@code OptionalDouble}.
          *
-         * @param op the {@code java.util.OptionalDouble} to convert
+         * @param optional the {@code java.util.OptionalDouble} to convert
          * @return an {@code OptionalDouble} containing the value from the specified {@code java.util.OptionalDouble} if present, otherwise an empty {@code OptionalDouble}
          */
-        public static OptionalDouble from(final java.util.OptionalDouble op) {
-            if (op.isPresent()) {
-                return of(op.getAsDouble());
+        public static OptionalDouble from(final java.util.OptionalDouble optional) {
+            if (optional.isPresent()) {
+                return of(optional.getAsDouble());
             } else {
                 return empty();
             }
@@ -5463,17 +5463,17 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result produced by the supplying function.
          *
-         * @param other a {@code DoubleSupplier} whose result is returned if no value is present
+         * @param supplier a {@code DoubleSupplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public double orElseGet(final DoubleSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public double orElseGet(final DoubleSupplier supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent) {
                 return value;
             } else {
-                return other.getAsDouble();
+                return supplier.getAsDouble();
             }
         }
 
@@ -5923,14 +5923,14 @@ public class u { // NOSONAR
          * Returns an {@code Optional} containing the value from the specified {@code java.util.Optional} if present, otherwise returns an empty {@code Optional}.
          *
          * @param <T> the type of the value
-         * @param op the {@code java.util.Optional} to convert, possibly {@code null}
+         * @param optional the {@code java.util.Optional} to convert, possibly {@code null}
          * @return an {@code Optional} containing the value from the specified {@code java.util.Optional} if present, otherwise an empty {@code Optional}
          */
-        public static <T> Optional<T> from(final java.util.Optional<T> op) {
-            if (op == null || op.isEmpty()) {
+        public static <T> Optional<T> from(final java.util.Optional<T> optional) {
+            if (optional == null || optional.isEmpty()) {
                 return empty();
             } else {
-                return of(op.get());
+                return of(optional.get());
             }
         }
 
@@ -6273,17 +6273,17 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result produced by the supplying function.
          *
-         * @param other the supplying function that produces a value to be returned
+         * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public T orElseGet(final Supplier<? extends T> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent()) {
                 return value;
             } else {
-                return other.get();
+                return supplier.get();
             }
         }
 
@@ -7403,7 +7403,7 @@ public class u { // NOSONAR
          * @return this {@code Nullable} if the value is not {@code null}, otherwise the {@code Nullable} produced by the supplying function
          * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public Nullable<T> orIfNull(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
+        public Nullable<T> orIfNull(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.Supplier);
 
             if (isNotNull()) {
@@ -7447,34 +7447,34 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise returns the result produced by the supplying function.
          *
-         * @param other the supplying function that produces a value to be returned
+         * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public T orElseGet(final Supplier<? extends T> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isPresent()) {
                 return value;
             } else {
-                return other.get();
+                return supplier.get();
             }
         }
 
         /**
          * Returns the value if it is not {@code null}, otherwise returns the result produced by the supplying function.
          *
-         * @param other the supplying function that produces a value to be returned
+         * @param supplier the supplying function that produces a value to be returned
          * @return the value if it is not {@code null}, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code other} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
-        public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, cs.other);
+        public T orElseGetIfNull(final Supplier<? extends T> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.other);
 
             if (isNotNull()) {
                 return value;
             } else {
-                return other.get();
+                return supplier.get();
             }
         }
 

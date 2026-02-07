@@ -77,13 +77,13 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *   <li>The object would exceed memory constraints</li>
      * </ul>
      *
-     * @param key the key with which the specified element is to be associated, must not be {@code null}
-     * @param e the element to be associated with the specified key, must not be {@code null}
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
+     * @param key the key with which the specified value is to be associated, must not be {@code null}
+     * @param value the value to be associated with the specified key, must not be {@code null}
+     * @return {@code true} if the value was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean put(K key, E e);
+    boolean put(K key, E value);
 
     /**
      * Associates the specified element with the specified key in this pool,
@@ -94,7 +94,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p><b>Execution Order:</b></p>
      * <ol>
      *   <li>Attempts to add the object to the pool using {@link #put(Object, Poolable)}</li>
-     *   <li>If put fails and {@code autoDestroyOnFailedToPut} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>If put fails and {@code autoDestroyOnFailedToPut} is {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)}</li>
      *   <li>Returns the success status of the put operation</li>
      * </ol>
      *
@@ -109,14 +109,14 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * pool.put("db1", conn, true);
      * }</pre>
      *
-     * @param key the key with which the specified element is to be associated, must not be {@code null}
-     * @param e the element to be associated with the specified key, must not be {@code null}
-     * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
+     * @param key the key with which the specified value is to be associated, must not be {@code null}
+     * @param value the value to be associated with the specified key, must not be {@code null}
+     * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
+     * @return {@code true} if the value was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
+    boolean put(K key, E value, boolean autoDestroyOnFailedToPut);
 
     /**
      * Returns the element associated with the specified key, or {@code null} if no mapping exists.
@@ -254,9 +254,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
          * The returned value is used to track total memory usage and enforce memory limits.
          * 
          * @param key the key part of the pair, never {@code null} when called by the pool
-         * @param e the value part of the pair, never {@code null} when called by the pool
+         * @param value the value part of the pair, never {@code null} when called by the pool
          * @return the combined size of the key-value pair in bytes, should be non-negative
          */
-        long sizeOf(K key, E e);
+        long sizeOf(K key, E value);
     }
 }

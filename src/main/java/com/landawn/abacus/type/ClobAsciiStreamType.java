@@ -80,13 +80,13 @@ public class ClobAsciiStreamType extends InputStreamType {
      * Retrieves a CLOB value as an ASCII InputStream from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the CLOB value
+     * @param columnName the label of the column containing the CLOB value
      * @return An InputStream containing the ASCII representation of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clobToAsciiStream(rs.getClob(columnLabel));
+    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+        return clobToAsciiStream(rs.getClob(columnName));
     }
 
     /**

@@ -178,13 +178,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * Therefore, SQL NULL values are converted to Boolean.valueOf(false), not {@code null}.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @return the boolean value at the specified column, or Boolean.valueOf(false) if the value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getBoolean(columnLabel);
+    public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getBoolean(columnName);
     }
 
     /**

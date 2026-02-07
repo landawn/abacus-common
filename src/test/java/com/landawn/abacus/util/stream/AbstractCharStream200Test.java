@@ -258,17 +258,17 @@ public class AbstractCharStream200Test extends TestBase {
     @Test
     public void testFilterWithActionOnDroppedItem() {
         CharList dropped = new CharList();
-        CharConsumer actionOnDroppedItem = dropped::add;
+        CharConsumer onDrop = dropped::add;
         CharPredicate predicate = c -> c != 'b' && c != 'd';
 
-        CharStream newStream = stream.filter(predicate, actionOnDroppedItem);
+        CharStream newStream = stream.filter(predicate, onDrop);
         List<Character> result = newStream.boxed().toList();
 
         assertEquals(Arrays.asList('a', 'c', 'e'), result);
         assertEquals(Arrays.asList('b', 'd'), dropped.boxed());
 
         dropped.clear();
-        newStream = CharStream.of(new char[] {}).filter(predicate, actionOnDroppedItem);
+        newStream = CharStream.of(new char[] {}).filter(predicate, onDrop);
         result = newStream.boxed().toList();
         assertTrue(result.isEmpty());
         assertTrue(dropped.isEmpty());
@@ -277,23 +277,23 @@ public class AbstractCharStream200Test extends TestBase {
     @Test
     public void testDropWhileWithActionOnDroppedItem() {
         CharList dropped = new CharList();
-        CharConsumer actionOnDroppedItem = dropped::add;
+        CharConsumer onDrop = dropped::add;
         CharPredicate predicate = c -> c != 'c';
 
-        CharStream newStream = stream.dropWhile(predicate, actionOnDroppedItem);
+        CharStream newStream = stream.dropWhile(predicate, onDrop);
         List<Character> result = newStream.boxed().toList();
 
         assertEquals(Arrays.asList('c', 'd', 'e'), result);
         assertEquals(Arrays.asList('a', 'b'), dropped.boxed());
 
         dropped.clear();
-        newStream = CharStream.of(new char[] {}).dropWhile(predicate, actionOnDroppedItem);
+        newStream = CharStream.of(new char[] {}).dropWhile(predicate, onDrop);
         result = newStream.boxed().toList();
         assertTrue(result.isEmpty());
         assertTrue(dropped.isEmpty());
 
         dropped.clear();
-        newStream = CharStream.of(new char[] { 'a', 'b', 'c' }).dropWhile(c -> c < 'z', actionOnDroppedItem);
+        newStream = CharStream.of(new char[] { 'a', 'b', 'c' }).dropWhile(c -> c < 'z', onDrop);
         result = newStream.boxed().toList();
         assertTrue(result.isEmpty());
         assertEquals(Arrays.asList('a', 'b', 'c'), dropped.boxed());

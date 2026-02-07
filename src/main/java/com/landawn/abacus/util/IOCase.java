@@ -267,9 +267,9 @@ public enum IOCase {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
 
-        final int endIndex = str.length() - search.length();
-        if (endIndex >= strStartIndex) {
-            for (int i = strStartIndex; i <= endIndex; i++) {
+        final int toIndex = str.length() - search.length();
+        if (toIndex >= strStartIndex) {
+            for (int i = strStartIndex; i <= toIndex; i++) {
                 if (checkRegionMatches(str, i, search)) {
                     return i;
                 }

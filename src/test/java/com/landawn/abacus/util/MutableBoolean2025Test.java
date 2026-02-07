@@ -186,7 +186,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_predicateTrue() throws Exception {
         MutableBoolean mb = MutableBoolean.of(false);
-        boolean updated = mb.setIf(true, v -> !v);
+        boolean updated = mb.setIf(v -> !v, true);
         assertTrue(updated);
         assertTrue(mb.value());
     }
@@ -194,7 +194,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_predicateFalse() throws Exception {
         MutableBoolean mb = MutableBoolean.of(true);
-        boolean updated = mb.setIf(false, v -> !v);
+        boolean updated = mb.setIf(v -> !v, false);
         assertFalse(updated);
         assertTrue(mb.value());
     }
@@ -202,7 +202,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_alwaysTrue() throws Exception {
         MutableBoolean mb = MutableBoolean.of(false);
-        boolean updated = mb.setIf(true, v -> true);
+        boolean updated = mb.setIf(v -> true, true);
         assertTrue(updated);
         assertTrue(mb.value());
     }
@@ -210,7 +210,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_alwaysFalse() throws Exception {
         MutableBoolean mb = MutableBoolean.of(false);
-        boolean updated = mb.setIf(true, v -> false);
+        boolean updated = mb.setIf(v -> false, true);
         assertFalse(updated);
         assertFalse(mb.value());
     }
@@ -218,7 +218,7 @@ public class MutableBoolean2025Test extends TestBase {
     @Test
     public void testSetIf_complexPredicate() throws Exception {
         MutableBoolean mb = MutableBoolean.of(true);
-        boolean updated = mb.setIf(false, v -> v);
+        boolean updated = mb.setIf(v -> v, false);
         assertTrue(updated);
         assertFalse(mb.value());
     }
@@ -485,7 +485,7 @@ public class MutableBoolean2025Test extends TestBase {
         boolean newVal = flag.negateAndGet();
         assertTrue(newVal);
 
-        boolean updated = flag.setIf(false, v -> v);
+        boolean updated = flag.setIf(v -> v, false);
         assertTrue(updated);
         assertFalse(flag.value());
     }

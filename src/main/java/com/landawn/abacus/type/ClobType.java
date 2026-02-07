@@ -115,13 +115,13 @@ public class ClobType extends AbstractType<Clob> {
      * Retrieves a CLOB value from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the CLOB value
+     * @param columnName the label of the column containing the CLOB value
      * @return The CLOB object in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Clob get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getClob(columnLabel);
+    public Clob get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getClob(columnName);
     }
 
     /**

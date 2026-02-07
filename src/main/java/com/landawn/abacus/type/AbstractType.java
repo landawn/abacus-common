@@ -700,13 +700,13 @@ public abstract class AbstractType<T> implements Type<T> {
      * Default implementation gets the value as a string and converts it.
      *
      * @param rs the ResultSet
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public T get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return valueOf(rs.getString(columnLabel));
+    public T get(final ResultSet rs, final String columnName) throws SQLException {
+        return valueOf(rs.getString(columnName));
     }
 
     /**
@@ -1312,13 +1312,13 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param <T> the target type
      * @param rs the ResultSet
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @param targetClass the target class
      * @return the column value converted to the target type
      * @throws SQLException if a database access error occurs
      */
-    protected static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
-        return Type.of(targetClass).get(rs, columnLabel);
+    protected static <T> T getColumnValue(final ResultSet rs, final String columnName, final Class<? extends T> targetClass) throws SQLException {
+        return Type.of(targetClass).get(rs, columnName);
     }
 
     /**

@@ -425,7 +425,7 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @return the first {@code non-null} element, or {@code null} if the iterable is {@code null} or empty.
      * @see N#firstNonNull(Iterable)
-     * @see Iterables#firstNonNullOrDefault(Iterable, Object)
+     * @see CommonUtil#firstNonNullOrDefault(Iterable, Object)
      */
     @MayReturnNull
     @Beta
@@ -457,7 +457,7 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @return the first {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
      * @see N#firstNonNull(Iterator)
-     * @see Iterables#firstNonNullOrDefault(Iterator, Object)
+     * @see CommonUtil#firstNonNullOrDefault(Iterator, Object)
      */
     @MayReturnNull
     @Beta
@@ -475,75 +475,6 @@ public final class Iterables {
         }
 
         return null;
-    }
-
-    /**
-     * Returns the first {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list, "default");   // returns "first"
-     * List<String> empty = Arrays.asList();
-     * String result2 = Iterables.firstNonNullOrDefault(empty, "default");   // returns "default"
-     * }</pre>
-     *
-     * @param <T> the type of the elements in the iterable.
-     * @param c the iterable to check.
-     * @param defaultValue the default value to return if the iterable is empty.
-     * @return the first {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
-     * @see #firstNonNullOrDefault(Iterator, Object)
-     * @see N#firstNonNull(Iterable)
-     */
-    @Beta
-    public static <T> T firstNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
-        N.requireNonNull(defaultValue, cs.defaultValue);
-
-        if (CommonUtil.isEmpty(c)) {
-            return defaultValue;
-        }
-
-        for (final T e : c) {
-            if (e != null) {
-                return e;
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
-     * Returns the first {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default");   // returns "first"
-     * }</pre>
-     *
-     * @param <T> the type of the elements in the iterator.
-     * @param iter the iterator to check.
-     * @param defaultValue the default value to return if the iterator is empty.
-     * @return the first {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
-     * @see #firstNonNullOrDefault(Iterable, Object)
-     * @see N#firstNonNull(Iterator)
-     */
-    @Beta
-    public static <T> T firstNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
-        N.requireNonNull(defaultValue, cs.defaultValue);
-
-        if (iter == null) {
-            return defaultValue;
-        }
-
-        while (iter.hasNext()) {
-            final T e = iter.next();
-            if (e != null) {
-                return e;
-            }
-        }
-
-        return defaultValue;
     }
 
     /**
@@ -643,7 +574,7 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @return the last {@code non-null} element, or {@code null} if the iterable is {@code null} or empty.
      * @see N#lastNonNull(Iterable)
-     * @see Iterables#lastNonNullOrDefault(Iterable, Object)
+     * @see CommonUtil#lastNonNullOrDefault(Iterable, Object)
      */
     @MayReturnNull
     @Beta
@@ -695,7 +626,7 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @return the last {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
      * @see N#lastNonNull(Iterator)
-     * @see Iterables#lastNonNullOrDefault(Iterator, Object)
+     * @see CommonUtil#lastNonNullOrDefault(Iterator, Object)
      */
     @MayReturnNull
     @Beta
@@ -714,65 +645,6 @@ public final class Iterables {
         }
 
         return lastNonNull;
-    }
-
-    /**
-     * Returns the last {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNullOrDefault(list, "default");   // returns "second"
-     *
-     * List<String> empty = Arrays.asList();
-     * String result2 = Iterables.lastNonNullOrDefault(empty, "default");   // returns "default"
-     *
-     * List<String> allNulls = Arrays.asList(null, null);
-     * String result3 = Iterables.lastNonNullOrDefault(allNulls, "default");   // returns "default"
-     * }</pre>
-     *
-     * @param <T> the type of the elements in the iterable.
-     * @param c the iterable to check.
-     * @param defaultValue the default value to return if the iterable is empty.
-     * @return the last {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
-     * @see #lastNonNullOrDefault(Iterator, Object)
-     * @see N#lastNonNull(Iterable)
-     */
-    @Beta
-    public static <T> T lastNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
-        N.requireNonNull(defaultValue, cs.defaultValue);
-
-        final T ret = lastNonNull(c);
-
-        return ret == null ? defaultValue : ret;
-    }
-
-    /**
-     * Returns the last {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNullOrDefault(list.iterator(), "default");   // returns "second"
-     *
-     * Iterator<String> emptyIter = Collections.emptyIterator();
-     * String result2 = Iterables.lastNonNullOrDefault(emptyIter, "default");   // returns "default"
-     * }</pre>
-     *
-     * @param <T> the type of the elements in the iterator.
-     * @param iter the iterator to check.
-     * @param defaultValue the default value to return if the iterator is empty.
-     * @return the last {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
-     * @see #lastNonNullOrDefault(Iterable, Object)
-     * @see N#lastNonNull(Iterator)
-     */
-    @Beta
-    public static <T> T lastNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
-        N.requireNonNull(defaultValue, cs.defaultValue);
-
-        final T ret = lastNonNull(iter);
-
-        return ret == null ? defaultValue : ret;
     }
 
     /**

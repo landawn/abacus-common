@@ -15,24 +15,21 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable container that combines an index, a key, and a value. This class extends
- * {@link Keyed} to add index information while maintaining the performance benefits of
- * key-based hashing and comparison.
- * 
- * <p>It's designed for performance improvement by only hash/compare {@code key} and {@code index}
- * in {@code hashCode/equals} method, ignoring the value. This makes it ideal for use in
- * collections where you need to track both the position and a unique identifier for elements.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ * An immutable holder of {@code index}, {@code key}, and {@code value}.
+ *
+ * <p>This type extends {@link Keyed} and adds positional information. Equality and hash code are
+ * based on {@code index} and {@code key} only; {@code value} is intentionally ignored.</p>
+ *
+ * <p><b>Usage example:</b></p>
  * <pre>{@code
- * IndexedKeyed<String, User> indexed = IndexedKeyed.of(0, "user123", new User("John"));
- * System.out.println(indexed.index());   // prints: 0
- * System.out.println(indexed.key());   // prints: "user123"
- * System.out.println(indexed.val());   // prints: User object
+ * IndexedKeyed<String, User> indexed = IndexedKeyed.of("user123", new User("John"), 0);
+ * System.out.println(indexed.index()); // 0
+ * System.out.println(indexed.key());   // user123
+ * System.out.println(indexed.val());   // User("John")
  * }</pre>
  *
- * @param <K> the type of the key
- * @param <T> the type of the value
+ * @param <K> key type
+ * @param <T> value type
  * @see Keyed
  * @see Wrapper
  */
@@ -41,83 +38,40 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
     private final int index;
 
-    IndexedKeyed(final int index, final K key, final T val) {
+    IndexedKeyed(final K key, final T val, final int index) {
         super(key, val);
         this.index = index;
     }
 
     /**
-     * Creates a new {@code IndexedKeyed} instance with the specified index, key, and value.
+     * Creates an {@code IndexedKeyed} with the specified key, value, and index.
      *
-     * <p>This factory method provides a convenient way to create instances without directly
-     * calling the constructor. The resulting object is immutable and encapsulates three pieces
-     * of information: an index (position), a key (identifier), and a value (content).</p>
-     *
-     * <p>The key and index are used for hashing and equality comparisons, while the value is
-     * stored but not considered in identity operations. This design is optimized for performance
-     * in collections where elements are uniquely identified by their index and key combination.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Create an indexed keyed element for a user at position 5
-     * IndexedKeyed<String, User> item = IndexedKeyed.of(5, "user-123", new User("John"));
-     *
-     * // Can also use null values
-     * IndexedKeyed<String, String> nullValue = IndexedKeyed.of(0, "key", null);
-     * }</pre>
-     *
-     * @param <K> the type of the key.
-     * @param <T> the type of the value.
-     * @param index the index position of this element (can be any integer including negative).
-     * @param key the key used for hashing and equality comparisons (can be null).
-     * @param val the value associated with the key (can be null).
-     * @return a new immutable {@code IndexedKeyed} instance containing the provided index, key, and value.
+     * @param key key component (nullable)
+     * @param val value component (nullable)
+     * @param index index component
+     * @param <K> key type
+     * @param <T> value type
+     * @return a new immutable {@code IndexedKeyed}
      */
-    public static <K, T> IndexedKeyed<K, T> of(final int index, final K key, final T val) {
-        return new IndexedKeyed<>(index, key, val);
+    public static <K, T> IndexedKeyed<K, T> of(final K key, final T val, final int index) {
+        return new IndexedKeyed<>(key, val, index);
     }
 
     /**
-     * Returns the index position associated with this object. The index represents
-     * the sequential position or order of this element in a collection or sequence.
+     * Returns the index component.
      *
-     * <p>This index value is included in hash code computation and equality checks
-     * alongside the key, making it part of the object's identity.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IndexedKeyed<String, String> item = IndexedKeyed.of(3, "key", "value");
-     * int pos = item.index();   // returns 3
-     * }</pre>
-     *
-     * @return the index value, which can be any integer including negative values.
+     * @return index value
      */
     public int index() {
         return index;
     }
 
     /**
-     * Returns a hash code value for this object. The hash code is computed using both
-     * the index and the key, while intentionally ignoring the value. This design ensures
-     * consistent hashing behavior even if the value is mutable or changes over time.
+     * Returns a hash code based on {@code index} and {@code key}.
      *
-     * <p>The hash code calculation uses the formula: {@code N.hashCode(index) * 31 + N.hashCode(key)},
-     * where {@code N.hashCode()} is a null-safe hash code computation utility that handles both
-     * primitive values and object references.</p>
+     * <p>{@code value} is not included.</p>
      *
-     * <p>This implementation guarantees that if two {@code IndexedKeyed} objects are equal
-     * according to {@link #equals(Object)}, they will have the same hash code, fulfilling
-     * the general contract of {@code hashCode}.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IndexedKeyed<String, String> item1 = IndexedKeyed.of(1, "key", "value1");
-     * IndexedKeyed<String, String> item2 = IndexedKeyed.of(1, "key", "value2");
-     * // Same hash code despite different values
-     * assert item1.hashCode() == item2.hashCode();
-     * }</pre>
-     *
-     * @return a hash code value for this object based on index and key only.
+     * @return hash code for this object
      */
     @Override
     public int hashCode() {
@@ -125,35 +79,12 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one. Two {@code IndexedKeyed}
-     * objects are considered equal if and only if they have the same index and the same key.
-     * The value is intentionally excluded from the equality comparison.
+     * Returns {@code true} if {@code obj} is an {@code IndexedKeyed} with equal {@code index} and {@code key}.
      *
-     * <p>This design allows for efficient lookups in collections where the combination of
-     * index and key uniquely identifies an element. It also provides performance benefits
-     * by avoiding potentially expensive value comparisons and ensures stable equality even
-     * when values are mutable.</p>
+     * <p>{@code value} is not considered.</p>
      *
-     * <p>The equality check follows this logic:</p>
-     * <ol>
-     *   <li>If comparing with itself (same reference), returns {@code true}</li>
-     *   <li>If the other object is not an {@code IndexedKeyed} instance, returns {@code false}</li>
-     *   <li>Otherwise, compares both index and key using null-safe equality</li>
-     * </ol>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IndexedKeyed<String, String> item1 = IndexedKeyed.of(1, "key", "value1");
-     * IndexedKeyed<String, String> item2 = IndexedKeyed.of(1, "key", "value2");
-     * IndexedKeyed<String, String> item3 = IndexedKeyed.of(1, "other", "value1");
-     *
-     * item1.equals(item2);   // true - same index and key, different value
-     * item1.equals(item3);   // false - same index but different key
-     * }</pre>
-     *
-     * @param obj the reference object with which to compare.
-     * @return {@code true} if this object has the same index and key as the obj argument;
-     *         {@code false} otherwise.
+     * @param obj object to compare with
+     * @return {@code true} if equal by index and key; otherwise {@code false}
      */
     @Override
     public boolean equals(final Object obj) {
@@ -169,27 +100,9 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     }
 
     /**
-     * Returns a string representation of this {@code IndexedKeyed} object. The string
-     * representation includes all three components (index, key, and value) in a readable
-     * format, regardless of whether they are used in equality comparisons.
+     * Returns a string representation in the form {@code "{index=..., key=..., val=...}"}.
      *
-     * <p>The format follows the pattern: {@code "{index=<index>, key=<key>, val=<value>}"}
-     * where each component is converted to its string representation. Null values are
-     * represented as the string "null".</p>
-     *
-     * <p>This method is useful for debugging, logging, and displaying the complete state
-     * of an {@code IndexedKeyed} instance.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IndexedKeyed<String, Integer> item1 = IndexedKeyed.of(2, "abc", 42);
-     * System.out.println(item1);   // Output: {index=2, key=abc, val=42}
-     *
-     * IndexedKeyed<String, String> item2 = IndexedKeyed.of(0, null, "test");
-     * System.out.println(item2);   // Output: {index=0, key=null, val=test}
-     * }</pre>
-     *
-     * @return a string representation of this object showing index, key, and value.
+     * @return string form of this object
      */
     @Override
     public String toString() {

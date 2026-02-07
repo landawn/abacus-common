@@ -3531,12 +3531,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param b the boolean value to be written.
+     * @param value the boolean value to be written.
      * @param output the Writer where the boolean's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final boolean b, final Writer output) throws IOException {
-        output.write(N.stringOf(b));
+    public static void write(final boolean value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -3550,12 +3550,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param c the character to be written.
+     * @param value the character to be written.
      * @param output the Writer where the character is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final char c, final Writer output) throws IOException {
-        output.write(c);
+    public static void write(final char value, final Writer output) throws IOException {
+        output.write(value);
     }
 
     /**
@@ -3568,12 +3568,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param b the byte value to be written.
+     * @param value the byte value to be written.
      * @param output the Writer where the byte's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final byte b, final Writer output) throws IOException {
-        output.write(N.stringOf(b));
+    public static void write(final byte value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -3586,12 +3586,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param s the short value to be written.
+     * @param value the short value to be written.
      * @param output the Writer where the short's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final short s, final Writer output) throws IOException {
-        output.write(N.stringOf(s));
+    public static void write(final short value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -3604,12 +3604,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param i the integer value to be written.
+     * @param value the integer value to be written.
      * @param output the Writer where the integer's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final int i, final Writer output) throws IOException {
-        output.write(N.stringOf(i));
+    public static void write(final int value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -3640,12 +3640,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param f the float value to be written.
+     * @param value the float value to be written.
      * @param output the Writer where the float string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final float f, final Writer output) throws IOException {
-        output.write(N.stringOf(f));
+    public static void write(final float value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -3658,12 +3658,12 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param d the double value to be written.
+     * @param value the double value to be written.
      * @param output the Writer where the double string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(final double d, final Writer output) throws IOException {
-        output.write(N.stringOf(d));
+    public static void write(final double value, final Writer output) throws IOException {
+        output.write(N.stringOf(value));
     }
 
     /**
@@ -7100,30 +7100,30 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects.
      * If an AutoCloseable object is {@code null}, it will be ignored.
      *
-     * @param a the AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    public static void closeAll(final AutoCloseable... a) {
-        if (N.isEmpty(a)) {
+    public static void closeAll(final AutoCloseable... closeables) {
+        if (N.isEmpty(closeables)) {
             return;
         }
 
-        closeAll(Arrays.asList(a));
+        closeAll(Arrays.asList(closeables));
     }
 
     /**
      * Closes all provided AutoCloseable objects in the Iterable.
      * If an AutoCloseable object is {@code null}, it will be ignored.
      *
-     * @param c the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    public static void closeAll(final Iterable<? extends AutoCloseable> c) {
-        if (N.isEmpty(c)) {
+    public static void closeAll(final Iterable<? extends AutoCloseable> closeables) {
+        if (N.isEmpty(closeables)) {
             return;
         }
 
         Exception ex = null;
 
-        for (final AutoCloseable closeable : c) {
+        for (final AutoCloseable closeable : closeables) {
             try {
                 if (closeable != null) {
                     closeable.close();
@@ -7173,28 +7173,28 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param a the AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    public static void closeAllQuietly(final AutoCloseable... a) {
-        if (N.isEmpty(a)) {
+    public static void closeAllQuietly(final AutoCloseable... closeables) {
+        if (N.isEmpty(closeables)) {
             return;
         }
 
-        closeAllQuietly(Arrays.asList(a));
+        closeAllQuietly(Arrays.asList(closeables));
     }
 
     /**
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param c the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
-    public static void closeAllQuietly(final Iterable<? extends AutoCloseable> c) {
-        if (N.isEmpty(c)) {
+    public static void closeAllQuietly(final Iterable<? extends AutoCloseable> closeables) {
+        if (N.isEmpty(closeables)) {
             return;
         }
 
-        for (final AutoCloseable closeable : c) {
+        for (final AutoCloseable closeable : closeables) {
             closeQuietly(closeable);
         }
     }

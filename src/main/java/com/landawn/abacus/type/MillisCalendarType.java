@@ -89,13 +89,13 @@ public class MillisCalendarType extends CalendarType {
      * }</pre>
      *
      * @param rs the ResultSet containing the query results
-     * @param columnLabel the label of the column to retrieve
+     * @param columnName the label of the column to retrieve
      * @return a Calendar object created from the milliseconds value, or {@code null} if the database value was 0
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final long lng = rs.getLong(columnLabel);
+    public Calendar get(final ResultSet rs, final String columnName) throws SQLException {
+        final long lng = rs.getLong(columnName);
 
         return (lng == 0) ? null : Dates.createCalendar(lng);
     }

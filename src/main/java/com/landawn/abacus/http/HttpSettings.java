@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Strings;
  *     .setUseCaches(false);
  *
  * // Use with HttpClient
- * HttpClient client = HttpClient.create("https://api.example.com",
+ * HttpClient client = HttpClient.create("http://localhost:18080",
  *     16, 5000, 10000, settings);
  *
  * // Or use with individual requests
@@ -350,7 +350,7 @@ public final class HttpSettings {
      * @param isOneWayRequest {@code true} for one-way requests
      * @return this HttpSettings instance for method chaining
      */
-    public HttpSettings isOneWayRequest(final boolean isOneWayRequest) {
+    public HttpSettings setOneWayRequest(final boolean isOneWayRequest) {
         this.isOneWayRequest = isOneWayRequest;
 
         return this;
@@ -652,7 +652,7 @@ public final class HttpSettings {
                 .setUseCaches(useCaches)
                 .doInput(doInput)
                 .doOutput(doOutput)
-                .isOneWayRequest(isOneWayRequest)
+                .setOneWayRequest(isOneWayRequest)
                 .setContentFormat(contentFormat);
 
         if (headers != null) {

@@ -89,13 +89,13 @@ public class NClobReaderType extends ReaderType {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clobToReader(rs.getNClob(columnLabel));
+    public Reader get(final ResultSet rs, final String columnName) throws SQLException {
+        return clobToReader(rs.getNClob(columnName));
     }
 
     /**

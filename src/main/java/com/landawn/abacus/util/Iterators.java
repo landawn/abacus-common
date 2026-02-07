@@ -3232,16 +3232,16 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original {@code Iterable}.
-     * @param iter the original {@code Iterable} to be skipped and limited, or {@code null} to return an empty iterator.
+     * @param iterable the original {@code Iterable} to be skipped and limited, or {@code null} to return an empty iterator.
      * @param offset the number of elements to skip from the beginning of the {@code Iterable}.
      * @param count the maximum number of elements to be iterated over from the {@code Iterable} after skipping.
      * @return an {@code ObjIterator} that will iterate over up to {@code count} elements of the original {@code Iterable} starting from the (offset+1)th element.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
-    public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iter, final long offset, final long count) {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iterable, final long offset, final long count) {
         checkOffsetCount(offset, count);
 
-        return iter == null ? ObjIterator.empty() : skipAndLimit(iter.iterator(), offset, count);
+        return iterable == null ? ObjIterator.empty() : skipAndLimit(iterable.iterator(), offset, count);
     }
 
     /**

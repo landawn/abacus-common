@@ -151,7 +151,7 @@ public class MutableByte2025Test extends TestBase {
     @Test
     public void testSetIfPredicateTrue() {
         MutableByte num = MutableByte.of((byte) 10);
-        boolean updated = num.setIf((byte) 20, v -> v < 15);
+        boolean updated = num.setIf(v -> v < 15, (byte) 20);
         Assertions.assertTrue(updated);
         Assertions.assertEquals((byte) 20, num.value());
     }
@@ -159,7 +159,7 @@ public class MutableByte2025Test extends TestBase {
     @Test
     public void testSetIfPredicateFalse() {
         MutableByte num = MutableByte.of((byte) 10);
-        boolean updated = num.setIf((byte) 20, v -> v > 15);
+        boolean updated = num.setIf(v -> v > 15, (byte) 20);
         Assertions.assertFalse(updated);
         Assertions.assertEquals((byte) 10, num.value());
     }
@@ -167,7 +167,7 @@ public class MutableByte2025Test extends TestBase {
     @Test
     public void testSetIfWithZeroValue() {
         MutableByte num = MutableByte.of((byte) 0);
-        boolean updated = num.setIf((byte) 5, v -> v == 0);
+        boolean updated = num.setIf(v -> v == 0, (byte) 5);
         Assertions.assertTrue(updated);
         Assertions.assertEquals((byte) 5, num.value());
     }
@@ -175,7 +175,7 @@ public class MutableByte2025Test extends TestBase {
     @Test
     public void testSetIfWithNegativeValue() {
         MutableByte num = MutableByte.of((byte) -10);
-        boolean updated = num.setIf((byte) 10, v -> v < 0);
+        boolean updated = num.setIf(v -> v < 0, (byte) 10);
         Assertions.assertTrue(updated);
         Assertions.assertEquals((byte) 10, num.value());
     }
@@ -183,8 +183,8 @@ public class MutableByte2025Test extends TestBase {
     @Test
     public void testSetIfMultipleConditions() {
         MutableByte num = MutableByte.of((byte) 10);
-        boolean updated1 = num.setIf((byte) 20, v -> v == 10);
-        boolean updated2 = num.setIf((byte) 30, v -> v < 15);
+        boolean updated1 = num.setIf(v -> v == 10, (byte) 20);
+        boolean updated2 = num.setIf(v -> v < 15, (byte) 30);
         Assertions.assertTrue(updated1);
         Assertions.assertFalse(updated2);
         Assertions.assertEquals((byte) 20, num.value());

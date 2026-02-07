@@ -70,13 +70,13 @@ public class ClobReaderType extends ReaderType {
      * Retrieves a CLOB value as a character Reader from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the CLOB value
+     * @param columnName the label of the column containing the CLOB value
      * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return clobToReader(rs.getClob(columnLabel));
+    public Reader get(final ResultSet rs, final String columnName) throws SQLException {
+        return clobToReader(rs.getClob(columnName));
     }
 
     /**

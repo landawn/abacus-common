@@ -77,14 +77,14 @@ public class AsciiStreamType extends InputStreamType {
      * Retrieves an ASCII InputStream from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet to retrieve the ASCII stream from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return an InputStream containing the ASCII data, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getAsciiStream(columnLabel);
+    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getAsciiStream(columnName);
     }
 
     /**

@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
@@ -273,7 +273,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      * @param propInfo property metadata including format information, or null
      * @param propNode the XML node containing the property value
      * @return the converted property value, or {@code null} if the node indicates a {@code null} value
-     * @throws ParseException if the property cannot be parsed or type is null
+     * @throws ParsingException if the property cannot be parsed or type is null
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
         final String txtValue = XmlUtil.getTextContent(propNode);
@@ -287,7 +287,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
         }
 
         if (propType == null) {
-            throw new ParseException("Can't parse property " + propName + " with value: " + txtValue);
+            throw new ParsingException("Can't parse property " + propName + " with value: " + txtValue);
         }
 
         if (propInfo != null && propInfo.hasFormat) {
@@ -549,7 +549,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      *
      * @param eleNode the XML element node to examine
      * @return the single child element node
-     * @throws ParseException if the element contains more than one child element node
+     * @throws ParsingException if the element contains more than one child element node
      */
     protected static Node checkOneNode(final Node eleNode) {
         final NodeList subEleNodes = eleNode.getChildNodes();
@@ -565,7 +565,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
                 } else if (subEleNode == null) {
                     subEleNode = subEleNodes.item(j);
                 } else {
-                    throw new ParseException("Only one child node is supported");
+                    throw new ParsingException("Only one child node is supported");
                 }
             }
         }

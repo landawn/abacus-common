@@ -123,13 +123,13 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * Otherwise, converts the value to long and wraps it in OptionalLong.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public OptionalLong get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public OptionalLong get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalLong.empty()
                 : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));

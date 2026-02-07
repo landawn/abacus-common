@@ -2090,6 +2090,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             private File[] subFiles = null;
             private int cursor = 0;
 
+            /**
+             * Returns whether another file is available from the current traversal state.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * if (iter.hasNext()) {
+             *     File file = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return {@code true} if another file is available
+             */
             public boolean hasNext() {
                 if ((subFiles == null || cursor >= subFiles.length) && paths.size() > 0) {
                     cursor = 0;
@@ -2107,6 +2119,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return subFiles != null && cursor < subFiles.length;
             }
 
+            /**
+             * Returns the next file from the traversal.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * while (iter.hasNext()) {
+             *     File file = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return the next file
+             * @throws NoSuchElementException if no more files are available
+             */
             public File next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -2161,6 +2186,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         private String cachedLine;
                         private boolean finished = false;
 
+                        /**
+                         * Returns whether another line can be read from the buffered reader.
+                         *
+                         * <p><b>Usage Examples:</b></p>
+                         * <pre>{@code
+                         * while (lineIter.hasNext()) {
+                         *     String line = lineIter.next();
+                         * }
+                         * }</pre>
+                         *
+                         * @return {@code true} if another line is available
+                         * @throws IOException if an I/O error occurs while reading
+                         */
                         public boolean hasNext() throws IOException {
                             if (cachedLine != null) {
                                 return true;
@@ -2177,6 +2215,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                             }
                         }
 
+                        /**
+                         * Returns the next line from the buffered reader.
+                         *
+                         * <p><b>Usage Examples:</b></p>
+                         * <pre>{@code
+                         * if (lineIter.hasNext()) {
+                         *     String line = lineIter.next();
+                         * }
+                         * }</pre>
+                         *
+                         * @return the next line
+                         * @throws IOException if an I/O error occurs while reading
+                         * @throws NoSuchElementException if no more lines are available
+                         */
                         public String next() throws IOException {
                             if (!hasNext()) {
                                 throw new NoSuchElementException("No more lines");
@@ -3454,19 +3506,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param predicate the predicate to apply to each element to determine if it should be included
-     * @param actionOnDroppedItem the action to perform on items that are dropped by the filter
+     * @param onDrop the action to perform on items that are dropped by the filter
      * @return a new sequence containing only the elements that match the predicate
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
     @IntermediateOp
-    public Seq<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate, final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem)
+    public Seq<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate, final Throwables.Consumer<? super T, ? extends E> onDrop)
             throws IllegalStateException {
         assertNotClosed();
 
         return filter(value -> {
             if (!predicate.test(value)) {
-                actionOnDroppedItem.accept(value);
+                onDrop.accept(value);
                 return false;
             }
 
@@ -3614,19 +3666,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param predicate the predicate to apply to each element to determine if it should be dropped
-     * @param actionOnDroppedItem the action to perform on items that are dropped
+     * @param onDrop the action to perform on items that are dropped
      * @return a new sequence containing the elements after the predicate becomes false
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
     @IntermediateOp
-    public Seq<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
-            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) throws IllegalStateException {
+    public Seq<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate, final Throwables.Consumer<? super T, ? extends E> onDrop)
+            throws IllegalStateException {
         assertNotClosed();
 
         return dropWhile(value -> {
             if (predicate.test(value)) {
-                actionOnDroppedItem.accept(value);
+                onDrop.accept(value);
                 return true;
             }
 
@@ -4086,6 +4138,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             private Seq<? extends R, ? extends E> s = null;
             private Throwables.Iterator<? extends R, ? extends E> cur = null;
 
+            /**
+             * Returns whether another mapped element is available.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * if (iter.hasNext()) {
+             *     R value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return {@code true} if another mapped element is available
+             * @throws E if the source iterator or mapper fails
+             */
             public boolean hasNext() throws E {
                 while (cur == null || !cur.hasNext()) {
                     if (elements.hasNext()) {
@@ -4110,6 +4175,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * Returns the next mapped element.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * while (iter.hasNext()) {
+             *     R value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return the next mapped element
+             * @throws E if the source iterator fails
+             * @throws NoSuchElementException if no more elements are available
+             */
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -6940,10 +7019,37 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         iterEx = new Throwables.Iterator<>() {
                             private boolean isFirst = true;
 
+                            /**
+                             * Returns whether this split iterator has another element.
+                             *
+                             * <p><b>Usage Examples:</b></p>
+                             * <pre>{@code
+                             * if (iterEx.hasNext()) {
+                             *     T v = iterEx.next();
+                             * }
+                             * }</pre>
+                             *
+                             * @return {@code true} if another element is available
+                             * @throws E if the underlying iterator fails
+                             */
                             public boolean hasNext() throws E {
                                 return isFirst || iter.hasNext();
                             }
 
+                            /**
+                             * Returns the next element for this split iterator.
+                             *
+                             * <p><b>Usage Examples:</b></p>
+                             * <pre>{@code
+                             * while (iterEx.hasNext()) {
+                             *     T v = iterEx.next();
+                             * }
+                             * }</pre>
+                             *
+                             * @return the next split element
+                             * @throws E if the underlying iterator fails
+                             * @throws NoSuchElementException if no more elements are available
+                             */
                             public T next() throws E {
                                 if (!hasNext()) {
                                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -7469,17 +7575,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * @param n the number of elements to skip, must not be negative
-     * @param actionOnSkippedItem the action to be performed on each skipped element
+     * @param onSkip the action to be performed on each skipped element
      * @return a new sequence where the first <i>n</i> elements are skipped and the action is performed on each skipped element
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if <i>n</i> is negative or actionOnSkippedItem is null
+     * @throws IllegalArgumentException if <i>n</i> is negative or onSkip is null
      * @see #skip(long)
      */
-    public Seq<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> actionOnSkippedItem)
-            throws IllegalStateException, IllegalArgumentException {
+    public Seq<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> onSkip) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
-        checkArgNotNull(actionOnSkippedItem, cs.action);
+        checkArgNotNull(onSkip, cs.action);
 
         if (n == 0) {
             return this;
@@ -7488,12 +7593,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final Throwables.Predicate<T, E> filter = new Throwables.Predicate<>() {
             final MutableLong cnt = MutableLong.of(n);
 
+            /**
+             * Tests whether the current value is still in the skipped prefix.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * boolean skipped = filter.test(value);
+             * }</pre>
+             *
+             * @param value the current value
+             * @return {@code true} if the value should be skipped
+             */
             public boolean test(final T value) {
                 return cnt.getAndDecrement() > 0;
             }
         };
 
-        return dropWhile(filter, actionOnSkippedItem);
+        return dropWhile(filter, onSkip);
     }
 
     /**
@@ -8866,10 +8982,36 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         final Throwables.Iterator<T, E> iter = this.iteratorEx();
 
         final Throwables.Iterator<T, E> iterator = new Throwables.Iterator<>() {
+            /**
+             * Returns whether another stepped element is available.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * if (iterator.hasNext()) {
+             *     T value = iterator.next();
+             * }
+             * }</pre>
+             *
+             * @return {@code true} if another element is available
+             * @throws E if the underlying iterator fails
+             */
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
+            /**
+             * Returns the next element and advances by the configured step.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * while (iterator.hasNext()) {
+             *     T value = iterator.next();
+             * }
+             * }</pre>
+             *
+             * @return the next stepped element
+             * @throws E if the underlying iterator fails
+             */
             public T next() throws E {
                 final T next = iter.next();
                 iter.advance(skip);
@@ -13854,6 +13996,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
 
+                /**
+                 * Returns whether another element is available from the wrapped stream iterator.
+                 *
+                 * <p><b>Usage Examples:</b></p>
+                 * <pre>{@code
+                 * if (iter.hasNext()) {
+                 *     T value = iter.next();
+                 * }
+                 * }</pre>
+                 *
+                 * @return {@code true} if another element is available
+                 * @throws E if the wrapped iterator fails
+                 */
                 public boolean hasNext() throws E {
                     try {
                         if (!isInitialized) {
@@ -13866,6 +14021,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     }
                 }
 
+                /**
+                 * Returns the next element from the wrapped stream iterator.
+                 *
+                 * <p><b>Usage Examples:</b></p>
+                 * <pre>{@code
+                 * while (iter.hasNext()) {
+                 *     T value = iter.next();
+                 * }
+                 * }</pre>
+                 *
+                 * @return the next element
+                 * @throws E if the wrapped iterator fails
+                 */
                 public T next() throws E {
                     try {
                         if (!isInitialized) {
@@ -13937,6 +14105,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
 
+                /**
+                 * Returns whether another element is available from the stream iterator.
+                 *
+                 * <p><b>Usage Examples:</b></p>
+                 * <pre>{@code
+                 * if (iter.hasNext()) {
+                 *     T value = iter.next();
+                 * }
+                 * }</pre>
+                 *
+                 * @return {@code true} if another element is available
+                 * @throws E if the wrapped iterator fails
+                 */
                 public boolean hasNext() throws E {
                     if (!isInitialized) {
                         init();
@@ -13945,6 +14126,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     return iter.hasNext();
                 }
 
+                /**
+                 * Returns the next element from the stream iterator.
+                 *
+                 * <p><b>Usage Examples:</b></p>
+                 * <pre>{@code
+                 * while (iter.hasNext()) {
+                 *     T value = iter.next();
+                 * }
+                 * }</pre>
+                 *
+                 * @return the next element
+                 * @throws E if the wrapped iterator fails
+                 */
                 public T next() throws E {
                     if (!isInitialized) {
                         init();
@@ -14009,6 +14203,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     private ObjIteratorEx<T> newObjIteratorEx(final Throwables.Iterator<T, E> elements) {
         return new ObjIteratorEx<>() {
+            /**
+             * Returns whether another element is available from the wrapped iterator.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * if (iter.hasNext()) {
+             *     T value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return {@code true} if another element is available
+             */
             public boolean hasNext() {
                 try {
                     return elements.hasNext();
@@ -14017,6 +14223,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
             }
 
+            /**
+             * Returns the next element from the wrapped iterator.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * while (iter.hasNext()) {
+             *     T value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return the next element
+             * @throws NoSuchElementException if no more elements are available
+             */
             public T next() { // NOSONAR
                 try {
                     return elements.next();
@@ -14209,6 +14428,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             private boolean isClosed = false;
             private T next = null;
 
+            /**
+             * Returns whether another buffered element is available.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * if (iter.hasNext()) {
+             *     T value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return {@code true} if another buffered element is available
+             * @throws E if a background producer reported an error
+             */
             public boolean hasNext() throws E {
                 try {
                     if (next == null && (next = queueToBuffer.poll()) == null) {
@@ -14229,6 +14461,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return next != null;
             }
 
+            /**
+             * Returns the next buffered element.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * while (iter.hasNext()) {
+             *     T value = iter.next();
+             * }
+             * }</pre>
+             *
+             * @return the next buffered element
+             * @throws E if a background producer reported an error
+             * @throws NoSuchElementException if no more elements are available
+             */
             public T next() throws E {
                 if (next == null && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -14490,13 +14736,41 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         @Serial
         private static final long serialVersionUID = -97425473105100734L;
 
+        /**
+         * Constructs an empty deque.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> dq = new LocalArrayDeque<>();
+         * }</pre>
+         */
         public LocalArrayDeque() {
         }
 
+        /**
+         * Constructs an empty deque with an initial capacity hint.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> dq = new LocalArrayDeque<>(16);
+         * }</pre>
+         *
+         * @param initialCapacity the initial capacity hint
+         */
         public LocalArrayDeque(final int initialCapacity) {
             super(initialCapacity);
         }
 
+        /**
+         * Constructs a deque initialized with the specified collection.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> dq = new LocalArrayDeque<>(List.of("a", "b"));
+         * }</pre>
+         *
+         * @param c the collection whose elements are to be placed into this deque
+         */
         public LocalArrayDeque(final Collection<? extends T> c) {
             super(c);
         }

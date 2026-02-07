@@ -199,18 +199,18 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
      * // Update only if current value is less than 'M'
-     * boolean updated = ch.setIf('Z', c -> c < 'M');   // returns true, value is now 'Z'
+     * boolean updated = ch.setIf(c -> c < 'M', 'Z');   // returns true, value is now 'Z'
      * // This update will fail because 'Z' is not < 'M'
-     * updated = ch.setIf('A', c -> c < 'M');           // returns false, value remains 'Z'
+     * updated = ch.setIf(c -> c < 'M', 'A');           // returns false, value remains 'Z'
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test against the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
      * @throws E if the predicate throws an exception during evaluation
      */
-    public <E extends Exception> boolean setIf(final char newValue, final Throwables.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

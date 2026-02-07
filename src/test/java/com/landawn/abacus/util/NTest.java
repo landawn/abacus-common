@@ -3434,8 +3434,8 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testUUID() {
-        N.println(Strings.uuid32());
-        N.println(Strings.uuid32().length());
+        N.println(Strings.uuidWithoutHyphens());
+        N.println(Strings.uuidWithoutHyphens().length());
         N.println(Strings.uuid());
         N.println(Strings.uuid().length());
 

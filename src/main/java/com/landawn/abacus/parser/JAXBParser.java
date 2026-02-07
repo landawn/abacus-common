@@ -25,7 +25,7 @@ import java.io.Writer;
 
 import org.w3c.dom.Node;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
@@ -103,7 +103,7 @@ final class JAXBParser extends AbstractXmlParser {
      * properly annotated with JAXB annotations.</p>
      *
      * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
-     * and will throw a {@link ParseException} if specified.</p>
+     * and will throw a {@link ParsingException} if specified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -115,7 +115,7 @@ final class JAXBParser extends AbstractXmlParser {
      * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the XML string representation of the serialized object, or empty string if obj is null
-     * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
+     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
      */
     @Override
     public String serialize(final Object obj, final XmlSerializationConfig config) {
@@ -152,7 +152,7 @@ final class JAXBParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
-     * @throws ParseException if JAXB marshalling fails
+     * @throws ParsingException if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final File output) {
@@ -192,7 +192,7 @@ final class JAXBParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
-     * @throws ParseException if JAXB marshalling fails
+     * @throws ParsingException if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
@@ -228,7 +228,7 @@ final class JAXBParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
-     * @throws ParseException if JAXB marshalling fails
+     * @throws ParsingException if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerializationConfig config, final Writer output) {
@@ -258,12 +258,12 @@ final class JAXBParser extends AbstractXmlParser {
      * @param obj the object to serialize
      * @param config the XML serialization configuration (optional)
      * @param output the writer to write to
-     * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
+     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
      * @throws UncheckedIOException if an I/O error occurs
      */
     void write(final Object obj, final XmlSerializationConfig config, final Writer output) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
-            throw new ParseException("'ignoredPropNames' is not supported");
+            throw new ParsingException("'ignoredPropNames' is not supported");
         }
 
         if (obj == null) {
@@ -285,7 +285,7 @@ final class JAXBParser extends AbstractXmlParser {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } catch (final JAXBException e) {
-            throw new ParseException(e);
+            throw new ParsingException(e);
         }
     }
 
@@ -372,19 +372,19 @@ final class JAXBParser extends AbstractXmlParser {
      * a Java object.</p>
      * 
      * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
-     * and will throw a {@link ParseException} if specified.</p>
+     * and will throw a {@link ParsingException} if specified.</p>
      *
      * @param source the reader containing XML data
      * @param config the XML deserialization configuration (optional)
      * @param targetClass the class of the object to create
      * @param <T> the type of the object to deserialize to
      * @return the deserialized object
-     * @throws ParseException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
+     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
     @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
-            throw new ParseException("'ignoredPropNames' is not supported");
+            throw new ParsingException("'ignoredPropNames' is not supported");
         }
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
@@ -392,7 +392,7 @@ final class JAXBParser extends AbstractXmlParser {
         try {
             return (T) unmarshaller.unmarshal(source);
         } catch (final JAXBException e) {
-            throw new ParseException(e);
+            throw new ParsingException(e);
         }
     }
 }

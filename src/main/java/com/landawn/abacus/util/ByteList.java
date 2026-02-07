@@ -278,6 +278,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     private static final long serialVersionUID = 6361439693114081075L;
 
     static final Random RAND = new SecureRandom();
+    static final int BOUND = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
 
     /**
      * The array buffer into which the elements of the ByteList are stored.
@@ -491,13 +492,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IllegalArgumentException if len is negative
      */
     public static ByteList random(final int len) {
-        final int bound = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
         final byte[] a = new byte[len];
 
         // Keep consistent with ByteStream/ShortList/ShortStream/CharList/CharStream.
         // RAND.nextBytes(a);
         for (int i = 0; i < len; i++) {
-            a[i] = (byte) (RAND.nextInt(bound) + Byte.MIN_VALUE);
+            a[i] = (byte) (RAND.nextInt(BOUND) + Byte.MIN_VALUE);
         }
 
         return of(a);

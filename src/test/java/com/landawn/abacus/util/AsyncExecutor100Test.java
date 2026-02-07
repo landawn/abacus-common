@@ -131,7 +131,7 @@ public class AsyncExecutor100Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<Void> future = executor.execute(() -> {
+        ContinuableFuture<Void> future = executor.executeWithRetry(() -> {
             if (attempts.incrementAndGet() < 3) {
                 throw new RuntimeException("Retry needed");
             }
@@ -147,7 +147,7 @@ public class AsyncExecutor100Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<String> future = executor.execute(() -> {
+        ContinuableFuture<String> future = executor.executeWithRetry(() -> {
             if (attempts.incrementAndGet() < 2) {
                 return null;
             }

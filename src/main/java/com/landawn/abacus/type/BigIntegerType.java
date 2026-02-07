@@ -127,13 +127,13 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
      * @return the BigInteger value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public BigInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final String stringValue = rs.getString(columnLabel);
+    public BigInteger get(final ResultSet rs, final String columnName) throws SQLException {
+        final String stringValue = rs.getString(columnName);
 
         return Strings.isEmpty(stringValue) ? null : new BigInteger(stringValue.trim());
     }

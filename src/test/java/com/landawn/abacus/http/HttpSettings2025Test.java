@@ -153,7 +153,7 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testIsOneWayRequestSet() {
         HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.isOneWayRequest(true);
+        HttpSettings result = settings.setOneWayRequest(true);
         assertTrue(settings.isOneWayRequest());
         assertEquals(settings, result);
     }
@@ -304,7 +304,7 @@ public class HttpSettings2025Test extends TestBase {
                 .setUseCaches(true)
                 .doInput(false)
                 .doOutput(false)
-                .isOneWayRequest(true)
+                .setOneWayRequest(true)
                 .setContentFormat(ContentFormat.JSON)
                 .header("X-Custom", "value");
 
@@ -374,7 +374,7 @@ public class HttpSettings2025Test extends TestBase {
                 .setUseCaches(false)
                 .doInput(true)
                 .doOutput(true)
-                .isOneWayRequest(false)
+                .setOneWayRequest(false)
                 .setContentFormat(ContentFormat.JSON)
                 .setContentType("application/json")
                 .setContentEncoding("gzip")

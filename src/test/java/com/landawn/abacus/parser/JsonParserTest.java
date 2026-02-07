@@ -56,7 +56,7 @@ import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountDevice;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -218,7 +218,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             json = N.toJson(obj);
             fail("Should throw ParseException");
-        } catch (final ParseException e) {
+        } catch (final ParsingException e) {
 
         }
 
@@ -2493,7 +2493,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             jsonParser.deserialize(json, ds, Account.class);
             fail("Should throw RuntimeException");
-        } catch (final ParseException e) {
+        } catch (final ParsingException e) {
 
         }
 
@@ -2523,7 +2523,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             jsonParser.deserialize(json, ds, Account.class);
             fail("Should throw RuntimeException");
-        } catch (final ParseException e) {
+        } catch (final ParsingException e) {
 
         }
 
@@ -2568,7 +2568,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             jsonParser.deserialize(json, JDC.create().ignoreUnmatchedProperty(false), Account.class);
             fail("Should throw RuntimeException");
-        } catch (final ParseException e) {
+        } catch (final ParsingException e) {
 
         }
 

@@ -75,14 +75,14 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * The long value is read from the database and wrapped in a new AtomicLong instance.
      *
      * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public AtomicLong get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return new AtomicLong(rs.getLong(columnLabel));
+    public AtomicLong get(final ResultSet rs, final String columnName) throws SQLException {
+        return new AtomicLong(rs.getLong(columnName));
     }
 
     /**

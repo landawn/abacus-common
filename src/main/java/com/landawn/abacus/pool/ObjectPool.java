@@ -76,12 +76,12 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *   <li>The object would exceed memory constraints</li>
      * </ul>
      *
-     * @param e the object to be added to the pool, must not be {@code null}
+     * @param element the object to be added to the pool, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean add(E e);
+    boolean add(E element);
 
     /**
      * Adds a new object to the pool with optional automatic destruction on failure.
@@ -90,7 +90,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <p><b>Execution Order:</b></p>
      * <ol>
      *   <li>Attempts to add the object to the pool using {@link #add(Poolable)}</li>
-     *   <li>If add fails and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>If add fails and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code element.destroy(PUT_ADD_FAILURE)}</li>
      *   <li>Returns the success status of the add operation</li>
      * </ol>
      *
@@ -104,13 +104,13 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * pool.add(obj, true);
      * }</pre>
      *
-     * @param e the object to be added to the pool, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
+     * @param element the object to be added to the pool, must not be {@code null}
+     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean add(E e, boolean autoDestroyOnFailedToAdd);
+    boolean add(E element, boolean autoDestroyOnFailedToAdd);
 
     /**
      * Attempts to add an object to the pool, waiting if necessary for space to become available.
@@ -127,7 +127,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * }
      * }</pre>
      *
-     * @param e the object to be added to the pool, must not be {@code null}
+     * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
@@ -135,7 +135,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean add(E e, long timeout, TimeUnit unit) throws InterruptedException;
+    boolean add(E element, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
@@ -144,23 +144,23 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <p><b>Execution Order:</b></p>
      * <ol>
      *   <li>Attempts to add the object to the pool using {@link #add(Poolable, long, TimeUnit)}, waiting up to the specified timeout</li>
-     *   <li>If add fails (timeout or capacity) and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>If add fails (timeout or capacity) and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code element.destroy(PUT_ADD_FAILURE)}</li>
      *   <li>Returns the success status of the add operation</li>
      * </ol>
      *
      * <p>The destroy operation is guaranteed to execute in a finally block if the add fails,
      * even if an exception occurs during the add attempt. This ensures no resource leaks.</p>
      *
-     * @param e the object to be added to the pool, must not be {@code null}
+     * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
      * @throws InterruptedException if interrupted while waiting
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
+    boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
     /**
      * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
@@ -220,11 +220,11 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Checks if the specified object is currently in the pool.
      * This method uses object equality (equals method) for comparison.
      *
-     * @param valueToFind the object to search for in the pool
+     * @param element the object to search for in the pool
      * @return {@code true} if the pool contains the specified object, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean contains(E valueToFind);
+    boolean contains(E element);
 
     /**
      * Interface for measuring the memory size of objects in the pool.
@@ -255,9 +255,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
          * Calculates the memory size of the given object in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
          * 
-         * @param e the object to measure, never {@code null} when called by the pool
+         * @param element the object to measure, never {@code null} when called by the pool
          * @return the size of the object in bytes, should be non-negative
          */
-        long sizeOf(E e);
+        long sizeOf(E element);
     }
 }

@@ -91,37 +91,37 @@ public class Pair200Test extends TestBase {
         Pair<String, Integer> pair = Pair.of("left", 1);
 
         // left depends on current right == 1
-        boolean leftSet = pair.setLeftIf("newLeft", (l, r) -> r == 1);
+        boolean leftSet = pair.setLeftIf((l, r) -> r == 1, "newLeft");
         assertTrue(leftSet);
         assertEquals("newLeft", pair.left());
         assertEquals(1, pair.right()); // right unchanged
 
         // predicate is false: right is still 1, not 0
-        boolean leftNotSet = pair.setLeftIf("anotherLeft", (l, r) -> r == 0);
+        boolean leftNotSet = pair.setLeftIf((l, r) -> r == 0, "anotherLeft");
         assertFalse(leftNotSet);
         assertEquals("newLeft", pair.left());
         assertEquals(1, pair.right());
 
         // right depends on current left value
-        boolean rightSet = pair.setRightIf(100, (l, r) -> "newLeft".equals(l));
+        boolean rightSet = pair.setRightIf((l, r) -> "newLeft".equals(l), 100);
         assertTrue(rightSet);
         assertEquals("newLeft", pair.left());
         assertEquals(100, pair.right());
 
         // predicate is false: right is 100, not < 50
-        boolean rightNotSet = pair.setRightIf(10, (l, r) -> r < 50);
+        boolean rightNotSet = pair.setRightIf((l, r) -> r < 50, 10);
         assertFalse(rightNotSet);
         assertEquals("newLeft", pair.left());
         assertEquals(100, pair.right());
 
         // both set if current right == 100
-        boolean bothSet = pair.setIf("finalLeft", 999, (l, r) -> r == 100);
+        boolean bothSet = pair.setIf((l, r) -> r == 100, "finalLeft", 999);
         assertTrue(bothSet);
         assertEquals("finalLeft", pair.left());
         assertEquals(999, pair.right());
 
         // predicate always false here
-        boolean bothNotSet = pair.setIf("short", 0, (l, r) -> r < 0);
+        boolean bothNotSet = pair.setIf((l, r) -> r < 0, "short", 0);
         assertFalse(bothNotSet);
         assertEquals("finalLeft", pair.left());
         assertEquals(999, pair.right());

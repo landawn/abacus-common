@@ -177,7 +177,7 @@ public class Holder2025Test extends TestBase {
     @Test
     public void test_setIf_PredicateTrue() throws Exception {
         Holder<Integer> holder = Holder.of(5);
-        boolean result = holder.setIf(10, n -> n != null && n < 10);
+        boolean result = holder.setIf(n -> n != null && n < 10, 10);
         assertTrue(result);
         assertEquals(10, holder.value());
     }
@@ -185,7 +185,7 @@ public class Holder2025Test extends TestBase {
     @Test
     public void test_setIf_PredicateFalse() throws Exception {
         Holder<Integer> holder = Holder.of(15);
-        boolean result = holder.setIf(10, n -> n != null && n < 10);
+        boolean result = holder.setIf(n -> n != null && n < 10, 10);
         assertFalse(result);
         assertEquals(15, holder.value());
     }
@@ -193,7 +193,7 @@ public class Holder2025Test extends TestBase {
     @Test
     public void test_setIf_NullValue() throws Exception {
         Holder<String> holder = Holder.of(null);
-        boolean result = holder.setIf("new", n -> n == null);
+        boolean result = holder.setIf(n -> n == null, "new");
         assertTrue(result);
         assertEquals("new", holder.value());
     }
@@ -201,7 +201,7 @@ public class Holder2025Test extends TestBase {
     //    @Test
     //    public void test_setIf_BiPredicateTrue() throws Exception {
     //        Holder<Integer> holder = Holder.of(5);
-    //        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
+    //        boolean result = holder.setIf((oldVal, newVal) -> oldVal < newVal, 10);
     //        assertTrue(result);
     //        assertEquals(10, holder.value());
     //    }
@@ -209,7 +209,7 @@ public class Holder2025Test extends TestBase {
     //    @Test
     //    public void test_setIf_BiPredicateFalse() throws Exception {
     //        Holder<Integer> holder = Holder.of(15);
-    //        boolean result = holder.setIf(10, (oldVal, newVal) -> oldVal < newVal);
+    //        boolean result = holder.setIf((oldVal, newVal) -> oldVal < newVal, 10);
     //        assertFalse(result);
     //        assertEquals(15, holder.value());
     //    }

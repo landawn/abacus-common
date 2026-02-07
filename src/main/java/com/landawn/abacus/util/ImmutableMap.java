@@ -61,7 +61,7 @@ import com.landawn.abacus.annotation.Beta;
  */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings("java:S2160")
-public class ImmutableMap<K, V> extends ImmutableAbstractMap<K, V> {
+public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     @SuppressWarnings("rawtypes")
     private static final ImmutableMap EMPTY = new ImmutableMap(N.emptyMap(), false);
@@ -498,29 +498,29 @@ public class ImmutableMap<K, V> extends ImmutableAbstractMap<K, V> {
         }
     }
 
-    /**
-     * Returns the value to which the specified key is mapped, or the defaultValue if this map
-     * contains no mapping for the key. This method distinguishes between a key that is mapped
-     * to {@code null} and a key that is not present in the map.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.getOrDefault("a", 0));    // 1
-     * System.out.println(map.getOrDefault("c", 0));    // 0
-     * System.out.println(map.getOrDefault("c", 99));   // 99
-     * }</pre>
-     *
-     * @param key the key whose associated value is to be returned.
-     * @param defaultValue the value to return if the map contains no mapping for the key.
-     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists.
-     */
-    @Override
-    public V getOrDefault(final Object key, final V defaultValue) {
-        final V val = get(key);
-
-        return val == null && !containsKey(key) ? defaultValue : val;
-    }
+    //    /**
+    //     * Returns the value to which the specified key is mapped, or the defaultValue if this map
+    //     * contains no mapping for the key. This method distinguishes between a key that is mapped
+    //     * to {@code null} and a key that is not present in the map.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
+    //     * System.out.println(map.getOrDefault("a", 0));    // 1
+    //     * System.out.println(map.getOrDefault("c", 0));    // 0
+    //     * System.out.println(map.getOrDefault("c", 99));   // 99
+    //     * }</pre>
+    //     *
+    //     * @param key the key whose associated value is to be returned.
+    //     * @param defaultValue the value to return if the map contains no mapping for the key.
+    //     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists.
+    //     */
+    //    @Override
+    //    public V getOrDefault(final Object key, final V defaultValue) {
+    //        final V val = get(key);
+    //
+    //        return val == null && !containsKey(key) ? defaultValue : val;
+    //    }
 
     /**
      * Creates a new Builder for constructing an ImmutableMap.

@@ -139,13 +139,13 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * Returns the {@code null} character (0) if the database value is NULL.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @return the first character of the string value, or 0 if NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Character get(ResultSet rs, String columnLabel) throws SQLException {
-        final String result = rs.getString(columnLabel);
+    public Character get(ResultSet rs, String columnName) throws SQLException {
+        final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
             return defaultValue();

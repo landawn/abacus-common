@@ -39,7 +39,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * <pre>{@code
  * try(LineIterator it = FileUtils.lineIterator(file, "UTF-8")) {
  *   while (it.hasNext()) {
- *     String line = it.nextLine();
+ *     String line = it.next();
  *     // do something with line
  *   }
  * }

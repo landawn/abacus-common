@@ -337,7 +337,7 @@ public class HttpResponse {
      *
      * <p><b>Example output:</b></p>
      * <pre>{@code
-     * HttpResponse{statusCode=200, message=OK, url=https://api.example.com/users, elapsedTime=123}
+     * HttpResponse{statusCode=200, message=OK, url=http://localhost:18080/users, elapsedTime=123}
      * }</pre>
      *
      * @return a string representation of this object

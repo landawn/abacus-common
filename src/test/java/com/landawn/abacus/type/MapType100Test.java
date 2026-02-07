@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 
@@ -127,7 +127,7 @@ public class MapType100Test extends TestBase {
         assertEquals(2, result.size());
         assertEquals(1, result.get("key1"));
         assertEquals(2, result.get("key2"));
-        assertThrows(ParseException.class, () -> mapType.valueOf("{invalid json}"));
+        assertThrows(ParsingException.class, () -> mapType.valueOf("{invalid json}"));
 
         final String json = "{ \"test2\":{  }}";
 

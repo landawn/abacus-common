@@ -135,7 +135,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  *       However, exceptions are thrown when attempting invalid operations like adding elements to a {@code null} array or collection.</li>
  *   <li><b>Return Values:</b> An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader is always
  *       preferred over {@code null} for method return values.</li>
- *   <li><b>Index Parameters:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters
+ *   <li><b>Index Parameters:</b> Methods use {@code fromIndex} and {@code toIndex} parameters
  *       (not {@code offset/count} parameters) for consistency.</li>
  * </ul>
  *
@@ -20280,7 +20280,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable of values to check, may be {@code null} or empty
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Iterables#firstNonNull(Iterable)
-     * @see Iterables#firstNonNullOrDefault(Iterable, Object)
+     * @see CommonUtil#firstNonNullOrDefault(Iterable, Object)
      */
     public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -20311,7 +20311,7 @@ sealed class CommonUtil permits N {
      * @param iter the iterator of values to check, may be {@code null}
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Iterables#firstNonNull(Iterator)
-     * @see Iterables#firstNonNullOrDefault(Iterator, Object)
+     * @see CommonUtil#firstNonNullOrDefault(Iterator, Object)
      */
     public static <T> Optional<T> firstNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -20327,6 +20327,98 @@ sealed class CommonUtil permits N {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Returns the first non-null element from the specified array, or the default value if no non-null element is found.
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to search through
+     * @param defaultValue the value to return if no non-null element is found or if the array is empty/null; must not be null
+     * @return the first non-null element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null
+     */
+    public static <T> T firstNonNullOrDefault(final T[] a, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        if (isEmpty(a)) {
+            return defaultValue;
+        }
+
+        for (final T e : a) {
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the first {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, "first", "second");
+     * String result = Iterables.firstNonNullOrDefault(list, "default");   // returns "first"
+     * List<String> empty = Arrays.asList();
+     * String result2 = Iterables.firstNonNullOrDefault(empty, "default");   // returns "default"
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the iterable.
+     * @param c the iterable to check.
+     * @param defaultValue the default value to return if the iterable is empty.
+     * @return the first {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
+     * @see #firstNonNullOrDefault(Iterator, Object)
+     * @see #firstNonNull(Iterable) 
+     */
+    public static <T> T firstNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        if (isEmpty(c)) {
+            return defaultValue;
+        }
+
+        for (final T e : c) {
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the first {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, "first", "second");
+     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default");   // returns "first"
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the iterator.
+     * @param iter the iterator to check.
+     * @param defaultValue the default value to return if the iterator is empty.
+     * @return the first {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
+     * @see #firstNonNullOrDefault(Iterable, Object)
+     * @see #firstNonNull(Iterator)
+     */
+    public static <T> T firstNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        if (iter == null) {
+            return defaultValue;
+        }
+
+        while (iter.hasNext()) {
+            final T e = iter.next();
+            if (e != null) {
+                return e;
+            }
+        }
+
+        return defaultValue;
     }
 
     /**
@@ -20479,6 +20571,80 @@ sealed class CommonUtil permits N {
         }
 
         return Optional.ofNullable(lastNonNull);
+    }
+
+    /**
+     * Returns the last non-null element from the specified array, or the default value if no non-null element is found.
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to search through
+     * @param defaultValue the value to return if no non-null element is found or if the array is empty/null; must not be null
+     * @return the last non-null element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null
+     */
+    public static <T> T lastNonNullOrDefault(final T[] a, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        final T ret = Iterables.lastNonNull(a);
+
+        return ret == null ? defaultValue : ret;
+    }
+
+    /**
+     * Returns the last {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("first", "second", null);
+     * String result = Iterables.lastNonNullOrDefault(list, "default");   // returns "second"
+     *
+     * List<String> empty = Arrays.asList();
+     * String result2 = Iterables.lastNonNullOrDefault(empty, "default");   // returns "default"
+     *
+     * List<String> allNulls = Arrays.asList(null, null);
+     * String result3 = Iterables.lastNonNullOrDefault(allNulls, "default");   // returns "default"
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the iterable.
+     * @param c the iterable to check.
+     * @param defaultValue the default value to return if the iterable is empty.
+     * @return the last {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
+     * @see #lastNonNullOrDefault(Iterator, Object)
+     * @see #lastNonNull(Iterable)
+     */
+    public static <T> T lastNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        final T ret = Iterables.lastNonNull(c);
+
+        return ret == null ? defaultValue : ret;
+    }
+
+    /**
+     * Returns the last {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("first", "second", null);
+     * String result = Iterables.lastNonNullOrDefault(list.iterator(), "default");   // returns "second"
+     *
+     * Iterator<String> emptyIter = Collections.emptyIterator();
+     * String result2 = Iterables.lastNonNullOrDefault(emptyIter, "default");   // returns "default"
+     * }</pre>
+     *
+     * @param <T> the type of the elements in the iterator.
+     * @param iter the iterator to check.
+     * @param defaultValue the default value to return if the iterator is empty.
+     * @return the last {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
+     * @see #lastNonNullOrDefault(Iterable, Object)
+     * @see lastNonNull(Iterator)
+     */
+    public static <T> T lastNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
+        checkArgNotNull(defaultValue, cs.defaultValue);
+
+        final T ret = Iterables.lastNonNull(iter);
+
+        return ret == null ? defaultValue : ret;
     }
 
     /**
@@ -20676,6 +20842,55 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty element from the specified array, or the default value if no non-empty element is found.
+     *
+     * @param <T> the type of CharSequence elements
+     * @param css the array of CharSequence elements to search through
+     * @param defaultValue the value to return if no non-empty element is found or if the array is empty/null; must not be empty
+     * @return the first non-empty element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null or empty
+     */
+    public static <T extends CharSequence> T firstNonEmptyOrDefault(final T[] css, T defaultValue) {
+        checkArgNotEmpty(defaultValue, cs.defaultValue);
+
+        if (isEmpty(css)) {
+            return defaultValue;
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotEmpty(e)) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the first non-empty element from the specified iterable, or the default value if no non-empty element is found.
+     *
+     * @param <T> the type of CharSequence elements
+     * @param css the iterable of CharSequence elements to search through
+     * @param defaultValue the value to return if no non-empty element is found or if the iterable is empty/null
+     * @return the first non-empty element, or {@code defaultValue} if none exists
+     */
+    public static <T extends CharSequence> T firstNonEmptyOrDefault(final Iterable<? extends T> css, T defaultValue) {
+        checkArgNotEmpty(defaultValue, cs.defaultValue);
+
+        if (isEmpty(css)) {
+            return defaultValue;
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotEmpty(e)) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
      * Returns the first non-blank CharSequence from the given CharSequences.
      * If both CharSequences are blank or {@code null}, it returns an empty Optional.
      *
@@ -20756,6 +20971,58 @@ sealed class CommonUtil permits N {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Returns the first non-blank element from the specified array, or the default value if no non-blank element is found.
+     * <p>
+     * A CharSequence is considered blank if it is null, empty, or contains only whitespace characters.
+     * </p>
+     *
+     * @param <T> the type of CharSequence elements
+     * @param css the array of CharSequence elements to search through
+     * @param defaultValue the value to return if no non-blank element is found or if the array is empty/null; must not be blank
+     * @return the first non-blank element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null, empty, or blank
+     */
+    public static <T extends CharSequence> T firstNonBlankOrDefault(final T[] css, T defaultValue) {
+        checkArgNotBlank(defaultValue, cs.defaultValue);
+
+        if (isEmpty(css)) {
+            return defaultValue;
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotBlank(e)) {
+                return e;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns the first non-blank element from the specified iterable, or the default value if no non-blank element is found.
+     *
+     * @param <T> the type of CharSequence elements
+     * @param css the iterable of CharSequence elements to search through
+     * @param defaultValue the value to return if no non-blank element is found or if the iterable is empty/null
+     * @return the first non-blank element, or {@code defaultValue} if none exists
+     */
+    public static <T extends CharSequence> T firstNonBlankOrDefault(final Iterable<? extends T> css, T defaultValue) {
+        checkArgNotBlank(defaultValue, cs.defaultValue);
+
+        if (isEmpty(css)) {
+            return defaultValue;
+        }
+
+        for (final T e : css) {
+            if (Strings.isNotBlank(e)) {
+                return e;
+            }
+        }
+
+        return defaultValue;
     }
 
     /**
@@ -31064,7 +31331,7 @@ sealed class CommonUtil permits N {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the array
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the array
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
      *
      * @param a the array to search through for the object, may be {@code null}
@@ -31640,7 +31907,7 @@ sealed class CommonUtil permits N {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
-     * <p>A negative startIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A startIndex larger than the
+     * <p>A negative fromIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A fromIndex larger than the
      * array length will search from the end of the array.
      *
      * @param a the array to traverse for looking for the object, may be {@code null}
@@ -32467,11 +32734,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all occurrences of the specified value in the given array, starting the search from the specified index.
-     * <p>This method searches the array from {@code startIndex} (inclusive) onwards and returns the positions (indices)
+     * <p>This method searches the array from {@code fromIndex} (inclusive) onwards and returns the positions (indices)
      * of all elements that are equal to the specified value. Equality is determined using {@link Objects#equals(Object, Object)},
      * which handles {@code null} values correctly.
      *
-     * <p>If {@code startIndex} is negative, the search starts from index 0. If {@code startIndex} is greater than or equal
+     * <p>If {@code fromIndex} is negative, the search starts from index 0. If {@code fromIndex} is greater than or equal
      * to the array length, an empty array is returned.
      *
      * <p>The indices are returned in ascending order.
@@ -32488,7 +32755,7 @@ sealed class CommonUtil permits N {
      * int[] indices2 = indicesOfAll(words, "apple", 3);
      * // Returns [4, 6] (only "apple"s at or after index 3)
      *
-     * // Search with negative startIndex (treated as 0)
+     * // Search with negative fromIndex (treated as 0)
      * int[] indices3 = indicesOfAll(words, "banana", -1);
      * // Returns [1]
      *
@@ -32499,24 +32766,24 @@ sealed class CommonUtil permits N {
      *
      * @param a the array to search within - may be {@code null} or empty
      * @param valueToFind the value to find in the array - may be {@code null}
-     * @param startIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
-     * @return an array of indices of all occurrences of the specified value starting from {@code startIndex}.
-     *         Returns an empty array if no occurrences are found, the array is {@code null}/empty, or {@code startIndex} is beyond the array length.
+     * @param fromIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
+     * @return an array of indices of all occurrences of the specified value starting from {@code fromIndex}.
+     *         Returns an empty array if no occurrences are found, the array is {@code null}/empty, or {@code fromIndex} is beyond the array length.
      *         The indices are in ascending order.
      * @see #indicesOfAll(Object[], Object)
      * @see #indicesOfAll(Collection, Object, int)
      * @see #indexOf(Object[], Object, int)
      */
-    public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int startIndex) {
+    public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return EMPTY_INT_ARRAY;
         }
 
         final IntList result = new IntList();
 
-        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+        for (int idx = N.max(fromIndex, 0); idx < len; idx++) {
             if (equals(a[idx], valueToFind)) {
                 result.add(idx);
             }
@@ -32541,13 +32808,13 @@ sealed class CommonUtil permits N {
      *
      * @param c the collection to search within
      * @param valueToFind the value to find in the collection
-     * @param startIndex the index to start the search from
+     * @param fromIndex the index to start the search from
      * @return an array of indices of all occurrences of the specified value
      */
-    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, final int startIndex) {
+    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, final int fromIndex) {
         final int size = size(c);
 
-        if (size == 0 || startIndex >= size) {
+        if (size == 0 || fromIndex >= size) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -32555,7 +32822,7 @@ sealed class CommonUtil permits N {
 
         if (c instanceof final List<?> list && c instanceof RandomAccess) {
 
-            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+            for (int idx = N.max(fromIndex, 0); idx < size; idx++) {
                 if (equals(list.get(idx), valueToFind)) {
                     result.add(idx);
                 }
@@ -32565,7 +32832,7 @@ sealed class CommonUtil permits N {
 
             int idx = 0;
 
-            while (idx < startIndex) {
+            while (idx < fromIndex) {
                 iter.next();
                 idx++;
             }
@@ -32608,19 +32875,19 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to search within
      * @param predicate the predicate to apply to elements of the array
-     * @param startIndex the index to start the search from
+     * @param fromIndex the index to start the search from
      * @return an array of indices of all elements that match the predicate. An empty array if the input array is empty.
      */
-    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int startIndex) {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return EMPTY_INT_ARRAY;
         }
 
         final IntList result = new IntList();
 
-        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+        for (int idx = N.max(fromIndex, 0); idx < len; idx++) {
             if (predicate.test(a[idx])) {
                 result.add(idx);
             }

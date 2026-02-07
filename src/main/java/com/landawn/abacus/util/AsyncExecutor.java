@@ -219,16 +219,16 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
-     * @param actionInFinal the Runnable to be executed after the command completes (in a finally block)
+     * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending completion of this action
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable actionInFinal) {
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable finallyAction) {
         return execute(new FutureTask<>(() -> {
             try {
                 command.run();
                 return null;
             } finally {
-                actionInFinal.run();
+                finallyAction.run();
             }
         }));
     }
@@ -315,15 +315,15 @@ public class AsyncExecutor {
      *
      * @param <R> the type of the result returned by the Callable
      * @param command the Callable command to be executed asynchronously; may throw exceptions
-     * @param actionInFinal the Runnable to be executed after the command completes (in a finally block)
+     * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending result of this computation
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actionInFinal) {
+    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable finallyAction) {
         return execute(new FutureTask<>(() -> {
             try {
                 return command.call();
             } finally {
-                actionInFinal.run();
+                finallyAction.run();
             }
         }));
     }
@@ -379,7 +379,7 @@ public class AsyncExecutor {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<Void> future = executor.execute(
+     * ContinuableFuture<Void> future = executor.executeWithRetry(
      *     () -> sendEmail(),
      *     3, // retry up to 3 times
      *     1000, // wait 1 second between retries
@@ -387,20 +387,31 @@ public class AsyncExecutor {
      * );
      * }</pre>
      *
-     * @param action the Runnable to be executed asynchronously; may throw checked exceptions
+     * @param command the Runnable to be executed asynchronously; may throw checked exceptions
      * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
      * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
      * @param retryCondition the predicate to determine whether to retry based on the caught exception;
      *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
      * @return a ContinuableFuture representing the pending completion of this action (including retries)
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
-            final Predicate<? super Exception> retryCondition) {
+    public ContinuableFuture<Void> executeWithRetry(final Throwables.Runnable<? extends Exception> command, final int retryTimes,
+            final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
         return execute(() -> {
-            Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(action);
+            Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(command);
             return null;
         });
     }
+
+    //    /**
+    //     * Executes a Runnable command asynchronously with automatic retry on failure.
+    //     *
+    //     * @deprecated Use {@link #executeWithRetry(Throwables.Runnable, int, long, Predicate)} instead for clearer semantics.
+    //     */
+    //    @Deprecated
+    //    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final int retryTimes, final long retryIntervalInMillis,
+    //            final Predicate<? super Exception> retryCondition) {
+    //        return executeWithRetry(command, retryTimes, retryIntervalInMillis, retryCondition);
+    //    }
 
     /**
      * Executes a Callable command asynchronously with automatic retry on failure or unsatisfactory result.
@@ -413,7 +424,7 @@ public class AsyncExecutor {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<String> future = executor.execute(
+     * ContinuableFuture<String> future = executor.executeWithRetry(
      *     () -> fetchDataFromAPI(),
      *     5, // retry up to 5 times
      *     2000, // wait 2 seconds between retries
@@ -422,20 +433,31 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param <R> the type of the result returned by the Callable
-     * @param action the Callable to be executed asynchronously; may throw exceptions
+     * @param command the Callable to be executed asynchronously; may throw exceptions
      * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
      * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
      * @param retryCondition the bi-predicate to determine whether to retry based on the result and exception;
      *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,
+    public <R> ContinuableFuture<R> executeWithRetry(final Callable<R> command, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return execute(() -> {
             final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
-            return retry.call(action);
+            return retry.call(command);
         });
     }
+
+    //    /**
+    //     * Executes a Callable command asynchronously with automatic retry on failure or unsatisfactory result.
+    //     *
+    //     * @deprecated Use {@link #executeWithRetry(Callable, int, long, BiPredicate)} instead for clearer semantics.
+    //     */
+    //    @Deprecated
+    //    public <R> ContinuableFuture<R> execute(final Callable<R> command, final int retryTimes, final long retryIntervalInMillis,
+    //            final BiPredicate<? super R, ? super Exception> retryCondition) {
+    //        return executeWithRetry(command, retryTimes, retryIntervalInMillis, retryCondition);
+    //    }
 
     /**
      * Executes a FutureTask asynchronously using the underlying executor.

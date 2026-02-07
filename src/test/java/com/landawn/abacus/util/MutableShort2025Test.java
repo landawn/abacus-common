@@ -57,7 +57,7 @@ public class MutableShort2025Test extends TestBase {
     @Test
     public void testSetIf_true() throws Exception {
         MutableShort ms = MutableShort.of((short) 10);
-        boolean updated = ms.setIf((short) 20, v -> v < 15);
+        boolean updated = ms.setIf(v -> v < 15, (short) 20);
         assertTrue(updated);
         assertEquals((short) 20, ms.value());
     }
@@ -65,7 +65,7 @@ public class MutableShort2025Test extends TestBase {
     @Test
     public void testSetIf_false() throws Exception {
         MutableShort ms = MutableShort.of((short) 10);
-        boolean updated = ms.setIf((short) 20, v -> v > 15);
+        boolean updated = ms.setIf(v -> v > 15, (short) 20);
         assertFalse(updated);
         assertEquals((short) 10, ms.value());
     }
@@ -325,11 +325,11 @@ public class MutableShort2025Test extends TestBase {
     public void testIntegration_predicate() throws Exception {
         MutableShort ms = MutableShort.of((short) 50);
 
-        boolean updated = ms.setIf((short) 100, v -> v >= 50);
+        boolean updated = ms.setIf(v -> v >= 50, (short) 100);
         assertTrue(updated);
         assertEquals((short) 100, ms.value());
 
-        updated = ms.setIf((short) 200, v -> v < 50);
+        updated = ms.setIf(v -> v < 50, (short) 200);
         assertFalse(updated);
         assertEquals((short) 100, ms.value());
     }

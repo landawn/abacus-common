@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
 
@@ -353,6 +354,136 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     public abstract char nextChar();
 
     /**
+     * Skips the first {@code n} elements from this iterator and returns a new iterator.
+     *
+     * @param n the number of elements to skip, must be non-negative
+     * @return this iterator if n is 0, otherwise a new CharIterator with n elements skipped
+     * @throws IllegalArgumentException if n is negative
+     */
+    public CharIterator skip(final long n) throws IllegalArgumentException {
+        N.checkArgNotNegative(n, cs.n);
+
+        if (n == 0) {
+            return this;
+        }
+
+        final CharIterator iter = this;
+
+        return new CharIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public char nextChar() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return iter.nextChar();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextChar();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    /**
+     * Limits this iterator to return at most the specified number of elements.
+     *
+     * @param count the maximum number of elements to return, must be non-negative
+     * @return an empty iterator if count is 0, otherwise a new CharIterator limited to count elements
+     * @throws IllegalArgumentException if count is negative
+     */
+    public CharIterator limit(final long count) throws IllegalArgumentException {
+        N.checkArgNotNegative(count, cs.count);
+
+        if (count == 0) {
+            return CharIterator.EMPTY;
+        }
+
+        final CharIterator iter = this;
+
+        return new CharIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public char nextChar() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                cnt--;
+                return iter.nextChar();
+            }
+        };
+    }
+
+    /**
+     * Filters elements based on the given predicate.
+     *
+     * @param predicate the predicate to test elements
+     * @return a new CharIterator containing only elements that match the predicate
+     * @throws IllegalArgumentException if predicate is null
+     */
+    public CharIterator filter(final CharPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.Predicate);
+
+        final CharIterator iter = this;
+
+        return new CharIterator() {
+            private boolean hasNext = false;
+            private char next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextChar();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public char nextChar() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    /**
      * Returns the first element wrapped in an {@code OptionalChar}, or an empty {@code OptionalChar}
      * if no elements are available.
      *
@@ -532,9 +663,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      */
     @Beta
     public ObjIterator<IndexedChar> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final CharIterator iter = this;
 

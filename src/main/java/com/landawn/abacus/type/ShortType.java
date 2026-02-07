@@ -92,12 +92,12 @@ public final class ShortType extends AbstractShortType {
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
      * @return the Short value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Short get(ResultSet rs, String columnLabel) throws SQLException {
-        return super.get(rs, columnLabel);
+    public Short get(ResultSet rs, String columnName) throws SQLException {
+        return super.get(rs, columnName);
     }
 }

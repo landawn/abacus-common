@@ -47,17 +47,17 @@ import com.landawn.abacus.util.cs;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
- * String response = HttpRequest.url("https://api.example.com/users")
+ * String response = HttpRequest.url("http://localhost:18080/users")
  *     .get(String.class);
  *
  * // POST request with JSON body and headers
- * User createdUser = HttpRequest.url("https://api.example.com/users")
+ * User createdUser = HttpRequest.url("http://localhost:18080/users")
  *     .header("Authorization", "Bearer token123")
  *     .jsonBody(new User("John", "Doe"))
  *     .post(User.class);
  *
  * // Async request with custom timeout
- * ContinuableFuture<String> future = HttpRequest.url("https://api.example.com/data")
+ * ContinuableFuture<String> future = HttpRequest.url("http://localhost:18080/data")
  *     .connectTimeout(5000)
  *     .readTimeout(10000)
  *     .asyncGet(String.class);
@@ -100,7 +100,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HttpRequest.url("https://api.example.com/data").get(String.class);
+     * String response = HttpRequest.url("http://localhost:18080/data").get(String.class);
      * }</pre>
      *
      * @param url The target URL for the request
@@ -117,7 +117,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HttpRequest.url("https://api.example.com/data", 5000, 10000).get(String.class);
+     * String response = HttpRequest.url("http://localhost:18080/data", 5000, 10000).get(String.class);
      * }</pre>
      *
      * @param url The target URL for the request
@@ -171,7 +171,7 @@ public final class HttpRequest {
      * HttpSettings settings = new HttpSettings()
      *     .header("User-Agent", "MyApp/1.0")
      *     .setConnectTimeout(5000);
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .settings(settings)
      *     .get();
      * }</pre>
@@ -196,7 +196,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/secure")
+     * HttpRequest.url("http://localhost:18080/secure")
      *     .basicAuth("username", "password")
      *     .get();
      * }</pre>
@@ -222,7 +222,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .header("Authorization", "Bearer token123")
      *     .header("Accept", "application/json")
      *     .get();
@@ -250,7 +250,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .headers("Authorization", "Bearer token123",
      *              "Accept", "application/json")
      *     .get();
@@ -280,7 +280,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .headers("Authorization", "Bearer token123",
      *              "Accept", "application/json",
      *              "User-Agent", "MyApp/1.0")
@@ -316,7 +316,7 @@ public final class HttpRequest {
      *     "Authorization", "Bearer token123",
      *     "Content-Type", "application/json"
      * );
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .headers(headers)
      *     .get();
      * }</pre>
@@ -344,7 +344,7 @@ public final class HttpRequest {
      * HttpHeaders headers = HttpHeaders.create()
      *     .setAuthorization("Bearer token123")
      *     .setAccept("application/json");
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .headers(headers)
      *     .get();
      * }</pre>
@@ -370,7 +370,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .connectTimeout(5000) // 5 seconds
      *     .get();
      * }</pre>
@@ -391,7 +391,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .connectTimeout(Duration.ofSeconds(5))
      *     .get();
      * }</pre>
@@ -414,7 +414,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .readTimeout(10000) // 10 seconds
      *     .get();
      * }</pre>
@@ -435,7 +435,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .readTimeout(Duration.ofSeconds(10))
      *     .get();
      * }</pre>
@@ -457,7 +457,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/static-data")
+     * HttpRequest.url("http://localhost:18080/static-data")
      *     .useCaches(true)
      *     .get();
      * }</pre>
@@ -481,7 +481,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SSLSocketFactory factory = createCustomSSLFactory();
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .sslSocketFactory(factory)
      *     .get();
      * }</pre>
@@ -504,7 +504,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
-     * HttpRequest.url("https://api.example.com")
+     * HttpRequest.url("http://localhost:18080")
      *     .proxy(proxy)
      *     .get();
      * }</pre>
@@ -525,7 +525,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/search")
+     * HttpRequest.url("http://localhost:18080/search")
      *     .query("q=test&page=1")
      *     .get();
      * }</pre>
@@ -545,7 +545,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = Map.of("q", "test", "page", 1);
-     * HttpRequest.url("https://api.example.com/search")
+     * HttpRequest.url("http://localhost:18080/search")
      *     .query(params)
      *     .get();
      * }</pre>
@@ -564,7 +564,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody("{\"name\":\"John\",\"age\":30}")
      *     .post();
      * }</pre>
@@ -586,7 +586,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", "Doe");
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(user)
      *     .post();
      * }</pre>
@@ -608,7 +608,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<user><name>John</name><age>30</age></user>";
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(xml)
      *     .post();
      * }</pre>
@@ -631,7 +631,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(user)
      *     .post();
      * }</pre>
@@ -653,7 +653,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> formData = Map.of("username", "john", "password", "secret");
-     * HttpRequest.url("https://api.example.com/login")
+     * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
      *     .post();
      * }</pre>
@@ -676,7 +676,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LoginForm form = new LoginForm("john", "secret");
-     * HttpRequest.url("https://api.example.com/login")
+     * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(form)
      *     .post();
      * }</pre>
@@ -708,7 +708,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3, 4};
-     * HttpRequest.url("https://api.example.com/upload")
+     * HttpRequest.url("http://localhost:18080/upload")
      *     .header("Content-Type", "application/octet-stream")
      *     .body(data)
      *     .post();
@@ -728,7 +728,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/data").get();
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/data").get();
      * System.out.println("Status: " + response.statusCode());
      * System.out.println("Body: " + response.body(String.class));
      * }</pre>
@@ -745,7 +745,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = HttpRequest.url("https://api.example.com/users/123")
+     * User user = HttpRequest.url("http://localhost:18080/users/123")
      *     .get(User.class);
      * }</pre>
      *
@@ -764,7 +764,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/users")
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(new User("John", "Doe"))
      *     .post();
      * }</pre>
@@ -782,7 +782,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
-     * User createdUser = HttpRequest.url("https://api.example.com/users")
+     * User createdUser = HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .post(User.class);
      * }</pre>
@@ -802,7 +802,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put();
      * }</pre>
@@ -820,7 +820,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User updatedUser = HttpRequest.url("https://api.example.com/users/123")
+     * User updatedUser = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(user)
      *     .put(User.class);
      * }</pre>
@@ -840,7 +840,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/users/123")
      *     .delete();
      * }</pre>
      *
@@ -857,7 +857,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DeleteResponse response = HttpRequest.url("https://api.example.com/users/123")
+     * DeleteResponse response = HttpRequest.url("http://localhost:18080/users/123")
      *     .delete(DeleteResponse.class);
      * }</pre>
      *
@@ -877,7 +877,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/users/123")
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/users/123")
      *     .head();
      * System.out.println("Exists: " + (response.statusCode() == 200));
      * }</pre>
@@ -907,7 +907,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpResponse response = HttpRequest.url("https://api.example.com/data")
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/data")
      *     .execute(HttpMethod.GET);
      * }</pre>
      *
@@ -948,7 +948,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("response.json");
-     * HttpRequest.url("https://api.example.com/large-data")
+     * HttpRequest.url("http://localhost:18080/large-data")
      *     .execute(HttpMethod.GET, file);
      * }</pre>
      *
@@ -975,7 +975,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .execute(HttpMethod.GET, baos);
      * byte[] data = baos.toByteArray();
      * }</pre>
@@ -1003,7 +1003,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
-     * HttpRequest.url("https://api.example.com/text")
+     * HttpRequest.url("http://localhost:18080/text")
      *     .execute(HttpMethod.GET, writer);
      * String text = writer.toString();
      * }</pre>
@@ -1035,7 +1035,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncGet()
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
@@ -1053,7 +1053,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncGet(executor)
      *     .getThenAccept(response -> System.out.println("Got: " + response.statusCode()));
      * }</pre>
@@ -1070,7 +1070,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncGet(User.class)
      *     .getThenAccept(user -> System.out.println("User: " + user.getName()));
      * }</pre>
@@ -1090,7 +1090,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncGet(User.class, executor)
      *     .getThenAccept(user -> System.out.println("User: " + user.getName()));
      * }</pre>
@@ -1110,7 +1110,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(new User("John", "Doe"))
      *     .asyncPost()
      *     .getThenAccept(response -> System.out.println("Created: " + response.statusCode()));
@@ -1129,7 +1129,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .asyncPost(executor)
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
@@ -1148,7 +1148,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(new User("John", "Doe"))
      *     .asyncPost(User.class)
      *     .getThenAccept(user -> System.out.println("Created user: " + user.getId()));
@@ -1169,7 +1169,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users")
+     * HttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .asyncPost(User.class, executor)
      *     .getThenAccept(user -> System.out.println("Created: " + user.getId()));
@@ -1190,7 +1190,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .asyncPut()
      *     .getThenAccept(response -> System.out.println("Updated: " + response.statusCode()));
@@ -1209,7 +1209,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .asyncPut(executor)
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
@@ -1228,7 +1228,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .asyncPut(User.class)
      *     .getThenAccept(user -> System.out.println("Updated user: " + user.getId()));
@@ -1249,7 +1249,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .asyncPut(User.class, executor)
      *     .getThenAccept(user -> System.out.println("Updated: " + user.getId()));
@@ -1270,7 +1270,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncDelete()
      *     .getThenAccept(response -> System.out.println("Deleted: " + response.statusCode()));
      * }</pre>
@@ -1288,7 +1288,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncDelete(executor)
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
@@ -1306,7 +1306,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncDelete(DeleteResponse.class)
      *     .getThenAccept(response -> System.out.println("Deleted: " + response.isSuccess()));
      * }</pre>
@@ -1326,7 +1326,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncDelete(DeleteResponse.class, executor)
      *     .getThenAccept(response -> System.out.println("Deleted: " + response.isSuccess()));
      * }</pre>
@@ -1346,7 +1346,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncHead()
      *     .getThenAccept(response -> System.out.println("Exists: " + (response.statusCode() == 200)));
      * }</pre>
@@ -1364,7 +1364,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/file")
+     * HttpRequest.url("http://localhost:18080/file")
      *     .asyncHead(executor)
      *     .getThenAccept(response -> System.out.println("Size: " + response.getContentLength()));
      * }</pre>
@@ -1408,7 +1408,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncExecute(HttpMethod.GET)
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
@@ -1428,7 +1428,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncExecute(HttpMethod.GET, executor)
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
@@ -1448,7 +1448,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncExecute(HttpMethod.GET, User.class)
      *     .getThenAccept(user -> System.out.println("User: " + user.getName()));
      * }</pre>
@@ -1475,7 +1475,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("https://api.example.com/users/123")
+     * HttpRequest.url("http://localhost:18080/users/123")
      *     .asyncExecute(HttpMethod.GET, User.class, executor)
      *     .getThenAccept(user -> System.out.println("User: " + user.getName()));
      * }</pre>
@@ -1503,7 +1503,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("data.json");
-     * HttpRequest.url("https://api.example.com/large-data")
+     * HttpRequest.url("http://localhost:18080/large-data")
      *     .asyncExecute(HttpMethod.GET, file)
      *     .thenRunAsync(() -> System.out.println("Download complete"));
      * }</pre>
@@ -1531,7 +1531,7 @@ public final class HttpRequest {
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * File file = new File("data.json");
-     * HttpRequest.url("https://api.example.com/large-data")
+     * HttpRequest.url("http://localhost:18080/large-data")
      *     .asyncExecute(HttpMethod.GET, file, executor)
      *     .thenRunAsync(() -> System.out.println("Download complete"));
      * }</pre>
@@ -1559,7 +1559,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncExecute(HttpMethod.GET, baos)
      *     .thenRunAsync(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
@@ -1587,7 +1587,7 @@ public final class HttpRequest {
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * HttpRequest.url("https://api.example.com/data")
+     * HttpRequest.url("http://localhost:18080/data")
      *     .asyncExecute(HttpMethod.GET, baos, executor)
      *     .thenRunAsync(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
@@ -1615,7 +1615,7 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
-     * HttpRequest.url("https://api.example.com/text")
+     * HttpRequest.url("http://localhost:18080/text")
      *     .asyncExecute(HttpMethod.GET, writer)
      *     .thenRunAsync(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>
@@ -1643,7 +1643,7 @@ public final class HttpRequest {
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * StringWriter writer = new StringWriter();
-     * HttpRequest.url("https://api.example.com/text")
+     * HttpRequest.url("http://localhost:18080/text")
      *     .asyncExecute(HttpMethod.GET, writer, executor)
      *     .thenRunAsync(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>

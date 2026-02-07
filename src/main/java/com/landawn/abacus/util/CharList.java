@@ -326,6 +326,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     private static final long serialVersionUID = 7293826835233022514L;
 
     static final Random RAND = new SecureRandom();
+    static final int BOUND = Character.MAX_VALUE + 1;
 
     /**
      * The array buffer into which the elements of the CharList are stored.
@@ -532,10 +533,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     public static CharList random(final int len) {
         final char[] a = new char[len];
-        final int mod = Character.MAX_VALUE + 1;
 
         for (int i = 0; i < len; i++) {
-            a[i] = (char) RAND.nextInt(mod);
+            a[i] = (char) RAND.nextInt(BOUND);
         }
 
         return of(a);

@@ -61,14 +61,14 @@ public class BlobInputStreamType extends InputStreamType {
      * Converts the SQL Blob to an InputStream for reading binary data.
      *
      * @param rs the ResultSet to retrieve the BLOB from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return blobToInputStream(rs.getBlob(columnLabel));
+    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+        return blobToInputStream(rs.getBlob(columnName));
     }
 
     /**

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 @Tag("new-test")
@@ -433,7 +433,7 @@ public class PropertiesUtil100Test extends TestBase {
 
     @Test
     public void testLoadFromInvalidXmlFile() {
-        Assertions.assertThrows(ParseException.class, () -> {
+        Assertions.assertThrows(ParsingException.class, () -> {
             PropertiesUtil.loadFromXml(testInvalidXmlFile);
         });
     }

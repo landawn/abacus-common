@@ -10197,18 +10197,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of two downstream collectors
+         * Returns a {@code Collector} that combines the results of two component collectors
          * into a {@code Tuple2}.
          * 
          * <p>This collector is useful when you need to perform two different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by both downstream collectors, and their final results are combined
+         * processed by both component collectors, and their final results are combined
          * into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to both downstream collectors and
+         * <p>The returned collector forwards elements to both component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of the two
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10222,13 +10222,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @return a {@code Collector} which combines the results of two downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @return a {@code Collector} which combines the results of two component collectors
          *         into a {@code Tuple2<R1, R2>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2> Collector<T, ?, Tuple2<R1, R2>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2) {
@@ -10236,18 +10236,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of three downstream collectors
+         * Returns a {@code Collector} that combines the results of three component collectors
          * into a {@code Tuple3}.
          * 
          * <p>This collector is useful when you need to perform three different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by all three downstream collectors, and their final results are
+         * processed by all three component collectors, and their final results are
          * combined into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all three
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10261,15 +10261,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @return a {@code Collector} which combines the results of three downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @return a {@code Collector} which combines the results of three component collectors
          *         into a {@code Tuple3<R1, R2, R3>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2, R3> Collector<T, ?, Tuple3<R1, R2, R3>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3) {
@@ -10277,18 +10277,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of four downstream collectors
+         * Returns a {@code Collector} that combines the results of four component collectors
          * into a {@code Tuple4}.
          * 
          * <p>This collector is useful when you need to perform four different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by all four downstream collectors, and their final results are
+         * processed by all four component collectors, and their final results are
          * combined into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all four
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10304,17 +10304,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param <R4> the result type of the fourth downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param downstream4 the fourth downstream collector
-         * @return a {@code Collector} which combines the results of four downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param <R4> the result type of the fourth component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param downstream4 the fourth component collector
+         * @return a {@code Collector} which combines the results of four component collectors
          *         into a {@code Tuple4<R1, R2, R3, R4>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2, R3, R4> Collector<T, ?, Tuple4<R1, R2, R3, R4>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4) {
@@ -10322,18 +10322,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of five downstream collectors
+         * Returns a {@code Collector} that combines the results of five component collectors
          * into a {@code Tuple5}.
          * 
          * <p>This collector is useful when you need to perform five different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by all five downstream collectors, and their final results are
+         * processed by all five component collectors, and their final results are
          * combined into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all five
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10350,19 +10350,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param <R4> the result type of the fourth downstream collector
-         * @param <R5> the result type of the fifth downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param downstream4 the fourth downstream collector
-         * @param downstream5 the fifth downstream collector
-         * @return a {@code Collector} which combines the results of five downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param <R4> the result type of the fourth component collector
+         * @param <R5> the result type of the fifth component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param downstream4 the fourth component collector
+         * @param downstream5 the fifth component collector
+         * @return a {@code Collector} which combines the results of five component collectors
          *         into a {@code Tuple5<R1, R2, R3, R4, R5>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
@@ -10381,18 +10381,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of six downstream collectors
+         * Returns a {@code Collector} that combines the results of six component collectors
          * into a {@code Tuple6}.
          * 
          * <p>This collector is useful when you need to perform six different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by all six downstream collectors, and their final results are
+         * processed by all six component collectors, and their final results are
          * combined into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all six
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10410,21 +10410,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param <R4> the result type of the fourth downstream collector
-         * @param <R5> the result type of the fifth downstream collector
-         * @param <R6> the result type of the sixth downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param downstream4 the fourth downstream collector
-         * @param downstream5 the fifth downstream collector
-         * @param downstream6 the sixth downstream collector
-         * @return a {@code Collector} which combines the results of six downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param <R4> the result type of the fourth component collector
+         * @param <R5> the result type of the fifth component collector
+         * @param <R6> the result type of the sixth component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param downstream4 the fourth component collector
+         * @param downstream5 the fifth component collector
+         * @param downstream6 the sixth component collector
+         * @return a {@code Collector} which combines the results of six component collectors
          *         into a {@code Tuple6<R1, R2, R3, R4, R5, R6>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2, R3, R4, R5, R6> Collector<T, ?, Tuple6<R1, R2, R3, R4, R5, R6>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
@@ -10445,18 +10445,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of seven downstream collectors
+         * Returns a {@code Collector} that combines the results of seven component collectors
          * into a {@code Tuple7}.
          * 
          * <p>This collector is useful when you need to perform seven different collection
          * operations on the same stream of elements in a single pass. Each element is
-         * processed by all seven downstream collectors, and their final results are
+         * processed by all seven component collectors, and their final results are
          * combined into a tuple.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all seven
-         * downstream collectors.</p>
+         * component collectors.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10480,23 +10480,23 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param <R4> the result type of the fourth downstream collector
-         * @param <R5> the result type of the fifth downstream collector
-         * @param <R6> the result type of the sixth downstream collector
-         * @param <R7> the result type of the seventh downstream collector
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param downstream4 the fourth downstream collector
-         * @param downstream5 the fifth downstream collector
-         * @param downstream6 the sixth downstream collector
-         * @param downstream7 the seventh downstream collector
-         * @return a {@code Collector} which combines the results of seven downstream collectors
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param <R4> the result type of the fourth component collector
+         * @param <R5> the result type of the fifth component collector
+         * @param <R6> the result type of the sixth component collector
+         * @param <R7> the result type of the seventh component collector
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param downstream4 the fourth component collector
+         * @param downstream5 the fifth component collector
+         * @param downstream6 the sixth component collector
+         * @param downstream7 the seventh component collector
+         * @return a {@code Collector} which combines the results of seven component collectors
          *         into a {@code Tuple7<R1, R2, R3, R4, R5, R6, R7>}
-         * @throws IllegalArgumentException if any downstream collector is null
+         * @throws IllegalArgumentException if any component collector is null
          */
         public static <T, R1, R2, R3, R4, R5, R6, R7> Collector<T, ?, Tuple7<R1, R2, R3, R4, R5, R6, R7>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
@@ -10520,18 +10520,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of two downstream collectors
+         * Returns a {@code Collector} that combines the results of two component collectors
          * using a specified merger function.
          * 
          * <p>This collector is useful when you need to perform two different collection
          * operations on the same stream of elements and combine their results in a custom
-         * way. Each element is processed by both downstream collectors, and their final
+         * way. Each element is processed by both component collectors, and their final
          * results are combined using the provided merger function.</p>
          * 
-         * <p>The returned collector forwards elements to both downstream collectors and
+         * <p>The returned collector forwards elements to both component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of the two
-         * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
+         * component collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10546,15 +10546,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
          * @param <R> the final result type
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param merger a function to merge the results of the two downstream collectors
-         * @return a {@code Collector} which combines the results of two downstream collectors
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param merger a function to merge the results of the two component collectors
+         * @return a {@code Collector} which combines the results of two component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any downstream collector or merger is null
+         * @throws IllegalArgumentException if any component collector or merger is null
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
@@ -10591,18 +10591,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of three downstream collectors
+         * Returns a {@code Collector} that combines the results of three component collectors
          * using a specified merger function.
          * 
          * <p>This collector is useful when you need to perform three different collection
          * operations on the same stream of elements and combine their results in a custom
-         * way. Each element is processed by all three downstream collectors, and their
+         * way. Each element is processed by all three component collectors, and their
          * final results are combined using the provided merger function.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of all three
-         * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
+         * component collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10617,17 +10617,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
          * @param <R> the final result type
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param merger a function to merge the results of the three downstream collectors
-         * @return a {@code Collector} which combines the results of three downstream collectors
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param merger a function to merge the results of the three component collectors
+         * @return a {@code Collector} which combines the results of three component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any downstream collector or merger is null
+         * @throws IllegalArgumentException if any component collector or merger is null
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
@@ -10673,18 +10673,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of four downstream collectors
+         * Returns a {@code Collector} that combines the results of four component collectors
          * using a specified merger function.
          * 
          * <p>This collector is useful when you need to perform four different collection
          * operations on the same stream of elements and combine their results in a custom
-         * way. Each element is processed by all four downstream collectors, and their
+         * way. Each element is processed by all four component collectors, and their
          * final results are combined using the provided merger function.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of all four
-         * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
+         * component collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10702,19 +10702,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param <R1> the result type of the first downstream collector
-         * @param <R2> the result type of the second downstream collector
-         * @param <R3> the result type of the third downstream collector
-         * @param <R4> the result type of the fourth downstream collector
+         * @param <R1> the result type of the first component collector
+         * @param <R2> the result type of the second component collector
+         * @param <R3> the result type of the third component collector
+         * @param <R4> the result type of the fourth component collector
          * @param <R> the final result type
-         * @param downstream1 the first downstream collector
-         * @param downstream2 the second downstream collector
-         * @param downstream3 the third downstream collector
-         * @param downstream4 the fourth downstream collector
-         * @param merger a function to merge the results of the four downstream collectors
-         * @return a {@code Collector} which combines the results of four downstream collectors
+         * @param downstream1 the first component collector
+         * @param downstream2 the second component collector
+         * @param downstream3 the third component collector
+         * @param downstream4 the fourth component collector
+         * @param merger a function to merge the results of the four component collectors
+         * @return a {@code Collector} which combines the results of four component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any downstream collector or merger is null
+         * @throws IllegalArgumentException if any component collector or merger is null
          */
         public static <T, R1, R2, R3, R4, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
@@ -10733,20 +10733,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         * Returns a {@code Collector} that combines the results of multiple downstream collectors
+         * Returns a {@code Collector} that combines the results of multiple component collectors
          * using a specified merger function.
          * 
          * <p>This collector is useful when you need to perform multiple different collection
          * operations on the same stream of elements and combine their results in a custom
-         * way. Each element is processed by all downstream collectors, and their final
+         * way. Each element is processed by all component collectors, and their final
          * results are combined using the provided merger function that receives an array
          * of results.</p>
          * 
-         * <p>The returned collector forwards elements to all downstream collectors and
+         * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The merger function receives
-         * an array containing the results from each downstream collector in the same order
+         * an array containing the results from each component collector in the same order
          * as they appear in the collection. The characteristics of the returned collector
-         * are the intersection of the characteristics of all downstream collectors,
+         * are the intersection of the characteristics of all component collectors,
          * excluding {@code IDENTITY_FINISH}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
@@ -10772,9 +10772,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *
          * @param <T> the type of input elements
          * @param <R> the final result type
-         * @param downstreams a collection of downstream collectors to combine
-         * @param merger a function to merge the results array from all downstream collectors
-         * @return a {@code Collector} which combines the results of multiple downstream collectors
+         * @param downstreams a collection of component collectors to combine
+         * @param merger a function to merge the results array from all component collectors
+         * @return a {@code Collector} which combines the results of multiple component collectors
          *         using the merger function
          * @throws IllegalArgumentException if downstreams is {@code null} or empty, or if merger is null
          */

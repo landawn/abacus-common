@@ -2568,15 +2568,15 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param m the map to be converted into a bean object.
+     * @param map the map to be converted into a bean object.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      * @see #mapToBean(Map, boolean, boolean, Class)
      * @see #mapToBean(Map, Collection, Class)
      */
-    public static <T> T mapToBean(final Map<String, Object> m, final Class<? extends T> targetType) {
-        return mapToBean(m, false, true, targetType);
+    public static <T> T mapToBean(final Map<String, Object> map, final Class<? extends T> targetType) {
+        return mapToBean(map, false, true, targetType);
     }
 
     /**
@@ -2606,7 +2606,7 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param m the map to be converted into a bean object.
+     * @param map the map to be converted into a bean object.
      * @param ignoreNullProperty if {@code true}, {@code null} values in the map will not be set on the bean.
      * @param ignoreUnmatchedProperty if {@code true}, map entries with keys that don't match any bean property will be ignored; if {@code false}, an exception will be thrown.
      * @param targetType the type of the bean object to be returned.
@@ -2616,11 +2616,11 @@ public final class Beans {
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public static <T> T mapToBean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
+    public static <T> T mapToBean(final Map<String, Object> map, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
-        if (m == null) {
+        if (map == null) {
             return null;
         }
 
@@ -2631,7 +2631,7 @@ public final class Beans {
         String propName = null;
         Object propValue = null;
 
-        for (final Map.Entry<String, Object> entry : m.entrySet()) {
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
             propName = entry.getKey();
             propValue = entry.getValue();
 
@@ -2680,17 +2680,17 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param m the map to be converted into a bean object.
+     * @param map the map to be converted into a bean object.
      * @param selectPropNames a collection of property names to be included in the resulting bean objects.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class or a selected property does not exist
      */
     @MayReturnNull
-    public static <T> T mapToBean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
+    public static <T> T mapToBean(final Map<String, Object> map, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
-        if (m == null) {
+        if (map == null) {
             return null;
         }
 
@@ -2700,7 +2700,7 @@ public final class Beans {
         Object propValue = null;
 
         for (final String propName : selectPropNames) {
-            propValue = m.get(propName);
+            propValue = map.get(propName);
 
             propInfo = beanInfo.getPropInfo(propName);
 
@@ -2745,14 +2745,14 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mList the collection of maps to be converted into bean objects.
+     * @param mapList the collection of maps to be converted into bean objects.
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      * @see #mapToBean(Collection, Collection, Class)
      */
-    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final Class<? extends T> targetType) {
-        return mapToBean(mList, false, true, targetType);
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final Class<? extends T> targetType) {
+        return mapToBean(mapList, false, true, targetType);
     }
 
     /**
@@ -2782,20 +2782,20 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mList the collection of maps to be converted into bean objects.
+     * @param mapList the collection of maps to be converted into bean objects.
      * @param ignoreNullProperty a boolean that determines whether {@code null} properties should be ignored.
      * @param ignoreUnmatchedProperty a boolean that determines whether unmatched properties should be ignored.
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final boolean ignoreNullProperty,
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final boolean ignoreNullProperty,
             final boolean ignoreUnmatchedProperty, final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
-        final List<T> beanList = new ArrayList<>(mList.size());
+        final List<T> beanList = new ArrayList<>(mapList.size());
 
-        for (final Map<String, Object> m : mList) {
-            beanList.add(mapToBean(m, ignoreNullProperty, ignoreUnmatchedProperty, targetType));
+        for (final Map<String, Object> map : mapList) {
+            beanList.add(mapToBean(map, ignoreNullProperty, ignoreUnmatchedProperty, targetType));
         }
 
         return beanList;
@@ -2828,20 +2828,20 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mList the collection of maps to be converted into bean objects.
+     * @param mapList the collection of maps to be converted into bean objects.
      * @param selectPropNames a collection of property names to be included in the resulting bean objects.
      *        If this is empty, no properties are set; use the non-select overload to include all properties.
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
-    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mList, final Collection<String> selectPropNames,
+    public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final Collection<String> selectPropNames,
             final Class<? extends T> targetType) {
         checkBeanClass(targetType);
 
-        final List<T> beanList = new ArrayList<>(mList.size());
+        final List<T> beanList = new ArrayList<>(mapList.size());
 
-        for (final Map<String, Object> m : mList) {
-            beanList.add(mapToBean(m, selectPropNames, targetType));
+        for (final Map<String, Object> map : mapList) {
+            beanList.add(mapToBean(map, selectPropNames, targetType));
         }
 
         return beanList;

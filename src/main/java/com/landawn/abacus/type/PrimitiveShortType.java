@@ -141,14 +141,14 @@ public final class PrimitiveShortType extends AbstractShortType {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to retrieve (column name or alias)
+     * @param columnName the label of the column to retrieve (column name or alias)
      * @return the short value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
     @Override
-    public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public Short get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         if (result == null) {
             return null; // NOSONAR

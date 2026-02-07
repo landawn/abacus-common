@@ -176,13 +176,13 @@ public class TimeType extends AbstractDateType<Time> {
      * }</pre>
      *
      * @param rs the ResultSet containing the query results
-     * @param columnLabel the label of the column to retrieve
+     * @param columnName the label of the column to retrieve
      * @return a Time object, or {@code null} if the database value is null
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getTime(columnLabel);
+    public Time get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getTime(columnName);
     }
 
     /**

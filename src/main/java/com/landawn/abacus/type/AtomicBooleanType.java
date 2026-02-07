@@ -134,14 +134,14 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * The boolean value is read from the database and wrapped in a new AtomicBoolean instance.
      *
      * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public AtomicBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return new AtomicBoolean(rs.getBoolean(columnLabel));
+    public AtomicBoolean get(final ResultSet rs, final String columnName) throws SQLException {
+        return new AtomicBoolean(rs.getBoolean(columnName));
     }
 
     /**

@@ -65,18 +65,18 @@ import okhttp3.internal.Util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
- * Response response = OkHttpRequest.url("https://api.example.com/users")
+ * Response response = OkHttpRequest.url("http://localhost:18080/users")
  *     .header("Accept", "application/json")
  *     .get();
  * 
  * // POST request with JSON body
  * User user = new User("John", "Doe");
- * String result = OkHttpRequest.url("https://api.example.com/users")
+ * String result = OkHttpRequest.url("http://localhost:18080/users")
  *     .jsonBody(user)
  *     .post(String.class);
  * 
  * // Asynchronous request
- * ContinuableFuture<Response> future = OkHttpRequest.url("https://api.example.com/data")
+ * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/data")
  *     .asyncGet();
  * }</pre>
  *
@@ -88,7 +88,7 @@ public final class OkHttpRequest {
     private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_JSON);
     private static final MediaType APPLICATION_XML_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_XML);
 
-    private static final KryoParser KRYO_PARSER = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    private static final KryoParser KRYO_PARSER = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient();
 
@@ -152,7 +152,7 @@ public final class OkHttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest request = OkHttpRequest.url("https://api.example.com/users");
+     * OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/users");
      * }</pre>
      *
      * @param url the URL string for the request
@@ -245,7 +245,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com")
+     * OkHttpRequest.url("http://localhost:18080")
      *     .connectTimeout(5000) // 5 seconds
      *     .get();
      * }</pre>
@@ -268,7 +268,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com")
+     * OkHttpRequest.url("http://localhost:18080")
      *     .connectTimeout(Duration.ofSeconds(5))
      *     .get();
      * }</pre>
@@ -293,7 +293,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com")
+     * OkHttpRequest.url("http://localhost:18080")
      *     .readTimeout(10000) // 10 seconds
      *     .get();
      * }</pre>
@@ -316,7 +316,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com")
+     * OkHttpRequest.url("http://localhost:18080")
      *     .readTimeout(Duration.ofSeconds(10))
      *     .get();
      * }</pre>
@@ -345,7 +345,7 @@ public final class OkHttpRequest {
      *     .noCache()
      *     .build();
      *
-     * OkHttpRequest.url("https://api.example.com/data")
+     * OkHttpRequest.url("http://localhost:18080/data")
      *     .cacheControl(cacheControl)
      *     .get();
      * }</pre>
@@ -365,7 +365,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object requestTag = "my-request-id";
-     * OkHttpRequest.url("https://api.example.com/data")
+     * OkHttpRequest.url("http://localhost:18080/data")
      *     .tag(requestTag)
      *     .asyncGet();
      *
@@ -400,7 +400,7 @@ public final class OkHttpRequest {
      * metadata.startTime = System.currentTimeMillis();
      * metadata.requestId = "req-123";
      *
-     * OkHttpRequest.url("https://api.example.com/data")
+     * OkHttpRequest.url("http://localhost:18080/data")
      *     .tag(RequestMetadata.class, metadata)
      *     .get();
      * }</pre>
@@ -420,7 +420,7 @@ public final class OkHttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com/secure")
+     * OkHttpRequest.url("http://localhost:18080/secure")
      *     .basicAuth("username", "password")
      *     .get();
      * }</pre>
@@ -440,7 +440,7 @@ public final class OkHttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com/data")
+     * OkHttpRequest.url("http://localhost:18080/data")
      *     .header("Accept", "application/json")
      *     .header("User-Agent", "MyApp/1.0")
      *     .get();
@@ -508,13 +508,13 @@ public final class OkHttpRequest {
      * headers.put("Accept", "application/json");
      * headers.put("Authorization", "Bearer token123");
      * 
-     * OkHttpRequest.url("https://api.example.com/data")
+     * OkHttpRequest.url("http://localhost:18080/data")
      *     .headers(headers)
      *     .get();
      * }</pre>
      *
-     * @param headers a map containing header names and values
-     * @return this OkHttpRequest instance for method chaining
+     * @param headers A map containing header names and values
+     * @return This OkHttpRequest instance for method chaining
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
@@ -577,7 +577,7 @@ public final class OkHttpRequest {
      * @return this OkHttpRequest instance for method chaining
      * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
      *             Most scenarios require replacing headers rather than adding duplicates.
-     *             Use {@link #header(String, String)} instead, which replaces any existing header
+     *             Use {@link #header(String, Object)} instead, which replaces any existing header
      *             with the same name. If you specifically need to add multiple headers with the
      *             same name (e.g., for multiply-valued headers like "Cookie"), consider using
      *             the underlying OkHttp RequestBuilder directly.
@@ -595,7 +595,7 @@ public final class OkHttpRequest {
      * @return this OkHttpRequest instance for method chaining
      * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
      *             In most scenarios, headers are set but rarely need to be explicitly removed.
-     *             If you need to override a header, use {@link #header(String, String)} which
+     *             If you need to override a header, use {@link #header(String, Object)} which
      *             replaces any existing header. If you have a specific use case requiring header
      *             removal, consider restructuring your code or using the underlying OkHttp
      *             RequestBuilder directly.
@@ -612,7 +612,7 @@ public final class OkHttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OkHttpRequest.url("https://api.example.com/search")
+     * OkHttpRequest.url("http://localhost:18080/search")
      *     .query("q=java&limit=10")
      *     .get();
      * }</pre>
@@ -636,13 +636,13 @@ public final class OkHttpRequest {
      * params.put("q", "java programming");
      * params.put("limit", 10);
      * 
-     * OkHttpRequest.url("https://api.example.com/search")
+     * OkHttpRequest.url("http://localhost:18080/search")
      *     .query(params)
      *     .get();
      * }</pre>
      *
-     * @param queryParams a map containing query parameter names and values
-     * @return this OkHttpRequest instance for method chaining
+     * @param queryParams A map containing query parameter names and values
+     * @return This OkHttpRequest instance for method chaining
      */
     public OkHttpRequest query(final Map<String, ?> queryParams) {
         query = queryParams;
@@ -656,7 +656,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
-     * OkHttpRequest.url("https://api.example.com/users")
+     * OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(json)
      *     .post();
      * }</pre>
@@ -675,7 +675,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * OkHttpRequest.url("https://api.example.com/users")
+     * OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(user)
      *     .post();
      * }</pre>
@@ -693,7 +693,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<user><name>John</name><age>30</age></user>";
-     * OkHttpRequest.url("https://api.example.com/users")
+     * OkHttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(xml)
      *     .post();
      * }</pre>
@@ -712,7 +712,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * OkHttpRequest.url("https://api.example.com/users")
+     * OkHttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(user)
      *     .post();
      * }</pre>
@@ -734,13 +734,13 @@ public final class OkHttpRequest {
      * formData.put("username", "john_doe");
      * formData.put("password", "secret123");
      * 
-     * OkHttpRequest.url("https://api.example.com/login")
+     * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
      *     .post();
      * }</pre>
      *
-     * @param formBodyByMap a map containing form field names and values
-     * @return this OkHttpRequest instance for method chaining
+     * @param formBodyByMap A map containing form field names and values
+     * @return This OkHttpRequest instance for method chaining
      * @see FormBody.Builder
      */
     public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
@@ -769,7 +769,7 @@ public final class OkHttpRequest {
      * login.setUsername("john_doe");
      * login.setPassword("secret123");
      * 
-     * OkHttpRequest.url("https://api.example.com/login")
+     * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(login)
      *     .post();
      * }</pre>
@@ -911,7 +911,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Response response = OkHttpRequest.url("https://api.example.com/users")
+     * Response response = OkHttpRequest.url("http://localhost:18080/users")
      *     .header("Accept", "application/json")
      *     .get();
      *
@@ -932,7 +932,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = OkHttpRequest.url("https://api.example.com/users")
+     * List<User> users = OkHttpRequest.url("http://localhost:18080/users")
      *     .get(new TypeToken<List<User>>(){}.getType());
      * }</pre>
      *
@@ -952,7 +952,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
-     * Response response = OkHttpRequest.url("https://api.example.com/users")
+     * Response response = OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .post();
      * }</pre>
@@ -971,7 +971,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
-     * User createdUser = OkHttpRequest.url("https://api.example.com/users")
+     * User createdUser = OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(newUser)
      *     .post(User.class);
      * }</pre>
@@ -992,7 +992,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
-     * Response response = OkHttpRequest.url("https://api.example.com/users/123")
+     * Response response = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put();
      * }</pre>
@@ -1011,7 +1011,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
-     * User result = OkHttpRequest.url("https://api.example.com/users/123")
+     * User result = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
      *     .put(User.class);
      * }</pre>
@@ -1032,7 +1032,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> updates = Map.of("status", "active");
-     * Response response = OkHttpRequest.url("https://api.example.com/users/123")
+     * Response response = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updates)
      *     .patch();
      * }</pre>
@@ -1051,7 +1051,7 @@ public final class OkHttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> updates = Map.of("status", "active");
-     * User result = OkHttpRequest.url("https://api.example.com/users/123")
+     * User result = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updates)
      *     .patch(User.class);
      * }</pre>
@@ -1071,7 +1071,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Response response = OkHttpRequest.url("https://api.example.com/users/123")
+     * Response response = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .delete();
      * }</pre>
      *
@@ -1088,7 +1088,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DeleteResponse result = OkHttpRequest.url("https://api.example.com/users/123")
+     * DeleteResponse result = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .delete(DeleteResponse.class);
      * }</pre>
      *
@@ -1108,7 +1108,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Response response = OkHttpRequest.url("https://api.example.com/large-file")
+     * Response response = OkHttpRequest.url("http://localhost:18080/large-file")
      *     .head();
      * // Check headers without downloading the entire file
      * String contentLength = response.header("Content-Length");
@@ -1127,7 +1127,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Response response = OkHttpRequest.url("https://api.example.com/resource")
+     * Response response = OkHttpRequest.url("http://localhost:18080/resource")
      *     .execute(HttpMethod.GET);
      * }</pre>
      *
@@ -1149,7 +1149,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = OkHttpRequest.url("https://api.example.com/users/123")
+     * User user = OkHttpRequest.url("http://localhost:18080/users/123")
      *     .execute(HttpMethod.GET, User.class);
      * }</pre>
      *
@@ -1258,7 +1258,7 @@ public final class OkHttpRequest {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<Response> future = OkHttpRequest.url("https://api.example.com/users")
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users")
      *     .asyncGet();
      * 
      * future.getThenAccept(response -> {
@@ -1291,7 +1291,7 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<List<User>> future = OkHttpRequest.url("https://api.example.com/users")
+     * ContinuableFuture<List<User>> future = OkHttpRequest.url("http://localhost:18080/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());
      *
      * future.getThenAccept(users -> {

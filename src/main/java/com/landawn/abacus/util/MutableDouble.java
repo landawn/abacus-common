@@ -183,17 +183,17 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.5);
-     * boolean changed = num.setIf(20.7, val -> val < 15);   // returns true, value becomes 20.7
-     * changed = num.setIf(5.0, val -> val < 15);            // returns false, value remains 20.7
+     * boolean changed = num.setIf(val -> val < 15, 20.7);   // returns true, value becomes 20.7
+     * changed = num.setIf(val -> val < 15, 5.0);            // returns false, value remains 20.7
      * }</pre>
      * 
      * @param <E> the type of exception that the predicate may throw
-     * @param newValue the new value to set if the predicate returns true
      * @param predicate the predicate that tests the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was set, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final double newValue, final Throwables.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

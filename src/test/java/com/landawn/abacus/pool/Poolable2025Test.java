@@ -86,7 +86,7 @@ public class Poolable2025Test extends TestBase {
         assertEquals(Poolable.Caller.VACATE, Poolable.Caller.valueOf("VACATE"));
         assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, Poolable.Caller.valueOf("REMOVE_REPLACE_CLEAR"));
         assertEquals(Poolable.Caller.PUT_ADD_FAILURE, Poolable.Caller.valueOf("PUT_ADD_FAILURE"));
-        assertEquals(Poolable.Caller.OTHER_OUTER, Poolable.Caller.valueOf("OTHER_OUTER"));
+        assertEquals(Poolable.Caller.OTHER_EXTERNAL, Poolable.Caller.valueOf("OTHER_EXTERNAL"));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class Poolable2025Test extends TestBase {
         assertEquals(2, Poolable.Caller.VACATE.value());
         assertEquals(3, Poolable.Caller.REMOVE_REPLACE_CLEAR.value());
         assertEquals(4, Poolable.Caller.PUT_ADD_FAILURE.value());
-        assertEquals(5, Poolable.Caller.OTHER_OUTER.value());
+        assertEquals(5, Poolable.Caller.OTHER_EXTERNAL.value());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class Poolable2025Test extends TestBase {
         assertEquals(2, Poolable.Caller.VACATE.ordinal());
         assertEquals(3, Poolable.Caller.REMOVE_REPLACE_CLEAR.ordinal());
         assertEquals(4, Poolable.Caller.PUT_ADD_FAILURE.ordinal());
-        assertEquals(5, Poolable.Caller.OTHER_OUTER.ordinal());
+        assertEquals(5, Poolable.Caller.OTHER_EXTERNAL.ordinal());
     }
 
     @Test
@@ -156,10 +156,10 @@ public class Poolable2025Test extends TestBase {
 
     @Test
     public void testCallerOtherOuter() {
-        Poolable.Caller caller = Poolable.Caller.OTHER_OUTER;
+        Poolable.Caller caller = Poolable.Caller.OTHER_EXTERNAL;
 
         assertNotNull(caller);
-        assertEquals("OTHER_OUTER", caller.name());
+        assertEquals("OTHER_EXTERNAL", caller.name());
         assertEquals(5, caller.value());
     }
 

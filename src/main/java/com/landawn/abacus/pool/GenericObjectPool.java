@@ -621,18 +621,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * }
      * }</pre>
      *
-     * @param valueToFind the object to search for
+     * @param element the object to search for
      * @return {@code true} if the pool contains the object, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean contains(final E valueToFind) throws IllegalStateException {
+    public boolean contains(final E element) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
 
         try {
-            return pool.contains(valueToFind);
+            return pool.contains(element);
         } finally {
             lock.unlock();
         }

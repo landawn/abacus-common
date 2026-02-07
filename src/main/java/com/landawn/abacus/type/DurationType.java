@@ -128,13 +128,13 @@ public class DurationType extends AbstractType<Duration> {
      * The database value is read as a long (milliseconds) and converted to Duration.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the duration value
+     * @param columnName the label of the column containing the duration value
      * @return A Duration created from the milliseconds value in the database
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Duration get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return Duration.ofMillis(rs.getLong(columnLabel));
+    public Duration get(final ResultSet rs, final String columnName) throws SQLException {
+        return Duration.ofMillis(rs.getLong(columnName));
     }
 
     /**

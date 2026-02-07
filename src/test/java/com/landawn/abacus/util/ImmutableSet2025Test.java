@@ -40,20 +40,20 @@ public class ImmutableSet2025Test extends TestBase {
         assertSame(empty, emptyInt);
     }
 
-    @Test
-    public void test_just() {
-        ImmutableSet<String> set = ImmutableSet.just("hello");
-        assertNotNull(set);
-        assertEquals(1, set.size());
-        assertTrue(set.contains("hello"));
-        assertFalse(set.contains("world"));
-
-        ImmutableSet<String> setWithNull = ImmutableSet.just(null);
-        assertEquals(1, setWithNull.size());
-        assertTrue(setWithNull.contains(null));
-
-        assertThrows(UnsupportedOperationException.class, () -> set.add("new"));
-    }
+    //    @Test
+    //    public void test_just() {
+    //        ImmutableSet<String> set = ImmutableSet.just("hello");
+    //        assertNotNull(set);
+    //        assertEquals(1, set.size());
+    //        assertTrue(set.contains("hello"));
+    //        assertFalse(set.contains("world"));
+    //
+    //        ImmutableSet<String> setWithNull = ImmutableSet.just(null);
+    //        assertEquals(1, setWithNull.size());
+    //        assertTrue(setWithNull.contains(null));
+    //
+    //        assertThrows(UnsupportedOperationException.class, () -> set.add("new"));
+    //    }
 
     @Test
     public void test_of_single() {
@@ -175,40 +175,40 @@ public class ImmutableSet2025Test extends TestBase {
         assertTrue(setWithNull.contains(null));
     }
 
-    @Test
-    public void test_of_varargs() {
-        String[] array = { "a", "b", "c", "d" };
-        ImmutableSet<String> set = ImmutableSet.of(array);
-        assertNotNull(set);
-        assertEquals(4, set.size());
-        assertTrue(set.contains("a"));
-        assertTrue(set.contains("d"));
-
-        ImmutableSet<String> emptySet = ImmutableSet.of((String[]) null);
-        assertNotNull(emptySet);
-        assertTrue(emptySet.isEmpty());
-
-        ImmutableSet<String> emptySet2 = ImmutableSet.of(new String[0]);
-        assertNotNull(emptySet2);
-        assertTrue(emptySet2.isEmpty());
-        assertSame(ImmutableSet.empty(), emptySet2);
-
-        String[] arrayWithDup = { "x", "y", "x", "z" };
-        ImmutableSet<String> setWithDup = ImmutableSet.of(arrayWithDup);
-        assertEquals(3, setWithDup.size());
-
-        String[] arrayWithNull = { "a", null, "b" };
-        ImmutableSet<String> setWithNull = ImmutableSet.of(arrayWithNull);
-        assertEquals(3, setWithNull.size());
-        assertTrue(setWithNull.contains(null));
-
-        String[] ordered = { "first", "second", "third" };
-        ImmutableSet<String> orderedSet = ImmutableSet.of(ordered);
-        List<String> list = new ArrayList<>(orderedSet);
-        assertEquals("first", list.get(0));
-        assertEquals("second", list.get(1));
-        assertEquals("third", list.get(2));
-    }
+    //    @Test
+    //    public void test_of_varargs() {
+    //        String[] array = { "a", "b", "c", "d" };
+    //        ImmutableSet<String> set = ImmutableSet.of(array);
+    //        assertNotNull(set);
+    //        assertEquals(4, set.size());
+    //        assertTrue(set.contains("a"));
+    //        assertTrue(set.contains("d"));
+    //
+    //        ImmutableSet<String> emptySet = ImmutableSet.of((String[]) null);
+    //        assertNotNull(emptySet);
+    //        assertTrue(emptySet.isEmpty());
+    //
+    //        ImmutableSet<String> emptySet2 = ImmutableSet.of(new String[0]);
+    //        assertNotNull(emptySet2);
+    //        assertTrue(emptySet2.isEmpty());
+    //        assertSame(ImmutableSet.empty(), emptySet2);
+    //
+    //        String[] arrayWithDup = { "x", "y", "x", "z" };
+    //        ImmutableSet<String> setWithDup = ImmutableSet.of(arrayWithDup);
+    //        assertEquals(3, setWithDup.size());
+    //
+    //        String[] arrayWithNull = { "a", null, "b" };
+    //        ImmutableSet<String> setWithNull = ImmutableSet.of(arrayWithNull);
+    //        assertEquals(3, setWithNull.size());
+    //        assertTrue(setWithNull.contains(null));
+    //
+    //        String[] ordered = { "first", "second", "third" };
+    //        ImmutableSet<String> orderedSet = ImmutableSet.of(ordered);
+    //        List<String> list = new ArrayList<>(orderedSet);
+    //        assertEquals("first", list.get(0));
+    //        assertEquals("second", list.get(1));
+    //        assertEquals("third", list.get(2));
+    //    }
 
     @Test
     public void test_copyOf() {
@@ -552,8 +552,7 @@ public class ImmutableSet2025Test extends TestBase {
         assertTrue(setWithNullAndOthers.contains("a"));
         assertEquals(3, setWithNullAndOthers.size());
 
-        String[] arrayWithNull = { "x", null, "y" };
-        ImmutableSet<String> setFromArray = ImmutableSet.of(arrayWithNull);
+        ImmutableSet<String> setFromArray = ImmutableSet.of("x", null, "y");
         assertTrue(setFromArray.contains(null));
         assertEquals(3, setFromArray.size());
 
@@ -591,21 +590,4 @@ public class ImmutableSet2025Test extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> largeSet.add(100));
     }
 
-    @Test
-    public void test_edgeCases() {
-        ImmutableSet<String> singleDup = ImmutableSet.of("same", "same");
-        assertEquals(1, singleDup.size());
-
-        ImmutableSet<String> fromEmpty = ImmutableSet.of(new String[0]);
-        ImmutableSet<String> fromNull = ImmutableSet.of((String[]) null);
-        assertEquals(fromEmpty, fromNull);
-        assertTrue(fromEmpty.isEmpty());
-
-        ImmutableSet<String> original = ImmutableSet.of("a", "b");
-        ImmutableSet<String> copy = ImmutableSet.copyOf(original);
-        assertSame(original, copy);
-
-        ImmutableSet<String> wrapped = ImmutableSet.wrap(original);
-        assertSame(original, wrapped);
-    }
 }

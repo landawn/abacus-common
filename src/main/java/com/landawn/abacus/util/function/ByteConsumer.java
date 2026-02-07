@@ -44,10 +44,10 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      * collector.accept((byte) 10);
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(byte t);
+    void accept(byte value);
 
     /**
      * Returns a composed {@code ByteConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -66,9 +66,9 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      * @return a composed {@code ByteConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ByteConsumer andThen(final ByteConsumer after) {
-        return t -> {
-            accept(t);
-            after.accept(t);
+        return value -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

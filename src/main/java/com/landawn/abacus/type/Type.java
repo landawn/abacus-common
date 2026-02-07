@@ -1207,11 +1207,11 @@ public interface Type<T> {
      * Retrieves a value of this type from a ResultSet by column name.
      *
      * @param rs the ResultSet
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
-    T get(ResultSet rs, String columnLabel) throws SQLException;
+    T get(ResultSet rs, String columnName) throws SQLException;
 
     /**
      * Sets a parameter value in a PreparedStatement.

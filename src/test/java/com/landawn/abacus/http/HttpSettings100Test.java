@@ -164,14 +164,14 @@ public class HttpSettings100Test extends TestBase {
         HttpSettings settings = new HttpSettings();
         assertFalse(settings.isOneWayRequest());
 
-        settings.isOneWayRequest(true);
+        settings.setOneWayRequest(true);
         assertTrue(settings.isOneWayRequest());
     }
 
     @Test
     public void testSetIsOneWayRequest() {
         HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.isOneWayRequest(true);
+        HttpSettings result = settings.setOneWayRequest(true);
         assertSame(settings, result);
         assertTrue(settings.isOneWayRequest());
     }
@@ -353,7 +353,7 @@ public class HttpSettings100Test extends TestBase {
                 .setUseCaches(true)
                 .doInput(false)
                 .doOutput(false)
-                .isOneWayRequest(true)
+                .setOneWayRequest(true)
                 .setContentFormat(ContentFormat.JSON)
                 .header("Header1", "value1");
 

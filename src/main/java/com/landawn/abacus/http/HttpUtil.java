@@ -137,7 +137,7 @@ public final class HttpUtil {
 
     static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
-    static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<>(ContentFormat.class);
 
@@ -413,7 +413,7 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
      * conn.setRequestProperty("Content-Type", "application/json");
      * String contentType = HttpUtil.getContentType(conn);  // "application/json"
      * }</pre>
@@ -517,7 +517,7 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
      * conn.setRequestProperty("Content-Encoding", "gzip");
      * String encoding = HttpUtil.getContentEncoding(conn);  // "gzip"
      * }</pre>
@@ -621,7 +621,7 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
      * conn.setRequestProperty("Accept", "application/json");
      * String accept = HttpUtil.getAccept(conn);  // "application/json"
      * }</pre>
@@ -725,7 +725,7 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
      * conn.setRequestProperty("Accept-Encoding", "gzip");
      * String acceptEncoding = HttpUtil.getAcceptEncoding(conn);  // "gzip"
      * }</pre>
@@ -829,7 +829,7 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("https://api.example.com").openConnection();
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
      * conn.setRequestProperty("Accept-Charset", "utf-8");
      * String acceptCharset = HttpUtil.getAcceptCharset(conn);  // "utf-8"
      * }</pre>
@@ -1203,9 +1203,9 @@ public final class HttpUtil {
 
         if ((fromIndex = contentType.indexOf("charset")) >= 0) {
             fromIndex = contentType.indexOf('=', fromIndex) + 1;
-            final int endIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
+            final int toIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
 
-            return Charset.forName(endIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, endIndex).trim());
+            return Charset.forName(toIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, toIndex).trim());
         }
 
         return defaultIfNull;

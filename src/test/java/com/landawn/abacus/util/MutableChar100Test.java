@@ -54,11 +54,11 @@ public class MutableChar100Test extends TestBase {
     public void testSetIf() throws Exception {
         MutableChar mutableChar = MutableChar.of('A');
 
-        boolean updated = mutableChar.setIf('Z', c -> c < 'M');
+        boolean updated = mutableChar.setIf(c -> c < 'M', 'Z');
         Assertions.assertTrue(updated);
         Assertions.assertEquals('Z', mutableChar.value());
 
-        updated = mutableChar.setIf('A', c -> c < 'M');
+        updated = mutableChar.setIf(c -> c < 'M', 'A');
         Assertions.assertFalse(updated);
         Assertions.assertEquals('Z', mutableChar.value());
     }

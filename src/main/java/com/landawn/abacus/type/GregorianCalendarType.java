@@ -219,13 +219,13 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return the GregorianCalendar value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public GregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public GregorianCalendar get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
         return ts == null ? null : asGregorianCalendar(ts);
     }
 

@@ -141,14 +141,14 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * The primitive byte[] from the database is converted to a Byte[] object array.
      *
      * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return a Byte array boxed from the database byte[], or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public Byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return Array.box(rs.getBytes(columnLabel));
+    public Byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+        return Array.box(rs.getBytes(columnName));
     }
 
     /**

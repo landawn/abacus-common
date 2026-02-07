@@ -142,13 +142,13 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * The bytes are read from the database and wrapped in a ByteList.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label/name
+     * @param columnName the column label/name
      * @return a ByteList containing the bytes from the database, or {@code null} if the column value is null
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public ByteList get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final byte[] bytes = rs.getBytes(columnLabel);
+    public ByteList get(final ResultSet rs, final String columnName) throws SQLException {
+        final byte[] bytes = rs.getBytes(columnName);
         return bytes == null ? null : ByteList.of(bytes);
     }
 

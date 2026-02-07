@@ -142,13 +142,13 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * }</pre>
      *
      * @param rs the ResultSet containing the query results
-     * @param columnLabel the label of the column to retrieve
+     * @param columnName the label of the column to retrieve
      * @return a MutableFloat containing the retrieved float value
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public MutableFloat get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return MutableFloat.of(rs.getFloat(columnLabel));
+    public MutableFloat get(final ResultSet rs, final String columnName) throws SQLException {
+        return MutableFloat.of(rs.getFloat(columnName));
     }
 
     /**

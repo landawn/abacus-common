@@ -43,10 +43,10 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      * appender.accept('i');   // sb now contains "Hi"
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(char t);
+    void accept(char value);
 
     /**
      * Returns a composed {@code CharConsumer} that performs, in sequence, this operation
@@ -67,9 +67,9 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      *         followed by the {@code after} operation
      */
     default CharConsumer andThen(final CharConsumer after) {
-        return t -> {
-            accept(t);
-            after.accept(t);
+        return value -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

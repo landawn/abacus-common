@@ -271,12 +271,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
      *
-     * @param c the PrimitiveList containing elements to be added to this list. 
+     * @param other the PrimitiveList containing elements to be added to this list. 
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
      *         {@code false} otherwise
      */
-    public abstract boolean addAll(L c);
+    public abstract boolean addAll(L other);
 
     /**
      * Inserts all elements from the specified PrimitiveList into this list at the specified position.
@@ -289,14 +289,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param index the index at which to insert the first element from the specified list.
      *              Must be between 0 and size() (inclusive).
-     * @param c the PrimitiveList containing elements to be inserted into this list.
+     * @param other the PrimitiveList containing elements to be inserted into this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
      *         {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    public abstract boolean addAll(int index, L c);
+    public abstract boolean addAll(int index, L other);
 
     /**
      * Appends all elements from the specified array to the end of this list,
@@ -305,12 +305,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
      *
-     * @param a the array containing elements to be added to this list.
+     * @param values the array containing elements to be added to this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty),
      *         {@code false} otherwise
      */
-    public abstract boolean addAll(A a);
+    public abstract boolean addAll(A values);
 
     /**
      * Inserts all elements from the specified array into this list at the specified position.
@@ -323,14 +323,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param index the index at which to insert the first element from the specified array.
      *              Must be between 0 and size() (inclusive).
-     * @param a the array containing elements to be inserted into this list.
+     * @param values the array containing elements to be inserted into this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty),
      *         {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    public abstract boolean addAll(int index, A a);
+    public abstract boolean addAll(int index, A values);
 
     /**
      * Removes from this list all of its elements that are contained in the specified PrimitiveList.
@@ -339,12 +339,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>For elements that appear multiple times in this list, all occurrences will be removed
      * if the element appears at least once in the specified list. The comparison is done by value.</p>
      *
-     * @param c the PrimitiveList containing elements to be removed from this list.
+     * @param other the PrimitiveList containing elements to be removed from this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
-    public abstract boolean removeAll(L c);
+    public abstract boolean removeAll(L other);
 
     /**
      * Removes from this list all of its elements that are contained in the specified array.
@@ -353,12 +353,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>For elements that appear multiple times in this list, all occurrences will be removed
      * if the element appears at least once in the specified array. The comparison is done by value.</p>
      *
-     * @param a the array containing elements to be removed from this list.
+     * @param values the array containing elements to be removed from this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
-    public abstract boolean removeAll(A a);
+    public abstract boolean removeAll(A values);
 
     /**
      * Removes duplicate elements from this list, keeping only the first occurrence of each value.
@@ -387,12 +387,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
      *
-     * @param c the PrimitiveList containing elements to be retained in this list.
+     * @param other the PrimitiveList containing elements to be retained in this list.
      *          If {@code null} or empty, this list will be cleared.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
-    public abstract boolean retainAll(L c);
+    public abstract boolean retainAll(L other);
 
     /**
      * Retains only the elements in this list that are contained in the specified array.
@@ -402,12 +402,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
      *
-     * @param a the array containing elements to be retained in this list.
+     * @param values the array containing elements to be retained in this list.
      *          If {@code null} or empty, this list will be cleared.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
-    public abstract boolean retainAll(A a);
+    public abstract boolean retainAll(A values);
 
     /**
      * Removes the elements at the specified positions from this list.
@@ -546,12 +546,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result = list1.containsAny(list2);   // returns {@code true} (common element: 3)
      * }</pre>
      *
-     * @param l the PrimitiveList to be checked for common elements with this list.
+     * @param other the PrimitiveList to be checked for common elements with this list.
      *          If {@code null} or empty, returns {@code false}.
      * @return {@code true} if this list contains any element from the specified list,
      *         {@code false} otherwise
      */
-    public abstract boolean containsAny(L l);
+    public abstract boolean containsAny(L other);
 
     /**
      * Returns {@code true} if this list contains any element that is also contained in the
@@ -568,12 +568,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result = list.containsAny(array);   // returns {@code true} (common element: 3)
      * }</pre>
      *
-     * @param a the array to be checked for common elements with this list.
+     * @param values the array to be checked for common elements with this list.
      *          If {@code null} or empty, returns {@code false}.
      * @return {@code true} if this list contains any element from the specified array,
      *         {@code false} otherwise
      */
-    public abstract boolean containsAny(A a);
+    public abstract boolean containsAny(A values);
 
     /**
      * Returns {@code true} if this list contains all elements in the specified PrimitiveList.
@@ -593,12 +593,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result = list1.containsAll(list2);   // returns true
      * }</pre>
      *
-     * @param l the PrimitiveList to be checked for containment in this list.
+     * @param other the PrimitiveList to be checked for containment in this list.
      *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list contains all elements in the specified list,
      *         {@code false} otherwise
      */
-    public abstract boolean containsAll(L l);
+    public abstract boolean containsAll(L other);
 
     /**
      * Returns {@code true} if this list contains all elements in the specified array.
@@ -618,12 +618,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result = list.containsAll(array);   // returns true
      * }</pre>
      *
-     * @param a the array to be checked for containment in this list.
+     * @param values the array to be checked for containment in this list.
      *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list contains all elements in the specified array,
      *         {@code false} otherwise
      */
-    public abstract boolean containsAll(A a);
+    public abstract boolean containsAll(A values);
 
     /**
      * Returns {@code true} if this list has no elements in common with the specified PrimitiveList.
@@ -643,12 +643,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result2 = list3.disjoint(list4);   // returns {@code false} (common element: 3)
      * }</pre>
      *
-     * @param l the PrimitiveList to check for disjointness with this list.
+     * @param other the PrimitiveList to check for disjointness with this list.
      *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if the two lists have no elements in common,
      *         {@code false} otherwise
      */
-    public abstract boolean disjoint(L l);
+    public abstract boolean disjoint(L other);
 
     /**
      * Returns {@code true} if this list has no elements in common with the specified array.
@@ -667,12 +667,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * boolean result2 = list.disjoint(array2);   // returns {@code false} (common element: 3)
      * }</pre>
      *
-     * @param a the array to check for disjointness with this list.
+     * @param values the array to check for disjointness with this list.
      *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list and the array have no elements in common,
      *         {@code false} otherwise
      */
-    public abstract boolean disjoint(A a);
+    public abstract boolean disjoint(A values);
 
     /**
      * Returns a new list containing elements that are present in both this list and the specified list.
@@ -695,14 +695,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
-     * @param b the list to find common elements with this list.
+     * @param other the list to find common elements with this list.
      *          If {@code null} or empty, returns an empty list.
      * @return a new PrimitiveList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
      * @see IntList#intersection(IntList)
      * @see N#intersection(int[], int[])
      */
-    public abstract L intersection(final L b);
+    public abstract L intersection(final L other);
 
     /**
      * Returns a new list containing elements that are present in both this list and the specified array.
@@ -725,14 +725,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
-     * @param b the array to find common elements with this list.
+     * @param otherValues the array to find common elements with this list.
      *          If {@code null} or empty, returns an empty list.
      * @return a new PrimitiveList containing elements present in both this list and the specified array,
      *         considering the minimum number of occurrences in either source.
      * @see IntList#intersection(int[])
      * @see N#intersection(int[], int[])
      */
-    public abstract L intersection(final A b);
+    public abstract L intersection(final A otherValues);
 
     /**
      * Returns a new list with the elements in this list but not in the specified list,
@@ -755,14 +755,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
-     * @param b the list to compare against this list.
+     * @param other the list to compare against this list.
      *          If {@code null} or empty, returns a copy of this list.
      * @return a new PrimitiveList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
      * @see IntList#difference(IntList)
      * @see N#difference(int[], int[])
      */
-    public abstract L difference(final L b);
+    public abstract L difference(final L other);
 
     /**
      * Returns a new list with the elements in this list but not in the specified array,
@@ -785,14 +785,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
-     * @param a the array to compare against this list.
+     * @param otherValues the array to compare against this list.
      *          If {@code null} or empty, returns a copy of this list.
      * @return a new PrimitiveList containing the elements that are present in this list but not in the specified array,
      *         considering the number of occurrences.
      * @see IntList#difference(int[])
      * @see N#difference(int[], int[])
      */
-    public abstract L difference(final A a);
+    public abstract L difference(final A otherValues);
 
     /**
      * Returns a new list containing elements that are present in either this list or the specified list,
@@ -816,14 +816,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // - 4 appears only in list2, so it remains
      * }</pre>
      *
-     * @param b the list to compare with this list for symmetric difference.
+     * @param other the list to compare with this list for symmetric difference.
      *          If {@code null} or empty, returns a copy of this list.
      * @return a new list containing elements that are present in either this list or the specified list,
      *         but not in both, considering the number of occurrences
      * @see IntList#symmetricDifference(IntList)
      * @see N#symmetricDifference(int[], int[])
      */
-    public abstract L symmetricDifference(final L b);
+    public abstract L symmetricDifference(final L other);
 
     /**
      * Returns a new list containing elements that are present in either this list or the specified array,
@@ -847,14 +847,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // - 4 appears only in array, so it remains
      * }</pre>
      *
-     * @param b the array to compare with this list for symmetric difference.
+     * @param otherValues the array to compare with this list for symmetric difference.
      *          If {@code null} or empty, returns a copy of this list.
      * @return a new list containing elements that are present in either this list or the specified array,
      *         but not in both, considering the number of occurrences
      * @see IntList#symmetricDifference(int[])
      * @see N#symmetricDifference(int[], int[])
      */
-    public abstract L symmetricDifference(final A b);
+    public abstract L symmetricDifference(final A otherValues);
 
     /**
      * Checks whether this list contains any duplicate elements.
@@ -1225,7 +1225,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws IllegalArgumentException if chunkSize &lt;= 0
      */
-    public abstract List<L> split(final int fromIndex, final int toIndex, int chunkSize);
+    public abstract List<L> split(final int fromIndex, final int toIndex, final int chunkSize);
 
     /**
      * Trims the capacity of this PrimitiveList instance to be the list's current size.

@@ -116,7 +116,7 @@ public final class Suppliers {
     private static final Supplier<String> UUID = Strings::uuid;
 
     /** The Constant GUID. */
-    private static final Supplier<String> GUID = Strings::uuid32;
+    private static final Supplier<String> GUID = Strings::uuidWithoutHyphens;
 
     /** The Constant EMPTY_BOOLEAN_ARRAY. */
     private static final Supplier<boolean[]> EMPTY_BOOLEAN_ARRAY = () -> N.EMPTY_BOOLEAN_ARRAY;

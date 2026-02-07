@@ -33,7 +33,7 @@ public class Strings100Test extends TestBase {
     @Test
     @DisplayName("Test guid() generates valid GUID without dashes")
     public void testGuid() {
-        String guid = Strings.uuid32();
+        String guid = Strings.uuidWithoutHyphens();
         assertNotNull(guid);
         assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));

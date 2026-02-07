@@ -234,13 +234,13 @@ public class InputStreamType extends AbstractType<InputStream> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return the InputStream from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getBinaryStream(columnLabel);
+    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getBinaryStream(columnName);
     }
 
     /**

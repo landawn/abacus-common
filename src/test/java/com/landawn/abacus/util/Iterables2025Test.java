@@ -114,24 +114,24 @@ public class Iterables2025Test extends TestBase {
     @Test
     public void testFirstNonNullOrDefaultIterable() {
         List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", Iterables.firstNonNullOrDefault(list, "default"));
+        assertEquals("found", CommonUtil.firstNonNullOrDefault(list, "default"));
 
         List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", Iterables.firstNonNullOrDefault(allNull, "default"));
+        assertEquals("default", CommonUtil.firstNonNullOrDefault(allNull, "default"));
 
-        assertEquals("default", Iterables.firstNonNullOrDefault((Iterable<String>) null, "default"));
-        assertEquals("default", Iterables.firstNonNullOrDefault(new ArrayList<String>(), "default"));
+        assertEquals("default", CommonUtil.firstNonNullOrDefault((Iterable<String>) null, "default"));
+        assertEquals("default", CommonUtil.firstNonNullOrDefault(new ArrayList<String>(), "default"));
     }
 
     @Test
     public void testFirstNonNullOrDefaultIterator() {
         List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", Iterables.firstNonNullOrDefault(list.iterator(), "default"));
+        assertEquals("found", CommonUtil.firstNonNullOrDefault(list.iterator(), "default"));
 
         List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", Iterables.firstNonNullOrDefault(allNull.iterator(), "default"));
+        assertEquals("default", CommonUtil.firstNonNullOrDefault(allNull.iterator(), "default"));
 
-        assertEquals("default", Iterables.firstNonNullOrDefault((Iterator<String>) null, "default"));
+        assertEquals("default", CommonUtil.firstNonNullOrDefault((Iterator<String>) null, "default"));
     }
 
     @Test
@@ -188,24 +188,24 @@ public class Iterables2025Test extends TestBase {
     @Test
     public void testLastNonNullOrDefaultIterable() {
         List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", Iterables.lastNonNullOrDefault(list, "default"));
+        assertEquals("second", CommonUtil.lastNonNullOrDefault(list, "default"));
 
         List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", Iterables.lastNonNullOrDefault(allNull, "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault(allNull, "default"));
 
-        assertEquals("default", Iterables.lastNonNullOrDefault((Iterable<String>) null, "default"));
-        assertEquals("default", Iterables.lastNonNullOrDefault(new ArrayList<String>(), "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault((Iterable<String>) null, "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault(new ArrayList<String>(), "default"));
     }
 
     @Test
     public void testLastNonNullOrDefaultIterator() {
         List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", Iterables.lastNonNullOrDefault(list.iterator(), "default"));
+        assertEquals("second", CommonUtil.lastNonNullOrDefault(list.iterator(), "default"));
 
         List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", Iterables.lastNonNullOrDefault(allNull.iterator(), "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault(allNull.iterator(), "default"));
 
-        assertEquals("default", Iterables.lastNonNullOrDefault((Iterator<String>) null, "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault((Iterator<String>) null, "default"));
     }
 
     @Test

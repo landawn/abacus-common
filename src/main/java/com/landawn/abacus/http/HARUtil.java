@@ -53,7 +53,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Send a single request from HAR file
- * String response = HARUtil.sendRequestByHAR(new File("capture.har"), "https://api.example.com/data");
+ * String response = HARUtil.sendRequestByHAR(new File("capture.har"), "http://localhost:18080/data");
  * 
  * // Send multiple requests matching a pattern
  * List<String> responses = HARUtil.sendMultiRequestsByHAR(
@@ -165,9 +165,13 @@ public final class HARUtil {
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
      * HARUtil.logRequestCurlForHARRequest(true, '"', curl -> {
-     *     Files.write(Paths.get("curl-commands.txt"),
+     *     try {
+     *         Files.write(Paths.get("curl-commands.txt"),
      *                 (curl + "\n").getBytes(),
      *                 StandardOpenOption.APPEND);
+     *     } catch (IOException e) {
+     *         throw new java.io.UncheckedIOException(e);
+     *     }
      * });
      * }</pre>
      *
@@ -192,7 +196,7 @@ public final class HARUtil {
      * <pre>{@code
      * String response = HARUtil.sendRequestByHAR(
      *     new File("capture.har"), 
-     *     "https://api.example.com/users/123"
+     *     "http://localhost:18080/users/123"
      * );
      * }</pre>
      * 
@@ -299,7 +303,7 @@ public final class HARUtil {
      * // Send all API requests from the HAR file
      * List<String> responses = HARUtil.sendMultiRequestsByHAR(
      *     new File("capture.har"), 
-     *     url -> url.startsWith("https://api.example.com/")
+     *     url -> url.startsWith("http://localhost:18080/")
      * );
      * }</pre>
      * 
@@ -351,7 +355,7 @@ public final class HARUtil {
      * HARUtil.streamMultiRequestsByHAR(harFile, url -> url.contains("/api/"))
      *     .forEach(tuple -> {
      *         Map<String, Object> request = tuple._1;
-     *         HttpResponse response = tuple._2;
+     *         com.landawn.abacus.http.HttpResponse response = tuple._2;
      *         System.out.println("URL: " + request.get("url"));
      *         System.out.println("Status: " + response.statusCode());
      *     });
@@ -448,7 +452,7 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
      *     new File("capture.har"),
      *     url -> url.contains("/api/users")
      * );
@@ -456,7 +460,7 @@ public final class HARUtil {
      * requestOpt.ifPresent(request -> {
      *     String url = HARUtil.getUrlByRequestEntry(request);
      *     HttpMethod method = HARUtil.getHttpMethodByRequestEntry(request);
-     *     HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
+     *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
      *     System.out.println("Found request: " + method + " " + url);
      * });
      * }</pre>
@@ -478,14 +482,14 @@ public final class HARUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
      *     harContent, 
      *     url -> url.endsWith("/login")
      * );
      * 
      * requestOpt.ifPresent(request -> {
      *     String method = HARUtil.getHttpMethodByRequestEntry(request).name();
-     *     HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
+     *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
      *     // Process request details...
      * });
      * }</pre>

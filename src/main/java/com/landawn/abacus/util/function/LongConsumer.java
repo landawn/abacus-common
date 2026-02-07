@@ -51,10 +51,10 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * LongStream.range(1, 5).forEach(printer);
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(long t);
+    void accept(long value);
 
     /**
      * Returns a composed {@code LongConsumer} that performs, in sequence, this operation followed by
@@ -75,9 +75,9 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      */
     @Override
     default LongConsumer andThen(final java.util.function.LongConsumer after) {
-        return (final long t) -> {
-            accept(t);
-            after.accept(t);
+        return (final long value) -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

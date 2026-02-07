@@ -2289,7 +2289,7 @@ public final class ParserUtil {
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
-            this.aliases = ImmutableList.of(getAliases(field));
+            this.aliases = ImmutableList.wrap(N.asList(getAliases(field)));
 
             this.getMethod = getMethod;
             this.setMethod = setMethod;
@@ -3603,8 +3603,33 @@ public final class ParserUtil {
     }
 
     interface DateTimeReaderWriter<T> {
+        /**
+         * Parses a string value into the target date/time type for the specified property.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Date value = readerWriter.read(propInfo, "2026-01-01");
+         * }</pre>
+         *
+         * @param propInfo metadata for the target property.
+         * @param strValue the source string value to parse.
+         * @return the parsed date/time value.
+         */
         T read(PropInfo propInfo, String strValue);
 
+        /**
+         * Writes a date/time value to the character writer using the property's formatting settings.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * readerWriter.write(propInfo, value, writer);
+         * }</pre>
+         *
+         * @param propInfo metadata for the target property.
+         * @param x the date/time value to serialize.
+         * @param writer the destination writer.
+         * @throws IOException if writing to the destination fails.
+         */
         void write(PropInfo propInfo, T x, CharacterWriter writer) throws IOException;
     }
 

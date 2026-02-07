@@ -124,13 +124,13 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * Otherwise, converts the value to double and wraps it in OptionalDouble.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public OptionalDouble get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalDouble.empty()
                 : OptionalDouble

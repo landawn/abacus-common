@@ -54,7 +54,7 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test guid() generates valid GUID")
     public void testGuid() {
-        String guid = Strings.uuid32();
+        String guid = Strings.uuidWithoutHyphens();
         assertNotNull(guid);
         assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));
@@ -64,8 +64,8 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test guid() generates unique GUIDs")
     public void testGuid_Unique() {
-        String guid1 = Strings.uuid32();
-        String guid2 = Strings.uuid32();
+        String guid1 = Strings.uuidWithoutHyphens();
+        String guid2 = Strings.uuidWithoutHyphens();
         assertFalse(guid1.equals(guid2));
     }
 

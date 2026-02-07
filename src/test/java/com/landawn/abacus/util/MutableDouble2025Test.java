@@ -177,7 +177,7 @@ public class MutableDouble2025Test extends TestBase {
     @DisplayName("Test setIf() when predicate is true")
     public void testSetIfTrue() throws Exception {
         MutableDouble md = MutableDouble.of(10.5);
-        boolean result = md.setIf(20.7, val -> val < 15.0);
+        boolean result = md.setIf(val -> val < 15.0, 20.7);
         assertTrue(result);
         assertEquals(20.7, md.value(), DELTA);
     }
@@ -186,7 +186,7 @@ public class MutableDouble2025Test extends TestBase {
     @DisplayName("Test setIf() when predicate is false")
     public void testSetIfFalse() throws Exception {
         MutableDouble md = MutableDouble.of(10.5);
-        boolean result = md.setIf(5.0, val -> val < 10.0);
+        boolean result = md.setIf(val -> val < 10.0, 5.0);
         assertFalse(result);
         assertEquals(10.5, md.value(), DELTA);
     }
@@ -195,7 +195,7 @@ public class MutableDouble2025Test extends TestBase {
     @DisplayName("Test setIf() with complex predicate")
     public void testSetIfComplexPredicate() throws Exception {
         MutableDouble md = MutableDouble.of(25.5);
-        boolean result = md.setIf(100.0, val -> val > 20.0 && val < 30.0);
+        boolean result = md.setIf(val -> val > 20.0 && val < 30.0, 100.0);
         assertTrue(result);
         assertEquals(100.0, md.value(), DELTA);
     }
@@ -204,7 +204,7 @@ public class MutableDouble2025Test extends TestBase {
     @DisplayName("Test setIf() preserves value when false")
     public void testSetIfPreservesValue() throws Exception {
         MutableDouble md = MutableDouble.of(50.0);
-        boolean result = md.setIf(75.0, val -> val < 25.0);
+        boolean result = md.setIf(val -> val < 25.0, 75.0);
         assertFalse(result);
         assertEquals(50.0, md.value(), DELTA);
     }

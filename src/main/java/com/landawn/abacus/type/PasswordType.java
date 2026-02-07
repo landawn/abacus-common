@@ -93,13 +93,13 @@ public class PasswordType extends AbstractStringType {
      * The password is returned as-is from the database (in its encrypted form).
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label/name
+     * @param columnName the column label/name
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public String get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getString(columnLabel);
+    public String get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getString(columnName);
     }
 
     /**

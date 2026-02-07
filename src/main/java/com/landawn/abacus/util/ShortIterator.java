@@ -623,9 +623,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      */
     @Beta
     public ObjIterator<IndexedShort> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ShortIterator iter = this;
 
@@ -696,9 +694,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element with its index 
+     * @throws IllegalArgumentException if action is null
      * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {
         int idx = 0;
 
         while (hasNext()) {

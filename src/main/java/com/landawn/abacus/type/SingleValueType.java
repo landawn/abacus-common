@@ -326,22 +326,22 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Uses JSON creator if available, otherwise attempts string conversion or direct cast.
      *
      * @param rs the ResultSet containing the query results
-     * @param columnLabel the label of the column to retrieve
+     * @param columnName the label of the column to retrieve
      * @return an instance of type T, or {@code null} if the database value is null
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public T get(final ResultSet rs, final String columnLabel) throws SQLException {
+    public T get(final ResultSet rs, final String columnName) throws SQLException {
         if (jsonValueType != null) {
             try {
-                return (T) jsonCreatorMethod.invoke(null, jsonValueType.get(rs, columnLabel));
+                return (T) jsonCreatorMethod.invoke(null, jsonValueType.get(rs, columnName));
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         } else if (creator != null) {
-            return creator.apply(rs.getString(columnLabel));
+            return creator.apply(rs.getString(columnName));
         } else {
-            final Object obj = rs.getObject(columnLabel);
+            final Object obj = rs.getObject(columnName);
 
             return obj == null || typeClass.isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, typeClass);
         }

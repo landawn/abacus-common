@@ -150,7 +150,7 @@ public class EventBus {
      */
     @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
     public EventBus() {
-        this(Strings.uuid32());
+        this(Strings.uuidWithoutHyphens());
     }
 
     /**

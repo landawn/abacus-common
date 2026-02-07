@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,13 +29,13 @@ public class ImmutableSortedSet100Test extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> emptySet.last());
     }
 
-    @Test
-    public void testJust() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.just(42);
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertEquals(42, set.first());
-        Assertions.assertEquals(42, set.last());
-    }
+    //    @Test
+    //    public void testJust() {
+    //        ImmutableSortedSet<Integer> set = ImmutableSortedSet.just(42);
+    //        Assertions.assertEquals(1, set.size());
+    //        Assertions.assertEquals(42, set.first());
+    //        Assertions.assertEquals(42, set.last());
+    //    }
 
     @Test
     public void testOf_SingleElement() {
@@ -145,7 +146,7 @@ public class ImmutableSortedSet100Test extends TestBase {
 
     @Test
     public void testCopyOf_Null() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(null);
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf((Collection<String>) null);
         Assertions.assertTrue(set.isEmpty());
     }
 

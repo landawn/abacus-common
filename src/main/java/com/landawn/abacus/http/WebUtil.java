@@ -79,22 +79,14 @@ public final class WebUtil {
      * request body is present, it's declared as a separate {@code requestBody}
      * variable for readability.</p>
      *
-     * <p><b>Input Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * curl -X POST https://api.example.com/users \
-     *   -H "Content-Type: application/json" \
-     *   -H "Authorization: Bearer token123" \
-     *   -d '{"name":"John","age":30}'
-     * }</pre>
-     *
-     * <p><b>Generated Output:</b></p>
-     * <pre>{@code
-     * String requestBody = "{\"name\":\"John\",\"age\":30}";
-     *
-     * HttpRequest.url("https://api.example.com/users")
-     *     .header("Content-Type", "application/json")
-     *     .header("Authorization", "Bearer token123")
-     *     .post(requestBody);
+     * String curl = "curl -X POST http://localhost:18080/users "
+     *     + "-H \"Content-Type: application/json\" "
+     *     + "-H \"Authorization: Bearer token123\" "
+     *     + "-d '{\"name\":\"John\",\"age\":30}'";
+     * String javaCode = WebUtil.convertCurlToHttpRequest(curl);
+     * System.out.println(javaCode);
      * }</pre>
      *
      * @param curl the cURL command string to convert, must not be {@code null} or empty
@@ -222,21 +214,13 @@ public final class WebUtil {
      *   <li>Otherwise defaults to GET</li>
      * </ul>
      *
-     * <p><b>Input Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * curl -X POST https://api.example.com/users \
-     *   -H "Content-Type: application/json" \
-     *   -d '{"name":"John"}'
-     * }</pre>
-     *
-     * <p><b>Generated Output:</b></p>
-     * <pre>{@code
-     * RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{\"name\":\"John\"}");
-     *
-     * OkHttpRequest.url("https://api.example.com/users")
-     *     .header("Content-Type", "application/json")
-     *     .body(requestBody)
-     *     .post();
+     * String curl = "curl -X POST http://localhost:18080/users "
+     *     + "-H \"Content-Type: application/json\" "
+     *     + "-d '{\"name\":\"John\"}'";
+     * String javaCode = WebUtil.convertCurlToOkHttpRequest(curl);
+     * System.out.println(javaCode);
      * }</pre>
      *
      * @param curl the cURL command string to convert, must not be {@code null} or empty
@@ -427,7 +411,7 @@ public final class WebUtil {
      * <pre>{@code
      * // Create request with cURL logging
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
-     *     "https://api.example.com",
+     *     "http://localhost:18080",
      *     curl -> logger.debug("cURL command: {}", curl)
      * );
      *
@@ -438,7 +422,7 @@ public final class WebUtil {
      *        .post();
      *
      * // The logHandler will receive something like:
-     * // curl -X POST 'https://api.example.com' \
+     * // curl -X POST 'http://localhost:18080' \
      * //   -H 'Authorization: Bearer token123' \
      * //   -H 'Content-Type: application/json' \
      * //   -d '{"key":"value"}'
@@ -481,7 +465,7 @@ public final class WebUtil {
      * <pre>{@code
      * // Use double quotes in generated cURL commands (e.g., for Windows compatibility)
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
-     *     "https://api.example.com",
+     *     "http://localhost:18080",
      *     '"',
      *     curl -> System.out.println("cURL: " + curl)
      * );
@@ -490,7 +474,7 @@ public final class WebUtil {
      *        .post();
      *
      * // Generates:
-     * // curl -X POST "https://api.example.com" \
+     * // curl -X POST "http://localhost:18080" \
      * //   -H "Content-Type: application/json"
      * }</pre>
      *
@@ -537,7 +521,7 @@ public final class WebUtil {
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
      *
-     * <p><b>Input Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Content-Type", "application/json");
@@ -545,20 +529,13 @@ public final class WebUtil {
      *
      * String curl = WebUtil.buildCurl(
      *     "POST",
-     *     "https://api.example.com/users",
+     *     "http://localhost:18080/users",
      *     headers,
      *     "{\"name\":\"John\",\"email\":\"john@example.com\"}",
      *     "application/json",
      *     '\''
      * );
-     * }</pre>
-     *
-     * <p><b>Generated Output:</b></p>
-     * <pre>{@code
-     * curl -X POST 'https://api.example.com/users' \
-     *   -H 'Content-Type: application/json' \
-     *   -H 'Authorization: Bearer token123' \
-     *   -d '{"name":"John","email":"john@example.com"}'
+     * System.out.println(curl);
      * }</pre>
      *
      * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be null

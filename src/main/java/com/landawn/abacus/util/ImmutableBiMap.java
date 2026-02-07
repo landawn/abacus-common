@@ -63,7 +63,7 @@ import com.landawn.abacus.annotation.Internal;
  * @see ImmutableMap
  */
 @SuppressWarnings("java:S2160")
-public final class ImmutableBiMap<K, V> extends ImmutableAbstractMap<K, V> {
+public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final ImmutableBiMap EMPTY = new ImmutableBiMap(new BiMap<>());

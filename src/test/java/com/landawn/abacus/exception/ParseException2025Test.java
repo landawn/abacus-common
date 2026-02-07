@@ -15,7 +15,7 @@ public class ParseException2025Test extends TestBase {
 
     @Test
     public void testDefaultConstructor() {
-        ParseException exception = new ParseException();
+        ParsingException exception = new ParsingException();
         assertNotNull(exception);
         assertNull(exception.getMessage());
         assertNull(exception.getCause());
@@ -25,7 +25,7 @@ public class ParseException2025Test extends TestBase {
     @Test
     public void testMessageConstructor() {
         String message = "Parse error";
-        ParseException exception = new ParseException(message);
+        ParsingException exception = new ParsingException(message);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -36,7 +36,7 @@ public class ParseException2025Test extends TestBase {
     public void testTokenAndMessageConstructor() {
         int token = 42;
         String message = "Parse error at token";
-        ParseException exception = new ParseException(token, message);
+        ParsingException exception = new ParsingException(token, message);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -47,7 +47,7 @@ public class ParseException2025Test extends TestBase {
     public void testMessageAndCauseConstructor() {
         String message = "Parse error";
         Throwable cause = new RuntimeException("Underlying cause");
-        ParseException exception = new ParseException(message, cause);
+        ParsingException exception = new ParsingException(message, cause);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertEquals(cause, exception.getCause());
@@ -57,7 +57,7 @@ public class ParseException2025Test extends TestBase {
     @Test
     public void testCauseConstructor() {
         Throwable cause = new RuntimeException("Underlying cause");
-        ParseException exception = new ParseException(cause);
+        ParsingException exception = new ParsingException(cause);
         assertNotNull(exception);
         assertEquals(cause.toString(), exception.getMessage());
         assertEquals(cause, exception.getCause());
@@ -66,23 +66,23 @@ public class ParseException2025Test extends TestBase {
 
     @Test
     public void testGetToken() {
-        ParseException exception1 = new ParseException();
+        ParsingException exception1 = new ParsingException();
         assertEquals(-2, exception1.getErrorToken());
 
         int customToken = 100;
-        ParseException exception2 = new ParseException(customToken, "Error");
+        ParsingException exception2 = new ParsingException(customToken, "Error");
         assertEquals(customToken, exception2.getErrorToken());
     }
 
     @Test
     public void testIsInstanceOfRuntimeException() {
-        ParseException exception = new ParseException();
+        ParsingException exception = new ParsingException();
         assertTrue(exception instanceof RuntimeException);
     }
 
     @Test
     public void testStackTrace() {
-        ParseException exception = new ParseException("Test message");
+        ParsingException exception = new ParsingException("Test message");
         StackTraceElement[] stackTrace = exception.getStackTrace();
         assertNotNull(stackTrace);
         assertTrue(stackTrace.length > 0);
@@ -90,21 +90,21 @@ public class ParseException2025Test extends TestBase {
 
     @Test
     public void testSerialVersionUID() {
-        ParseException exception = new ParseException("Test");
+        ParsingException exception = new ParsingException("Test");
         assertTrue(exception instanceof java.io.Serializable);
     }
 
     @Test
     public void testNegativeToken() {
         int negativeToken = -100;
-        ParseException exception = new ParseException(negativeToken, "Error");
+        ParsingException exception = new ParsingException(negativeToken, "Error");
         assertEquals(negativeToken, exception.getErrorToken());
     }
 
     @Test
     public void testZeroToken() {
         int zeroToken = 0;
-        ParseException exception = new ParseException(zeroToken, "Error");
+        ParsingException exception = new ParsingException(zeroToken, "Error");
         assertEquals(zeroToken, exception.getErrorToken());
     }
 }

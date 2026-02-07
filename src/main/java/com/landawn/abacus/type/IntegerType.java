@@ -105,14 +105,14 @@ public final class IntegerType extends AbstractIntegerType {
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
      * @return the Integer value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
      * @throws NumberFormatException if a non-numeric value cannot be converted to Integer
      */
     @Override
-    public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public Integer get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         if (result == null) {
             return null; // NOSONAR

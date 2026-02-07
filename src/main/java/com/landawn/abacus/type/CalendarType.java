@@ -152,13 +152,13 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * The method reads the value as a Timestamp and converts it to Calendar.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the timestamp value
+     * @param columnName the label of the column containing the timestamp value
      * @return A Calendar instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public Calendar get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return (ts == null) ? null : Dates.createCalendar(ts);
     }

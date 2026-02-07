@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -22,12 +23,12 @@ public class ImmutableList101Test extends TestBase {
         Assertions.assertEquals(0, emptyList.size());
     }
 
-    @Test
-    public void testJust() {
-        ImmutableList<String> list = ImmutableList.just("single");
-        Assertions.assertEquals(1, list.size());
-        Assertions.assertEquals("single", list.get(0));
-    }
+    //    @Test
+    //    public void testJust() {
+    //        ImmutableList<String> list = ImmutableList.just("single");
+    //        Assertions.assertEquals(1, list.size());
+    //        Assertions.assertEquals("single", list.get(0));
+    //    }
 
     @Test
     public void testOf_SingleElement() {
@@ -102,26 +103,26 @@ public class ImmutableList101Test extends TestBase {
         Assertions.assertEquals("j", list.get(9));
     }
 
-    @Test
-    public void testOf_VarArgs() {
-        String[] array = { "one", "two", "three" };
-        ImmutableList<String> list = ImmutableList.of(array);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("one", list.get(0));
-        Assertions.assertEquals("three", list.get(2));
-    }
-
-    @Test
-    public void testOf_VarArgs_Empty() {
-        ImmutableList<String> list = ImmutableList.of();
-        Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testOf_VarArgs_Null() {
-        ImmutableList<String> list = ImmutableList.of((String[]) null);
-        Assertions.assertTrue(list.isEmpty());
-    }
+    //    @Test
+    //    public void testOf_VarArgs() {
+    //        String[] array = { "one", "two", "three" };
+    //        ImmutableList<String> list = ImmutableList.of(array);
+    //        Assertions.assertEquals(3, list.size());
+    //        Assertions.assertEquals("one", list.get(0));
+    //        Assertions.assertEquals("three", list.get(2));
+    //    }
+    //
+    //    @Test
+    //    public void testOf_VarArgs_Empty() {
+    //        ImmutableList<String> list = ImmutableList.of();
+    //        Assertions.assertTrue(list.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testOf_VarArgs_Null() {
+    //        ImmutableList<String> list = ImmutableList.of((String[]) null);
+    //        Assertions.assertTrue(list.isEmpty());
+    //    }
 
     @Test
     public void testCopyOf() {
@@ -150,7 +151,7 @@ public class ImmutableList101Test extends TestBase {
 
     @Test
     public void testCopyOf_Null() {
-        ImmutableList<String> list = ImmutableList.copyOf(null);
+        ImmutableList<String> list = ImmutableList.copyOf((Collection<String>) null);
         Assertions.assertTrue(list.isEmpty());
     }
 

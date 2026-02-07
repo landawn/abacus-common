@@ -89,13 +89,13 @@ public class MillisTimeType extends TimeType {
      * }</pre>
      *
      * @param rs The ResultSet containing the data
-     * @param columnLabel The label of the column to retrieve the value from
+     * @param columnName The label of the column to retrieve the value from
      * @return A Time object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final long lng = rs.getLong(columnLabel);
+    public Time get(final ResultSet rs, final String columnName) throws SQLException {
+        final long lng = rs.getLong(columnName);
 
         return (lng == 0) ? null : Dates.createTime(lng);
     }

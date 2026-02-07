@@ -25,7 +25,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
 import com.landawn.abacus.parser.entity.GenericEntity;
@@ -212,7 +212,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         try {
             abacusXMLDOMParser.serialize(abacusXMLDOMParser);
             fail("Should throw RuntimeException");
-        } catch (ParseException e) {
+        } catch (ParsingException e) {
 
         }
     }
@@ -841,7 +841,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         try {
             abacusXMLDOMParser.deserialize(xml, XDC.of(false, null), Account.class);
             fail("Should throw RuntimeException");
-        } catch (ParseException e) {
+        } catch (ParsingException e) {
 
         }
 

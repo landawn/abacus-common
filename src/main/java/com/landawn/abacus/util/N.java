@@ -166,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Exception Philosophy:</b> Exceptions are thrown only when the method contract is violated
  *       (e.g., adding to a {@code null} array). Safe operations (e.g., reversing a {@code null} String)
  *       return the input unchanged.</li>
- *   <li><b>Index Conventions:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex}
+ *   <li><b>Index Conventions:</b> Methods use {@code fromIndex} and {@code toIndex}
  *       parameters (half-open ranges [fromIndex, toIndex)), NOT {@code offset/count} parameters.</li>
  *   <li><b>Performance First:</b> Optimized for performance with minimal overhead and object allocation.</li>
  * </ul>
@@ -38566,12 +38566,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             a[cnt++ % batchSize] = iter.next();
 
             if (cnt % batchSize == 0) {
-                batchAction.accept(ImmutableList.of(a));
+                batchAction.accept(ImmutableList.wrap(N.asList(a)));
             }
         }
 
         if (cnt % batchSize != 0) {
-            batchAction.accept(ImmutableList.of(copyOfRange(a, 0, cnt % batchSize)));
+            batchAction.accept(ImmutableList.wrap(N.asList(copyOfRange(a, 0, cnt % batchSize))));
         }
     }
 
@@ -38841,12 +38841,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             a[cnt++ % batchSize] = iter.next();
 
             if (cnt % batchSize == 0) {
-                result.add(batchAction.apply(ImmutableList.of(a)));
+                result.add(batchAction.apply(ImmutableList.wrap(N.asList(a))));
             }
         }
 
         if (cnt % batchSize != 0) {
-            result.add(batchAction.apply(ImmutableList.of(copyOfRange(a, 0, cnt % batchSize))));
+            result.add(batchAction.apply(ImmutableList.wrap(N.asList(copyOfRange(a, 0, cnt % batchSize)))));
         }
 
         return result;

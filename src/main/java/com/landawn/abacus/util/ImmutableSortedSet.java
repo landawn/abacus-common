@@ -84,33 +84,35 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         return EMPTY;
     }
 
-    /**
-     * Returns an ImmutableSortedSet containing a single element.
-     * The element must implement Comparable to determine its natural ordering.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableSortedSet<Integer> singletonSet = ImmutableSortedSet.just(42);
-     * System.out.println(singletonSet.first());   // 42
-     * }</pre>
-     *
-     * @param <E> the type of element, must extend Comparable
-     * @param e the element to be contained in the set
-     * @return an ImmutableSortedSet containing only the specified element
-     * @throws ClassCastException if the element does not implement Comparable
-     */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(final E e) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e)));
-    }
+    //    /**
+    //     * Returns an ImmutableSortedSet containing a single element.
+    //     * The element must implement Comparable to determine its natural ordering.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * ImmutableSortedSet<Integer> singletonSet = ImmutableSortedSet.just(42);
+    //     * System.out.println(singletonSet.first());   // 42
+    //     * }</pre>
+    //     *
+    //     * @param <E> the type of element, must extend Comparable
+    //     * @param e the element to be contained in the set
+    //     * @return an ImmutableSortedSet containing only the specified element
+    //     * @throws ClassCastException if the element does not implement Comparable
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(final E e) {
+    //        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e)));
+    //    }
 
     /**
      * Returns an ImmutableSortedSet containing a single element.
-     * This method is equivalent to {@link #just(Comparable)} and exists for API consistency.
+     * This method exists for API consistency with other immutable collection factories.
      *
      * @param <E> the type of element, must extend Comparable
      * @param e1 the element to be contained in the set
      * @return an ImmutableSortedSet containing only the specified element
-     * @see #just(Comparable)
+     * @see #of(Comparable, Comparable)
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) {
         return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)));

@@ -137,13 +137,13 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * }</pre>
      *
      * @param rs The ResultSet containing the data
-     * @param columnLabel The label of the column to retrieve the value from
+     * @param columnName The label of the column to retrieve the value from
      * @return A MutableChar containing the retrieved character value
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public MutableChar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return MutableChar.of((char) rs.getInt(columnLabel));
+    public MutableChar get(final ResultSet rs, final String columnName) throws SQLException {
+        return MutableChar.of((char) rs.getInt(columnName));
     }
 
     /**

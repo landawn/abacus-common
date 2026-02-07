@@ -117,16 +117,16 @@ public class Holder100Test extends TestBase {
     public void testSetIf() throws Exception {
         Holder<Integer> holder = Holder.of(10);
 
-        boolean updated = holder.setIf(20, v -> v < 15);
+        boolean updated = holder.setIf(v -> v < 15, 20);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20, holder.value());
 
-        updated = holder.setIf(30, v -> v < 15);
+        updated = holder.setIf(v -> v < 15, 30);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20, holder.value());
 
         holder.setValue(null);
-        updated = holder.setIf(5, v -> v == null);
+        updated = holder.setIf(v -> v == null, 5);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(5, holder.value());
     }
@@ -135,11 +135,11 @@ public class Holder100Test extends TestBase {
     //    public void testSetIfWithBiPredicate() throws Exception {
     //        Holder<String> holder = Holder.of("old");
     //
-    //        boolean updated = holder.setIf("newVal", (current, newVal) -> current.length() < newVal.length());
+    //        boolean updated = holder.setIf((current, newVal) -> current.length() < newVal.length(), "newVal");
     //        Assertions.assertTrue(updated);
     //        Assertions.assertEquals("newVal", holder.value());
     //
-    //        updated = holder.setIf("no", (current, newVal) -> current.length() < newVal.length());
+    //        updated = holder.setIf((current, newVal) -> current.length() < newVal.length(), "no");
     //        Assertions.assertFalse(updated);
     //        Assertions.assertEquals("newVal", holder.value());
     //    }

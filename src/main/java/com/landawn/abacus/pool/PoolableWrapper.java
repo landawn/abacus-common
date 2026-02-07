@@ -37,12 +37,12 @@ import com.landawn.abacus.util.N;
  * <pre>{@code
  * // Wrap with infinite lifetime
  * String data = "cached data";
- * PoolableWrapper<String> wrapped = Poolable.wrap(data);
+ * PoolableWrapper<String> wrapped = PoolableWrapper.of(data);
  * pool.add(wrapped);
  * 
  * // Wrap with specific lifetime limits
  * ByteBuffer buffer = ByteBuffer.allocate(1024);
- * PoolableWrapper<ByteBuffer> wrappedBuffer = Poolable.wrap(
+ * PoolableWrapper<ByteBuffer> wrappedBuffer = PoolableWrapper.of(
  *     buffer, 
  *     600000,  // 10 minute lifetime
  *     60000    // 1 minute max idle
@@ -76,23 +76,23 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * Constructs a new PoolableWrapper with infinite lifetime and idle time.
      * The wrapped object will never expire based on time.
      * 
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      */
-    public PoolableWrapper(final T srcObject) {
-        this(srcObject, Long.MAX_VALUE, Long.MAX_VALUE);
+    public PoolableWrapper(final T value) {
+        this(value, Long.MAX_VALUE, Long.MAX_VALUE);
     }
 
     /**
      * Constructs a new PoolableWrapper with specified lifetime and idle time limits.
      * 
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      * @param liveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
-    public PoolableWrapper(final T srcObject, final long liveTime, final long maxIdleTime) {
+    public PoolableWrapper(final T value, final long liveTime, final long maxIdleTime) {
         super(liveTime, maxIdleTime);
-        this.srcObject = srcObject;
+        this.srcObject = value;
     }
 
     /**
@@ -102,15 +102,15 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> data = Arrays.asList("a", "b", "c");
-     * PoolableWrapper<List<String>> wrapped = Poolable.wrap(data);
+     * PoolableWrapper<List<String>> wrapped = PoolableWrapper.of(data);
      * }</pre>
      * 
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      * @return a new PoolableWrapper containing the source object
      */
-    static <T> PoolableWrapper<T> of(final T srcObject) {
-        return new PoolableWrapper<>(srcObject);
+    static <T> PoolableWrapper<T> of(final T value) {
+        return new PoolableWrapper<>(value);
     }
 
     /**
@@ -121,20 +121,20 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * <pre>{@code
      * // Cache a computed result for 5 minutes, expire after 1 minute idle
      * ComplexResult result = computeExpensiveOperation();
-     * PoolableWrapper<ComplexResult> wrapped = Poolable.wrap(
+     * PoolableWrapper<ComplexResult> wrapped = PoolableWrapper.of(
      *     result, 300000, 60000
      * );
      * }</pre>
      * 
      * @param <T> the type of the object to wrap
-     * @param srcObject the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}
      * @param liveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @return a new PoolableWrapper with the specified settings
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
-    static <T> PoolableWrapper<T> of(final T srcObject, final long liveTime, final long maxIdleTime) {
-        return new PoolableWrapper<>(srcObject, liveTime, maxIdleTime);
+    static <T> PoolableWrapper<T> of(final T value, final long liveTime, final long maxIdleTime) {
+        return new PoolableWrapper<>(value, liveTime, maxIdleTime);
     }
 
     /**

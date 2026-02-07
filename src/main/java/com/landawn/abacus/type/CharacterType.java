@@ -99,13 +99,13 @@ public final class CharacterType extends AbstractCharacterType {
      * }</pre>
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
      * @return the first character of the string value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Character get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final String result = rs.getString(columnLabel);
+    public Character get(final ResultSet rs, final String columnName) throws SQLException {
+        final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
             return null; // NOSONAR

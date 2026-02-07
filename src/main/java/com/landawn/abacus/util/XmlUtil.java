@@ -61,7 +61,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -587,7 +587,7 @@ public final class XmlUtil {
      *
      * @return A new instance of {@code SAXParser}
      * @throws RuntimeException if the parser cannot be created
-     * @throws ParseException if SAX parsing configuration fails
+     * @throws ParsingException if SAX parsing configuration fails
      * @see SAXParserFactory#newSAXParser()
      */
     public static SAXParser createSAXParser() {
@@ -600,7 +600,7 @@ public final class XmlUtil {
                 } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final SAXException e) {
-                    throw new ParseException(e);
+                    throw new ParsingException(e);
                 }
             }
 

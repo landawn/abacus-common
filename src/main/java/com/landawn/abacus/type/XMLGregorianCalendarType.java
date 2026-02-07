@@ -223,13 +223,13 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column containing the timestamp value
+     * @param columnName the label of the column containing the timestamp value
      * @return the XMLGregorianCalendar value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public XMLGregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public XMLGregorianCalendar get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
         return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
     }
 

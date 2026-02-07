@@ -170,13 +170,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * The timestamp from the database is converted to OffsetDateTime using the default zone ID.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return an OffsetDateTime representing the timestamp, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public OffsetDateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public OffsetDateTime get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
     }

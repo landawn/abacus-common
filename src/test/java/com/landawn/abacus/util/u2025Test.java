@@ -752,7 +752,7 @@ public class u2025Test extends TestBase {
     @Test
     public void testOptionalInt_mapToLong() {
         OptionalInt opt = OptionalInt.of(42);
-        OptionalLong mapped = opt.mapToLong(v -> (long) v);
+        OptionalLong mapped = opt.mapToLong(v -> v.longValue());
         assertTrue(mapped.isPresent());
         assertEquals(42L, mapped.get());
     }

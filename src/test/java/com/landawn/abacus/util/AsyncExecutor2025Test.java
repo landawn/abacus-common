@@ -297,7 +297,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+        ContinuableFuture<Void> future = executor.executeWithRetry((Throwables.Runnable<Exception>) () -> {
             attempts.incrementAndGet();
         }, 3, 10, e -> e instanceof RuntimeException);
 
@@ -311,7 +311,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+        ContinuableFuture<Void> future = executor.executeWithRetry((Throwables.Runnable<Exception>) () -> {
             if (attempts.incrementAndGet() < 3) {
                 throw new RuntimeException("Retry needed");
             }
@@ -327,7 +327,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+        ContinuableFuture<Void> future = executor.executeWithRetry((Throwables.Runnable<Exception>) () -> {
             attempts.incrementAndGet();
             throw new RuntimeException("Always fails");
         }, 2, 10, e -> e instanceof RuntimeException);
@@ -342,7 +342,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+        ContinuableFuture<Void> future = executor.executeWithRetry((Throwables.Runnable<Exception>) () -> {
             attempts.incrementAndGet();
             throw new IllegalStateException("Different exception");
         }, 2, 10, e -> e instanceof RuntimeException);
@@ -357,7 +357,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<String> future = executor.execute(() -> {
+        ContinuableFuture<String> future = executor.executeWithRetry(() -> {
             attempts.incrementAndGet();
             return "Success";
         }, 3, 10, (result, exception) -> result == null);
@@ -373,7 +373,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<String> future = executor.execute(() -> {
+        ContinuableFuture<String> future = executor.executeWithRetry(() -> {
             if (attempts.incrementAndGet() < 2) {
                 return null;
             }
@@ -391,7 +391,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<String> future = executor.execute(() -> {
+        ContinuableFuture<String> future = executor.executeWithRetry(() -> {
             if (attempts.incrementAndGet() < 3) {
                 throw new RuntimeException("Retry needed");
             }
@@ -409,7 +409,7 @@ public class AsyncExecutor2025Test extends TestBase {
         AsyncExecutor executor = new AsyncExecutor();
         AtomicInteger attempts = new AtomicInteger(0);
 
-        ContinuableFuture<String> future = executor.execute(() -> {
+        ContinuableFuture<String> future = executor.executeWithRetry(() -> {
             attempts.incrementAndGet();
             return null;
         }, 2, 10, (result, exception) -> result == null);

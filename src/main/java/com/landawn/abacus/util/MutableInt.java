@@ -182,17 +182,17 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * boolean updated = num.setIf(20, v -> v < 15);   // returns true, value is now 20
-     * updated = num.setIf(30, v -> v < 15);           // returns false, value remains 20
+     * boolean updated = num.setIf(v -> v < 15, 20);   // returns true, value is now 20
+     * updated = num.setIf(v -> v < 15, 30);           // returns false, value remains 20
      * }</pre>
      * 
      * @param <E> the type of exception the predicate may throw
-     * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final int newValue, final Throwables.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

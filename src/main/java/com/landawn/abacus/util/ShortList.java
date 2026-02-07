@@ -316,6 +316,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     private static final long serialVersionUID = 25682021483156507L;
 
     static final Random RAND = new SecureRandom();
+    static final int BOUND = Short.MAX_VALUE - Short.MIN_VALUE + 1;
 
     /**
      * The array buffer into which the elements of the ShortList are stored.
@@ -513,11 +514,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if len is negative
      */
     public static ShortList random(final int len) {
-        final int bound = Short.MAX_VALUE - Short.MIN_VALUE + 1;
         final short[] a = new short[len];
 
         for (int i = 0; i < len; i++) {
-            a[i] = (short) (RAND.nextInt(bound) + Short.MIN_VALUE);
+            a[i] = (short) (RAND.nextInt(BOUND) + Short.MIN_VALUE);
         }
 
         return of(a);

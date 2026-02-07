@@ -1033,15 +1033,15 @@ public final class Numbers {
      * @param <T> the target type of the conversion (must extend Number)
      * @param value the number to convert
      * @param targetType the class object representing the target type
-     * @param defaultValueForNull the value to return if the input value is null
+     * @param defaultValue the value to return if the input value is null
      * @return the converted number as an instance of the target type,
      *         or the specified default value if the input value is null
      * @throws ArithmeticException if the conversion would result in an overflow
      * @see #convert(Number, Class)
      */
-    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType, T defaultValueForNull) throws ArithmeticException {
+    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType, T defaultValue) throws ArithmeticException {
         if (value == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         return convert(value, targetType);
@@ -1122,7 +1122,7 @@ public final class Numbers {
      * @param <T> the target type of the conversion (must extend Number)
      * @param value the number to convert
      * @param targetType the Type object representing the target type
-     * @param defaultValueForNull the value to return if the input value is null
+     * @param defaultValue the value to return if the input value is null
      * @return the converted number as an instance of the target type,
      *         or the specified default value if the input value is null
      * @throws ArithmeticException if the conversion would result in an overflow
@@ -1130,9 +1130,9 @@ public final class Numbers {
      * @see #convert(Number, Class, Number)
      * @see com.landawn.abacus.type.Type
      */
-    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType, T defaultValueForNull) throws ArithmeticException {
+    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType, T defaultValue) throws ArithmeticException {
         if (value == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         return convert(value, targetType);
@@ -1830,7 +1830,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the byte representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a byte.
      * @see #toByte(String)
@@ -1840,9 +1840,9 @@ public final class Numbers {
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final String str, final byte defaultValueForNull) throws NumberFormatException {
+    public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (str.length() < 5) {
@@ -1878,7 +1878,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the byte representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #toByte(String)
@@ -1888,9 +1888,9 @@ public final class Numbers {
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final Object obj, final byte defaultValueForNull) throws NumberFormatException {
+    public static byte toByte(final Object obj, final byte defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Byte) {
@@ -1905,7 +1905,7 @@ public final class Numbers {
             return (byte) lng;
         }
 
-        return toByte(obj.toString(), defaultValueForNull);
+        return toByte(obj.toString(), defaultValue);
     }
 
     /**
@@ -1983,7 +1983,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the short representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a short.
      * @see #toShort(String)
@@ -1993,9 +1993,9 @@ public final class Numbers {
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final String str, final short defaultValueForNull) throws NumberFormatException {
+    public static short toShort(final String str, final short defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (str.length() < 5) {
@@ -2031,7 +2031,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the short representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
      * @see #toShort(String)
@@ -2041,9 +2041,9 @@ public final class Numbers {
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final Object obj, final short defaultValueForNull) throws NumberFormatException {
+    public static short toShort(final Object obj, final short defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Short) {
@@ -2058,7 +2058,7 @@ public final class Numbers {
             return (short) lng;
         }
 
-        return toShort(obj.toString(), defaultValueForNull);
+        return toShort(obj.toString(), defaultValue);
     }
 
     /**
@@ -2136,7 +2136,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the integer representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as an integer.
      * @see #toInt(String)
@@ -2146,9 +2146,9 @@ public final class Numbers {
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final String str, final int defaultValueForNull) throws NumberFormatException {
+    public static int toInt(final String str, final int defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (str.length() < 5) {
@@ -2180,7 +2180,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the integer representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #toInt(String)
@@ -2190,9 +2190,9 @@ public final class Numbers {
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final Object obj, final int defaultValueForNull) throws NumberFormatException {
+    public static int toInt(final Object obj, final int defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Integer) {
@@ -2207,7 +2207,7 @@ public final class Numbers {
             return (int) lng;
         }
 
-        return toInt(obj.toString(), defaultValueForNull);
+        return toInt(obj.toString(), defaultValue);
     }
 
     /**
@@ -2287,7 +2287,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the long representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a long.
      * @see #toLong(String)
@@ -2297,9 +2297,9 @@ public final class Numbers {
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final String str, final long defaultValueForNull) throws NumberFormatException {
+    public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (str.length() < 5) {
@@ -2341,7 +2341,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the long representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
      * @see #toLong(String)
@@ -2351,9 +2351,9 @@ public final class Numbers {
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final Object obj, final long defaultValueForNull) throws NumberFormatException {
+    public static long toLong(final Object obj, final long defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Long) {
@@ -2378,7 +2378,7 @@ public final class Numbers {
             return ((Number) obj).longValue();
         }
 
-        return toLong(obj.toString(), defaultValueForNull);
+        return toLong(obj.toString(), defaultValue);
     }
 
     /**
@@ -2458,7 +2458,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the float representation of the string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a float.
      * @see #toFloat(String)
@@ -2467,9 +2467,9 @@ public final class Numbers {
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
-    public static float toFloat(final String str, final float defaultValueForNull) throws NumberFormatException {
+    public static float toFloat(final String str, final float defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         return Float.parseFloat(str);
@@ -2493,7 +2493,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the float representation of the object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
      * @see #toFloat(String)
@@ -2502,9 +2502,9 @@ public final class Numbers {
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
-    public static float toFloat(final Object obj, final float defaultValueForNull) throws NumberFormatException {
+    public static float toFloat(final Object obj, final float defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Number) {
@@ -2515,7 +2515,7 @@ public final class Numbers {
             }
         }
 
-        return toFloat(obj.toString(), defaultValueForNull);
+        return toFloat(obj.toString(), defaultValue);
     }
 
     /**
@@ -2596,7 +2596,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
-     * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
+     * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the double representation of the string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a double.
      * @see #toDouble(String)
@@ -2605,9 +2605,9 @@ public final class Numbers {
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
-    public static double toDouble(final String str, final double defaultValueForNull) throws NumberFormatException {
+    public static double toDouble(final String str, final double defaultValue) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         return Double.parseDouble(str);
@@ -2631,7 +2631,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
-     * @param defaultValueForNull the default value to return if the object is {@code null}.
+     * @param defaultValue the default value to return if the object is {@code null}.
      * @return the double representation of the object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
      * @see #toDouble(String)
@@ -2640,9 +2640,9 @@ public final class Numbers {
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
-    public static double toDouble(final Object obj, final double defaultValueForNull) throws NumberFormatException {
+    public static double toDouble(final Object obj, final double defaultValue) throws NumberFormatException {
         if (obj == null) {
-            return defaultValueForNull;
+            return defaultValue;
         }
 
         if (obj instanceof Number) {
@@ -2653,7 +2653,7 @@ public final class Numbers {
             }
         }
 
-        return toDouble(obj.toString(), defaultValueForNull);
+        return toDouble(obj.toString(), defaultValue);
     }
 
     /**
@@ -2686,11 +2686,11 @@ public final class Numbers {
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
-     * @param defaultValueForNull the default value to return if the {@code BigDecimal} is {@code null}.
+     * @param defaultValue the default value to return if the {@code BigDecimal} is {@code null}.
      * @return the double represented by the {@code BigDecimal} or the default value if the {@code BigDecimal} is {@code null}.
      */
-    public static double toDouble(final BigDecimal value, final double defaultValueForNull) {
-        return value == null ? defaultValueForNull : value.doubleValue();
+    public static double toDouble(final BigDecimal value, final double defaultValue) {
+        return value == null ? defaultValue : value.doubleValue();
     }
 
     /**
@@ -4182,8 +4182,8 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    // TODO(kevinb): remove after this warning is disabled globally
     public static int log2(final long x, final RoundingMode mode) {
+        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
         switch (mode) {
             case UNNECESSARY:
@@ -4347,8 +4347,8 @@ public final class Numbers {
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
-    // TODO(kevinb): remove after this warning is disabled globally
     public static int log2(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
+        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", N.checkArgNotNull(x));
         final int logFloor = x.bitLength() - 1;
         switch (mode) {
@@ -4469,8 +4469,8 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    // TODO(kevinb): remove after this warning is disabled globally
     public static int log10(final long x, final RoundingMode mode) {
+        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
 
         final int logFloor = log10Floor(x);
@@ -7447,8 +7447,8 @@ public final class Numbers {
      * @see #roundToLong(double, RoundingMode)
      * @see RoundingMode
      */
-    // #roundIntermediate, java.lang.Math.getExponent, com.google.common.math.DoubleUtils
     public static BigInteger roundToBigInteger(double x, final RoundingMode mode) {
+        // #roundIntermediate, java.lang.Math.getExponent, com.google.common.math.DoubleUtils
         x = roundIntermediate(x, mode);
         if (MIN_LONG_AS_DOUBLE - x < 1.0 && x < MAX_LONG_AS_DOUBLE_PLUS_ONE) {
             return BigInteger.valueOf((long) x);

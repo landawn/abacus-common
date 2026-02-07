@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -39,22 +40,22 @@ public class ImmutableSortedSet2025Test extends TestBase {
         ImmutableSortedSet<Integer> empty2 = ImmutableSortedSet.empty();
         assertSame(empty1, empty2);
     }
-
-    @Test
-    public void test_just_withSingleElement() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.just("test");
-        assertNotNull(set);
-        assertEquals(1, set.size());
-        assertTrue(set.contains("test"));
-    }
-
-    @Test
-    public void test_just_withNullableComparator() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.just(10);
-        assertNotNull(set);
-        assertEquals(1, set.size());
-        assertTrue(set.contains(10));
-    }
+    //
+    //    @Test
+    //    public void test_just_withSingleElement() {
+    //        ImmutableSortedSet<String> set = ImmutableSortedSet.just("test");
+    //        assertNotNull(set);
+    //        assertEquals(1, set.size());
+    //        assertTrue(set.contains("test"));
+    //    }
+    //
+    //    @Test
+    //    public void test_just_withNullableComparator() {
+    //        ImmutableSortedSet<Integer> set = ImmutableSortedSet.just(10);
+    //        assertNotNull(set);
+    //        assertEquals(1, set.size());
+    //        assertTrue(set.contains(10));
+    //    }
 
     @Test
     public void test_of_oneElement() {
@@ -166,7 +167,7 @@ public class ImmutableSortedSet2025Test extends TestBase {
 
     @Test
     public void test_copyOf_withNull() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(null);
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf((Collection<String>) null);
         assertSame(ImmutableSortedSet.empty(), set);
     }
 
@@ -355,12 +356,6 @@ public class ImmutableSortedSet2025Test extends TestBase {
         assertThrows(NoSuchElementException.class, () -> {
             emptySet.first();
         });
-    }
-
-    @Test
-    public void test_first_singleElement() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.just("only");
-        assertEquals("only", set.first());
     }
 
     @Test

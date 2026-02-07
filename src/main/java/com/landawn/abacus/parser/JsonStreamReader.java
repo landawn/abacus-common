@@ -17,7 +17,7 @@ package com.landawn.abacus.parser;
 import java.io.IOException;
 import java.io.Reader;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
@@ -30,8 +30,8 @@ class JsonStreamReader extends JsonStringReader {
         super(rbuf, 0, 0, cbuf, reader);
     }
 
-    JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int endIndex, final char[] cbuf) {
-        super(rbuf, beginIndex, endIndex, cbuf, reader);
+    JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int toIndex, final char[] cbuf) {
+        super(rbuf, beginIndex, toIndex, cbuf, reader);
     }
 
     /**
@@ -338,7 +338,7 @@ class JsonStreamReader extends JsonStringReader {
         if (strBeginIndex >= strEndIndex) {
             refill();
             if (strBeginIndex >= strEndIndex) {
-                throw new ParseException("Incomplete escape sequence at end of input");
+                throw new ParsingException("Incomplete escape sequence at end of input");
             }
         }
 
@@ -355,7 +355,7 @@ class JsonStreamReader extends JsonStringReader {
                     if (strBeginIndex >= strEndIndex) {
                         refill();
                         if (strBeginIndex >= strEndIndex) {
-                            throw new ParseException("Incomplete unicode escape sequence: expected 4 hex digits");
+                            throw new ParsingException("Incomplete unicode escape sequence: expected 4 hex digits");
                         }
                     }
 
@@ -370,7 +370,7 @@ class JsonStreamReader extends JsonStringReader {
                     } else if ((c >= 'A') && (c <= 'F')) {
                         result += (char) (c - 'A' + 10);
                     } else {
-                        throw new ParseException("Number format exception: \\u" + String.valueOf(cbuf));
+                        throw new ParsingException("Number format exception: \\u" + String.valueOf(cbuf));
                     }
                 }
 

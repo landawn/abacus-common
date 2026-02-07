@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -737,7 +737,7 @@ public final class PropertiesUtil {
      * @param source the XML file from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final File source) {
         return loadFromXml(source, false);
@@ -759,7 +759,7 @@ public final class PropertiesUtil {
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
         return loadFromXml(source, autoRefresh, Properties.class);
@@ -780,7 +780,7 @@ public final class PropertiesUtil {
      * @param source the InputStream from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final InputStream source) {
         return loadFromXml(source, Properties.class);
@@ -801,7 +801,7 @@ public final class PropertiesUtil {
      * @param source the Reader from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading from the reader
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static Properties<String, Object> loadFromXml(final Reader source) {
         return loadFromXml(source, Properties.class);
@@ -825,7 +825,7 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass) {
         return loadFromXml(source, false, targetClass);
@@ -853,7 +853,7 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the file
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
@@ -901,7 +901,7 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the stream
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -910,7 +910,7 @@ public final class PropertiesUtil {
         try {
             doc = docBuilder.parse(source);
         } catch (final SAXException e) {
-            throw new ParseException(e);
+            throw new ParsingException(e);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -936,7 +936,7 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading from the reader
-     * @throws ParseException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has invalid structure
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -945,7 +945,7 @@ public final class PropertiesUtil {
         try {
             doc = docBuilder.parse(new InputSource(source));
         } catch (final SAXException e) {
-            throw new ParseException(e);
+            throw new ParsingException(e);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

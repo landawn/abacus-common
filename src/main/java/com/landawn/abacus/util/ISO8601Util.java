@@ -213,7 +213,7 @@ final class ISO8601Util {
      * <pre>{@code
      * ParsePosition pos = new ParsePosition(0);
      * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);
-     * int endIndex = pos.getIndex();   // Position after the parsed date
+     * int toIndex = pos.getIndex();   // Position after the parsed date
      * }</pre>
      *
      * @param date the ISO8601 string to parse
@@ -391,25 +391,25 @@ final class ISO8601Util {
         return (offset < value.length()) && (value.charAt(offset) == expected);
     }
 
-    private static int parseInt(final String value, final int beginIndex, final int endIndex) throws NumberFormatException {
-        if (beginIndex < 0 || endIndex > value.length() || beginIndex > endIndex) {
+    private static int parseInt(final String value, final int beginIndex, final int toIndex) throws NumberFormatException {
+        if (beginIndex < 0 || toIndex > value.length() || beginIndex > toIndex) {
             throw new NumberFormatException(value);
         }
         // use the same logic as in Integer.parseInt() but less generic we're not supporting negative values
         int i = beginIndex;
         int result = 0;
         int digit;
-        if (i < endIndex) {
+        if (i < toIndex) {
             digit = Character.digit(value.charAt(i++), 10);
             if (digit < 0) {
-                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, endIndex));
+                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, toIndex));
             }
             result = -digit;
         }
-        while (i < endIndex) {
+        while (i < toIndex) {
             digit = Character.digit(value.charAt(i++), 10);
             if (digit < 0) {
-                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, endIndex));
+                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, toIndex));
             }
             result *= 10;
             result -= digit;

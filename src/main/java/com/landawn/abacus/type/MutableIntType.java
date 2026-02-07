@@ -139,13 +139,13 @@ public class MutableIntType extends NumberType<MutableInt> {
      * }</pre>
      *
      * @param rs The ResultSet containing the data
-     * @param columnLabel The label of the column to retrieve the value from
+     * @param columnName The label of the column to retrieve the value from
      * @return A MutableInt containing the retrieved value
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public MutableInt get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return MutableInt.of(rs.getInt(columnLabel));
+    public MutableInt get(final ResultSet rs, final String columnName) throws SQLException {
+        return MutableInt.of(rs.getInt(columnName));
     }
 
     /**

@@ -108,13 +108,13 @@ public class BytesType extends AbstractType<byte[]> {
      * Retrieves a byte array value from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the byte array value
+     * @param columnName the label of the column containing the byte array value
      * @return The byte array value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getBytes(columnLabel);
+    public byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getBytes(columnName);
     }
 
     /**

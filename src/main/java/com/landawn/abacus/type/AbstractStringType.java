@@ -220,14 +220,14 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from, must not be {@code null}
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified, must not be {@code null}
      * @return the String value in the specified column, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public String get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getString(columnLabel);
+    public String get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getString(columnName);
     }
 
     /**

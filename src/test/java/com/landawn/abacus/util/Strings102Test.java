@@ -28,7 +28,7 @@ public class Strings102Test extends TestBase {
 
     @Test
     public void testGuid() {
-        String guid = Strings.uuid32();
+        String guid = Strings.uuidWithoutHyphens();
         assertNotNull(guid);
         assertEquals(32, guid.length());
         assertFalse(guid.contains("-"));

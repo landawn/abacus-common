@@ -123,13 +123,13 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Otherwise, converts the value to int and wraps it in OptionalInt.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Object result = rs.getObject(columnLabel);
+    public OptionalInt get(final ResultSet rs, final String columnName) throws SQLException {
+        final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalInt.empty()
                 : OptionalInt.of(result instanceof Integer num ? num : (result instanceof Number num ? num.intValue() : Numbers.toInt(result.toString())));

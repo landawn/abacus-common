@@ -192,13 +192,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label for the column specified with the SQL AS clause
+     * @param columnName the label for the column specified with the SQL AS clause
      * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public OptionalChar get(final ResultSet rs, final String columnLabel) throws SQLException {
-        //    final Object result = rs.getObject(columnLabel);
+    public OptionalChar get(final ResultSet rs, final String columnName) throws SQLException {
+        //    final Object result = rs.getObject(columnName);
         //
         //    if (result instanceof Character) {
         //        return OptionalChar.of((Character) result);
@@ -209,7 +209,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
         //        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
         //    }
 
-        final String result = rs.getString(columnLabel);
+        final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
             return OptionalChar.empty();

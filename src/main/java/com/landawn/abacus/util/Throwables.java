@@ -472,8 +472,8 @@ public final class Throwables {
      * @see #call(Throwables.Callable, java.util.function.Supplier)
      */
     @Beta
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, "cmd");
 
         try {
@@ -570,9 +570,9 @@ public final class Throwables {
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, "cmd");
         N.checkArgNotNull(predicate, "predicate");
 
@@ -1920,10 +1920,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given boolean argument.
          *
-         * @param t the boolean input argument
+         * @param value the boolean input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(boolean t) throws E;
+        void accept(boolean value) throws E;
     }
 
     /**
@@ -1974,10 +1974,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given char argument.
          *
-         * @param t the char input argument
+         * @param value the char input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(char t) throws E;
+        void accept(char value) throws E;
     }
 
     /**
@@ -2028,10 +2028,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given byte argument.
          *
-         * @param t the byte input argument
+         * @param value the byte input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(byte t) throws E;
+        void accept(byte value) throws E;
     }
 
     /**
@@ -2082,10 +2082,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given short argument.
          *
-         * @param t the short input argument
+         * @param value the short input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(short t) throws E;
+        void accept(short value) throws E;
     }
 
     /**
@@ -2136,10 +2136,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given int argument.
          *
-         * @param t the int input argument
+         * @param value the int input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(int t) throws E;
+        void accept(int value) throws E;
     }
 
     /**
@@ -2226,10 +2226,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given long argument.
          *
-         * @param t the long input argument
+         * @param value the long input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(long t) throws E;
+        void accept(long value) throws E;
     }
 
     /**
@@ -2316,10 +2316,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given float argument.
          *
-         * @param t the float input argument
+         * @param value the float input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(float t) throws E;
+        void accept(float value) throws E;
     }
 
     /**
@@ -2370,10 +2370,10 @@ public final class Throwables {
         /**
          * Performs this operation on the given double argument.
          *
-         * @param t the double input argument
+         * @param value the double input argument
          * @throws E if an exception occurs during the operation
          */
-        void accept(double t) throws E;
+        void accept(double value) throws E;
     }
 
     /**

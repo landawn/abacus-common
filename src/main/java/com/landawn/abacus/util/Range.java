@@ -540,7 +540,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Determines whether this range contains <em>all</em> elements in the specified collection.
      *
      * <p>This method iterates over the given collection and checks each element using
-     * {@link #contains(Object)}. The evaluation short-circuits and returns {@code false}
+     * {@link #contains}. The evaluation short-circuits and returns {@code false}
      * as soon as an element is found that is not contained within this range.</p>
      *
      * <p>An empty or {@code null} collection is considered trivially satisfied and
@@ -577,7 +577,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Determines whether this range contains <em>any</em> element in the specified collection.
      *
      * <p>This method iterates over the given collection and checks each element using
-     * {@link #contains(Object)}. The evaluation short-circuits and returns {@code true}
+     * {@link #contains}. The evaluation short-circuits and returns {@code true}
      * as soon as a contained element is found.</p>
      *
      * <p>If the collection is {@code null} or empty, this method returns {@code false}.</p>

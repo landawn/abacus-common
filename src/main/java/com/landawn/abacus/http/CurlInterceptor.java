@@ -41,9 +41,12 @@ import okio.Buffer;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * OkHttpClient client = new OkHttpClient.Builder()
- *     .addInterceptor(new CurlInterceptor(curl -> System.out.println(curl)))
- *     .build();
+ * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
+ *     "http://localhost:18080",
+ *     curl -> System.out.println(curl)
+ * );
+ *
+ * request.get();
  * }</pre>
  * 
  */

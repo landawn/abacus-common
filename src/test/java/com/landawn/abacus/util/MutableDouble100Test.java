@@ -54,11 +54,11 @@ public class MutableDouble100Test extends TestBase {
     public void testSetIf() throws Exception {
         MutableDouble mutableDouble = MutableDouble.of(10.5);
 
-        boolean updated = mutableDouble.setIf(20.5, v -> v < 15.0);
+        boolean updated = mutableDouble.setIf(v -> v < 15.0, 20.5);
         Assertions.assertTrue(updated);
         Assertions.assertEquals(20.5, mutableDouble.value());
 
-        updated = mutableDouble.setIf(30.5, v -> v < 15.0);
+        updated = mutableDouble.setIf(v -> v < 15.0, 30.5);
         Assertions.assertFalse(updated);
         Assertions.assertEquals(20.5, mutableDouble.value());
     }

@@ -224,17 +224,17 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
-     * boolean updated = flag.setIf(true, v -> !v);   // returns true, value is now true
-     * updated = flag.setIf(false, v -> !v);          // returns false, value remains true
+     * boolean updated = flag.setIf(v -> !v, true);   // returns true, value is now true
+     * updated = flag.setIf(v -> !v, false);          // returns false, value remains true
      * }</pre>
      * 
      * @param <E> the type of exception the predicate may throw
-     * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final boolean newValue, final Throwables.BooleanPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

@@ -217,13 +217,13 @@ public class DateType extends AbstractDateType<Date> {
      * }</pre>
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the date value
+     * @param columnName the label of the column containing the date value
      * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getDate(columnLabel);
+    public Date get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getDate(columnName);
     }
 
     /**

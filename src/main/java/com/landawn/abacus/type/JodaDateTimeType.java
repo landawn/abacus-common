@@ -270,13 +270,13 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label to retrieve the value from
+     * @param columnName the column label to retrieve the value from
      * @return a DateTime instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public DateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnLabel);
+    public DateTime get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : new DateTime(ts.getTime());
     }

@@ -197,13 +197,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Retrieves a byte array from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label/name
+     * @param columnName the column label/name
      * @return the byte array from the database
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getBytes(columnLabel);
+    public byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getBytes(columnName);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,13 +26,13 @@ public class ImmutableSet100Test extends TestBase {
         Assertions.assertFalse(emptySet.contains("anything"));
     }
 
-    @Test
-    public void testJust() {
-        ImmutableSet<String> set = ImmutableSet.just("single");
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains("single"));
-        Assertions.assertFalse(set.contains("other"));
-    }
+    //    @Test
+    //    public void testJust() {
+    //        ImmutableSet<String> set = ImmutableSet.just("single");
+    //        Assertions.assertEquals(1, set.size());
+    //        Assertions.assertTrue(set.contains("single"));
+    //        Assertions.assertFalse(set.contains("other"));
+    //    }
 
     @Test
     public void testOf_SingleElement() {
@@ -112,28 +113,28 @@ public class ImmutableSet100Test extends TestBase {
         Assertions.assertEquals(10, set.size());
         Assertions.assertTrue(set.contains("j"));
     }
-
-    @Test
-    public void testOf_VarArgs_Empty() {
-        ImmutableSet<String> set = ImmutableSet.of();
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testOf_VarArgs_Null() {
-        ImmutableSet<String> set = ImmutableSet.of((String[]) null);
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testOf_VarArgs_WithDuplicates() {
-        String[] array = { "red", "green", "blue", "red" };
-        ImmutableSet<String> set = ImmutableSet.of(array);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains("red"));
-        Assertions.assertTrue(set.contains("green"));
-        Assertions.assertTrue(set.contains("blue"));
-    }
+    //
+    //    @Test
+    //    public void testOf_VarArgs_Empty() {
+    //        ImmutableSet<String> set = ImmutableSet.of();
+    //        Assertions.assertTrue(set.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testOf_VarArgs_Null() {
+    //        ImmutableSet<String> set = ImmutableSet.of((String[]) null);
+    //        Assertions.assertTrue(set.isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testOf_VarArgs_WithDuplicates() {
+    //        String[] array = { "red", "green", "blue", "red" };
+    //        ImmutableSet<String> set = ImmutableSet.of(array);
+    //        Assertions.assertEquals(3, set.size());
+    //        Assertions.assertTrue(set.contains("red"));
+    //        Assertions.assertTrue(set.contains("green"));
+    //        Assertions.assertTrue(set.contains("blue"));
+    //    }
 
     @Test
     public void testCopyOf_Collection() {
@@ -160,7 +161,7 @@ public class ImmutableSet100Test extends TestBase {
 
     @Test
     public void testCopyOf_NullCollection() {
-        ImmutableSet<String> set = ImmutableSet.copyOf(null);
+        ImmutableSet<String> set = ImmutableSet.copyOf((Collection<String>) null);
         Assertions.assertTrue(set.isEmpty());
     }
 

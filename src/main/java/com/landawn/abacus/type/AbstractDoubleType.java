@@ -168,13 +168,13 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label
+     * @param columnName the column label
      * @return the double value at the specified column; returns 0.0 if SQL NULL (may be overridden by subclasses to return null)
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Double get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getDouble(columnLabel);
+    public Double get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getDouble(columnName);
     }
 
     /**

@@ -20,7 +20,7 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
 
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
@@ -112,7 +112,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON string; never {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T readString(final String source, final Type<? extends T> targetType) {
@@ -134,7 +134,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON string; never {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T readString(final String source, final Class<? extends T> targetType) {
@@ -177,7 +177,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @param source the JSON array string to deserialize; must not be {@code null}
      * @param output the array to populate with deserialized elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws IndexOutOfBoundsException if the JSON array size doesn't match the output array size
      */
     @Override
@@ -219,7 +219,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @param source the JSON array string to deserialize; must not be {@code null}
      * @param output the collection to populate with deserialized elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
@@ -261,7 +261,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @param source the JSON object string to deserialize; must not be {@code null}
      * @param output the map to populate with deserialized key-value pairs; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or not an object
+     * @throws ParsingException if the JSON structure is invalid or not an object
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override

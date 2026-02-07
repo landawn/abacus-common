@@ -267,21 +267,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * - NAME: reads as string
      *
      * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the enum value
+     * @param columnName the label of the column containing the enum value
      * @return the enum value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public T get(final ResultSet rs, final String columnLabel) throws SQLException {
+    public T get(final ResultSet rs, final String columnName) throws SQLException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
-                final int intValue = rs.getInt(columnLabel);
+                final int intValue = rs.getInt(columnName);
                 return rs.wasNull() ? null : valueOf(intValue);
             } else {
-                return valueOf(rs.getString(columnLabel));
+                return valueOf(rs.getString(columnName));
             }
         } else {
-            return super.get(rs, columnLabel);
+            return super.get(rs, columnName);
         }
     }
 

@@ -620,9 +620,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      */
     @Beta
     public ObjIterator<IndexedLong> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final LongIterator iter = this;
 

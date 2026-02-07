@@ -49,7 +49,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -191,7 +191,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T readString(String source, JsonDeserializationConfig config, Type<? extends T> targetType) {
@@ -237,7 +237,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T readString(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -263,7 +263,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the pre-allocated array to populate with parsed values; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     @Override
@@ -310,7 +310,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the collection to populate with parsed elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
@@ -357,7 +357,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the map to populate with parsed key-value pairs; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or not an object
+     * @throws ParsingException if the JSON structure is invalid or not an object
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override
@@ -403,7 +403,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws IOException if an I/O error occurs during reading
-     * @throws ParseException if the JSON structure doesn't match the target class or is invalid
+     * @throws ParsingException if the JSON structure doesn't match the target class or is invalid
      */
     @SuppressWarnings("unchecked")
     protected <T> T readString(final String source, final JsonReader jr, final JsonDeserializationConfig config, final Type<? extends T> targetType,
@@ -458,7 +458,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
                 }
 
-                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz()) //NOSONAR
+                throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz()) //NOSONAR
                         + ". Only Array/List/Map and Bean class with getter/setter methods are supported"); //NOSONAR
         }
     }
@@ -772,7 +772,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
             default:
                 if (config == null || config.failOnEmptyBean()) {
-                    throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
+                    throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
                             + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
                 } else {
                     bw.write("{}");
@@ -821,7 +821,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
 
         if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
-            throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
+            throw new ParsingException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
         final Exclusion exclusion = getExclusion(config, beanInfo);
@@ -1948,7 +1948,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(String source, JsonDeserializationConfig config, Type<? extends T> targetType) {
@@ -1992,7 +1992,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -2023,7 +2023,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return the deserialized object of type {@code T}
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserializationConfig config, Type<? extends T> targetType) {
@@ -2073,7 +2073,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return the deserialized object of type {@code T}
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
@@ -2102,7 +2102,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(File source, JsonDeserializationConfig config, Type<? extends T> targetType) {
@@ -2136,7 +2136,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final File source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -2164,7 +2164,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(InputStream source, JsonDeserializationConfig config, Type<? extends T> targetType) {
@@ -2195,7 +2195,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final InputStream source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -2223,7 +2223,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(Reader source, JsonDeserializationConfig config, final Type<? extends T> targetType) {
@@ -2251,7 +2251,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
-     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final Reader source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -2329,7 +2329,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
                 }
 
-                throw new ParseException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz())
+                throw new ParsingException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz())
                         + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
     }
@@ -2355,7 +2355,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
+                throw new ParsingException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
             }
 
             return null; // result;
@@ -2401,7 +2401,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             if (ignoreUnmatchedProperty) {
                                 break;
                             } else {
-                                throw new ParseException("Unknown property: " + propName);
+                                throw new ParsingException("Unknown property: " + propName);
                             }
                         }
                     } else {
@@ -2439,12 +2439,12 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 if (ignoreUnmatchedProperty) {
                                     break;
                                 } else {
-                                    throw new ParseException("Unknown property: " + propName);
+                                    throw new ParsingException("Unknown property: " + propName);
                                 }
                             }
                         }
                     } else {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     break;
@@ -2452,7 +2452,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case COMMA:
 
                     if (isPropName) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     } else {
                         isPropName = true;
 
@@ -2472,7 +2472,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACE:
 
                     if (isPropName) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2524,7 +2524,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACKET:
 
                     if (isPropName) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2577,9 +2577,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if ((isPropName && propInfo != null) /* check for empty JSON text {} */
                             || (isPropName && Strings.isEmpty(propName) && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
                     } else {
                         if (jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2594,7 +2594,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     return beanInfo.finishBeanResult(result);
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -2718,7 +2718,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
                         }
                     } else {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     break;
@@ -2726,7 +2726,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case COMMA:
 
                     if (isKey) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     } else {
                         isKey = true;
 
@@ -2789,9 +2789,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if (isKey && key != null /* check for empty JSON text {} */
                             || (isKey && key == null && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                     } else {
                         if (jr.hasText()) {
                             if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
@@ -2809,7 +2809,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     return (T) creatorAndConvertor._2.apply(result);
 
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -2916,7 +2916,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         case END_BRACKET, EOF:
 
                             if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                                throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                                throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                             } else if (jr.hasText() || preToken == COMMA) {
                                 value = readValue(jr, readNullToEmpty, eleType);
 
@@ -2928,7 +2928,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             return collectionToArray(c, targetType);
 
                         default:
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                     }
                 }
             } finally {
@@ -2990,7 +2990,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     case END_BRACKET, EOF:
 
                         if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                            throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                            throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                         } else if (jr.hasText() || preToken == COMMA) {
                             value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3002,7 +3002,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         return (T) output;
 
                     default:
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                 }
             }
         }
@@ -3109,7 +3109,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACKET, EOF:
 
                     if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                     } else if (jr.hasText() || preToken == COMMA) {
                         value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3122,7 +3122,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     return (T) creatorAndConvertor._2.apply(result);
 
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -3134,7 +3134,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
             }
 
             return null;
@@ -3154,11 +3154,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                         if (mapEntity == null) {
                             mapEntity = new MapEntity(jr.getText());
                         } else {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
                     } else {
                         if (mapEntity == null) {
-                            throw new ParseException(token, "Bean name cannot be null or empty");
+                            throw new ParsingException(token, "Bean name cannot be null or empty");
                         }
                     }
 
@@ -3175,13 +3175,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                     }
 
                     return (T) mapEntity;
 
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -3193,7 +3193,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
             }
 
             return null;
@@ -3213,11 +3213,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                         if (entityId == null) {
                             entityId = Seid.of(jr.getText());
                         } else {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
                     } else {
                         if (entityId == null) {
-                            throw new ParseException(token, "Bean name cannot be null or empty");
+                            throw new ParsingException(token, "Bean name cannot be null or empty");
                         }
                     }
 
@@ -3234,13 +3234,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                     }
 
                     return (T) entityId;
 
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -3253,7 +3253,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
             }
 
             return null;
@@ -3316,14 +3316,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     valueType = hasValueTypes ? config.getValueType(key, objType) : objType;
                                 }
                             } else {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             }
 
                             break;
 
                         case COMMA:
                             if (isKey) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             } else {
                                 isKey = true;
 
@@ -3342,7 +3342,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case START_BRACE:
                             if (isKey) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
                                     readMap(jr, defaultJsonDeserializationConfig, null, false, Map.class, null, null);
@@ -3357,7 +3357,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case START_BRACKET:
                             if (isKey) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
                                     readCollection(jr, defaultJsonDeserializationConfig, null, config.getPropHandler(key), false, List.class, null, null);
@@ -3372,7 +3372,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case END_BRACE:
                             if (isKey && key != null /* check for empty JSON text {} */) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             } else {
                                 if (jr.hasText()) {
                                     if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
@@ -3404,14 +3404,14 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                             break;
                         default:
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     if (isBraceEnded) {
                         if (token == END_BRACKET || token == EOF /*should not happen*/) {
                             break;
                         } else if (token != START_BRACE) {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         isBraceEnded = false;
@@ -3420,7 +3420,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             } else if (token == END_BRACKET || token == EOF /*should not happen*/) {
                 // end
             } else {
-                throw new ParseException(token, getErrorMsg(jr, token));
+                throw new ParsingException(token, getErrorMsg(jr, token));
             }
 
             rs = new RowDataset(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
@@ -3454,13 +3454,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                             final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             }
 
                             if (order == 6) {
                                 isFrozen = jr.readValue(boolType);
                             } else {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             }
                         }
 
@@ -3474,14 +3474,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 columnName = jr.getText();
                             }
                         } else {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         break;
 
                     case COMMA:
                         if (isKey) {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         } else {
                             isKey = true;
 
@@ -3489,13 +3489,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 final Integer order = datasetSheetPropOrder.get(columnName);
 
                                 if (order == null) {
-                                    throw new ParseException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(token, getErrorMsg(jr, token));
                                 }
 
                                 if (order == 6) {
                                     isFrozen = jr.readValue(boolType);
                                 } else {
-                                    throw new ParseException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(token, getErrorMsg(jr, token));
                                 }
                             }
                         }
@@ -3506,7 +3506,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         switch (order) {
@@ -3519,7 +3519,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 break;
 
                             default:
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         break;
@@ -3544,7 +3544,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         if (isKey) {
                                             columnName = jr.getText();
                                         } else {
-                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(token, getErrorMsg(jr, token));
                                         }
 
                                         break;
@@ -3557,19 +3557,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                                                 columnName = jr.getText();
                                             }
                                         } else {
-                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(token, getErrorMsg(jr, token));
                                         }
 
                                         break;
 
                                     case COMMA:
                                         if (isKey) {
-                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(token, getErrorMsg(jr, token));
                                         } else {
                                             isKey = true;
 
                                             if (jr.hasText()) {
-                                                throw new ParseException(token, getErrorMsg(jr, token));
+                                                throw new ParsingException(token, getErrorMsg(jr, token));
                                             }
                                         }
 
@@ -3579,7 +3579,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         final int index = N.indexOf(columnNameList, columnName);
 
                                         if (index == N.INDEX_NOT_FOUND) {
-                                            throw new ParseException("Column: " + columnName + " is not found column list: " + columnNameList);
+                                            throw new ParsingException("Column: " + columnName + " is not found column list: " + columnNameList);
                                         }
 
                                         valueType = N.isEmpty(columnTypeList) ? null : columnTypeList.get(index);
@@ -3604,7 +3604,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     case END_BRACE:
                                         if (jr.hasText()) {
                                             // it should not happen.
-                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(token, getErrorMsg(jr, token));
                                         }
 
                                         columnName = null;
@@ -3613,11 +3613,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         break;
 
                                     default:
-                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(token, getErrorMsg(jr, token));
                                 }
                             } while (readingColumns);
                         } else {
-                            throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
+                            throw new ParsingException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
                         }
 
                         break;
@@ -3625,9 +3625,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                     case END_BRACE, EOF:
 
                         if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                            throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                            throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                         } else if ((isKey && columnName != null) || jr.hasText()) {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         if (columnNameList == null) {
@@ -3648,7 +3648,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         return (T) rs;
 
                     default:
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                 }
             }
         }
@@ -3682,7 +3682,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
             }
 
             return null;
@@ -3715,7 +3715,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                         }
 
                         switch (order) { //NOSONAR
@@ -3728,7 +3728,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 break;
 
                             default:
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                         }
                     }
 
@@ -3742,14 +3742,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                             columnName = jr.getText();
                         }
                     } else {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     break;
 
                 case COMMA:
                     if (isKey) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     } else {
                         isKey = true;
 
@@ -3757,7 +3757,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
-                                throw new ParseException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(token, getErrorMsg(jr, token));
                             }
 
                             switch (order) { //NOSONAR
@@ -3770,7 +3770,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 default:
-                                    throw new ParseException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(token, getErrorMsg(jr, token));
                             }
                         }
                     }
@@ -3781,7 +3781,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     final Integer order = datasetSheetPropOrder.get(columnName);
 
                     if (order == null) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     switch (order) {
@@ -3800,7 +3800,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             break;
 
                         default:
-                            throw new ParseException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     break;
@@ -3823,7 +3823,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     if (isKey) {
                                         columnName = jr.getText();
                                     } else {
-                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(token, getErrorMsg(jr, token));
                                     }
 
                                     break;
@@ -3836,19 +3836,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                                             columnName = jr.getText();
                                         }
                                     } else {
-                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(token, getErrorMsg(jr, token));
                                     }
 
                                     break;
 
                                 case COMMA:
                                     if (isKey) {
-                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(token, getErrorMsg(jr, token));
                                     } else {
                                         isKey = true;
 
                                         if (jr.hasText()) {
-                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(token, getErrorMsg(jr, token));
                                         }
                                     }
 
@@ -3858,7 +3858,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     final int index = N.indexOf(columnKeyList, columnName);
 
                                     if (index == N.INDEX_NOT_FOUND) {
-                                        throw new ParseException("Column: " + columnName + " is not found column list: " + columnKeyList);
+                                        throw new ParsingException("Column: " + columnName + " is not found column list: " + columnKeyList);
                                     }
 
                                     valueType = N.isEmpty(columnTypeList) ? null : columnTypeList.get(index);
@@ -3883,7 +3883,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 case END_BRACE:
                                     if (jr.hasText()) {
                                         // it should not happen.
-                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(token, getErrorMsg(jr, token));
                                     }
 
                                     columnName = null;
@@ -3892,11 +3892,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 default:
-                                    throw new ParseException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(token, getErrorMsg(jr, token));
                             }
                         } while (readingColumns);
                     } else {
-                        throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
+                        throw new ParsingException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
                     }
 
                     break;
@@ -3904,9 +3904,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
                     } else if ((isKey && columnName != null) || jr.hasText()) {
-                        throw new ParseException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(token, getErrorMsg(jr, token));
                     }
 
                     if (rowKeyList == null) {
@@ -3922,7 +3922,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     return (T) sheet;
 
                 default:
-                    throw new ParseException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(token, getErrorMsg(jr, token));
             }
         }
     }
@@ -4019,7 +4019,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      */
     @Override
     public <T> Stream<T> stream(final String source, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
@@ -4074,7 +4074,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
      * @throws UncheckedIOException if an I/O error occurs during file reading or parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      */
     @Override
     public <T> Stream<T> stream(final File source, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
@@ -4122,7 +4122,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
      * @throws UncheckedIOException if an I/O error occurs during stream reading or parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      */
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JsonDeserializationConfig config,
@@ -4161,7 +4161,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for streaming
      * @throws UncheckedIOException if an I/O error occurs during reading or parsing
-     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid or not an array
      */
     @Override
     public <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final JsonDeserializationConfig config,

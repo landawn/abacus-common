@@ -158,13 +158,13 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * Otherwise, converts the value to the appropriate type and wraps it in Optional.
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
+     * @param columnName the label of the column to read
      * @return Optional.empty() if the column is {@code null}, otherwise Optional containing the converted value
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Optional<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
-        final T result = getColumnValue(rs, columnLabel, elementType.clazz());
+    public Optional<T> get(final ResultSet rs, final String columnName) throws SQLException {
+        final T result = getColumnValue(rs, columnName, elementType.clazz());
 
         return result == null ? (Optional<T>) Optional.empty()
                 : Optional.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));

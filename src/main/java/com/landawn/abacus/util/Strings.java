@@ -81,7 +81,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Validation:</b> isEmpty, isBlank, isEmail, isJavaIdentifier, isBase64</li>
+ *   <li><b>Validation:</b> isEmpty, isBlank, isValidEmailAddress, isJavaIdentifier, isBase64</li>
  *   <li><b>Transformation:</b> reverse, abbreviate, capitalize, uncapitalize, swapCase</li>
  *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toUpperCamelCase</li>
  *   <li><b>Padding:</b> leftPad, rightPad, center with character or string padding</li>
@@ -111,7 +111,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Null-safe validation operations
  * boolean empty = Strings.isEmpty(null);                // Returns true
  * boolean blank = Strings.isBlank("   ");               // Returns true
- * boolean email = Strings.isEmail("user@domain.com");   // Returns true
+ * boolean email = Strings.isValidEmailAddress("user@domain.com");   // Returns true
  *
  * // Safe transformation operations
  * String reversed    = Strings.reverse(null);                  // Returns null
@@ -166,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Validation Operations:</b>
  * <ul>
  *   <li><b>Empty/Blank Checking:</b> {@code Strings.isEmpty()}, {@code Strings.isBlank()}, {@code Strings.isNotEmpty()}, {@code Strings.isNotBlank()}</li>
- *   <li><b>Format Validation:</b> {@code Strings.isEmail()}, {@code Strings.isBase64()}</li>
+ *   <li><b>Format Validation:</b> {@code Strings.isValidEmailAddress()}, {@code Strings.isBase64()}</li>
  *   <li><b>Identifier Validation:</b> {@code Strings.isJavaIdentifier()}, {@code Strings.isValidIdentifier()}</li>
  *   <li><b>Pattern Matching:</b> {@code Strings.matches()}, {@code Strings.matchesIgnoreCase()}</li>
  * </ul>
@@ -263,7 +263,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     String phone = Strings.extractFirstInteger(cleaned);
  *
  *     // Format email properly
- *     if (Strings.isEmail(email)) {
+ *     if (Strings.isValidEmailAddress(email)) {
  *         email = Strings.lowerCase(email);
  *         
  *         // Extract name from email
@@ -461,7 +461,7 @@ public final class Strings {
      * }</pre>
      *
      * @return a new UUID string in the standard format (8-4-4-4-12).
-     * @see #uuid32()
+     * @see #uuidWithoutHyphens()
      * @see UUID#randomUUID()
      */
     public static String uuid() {
@@ -482,15 +482,15 @@ public final class Strings {
      * String guid = guid();   // returns something like "550e8400e29b41d4a716446655440000"
      * 
      * // Common use cases
-     * String sessionId = "SESSION_" + uuid32();        // returns "SESSION_550e8400e29b41d4a716446655440000"
-     * String fileName = "temp_" + uuid32() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
+     * String sessionId = "SESSION_" + uuidWithoutHyphens();        // returns "SESSION_550e8400e29b41d4a716446655440000"
+     * String fileName = "temp_" + uuidWithoutHyphens() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
      * }</pre>
      *
      * @return a new UUID string without hyphens, consisting of 32 hexadecimal characters.
      * @see #uuid()
      * @see UUID#randomUUID()
      */
-    public static String uuid32() {
+    public static String uuidWithoutHyphens() { // uuid32() is better or not
         return uuid().replace("-", "");
     }
 
@@ -1440,18 +1440,18 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for {@code null}
-     * @param defaultForNull the default value to return if {@code str} is {@code null}
-     * @return {@code str} if it is not {@code null}, otherwise {@code defaultForNull}
+     * @param defaultValue the default value to return if {@code str} is {@code null}
+     * @return {@code str} if it is not {@code null}, otherwise {@code defaultValue}
      * @throws IllegalArgumentException if the specified default value is {@code null}.
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see N#defaultIfNull(Object, Object)
      */
-    public static <T extends CharSequence> T defaultIfNull(final T str, final T defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfNull(final T str, final T defaultValue) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValue, cs.defaultValue);
 
-        return str == null ? defaultForNull : str;
+        return str == null ? defaultValue : str;
     }
 
     /**
@@ -1470,17 +1470,17 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for {@code null}
-     * @param supplierForDefault the supplier that provides the default value if {@code str} is {@code null}
-     * @return {@code str} if it is not {@code null}, otherwise the value provided by {@code supplierForDefault}
+     * @param defaultValueSupplier the supplier that provides the default value if {@code str} is {@code null}
+     * @return {@code str} if it is not {@code null}, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified {@code charSequence} is {@code null}.
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
      * @see N#defaultIfNull(Object, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfNull(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
+    public static <T extends CharSequence> T defaultIfNull(final T str, final Supplier<? extends T> defaultValueSupplier) throws IllegalArgumentException {
         if (str == null) {
-            return N.checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
+            return N.checkArgNotNull(defaultValueSupplier.get(), cs.defaultValue);
         }
 
         return str;
@@ -1502,8 +1502,8 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for emptiness
-     * @param defaultForEmpty the default value to return if {@code str} is empty
-     * @return {@code str} if it is not empty, otherwise {@code defaultForEmpty}
+     * @param defaultValue the default value to return if {@code str} is empty
+     * @return {@code str} if it is not empty, otherwise {@code defaultValue}
      * @throws IllegalArgumentException if the specified default charSequence value is empty.
      * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #defaultIfNull(CharSequence, CharSequence)
@@ -1511,10 +1511,10 @@ public final class Strings {
      * @see #firstNonEmpty(String, String)
      * @see N#defaultIfEmpty(CharSequence, CharSequence)
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultForEmpty) throws IllegalArgumentException {
-        N.checkArgNotEmpty(defaultForEmpty, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultValue) throws IllegalArgumentException {
+        N.checkArgNotEmpty(defaultValue, cs.defaultValue);
 
-        return isEmpty(str) ? defaultForEmpty : str;
+        return isEmpty(str) ? defaultValue : str;
     }
 
     /**
@@ -1533,8 +1533,8 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for emptiness
-     * @param supplierForDefault the supplier that provides the default value if {@code str} is empty
-     * @return {@code str} if it is not empty, otherwise the value provided by {@code supplierForDefault}
+     * @param defaultValueSupplier the supplier that provides the default value if {@code str} is empty
+     * @return {@code str} if it is not empty, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
      * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
@@ -1542,9 +1542,9 @@ public final class Strings {
      * @see #firstNonEmpty(String, String)
      * @see N#defaultIfEmpty(CharSequence, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) {
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> defaultValueSupplier) {
         if (isEmpty(str)) {
-            return N.checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
+            return N.checkArgNotEmpty(defaultValueSupplier.get(), cs.defaultValue);
         }
 
         return str;
@@ -1567,8 +1567,8 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for blankness
-     * @param defaultForBlank the default value to return if {@code str} is blank
-     * @return {@code str} if it is not blank, otherwise {@code defaultForBlank}
+     * @param defaultValue the default value to return if {@code str} is blank
+     * @return {@code str} if it is not blank, otherwise {@code defaultValue}
      * @throws IllegalArgumentException if the specified default charSequence value is blank.
      * @see #defaultIfBlank(CharSequence, Supplier)
      * @see #defaultIfNull(CharSequence, CharSequence)
@@ -1576,10 +1576,10 @@ public final class Strings {
      * @see #firstNonBlank(String, String)
      * @see N#defaultIfBlank(CharSequence, CharSequence)
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultForBlank) throws IllegalArgumentException {
-        N.checkArgNotBlank(defaultForBlank, cs.defaultValue);
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultValue) throws IllegalArgumentException {
+        N.checkArgNotBlank(defaultValue, cs.defaultValue);
 
-        return isBlank(str) ? defaultForBlank : str;
+        return isBlank(str) ? defaultValue : str;
     }
 
     /**
@@ -1598,8 +1598,8 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for blankness
-     * @param supplierForDefault the supplier that provides the default value if {@code str} is blank
-     * @return {@code str} if it is not blank, otherwise the value provided by {@code supplierForDefault}
+     * @param defaultValueSupplier the supplier that provides the default value if {@code str} is blank
+     * @return {@code str} if it is not blank, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
      * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
@@ -1607,9 +1607,9 @@ public final class Strings {
      * @see #firstNonBlank(String, String)
      * @see N#defaultIfBlank(CharSequence, Supplier)
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) {
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> defaultValueSupplier) {
         if (isBlank(str)) {
-            return N.checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
+            return N.checkArgNotBlank(defaultValueSupplier.get(), cs.defaultValue);
         }
 
         return str;
@@ -6444,12 +6444,11 @@ public final class Strings {
      * Strings.stripAccents("Łódź");         // returns "Lodz"
      * }</pre>
      *
+     * <p>See also Lucene's ASCIIFoldingFilter and related Lucene issue LUCENE-1343 for accent-folding behavior details.</p>
+     *
      * @param str the String to strip accents from, may be {@code null}
      * @return the stripped String, {@code null} if {@code null} String input
      */
-    // See also Lucene's ASCIIFoldingFilter (Lucene 2.9) that replaces accented
-    // characters by their unaccented equivalent (and uncommitted bug fix:
-    // https://issues.apache.org/jira/browse/LUCENE-1343?focusedCommentId=12858907&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_12858907).
     @MayReturnNull
     public static String stripAccents(final String str) {
         if (str == null) {
@@ -11332,10 +11331,11 @@ public final class Strings {
      * Strings.containsWhitespace(null);             // returns false
      * }</pre>
      *
+     * <p>Adapted from {@code org.springframework.util.StringUtils} under Apache License 2.0.</p>
+     *
      * @param str the string to be checked, may be {@code null} or empty
      * @return {@code true} if the string contains any whitespace characters, {@code false} otherwise
      */
-    // From org.springframework.util.StringUtils, under Apache License 2.0
     public static boolean containsWhitespace(final String str) {
         if (str == null || str.isEmpty()) {
             return false;
@@ -18715,8 +18715,8 @@ public final class Strings {
      *     {@code non-null} values are converted to strings using {@link Object#toString()}.
      * @return the formatted string with placeholders replaced by arguments.
      */
-    // TODO(diamondm) consider using Arrays.toString() for array parameters
     public static String lenientFormat(String template, Object... args) {
+        // TODO(diamondm): consider using Arrays.toString() for array parameters.
         template = String.valueOf(template); // null -> "null"
 
         if (args == null) {

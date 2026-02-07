@@ -191,13 +191,13 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnLabel the column label/name
+     * @param columnName the column label/name
      * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getTimestamp(columnLabel);
+    public Timestamp get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getTimestamp(columnName);
     }
 
     /**

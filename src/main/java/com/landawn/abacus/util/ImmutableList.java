@@ -67,7 +67,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *     .build();
  *
  * // Use reverse view
- * ImmutableList<Integer> reversed = ImmutableList.of(1, 2, 3).reverse();
+ * ImmutableList<Integer> reversedView = ImmutableList.of(1, 2, 3).reversed();
  * // reversed contains [3, 2, 1]
  * }</pre>
  *
@@ -125,23 +125,25 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return EMPTY;
     }
 
-    /**
-     * Returns an ImmutableList containing a single element.
-     * This is a convenience method equivalent to {@link #of(Object)}.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableList<String> single = ImmutableList.just("hello");
-     * System.out.println(single.get(0));   // prints: hello
-     * }</pre>
-     *
-     * @param <E> the type of the element.
-     * @param e the single element to be contained in the ImmutableList.
-     * @return an ImmutableList containing only the specified element.
-     */
-    public static <E> ImmutableList<E> just(final E e) {
-        return new ImmutableList<>(Array.asList(e), false);
-    }
+    //    /**
+    //     * Returns an ImmutableList containing a single element.
+    //     * This is a convenience method equivalent to {@link #of(Object)}.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * ImmutableList<String> single = ImmutableList.just("hello");
+    //     * System.out.println(single.get(0));   // prints: hello
+    //     * }</pre>
+    //     *
+    //     * @param <E> the type of the element.
+    //     * @param e the single element to be contained in the ImmutableList.
+    //     * @return an ImmutableList containing only the specified element.
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    public static <E> ImmutableList<E> just(final E e) {
+    //        return new ImmutableList<>(Array.asList(e), false);
+    //    }
 
     /**
      * Returns an ImmutableList containing a single element.
@@ -360,31 +362,64 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
     }
 
+    //    /**
+    //     * Returns an ImmutableList containing all elements from the provided array in the same order.
+    //     * The returned list is independent of the input array; changes to the array after this call
+    //     * will not affect the returned list. If the array is {@code null} or empty, an empty ImmutableList is returned.
+    //     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
+    //     * 
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * String[] array = {"one", "two", "three"};
+    //     * ImmutableList<String> list = ImmutableList.of(array);
+    //     * array[0] = "modified";  // Does not affect list
+    //     * }</pre>
+    //     *
+    //     * @param <E> the type of the elements.
+    //     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty.
+    //     * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty.
+    //     * @see List#of(Object...)
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SafeVarargs
+    //    public static <E> ImmutableList<E> of(final E... a) {
+    //        if (N.isEmpty(a)) {
+    //            return empty();
+    //        } else {
+    //            // return new ImmutableList<>(List.of(a), true);   // Doesn't support null element
+    //            return new ImmutableList<>(Array.asList(a), false);
+    //        }
+    //    }
+
     /**
-     * Returns an ImmutableList containing all elements from the provided array in the same order.
-     * The returned list is independent of the input array; changes to the array after this call
-     * will not affect the returned list. If the array is {@code null} or empty, an empty ImmutableList is returned.
-     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
-     * 
+     * Returns an {@code ImmutableList} containing the elements of the specified array.
+     *
+     * <p>Subsequent modifications to the original array do not affect the returned list.</p>
+     *
+     * <p>The iteration order of the resulting list matches the array's index order.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] array = {"one", "two", "three"};
-     * ImmutableList<String> list = ImmutableList.of(array);
-     * array[0] = "modified";  // Does not affect list
+     * String[] array = { "a", "b", "c" };
+     * ImmutableList<String> list = ImmutableList.copyOf(array);
+     *
+     * array[0] = "x";   // Does not affect list
+     * // list => ["a", "b", "c"]
      * }</pre>
      *
-     * @param <E> the type of the elements.
-     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty.
-     * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty.
-     * @see List#of(Object...)
+     * @param <E> the element type
+     * @param elements the array whose elements are to be placed into the {@code ImmutableList}; 
+     * @return an {@code ImmutableList} containing the elements of {@code elements} 
+     * @see #copyOf(Collection)
      */
-    @SafeVarargs
-    public static <E> ImmutableList<E> of(final E... a) {
-        if (N.isEmpty(a)) {
+    public static <E> ImmutableList<E> copyOf(E[] elements) {
+        if (N.isEmpty(elements)) {
             return empty();
+        } else if (elements.length == 1) {
+            return of(elements[0]);
         } else {
-            // return new ImmutableList<>(List.of(a), true);   // Doesn't support null element
-            return new ImmutableList<>(Array.asList(a), false);
+            return copyOf(N.asList(elements));
         }
     }
 

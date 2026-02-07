@@ -110,7 +110,6 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      *
      * @param str The string to parse
      * @return The parsed LocalTime object, or {@code null} if the input is {@code null} or empty
-     * @throws DateTimeParseException if the string cannot be parsed as a LocalTime
      */
     @Override
     public LocalTime valueOf(final String str) {

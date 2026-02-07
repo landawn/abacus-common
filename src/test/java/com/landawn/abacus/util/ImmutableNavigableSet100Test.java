@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -165,13 +166,13 @@ public class ImmutableNavigableSet100Test extends TestBase {
         Assertions.assertNull(emptySet.higher("any"));
     }
 
-    @Test
-    public void testJust() {
-        ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.just(42);
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertEquals(42, set.first());
-        Assertions.assertEquals(42, set.last());
-    }
+    //    @Test
+    //    public void testJust() {
+    //        ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.just(42);
+    //        Assertions.assertEquals(1, set.size());
+    //        Assertions.assertEquals(42, set.first());
+    //        Assertions.assertEquals(42, set.last());
+    //    }
 
     @Test
     public void testOf_SingleElement() {
@@ -274,7 +275,7 @@ public class ImmutableNavigableSet100Test extends TestBase {
 
     @Test
     public void testCopyOf_Null() {
-        ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(null);
+        ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf((Collection<String>) null);
         Assertions.assertTrue(set.isEmpty());
     }
 

@@ -41,10 +41,10 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * DoubleStream.of(1.1, 2.2, 3.3).forEach(printer);
      * }</pre>
      *
-     * @param t the input argument
+     * @param value the input argument
      */
     @Override
-    void accept(double t);
+    void accept(double value);
 
     /**
      * Returns a composed {@code DoubleConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -64,9 +64,9 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      */
     @Override
     default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) {
-        return (final double t) -> {
-            accept(t);
-            after.accept(t);
+        return (final double value) -> {
+            accept(value);
+            after.accept(value);
         };
     }
 }

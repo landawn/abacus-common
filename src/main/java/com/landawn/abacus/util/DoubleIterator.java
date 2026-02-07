@@ -665,9 +665,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed(final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
+        N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final DoubleIterator iter = this;
 

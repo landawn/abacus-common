@@ -183,17 +183,17 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
-     * boolean updated = num.setIf(20L, v -> v < 15L);   // returns true, value is now 20L
-     * updated = num.setIf(30L, v -> v < 15L);           // returns false, value remains 20L
+     * boolean updated = num.setIf(v -> v < 15L, 20L);   // returns true, value is now 20L
+     * updated = num.setIf(v -> v < 15L, 30L);           // returns false, value remains 20L
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
-     * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test against the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final long newValue, final Throwables.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

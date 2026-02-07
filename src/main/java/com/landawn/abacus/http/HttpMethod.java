@@ -40,7 +40,7 @@ package com.landawn.abacus.http;
  * String methodName = method.name();   // "GET"
  *
  * // Using with HTTP clients
- * String response = HttpRequest.url("https://api.example.com/users")
+ * String response = HttpRequest.url("http://localhost:18080/users")
  *     .jsonBody("{\"name\":\"John\"}")
  *     .post(String.class);
  * }</pre>
@@ -114,26 +114,16 @@ public enum HttpMethod {
      *   </li>
      *   <li><b>Use POST with X-HTTP-Method-Override header:</b> Some servers support method tunneling
      *       <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/1")
+     * HttpRequest.url("http://localhost:18080/users/1")
      *     .header("X-HTTP-Method-Override", "PATCH")
      *     .post(String.class);
      *       }</pre>
      *   </li>
      *   <li><b>Use PUT for updates:</b> If the API supports it, use PUT instead
      *       <pre>{@code
-     * HttpRequest.url("https://api.example.com/users/1")
+     * HttpRequest.url("http://localhost:18080/users/1")
      *     .jsonBody("{\"name\":\"Updated Name\"}")
      *     .put(String.class);
-     *       }</pre>
-     *   </li>
-     *   <li><b>Reflection workaround (not recommended):</b> Override the protected method field
-     *       <pre>{@code
-     * // This is fragile and may break with different JVM versions
-     * HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-     * connection.setRequestMethod("POST");
-     * Field methodField = HttpURLConnection.class.getDeclaredField("method");
-     * methodField.setAccessible(true);
-     * methodField.set(connection, "PATCH");
      *       }</pre>
      *   </li>
      * </ol>

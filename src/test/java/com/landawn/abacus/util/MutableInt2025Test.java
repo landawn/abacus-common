@@ -120,7 +120,7 @@ public class MutableInt2025Test extends TestBase {
     @Test
     public void testSetIfTrue() {
         MutableInt num = MutableInt.of(10);
-        boolean result = num.setIf(20, v -> v < 15);
+        boolean result = num.setIf(v -> v < 15, 20);
         assertTrue(result);
         assertEquals(20, num.value());
     }
@@ -128,7 +128,7 @@ public class MutableInt2025Test extends TestBase {
     @Test
     public void testSetIfFalse() {
         MutableInt num = MutableInt.of(10);
-        boolean result = num.setIf(20, v -> v > 15);
+        boolean result = num.setIf(v -> v > 15, 20);
         assertFalse(result);
         assertEquals(10, num.value());
     }
@@ -136,7 +136,7 @@ public class MutableInt2025Test extends TestBase {
     @Test
     public void testSetIfEdgeCase() {
         MutableInt num = MutableInt.of(10);
-        boolean result = num.setIf(20, v -> v == 10);
+        boolean result = num.setIf(v -> v == 10, 20);
         assertTrue(result);
         assertEquals(20, num.value());
     }

@@ -213,29 +213,29 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * boolean updated = num.setIf(20.5f, v -> v < 15.0f);   // returns true, value is now 20.5f
-     * updated = num.setIf(30.5f, v -> v < 15.0f);           // returns false, value remains 20.5f
+     * boolean updated = num.setIf(v -> v < 15.0f, 20.5f);   // returns true, value is now 20.5f
+     * updated = num.setIf(v -> v < 15.0f, 30.5f);           // returns false, value remains 20.5f
      *
      * // More complex predicates
      * MutableFloat temperature = MutableFloat.of(98.6f);
      * // Only update if temperature is within normal range
-     * temperature.setIf(99.5f, t -> t >= 97.0f && t <= 100.0f);
+     * temperature.setIf(t -> t >= 97.0f && t <= 100.0f, 99.5f);
      *
      * // With exception handling
      * MutableFloat price = MutableFloat.of(100.0f);
-     * price.setIf(120.0f, p -> {
+     * price.setIf(p -> {
      *     if (p < 0) throw new IllegalStateException("Negative price");
      *     return p < 150.0f;
-     * });
+     * }, 120.0f);
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
-     * @param newValue the new value to set if the condition is met
      * @param predicate the predicate to test the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final float newValue, final Throwables.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
         if (predicate.test(value)) {
             value = newValue;
             return true;

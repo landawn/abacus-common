@@ -154,41 +154,45 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * HttpSettings settings = HttpSettings.create()
  *     .setContentType("application/json")
  *     .setContentEncoding("gzip");
- * HttpClient client = HttpClient.create("https://api.example.com",
+ * HttpClient userClient = HttpClient.create("http://localhost:18080/users/123",
  *     16, 5000, 30000, settings);
  *
  * // Simple GET request with automatic deserialization
- * User user = client.get("/users/123", User.class);
+ * User user = userClient.get(User.class);
  *
  * // POST request with automatic serialization
+ * HttpClient usersClient = HttpClient.create("http://localhost:18080/users",
+ *     16, 5000, 30000, settings);
  * CreateUserRequest request = new CreateUserRequest("John", "Doe", "john@example.com");
- * User createdUser = client.post("/users", request, User.class);
+ * User createdUser = usersClient.post(request, User.class);
  *
  * // Asynchronous operations with error handling
- * ContinuableFuture<List<User>> usersFuture = client.asyncGet("/users",
- *         new Type<List<User>>() {})
- *     .thenApply((users, exception) -> {
+ * ContinuableFuture<UserList> usersFuture = usersClient.asyncGet(UserList.class)
+ *     .thenCallAsync((userList, exception) -> {
  *         if (exception != null) {
  *             logger.error("Failed to fetch users", exception);
- *             return Collections.emptyList();
+ *             return new UserList();
  *         }
- *         return users;
+ *         return userList;
  *     });
  *
  * // Form data submission with custom settings
  * Map<String, String> formData = Map.of("username", "john", "password", "secret");
  * HttpSettings formSettings = HttpSettings.create()
  *     .setContentType("application/x-www-form-urlencoded");
- * String response = client.post("/login", formData, formSettings, String.class);
+ * HttpClient loginClient = HttpClient.create("http://localhost:18080/login",
+ *     16, 5000, 30000, formSettings);
+ * String response = loginClient.post(formData, formSettings, String.class);
  * }</pre>
  *
  * <p><b>Advanced Configuration and Customization:</b>
  * <pre>{@code
  * // SSL/TLS configuration with custom certificates
- * SSLSocketFactory sslFactory = createCustomSSLFactory();
+ * javax.net.ssl.SSLSocketFactory sslFactory =
+ *     (javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault();
  * HttpSettings secureSettings = HttpSettings.create()
  *     .setSSLSocketFactory(sslFactory);
- * HttpClient secureClient = HttpClient.create("https://secure-api.example.com",
+ * HttpClient secureClient = HttpClient.create("http://localhost:18080",
  *     16, 5000, 30000, secureSettings);
  *
  * // Proxy configuration with authentication
@@ -196,15 +200,16 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * HttpSettings proxySettings = HttpSettings.create()
  *     .setProxy(proxy)
  *     .header("Proxy-Authorization", "Basic " + Strings.base64Encode("user:pass".getBytes()));
- * HttpClient proxyClient = HttpClient.create("https://external-api.com",
+ * HttpClient proxyClient = HttpClient.create("http://localhost:18080",
  *     16, 5000, 30000, proxySettings);
  *
  * // Custom headers and authentication
+ * String accessToken = "token123";
  * HttpSettings authSettings = HttpSettings.create()
  *     .header(HttpHeaders.Names.AUTHORIZATION, "Bearer " + accessToken)
  *     .header(HttpHeaders.Names.USER_AGENT, "MyApp/1.0")
  *     .header("X-API-Version", "v2");
- * HttpClient authClient = HttpClient.create("https://api.example.com",
+ * HttpClient authClient = HttpClient.create("http://localhost:18080",
  *     16, 5000, 30000, authSettings);
  *
  * // Connection pooling and timeout tuning
@@ -303,7 +308,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <li>Ignoring HTTP status codes and error responses</li>
  *   <li>Using blocking operations in async contexts (causes thread pool exhaustion)</li>
  *   <li>Not configuring appropriate timeouts (can cause indefinite blocking)</li>
- *   <li>Hardcoding URLs instead of using path() method for URL construction</li>
+ *   <li>Hardcoding URLs instead of composing paths from a base URL</li>
  *   <li>Not handling SSL certificate validation in production environments</li>
  *   <li>Ignoring content encoding headers when manually processing responses</li>
  * </ul>
@@ -319,42 +324,46 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Example: Microservice Client Implementation</b>
  * <pre>{@code
- * @Component
  * public class UserServiceClient {
- *     private final HttpClient httpClient;
+ *     private final String baseUrl;
+ *     private final int timeoutMs;
+ *     private final HttpSettings settings;
  *
- *     public UserServiceClient(@Value("${user.service.url}") String baseUrl,
- *                             @Value("${user.service.timeout}") int timeoutMs) {
- *         HttpSettings settings = HttpSettings.create()
+ *     public UserServiceClient(String baseUrl, int timeoutMs) {
+ *         this.baseUrl = baseUrl;
+ *         this.timeoutMs = timeoutMs;
+ *         this.settings = HttpSettings.create()
  *             .setContentType("application/json")
  *             .setContentEncoding("gzip")
  *             .header(HttpHeaders.Names.USER_AGENT, "UserServiceClient/1.0");
- *         this.httpClient = HttpClient.create(baseUrl, 16,
- *             timeoutMs, timeoutMs * 2, settings);
+ *     }
+ *
+ *     private HttpClient clientFor(String path) {
+ *         return HttpClient.create(baseUrl + path, 16, timeoutMs, timeoutMs * 2, settings);
  *     }
  *
  *     public User findById(Long userId) {
- *         String path = "/users/" + userId;
- *         return httpClient.get(path, User.class);
+ *         return clientFor("/users/" + userId).get(User.class);
  *     }
  *
  *     public ContinuableFuture<User> createUserAsync(CreateUserRequest request) {
- *         return httpClient.asyncPost("/users", request, User.class);
+ *         return clientFor("/users").asyncPost(request, User.class);
  *     }
  *
- *     public List<User> searchUsers(UserSearchCriteria criteria) {
+ *     public UserList searchUsers(UserSearchCriteria criteria) {
  *         String path = "/users/search?" + URLEncodedUtil.encode(criteria);
- *         return httpClient.get(path, new Type<List<User>>() {});
+ *         return clientFor(path).get(UserList.class);
  *     }
  *
  *     public void updateUserAsync(Long userId, UpdateUserRequest request,
  *                               Consumer<User> onSuccess, Consumer<Exception> onError) {
- *         String path = "/users/" + userId;
- *         httpClient.asyncPut(path, request, User.class)
- *             .thenAccept(user -> onSuccess.accept(user))
- *             .exceptionally(exception -> {
- *                 onError.accept((Exception) exception);
- *                 return null;
+ *         clientFor("/users/" + userId).asyncPut(request, User.class)
+ *             .thenRunAsync((user, exception) -> {
+ *                 if (exception != null) {
+ *                     onError.accept(exception);
+ *                 } else {
+ *                     onSuccess.accept(user);
+ *                 }
  *             });
  *     }
  * }
@@ -477,7 +486,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpClient client = HttpClient.create("https://api.example.com");
+     * HttpClient client = HttpClient.create("http://localhost:18080");
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -494,7 +503,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpClient client = HttpClient.create("https://api.example.com", 32);
+     * HttpClient client = HttpClient.create("http://localhost:18080", 32);
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -512,7 +521,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpClient client = HttpClient.create("https://api.example.com", 5000, 10000);
+     * HttpClient client = HttpClient.create("http://localhost:18080", 5000, 10000);
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -530,7 +539,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpClient client = HttpClient.create("https://api.example.com", 32, 5000, 10000);
+     * HttpClient client = HttpClient.create("http://localhost:18080", 32, 5000, 10000);
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -552,7 +561,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .setContentType("application/json")
      *     .header("Authorization", "Bearer token123");
-     * HttpClient client = HttpClient.create("https://api.example.com", 16, 5000, 10000, settings);
+     * HttpClient client = HttpClient.create("http://localhost:18080", 16, 5000, 10000, settings);
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -577,8 +586,8 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger sharedCounter = new AtomicInteger(0);
-     * HttpClient client1 = HttpClient.create("https://api1.example.com", 10, 5000, 10000, null, sharedCounter);
-     * HttpClient client2 = HttpClient.create("https://api2.example.com", 10, 5000, 10000, null, sharedCounter);
+     * HttpClient client1 = HttpClient.create("http://localhost:18080/api1", 10, 5000, 10000, null, sharedCounter);
+     * HttpClient client2 = HttpClient.create("http://localhost:18080/api2", 10, 5000, 10000, null, sharedCounter);
      * // Both clients share a maximum of 10 concurrent connections total
      * }</pre>
      *
@@ -603,8 +612,8 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor customExecutor = Executors.newFixedThreadPool(4);
-     * HttpClient client = HttpClient.create("https://api.example.com", 16, 5000, 10000, customExecutor);
-     * client.asyncGet(User.class).thenAccept(user -> System.out.println(user));
+     * HttpClient client = HttpClient.create("http://localhost:18080", 16, 5000, 10000, customExecutor);
+     * client.asyncGet(User.class).thenRunAsync(user -> System.out.println(user));
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -630,7 +639,7 @@ public final class HttpClient {
      *     .setContentFormat(ContentFormat.JSON)
      *     .header("Authorization", "Bearer token");
      * Executor executor = Executors.newCachedThreadPool();
-     * HttpClient client = HttpClient.create("https://api.example.com", 20, 5000, 15000, settings, executor);
+     * HttpClient client = HttpClient.create("http://localhost:18080", 20, 5000, 15000, settings, executor);
      * }</pre>
      *
      * @param url The base URL for the HTTP client
@@ -658,7 +667,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
      * Executor executor = Executors.newFixedThreadPool(10);
      * HttpClient client = HttpClient.create(
-     *     "https://api.example.com", 20, 5000, 10000, settings, sharedCounter, executor
+     *     "http://localhost:18080", 20, 5000, 10000, settings, sharedCounter, executor
      * );
      * }</pre>
      *
@@ -683,7 +692,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpClient client = HttpClient.create(apiUrl);
      * }</pre>
      *
@@ -701,7 +710,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpClient client = HttpClient.create(apiUrl, 32);
      * }</pre>
      *
@@ -720,7 +729,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpClient client = HttpClient.create(apiUrl, 5000, 10000);
      * }</pre>
      *
@@ -739,7 +748,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpClient client = HttpClient.create(apiUrl, 32, 5000, 10000);
      * }</pre>
      *
@@ -759,7 +768,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpSettings settings = HttpSettings.create()
      *     .setContentType("application/json")
      *     .header("Authorization", "Bearer token123");
@@ -787,8 +796,8 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger sharedCounter = new AtomicInteger(0);
-     * URL apiUrl1 = new URL("https://api1.example.com");
-     * URL apiUrl2 = new URL("https://api2.example.com");
+     * URL apiUrl1 = new URL("http://localhost:18080/api1");
+     * URL apiUrl2 = new URL("http://localhost:18080/api2");
      * HttpClient client1 = HttpClient.create(apiUrl1, 10, 5000, 10000, null, sharedCounter);
      * HttpClient client2 = HttpClient.create(apiUrl2, 10, 5000, 10000, null, sharedCounter);
      * // Both clients share a maximum of 10 concurrent connections total
@@ -814,10 +823,10 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * Executor customExecutor = Executors.newFixedThreadPool(4);
      * HttpClient client = HttpClient.create(apiUrl, 16, 5000, 10000, customExecutor);
-     * client.asyncGet(User.class).thenAccept(user -> System.out.println(user));
+     * client.asyncGet(User.class).thenRunAsync(user -> System.out.println(user));
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
@@ -839,7 +848,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * HttpSettings settings = HttpSettings.create()
      *     .setContentFormat(ContentFormat.JSON)
      *     .header("Authorization", "Bearer token");
@@ -868,7 +877,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL apiUrl = new URL("https://api.example.com");
+     * URL apiUrl = new URL("http://localhost:18080");
      * AtomicInteger sharedCounter = new AtomicInteger(0);
      * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
      * Executor executor = Executors.newFixedThreadPool(10);
@@ -897,7 +906,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpClient client = HttpClient.create("https://api.example.com/users");
+     * HttpClient client = HttpClient.create("http://localhost:18080/users");
      * String response = client.get();
      * }</pre>
      *
@@ -1727,8 +1736,13 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.asyncGet()
-     *     .thenAccept(response -> System.out.println("Response: " + response))
-     *     .exceptionally(e -> { e.printStackTrace(); return null; });
+     *     .thenRunAsync((response, exception) -> {
+     *         if (exception != null) {
+     *             exception.printStackTrace();
+     *         } else {
+     *             System.out.println("Response: " + response);
+     *         }
+     *     });
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the response body
@@ -1746,7 +1760,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("Authorization", "Bearer token123");
      * client.asyncGet(settings)
-     *     .thenAccept(response -> System.out.println("Response: " + response));
+     *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1764,7 +1778,7 @@ public final class HttpClient {
      * <pre>{@code
      * Map<String, Object> params = Map.of("id", 123, "name", "John");
      * client.asyncGet(params)
-     *     .thenAccept(response -> System.out.println("Response: " + response));
+     *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -1784,7 +1798,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("Authorization", "Bearer token123");
      * client.asyncGet(params, settings)
-     *     .thenAccept(response -> System.out.println("Response: " + response));
+     *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -1801,7 +1815,7 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.asyncGet(User.class)
-     *     .thenAccept(user -> System.out.println("User: " + user.getName()));
+     *     .thenRunAsync(user -> System.out.println("User: " + user.getName()));
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1819,7 +1833,7 @@ public final class HttpClient {
      * <pre>{@code
      * Map<String, Object> params = Map.of("userId", 123);
      * client.asyncGet(params, User.class)
-     *     .thenAccept(user -> System.out.println("User: " + user.getName()));
+     *     .thenRunAsync(user -> System.out.println("User: " + user.getName()));
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1840,7 +1854,7 @@ public final class HttpClient {
      *     .setContentFormat(ContentFormat.JSON)
      *     .header("Authorization", "Bearer token123");
      * client.asyncGet(settings, User.class)
-     *     .thenAccept(user -> System.out.println("User: " + user.getName()));
+     *     .thenRunAsync(user -> System.out.println("User: " + user.getName()));
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1864,7 +1878,7 @@ public final class HttpClient {
      *     .header("Authorization", "Bearer token123")
      *     .setConnectTimeout(10000);
      * client.asyncGet(params, settings, UserList.class)
-     *     .thenAccept(users -> users.forEach(u -> System.out.println(u.getName())));
+     *     .thenRunAsync(users -> users.forEach(u -> System.out.println(u.getName())));
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1883,7 +1897,7 @@ public final class HttpClient {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.asyncDelete()
-     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the response body as a String
@@ -1899,7 +1913,7 @@ public final class HttpClient {
      * <pre>{@code
      * Map<String, Object> params = Map.of("id", 123);
      * client.asyncDelete(params)
-     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
      * }</pre>
      *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -1917,7 +1931,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("Authorization", "Bearer token123");
      * client.asyncDelete(settings)
-     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
      * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1993,7 +2007,7 @@ public final class HttpClient {
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * client.asyncPost(newUser)
-     *     .thenAccept(response -> System.out.println("Created: " + response));
+     *     .thenRunAsync(response -> System.out.println("Created: " + response));
      * }</pre>
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -2046,7 +2060,7 @@ public final class HttpClient {
      * <pre>{@code
      * User updatedUser = new User("John", "Doe");
      * client.asyncPut(updatedUser)
-     *     .thenAccept(response -> System.out.println("Updated: " + response));
+     *     .thenRunAsync(response -> System.out.println("Updated: " + response));
      * }</pre>
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -2063,7 +2077,7 @@ public final class HttpClient {
      * <pre>{@code
      * UpdateUserRequest updateRequest = new UpdateUserRequest("Jane", "Doe");
      * client.asyncPut(updateRequest, User.class)
-     *     .thenAccept(user -> System.out.println("Updated user: " + user.getName()));
+     *     .thenRunAsync(user -> System.out.println("Updated user: " + user.getName()));
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -2084,7 +2098,7 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("If-Match", "\"abc123\"");
      * client.asyncPut(updatedUser, settings)
-     *     .thenAccept(response -> System.out.println("Response: " + response));
+     *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -2104,12 +2118,14 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("If-Match", "\"abc123\"")
      *     .setReadTimeout(30000);
-     * client.asyncPut(updateRequest, settings, User.class)
-     *     .thenAccept(user -> System.out.println("Updated: " + user.getName()))
-     *     .exceptionally(e -> {
-     *         System.err.println("Update failed: " + e.getMessage());
-     *         return null;
-     *     });
+    * client.asyncPut(updateRequest, settings, User.class)
+    *     .thenRunAsync((user, exception) -> {
+    *         if (exception != null) {
+    *             System.err.println("Update failed: " + exception.getMessage());
+    *         } else {
+    *             System.out.println("Updated: " + user.getName());
+    *         }
+    *     });
      * }</pre>
      *
      * @param <T> The type of the response object

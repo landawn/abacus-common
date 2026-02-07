@@ -97,16 +97,16 @@ public class MutableFloat2025Test extends TestBase {
     @Test
     public void test_setIf() {
         MutableFloat mf = MutableFloat.of(10.5f);
-        boolean updated = mf.setIf(20.5f, v -> v < 15.0f);
+        boolean updated = mf.setIf(v -> v < 15.0f, 20.5f);
         assertTrue(updated);
         assertEquals(20.5f, mf.value());
 
-        updated = mf.setIf(30.5f, v -> v < 15.0f);
+        updated = mf.setIf(v -> v < 15.0f, 30.5f);
         assertFalse(updated);
         assertEquals(20.5f, mf.value());
 
         MutableFloat temperature = MutableFloat.of(98.6f);
-        updated = temperature.setIf(99.5f, t -> t >= 97.0f && t <= 100.0f);
+        updated = temperature.setIf(t -> t >= 97.0f && t <= 100.0f, 99.5f);
         assertTrue(updated);
         assertEquals(99.5f, temperature.value());
     }
@@ -116,11 +116,11 @@ public class MutableFloat2025Test extends TestBase {
         MutableFloat price = MutableFloat.of(100.0f);
         assertThrows(IllegalStateException.class, () -> {
             price.setValue(-10.0f);
-            price.setIf(120.0f, p -> {
+            price.setIf(p -> {
                 if (p < 0)
                     throw new IllegalStateException("Negative price");
                 return p < 150.0f;
-            });
+            }, 120.0f);
         });
     }
 

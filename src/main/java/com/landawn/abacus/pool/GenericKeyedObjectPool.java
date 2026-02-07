@@ -221,21 +221,21 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * }
      * }</pre>
      *
-     * @param key the key with which the specified element is to be associated
-     * @param element the element to be associated with the specified key
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the specified key
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean put(final K key, final E element) throws IllegalStateException {
+    public boolean put(final K key, final E value) throws IllegalStateException {
         assertNotClosed();
 
-        if (key == null || element == null) {
-            throw new IllegalArgumentException("Key and element cannot be null");
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Key and value cannot be null");
         }
 
-        if (element.activityPrint().isExpired()) {
+        if (value.activityPrint().isExpired()) {
             return false;
         }
 
@@ -259,7 +259,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            final long keyValueMemorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, element);
+            final long keyValueMemorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, value);
 
             if (memoryMeasure != null && keyValueMemorySize < 0) {
                 logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
@@ -281,7 +281,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     }
                 }
 
-                oldValue = pool.put(key, element);
+                oldValue = pool.put(key, value);
 
                 if (oldValue != null) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
@@ -289,7 +289,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 totalDataSize.addAndGet(keyValueMemorySize);
             } else {
-                oldValue = pool.put(key, element);
+                oldValue = pool.put(key, value);
 
                 if (oldValue != null) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
@@ -312,22 +312,22 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * destroys the element if the put operation fails. The destruction occurs in a finally block
      * to ensure cleanup even if an exception is thrown.</p>
      *
-     * @param key the key with which the specified element is to be associated
-     * @param element the element to be associated with the specified key
-     * @param autoDestroyOnFailedToPut if {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)} when put fails
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the specified key
+     * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} when put fails
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean put(final K key, final E element, final boolean autoDestroyOnFailedToPut) {
+    public boolean put(final K key, final E value, final boolean autoDestroyOnFailedToPut) {
         boolean success = false;
 
         try {
-            success = put(key, element);
+            success = put(key, value);
         } finally {
-            if (autoDestroyOnFailedToPut && !success && element != null) {
-                element.destroy(Caller.PUT_ADD_FAILURE);
+            if (autoDestroyOnFailedToPut && !success && value != null) {
+                value.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 

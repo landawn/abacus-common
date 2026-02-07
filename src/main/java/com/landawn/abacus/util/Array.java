@@ -948,11 +948,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] names = Array.of("Alice", "Bob", "Charlie");     // returns String array of names
      * }</pre>
      *
-     * @param a the input array of strings.
+     * @param a the input array of CharSequence.
      * @return the same input array.
      * @see N#asArray(Object...)
      */
-    public static String[] of(final String... a) {
+    public static <T extends CharSequence> T[] of(final T... a) {
         return a;
     }
 

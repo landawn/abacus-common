@@ -54,11 +54,11 @@ public class MutableByte100Test extends TestBase {
     public void testSetIf() throws Exception {
         MutableByte mutableByte = MutableByte.of((byte) 10);
 
-        boolean updated = mutableByte.setIf((byte) 20, v -> v < 15);
+        boolean updated = mutableByte.setIf(v -> v < 15, (byte) 20);
         Assertions.assertTrue(updated);
         Assertions.assertEquals((byte) 20, mutableByte.value());
 
-        updated = mutableByte.setIf((byte) 30, v -> v < 15);
+        updated = mutableByte.setIf(v -> v < 15, (byte) 30);
         Assertions.assertFalse(updated);
         Assertions.assertEquals((byte) 20, mutableByte.value());
     }

@@ -97,14 +97,14 @@ public class BlobType extends AbstractType<Blob> {
      * Retrieves a Blob value from a ResultSet using the specified column label.
      *
      * @param rs the ResultSet to retrieve the Blob from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
+     * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
      * @return the Blob object in the specified column, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public Blob get(final ResultSet rs, final String columnLabel) throws SQLException {
-        return rs.getBlob(columnLabel);
+    public Blob get(final ResultSet rs, final String columnName) throws SQLException {
+        return rs.getBlob(columnName);
     }
 
     /**

@@ -380,8 +380,8 @@ public final class Try<T extends AutoCloseable> {
      * @return the result of the {@code cmd} or the default value if an exception occurs.
      * @see #call(java.util.concurrent.Callable, Supplier)
      */
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -469,9 +469,9 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      */
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate,
             final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.Predicate);
 
@@ -665,8 +665,8 @@ public final class Try<T extends AutoCloseable> {
      * @return the result from the command or the default value if an exception occurs.
      * @see #call(Throwables.Function, Supplier)
      */
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
         } catch (final Exception e) {
@@ -742,9 +742,9 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      * @see #call(Throwables.Function, Predicate, Supplier)
      */
-    // <R extends Comparable<? super R>> to avoid ambiguous error with Comparable<R>. Comparable is most common super interface for all types.
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
             final Predicate<? super Exception> predicate, final R defaultValue) {
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
         } catch (final Exception e) {
