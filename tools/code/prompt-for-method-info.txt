@@ -1,0 +1,161 @@
+You are a Java library API document generator.
+
+Goal:
+Generate TWO artifacts for this library release:
+1) API.md (human+AI friendly)
+2) api-index.json (machine-friendly)
+
+Inputs I will provide:
+- java class files under folder: ./src/main/java
+
+Hard rules:
+- ONLY document what is actually present in the provided inputs.
+- DO NOT invent methods, overloads, types, exceptions, behaviors, or examples.
+- If a behavior is unclear from Javadoc/signature, mark it as "unspecified" or omit it.
+- Keep wording precise and minimal; prioritize correctness over completeness.
+- Preserve generic type parameters, bounds, wildcards, nullability annotations, checked exceptions, and overload differences exactly.
+- Keep ordering stable: package → type → members.
+
+Output requirements:
+A) Produce API.md in GitHub-flavored Markdown with this structure:
+
+# <LibraryName> API Index (v<version>)
+- Build: <git sha or unknown>
+- Java: <target or unknown>
+- Generated: <YYYY-MM-DD>
+
+## Packages
+- com.foo.bar — <1-line package summary if available>
+
+--- For each package:
+
+## com.foo.bar
+### <TypeKind> <SimpleName> (<FQN>)
+<1–3 lines summary from class Javadoc (no more than 3 lines).>
+
+**Since:** <since or omit>
+**Thread-safety:** <thread-safe | not thread-safe | conditional | unspecified>
+**Nullability:** <notes or unspecified>
+
+#### Public Constructors
+- <signature> — <1-line summary>
+
+#### Public Static Methods
+##### <methodName>(...) -> <returnType>
+- **Signature:** `<exact signature>`
+- **Summary:** <1-line>
+- **Contract:** <bullets: key semantics, edge cases only if stated>
+- **Parameters:**
+  - `p` (<type>) — <summary from @param>
+- **Returns:** <from @return>
+- **Throws:** <from @throws>
+- **Performance:** <only if documented>
+- **Examples:**
+  - ```java
+    <example>
+    ```
+- **See also:** <@see items>
+
+#### Public Instance Methods
+(same format)
+
+Notes:
+- Group overloads under the same header, but each overload MUST have its own Signature/Params/Returns/Throws.
+- Keep examples short and compile-ish; if not provided in Javadoc, do not invent. You may omit Examples section if none exist.
+- For inherited methods, only list them if they are overridden OR the library explicitly documents them.
+
+B) Produce api-index.json with this schema (strict JSON, UTF-8, no trailing commas):
+
+{
+  "library": {
+    "name": "<LibraryName>",
+    "version": "<version or unknown>",
+    "generated_at": "<YYYY-MM-DD>",
+    "java_target": "<e.g., 8/11/17/21 or unknown>",
+    "source": {
+      "git_sha": "<sha or unknown>"
+    }
+  },
+  "packages": [
+    {
+      "name": "com.foo.bar",
+      "summary": "<optional>",
+      "types": [
+        {
+          "fqn": "com.foo.bar.Maps",
+          "name": "Maps",
+          "kind": "class|interface|enum|record|annotation",
+          "modifiers": ["public", "final"],
+          "since": "<optional>",
+          "deprecated": {
+            "is_deprecated": true,
+            "message": "<optional>",
+            "since": "<optional>",
+            "for_removal": false
+          },
+          "javadoc_summary": "<1-3 lines>",
+          "thread_safety": "thread-safe|not-thread-safe|conditional|unspecified",
+          "nullability": "<free text or omitted>",
+          "type_params": [
+            {"name":"K","bounds":["java.lang.Object"]}
+          ],
+          "constructors": [
+            {
+              "signature": "public Maps()",
+              "javadoc_summary": "<optional>",
+              "since": "<optional>",
+              "deprecated": { ... optional ... },
+              "params": []
+            }
+          ],
+          "methods": [
+            {
+              "name": "getIfExists",
+              "kind": "static|instance",
+              "modifiers": ["public", "static"],
+              "signature": "public static <K,V> Nullable<V> getIfExists(Map<K,? extends V> map, K key)",
+              "return_type": "Nullable<V>",
+              "type_params": [{"name":"K","bounds":["java.lang.Object"]}],
+              "params": [
+                {"name":"map","type":"Map<K,? extends V>","javadoc":"...","nullability":"unspecified"},
+                {"name":"key","type":"K","javadoc":"...","nullability":"unspecified"}
+              ],
+              "throws": [
+                {"type":"java.lang.NullPointerException","condition":"if key is null"}
+              ],
+              "since": "<optional>",
+              "deprecated": { ... optional ... },
+              "javadoc_summary": "<1 line>",
+              "contract": ["... bullet strings from Javadoc only ..."],
+              "performance": "<optional>",
+              "examples": ["...java snippet strings..."],
+              "see_also": ["com.foo.bar.Maps#containsKey(java.util.Map,java.lang.Object)"]
+            }
+          ],
+          "fields": [
+            {
+              "name": "DEFAULT",
+              "modifiers": ["public", "static", "final"],
+              "type": "int",
+              "value": "<optional literal if present>",
+              "javadoc_summary": "<optional>"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+Validation rules:
+- Every signature must match provided source exactly (including generics, annotations, throws clause).
+- Use fully qualified exception type names in JSON.
+- "deprecated" object appears only if deprecated, otherwise omit it entirely.
+- Omit unknown fields rather than guessing.
+- Keep arrays empty rather than null.
+- Output MUST be exactly two blocks:
+  1) API.md (Markdown)
+  2) api-index.json (JSON)
+
+Now, read the provided library sources/signatures and generate both artifacts.
+
