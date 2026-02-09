@@ -270,8 +270,7 @@ public final class ApiDocGenerator {
         for (final UnitData ud : units) {
             for (final Tree t : ud.unit.getTypeDecls()) {
                 if (t instanceof ClassTree ct) {
-                    typeOrder = collectType(TreePath.getPath(ud.unit, ct), ud, null, null, packageMap, typesByPackage, allTypes, docTrees, sourcePositions,
-                            typeOrder);
+                    typeOrder = collectType(TreePath.getPath(ud.unit, ct), ud, null, null, packageMap, typesByPackage, allTypes, docTrees, sourcePositions, typeOrder);
                 }
             }
         }
@@ -291,8 +290,8 @@ public final class ApiDocGenerator {
     }
 
     private static int collectType(final TreePath typePath, final UnitData unitData, final TypeInfo parentType, final String enclosingFqn,
-            final Map<String, PackageInfoData> packageMap, final Map<String, Map<String, String>> typesByPackage, final Map<String, String> allTypes,
-            final DocTrees docTrees, final SourcePositions sourcePositions, final int startOrder) {
+            final Map<String, PackageInfoData> packageMap, final Map<String, Map<String, String>> typesByPackage, final Map<String, String> allTypes, final DocTrees docTrees,
+            final SourcePositions sourcePositions, final int startOrder) {
         int nextOrder = startOrder;
         final ClassTree classTree = (ClassTree) typePath.getLeaf();
         if (!isPublicType(classTree, parentType)) {
@@ -382,8 +381,7 @@ public final class ApiDocGenerator {
                     type.methods.add(method);
                 }
             } else if (member instanceof ClassTree nested) {
-                nextOrder = collectType(new TreePath(typePath, nested), unitData, type, fqn, packageMap, typesByPackage, allTypes, docTrees, sourcePositions,
-                        nextOrder);
+                nextOrder = collectType(new TreePath(typePath, nested), unitData, type, fqn, packageMap, typesByPackage, allTypes, docTrees, sourcePositions, nextOrder);
             }
         }
 
@@ -441,8 +439,8 @@ public final class ApiDocGenerator {
 
     private static List<String> sortedModifiers(final ModifiersTree modifiers, final TypeInfo ownerType) {
         final LinkedHashSet<String> out = new LinkedHashSet<>();
-        final List<Modifier> order = List.of(Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.ABSTRACT, Modifier.STATIC, Modifier.FINAL,
-                Modifier.TRANSIENT, Modifier.VOLATILE, Modifier.SYNCHRONIZED, Modifier.NATIVE, Modifier.STRICTFP, Modifier.DEFAULT);
+        final List<Modifier> order = List.of(Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.ABSTRACT, Modifier.STATIC, Modifier.FINAL, Modifier.TRANSIENT,
+                Modifier.VOLATILE, Modifier.SYNCHRONIZED, Modifier.NATIVE, Modifier.STRICTFP, Modifier.DEFAULT);
         for (final Modifier m : order) {
             if (modifiers.getFlags().contains(m)) {
                 out.add(m.toString().toLowerCase(Locale.ROOT));
@@ -583,8 +581,8 @@ public final class ApiDocGenerator {
         return out;
     }
 
-    private static List<ThrowInfo> readThrows(final MethodTree methodTree, final DocInfo doc, final UnitData unitData,
-            final Map<String, Map<String, String>> typesByPackage, final Map<String, String> allTypes, final TypeInfo ownerType) {
+    private static List<ThrowInfo> readThrows(final MethodTree methodTree, final DocInfo doc, final UnitData unitData, final Map<String, Map<String, String>> typesByPackage,
+            final Map<String, String> allTypes, final TypeInfo ownerType) {
         final List<ThrowInfo> out = new ArrayList<>();
         final Set<String> ownerTypeParams = ownerType.typeParams.stream().map(tp -> tp.name).collect(Collectors.toSet());
         final Set<String> methodTypeParams = methodTree.getTypeParameters().stream().map(tp -> tp.getName().toString()).collect(Collectors.toSet());
@@ -810,10 +808,7 @@ public final class ApiDocGenerator {
 
     private static void appendMethodGroupsMarkdown(final StringBuilder sb, final List<MethodInfo> methods, final String kind) {
         final Map<String, List<MethodInfo>> groups = new LinkedHashMap<>();
-        methods.stream()
-                .filter(m -> kind.equals(m.kind))
-                .sorted(Comparator.comparingInt(m -> m.order))
-                .forEach(m -> groups.computeIfAbsent(m.name, k -> new ArrayList<>()).add(m));
+        methods.stream().filter(m -> kind.equals(m.kind)).sorted(Comparator.comparingInt(m -> m.order)).forEach(m -> groups.computeIfAbsent(m.name, k -> new ArrayList<>()).add(m));
         if (groups.isEmpty()) {
             sb.append("- (none)\n");
             return;
