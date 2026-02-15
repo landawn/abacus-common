@@ -497,7 +497,7 @@ public final class HttpSettings {
      * @return this HttpSettings instance for method chaining
      */
     @SuppressWarnings("UnusedReturnValue")
-    public HttpSettings basicAuth(final String username, final Object password) {
+    public HttpSettings basicAuth(final String username, final String password) {
         return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
     }
 

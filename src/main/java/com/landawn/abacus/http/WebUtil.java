@@ -106,8 +106,10 @@ public final class WebUtil {
         StringBuilder headers = new StringBuilder();
         String token = "";
         String body = "";
+        boolean hasDataOption = false;
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
+            final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
                     && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
@@ -125,8 +127,16 @@ public final class WebUtil {
                             .append(escapeJava(header.substring(idx + 1).trim()))
                             .append("\")"); //NOSONAR
                 }
-            } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
-                body = tokens.get(++i);
+            } else if (isDataOptionToken(token)) {
+                hasDataOption = true;
+
+                if (inlineBody != null) {
+                    body = inlineBody;
+                } else if (i + 1 < size) {
+                    body = tokens.get(++i);
+                } else {
+                    body = Strings.EMPTY;
+                }
             }
         }
 
@@ -149,8 +159,7 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = Strings.contains(curl, " -d ") || Strings.contains(curl, " --data ") || Strings.contains(curl, " --data-raw ") ? HttpMethod.POST
-                    : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = hasDataOption ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -241,8 +250,10 @@ public final class WebUtil {
         String token = "";
         String body = "";
         String mediaType = null;
+        boolean hasDataOption = false;
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
+            final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
                     && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
@@ -264,8 +275,16 @@ public final class WebUtil {
                         mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
                     }
                 }
-            } else if ((Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) && i + 1 < size) {
-                body = tokens.get(++i);
+            } else if (isDataOptionToken(token)) {
+                hasDataOption = true;
+
+                if (inlineBody != null) {
+                    body = inlineBody;
+                } else if (i + 1 < size) {
+                    body = tokens.get(++i);
+                } else {
+                    body = Strings.EMPTY;
+                }
             }
         }
 
@@ -292,8 +311,7 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = Strings.contains(curl, " -d ") || Strings.contains(curl, " --data ") || Strings.contains(curl, " --data-raw ") ? HttpMethod.POST
-                    : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = hasDataOption ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -309,6 +327,27 @@ public final class WebUtil {
         }
 
         return sb.toString();
+    }
+
+    private static boolean isDataOptionToken(final String token) {
+        return Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d") || Strings.startsWith(token, "--data-raw=")
+                || Strings.startsWith(token, "--data=") || Strings.startsWith(token, "-d=");
+    }
+
+    private static String extractInlineDataValue(final String token) {
+        final String dataRawPrefix = "--data-raw=";
+        final String dataPrefix = "--data=";
+        final String shortDataPrefix = "-d=";
+
+        if (Strings.startsWith(token, dataRawPrefix)) {
+            return token.length() > dataRawPrefix.length() ? token.substring(dataRawPrefix.length()) : null;
+        } else if (Strings.startsWith(token, dataPrefix)) {
+            return token.length() > dataPrefix.length() ? token.substring(dataPrefix.length()) : null;
+        } else if (Strings.startsWith(token, shortDataPrefix)) {
+            return token.length() > shortDataPrefix.length() ? token.substring(shortDataPrefix.length()) : null;
+        }
+
+        return null;
     }
 
     private static String escapeJava(final String str) {

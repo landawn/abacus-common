@@ -366,11 +366,18 @@ public final class Reflection<T> {
 
                     //noinspection ConstantValue
                     if (paramTypes != null && paramTypes.length == argTypes.length) {
+                        boolean allMatch = true;
+
                         for (int i = 0, len = paramTypes.length; i < len; i++) {
-                            if ((argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i]) || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))
-                                    && (i == len - 1)) {
-                                result = constructor;
+                            if (!(argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i])
+                                    || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))) {
+                                allMatch = false;
+                                break;
                             }
+                        }
+
+                        if (allMatch) {
+                            result = constructor;
                         }
                     }
 
@@ -416,11 +423,18 @@ public final class Reflection<T> {
 
                     //noinspection ConstantValue
                     if (method.getName().equals(methodName) && (paramTypes != null && paramTypes.length == argTypes.length)) {
+                        boolean allMatch = true;
+
                         for (int i = 0, len = paramTypes.length; i < len; i++) {
-                            if ((argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i]) || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))
-                                    && (i == len - 1)) {
-                                result = method;
+                            if (!(argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i])
+                                    || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))) {
+                                allMatch = false;
+                                break;
                             }
+                        }
+
+                        if (allMatch) {
+                            result = method;
                         }
                     }
 
@@ -432,9 +446,9 @@ public final class Reflection<T> {
                 if (result == null) {
                     throw new RuntimeException("No method found by name: " + methodName + " with parameter types: " + N.toString(argTypes));
                 }
-
-                argsMethodPool.put(key, result);
             }
+
+            argsMethodPool.put(key, result);
         }
 
         return result;

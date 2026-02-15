@@ -44,7 +44,7 @@ public class URLEncodedUtilTest extends AbstractTest {
             parameters.put(propName, CommonUtil.asArray(CommonUtil.stringOf(props.get(propName))));
         }
 
-        Account account2 = URLEncodedUtil.decodeToBean(parameters, Account.class);
+        Account account2 = URLEncodedUtil.convertToBean(parameters, Account.class);
 
         assertEquals(account, account2);
     }

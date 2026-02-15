@@ -94,18 +94,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * It automatically integrates with Spring's content negotiation mechanism to handle JSON
      * serialization and deserialization for REST endpoints.</p>
      *
-     * <p><b>Example usage in Spring MVC:</b></p>
-     * <pre>{@code
-     * @Configuration
-     * public class WebConfig implements WebMvcConfigurer {
-     *     @Override
-     *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-     *         converters.add(new JsonHttpMessageConverter());
-     *     }
-     * }
-     * }</pre>
-     *
-     * <p><b>Example usage with RestTemplate:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RestTemplate restTemplate = new RestTemplate();
      * restTemplate.getMessageConverters().add(0, new JsonHttpMessageConverter());
@@ -129,7 +118,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *   <li>Specifying property inclusion/exclusion rules</li>
      * </ul>
      *
-     * <p><b>Example with custom configurations:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Configure serialization to exclude null values
      * JsonSerializationConfig serConfig = new JsonSerializationConfig()
@@ -144,22 +133,6 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *
      * // Use in Spring configuration
      * restTemplate.getMessageConverters().add(0, converter);
-     * }</pre>
-     *
-     * <p><b>Example in Spring MVC configuration:</b></p>
-     * <pre>{@code
-     * @Configuration
-     * public class WebConfig implements WebMvcConfigurer {
-     *     @Override
-     *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-     *         JsonSerializationConfig jsc = new JsonSerializationConfig()
-     *             .setExclusion(Exclusion.NULL);
-     *         JsonDeserializationConfig jdc = new JsonDeserializationConfig()
-     *             .ignoreUnmatchedProperty(true);
-     *
-     *         converters.add(new JsonHttpMessageConverter(jsc, jdc));
-     *     }
-     * }
      * }</pre>
      *
      * @param jsc the serialization configuration controlling how Java objects are converted to JSON.

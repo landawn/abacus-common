@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Strings;
 import com.landawn.abacus.TestBase;
@@ -381,15 +381,15 @@ public class ArrayCharStream200Test extends TestBase {
         assertTrue(element.isPresent());
         assertEquals('c', element.get());
 
-        element = stream.elementAt(0);
+        element = createCharStream(TEST_ARRAY).elementAt(0);
         assertTrue(element.isPresent());
         assertEquals('a', element.get());
 
-        element = stream.elementAt(4);
+        element = createCharStream(TEST_ARRAY).elementAt(4);
         assertTrue(element.isPresent());
         assertEquals('e', element.get());
 
-        element = stream.elementAt(5);
+        element = createCharStream(TEST_ARRAY).elementAt(5);
         assertFalse(element.isPresent());
 
         element = createCharStream(new char[] {}).elementAt(0);

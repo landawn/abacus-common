@@ -137,7 +137,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * // Servlet parameter processing
  * HttpServletRequest request = getRequest();
- * UserProfile profile = URLEncodedUtil.decodeToBean(
+ * UserProfile profile = URLEncodedUtil.convertToBean(
  *     request.getParameterMap(), UserProfile.class);
  * }</pre>
  *
@@ -635,9 +635,22 @@ public final class URLEncodedUtil {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            sb.append(url);
-            sb.append(WD._QUESTION_MARK);
+            final int fragmentIndex = url.indexOf('#');
+            final String baseUrl = fragmentIndex < 0 ? url : url.substring(0, fragmentIndex);
+            final String fragment = fragmentIndex < 0 ? Strings.EMPTY : url.substring(fragmentIndex);
+
+            sb.append(baseUrl);
+
+            if (baseUrl.indexOf('?') >= 0) {
+                if (!baseUrl.endsWith("?") && !baseUrl.endsWith("&")) {
+                    sb.append('&');
+                }
+            } else {
+                sb.append('?');
+            }
+
             encode(parameters, charset, namingPolicy, sb);
+            sb.append(fragment);
 
             return sb.toString();
         } finally {
@@ -1206,7 +1219,7 @@ public final class URLEncodedUtil {
      * Map<String, String[]> params = new HashMap<>();
      * params.put("name", new String[] {"Alice"});
      * params.put("tags", new String[] {"java", "coding"});
-     * User user = URLEncodedUtil.decodeToBean(params, User.class);
+     * User user = URLEncodedUtil.convertToBean(params, User.class);
      * // user: {name="Alice", tags="java, coding"}
      * }</pre>
      *
@@ -1217,7 +1230,7 @@ public final class URLEncodedUtil {
      * @return an instance of type T with properties populated from the parameter map;
      *         returns an empty instance if {@code parameters} is {@code null} or empty.
      */
-    public static <T> T decodeToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
+    public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 
@@ -1292,7 +1305,15 @@ public final class URLEncodedUtil {
             } else if (plusAsBlank && (c == '+')) {
                 bb.put((byte) ' ');
             } else {
-                bb.put((byte) c);
+                // Encode non-ASCII chars properly instead of truncating via (byte) cast
+                if (c > 0x7F) {
+                    final byte[] bytes = String.valueOf(c).getBytes(charset);
+                    for (final byte b : bytes) {
+                        bb.put(b);
+                    }
+                } else {
+                    bb.put((byte) c);
+                }
             }
         }
 

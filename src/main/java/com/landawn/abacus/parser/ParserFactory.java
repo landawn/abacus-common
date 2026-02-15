@@ -168,6 +168,13 @@ public final class ParserFactory {
     /**
      * Checks if abacus-common XML parser is available.
      * abacus-common XML parser provides extended XML functionality specific to the abacus-common framework.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (ParserFactory.isAbacusXmlParserAvailable()) {
+     *     XmlParser parser = ParserFactory.createAbacusXmlParser();
+     * }
+     * }</pre>
      * 
      * @return {@code true} if abacus-common XML parser is available, {@code false} otherwise
      */
@@ -178,6 +185,13 @@ public final class ParserFactory {
     /**
      * Checks if standard XML parser is available.
      * This checks for the availability of standard Java XML processing capabilities.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (ParserFactory.isXmlParserAvailable()) {
+     *     XmlParser parser = ParserFactory.createXmlParser();
+     * }
+     * }</pre>
      * 
      * @return {@code true} if XML parser is available, {@code false} otherwise
      */
@@ -188,6 +202,13 @@ public final class ParserFactory {
     /**
      * Checks if Apache Avro parser is available.
      * Avro is a data serialization system that provides rich data structures and a compact, fast, binary data format.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (ParserFactory.isAvroParserAvailable()) {
+     *     AvroParser parser = ParserFactory.createAvroParser();
+     * }
+     * }</pre>
      * 
      * @return {@code true} if Avro parser is available, {@code false} otherwise
      */
@@ -198,6 +219,13 @@ public final class ParserFactory {
     /**
      * Checks if Kryo parser is available.
      * Kryo is a fast and efficient object graph serialization framework for Java.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (ParserFactory.isKryoParserAvailable()) {
+     *     KryoParser parser = ParserFactory.createKryoParser();
+     * }
+     * }</pre>
      * 
      * @return {@code true} if Kryo parser is available, {@code false} otherwise
      */

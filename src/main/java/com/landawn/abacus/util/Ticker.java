@@ -46,6 +46,7 @@ package com.landawn.abacus.util;
  * @see System#nanoTime()
  */
 public abstract class Ticker {
+    // TODO(kak): Consider removing this
     /**
      * Constructor for use by subclasses.
      * 
@@ -69,7 +70,6 @@ public abstract class Ticker {
      *
      * @return the current reading of the ticker, in nanoseconds
      */
-    // TODO(kak): Consider removing this
     public abstract long read();
 
     /**

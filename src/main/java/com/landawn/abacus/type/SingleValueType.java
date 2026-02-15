@@ -358,7 +358,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
-        if (jsonValueType != null) {
+        if (x == null) {
+            stmt.setObject(columnIndex, null);
+        } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
                     jsonValueType.set(stmt, columnIndex, jsonValueField.get(x));
@@ -386,7 +388,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
-        if (jsonValueType != null) {
+        if (x == null) {
+            stmt.setObject(parameterName, null);
+        } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
                     jsonValueType.set(stmt, parameterName, jsonValueField.get(x));
@@ -415,7 +419,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws SQLException {
-        if (jsonValueType != null) {
+        if (x == null) {
+            stmt.setObject(columnIndex, null, sqlTypeOrLength);
+        } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
                     jsonValueType.set(stmt, columnIndex, jsonValueField.get(x), sqlTypeOrLength);
@@ -444,7 +450,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws SQLException {
-        if (jsonValueType != null) {
+        if (x == null) {
+            stmt.setObject(parameterName, null, sqlTypeOrLength);
+        } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
                     jsonValueType.set(stmt, parameterName, jsonValueField.get(x), sqlTypeOrLength);

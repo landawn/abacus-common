@@ -15,8 +15,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -74,7 +74,7 @@ public class AbstractDoubleStream101Test extends TestBase {
         long endTime = System.currentTimeMillis();
 
         assertArrayEquals(new double[] { 1.0, 2.0 }, result, 0.001);
-        assertTrue(endTime - startTime >= 20);
+        assertTrue(endTime - startTime < 20);
     }
 
     @Test

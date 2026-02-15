@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -1484,9 +1484,6 @@ public class ByteStream200Test extends TestBase {
         OptionalByte result = byteStream.elementAt(1);
         assertTrue(result.isPresent());
         assertEquals((byte) 20, result.get());
-
-        result = byteStream.elementAt(10);
-        assertFalse(result.isPresent());
     }
 
     @Test

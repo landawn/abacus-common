@@ -599,6 +599,7 @@ public class AsyncExecutor {
                 executorService.awaitTermination(terminationTimeout, timeUnit);
             }
         } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.warn("Not all AsyncExecutor tasks completed successfully before shutdown");
         } finally {
             executor = null;

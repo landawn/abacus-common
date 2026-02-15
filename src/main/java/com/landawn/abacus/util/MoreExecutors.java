@@ -213,8 +213,8 @@ public final class MoreExecutors {
                 service.shutdown();
                 //noinspection ResultOfMethodCallIgnored
                 service.awaitTermination(terminationTimeout, timeUnit);
-            } catch (final InterruptedException ignored) {
-                // We're shutting down anyway, so ignore.
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }));
     }

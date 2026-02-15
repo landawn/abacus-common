@@ -975,11 +975,11 @@ public final class Multiset<E> implements Collection<E> {
 
         final int oldCount = count.value();
 
-        count.subtract(occurrencesToRemove);
-
-        if (count.value() <= 0) {
+        if (oldCount <= occurrencesToRemove) {
             //noinspection SuspiciousMethodCalls
             backingMap.remove(element);
+        } else {
+            count.subtract(occurrencesToRemove);
         }
 
         return oldCount;
@@ -1013,14 +1013,14 @@ public final class Multiset<E> implements Collection<E> {
             return 0;
         }
 
-        count.subtract(occurrences);
-
-        if (count.value() <= 0) {
+        if (count.value() <= occurrences) {
             //noinspection SuspiciousMethodCalls
             backingMap.remove(element);
 
             return 0;
         }
+
+        count.subtract(occurrences);
 
         return count.value();
     }

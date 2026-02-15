@@ -420,7 +420,7 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testBasicAuthWithObjectPassword() {
         HttpSettings settings = HttpSettings.create();
-        settings.basicAuth("user", Integer.valueOf(12345));
+        settings.basicAuth("user", "12345");
         assertNotNull(settings.headers().get(HttpHeaders.Names.AUTHORIZATION));
     }
 }

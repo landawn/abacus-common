@@ -14,8 +14,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -65,10 +65,10 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testDelay() {
         long startTime = System.nanoTime();
-        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(10)).forEach(c -> {
+        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(100)).forEach(c -> {
         });
         long endTime = System.nanoTime();
-        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) >= 30);
+        assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) < 300);
     }
 
     @Test

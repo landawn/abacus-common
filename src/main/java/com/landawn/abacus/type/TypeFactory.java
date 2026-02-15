@@ -584,10 +584,10 @@ public final class TypeFactory {
                 }
             } else if (clsName.equalsIgnoreCase(XMLType.XML)) {
                 if (typeParameters.length > 1) {
-                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". JSON Type can only have one type parameter.");
+                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". XML Type can only have one type parameter.");
                 }
                 if (parameters.length > 0) {
-                    throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". JSON Type can only have zero parameter.");
+                    throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". XML Type can only have zero parameter.");
                 }
 
                 if (typeParameters.length == 0) {

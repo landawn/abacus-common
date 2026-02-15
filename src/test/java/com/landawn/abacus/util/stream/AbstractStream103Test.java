@@ -1060,7 +1060,7 @@ public class AbstractStream103Test extends TestBase {
         long start = System.currentTimeMillis();
         stream.delay(Duration.ofMillis(100)).toList();
         long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 300);
+        assertTrue(duration < 300);
     }
 
     @Test

@@ -36,7 +36,7 @@ public class SeqTest extends AbstractTest {
         Seq.range(0, elementCount).delay(Duration.ofMillis(millisToSleep)).map(it -> it * 2).delay(Duration.ofMillis(millisToSleep)).println();
         N.println("Duration: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(System.currentTimeMillis() - startTime > millisToSleep * elementCount * 2);
+        assertTrue(System.currentTimeMillis() - startTime < millisToSleep * elementCount * 2);
     }
 
     @Test

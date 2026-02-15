@@ -703,6 +703,16 @@ public class Range2025Test extends TestBase {
     }
 
     @Test
+    public void test_span_withEarlierRangeAsArgument() {
+        Range<Integer> range1 = Range.closed(1, 5);
+        Range<Integer> range2 = Range.open(0, 3);
+        Range<Integer> result = range1.span(range2);
+        assertEquals(0, result.lowerEndpoint());
+        assertEquals(5, result.upperEndpoint());
+        assertEquals(Range.BoundType.OPEN_CLOSED, result.boundType());
+    }
+
+    @Test
     public void test_span_equal() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(1, 5);

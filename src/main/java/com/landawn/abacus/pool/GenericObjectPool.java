@@ -680,11 +680,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public void close() {
-        if (isClosed) {
-            return;
-        }
+        lock.lock();
 
-        isClosed = true;
+        try {
+            if (isClosed) {
+                return;
+            }
+
+            isClosed = true;
+        } finally {
+            lock.unlock();
+        }
 
         try {
             if (scheduleFuture != null) {
@@ -757,7 +763,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             destroyAll(new ArrayList<>(pool), Caller.VACATE);
             pool.clear();
         } else if (vacationNumber > 0) {
-            final Queue<E> heap = new PriorityQueue<>(vacationNumber, cmp);
+            final Comparator<E> reversedCmp = cmp.reversed();
+            final Queue<E> heap = new PriorityQueue<>(vacationNumber, reversedCmp);
 
             for (final E element : pool) {
                 if (heap.size() < vacationNumber) {

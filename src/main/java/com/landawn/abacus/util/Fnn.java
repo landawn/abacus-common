@@ -1079,7 +1079,7 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, E extends Exception> Throwables.Predicate<T[], E> isEmptyA() {
+    public static <T, E extends Exception> Throwables.Predicate<T[], E> isEmptyArray() {
         return (Throwables.Predicate) Fn.IS_EMPTY_A;
     }
 
@@ -1094,7 +1094,7 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isEmptyC() {
+    public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isEmptyCollection() {
         return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_C;
     }
 
@@ -1109,7 +1109,7 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isEmptyM() {
+    public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isEmptyMap() {
         return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_M;
     }
 

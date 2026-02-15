@@ -1276,7 +1276,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof BiMap && keyMap.equals(((BiMap<?, ?>) obj).keyMap));
+        return obj == this || (obj instanceof Map && keyMap.equals(obj));
     }
 
     /**

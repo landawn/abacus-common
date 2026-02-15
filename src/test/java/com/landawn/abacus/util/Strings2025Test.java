@@ -2184,6 +2184,8 @@ public class Strings2025Test extends TestBase {
     public void testIndexOfAnyBut_WithFromIndex() {
         assertEquals(3, Strings.indexOfAnyBut("aaabbb", 3, 'a'));
         assertEquals(-1, Strings.indexOfAnyBut("aaa", 0, 'a'));
+        assertEquals(2, Strings.indexOfAnyBut("abc", 2));
+        assertEquals(-1, Strings.indexOfAnyBut("abc", 3));
     }
 
     @Test
@@ -2417,6 +2419,7 @@ public class Strings2025Test extends TestBase {
     public void testContainsAll_CharArray() {
         assertTrue(Strings.containsAll("abc", 'a', 'b', 'c'));
         assertFalse(Strings.containsAll("abc", 'a', 'x'));
+        assertTrue(Strings.containsAll("abc", (char[]) null));
         assertFalse(Strings.containsAll(null, 'a', 'b'));
         assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDC00', 'a'));
         assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDFFF', 'a'));

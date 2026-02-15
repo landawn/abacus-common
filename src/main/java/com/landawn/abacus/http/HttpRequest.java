@@ -185,7 +185,7 @@ public final class HttpRequest {
         checkSettings();
 
         if (httpSettings != null) {
-            Beans.copyInto(settings, httpSettings);
+            Beans.copyInto(httpSettings, settings);
         }
 
         return this;
@@ -208,7 +208,7 @@ public final class HttpRequest {
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest basicAuth(final String username, final Object password) {
+    public HttpRequest basicAuth(final String username, final String password) {
         checkSettings();
 
         settings.basicAuth(username, password);

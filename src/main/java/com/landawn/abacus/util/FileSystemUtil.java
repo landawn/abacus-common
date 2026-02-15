@@ -289,6 +289,11 @@ final class FileSystemUtil {
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
         path = FilenameUtil.normalize(path, false);
+
+        if (path == null) {
+            throw new IOException("Invalid path: unable to normalize");
+        }
+
         if (!path.isEmpty() && path.charAt(0) != '"') {
             path = "\"" + path + "\"";
         }
@@ -455,14 +460,31 @@ final class FileSystemUtil {
         OutputStream out = null;
         InputStream err = null;
         BufferedReader inr = null;
+        Thread monitor = null;
         try { //NOSONAR
 
-            final Thread monitor = ThreadMonitor.start(timeout);
+            monitor = ThreadMonitor.start(timeout);
 
             proc = openProcess(cmdAttrs);
             in = proc.getInputStream();
             out = proc.getOutputStream();
             err = proc.getErrorStream();
+
+            // Consume stderr in a separate thread to prevent deadlock when the error stream buffer fills up
+            final InputStream errStream = err;
+            final Thread errGobbler = new Thread(() -> {
+                try {
+                    final byte[] buf = new byte[1024];
+                    while (errStream.read(buf) != -1) { //NOSONAR
+                        // discard
+                    }
+                } catch (final IOException ignored) {
+                    // ignore
+                }
+            });
+            errGobbler.setDaemon(true);
+            errGobbler.start();
+
             // default charset is most likely appropriate here
             inr = new BufferedReader(IOUtil.newInputStreamReader(in, Charset.defaultCharset()));
             String line = inr.readLine();
@@ -473,8 +495,6 @@ final class FileSystemUtil {
             }
 
             proc.waitFor();
-
-            ThreadMonitor.stop(monitor);
 
             if (proc.exitValue() != 0) {
                 // os command problem, throw exception
@@ -487,8 +507,10 @@ final class FileSystemUtil {
             return lines;
 
         } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw new IOException("Command line threw an InterruptedException " + "for command " + Arrays.asList(cmdAttrs) + " timeout=" + timeout, ex);
         } finally {
+            ThreadMonitor.stop(monitor);
             IOUtil.closeQuietly(in);
             IOUtil.closeQuietly(out);
             IOUtil.closeQuietly(err);

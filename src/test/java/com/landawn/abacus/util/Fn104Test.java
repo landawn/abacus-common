@@ -843,24 +843,24 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testIsEmptyA() {
-        Predicate<String[]> pred = Fn.isEmptyA();
+    public void testIsEmptyArray() {
+        Predicate<String[]> pred = Fn.isEmptyArray();
         assertTrue(pred.test(new String[0]));
         assertTrue(pred.test(null));
         assertFalse(pred.test(new String[] { "a" }));
     }
 
     @Test
-    public void testIsEmptyC() {
-        Predicate<List<String>> pred = Fn.isEmptyC();
+    public void testIsEmptyCollection() {
+        Predicate<List<String>> pred = Fn.isEmptyCollection();
         assertTrue(pred.test(Collections.emptyList()));
         assertTrue(pred.test(null));
         assertFalse(pred.test(Arrays.asList("a")));
     }
 
     @Test
-    public void testIsEmptyM() {
-        Predicate<Map<String, Integer>> pred = Fn.isEmptyM();
+    public void testIsEmptyMap() {
+        Predicate<Map<String, Integer>> pred = Fn.isEmptyMap();
         assertTrue(pred.test(Collections.emptyMap()));
         assertTrue(pred.test(null));
         Map<String, Integer> map = new HashMap<>();

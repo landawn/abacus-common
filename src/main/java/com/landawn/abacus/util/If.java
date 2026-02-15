@@ -637,21 +637,22 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given CharSequence is {@code null}, empty, or contains only whitespace.
-     * 
+     *
      * <p>A CharSequence is considered blank if it is {@code null}, has zero length, or contains only
      * whitespace characters as defined by {@link Character#isWhitespace(char)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * If.isBlank(userInput)
-     *   .then(() -> System.out.println("Please enter valid input"));
+     * If.isBlank("   ").then(() -> System.out.println("blank"));    // prints "blank"
+     * If.isBlank("").then(() -> System.out.println("blank"));       // prints "blank"
+     * If.isBlank("abc").then(() -> System.out.println("blank"));    // does nothing
      * }</pre>
      *
-     * @param s the CharSequence to check
-     * @return an If instance that is {@code true} if the CharSequence is {@code null}, empty, or blank
+     * @param s the CharSequence to check (can be {@code null})
+     * @return an If instance that is {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace
      */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isBlank(final CharSequence s) {
+        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
         return is(Strings.isBlank(s));
     }
 
@@ -936,22 +937,22 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given CharSequence is not {@code null}, not empty, and not blank.
-     * 
+     *
      * <p>A CharSequence is considered not blank if it is not {@code null}, has length > 0, and contains
      * at least one non-whitespace character.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * If.notBlank(username)
-     *   .then(() -> loginUser(username))
-     *   .orElse(() -> showError("Username cannot be blank"));
+     * If.notBlank("admin").then(() -> loginUser("admin"));          // executes
+     * If.notBlank("   ").then(() -> loginUser("   "));              // does nothing
+     * If.notBlank(null).then(() -> loginUser("guest"));             // does nothing
      * }</pre>
      *
-     * @param s the CharSequence to check
-     * @return an If instance that is {@code true} if the CharSequence is not {@code null}, not empty, and not blank
+     * @param s the CharSequence to check (can be {@code null})
+     * @return an If instance that is {@code true} if the CharSequence is not {@code null}, not empty, and contains non-whitespace characters
      */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If notBlank(final CharSequence s) {
+        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
         return is(Strings.isNotBlank(s));
     }
 

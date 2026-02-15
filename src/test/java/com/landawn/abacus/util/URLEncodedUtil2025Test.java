@@ -289,7 +289,7 @@ public class URLEncodedUtil2025Test extends TestBase {
         params.put("name", new String[] { "Alice" });
         params.put("age", new String[] { "25" });
 
-        User user = URLEncodedUtil.decodeToBean(params, User.class);
+        User user = URLEncodedUtil.convertToBean(params, User.class);
         assertNotNull(user);
         assertEquals("Alice", user.getName());
         assertEquals(25, user.getAge());
@@ -301,7 +301,7 @@ public class URLEncodedUtil2025Test extends TestBase {
         params.put("name", new String[] { "Bob", "Bobby" });
         params.put("age", new String[] { "30" });
 
-        User user = URLEncodedUtil.decodeToBean(params, User.class);
+        User user = URLEncodedUtil.convertToBean(params, User.class);
         assertNotNull(user);
         assertEquals("Bob, Bobby", user.getName());
         assertEquals(30, user.getAge());
@@ -313,7 +313,7 @@ public class URLEncodedUtil2025Test extends TestBase {
         params.put("name", new String[] { "" });
         params.put("age", new String[] { "35" });
 
-        User user = URLEncodedUtil.decodeToBean(params, User.class);
+        User user = URLEncodedUtil.convertToBean(params, User.class);
         assertNotNull(user);
         assertNull(user.getName());
         assertEquals(35, user.getAge());
@@ -321,13 +321,13 @@ public class URLEncodedUtil2025Test extends TestBase {
 
     @Test
     public void test_decodeToBean_nullMap() {
-        User user = URLEncodedUtil.decodeToBean(null, User.class);
+        User user = URLEncodedUtil.convertToBean(null, User.class);
         assertNotNull(user);
     }
 
     @Test
     public void test_decodeToBean_emptyMap() {
-        User user = URLEncodedUtil.decodeToBean(new HashMap<>(), User.class);
+        User user = URLEncodedUtil.convertToBean(new HashMap<>(), User.class);
         assertNotNull(user);
     }
 
@@ -441,6 +441,15 @@ public class URLEncodedUtil2025Test extends TestBase {
 
         String result = URLEncodedUtil.encode("http://search.example.com", params);
         assertEquals("http://search.example.com?q=java+url+encoding&page=1", result);
+    }
+
+    @Test
+    public void test_encode_url_object_withExistingQueryAndFragment() {
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("page", 2);
+
+        String result = URLEncodedUtil.encode("http://search.example.com?q=java#section", params);
+        assertEquals("http://search.example.com?q=java&page=2#section", result);
     }
 
     @Test

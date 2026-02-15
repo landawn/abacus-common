@@ -754,29 +754,29 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testIsEmptyA() {
-        Predicate<String[]> isEmptyA = Fn.isEmptyA();
-        assertTrue(isEmptyA.test(new String[] {}));
-        assertTrue(isEmptyA.test(null));
-        assertFalse(isEmptyA.test(new String[] { "a" }));
+    public void testIsEmptyArray() {
+        Predicate<String[]> isEmptyArray = Fn.isEmptyArray();
+        assertTrue(isEmptyArray.test(new String[] {}));
+        assertTrue(isEmptyArray.test(null));
+        assertFalse(isEmptyArray.test(new String[] { "a" }));
     }
 
     @Test
-    public void testIsEmptyC() {
-        Predicate<List<String>> isEmptyC = Fn.isEmptyC();
-        assertTrue(isEmptyC.test(new ArrayList<>()));
-        assertTrue(isEmptyC.test(null));
-        assertFalse(isEmptyC.test(Arrays.asList("a")));
+    public void testIsEmptyCollection() {
+        Predicate<List<String>> isEmptyCollection = Fn.isEmptyCollection();
+        assertTrue(isEmptyCollection.test(new ArrayList<>()));
+        assertTrue(isEmptyCollection.test(null));
+        assertFalse(isEmptyCollection.test(Arrays.asList("a")));
     }
 
     @Test
-    public void testIsEmptyM() {
-        Predicate<Map<String, Integer>> isEmptyM = Fn.isEmptyM();
-        assertTrue(isEmptyM.test(new HashMap<>()));
-        assertTrue(isEmptyM.test(null));
+    public void testIsEmptyMap() {
+        Predicate<Map<String, Integer>> isEmptyMap = Fn.isEmptyMap();
+        assertTrue(isEmptyMap.test(new HashMap<>()));
+        assertTrue(isEmptyMap.test(null));
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
-        assertFalse(isEmptyM.test(map));
+        assertFalse(isEmptyMap.test(map));
     }
 
     @Test

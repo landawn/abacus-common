@@ -2012,7 +2012,7 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<T[]> isEmptyA() {
+    public static <T> Predicate<T[]> isEmptyArray() {
         return (Predicate) IS_EMPTY_A;
     }
 
@@ -2024,7 +2024,7 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection> Predicate<T> isEmptyC() {
+    public static <T extends Collection> Predicate<T> isEmptyCollection() {
         return (Predicate<T>) IS_EMPTY_C;
     }
 
@@ -2036,7 +2036,7 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map> Predicate<T> isEmptyM() {
+    public static <T extends Map> Predicate<T> isEmptyMap() {
         return (Predicate<T>) IS_EMPTY_M;
     }
 

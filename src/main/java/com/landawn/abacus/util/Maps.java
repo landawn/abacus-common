@@ -1022,7 +1022,7 @@ public final class Maps {
      * @see #getByPath(Map, String)
      */
     public static <T> T getByPathOrDefault(final Map<String, ?> map, final String path, final T defaultValue) {
-        // N.checkArgNotNull(defaultValue, "defaultValue");
+        N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         final Object val = getByPathOrDefaultValue(map, path, defaultValue);
 
@@ -2441,7 +2441,7 @@ public final class Maps {
      * @throws IllegalArgumentException if the specified {@code defaultValue} is {@code null}.
      */
     public static <K> String getAsStringOrDefault(final Map<? super K, ?> map, final K key, final String defaultValue) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
+        N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultValue;
@@ -2581,7 +2581,7 @@ public final class Maps {
      * @see N#convert(Object, Type)
      */
     public static <K, T> T getAsOrDefault(final Map<? super K, ?> map, final K key, final T defaultValue) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
+        N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultValue;
@@ -2667,7 +2667,7 @@ public final class Maps {
      *         contains {@code defaultValue} repeated {@code keys.size()} times.
      */
     public static <K, V> List<V> getValuesOrDefault(final Map<K, V> map, final Collection<?> keys, final V defaultValue) throws IllegalArgumentException {
-        // N.checkArgNotNull(defaultValue, "defaultValue");   // NOSONAR
+        N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         if (N.isEmpty(keys)) {
             return new ArrayList<>();
@@ -4273,7 +4273,7 @@ public final class Maps {
             newKey = keyConverter.apply(key);
 
             if (!newKeySet.add(newKey)) {
-                throw new IllegalStateException("Duplicate new Keys: " + Joiner.defauLt().appendAll(newKeySet).append(newKey).toString());
+                throw new IllegalStateException("Duplicate new Keys: " + Joiner.defauLt().appendAll(newKeySet).append(newKey));
             }
         }
 

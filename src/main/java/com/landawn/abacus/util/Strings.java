@@ -9147,11 +9147,11 @@ public final class Strings {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isEmpty(valuesToExclude)) {
-            return 0;
-        }
-
         fromIndex = Math.max(0, fromIndex);
+
+        if (N.isEmpty(valuesToExclude)) {
+            return fromIndex < str.length() ? fromIndex : N.INDEX_NOT_FOUND;
+        }
 
         final int strLen = str.length();
         char ch = 0;
@@ -19055,8 +19055,8 @@ public final class Strings {
      * @param end the position to stop overlaying before; must be valid
      * @return overlayed String, or {@code overlay} if {@code null} String input
      * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str, or indices are invalid
-     * @deprecated replaced by {@code Strings.replace(String, int, int, String)}
-     * @see #replace(String, int, int, String)
+     * @deprecated replaced by {@code Strings.replaceRange(String, int, int, String)}
+     * @see #replaceRange(String, int, int, String)
      * @see N#replaceRange(String, int, int, String)
      */
     @Deprecated
@@ -20405,8 +20405,12 @@ public final class Strings {
     }
 
     static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
-        if (!canBeNullOrEmpty && N.isEmpty(chs)) {
-            throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' cannot be null or empty");
+        if (N.isEmpty(chs)) {
+            if (!canBeNullOrEmpty) {
+                throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' cannot be null or empty");
+            }
+
+            return;
         }
 
         for (final char ch : chs) {

@@ -1166,6 +1166,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         return df.format(x);
@@ -1202,6 +1204,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         if (x == null) {
@@ -1239,6 +1243,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         return df.format(x);
@@ -1275,6 +1281,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         if (x == null) {
@@ -1313,6 +1321,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         return df.format(x);
@@ -1350,6 +1360,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         if (x == null) {
@@ -1391,6 +1403,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         return df.format(x);
@@ -1429,6 +1443,8 @@ public final class Numbers {
 
         if (df == null) {
             df = new DecimalFormat(decimalFormat);
+        } else {
+            df = (DecimalFormat) df.clone();
         }
 
         if (x == null) {
@@ -3326,8 +3342,6 @@ public final class Numbers {
 
             //Requesting a specific type.
             final String numeric = str.substring(0, len - 1);
-            isAllZeros(mant);
-            isAllZeros(exp);
             switch (lastChar) {
                 case 'l':
                 case 'L':

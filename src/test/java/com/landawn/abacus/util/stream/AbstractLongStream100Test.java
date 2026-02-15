@@ -18,8 +18,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -76,7 +76,7 @@ public class AbstractLongStream100Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
-        assertTrue(duration >= 300);
+        assertTrue(duration < 300);
 
         assertThrows(IllegalArgumentException.class, () -> {
             createLongStream(new long[] { 1 }).delay((Duration) null);

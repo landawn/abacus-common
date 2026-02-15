@@ -36,66 +36,100 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * Utility class for generating property name table classes from entity classes.
- * This class provides methods to generate inner classes or standalone classes containing
- * constants for property names, which can be used to avoid hard-coding string literals
- * when referencing entity properties.
- * 
- * <p>The generated classes help with:
+ * Utilities for generating property-name table interfaces from entity classes.
+ *
+ * <p>The generated source defines constants for bean properties so callers can avoid hard-coded
+ * string literals when building queries, projections, or sort clauses.
+ *
+ * <p>This utility supports:
  * <ul>
- *   <li>Type-safe property name references</li>
- *   <li>IDE auto-completion support</li>
- *   <li>Compile-time checking of property names</li>
- *   <li>Easier refactoring when property names change</li>
+ *   <li>Generating an inner interface for a single entity (typically {@value #X})</li>
+ *   <li>Generating a standalone interface for multiple entities</li>
+ *   <li>Optional variants for snake case, screaming snake case, and function-based names</li>
+ *   <li>Optional write-back to source files</li>
  * </ul>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Usage Example:</b></p>
  * <pre>{@code
- * // Generate inner class 'x' for a single entity
- * String code = CodeGenerationUtil.generatePropNameTableClass(User.class);
- * 
- * // Generate standalone class for multiple entities
+ * // Generate an inner interface for one entity
+ * String innerCode = CodeGenerationUtil.generatePropNameTableClass(User.class);
+ *
+ * // Generate a standalone interface for multiple entities
  * List<Class<?>> entities = Arrays.asList(User.class, Order.class, Product.class);
- * String code = CodeGenerationUtil.generatePropNameTableClasses(entities, "s");
+ * String standaloneCode = CodeGenerationUtil.generatePropNameTableClasses(entities, "Props");
  * }</pre>
- * 
+ *
+ * <p>To include extra fields that are not declared directly on the target entities, provide a
+ * synthetic helper type (e.g. {@code DummyEntity}) in {@code entityClasses}, or add shared members through
+ * {@link PropNameTableCodeConfig#extendedInterfaces}.
  */
 public final class CodeGenerationUtil {
-    /**
-     * Default name of class for field/prop names.
-     * Used as the default class name when generating property name table classes.
-     */
+
+    //    If by “english directory” you mean the English dictionary (i.e., all English words), then there is no single exact number—it depends heavily on which dictionary and what you count as a word (inflections, archaic words, technical terms, proper nouns, etc.).
+    //
+    //    That said, here are widely cited approximate ranges based on large modern dictionaries (Oxford / Merriam-Webster–scale):
+    //
+    //    Approximate counts (modern English)
+    //    Starting letter Approx. number of words
+    //    S   ≈ 70,000 – 80,000
+    //    X   ≈ 300 – 500
+    //    Why the difference is so extreme
+    //
+    //    S
+    //
+    //    Extremely productive letter in English
+    //
+    //    Used for:
+    //
+    //    plurals (s, es)
+    //
+    //    verbs (see, say, stand, …)
+    //
+    //    prefixes (sub-, super-, semi-, self-, syn-)
+    //
+    //    Massive Latin + Germanic overlap
+    //
+    //    X
+    //
+    //    Rare initial letter in native English
+    //
+    //    Mostly comes from:
+    //
+    //    Greek (xeno-, xyl-)
+    //
+    //    Modern borrowings (x-ray, xenophobia)
+    //
+    //    Almost no inflectional families
+    //
+    //    Order-of-magnitude takeaway
+    //
+    //    Words starting with “s” outnumber “x” by ~200×
+    //
+    //    Roughly:
+    //
+    //    1 out of every 10 English words starts with “s”
+    //    1 out of every 2,000 starts with “x”
+
+    /** Default inner interface name for single-entity property constants. */
+    public static final String X = "x";
+
+    /** Conventional class name for standalone property-name tables. */
     public static final String S = "s";
 
-    /**
-     * Default name of class for lower case field/prop names concatenated by underscore "_".
-     * Used for generating property names in lower_case_format.
-     */
+    /** Default nested interface name for snake_case property constants. */
     public static final String SL = "sl";
 
-    /**
-     * Default name of class for upper case field/prop names concatenated by underscore "_".
-     * Used for generating property names in UPPER_CASE_FORMAT.
-     */
+    /** Default nested interface name for SCREAMING_SNAKE_CASE property constants. */
     public static final String SU = "su";
 
-    /**
-     * Default name of class for function field/prop names.
-     * Used for generating function-based property names like min(), max(), etc.
-     */
+    /** Default nested interface name for function-based property constants. */
     public static final String SF = "sf";
 
     /**
-     * Default name of inner class for field names inside an entity class.
-     * Typically used when generating property name tables as inner classes.
-     */
-    public static final String X = "x";
-
-    /**
-     * Predefined function for generating min() property names.
-     * Only applicable to properties that implement Comparable interface.
-     * 
-     * <p><b>Usage Examples:</b></p> For a property "age", it generates "min(age)"
+     * Built-in formatter for {@code min(property)} expressions.
+     *
+     * <p>Returns {@code null} for non-{@link Comparable} property types so those properties are
+     * skipped during function-name generation.
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MIN_FUNC = (entityClass, propClass, propName) -> {
         if (Comparable.class.isAssignableFrom(propClass)) {
@@ -106,10 +140,10 @@ public final class CodeGenerationUtil {
     };
 
     /**
-     * Predefined function for generating max() property names.
-     * Only applicable to properties that implement Comparable interface.
-     * 
-     * <p><b>Usage Examples:</b></p> For a property "age", it generates "max(age)"
+     * Built-in formatter for {@code max(property)} expressions.
+     *
+     * <p>Returns {@code null} for non-{@link Comparable} property types so those properties are
+     * skipped during function-name generation.
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MAX_FUNC = (entityClass, propClass, propName) -> {
         if (Comparable.class.isAssignableFrom(propClass)) {
@@ -136,24 +170,12 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates a property name table class as an inner interface for the specified entity class.
-     * The generated interface will contain string constants for each property in the entity.
-     * 
-     * <p>The default interface name is "x".
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String code = CodeGenerationUtil.generatePropNameTableClass(User.class);
-     * // Generates:
-     * // public interface x {
-     * //     String id = "id";
-     * //     String name = "name";
-     * //     String email = "email";
-     * // }
-     * }</pre>
+     * Generates source for an inner property-name interface in the target entity.
      *
-     * @param entityClass the entity class to generate property names for
-     * @return the generated Java code as a string
+     * <p>The generated interface name defaults to {@value #X}.
+     *
+     * @param entityClass the entity class that contributes bean property names
+     * @return generated Java source that declares the inner interface and constants
      * @see #generatePropNameTableClass(Class, String)
      */
     @Beta
@@ -162,23 +184,11 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates a property name table class as an inner interface for the specified entity class
-     * with a custom interface name.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "Props");
-     * // Generates:
-     * // public interface Props {
-     * //     String id = "id";
-     * //     String name = "name";
-     * //     String email = "email";
-     * // }
-     * }</pre>
+     * Generates source for an inner property-name interface with a custom interface name.
      *
-     * @param entityClass the entity class to generate property names for
-     * @param propNameTableClassName the name of the generated interface
-     * @return the generated Java code as a string
+     * @param entityClass the entity class that contributes bean property names
+     * @param propNameTableClassName interface name for generated constants
+     * @return generated Java source that declares the inner interface and constants
      * @see #generatePropNameTableClass(Class, String, String)
      */
     @Beta
@@ -187,25 +197,17 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates a property name table class as an inner interface for the specified entity class
-     * and optionally writes it to the source file.
-     * 
-     * <p>If srcDir is provided, the generated code will be inserted into the existing
-     * entity class file. If the interface already exists, it will be replaced.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Generate and write to file
-     * String code = CodeGenerationUtil.generatePropNameTableClass(
-     *     User.class, "Props", "./src/main/java"
-     * );
-     * }</pre>
+     * Generates source for an inner property-name interface and optionally writes it back to disk.
      *
-     * @param entityClass the entity class to generate property names for
-     * @param propNameTableClassName the name of the generated interface
-     * @param srcDir the source directory to write the file to, or null to only return the code
-     * @return the generated Java code as a string
-     * @throws RuntimeException if writing to file fails
+     * <p>When {@code srcDir} is not empty, this method loads the entity source file, replaces a
+     * previously generated interface with the same name (if present), and inserts the new interface
+     * before the entity's closing brace.
+     *
+     * @param entityClass the entity class that contributes bean property names
+     * @param propNameTableClassName interface name for generated constants
+     * @param srcDir source root directory; if {@code null} or empty, source is not written
+     * @return generated Java source that declares the inner interface and constants
+     * @throws RuntimeException if writing the modified source file fails
      */
     @Beta
     public static String generatePropNameTableClass(final Class<?> entityClass, final String propNameTableClassName, final String srcDir) {
@@ -303,37 +305,24 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates property name table classes for multiple entity classes using default settings.
-     * The generated class will contain property name constants for all provided entities.
-     * 
-     * <p>Uses "s" as the default class name.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
-     * String code = CodeGenerationUtil.generatePropNameTableClasses(entities);
-     * }</pre>
+     * Generates a standalone property-name table for multiple entity classes.
      *
-     * @param entityClasses collection of entity classes to process
-     * @return the generated Java code as a string
+     * <p>The generated top-level interface name defaults to {@value #X} for compatibility.
+     *
+     * @param entityClasses entity classes that contribute bean property names
+     * @return generated Java source for the standalone property-name table
      * @see #generatePropNameTableClasses(Collection, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses) {
-        return generatePropNameTableClasses(entityClasses, S);
+        return generatePropNameTableClasses(entityClasses, X);
     }
 
     /**
-     * Generates property name table classes for multiple entity classes with a custom class name.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
-     * String code = CodeGenerationUtil.generatePropNameTableClasses(entities, "Props");
-     * }</pre>
+     * Generates a standalone property-name table for multiple entity classes with a custom name.
      *
-     * @param entityClasses collection of entity classes to process
-     * @param propNameTableClassName the name of the generated class
-     * @return the generated Java code as a string
+     * @param entityClasses entity classes that contribute bean property names
+     * @param propNameTableClassName top-level interface name to generate
+     * @return generated Java source for the standalone property-name table
      * @see #generatePropNameTableClasses(Collection, String, String, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName) {
@@ -341,26 +330,15 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates property name table classes for multiple entity classes with full customization.
-     * Optionally writes the generated class to a file in the specified source directory.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
-     * String code = CodeGenerationUtil.generatePropNameTableClasses(
-     *     entities, 
-     *     "Props", 
-     *     "com.example.generated", 
-     *     "./src/main/java"
-     * );
-     * }</pre>
+     * Generates a standalone property-name table for multiple entities with package/file options.
      *
-     * @param entityClasses collection of entity classes to process
-     * @param propNameTableClassName the name of the generated class
-     * @param propNameTableClassPackageName the package name for the generated class
-     * @param srcDir the source directory to write the file to, or null to only return the code
-     * @return the generated Java code as a string
-     * @throws RuntimeException if writing to file fails
+     * @param entityClasses entity classes that contribute bean property names
+     * @param propNameTableClassName top-level interface name to generate
+     * @param propNameTableClassPackageName package for generated source; if empty, uses the first
+     *        entity package
+     * @param srcDir source root directory; if {@code null} or empty, source is not written
+     * @return generated Java source for the standalone property-name table
+     * @throws RuntimeException if writing the generated file fails
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName,
             final String propNameTableClassPackageName, final String srcDir) {
@@ -377,46 +355,21 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Generates property name table classes using a comprehensive configuration object.
-     * This is the most flexible method, allowing full customization of the generation process.
-     * 
-     * <p>The configuration object supports:
-     * <ul>
-     *   <li>Custom property name converters</li>
-     *   <li>Lower/upper case property name generation</li>
-     *   <li>Function-based property names (min, max, etc.)</li>
-     *   <li>Per-class property name lists</li>
-     * </ul>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-     *     .entityClasses(entities)
-     *     .className("Props")
-     *     .packageName("com.example.generated")
-     *     .srcDir("./src/main/java")
-     *     .generateSnakeCase(true)
-     *     .generateScreamingSnakeCase(true)
-     *     .generateFunctionPropName(true)
-     *     .propFunctions(N.asLinkedHashMap("min", MIN_FUNC, "max", MAX_FUNC))
-     *     .build();
-     * 
-     * String code = CodeGenerationUtil.generatePropNameTableClasses(config);
-     * }</pre>
+     * Generates property-name table source using a full configuration object.
      *
-     * @param codeConfig the configuration object containing all generation parameters
-     * @return the generated Java code as a string
-     * @throws IllegalArgumentException if codeConfig is null or invalid
-     * @throws RuntimeException if writing to file fails (when srcDir is specified)
+     * <p>This overload supports property-name remapping, optional case-specific nested interfaces,
+     * function-based property constants, class-level property lists, inherited interfaces, and
+     * optional write-to-file behavior.
+     *
+     * @param codeConfig full generation configuration
+     * @return generated Java source for the property-name table class
+     * @throws IllegalArgumentException if {@code codeConfig} is invalid
+     * @throws RuntimeException if writing to file fails when {@code srcDir} is configured
      */
     public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) {
         N.checkArgNotNull(codeConfig, cs.codeConfig);
 
         final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "entityClasses");
-        final String propNameTableClassName = N.checkArgNotEmpty(codeConfig.getClassName(), "className");
-        final BiFunction<Class<?>, String, String> propNameConverter = N.defaultIfNull(codeConfig.getPropNameConverter(), identityPropNameConverter);
-
-        final String interfaceName = "public interface " + propNameTableClassName;
 
         final List<Class<?>> entityClassesToUse = StreamEx.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
@@ -430,12 +383,21 @@ public final class CodeGenerationUtil {
                     || !simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER);
         }).toList();
 
-        final StringBuilder sb = new StringBuilder();
-
         final Class<?> entityClass = N.firstElement(entityClassesToUse).orElseThrow();
+        final boolean generateClassPropNameList = codeConfig.isGenerateClassPropNameList();
         final String propNameTableClassPackageName = codeConfig.getPackageName();
         final String packageName = N.defaultIfEmpty(propNameTableClassPackageName, ClassUtil.getPackageName(entityClass));
-        final boolean generateClassPropNameList = codeConfig.isGenerateClassPropNameList();
+        final String propNameTableClassName = N.checkArgNotEmpty(codeConfig.getClassName(), "className");
+        final Collection<Class<?>> extendedInterfaces = codeConfig.getExtendedInterfaces();
+        final BiFunction<Class<?>, String, String> propNameConverter = N.defaultIfNull(codeConfig.getPropNameConverter(), identityPropNameConverter);
+
+        final String interfaceName = Stream.of(extendedInterfaces)
+                .map(ClassUtil::getCanonicalClassName)
+                .map(it -> Strings.isEmpty(packageName) ? it : Strings.replaceAll(it, packageName + ".", ""))
+                .mapFirst(it -> " extends " + it)
+                .join(", ", "public interface " + propNameTableClassName, "");
+
+        final StringBuilder sb = new StringBuilder();
 
         if (Strings.isNotEmpty(packageName)) {
             sb.append("package ").append(packageName).append(";").append(LINE_SEPARATOR);
@@ -888,25 +850,28 @@ public final class CodeGenerationUtil {
     }
 
     /**
-     * Configuration class for property name table code generation.
-     * This class provides a builder pattern for configuring all aspects of the code generation process.
-     * 
-     * <p>Example configuration:</p>
+     * Configuration for {@link #generatePropNameTableClasses(PropNameTableCodeConfig)}.
+     *
+     * <p>Use the Lombok-generated builder to enable only the features you need.
+     * Typical options include class/package output, property-name conversion, case-specific nested
+     * interfaces, function-based constants, and per-class property-name lists.
+     *
+     * <p>Example:</p>
      * <pre>{@code
      * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-     *     .entityClasses(classes)
-     *     .className(CodeGenerationUtil.S)
-     *     .packageName("com.landawn.abacus.samples.util")
-     *     .srcDir("./samples")
-     *     .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName)
-     *     .generateClassPropNameList(true)
-     *     .generateSnakeCase(true)
-     *     .generateScreamingSnakeCase(true)
-     *     .classNameForScreamingSnakeCase("sau")
-     *     .generateFunctionPropName(true)
-     *     .functionClassName("f")
-     *     .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
-     *     .build();
+     *         .entityClasses(classes)
+     *         .className(CodeGenerationUtil.S)
+     *         .packageName("com.landawn.abacus.samples.util")
+     *         .srcDir("./samples")
+     *         .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName)
+     *         .generateClassPropNameList(true)
+     *         .generateSnakeCase(true)
+     *         .generateScreamingSnakeCase(true)
+     *         .classNameForScreamingSnakeCase("sau")
+     *         .generateFunctionPropName(true)
+     *         .functionClassName("f")
+     *         .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+     *         .build();
      * }</pre>
      */
     @Builder
@@ -914,59 +879,74 @@ public final class CodeGenerationUtil {
     @AllArgsConstructor
     @Accessors(chain = true)
     public static final class PropNameTableCodeConfig {
-        /** Collection of entity classes to generate property name tables for. Required. */
+        /** Entity classes to scan for bean properties. Required. */
         private Collection<Class<?>> entityClasses;
 
-        /** Name of the generated property name table class. Required. */
+        /** Top-level interface name for generated property constants. Required. */
         private String className;
 
-        /** Package name for the generated class. If null, uses the package of the first entity class. */
+        /** Package for generated source; if {@code null}, uses the first entity package. */
         private String packageName;
 
-        /** Source directory to write the generated file to. If null, only returns the generated code as a string. */
+        /** Source root to write files into; if {@code null}, only returns generated source text. */
         private String srcDir;
 
-        /** Function to convert property names. Receives the entity class and property name, returns the converted property name.
-         * Return null or empty string to skip a property. If null, uses identity function (no conversion). */
-        private BiFunction<Class<?>, String, String> propNameConverter;
-
-        /** Whether to generate a List of property names for each class. Default is false. */
-        private boolean generateClassPropNameList;
-
-        /** Whether to generate an inner interface with lower case property names concatenated with underscore. Default is false. */
-        private boolean generateSnakeCase;
-
-        /** Name for the lower case with underscore inner interface. If null, uses {@link #SL}. */
-        private String classNameForSnakeCase;
-
-        /** Function to convert property names to lower case with underscore format.
-         * If null, uses {@link Strings#toSnakeCase(String)}. */
-        private BiFunction<Class<?>, String, String> propNameConverterForSnakeCase;
-
-        /** Whether to generate an inner interface with upper case property names concatenated with underscore. Default is false. */
-        private boolean generateScreamingSnakeCase;
-
-        /** Name for the upper case with underscore inner interface. If null, uses {@link #SU}. */
-        private String classNameForScreamingSnakeCase;
-
-        /** Function to convert property names to upper case with underscore format.
-         * If null, uses {@link Strings#toScreamingSnakeCase(String)}. */
-        private BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase;
-
-        /** Whether to generate an inner interface with function-based property names (e.g., min(age), max(salary)). Default is false. */
-        private boolean generateFunctionPropName;
-
-        /** Name for the function property name inner interface. If null, uses {@link #SF}. */
-        private String functionClassName;
-
-        /** Map of function name to function implementation. The function receives entity class, property class, and property name,
-         * and returns the function property name string. Return null to skip a property for that function. */
-        private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
+        /** Optional interfaces that the generated top-level interface should extend. */
+        private Collection<Class<?>> extendedInterfaces;
 
         /**
-         * Default constructor.
-         * Creates a new instance with default values for all fields.
+         * Converts property names before constants are emitted.
+         *
+         * <p>The function receives {@code (entityClass, propName)}. Return {@code null} or empty
+         * to skip a property. If {@code null}, identity mapping is used.
          */
+        private BiFunction<Class<?>, String, String> propNameConverter;
+
+        /** Whether to generate a {@code List<String>} constant per entity class. Default is {@code false}. */
+        private boolean generateClassPropNameList;
+
+        /** Whether to generate a snake_case nested interface. Default is {@code false}. */
+        private boolean generateSnakeCase;
+
+        /** Nested interface name for snake_case constants. Defaults to {@link CodeGenerationUtil#SL}. */
+        private String classNameForSnakeCase;
+
+        /**
+         * Converts property names to snake_case constant values.
+         *
+         * <p>If {@code null}, {@link Strings#toSnakeCase(String)} is used.
+         */
+        private BiFunction<Class<?>, String, String> propNameConverterForSnakeCase;
+
+        /** Whether to generate a SCREAMING_SNAKE_CASE nested interface. Default is {@code false}. */
+        private boolean generateScreamingSnakeCase;
+
+        /** Nested interface name for SCREAMING_SNAKE_CASE constants. Defaults to {@link CodeGenerationUtil#SU}. */
+        private String classNameForScreamingSnakeCase;
+
+        /**
+         * Converts property names to SCREAMING_SNAKE_CASE constant values.
+         *
+         * <p>If {@code null}, {@link Strings#toScreamingSnakeCase(String)} is used.
+         */
+        private BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase;
+
+        /** Whether to generate a nested interface for function-based names (for example, {@code min(age)}). */
+        private boolean generateFunctionPropName;
+
+        /** Nested interface name for function-based constants. Defaults to {@link CodeGenerationUtil#SF}. */
+        private String functionClassName;
+
+        /**
+         * Function definitions used when {@link #generateFunctionPropName} is enabled.
+         *
+         * <p>Map key is a constant prefix (for example {@code min}); function input is
+         * {@code (entityClass, propertyType, convertedPropertyName)}; returning {@code null} or
+         * empty skips the property.
+         */
+        private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
+
+        /** Default constructor for framework/tooling compatibility. */
         public PropNameTableCodeConfig() {
         }
     }

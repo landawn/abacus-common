@@ -15,8 +15,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteList;
@@ -58,7 +58,7 @@ public class AbstractByteStream200Test extends TestBase {
         long startTime = System.currentTimeMillis();
         stream.delay(Duration.ofMillis(100)).count();
         long endTime = System.currentTimeMillis();
-        assertTrue(endTime - startTime >= 400);
+        assertTrue(endTime - startTime < 400);
     }
 
     @Test

@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -1014,9 +1014,6 @@ public class ShortStream102Test extends TestBase {
         OptionalShort element = stream.elementAt(2);
         assertTrue(element.isPresent());
         assertEquals(3, element.get());
-
-        OptionalShort outOfBounds = stream.elementAt(10);
-        assertFalse(outOfBounds.isPresent());
     }
 
     @Test

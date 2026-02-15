@@ -415,7 +415,7 @@ public final class IOUtil {
         stringDecodeMethod = decodeMethod;
     }
 
-    private static String hostName;
+    private static volatile String hostName;
 
     /**
      * The number of available processors/CPU cores on the current system.
@@ -9188,8 +9188,8 @@ public final class IOUtil {
         final long lineNumOfPart = N.max(estimateLineCount(file, 10000) / numOfParts, 1);
 
         final int index = file.getName().lastIndexOf('.');
-        final String prefix = file.getName().substring(0, index);
-        final String postfix = (index > 0) ? file.getName().substring(index) : "";
+        final String prefix = index >= 0 ? file.getName().substring(0, index) : file.getName();
+        final String postfix = index >= 0 ? file.getName().substring(index) : "";
 
         final Holder<ZipFile> outputZipFile = new Holder<>();
         InputStream is = null;

@@ -572,9 +572,9 @@ public class Fn202Test extends TestBase {
         assertTrue(Fn.isBlank(s -> (String) s).test(" "));
         assertFalse(Fn.isBlank(s -> (String) s).test("a"));
 
-        assertTrue(Fn.isEmptyA().test(new String[0]));
-        assertTrue(Fn.isEmptyC().test(new ArrayList<>()));
-        assertTrue(Fn.isEmptyM().test(new HashMap<>()));
+        assertTrue(Fn.isEmptyArray().test(new String[0]));
+        assertTrue(Fn.isEmptyCollection().test(new ArrayList<>()));
+        assertTrue(Fn.isEmptyMap().test(new HashMap<>()));
 
         assertFalse(Fn.notNull().test(null));
         assertTrue(Fn.notNull().test(""));

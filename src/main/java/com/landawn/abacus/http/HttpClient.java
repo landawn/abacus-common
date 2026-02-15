@@ -1708,7 +1708,7 @@ public final class HttpClient {
                 // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream,
                 // error may happen when read the input stream in sever side.
 
-                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {
+                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName) && !connection.getDoOutput()) {
                     continue;
                 }
 

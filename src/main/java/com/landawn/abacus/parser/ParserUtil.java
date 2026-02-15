@@ -1681,7 +1681,7 @@ public final class ParserUtil {
                     || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(HAS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod));
+                    || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
         }
 
         /**
@@ -1790,6 +1790,8 @@ public final class ParserUtil {
                             return null;
                         }
                     }
+                } else {
+                    return null;
                 }
             }
 
@@ -2615,7 +2617,7 @@ public final class ParserUtil {
             propFuncMap.put(long.class, new DateTimeReaderWriter<Long>() {
                 @Override
                 public Long read(final PropInfo propInfo, final String strValue) {
-                    return Numbers.toLong(strValue);
+                    return strValue == null ? 0L : Numbers.toLong(strValue);
                 }
 
                 @Override
@@ -2644,6 +2646,10 @@ public final class ParserUtil {
             propFuncMap.put(java.util.Date.class, new DateTimeReaderWriter<java.util.Date>() {
                 @Override
                 public java.util.Date read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return new java.util.Date(Numbers.toLong(strValue));
                     } else {
@@ -2665,6 +2671,10 @@ public final class ParserUtil {
             propFuncMap.put(java.util.Calendar.class, new DateTimeReaderWriter<java.util.Calendar>() {
                 @Override
                 public java.util.Calendar read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         final Calendar calendar = Calendar.getInstance();
                         calendar.setTimeInMillis(Numbers.toLong(strValue));
@@ -2689,6 +2699,10 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Timestamp.class, new DateTimeReaderWriter<java.sql.Timestamp>() {
                 @Override
                 public java.sql.Timestamp read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue));
                     } else {
@@ -2709,6 +2723,10 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Date.class, new DateTimeReaderWriter<java.sql.Date>() {
                 @Override
                 public java.sql.Date read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Date(Numbers.toLong(strValue));
                     } else {
@@ -2729,6 +2747,10 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Time.class, new DateTimeReaderWriter<java.sql.Time>() {
                 @Override
                 public java.sql.Time read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Time(Numbers.toLong(strValue));
                     } else {
@@ -2749,6 +2771,10 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalDateTime.class, new DateTimeReaderWriter<java.time.LocalDateTime>() {
                 @Override
                 public java.time.LocalDateTime read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue)).toLocalDateTime();
                     } else {
@@ -2809,6 +2835,10 @@ public final class ParserUtil {
             propFuncMap.put(java.time.ZonedDateTime.class, new DateTimeReaderWriter<java.time.ZonedDateTime>() {
                 @Override
                 public java.time.ZonedDateTime read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(strValue)), propInfo.zoneId);
                     } else {
@@ -2831,6 +2861,10 @@ public final class ParserUtil {
                     propFuncMap.put(org.joda.time.DateTime.class, new DateTimeReaderWriter<org.joda.time.DateTime>() {
                         @Override
                         public org.joda.time.DateTime read(final PropInfo propInfo, final String strValue) {
+                            if (strValue == null) {
+                                return null;
+                            }
+
                             if (propInfo.isLongDateFormat) {
                                 final org.joda.time.DateTime dt = new org.joda.time.DateTime(Numbers.toLong(strValue));
                                 return dt.getZone().equals(propInfo.jodaDTFH.dtz) ? dt : dt.withZone(propInfo.jodaDTFH.dtz);
@@ -2852,6 +2886,10 @@ public final class ParserUtil {
                     propFuncMap.put(org.joda.time.MutableDateTime.class, new DateTimeReaderWriter<org.joda.time.MutableDateTime>() {
                         @Override
                         public org.joda.time.MutableDateTime read(final PropInfo propInfo, final String strValue) {
+                            if (strValue == null) {
+                                return null;
+                            }
+
                             if (propInfo.isLongDateFormat) {
                                 final org.joda.time.MutableDateTime dt = new org.joda.time.MutableDateTime(Numbers.toLong(strValue));
 

@@ -197,6 +197,7 @@ public class EventBus {
                     //noinspection ResultOfMethodCallIgnored
                     executorService.awaitTermination(60, TimeUnit.SECONDS);
                 } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.warn("Not all EventBus tasks completed successfully before shutdown");
                 } finally {
                     logger.warn("EventBus shutdown completed");
@@ -664,10 +665,11 @@ public class EventBus {
      */
     public EventBus post(final String eventId, final Object event) {
         final Class<?> eventClass = event.getClass();
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
 
         List<List<SubIdentifier>> subscriberLists = listOfSubEventSubs;
 
-        if (Strings.isEmpty(eventId)) {
+        if (normalizedEventId == null) {
             if (subscriberLists == null) {
                 synchronized (registeredSubMap) {
                     subscriberLists = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
@@ -675,17 +677,17 @@ public class EventBus {
                 }
             }
         } else {
-            List<SubIdentifier> eventIdSubscribers = listOfEventIdSubMap.get(eventId);
+            List<SubIdentifier> eventIdSubscribers = listOfEventIdSubMap.get(normalizedEventId);
 
             if (eventIdSubscribers == null) {
                 synchronized (registeredEventIdSubMap) {
-                    if (registeredEventIdSubMap.containsKey(eventId)) {
-                        eventIdSubscribers = new ArrayList<>(registeredEventIdSubMap.get(eventId)); // in case concurrent register/unregister.
+                    if (registeredEventIdSubMap.containsKey(normalizedEventId)) {
+                        eventIdSubscribers = new ArrayList<>(registeredEventIdSubMap.get(normalizedEventId)); // in case concurrent register/unregister.
                     } else {
                         eventIdSubscribers = N.emptyList();
                     }
 
-                    listOfEventIdSubMap.put(eventId, eventIdSubscribers);
+                    listOfEventIdSubMap.put(normalizedEventId, eventIdSubscribers);
                 }
             }
 
@@ -694,7 +696,7 @@ public class EventBus {
 
         for (final List<SubIdentifier> subscribers : subscriberLists) {
             for (final SubIdentifier subscriber : subscribers) {
-                if (subscriber.isMyEvent(eventId, eventClass)) {
+                if (subscriber.isMyEvent(normalizedEventId, eventClass)) {
                     try {
                         dispatch(subscriber, event);
                     } catch (final Exception e) {

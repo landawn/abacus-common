@@ -161,7 +161,7 @@ public class CodeGenerationUtil100Test extends TestBase {
         String result = CodeGenerationUtil.generatePropNameTableClasses(classes);
 
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.contains("public interface s"));
+        Assertions.assertTrue(result.contains("public interface x"));
         Assertions.assertTrue(result.contains("String id = \"id\""));
         Assertions.assertTrue(result.contains("String name = \"name\""));
         Assertions.assertTrue(result.contains("String description = \"description\""));

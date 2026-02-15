@@ -159,30 +159,30 @@ public class URLEncodedUtil100Test extends TestBase {
         parameters.put("age", new String[] { "30" });
         parameters.put("active", new String[] { "true" });
 
-        TestBean bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
+        TestBean bean = URLEncodedUtil.convertToBean(parameters, TestBean.class);
 
         Assertions.assertEquals("John", bean.getName());
         Assertions.assertEquals(30, bean.getAge());
         Assertions.assertTrue(bean.isActive());
 
         parameters.put("tags", new String[] { "reading", "swimming", "coding" });
-        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
+        bean = URLEncodedUtil.convertToBean(parameters, TestBean.class);
         Assertions.assertNotNull(bean);
 
-        bean = URLEncodedUtil.decodeToBean(new HashMap<>(), TestBean.class);
+        bean = URLEncodedUtil.convertToBean(new HashMap<>(), TestBean.class);
         Assertions.assertNotNull(bean);
 
-        bean = URLEncodedUtil.decodeToBean(null, TestBean.class);
+        bean = URLEncodedUtil.convertToBean(null, TestBean.class);
         Assertions.assertNotNull(bean);
 
         parameters.clear();
         parameters.put("name", new String[] { "" });
-        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
+        bean = URLEncodedUtil.convertToBean(parameters, TestBean.class);
         Assertions.assertNull(bean.getName());
 
         parameters.clear();
         parameters.put("tags", new String[] { "tag1", "tag2", "tag3" });
-        bean = URLEncodedUtil.decodeToBean(parameters, TestBean.class);
+        bean = URLEncodedUtil.convertToBean(parameters, TestBean.class);
         Assertions.assertArrayEquals(new String[] { "tag1", "tag2", "tag3" }, bean.getTags());
     }
 

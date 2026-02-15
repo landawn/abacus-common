@@ -417,4 +417,5 @@ public class PropInfo100Test extends TestBase {
     public static class TestObject {
         public String value;
     }
+
 }

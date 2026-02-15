@@ -8783,7 +8783,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(duration, cs.delay);
 
         final long millis = duration.toMillis();
-        final Throwables.Consumer<T, E> action = it -> N.sleepUninterruptibly(millis);
+        final Throwables.Consumer<T, E> action = new Throwables.Consumer<>() {
+            private boolean isFirst = true;
+
+            @Override
+            public void accept(final T it) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    N.sleepUninterruptibly(millis);
+                }
+            }
+        };
 
         return onEach(action);
     }
@@ -8894,11 +8905,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     cnt = 0;
                 }
 
-                if (cnt++ < maxWindowSize) {
-                    return true;
-                }
-
-                return false;
+                return cnt++ < maxWindowSize;
             }
         };
 
@@ -11042,11 +11049,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNegative(position, cs.position);
 
-        if (position == 0) {
-            return first();
-        } else {
-            //noinspection resource
-            return skip(position).first();
+        try {
+            if (position == 0) {
+                return first();
+            } else {
+                //noinspection resource
+                return skip(position).first();
+            }
+        } finally {
+            close();
         }
     }
 

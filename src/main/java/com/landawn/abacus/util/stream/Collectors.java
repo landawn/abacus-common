@@ -7105,7 +7105,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.setRight(N.len(t));
             } else if (a.right() > 0) {
 
-                a.setRight(Strings.lengthOfCommonPrefix(a.left(), t));
+                a.setRight(Math.min(a.right(), Strings.lengthOfCommonPrefix(a.left(), t)));
                 a.setLeft(N.len(t) < N.len(a.left()) ? t : a.left());
             }
         };
@@ -7156,10 +7156,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<Pair<CharSequence, Integer>, CharSequence> accumulator = (a, t) -> {
             if (a.right() == -1) {
                 a.setLeft(t);
-                a.setRight(t.length());
+                a.setRight(N.len(t));
             } else if (a.right() > 0) {
 
-                a.setRight(Strings.lengthOfCommonSuffix(a.left(), t));
+                a.setRight(Math.min(a.right(), Strings.lengthOfCommonSuffix(a.left(), t)));
                 a.setLeft(N.len(t) < N.len(a.left()) ? t : a.left());
             }
         };

@@ -298,7 +298,7 @@ import com.landawn.abacus.util.stream.Stream;
  * List<String> rawData = Arrays.asList("  1  ", "2", null, "invalid", "3", "  ");
  *
  * // Process data with null-safe operations
- * List<Integer> processedNumbers = N.filter(rawData, N::isNotBlank)    // Remove nulls and blanks
+ * List<Integer> processedNumbers = N.filter(rawData, s -> s != null && !s.isBlank())    // Remove nulls and blanks
  *     .stream()
  *     .map(String::trim)                                               // Trim whitespace
  *     .map(s -> {                                                      // Safe parsing with try-catch
@@ -306,7 +306,7 @@ import com.landawn.abacus.util.stream.Stream;
  *         catch (NumberFormatException e) { return null; }
  *     })
  *     .filter(Objects::nonNull)                                        // Keep valid numbers
- *     .collect(Collectors.toList());   // Collect to list
+ *     .collect(java.util.stream.Collectors.toList());   // Collect to list
  *
  * // Mathematical analysis
  * double average = N.averageInt(processedNumbers);   // Calculate average
@@ -319,7 +319,7 @@ import com.landawn.abacus.util.stream.Stream;
  * });
  *
  * // Group and analyze
- * Map<Boolean, List<Integer>> partitioned = N.partition(processedNumbers, n -> n > 2);
+ * Map<Boolean, List<Integer>> partitioned = N.groupBy(processedNumbers, n -> n > 2);
  * List<Integer> large = partitioned.get(true);    // Numbers > 2
  * List<Integer> small = partitioned.get(false);   // Numbers <= 2
  * }</pre>
@@ -1271,7 +1271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stream<String> words = Stream.of("hello", "world", "java", "stream");
+    * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
      * Set<String> searchFor = Set.of("hello", "java");
      * boolean result = N.containsAll(words.iterator(), searchFor);   // Returns true (iterator consumed)
      * }</pre>
@@ -1351,7 +1351,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> fruits = Arrays.asList("apple", "banana", "cherry", "date");
-     * Set<String> common = Set.of("apple", "grape");
+     * List<String> common = Arrays.asList("apple", "grape");
      * boolean result = N.containsAny(fruits, common);   // Returns true (found "apple")
      * }</pre>
      *
@@ -1381,7 +1381,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stream<String> words = Stream.of("hello", "world", "java", "stream");
+    * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
      * Set<String> keywords = Set.of("java", "python", "c++");
      * boolean result = N.containsAny(words.iterator(), keywords);   // Returns true (iterator consumed)
      * }</pre>
@@ -1459,7 +1459,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> document = Arrays.asList("the", "quick", "brown", "fox");
+     * Iterable<String> document = Arrays.asList("the", "quick", "brown", "fox");
      * Set<String> stopWords = Set.of("and", "or", "but", "if");
      * boolean result = N.containsNone(document, stopWords);   // Returns true
      * }</pre>
@@ -1485,7 +1485,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stream<String> userInput = Stream.of("hello", "world", "test");
+    * com.landawn.abacus.util.stream.Stream<String> userInput = com.landawn.abacus.util.stream.Stream.of("hello", "world", "test");
      * Set<String> forbidden = Set.of("admin", "root", "system");
      * boolean result = N.containsNone(userInput.iterator(), forbidden);   // Returns true (iterator consumed)
      * }</pre>
@@ -1605,7 +1605,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
      * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
      * // Returns [3, 4, 5, 6, 7]
      * }</pre>
@@ -27472,7 +27472,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"Hi", "Hello"};
-     * List<Character> result = N.flatMap(words, s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     * List<Character> result = N.flatMap(words, s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -27500,7 +27500,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] words = {"Hi", "Hello"};
      * Set<Character> result = N.flatMap(words,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -27532,7 +27532,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] words = {"Hi", "Hello", "Hey"};
      * List<Character> result = N.flatMap(words, 0, 2,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from the first 2 words
      * }</pre>
      *
@@ -27560,7 +27560,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] words = {"Hi", "Hello", "Hey"};
      * Set<Character> result = N.flatMap(words, 0, 2,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from the first 2 words
      * }</pre>
@@ -27607,7 +27607,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("Hi", "Hello", "Hey");
      * List<Character> result = N.flatMap(words, 0, 2,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from the first 2 words
      * }</pre>
      *
@@ -27635,7 +27635,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("Hi", "Hello", "Hey");
      * Set<Character> result = N.flatMap(words, 0, 2,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from the first 2 words
      * }</pre>
@@ -27703,7 +27703,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Iterable<String> words = Arrays.asList("Hi", "Hello");
      * List<Character> result = N.flatMap(words,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -27727,7 +27727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Iterable<String> words = Arrays.asList("Hi", "Hello");
      * Set<Character> result = N.flatMap(words,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -27768,7 +27768,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("Hi", "Hello").iterator();
      * List<Character> result = N.flatMap(iter,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -27793,7 +27793,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("Hi", "Hello").iterator();
      * Set<Character> result = N.flatMap(iter,
-     *     s -> s.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -27836,7 +27836,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] sentences = {"Hi there", "Hello world"};
      * List<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -27865,7 +27865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] sentences = {"Hi there", "Hello world"};
      * Set<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -27917,7 +27917,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterable<String> sentences = Arrays.asList("Hi there", "Hello world");
      * List<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -27946,7 +27946,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterable<String> sentences = Arrays.asList("Hi there", "Hello world");
      * Set<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -27998,7 +27998,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterator<String> iter = Arrays.asList("Hi there", "Hello world").iterator();
      * List<Character> result = N.flatMap(iter,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()));
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // Returns all characters from all words
      * }</pre>
      *
@@ -28027,7 +28027,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterator<String> iter = Arrays.asList("Hi there", "Hello world").iterator();
      * Set<Character> result = N.flatMap(iter,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(Collectors.toList()),
+     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
      *     n -> new HashSet<>());
      * // Returns all unique characters from all words
      * }</pre>
@@ -32126,7 +32126,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
-     * Map<Character, Long> result = N.groupBy(words, s -> s.charAt(0), Collectors.counting());
+     * Map<Character, Long> result = N.groupBy(words, s -> s.charAt(0), java.util.stream.Collectors.counting());
      * // Returns {'a': 2, 'b': 2}
      * }</pre>
      *
@@ -32152,7 +32152,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "apricot", "banana");
-     * TreeMap<Character, String> result = N.groupBy(words, s -> s.charAt(0), Collectors.joining(", "), TreeMap::new);
+     * TreeMap<Character, String> result = N.groupBy(words, s -> s.charAt(0), java.util.stream.Collectors.joining(", "), TreeMap::new);
      * // Returns a TreeMap with sorted keys: {'a': "apple, apricot", 'b': "banana"}
      * }</pre>
      *
@@ -32209,7 +32209,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("apple", "apricot", "banana").iterator();
-     * Map<Character, Long> result = N.groupBy(iter, s -> s.charAt(0), Collectors.counting());
+     * Map<Character, Long> result = N.groupBy(iter, s -> s.charAt(0), java.util.stream.Collectors.counting());
      * // Returns {'a': 2, 'b': 1}
      * }</pre>
      *
@@ -32237,7 +32237,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("apple", "apricot", "banana").iterator();
-     * TreeMap<Character, String> result = N.groupBy(iter, s -> s.charAt(0), Collectors.joining(", "), TreeMap::new);
+     * TreeMap<Character, String> result = N.groupBy(iter, s -> s.charAt(0), java.util.stream.Collectors.joining(", "), TreeMap::new);
      * // Returns a TreeMap with sorted keys
      * }</pre>
      *
@@ -39971,7 +39971,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             throw N.toRuntimeException(e); // Converts checked exception to RuntimeException
      *         }
      *     })
-     *     .collect(Collectors.toList());
+     *     .collect(java.util.stream.Collectors.toList());
      *
      * // Method reference style
      * public URL parseURL(String url) {

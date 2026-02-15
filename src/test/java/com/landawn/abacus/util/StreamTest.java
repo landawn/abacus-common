@@ -709,9 +709,9 @@ public class StreamTest extends AbstractTest {
         Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.notEmptyC()).forEach(Fn.println());
         Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyM()).forEach(Fn.println());
 
-        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyA()).forEach(Fn.println());
-        Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.isEmptyC()).forEach(Fn.println());
-        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.isEmptyM()).forEach(Fn.println());
+        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
+        Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
+        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.isEmptyMap()).forEach(Fn.println());
 
         N.println(Strings.repeat('=', 80));
 
@@ -719,9 +719,9 @@ public class StreamTest extends AbstractTest {
         Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.notEmptyC()).forEach(Fn.println());
         Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyM()).forEach(Fn.println());
 
-        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyA()).forEach(Fn.println());
-        Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.isEmptyC()).forEach(Fn.println());
-        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyM()).forEach(Fn.println());
+        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
+        Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());
+        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyMap()).forEach(Fn.println());
     }
 
     @Test

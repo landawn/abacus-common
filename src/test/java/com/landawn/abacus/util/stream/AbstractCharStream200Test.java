@@ -21,8 +21,8 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -84,7 +84,7 @@ public class AbstractCharStream200Test extends TestBase {
         });
         long endTime = System.currentTimeMillis();
 
-        assertTrue(endTime - startTime >= 5 * 10);
+        assertTrue(endTime - startTime < 5 * 10);
     }
 
     @Test

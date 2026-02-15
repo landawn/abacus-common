@@ -158,7 +158,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Flag indicating whether this pool has been closed.
      */
-    boolean isClosed = false;
+    volatile boolean isClosed = false;
 
     /**
      * Constructs a new AbstractPool with the specified configuration.

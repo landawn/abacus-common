@@ -111,7 +111,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param output the output file to write to (must not be {@code null})
-     * @throws UncheckedIOException if an I/O error occurs during file writing
+     * @throws UncheckedIOException if an I/O error occurs during file writing, or if parent directories don't exist
      */
     void serialize(Object obj, File output) throws UncheckedIOException;
 
@@ -120,7 +120,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p>The file will be created if it doesn't exist, or overwritten if it does.
      * Parent directories must exist or an exception will be thrown. The configuration
-     * parameter allows control over serialization behavior and output formatting.</p>
+     * parameter controls serialization behavior and output formatting.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -131,7 +131,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
-     * @throws UncheckedIOException if an I/O error occurs during file writing
+     * @throws UncheckedIOException if an I/O error occurs during file writing, or if parent directories don't exist
      */
     void serialize(Object obj, SC config, File output) throws UncheckedIOException;
 
@@ -359,7 +359,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p>This method allows fine-grained control over the deserialization process.
      * The configuration parameter can specify date formats, type mappings, property
-     * handling, and other parser-specific options.</p>
+     * handling, and other parser-specific options. The source file must exist and be
+     * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -374,7 +375,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
+     * @throws UncheckedIOException if an I/O error occurs during file reading, or if the file doesn't exist
      */
     <T> T deserialize(File source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
 
@@ -383,7 +384,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p>This method allows fine-grained control over the deserialization process.
      * The configuration parameter can specify date formats, type mappings, property
-     * handling, and other parser-specific options.</p>
+     * handling, and other parser-specific options. The source file must exist and be
+     * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -398,7 +400,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
+     * @throws UncheckedIOException if an I/O error occurs during file reading, or if the file doesn't exist
      */
     <T> T deserialize(File source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
 

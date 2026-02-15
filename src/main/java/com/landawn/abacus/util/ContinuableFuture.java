@@ -2326,9 +2326,18 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                final long startNanos = System.nanoTime();
+
                 delay();
 
-                return future.get(timeout, unit);
+                final long elapsedNanos = System.nanoTime() - startNanos;
+                final long remainingNanos = unit.toNanos(timeout) - elapsedNanos;
+
+                if (remainingNanos <= 0) {
+                    throw new TimeoutException("Timeout after delay");
+                }
+
+                return future.get(remainingNanos, TimeUnit.NANOSECONDS);
             }
 
             private void delay() {

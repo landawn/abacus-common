@@ -117,6 +117,11 @@ public final class HARUtil {
      *
      * <p><b>Note:</b> This method resets the filter for the current thread only,
      * as the header filter is stored in thread-local storage.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HARUtil.resetHttpHeaderFilterForHARRequest();
+     * }</pre>
      */
     public static void resetHttpHeaderFilterForHARRequest() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
@@ -132,6 +137,11 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HARUtil.logRequestCurlForHARRequest(true);
+     * }</pre>
+     *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @see #logRequestCurlForHARRequest(boolean, char)
      * @see #logRequestCurlForHARRequest(boolean, char, Consumer)
@@ -145,6 +155,11 @@ public final class HARUtil {
      *
      * <p>When enabled, a curl command equivalent to each HAR request will be logged
      * using the default logger at INFO level.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HARUtil.logRequestCurlForHARRequest(true, '"');
+     * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands (typically ' or ")
@@ -242,6 +257,11 @@ public final class HARUtil {
      * 
      * <p>This method parses the HAR JSON string, finds the first request entry matching
      * the exact target URL, and replays that request.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String response = HARUtil.sendRequestByHAR(harContent, "http://localhost:18080/users/123");
+     * }</pre>
      * 
      * @param har the HAR content as a JSON string
      * @param targetUrl the exact URL to match in the HAR content
@@ -268,6 +288,11 @@ public final class HARUtil {
      *   <li>Find the first request matching the URL filter</li>
      *   <li>Replay the request with original HTTP method, headers, and body</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String response = HARUtil.sendRequestByHAR(harContent, url -> url.contains("/api/users"));
+     * }</pre>
      * 
      * @param har the HAR content as a JSON string
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent
@@ -322,6 +347,11 @@ public final class HARUtil {
      * 
      * <p>This method parses the HAR JSON string and replays all requests whose URLs match
      * the provided filter predicate. Requests are sent in the order they appear in the HAR file.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> responses = HARUtil.sendMultiRequestsByHAR(harContent, url -> url.startsWith("http://localhost:18080/"));
+     * }</pre>
      * 
      * @param har the HAR content as a JSON string
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent
@@ -378,6 +408,13 @@ public final class HARUtil {
      * <p>This method provides a streaming interface for processing HAR entries. The stream
      * is lazy - requests are only sent when the stream is consumed. This allows for
      * efficient processing of large HAR files.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HARUtil.streamMultiRequestsByHAR(harContent, url -> url.contains("/api/"))
+     *     .map(tp -> tp._2.statusCode())
+     *     .forEach(System.out::println);
+     * }</pre>
      * 
      * @param har the HAR content as a JSON string
      * @param filterForTargetUrl predicate to test URLs; only matching URLs will be included in the stream
@@ -511,6 +548,11 @@ public final class HARUtil {
 
     /**
      * Extracts the URL from a HAR request entry.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String url = HARUtil.getUrlByRequestEntry(requestEntry);
+     * }</pre>
      * 
      * @param requestEntry the HAR request entry map
      * @return the URL string from the request entry
@@ -524,6 +566,11 @@ public final class HARUtil {
      *
      * <p>The method name in the HAR entry is converted to uppercase and mapped
      * to the corresponding {@link HttpMethod} enum value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
+     * }</pre>
      *
      * @param requestEntry the HAR request entry map
      * @return the HTTP method enum value (GET, POST, PUT, DELETE, etc.)
@@ -541,6 +588,12 @@ public final class HARUtil {
      * Headers that don't pass the filter are excluded from the returned HttpHeaders object.</p>
      * 
      * <p>The header filter can be configured using {@link #setHttpHeaderFilterForHARRequest(BiPredicate)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
+     * String contentType = (String) headers.get(HttpHeaders.Names.CONTENT_TYPE);
+     * }</pre>
      * 
      * @param requestEntry the HAR request entry map containing a "headers" array
      * @return an HttpHeaders object containing the filtered headers

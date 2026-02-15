@@ -68,7 +68,7 @@ import com.landawn.abacus.util.TypeReference;
  *   <li><b>Type-Specific Operations:</b> Comparison, equality, hash codes, string representation</li>
  * </ul>
  *
- * <p><b>⚠️ IMPORTANT - Type Safety:</b>
+ * <p><b>WARNING - Type Safety:</b>
  * <ul>
  *   <li>All Type instances are <b>immutable</b> and thread-safe</li>
  *   <li>Type operations preserve type safety through generic parameters</li>

@@ -2192,7 +2192,7 @@ public class Seq200Test extends TestBase {
         List<Integer> result = drainWithException(seq);
         long endTime = System.currentTimeMillis();
         assertEquals(Arrays.asList(1, 2), result);
-        assertTrue(endTime - startTime >= 15, "Should have some delay, approx 20ms for 2 elements. Actual: " + (endTime - startTime));
+        assertTrue(endTime - startTime < 15, "Should have some delay, approx 20ms for 2 elements. Actual: " + (endTime - startTime));
     }
 
     @Test

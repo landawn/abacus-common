@@ -17,11 +17,9 @@ package com.landawn.abacus.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -1959,17 +1957,78 @@ public final class Futures {
 
         final long startTime = System.currentTimeMillis();
         final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);
+        final ExecutorCompletionService<Result<T, Exception>> completionService = new ExecutorCompletionService<>(N.ASYNC_EXECUTOR.getExecutor());
+        final int futureCount = cfs.size();
+
+        for (final Future<? extends T> future : cfs) {
+            completionService.submit(() -> {
+                try {
+                    return Result.of(future.get(), null);
+                } catch (final Exception e) {
+                    return Result.of(null, convertException(e));
+                }
+            });
+        }
 
         return new ObjIterator<>() {
-            private final Set<Future<? extends T>> activeFutures = N.newSetFromMap(new IdentityHashMap<>());
-
-            { //NOSONAR
-                activeFutures.addAll(cfs);
-            }
+            private int remainingCount = futureCount;
+            private boolean resultReady = false;
+            private boolean noMore = false;
+            private Result<T, Exception> nextResult = null;
 
             @Override
             public boolean hasNext() {
-                return activeFutures.size() > 0;
+                if (resultReady) {
+                    return true;
+                }
+
+                if (noMore) {
+                    return false;
+                }
+
+                if (remainingCount <= 0) {
+                    noMore = true;
+                    return false;
+                }
+
+                final long remainingTimeInMillis = totalTimeoutForAllInMillis == Long.MAX_VALUE ? Long.MAX_VALUE
+                        : totalTimeoutForAllInMillis - (System.currentTimeMillis() - startTime);
+
+                final Future<Result<T, Exception>> doneFuture;
+
+                try {
+                    if (remainingTimeInMillis == Long.MAX_VALUE) {
+                        doneFuture = completionService.take();
+                    } else if (remainingTimeInMillis > 0) {
+                        doneFuture = completionService.poll(remainingTimeInMillis, TimeUnit.MILLISECONDS);
+                    } else {
+                        doneFuture = null;
+                    }
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    noMore = true;
+                    resultReady = true;
+                    nextResult = Result.of(null, e);
+                    return true;
+                }
+
+                if (doneFuture == null) {
+                    noMore = true;
+                    resultReady = true;
+                    nextResult = Result.of(null, new TimeoutException());
+                    return true;
+                }
+
+                try {
+                    nextResult = doneFuture.get();
+                } catch (final Exception e) {
+                    nextResult = Result.of(null, e);
+                } finally {
+                    remainingCount--;
+                }
+
+                resultReady = true;
+                return true;
             }
 
             @Override
@@ -1978,28 +2037,8 @@ public final class Futures {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                while (true) {
-                    final java.util.Iterator<Future<? extends T>> iterator = activeFutures.iterator();
-                    while (iterator.hasNext()) {
-                        final Future<? extends T> cf = iterator.next();
-                        if (cf.isDone()) {
-                            try {
-                                return resultHandler.apply(Result.of(cf.get(), null));
-                            } catch (final Exception e) {
-                                return resultHandler.apply(Result.of(null, Futures.convertException(e)));
-                            } finally {
-                                iterator.remove();
-                            }
-                        }
-                    }
-
-                    if (System.currentTimeMillis() - startTime >= totalTimeoutForAllInMillis) {
-                        activeFutures.clear();
-                        return resultHandler.apply(Result.of(null, new TimeoutException()));
-                    }
-
-                    N.sleepUninterruptibly(1);
-                }
+                resultReady = false;
+                return resultHandler.apply(nextResult);
             }
         };
     }

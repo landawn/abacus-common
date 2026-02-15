@@ -2083,7 +2083,7 @@ public class DigestUtil {
      */
     private static MessageDigest updateDigest(final MessageDigest digest, final FileChannel data) throws IOException {
         final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        while (data.read(buffer) > 0) {
+        while (data.read(buffer) != -1) {
             buffer.flip();
             digest.update(buffer);
             buffer.clear();

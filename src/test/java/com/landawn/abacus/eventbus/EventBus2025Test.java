@@ -93,6 +93,22 @@ public class EventBus2025Test extends TestBase {
     }
 
     @Test
+    public void testPostWithEmptyEventIdBehavesAsNoEventId() {
+        AtomicReference<String> result = new AtomicReference<>();
+        Object subscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                result.set(event);
+            }
+        };
+
+        eventBus.register(subscriber);
+        eventBus.post("", "hello");
+
+        assertEquals("hello", result.get());
+    }
+
+    @Test
     public void testStickyEvent() {
         eventBus.postSticky("sticky message");
 

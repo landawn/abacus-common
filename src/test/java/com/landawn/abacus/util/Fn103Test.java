@@ -2474,8 +2474,8 @@ public class Fn103Test extends TestBase {
             }
 
             @Test
-            public void testIsEmptyA() throws Exception {
-                Throwables.Predicate<String[], Exception> predicate = Fnn.isEmptyA();
+            public void testIsEmptyArray() throws Exception {
+                Throwables.Predicate<String[], Exception> predicate = Fnn.isEmptyArray();
 
                 assertTrue(predicate.test(null));
                 assertTrue(predicate.test(new String[0]));
@@ -2483,8 +2483,8 @@ public class Fn103Test extends TestBase {
             }
 
             @Test
-            public void testIsEmptyC() throws Exception {
-                Throwables.Predicate<Collection<String>, Exception> predicate = Fnn.isEmptyC();
+            public void testIsEmptyCollection() throws Exception {
+                Throwables.Predicate<Collection<String>, Exception> predicate = Fnn.isEmptyCollection();
 
                 assertTrue(predicate.test(null));
                 assertTrue(predicate.test(new ArrayList<>()));
@@ -2492,8 +2492,8 @@ public class Fn103Test extends TestBase {
             }
 
             @Test
-            public void testIsEmptyM() throws Exception {
-                Throwables.Predicate<Map<String, String>, Exception> predicate = Fnn.isEmptyM();
+            public void testIsEmptyMap() throws Exception {
+                Throwables.Predicate<Map<String, String>, Exception> predicate = Fnn.isEmptyMap();
 
                 assertTrue(predicate.test(null));
                 assertTrue(predicate.test(new HashMap<>()));

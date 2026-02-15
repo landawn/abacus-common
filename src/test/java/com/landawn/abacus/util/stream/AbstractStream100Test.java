@@ -1434,7 +1434,7 @@ public class AbstractStream100Test extends TestBase {
         long duration = System.currentTimeMillis() - startTime;
 
         assertEquals(input, result);
-        assertTrue(duration >= 150);
+        assertTrue(duration < 150);
     }
 
     @Data

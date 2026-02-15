@@ -95,6 +95,16 @@ public class WebUtil2025Test extends TestBase {
     }
 
     @Test
+    public void testCurl2HttpRequestWithInlineDataOption() {
+        String curl = "curl https://api.example.com/users --data='{\"name\":\"John\"}'";
+        String result = WebUtil.convertCurlToHttpRequest(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains("String requestBody"));
+        assertTrue(result.contains(".post(requestBody);"));
+    }
+
+    @Test
     public void testCurl2HttpRequestWithLongForm() {
         String curl = "curl --request POST --header \"Content-Type: application/json\" https://api.example.com/users";
         String result = WebUtil.convertCurlToHttpRequest(curl);
@@ -176,6 +186,17 @@ public class WebUtil2025Test extends TestBase {
         assertNotNull(result);
         assertTrue(result.contains(".body(requestBody)"));
         assertTrue(result.contains("MediaType.parse(\"text/plain\")"));
+    }
+
+    @Test
+    public void testCurl2OkHttpRequestWithInlineDataOption() {
+        String curl = "curl -H \"Content-Type: text/plain\" https://api.example.com/echo --data=Hello";
+        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains("RequestBody requestBody"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
     }
 
     @Test

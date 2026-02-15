@@ -245,7 +245,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         try {
             // Make sure the old value is removed regardless if the new value will put successfully or not.
-            E oldValue = remove(key);
+            // Use pool.remove() directly to avoid double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
+            E oldValue = pool.remove(key);
 
             if (oldValue != null) {
                 destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
@@ -627,11 +628,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public void close() {
-        if (isClosed) {
-            return;
-        }
+        lock.lock();
 
-        isClosed = true;
+        try {
+            if (isClosed) {
+                return;
+            }
+
+            isClosed = true;
+        } finally {
+            lock.unlock();
+        }
 
         try {
             if (scheduleFuture != null) {
@@ -725,7 +732,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             destroyAll(new HashMap<>(pool), Caller.VACATE);
             pool.clear();
         } else if (vacationNumber > 0) {
-            final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, cmp);
+            final Comparator<Map.Entry<K, E>> reversedCmp = cmp.reversed();
+            final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, reversedCmp);
 
             for (final Map.Entry<K, E> entry : pool.entrySet()) {
                 if (heap.size() < vacationNumber) {

@@ -325,6 +325,7 @@ public final class Iterables {
     }
 
     // Not sure if it is needed. and also, it is not consistent with the other methods which mostly return Optional.
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
     /**
      * Returns the first {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
@@ -3655,7 +3656,6 @@ public final class Iterables {
      * @see java.util.Collections#copy(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
      */
-    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
     public static <T> void copyInto(final List<? extends T> src, final List<? super T> dest) {
         if (CommonUtil.isEmpty(src)) {
             return;
@@ -3668,6 +3668,7 @@ public final class Iterables {
         Collections.copy(dest, src);
     }
 
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
     /**
      * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
      * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
@@ -3696,7 +3697,6 @@ public final class Iterables {
      * @see N#copy(Object[], int, Object[], int, int)
      * @see Collections#copy(List, List)
      */
-    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
     public static <T> void copyRange(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
         CommonUtil.checkFromToIndex(srcPos, srcPos + length, CommonUtil.size(src));

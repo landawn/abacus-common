@@ -162,7 +162,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final String code = CodeGenerationUtil.generatePropNameTableClasses(classes);
 
         assertNotNull(code);
-        assertTrue(code.contains("public interface s"));
+        assertTrue(code.contains("public interface x"));
         assertTrue(code.contains("String id = \"id\";"));
         assertTrue(code.contains("String name = \"name\";"));
         assertTrue(code.contains("String orderId = \"orderId\";"));
@@ -176,7 +176,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
         final String code = CodeGenerationUtil.generatePropNameTableClasses(classes);
 
         assertNotNull(code);
-        assertTrue(code.contains("public interface s"));
+        assertTrue(code.contains("public interface x"));
         assertTrue(code.contains("String id = \"id\";"));
     }
 

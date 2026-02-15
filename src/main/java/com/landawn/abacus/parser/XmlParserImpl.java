@@ -553,7 +553,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
-        final String nextIndentation = propIndentation + config.getIndentation();
+        final String nextIndentation = isPrettyFormat ? (propIndentation + config.getIndentation()) : null;
 
         String strKey = null;
         Type<Object> valueType = null;
@@ -649,7 +649,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
-        final String nextIndentation = propIndentation + config.getIndentation();
+        final String nextIndentation = isPrettyFormat ? (propIndentation + config.getIndentation()) : null;
 
         Object value = null;
         Type<Object> valueType = null;
@@ -1488,8 +1488,10 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         switch (parserType) {
             case StAX:
+                XMLStreamReader xmlReader = null;
+
                 try {
-                    final XMLStreamReader xmlReader = createXMLStreamReader(source);
+                    xmlReader = createXMLStreamReader(source);
 
                     for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
                         // do nothing.
@@ -1516,6 +1518,14 @@ final class XmlParserImpl extends AbstractXmlParser {
                     return readByStreamParser(xmlReader, configToUse, targetType);
                 } catch (final XMLStreamException e) {
                     throw new ParsingException(e);
+                } finally {
+                    if (xmlReader != null) {
+                        try {
+                            xmlReader.close();
+                        } catch (final XMLStreamException e) {
+                            // ignore
+                        }
+                    }
                 }
 
             case DOM: //NOSONAR

@@ -2246,11 +2246,11 @@ sealed class CommonUtil permits N {
      * checkArgument(false);       // throws IllegalArgumentException
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException();
         }
     }
@@ -2264,12 +2264,12 @@ sealed class CommonUtil permits N {
      * checkArgument(count > 0, "Count must be positive");
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final Object argNameOrErrorMsg) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final Object argNameOrErrorMsg) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(String.valueOf(argNameOrErrorMsg));
         }
     }
@@ -2285,13 +2285,14 @@ sealed class CommonUtil permits N {
      * checkArgument(i < j, "Expected i < j, but %s >= %s", i, j);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs)
+            throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
         }
     }
@@ -2304,13 +2305,13 @@ sealed class CommonUtil permits N {
      * checkArgument(c == 'a', "Expected 'a' but got %s", c);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
     }
@@ -2324,13 +2325,13 @@ sealed class CommonUtil permits N {
      * checkArgument(count > 0, "Count must be positive: %s", count);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
     }
@@ -2344,13 +2345,13 @@ sealed class CommonUtil permits N {
      * checkArgument(count > 0, "Count must be positive: %s", count);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
     }
@@ -2363,13 +2364,13 @@ sealed class CommonUtil permits N {
      * checkArgument(val > 0.0, "Value must be positive: %s", val);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
     }
@@ -2382,13 +2383,13 @@ sealed class CommonUtil permits N {
      * checkArgument(obj != null, "Object must not be null: %s", obj);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
     }
@@ -2401,15 +2402,16 @@ sealed class CommonUtil permits N {
      * checkArgument(c1 != c2, "Chars must be different: %s, %s", c1, c2);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final char arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -2418,18 +2420,20 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int i = 1;
      * checkArgument(c != i, "Char and int must be different: %s, %s", c, i);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final int arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -2438,18 +2442,20 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * long l = 10L;
      * checkArgument(c != l, "Char and long must be different: %s, %s", c, l);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final long arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -2458,394 +2464,20 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * double d = 2.0;
      * checkArgument(c != d, "Char %s must not equal double %s", c, d);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final double arg2)
             throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -2854,18 +2486,16 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @param p4 the fourth parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final Object arg2)
             throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3, p4));
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -2874,12 +2504,411 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final char arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final int arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final long arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final double arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final Object arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final char arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final int arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final long arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final double arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final Object arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final char arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final int arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final long arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final double arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final Object arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final char arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final int arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final long arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final double arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @param arg3 the third parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3)
+            throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2, arg3));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @param arg3 the third parameter to be used in the exception message
+     * @param arg4 the fourth parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3,
+            final Object arg4) throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
-        if (!b) {
+    public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
+        if (!expression) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
     }
@@ -3136,15 +3165,16 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * boolean initialized = true;
      * checkState(initialized);   // Valid if initialized is true
      * checkState(false);         // throws IllegalStateException
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException();
         }
     }
@@ -3154,15 +3184,16 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * boolean initialized = true;
      * checkState(initialized, "Not initialized");
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessage the name of the argument or an error message to be used in the exception
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final Object errorMessage) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final Object errorMessage) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(String.valueOf(errorMessage));
         }
     }
@@ -3172,16 +3203,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkState(initialized, "Not initialized: %s", this);
+     * Object state = new Object();
+     * checkState(state != null, "Not initialized: %s", state);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
         }
     }
@@ -3191,16 +3223,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * char status = 'A';
      * checkState(status == 'A', "Status must be 'A' but was %s", status);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char p) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
     }
@@ -3210,16 +3243,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int size = 1;
      * checkState(size > 0, "Size must be positive: %s", size);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int p) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
     }
@@ -3229,16 +3263,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * int count = 1;
      * checkState(count > 0, "Count must be positive: %s", count);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long p) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
     }
@@ -3248,16 +3283,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * double val = 1.0;
      * checkState(val > 0.0, "Value must be positive: %s", val);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double p) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
     }
@@ -3270,13 +3306,13 @@ sealed class CommonUtil permits N {
      * checkState(obj != null, "Object must not be null: %s", obj);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object p) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
     }
@@ -3289,15 +3325,15 @@ sealed class CommonUtil permits N {
      * checkState(c1 != c2, "Characters must be different: %s and %s", c1, c2);
      * }</pre>
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char arg1, final char arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -3306,15 +3342,15 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char arg1, final int arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -3323,15 +3359,15 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char arg1, final long arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
@@ -3340,419 +3376,431 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
-     * @param b a boolean expression
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
-     *
-     * @param b a boolean expression
-     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char arg1, final double arg2)
             throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param b a boolean expression
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param p1 the parameter to be used in the exception message
-     * @param p2 the second parameter to be used in the exception message
-     * @param p3 the third parameter to be used in the exception message
-     * @param p4 the fourth parameter to be used in the exception message
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final char arg1, final Object arg2)
             throws IllegalStateException {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3, p4));
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
         }
     }
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * @param b a boolean expression
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int arg1, final char arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int arg1, final int arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int arg1, final long arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int arg1, final double arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final int arg1, final Object arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long arg1, final char arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long arg1, final int arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long arg1, final long arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long arg1, final double arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final long arg1, final Object arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double arg1, final char arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double arg1, final int arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double arg1, final long arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double arg1, final double arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final double arg1, final Object arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final char arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final int arg2) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final long arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final double arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @param arg3 the third parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3)
+            throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2, arg3));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param arg1 the parameter to be used in the exception message
+     * @param arg2 the second parameter to be used in the exception message
+     * @param arg3 the third parameter to be used in the exception message
+     * @param arg4 the fourth parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3,
+            final Object arg4) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
-        if (!b) {
+    public static void checkState(final boolean expression, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
+        if (!expression) {
             throw new IllegalStateException(errorMessageSupplier.get());
         }
     }
@@ -3763,7 +3811,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * requireNonNull("not null");   // Returns "not null"
-     * requireNonNull(null);         // Throws NullPointerException
+     * requireNonNull(null);         // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the object
@@ -3788,7 +3836,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, "Object cannot be null");   // Throws NullPointerException
+     * requireNonNull(null, "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the object
@@ -3818,7 +3866,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, () -> "Object cannot be null");   // Throws NullPointerException
+     * requireNonNull(null, () -> "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the object
@@ -4033,8 +4081,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * boolean[] a = {true, false, true};
      * boolean[] b = {true, false, false};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first boolean array; must not be null
@@ -4085,8 +4133,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * char[] a = {'a', 'b', 'c'};
      * char[] b = {'a', 'b', 'd'};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first char array; must not be null
@@ -4137,8 +4185,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * byte[] a = {1, 2, 3};
      * byte[] b = {1, 2, 4};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first byte array, must not be null
@@ -4189,8 +4237,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * short[] a = {1, 2, 3};
      * short[] b = {1, 2, 4};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first short array, must not be null
@@ -4241,8 +4289,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * int[] a = {1, 2, 3};
      * int[] b = {1, 2, 4};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first int array, must not be null
@@ -4293,8 +4341,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
      * long[] b = {1L, 2L, 4L};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first long array, must not be null
@@ -4345,8 +4393,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f};
      * float[] b = {1.0f, 2.0f, 4.0f};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first float array, must not be null
@@ -4433,8 +4481,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * double[] a = {1.0, 2.0, 3.0};
      * double[] b = {1.0, 2.0, 4.0};
-     * equals(a, 0, b, 0, 2);   // returns true
-     * equals(a, 0, b, 0, 3);   // returns false
+     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
+     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first double array, must not be null
@@ -4511,7 +4559,19 @@ sealed class CommonUtil permits N {
      * @see Arrays#equals(Object[], Object[])
      */
     public static boolean equals(final Object[] a, final Object[] b) {
-        return a == b || (a != null && b != null && a.length == b.length && equals(a, 0, b, 0, a.length));
+        if (a == b) {
+            return true;
+        } else if ((a == null) || (b == null) || (a.length != b.length)) {
+            return false;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            if (!equals(a[i], b[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -4535,8 +4595,6 @@ sealed class CommonUtil permits N {
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return true;
-        } else if (!a.getClass().equals(b.getClass())) {
-            return false;
         }
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -4626,7 +4684,7 @@ sealed class CommonUtil permits N {
      * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object[] a, final Object[] b) {
-        return a == b || (a != null && b != null && a.length == b.length && deepEquals(a, 0, b, 0, a.length));
+        return a == b || Arrays.deepEquals(a, b);
     }
 
     /**
@@ -4650,8 +4708,6 @@ sealed class CommonUtil permits N {
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return true;
-        } else if (!a.getClass().equals(b.getClass())) {
-            return false;
         }
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -20637,7 +20693,7 @@ sealed class CommonUtil permits N {
      * @param defaultValue the default value to return if the iterator is empty.
      * @return the last {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
      * @see #lastNonNullOrDefault(Iterable, Object)
-     * @see lastNonNull(Iterator)
+     * @see #lastNonNull(Iterator)
      */
     public static <T> T lastNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
         checkArgNotNull(defaultValue, cs.defaultValue);
@@ -29055,49 +29111,8 @@ sealed class CommonUtil permits N {
         sort(list, Comparators.comparingDouble(keyExtractor));
     }
 
-    /*
-     * Tested by ArrayUtilTest.test_parallel_sort_perf
-    @Test
-    public void test_parallel_sort_perf() {
-        final int arrayLength = 3000;
-        final int loopNum = 100000;
-        {
-            final int[] a = Array.random(arrayLength);
-            Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "sort(int[])", () -> sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "parallelSort(int[])", () -> parallelSort(a.clone())).printResult();
-        }
-    
-        {
-            final long[] a = LongList.random(arrayLength).toArray();
-            Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "sort(long[])", () -> sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "parallelSort(long[])", () -> parallelSort(a.clone())).printResult();
-        }
-    
-        {
-            final double[] a = DoubleList.random(arrayLength).toArray();
-            Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "sort(double[])", () -> sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "parallelSort(double[])", () -> parallelSort(a.clone())).printResult();
-        }
-    
-        {
-            final String[] a = new String[2000];
-            for (int i = 0; i < a.length; i++) {
-                a[i] = Strings.uuid();
-            }
-    
-            Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "sort(Object[])", () -> sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "parallelSort(Object[])", () -> parallelSort(a.clone())).printResult();
-        }
-    }
-     */
+    // Retained comment for previous benchmark behavior:
+    // Tested by ArrayUtilTest.test_parallel_sort_perf
     private static final int PARALLEL_SORT_PRIMITIVE_THRESHOLD = 3000;
     private static final int PARALLEL_SORT_OBJECT_THRESHOLD = 2000;
 

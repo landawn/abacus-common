@@ -1082,7 +1082,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", null, "john@email.com");
+     * User user = new User("John", 0, "john@email.com");
      *
      * // Get all properties
      * List<String> allProps = Beans.getPropNames(user, false);
@@ -3901,7 +3901,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Custom conversion with all options
-     * User user = new User("John", null, new Address("NYC"));
+     * User user = new User("John", 0, new Address("NYC"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
      *
      * LinkedHashMap<String, Object> result = deepBeanToMap(user, true, ignored,
@@ -4340,7 +4340,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Include null properties
-     * User user = new User("John", null, new Address("NYC", (String) null));
+     * User user = new User("John", 0, new Address("NYC", (String) null));
      * Map<String, Object> withNulls = beanToFlatMap(user, false);
      * // withNulls: {name=John, age=null, address.city=NYC, address.zipCode=null}
      *
@@ -4366,12 +4366,12 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Filter nulls and exclude specific properties
-     * User user = new User("John", null, "secret123", new Address("NYC"));
+     * User user = new User("John", 0, "secret123", new Address("NYC"));
      * Set<String> ignored = new HashSet<>(Arrays.asList("password"));
      *
      * Map<String, Object> result = beanToFlatMap(user, true, ignored);
      * // result: {name=John, address.city=NYC}
-     * // (age is null so excluded, password is in ignored set)
+     * // (age is 0, password is in ignored set)
      * }</pre>
      *
      * @param bean the bean object to be converted into a flat map.
@@ -4502,7 +4502,7 @@ public final class Beans {
      * Map<String, Object> output = new HashMap<>();
      * output.put("timestamp", new Date());
      *
-     * User user = new User("John", null, new Address("NYC"));
+     * User user = new User("John", 0, new Address("NYC"));
      * beanToFlatMap(user, true, output);
      * // output: {timestamp=..., name=John, address.city=NYC}
      * // (age null is excluded)
@@ -6179,10 +6179,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UserDTO dto = new UserDTO("John", "john@example.com");
-     * UserEntity entity = new UserEntity("John", "john@example.com", new Date());
+     * UserDTO dto = new UserDTO("John", 25);
+     * UserEntity entity = new UserEntity("John", 25, "john@example.com");
      * boolean equal = Beans.equalsByCommonProps(dto, entity);
-     * // Returns true if common properties (name, email) are equal
+     * // Returns true if common properties (name, age) are equal
      * }</pre>
      *
      * @param bean1 the first bean to compare; must not be null

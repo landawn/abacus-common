@@ -958,8 +958,27 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @return the minimal range that contains all values from both input ranges
      */
     public Range<T> span(final Range<T> other) {
-        final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? lowerEndpoint : other.lowerEndpoint;
-        final UpperEndpoint<T> newUpperEndpoint = upperEndpoint.includes(other.upperEndpoint.value) ? upperEndpoint : other.upperEndpoint;
+        final int lowerCmp = N.compare(lowerEndpoint.value, other.lowerEndpoint.value);
+        final LowerEndpoint<T> newLowerEndpoint;
+
+        if (lowerCmp < 0) {
+            newLowerEndpoint = lowerEndpoint;
+        } else if (lowerCmp > 0) {
+            newLowerEndpoint = other.lowerEndpoint;
+        } else {
+            newLowerEndpoint = lowerEndpoint.isClosed ? lowerEndpoint : other.lowerEndpoint;
+        }
+
+        final int upperCmp = N.compare(upperEndpoint.value, other.upperEndpoint.value);
+        final UpperEndpoint<T> newUpperEndpoint;
+
+        if (upperCmp > 0) {
+            newUpperEndpoint = upperEndpoint;
+        } else if (upperCmp < 0) {
+            newUpperEndpoint = other.upperEndpoint;
+        } else {
+            newUpperEndpoint = upperEndpoint.isClosed ? upperEndpoint : other.upperEndpoint;
+        }
 
         BoundType boundType = null;//NOSONAR
 

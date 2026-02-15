@@ -82,6 +82,8 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
 // would mean a maximum rate of "1MB/s", which might be small in some cases.
 public abstract class RateLimiter {
 
+    // TODO(user): "This is equivalent to
+    // {@code createWithCapacity(permitsPerSecond, 1, TimeUnit.SECONDS)}".
     /**
      * Creates a {@code RateLimiter} with the specified stable throughput, given as
      * "permits per second" (commonly referred to as <i>QPS</i>, queries per second).
@@ -112,8 +114,6 @@ public abstract class RateLimiter {
      * @return a newly created {@code RateLimiter} with the specified rate
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
      */
-    // TODO(user): "This is equivalent to
-    // {@code createWithCapacity(permitsPerSecond, 1, TimeUnit.SECONDS)}".
     public static RateLimiter create(final double permitsPerSecond) {
         /*
          * The default RateLimiter configuration can save the unused permits of up to one second. This

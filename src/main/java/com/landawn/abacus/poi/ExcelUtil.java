@@ -591,11 +591,12 @@ public final class ExcelUtil {
         }
 
         final Row headerRow = rowIter.next();
-        final int columnCount = headerRow.getPhysicalNumberOfCells();
+        final int columnCount = Math.max(headerRow.getLastCellNum(), 0);
         final String[] headers = new String[columnCount];
 
         for (int i = 0; i < columnCount; i++) {
-            headers[i] = CELL_TO_STRING.apply(headerRow.getCell(i));
+            final Cell cell = headerRow.getCell(i);
+            headers[i] = cell == null ? "" : CELL_TO_STRING.apply(cell);
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
@@ -1730,10 +1731,9 @@ public final class ExcelUtil {
          */
         public static TriConsumer<String[], Row, Object[]> create(final Function<Cell, ?> cellMapper) {
             return (header, row, output) -> {
-                int idx = 0;
-
-                for (Cell cell : row) {
-                    output[idx++] = cellMapper.apply(cell);
+                for (int i = 0, len = header.length; i < len; i++) {
+                    final Cell cell = row.getCell(i);
+                    output[i] = cell == null ? null : cellMapper.apply(cell);
                 }
             };
         }
