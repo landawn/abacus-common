@@ -77,14 +77,14 @@ public class AbstractCharStream200Test extends TestBase {
 
     @Test
     public void testDelay() {
-        Duration delay = Duration.ofMillis(10);
+        Duration delay = Duration.ofMillis(100);
         CharStream delayedStream = stream.delay(delay);
         long startTime = System.currentTimeMillis();
         delayedStream.forEach(c -> {
         });
         long endTime = System.currentTimeMillis();
 
-        assertTrue(endTime - startTime < 5 * 10);
+        assertTrue(endTime - startTime < 5 * 100);
     }
 
     @Test

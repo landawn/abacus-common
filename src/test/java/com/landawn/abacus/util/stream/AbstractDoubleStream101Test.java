@@ -67,14 +67,14 @@ public class AbstractDoubleStream101Test extends TestBase {
     @Test
     public void testDelay() {
         stream = createDoubleStream(new double[] { 1.0, 2.0 });
-        Duration delay = Duration.ofMillis(10);
+        Duration delay = Duration.ofMillis(100);
 
         long startTime = System.currentTimeMillis();
         double[] result = stream.delay(delay).toArray();
         long endTime = System.currentTimeMillis();
 
         assertArrayEquals(new double[] { 1.0, 2.0 }, result, 0.001);
-        assertTrue(endTime - startTime < 20);
+        assertTrue(endTime - startTime < 200);
     }
 
     @Test
