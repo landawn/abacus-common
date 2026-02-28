@@ -79,38 +79,38 @@ public class HARUtil100Test extends TestBase {
         if (tempHARFile != null && tempHARFile.exists()) {
             tempHARFile.delete();
         }
-        HARUtil.resetHttpHeaderFilterForHARRequest();
+        HARUtil.resetHeaderFilter();
     }
 
     @Test
     public void testSetHttpHeaderFilterForHARRequest() {
         BiPredicate<String, String> filter = (name, value) -> !name.equalsIgnoreCase("Authorization");
-        HARUtil.setHttpHeaderFilterForHARRequest(filter);
+        HARUtil.setHeaderFilter(filter);
 
-        assertThrows(IllegalArgumentException.class, () -> HARUtil.setHttpHeaderFilterForHARRequest(null));
+        assertThrows(IllegalArgumentException.class, () -> HARUtil.setHeaderFilter(null));
     }
 
     @Test
-    public void testResetHttpHeaderFilterForHARRequest() {
+    public void testResetHeaderFilter() {
         BiPredicate<String, String> filter = (name, value) -> false;
-        HARUtil.setHttpHeaderFilterForHARRequest(filter);
-        HARUtil.resetHttpHeaderFilterForHARRequest();
+        HARUtil.setHeaderFilter(filter);
+        HARUtil.resetHeaderFilter();
     }
 
     @Test
     public void testLogRequestCurlForHARRequest() {
-        HARUtil.logRequestCurlForHARRequest(true);
-        HARUtil.logRequestCurlForHARRequest(false);
+        HARUtil.logCurl(true);
+        HARUtil.logCurl(false);
 
-        HARUtil.logRequestCurlForHARRequest(true, '"');
-        HARUtil.logRequestCurlForHARRequest(false, '\'');
+        HARUtil.logCurl(true, '"');
+        HARUtil.logCurl(false, '\'');
     }
 
     @Test
     public void testLogRequestCurlForHARRequestWithHandler() {
         Consumer<String> handler = curl -> System.out.println(curl);
-        HARUtil.logRequestCurlForHARRequest(true, '\'', handler);
-        HARUtil.logRequestCurlForHARRequest(false, '"', handler);
+        HARUtil.logCurl(true, '\'', handler);
+        HARUtil.logCurl(false, '"', handler);
     }
 
     @Test
@@ -182,18 +182,18 @@ public class HARUtil100Test extends TestBase {
     @Test
     public void testGetRequestEntryByUrlFromHARWithFile() {
         Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByUrlFromHAR(tempHARFile, filter);
+        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByURLFromHAR(tempHARFile, filter);
         assertTrue(entry.isPresent());
     }
 
     @Test
     public void testGetRequestEntryByUrlFromHARWithString() {
         Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByUrlFromHAR(sampleHAR, filter);
+        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByURLFromHAR(sampleHAR, filter);
         assertTrue(entry.isPresent());
 
         filter = url -> url.contains("/nonexistent");
-        entry = HARUtil.getRequestEntryByUrlFromHAR(sampleHAR, filter);
+        entry = HARUtil.getRequestEntryByURLFromHAR(sampleHAR, filter);
         assertFalse(entry.isPresent());
     }
 
@@ -202,7 +202,7 @@ public class HARUtil100Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/test");
 
-        String url = HARUtil.getUrlByRequestEntry(requestEntry);
+        String url = HARUtil.getURLByRequestEntry(requestEntry);
         assertEquals("https://api.example.com/test", url);
     }
 
@@ -245,7 +245,7 @@ public class HARUtil100Test extends TestBase {
     @Test
     public void testGetHeadersByRequestEntryWithFilter() {
         BiPredicate<String, String> filter = (name, value) -> !name.equalsIgnoreCase("Authorization");
-        HARUtil.setHttpHeaderFilterForHARRequest(filter);
+        HARUtil.setHeaderFilter(filter);
 
         Map<String, Object> requestEntry = new HashMap<>();
         List<Map<String, String>> headers = new ArrayList<>();

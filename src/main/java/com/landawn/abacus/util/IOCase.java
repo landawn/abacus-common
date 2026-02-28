@@ -270,7 +270,7 @@ public enum IOCase {
         final int toIndex = str.length() - search.length();
         if (toIndex >= strStartIndex) {
             for (int i = strStartIndex; i <= toIndex; i++) {
-                if (checkRegionMatches(str, i, search)) {
+                if (checkRegiocountMatchBetweenes(str, i, search)) {
                     return i;
                 }
             }
@@ -287,8 +287,8 @@ public enum IOCase {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE");   // true
-     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE");    // false
+     * boolean matches = IOCase.INSENSITIVE.checkRegiocountMatchBetweenes("File.txt", 0, "FILE");   // true
+     * boolean matches2 = IOCase.SENSITIVE.checkRegiocountMatchBetweenes("File.txt", 0, "FILE");    // false
      * }</pre>
      *
      * @param str the string to check, not null
@@ -297,7 +297,7 @@ public enum IOCase {
      * @return {@code true} if the region matches according to the case rule
      * @throws IllegalArgumentException if either string is null
      */
-    public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+    public boolean checkRegiocountMatchBetweenes(final String str, final int strStartIndex, final String search) {
         if (str == null || search == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }

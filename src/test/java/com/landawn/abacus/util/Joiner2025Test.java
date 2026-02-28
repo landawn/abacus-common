@@ -81,7 +81,7 @@ public class Joiner2025Test extends TestBase {
 
     @Test
     public void testDefauLt() {
-        Joiner joiner = Joiner.defauLt();
+        Joiner joiner = Joiner.withDefault();
         assertNotNull(joiner);
         joiner.append("a").append("b").append("c");
         assertEquals("a, b, c", joiner.toString());

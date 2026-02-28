@@ -17,6 +17,8 @@ package com.landawn.abacus.http;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+
+import com.landawn.abacus.util.Charsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -26,6 +28,7 @@ import com.landawn.abacus.util.Strings;
 
 import okhttp3.Headers;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -122,10 +125,10 @@ class CurlInterceptor implements Interceptor {
         final RequestBody requestBody = request.body();
 
         if (requestBody != null) {
-            Charset charset = Charset.defaultCharset();
+            Charset charset = Charsets.UTF_8;
             final String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
-            //noinspection DataFlowIssue
-            bodyContentType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
+            final MediaType requestBodyContentType = requestBody.contentType();
+            bodyContentType = requestBodyContentType == null ? null : requestBodyContentType.toString();
 
             if (Strings.isNotEmpty(bodyContentType) && bodyContentType.contains("charset")) {
                 charset = HttpUtil.getCharset(bodyContentType);

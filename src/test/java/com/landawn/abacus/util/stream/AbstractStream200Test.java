@@ -139,7 +139,7 @@ public class AbstractStream200Test extends TestBase {
 
     @Test
     public void test_flattMap_array() {
-        List<Integer> result = Stream.of("1,2", "3,4").flattmap(s -> s.split(",")).map(i -> Numbers.toInt(i)).toList();
+        List<Integer> result = Stream.of("1,2", "3,4").flatMapArray(s -> s.split(",")).map(i -> Numbers.toInt(i)).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
@@ -987,9 +987,9 @@ public class AbstractStream200Test extends TestBase {
     }
 
     @Test
-    public void test_nMatch() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5).nMatch(2, 2, i -> i % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).nMatch(3, 3, i -> i % 2 == 0));
+    public void test_countMatchBetween() {
+        assertTrue(Stream.of(1, 2, 3, 4, 5).countMatchBetween(2, 2, i -> i % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).countMatchBetween(3, 3, i -> i % 2 == 0));
     }
 
     @Test

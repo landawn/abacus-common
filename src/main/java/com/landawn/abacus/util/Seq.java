@@ -4275,11 +4275,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> numbers = Seq.of(1, 2, 3);
-     * Seq<Integer, Exception> result = numbers.flattmap(n -> new Integer[] {n, n * 10});
+     * Seq<Integer, Exception> result = numbers.flatMapArray(n -> new Integer[] {n, n * 10});
      * // Result: [1, 10, 2, 20, 3, 30]
      * 
      * Seq<String, Exception> words = Seq.of("Hello", "World");
-     * Seq<Character, Exception> chars = words.flattmap(s -> s.chars()
+     * Seq<Character, Exception> chars = words.flatMapArray(s -> s.chars()
      *     .mapToObj(c -> (char) c)
      *     .toArray(Character[]::new));
      * // Result: ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
@@ -4291,7 +4291,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
-    public <R> Seq<R, E> flattmap(final Throwables.Function<? super T, R[], ? extends E> mapper) { //NOSONAR
+    public <R> Seq<R, E> flatMapArray(final Throwables.Function<? super T, R[], ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
         return create(new Throwables.Iterator<>() {
@@ -9452,7 +9452,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public <T2, T3, R> Seq<R, E> zipWith(final Seq<T2, E> b, final Seq<T3, E> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
-            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) throws IllegalArgumentException {
+            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
         return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -10339,7 +10339,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6);
-     * boolean has2to4Even = seq.nMatch(2, 4, n -> n % 2 == 0);
+     * boolean has2to4Even = seq.countMatchBetween(2, 4, n -> n % 2 == 0);
      * // has2to4Even == true (there are 3 even numbers)
      * }</pre>
      * 
@@ -10355,7 +10355,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E2 if the predicate throws an exception
      */
     @TerminalOp
-    public <E2 extends Exception> boolean nMatch(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
+    public <E2 extends Exception> boolean countMatchBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
@@ -14198,7 +14198,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 private void init() {
                     if (!isInitialized) {
                         isInitialized = true;
-                        iter = stream.iterator();
+                        iter = s.iterator();
                     }
                 }
 
@@ -14702,6 +14702,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Internal
     private interface LocalRunnable extends Runnable {
 
+        /**
+         * Wraps a close handler into a one-time executable {@code LocalRunnable}.
+         * Returns a no-op handler when {@code closeHandler} is {@code null}, and returns the same instance if it is already a {@code LocalRunnable}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Runnable closeHandler = () -> resource.close();
+         * LocalRunnable local = LocalRunnable.wrap(closeHandler);
+         * local.run();
+         * }</pre>
+         *
+         * @param closeHandler the close handler to wrap, may be {@code null}
+         * @return a one-time runnable wrapper for the close handler
+         */
         static LocalRunnable wrap(final Runnable closeHandler) {
             if (closeHandler == null) {
                 return EMPTY_CLOSE_HANDLER;
@@ -14724,6 +14738,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             };
         }
 
+        /**
+         * Wraps an {@code AutoCloseable} into a one-time executable {@code LocalRunnable}.
+         * The returned runnable closes the given resource at most once.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * AutoCloseable closeable = resource;
+         * LocalRunnable local = LocalRunnable.wrap(closeable);
+         * local.run();
+         * }</pre>
+         *
+         * @param closeable the closeable resource to wrap, may be {@code null}
+         * @return a one-time runnable wrapper that closes the given resource
+         */
         static LocalRunnable wrap(final AutoCloseable closeable) {
             return new LocalRunnable() {
                 private volatile boolean isClosed = false;

@@ -49,7 +49,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     public static final XmlParser abacusXMLDOMParser = ParserFactory.createAbacusXmlDOMParser();
     public static final XmlParser xmlParser = ParserFactory.createXmlParser();
     public static final XmlParser xmlDOMParser = ParserFactory.createXmlDOMParser();
-    protected static final XmlParser jaxbXmlParser = ParserFactory.createJAXBParser();
+    protected static final XmlParser jaxbXmlParser = ParserFactory.createJaxbParser();
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
     protected static final JsonSerializationConfig jsc = JSC.of(true, true);
     protected static final XBean xBean = createXBean();

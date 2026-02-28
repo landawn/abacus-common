@@ -21,10 +21,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char)}.
  *
- * @see java.util.function.UnaryOperator
- * @see CharBinaryOperator
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.UnaryOperator
+ * @see CharBinaryOperator
  */
 @FunctionalInterface
 public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeException> { //NOSONAR

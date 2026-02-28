@@ -21,11 +21,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(byte, byte, byte)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Predicate
  * @see BytePredicate
  * @see ByteBiPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeException> { //NOSONAR

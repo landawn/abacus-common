@@ -21,9 +21,10 @@ package com.landawn.abacus.util.function;
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsFloat(int)}.
  *
- * @see java.util.function.Function
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Function
  */
 @FunctionalInterface
 public interface IntToFloatFunction {

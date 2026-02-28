@@ -110,7 +110,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Factory Methods:</b>
  * <ul>
- *   <li>{@link #defauLt()} - Default whitespace-based splitting</li>
+ *   <li>{@link #withDefault()} - Default whitespace-based splitting</li>
  *   <li>{@link #forLines()} - Line-based splitting for text processing</li>
  *   <li>{@link #with(char)} - Single character delimiter</li>
  *   <li>{@link #with(CharSequence)} - Multi-character string delimiter</li>
@@ -259,8 +259,15 @@ public final class Splitter {
 
     /**
      * The default delimiter used to separate elements when joining.
+     * @see Joiner#DEFAULT_DELIMITER
      */
-    public static final String DEFAULT_DELIMITER = Strings.ELEMENT_SEPARATOR;
+    public static final String DEFAULT_DELIMITER = Joiner.DEFAULT_DELIMITER;
+
+    /**
+     * The default delimiter used to separate keys and values in key-value pairs.
+     * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
+     */
+    public static final String DEFAULT_KEY_VALUE_DELIMITER = Joiner.DEFAULT_KEY_VALUE_DELIMITER;
 
     /**
      * A compiled regular expression pattern that matches one or more whitespace characters.
@@ -311,19 +318,18 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> parts = Splitter.defauLt().split("apple, banana, cherry");
+     * List<String> parts = Splitter.withDefault().split("apple, banana, cherry");
      * // Returns ["apple", "banana", "cherry"]
      * }</pre>
      *
      * @return a new Splitter instance configured with the default delimiter ", ".
      * @see #with(CharSequence)
      * @see #forLines()
-     * @see Joiner#DEFAULT_DELIMITER
-     * @see Joiner#defauLt()
+     * @see Joiner#withDefault()
      */
     @Beta
-    public static Splitter defauLt() {
-        return with(Joiner.DEFAULT_DELIMITER);
+    public static Splitter withDefault() {
+        return with(DEFAULT_DELIMITER);
     }
 
     /**
@@ -340,7 +346,7 @@ public final class Splitter {
      *
      * @return a new Splitter instance configured to split by line separators.
      * @see #with(Pattern)
-     * @see #defauLt()
+     * @see #withDefault()
      */
     @Beta
     public static Splitter forLines() {
@@ -1243,6 +1249,8 @@ public final class Splitter {
 
         final Class<?> eleCls = arrayType.getComponentType();
 
+        N.checkArgument(eleCls != null, "'arrayType' must be an array type, but got: %s", arrayType);
+
         final List<String> substrs = split(source);
 
         if (eleCls.equals(String.class) || eleCls.equals(Object.class)) {
@@ -1460,7 +1468,9 @@ public final class Splitter {
 
         MapSplitter(final Splitter entrySplitter, final Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
+            this.entrySplitter.omitEmptyStrings();
             this.keyValueSplitter = keyValueSplitter;
+            this.keyValueSplitter.limit(2);
         }
 
         /**
@@ -1470,19 +1480,17 @@ public final class Splitter {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Map<String, String> map = MapSplitter.defauLt().split("name=John, age=30, city=NYC");
+         * Map<String, String> map = MapSplitter.withDefault().split("name=John, age=30, city=NYC");
          * // Returns {name=John, age=30, city=NYC}
          * }</pre>
          *
          * @return a new MapSplitter instance with default delimiters ", " and "=".
          * @see #with(CharSequence, CharSequence)
-         * @see Joiner#DEFAULT_DELIMITER
-         * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
-         * @see Joiner#defauLt()
+         * @see Joiner#withDefault()
          */
         @Beta
-        public static MapSplitter defauLt() {
-            return with(Joiner.DEFAULT_DELIMITER, Joiner.DEFAULT_KEY_VALUE_DELIMITER);
+        public static MapSplitter withDefault() {
+            return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
         }
 
         /**
@@ -1970,9 +1978,6 @@ public final class Splitter {
         public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, cs.output);
 
-            entrySplitter.omitEmptyStrings();
-            keyValueSplitter.limit(2);
-
             final ObjIterator<String> iter = entrySplitter.iterate(source);
             ObjIterator<String> keyValueIter = null;
             String entryString = null;
@@ -2066,9 +2071,6 @@ public final class Splitter {
             N.checkArgNotNull(keyType, cs.keyType);
             N.checkArgNotNull(valueType, cs.valueType);
             N.checkArgNotNull(output, cs.output);
-
-            entrySplitter.omitEmptyStrings();
-            keyValueSplitter.limit(2);
 
             final ObjIterator<String> iter = entrySplitter.iterate(source);
             ObjIterator<String> keyValueIter = null;
@@ -2167,9 +2169,6 @@ public final class Splitter {
          * @see #splitToEntryStream(CharSequence)
          */
         public Stream<Map.Entry<String, String>> splitToStream(final CharSequence source) {
-            entrySplitter.omitEmptyStrings();
-            keyValueSplitter.limit(2);
-
             return Stream.of(new ObjIteratorEx<>() {
                 private final ObjIterator<String> iter = entrySplitter.iterate(source);
                 private ObjIterator<String> keyValueIter = null;

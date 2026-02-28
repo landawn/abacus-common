@@ -948,38 +948,38 @@ public class ByteStream104Test extends TestBase {
 
     @Test
     public void testFlattmapToObjArray() {
-        assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).count());
-        assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).count());
+        assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
+        assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toArray());
         assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toList());
         assertEquals(10,
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).count());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
         assertEquals(9,
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
-                        .flattmapToObj(e -> new String[] { "A" + e, "B" + e })
+                        .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
                         .skip(1)
                         .count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
-                        .flattmapToObj(e -> new String[] { "A" + e, "B" + e })
+                        .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
                         .skip(1)
                         .toArray());
         assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
-                        .flattmapToObj(e -> new String[] { "A" + e, "B" + e })
+                        .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
                         .skip(1)
                         .toList());
     }

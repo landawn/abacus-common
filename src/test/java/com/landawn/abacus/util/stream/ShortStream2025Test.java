@@ -540,7 +540,7 @@ public class ShortStream2025Test extends TestBase {
 
     @Test
     public void testFlattmapToObj() {
-        Stream<String> stream = ShortStream.of((short) 1, (short) 2).flattmapToObj(n -> new String[] { "A" + n, "B" + n });
+        Stream<String> stream = ShortStream.of((short) 1, (short) 2).flatMapArrayToObj(n -> new String[] { "A" + n, "B" + n });
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2" }, stream.toArray());
     }
 
@@ -1408,18 +1408,14 @@ public class ShortStream2025Test extends TestBase {
 
     @Test
     public void testDebounce_EmptyStream() {
-        short[] result = ShortStream.empty()
-                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        short[] result = ShortStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(0, result.length);
     }
 
     @Test
     public void testDebounce_SingleElement() {
-        short[] result = ShortStream.of((short) 42)
-                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
-                .toArray();
+        short[] result = ShortStream.of((short) 42).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
 
         assertEquals(1, result.length);
         assertEquals((short) 42, result[0]);
@@ -1465,9 +1461,7 @@ public class ShortStream2025Test extends TestBase {
             input[i] = (short) i;
         }
 
-        short[] result = ShortStream.of(input)
-                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
-                .toArray();
+        short[] result = ShortStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
 
         assertEquals(500, result.length);
     }
@@ -1486,9 +1480,9 @@ public class ShortStream2025Test extends TestBase {
     @Test
     public void testDebounce_ChainedWithOtherOperations() {
         short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 10)
-                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
-                .map(n -> (short) (n * 10))  // 20, 40, 60
+                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
+                .map(n -> (short) (n * 10)) // 20, 40, 60
                 .toArray();
 
         assertEquals(3, result.length);

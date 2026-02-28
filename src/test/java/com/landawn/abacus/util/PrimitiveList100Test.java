@@ -153,9 +153,9 @@ public class PrimitiveList100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteAllByIndices(int... indices) method")
+    @DisplayName("Test removeAt(int... indices) method")
     public void testDeleteAllByIndices() {
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
 
         assertEquals(3, list.size());
         assertEquals(1, list.get(0));
@@ -164,9 +164,9 @@ public class PrimitiveList100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteRange(int fromIndex, int toIndex) method")
+    @DisplayName("Test removeRange(int fromIndex, int toIndex) method")
     public void testDeleteRange() {
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
 
         assertEquals(2, list.size());
         assertEquals(1, list.get(0));

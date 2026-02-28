@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;
 import com.esotericsoftware.reflectasm.MethodAccess;
+import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * High-performance reflection utility class that leverages ASM (bytecode manipulation) for faster
@@ -95,11 +96,11 @@ final class ReflectASM<T> {
 
     private final Class<T> cls;
 
-    private final T target;
+    private final T instance;
 
-    ReflectASM(final Class<T> cls, final T target) {
+    ReflectASM(final Class<T> cls, final T instance) {
         this.cls = cls;
-        this.target = target;
+        this.instance = instance;
     }
 
     /**
@@ -134,7 +135,7 @@ final class ReflectASM<T> {
      * This is used when you want to create new instances or access static members of a class.
      * 
      * <p>The returned ReflectASM instance can be used to create new instances of the class
-     * using the {@link #_new()} method, or to access static fields and methods.</p>
+     * using the {@link #newInstance()} method, or to access static fields and methods.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -187,12 +188,12 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param target the object instance to perform reflection on
+     * @param instance the object instance to perform reflection on
      * @return a ReflectASM instance for the specified object
      * @throws IllegalArgumentException if target is null
      */
-    public static <T> ReflectASM<T> on(final T target) {
-        return new ReflectASM<>((Class<T>) target.getClass(), target);
+    public static <T> ReflectASM<T> on(final T instance) {
+        return new ReflectASM<>((Class<T>) instance.getClass(), instance);
     }
 
     /**
@@ -224,8 +225,25 @@ final class ReflectASM<T> {
      * @return a new ReflectASM instance wrapping the newly created object
      * @throws RuntimeException if the class cannot be instantiated (e.g., no public no-arg constructor)
      */
-    public ReflectASM<T> _new() { //NOSONAR
+    public ReflectASM<T> newInstance() { //NOSONAR
         return new ReflectASM<>(cls, getConstructorAccess(cls).newInstance());
+    }
+
+    /**
+     * Returns the target instance wrapped by this ReflectASM object.
+     * Returns {@code null} if this ReflectASM was created from a class rather than an instance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyClass created = ReflectASM.on(MyClass.class).newInstance().instance();
+     * MyClass existing = ReflectASM.on(created).instance();
+     * }</pre>
+     *
+     * @return the target instance, or {@code null} if reflecting on a class
+     */
+    @MayReturnNull
+    public T instance() {
+        return instance;
     }
 
     /**
@@ -266,7 +284,7 @@ final class ReflectASM<T> {
     public <V> V get(final String fieldName) {
         final FieldAccess fieldAccess = getFieldAccess();
 
-        return (V) fieldAccess.get(target, fieldName);
+        return (V) fieldAccess.get(instance, fieldName);
     }
 
     /**
@@ -310,7 +328,7 @@ final class ReflectASM<T> {
     public ReflectASM<T> set(final String fieldName, final Object value) {
         final FieldAccess fieldAccess = getFieldAccess();
 
-        fieldAccess.set(target, fieldName, value);
+        fieldAccess.set(instance, fieldName, value);
 
         return this;
     }
@@ -360,7 +378,7 @@ final class ReflectASM<T> {
     public <V> V invoke(final String methodName, final Object... args) {
         final MethodAccess methodAccess = getMethodAccess(cls);
 
-        return (V) methodAccess.invoke(target, methodName, args);
+        return (V) methodAccess.invoke(instance, methodName, args);
     }
 
     /**

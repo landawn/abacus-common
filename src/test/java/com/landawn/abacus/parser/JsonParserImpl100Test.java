@@ -134,37 +134,37 @@ public class JsonParserImpl100Test extends TestBase {
     }
 
     @Test
-    public void testReadStringToObject() {
+    public void testparseToObject() {
         String json = "{\"name\": \"John\",\"age\":30}";
-        Person person = parser.readString(json, null, Person.class);
+        Person person = parser.parse(json, null, Person.class);
 
         assertEquals("John", person.getName());
         assertEquals(30, person.getAge());
     }
 
     @Test
-    public void testReadStringToArray() {
+    public void testparseToArray() {
         String json = "[1,2,3,4,5]";
         Integer[] array = new Integer[5];
-        parser.readString(json, null, array);
+        parser.parse(json, null, array);
 
         assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, array);
     }
 
     @Test
-    public void testReadStringToCollection() {
+    public void testparseToCollection() {
         String json = "[\"a\",\"b\",\"c\"]";
         List<String> list = new ArrayList<>();
-        parser.readString(json, null, list);
+        parser.parse(json, null, list);
 
         assertEquals(Arrays.asList("a", "b", "c"), list);
     }
 
     @Test
-    public void testReadStringToMap() {
+    public void testparseToMap() {
         String json = "{\"key1\": \"value1\",\"key2\": \"value2\"}";
         Map<String, String> map = new HashMap<>();
-        parser.readString(json, null, map);
+        parser.parse(json, null, map);
 
         assertEquals("value1", map.get("key1"));
         assertEquals("value2", map.get("key2"));
@@ -430,6 +430,22 @@ public class JsonParserImpl100Test extends TestBase {
         String json = parser.serialize(sheet, JSC.create().writeColumnType(true).writeRowColumnKeyType(true).prettyFormat(true).quotePropName(true));
 
         Sheet<String, String, Integer> sheet2 = parser.deserialize(json, Sheet.class);
+        assertEquals(sheet, sheet2);
+    }
+
+    @Test
+    public void testSerializeSheetWithNumericColumnKeys() {
+        List<String> rowKeys = Arrays.asList("R1", "R2");
+        List<Integer> columnKeys = Arrays.asList(1, 2);
+        Object[][] data = { { 10, 20 }, { 30, 40 } };
+        Sheet<String, Integer, Integer> sheet = new Sheet<>(rowKeys, columnKeys, data);
+
+        sheet.freeze();
+        String json = parser.serialize(sheet, JSC.create().writeColumnType(true).writeRowColumnKeyType(true).quotePropName(true));
+
+        assertTrue(json.contains("\"columnKeyType\""));
+
+        Sheet<String, Integer, Integer> sheet2 = parser.deserialize(json, Sheet.class);
         assertEquals(sheet, sheet2);
     }
 

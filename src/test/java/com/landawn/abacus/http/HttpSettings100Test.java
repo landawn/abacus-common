@@ -29,7 +29,7 @@ public class HttpSettings100Test extends TestBase {
         assertNotNull(settings);
         assertEquals(0, settings.getConnectTimeout());
         assertEquals(0, settings.getReadTimeout());
-        assertFalse(settings.getUseCaches());
+        assertFalse(settings.useCaches());
         assertTrue(settings.doInput());
         assertTrue(settings.doOutput());
         assertFalse(settings.isOneWayRequest());
@@ -108,21 +108,21 @@ public class HttpSettings100Test extends TestBase {
     @Test
     public void testGetUseCaches() {
         HttpSettings settings = new HttpSettings();
-        assertFalse(settings.getUseCaches());
+        assertFalse(settings.useCaches());
 
-        settings.setUseCaches(true);
-        assertTrue(settings.getUseCaches());
+        settings.useCaches(true);
+        assertTrue(settings.useCaches());
     }
 
     @Test
     public void testSetUseCaches() {
         HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.setUseCaches(true);
+        HttpSettings result = settings.useCaches(true);
         assertSame(settings, result);
-        assertTrue(settings.getUseCaches());
+        assertTrue(settings.useCaches());
 
-        settings.setUseCaches(false);
-        assertFalse(settings.getUseCaches());
+        settings.useCaches(false);
+        assertFalse(settings.useCaches());
     }
 
     @Test
@@ -350,7 +350,7 @@ public class HttpSettings100Test extends TestBase {
         HttpSettings original = new HttpSettings();
         original.setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
-                .setUseCaches(true)
+                .useCaches(true)
                 .doInput(false)
                 .doOutput(false)
                 .setOneWayRequest(true)
@@ -375,7 +375,7 @@ public class HttpSettings100Test extends TestBase {
         assertEquals(original.getReadTimeout(), copy.getReadTimeout());
         assertEquals(original.getSSLSocketFactory(), copy.getSSLSocketFactory());
         assertEquals(original.getProxy(), copy.getProxy());
-        assertEquals(original.getUseCaches(), copy.getUseCaches());
+        assertEquals(original.useCaches(), copy.useCaches());
         assertEquals(original.doInput(), copy.doInput());
         assertEquals(original.doOutput(), copy.doOutput());
         assertEquals(original.isOneWayRequest(), copy.isOneWayRequest());
@@ -400,7 +400,7 @@ public class HttpSettings100Test extends TestBase {
     @Test
     public void testToString() {
         HttpSettings settings = new HttpSettings();
-        settings.setConnectTimeout(5000L).setReadTimeout(10000L).setUseCaches(true).setContentFormat(ContentFormat.JSON).header("Header1", "value1");
+        settings.setConnectTimeout(5000L).setReadTimeout(10000L).useCaches(true).setContentFormat(ContentFormat.JSON).header("Header1", "value1");
 
         String str = settings.toString();
         assertNotNull(str);

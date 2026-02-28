@@ -730,25 +730,25 @@ public class DoubleStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmapToObj() {
-        assertEquals(6, DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).count());
+        assertEquals(6, DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).count());
         assertArrayEquals(new String[] { "a1.0", "b1.0", "a2.0", "b2.0", "a3.0", "b3.0" },
-                DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).toArray());
+                DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).toArray());
         assertArrayEquals(new String[] { "a2.0", "b2.0", "a3.0", "b3.0" },
-                DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toArray());
+                DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toArray());
         assertEquals(N.asList("a1.0", "b1.0", "a2.0", "b2.0", "a3.0", "b3.0"),
-                DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).toList());
-        assertEquals(N.asList("a2.0", "b2.0", "a3.0", "b3.0"), DoubleStream.of(1, 2, 3).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toList());
-        assertEquals(6, DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).count());
+                DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).toList());
+        assertEquals(N.asList("a2.0", "b2.0", "a3.0", "b3.0"), DoubleStream.of(1, 2, 3).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toList());
+        assertEquals(6, DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).count());
         assertArrayEquals(new String[] { "a1.0", "b1.0", "a2.0", "b2.0", "a3.0", "b3.0" },
-                DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).toArray());
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).toArray());
         assertArrayEquals(new String[] { "a2.0", "b2.0", "a3.0", "b3.0" },
-                DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toArray());
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toArray());
         assertEquals(N.asList("a1.0", "b1.0", "a2.0", "b2.0", "a3.0", "b3.0"),
-                DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).toList());
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).toList());
         assertEquals(N.asList("a2.0", "b2.0", "a3.0", "b3.0"),
-                DoubleStream.of(1, 2, 3).map(e -> e).flattmapToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toList());
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(d -> new String[] { "a" + d, "b" + d }).skip(2).toList());
     }
 
     @Test

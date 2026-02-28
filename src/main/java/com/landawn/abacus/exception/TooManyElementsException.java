@@ -44,7 +44,7 @@ import java.io.Serial;
  * }</pre>
  * 
  * @see IllegalStateException
- * @see DuplicatedResultException
+ * @see DuplicateResultException
  */
 public class TooManyElementsException extends IllegalStateException {
 

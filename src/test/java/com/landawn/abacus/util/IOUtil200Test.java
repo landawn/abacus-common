@@ -144,10 +144,10 @@ public class IOUtil200Test extends TestBase {
     @Test
     @Disabled("Depends on FileSystemUtil and external environment, hard to unit test reliably")
     public void testFreeDiskSpaceKb() {
-        assertTrue(IOUtil.freeDiskSpaceKB() >= 0);
+        assertTrue(IOUtil.freeDiskSpaceInKB() >= 0);
         File currentDir = new File(".");
-        assertTrue(IOUtil.freeDiskSpaceKB(currentDir.getAbsolutePath()) >= 0);
-        assertTrue(IOUtil.freeDiskSpaceKB(currentDir.getAbsolutePath(), 5000) >= 0);
+        assertTrue(IOUtil.freeDiskSpaceInKB(currentDir.getAbsolutePath()) >= 0);
+        assertTrue(IOUtil.freeDiskSpaceInKB(currentDir.getAbsolutePath(), 5000) >= 0);
     }
 
     @Test
@@ -1835,6 +1835,31 @@ public class IOUtil200Test extends TestBase {
     }
 
     @Test
+    public void testSplitBySizeWithEmptyFileCreatesOnePart() throws IOException {
+        File sourceFile = createTempFileWithContent("splitEmptySource", ".dat", new byte[0]);
+        File destDir = createTempDirectory("splitEmptyDest");
+
+        IOUtil.splitBySize(sourceFile, 10, destDir);
+
+        File part1 = new File(destDir, sourceFile.getName() + "_0001");
+        assertTrue(part1.exists());
+        assertEquals(0, part1.length());
+
+        File[] splitFiles = destDir.listFiles((dir, name) -> name.startsWith(sourceFile.getName() + "_"));
+        assertNotNull(splitFiles);
+        assertEquals(1, splitFiles.length);
+    }
+
+    @Test
+    public void testSplitBySizeWithNonPositivePartSizeThrows() throws IOException {
+        File sourceFile = createTempFileWithContent("splitInvalidSource", ".dat", "abc");
+        File destDir = createTempDirectory("splitInvalidDest");
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.splitBySize(sourceFile, 0, destDir));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.splitBySize(sourceFile, -1, destDir));
+    }
+
+    @Test
     public void testSplitByCount() throws IOException {
         byte[] content = new byte[105];
         for (int i = 0; i < 105; i++)
@@ -2285,14 +2310,14 @@ public class IOUtil200Test extends TestBase {
         File unGzippedFile = new File(tempDir.toFile(), "unGzippedFromGz.txt");
 
         try (InputStream in = IOUtil.newBufferedInputStream(originalFile);
-                OutputStream out = IOUtil.newGZIPOutputStream(IOUtil.newBufferedOutputStream(gzippedFile))) {
+             OutputStream out = IOUtil.newGZIPOutputStream(IOUtil.newBufferedOutputStream(gzippedFile))) {
             IOUtil.write(in, out);
         }
         assertTrue(gzippedFile.exists());
         assertTrue(gzippedFile.length() < originalFile.length());
 
         try (InputStream in = IOUtil.newGZIPInputStream(IOUtil.newBufferedInputStream(gzippedFile));
-                OutputStream out = IOUtil.newBufferedOutputStream(unGzippedFile)) {
+             OutputStream out = IOUtil.newBufferedOutputStream(unGzippedFile)) {
             IOUtil.write(in, out);
         }
         assertTrue(unGzippedFile.exists());
@@ -2307,8 +2332,8 @@ public class IOUtil200Test extends TestBase {
 
         File gzippedFile = new File(tempDir.toFile(), "testReadAllBytes.txt.gz");
         try (FileOutputStream fos = new FileOutputStream(gzippedFile);
-                GZIPOutputStream gzos = new GZIPOutputStream(fos);
-                FileInputStream fis = new FileInputStream(tempTxtFile)) {
+             GZIPOutputStream gzos = new GZIPOutputStream(fos);
+             FileInputStream fis = new FileInputStream(tempTxtFile)) {
             IOUtil.write(fis, gzos);
         }
         assertTrue(gzippedFile.exists());
@@ -2323,7 +2348,8 @@ public class IOUtil200Test extends TestBase {
         String entryName = "entry.txt";
         File zippedFile = new File(tempDir.toFile(), "testReadAllBytes.zip");
 
-        try (FileOutputStream fos = new FileOutputStream(zippedFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
+        try (FileOutputStream fos = new FileOutputStream(zippedFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
             ZipEntry entry = new ZipEntry(entryName);
             zos.putNextEntry(entry);
             zos.write(originalContent.getBytes(StandardCharsets.UTF_8));
@@ -2357,13 +2383,13 @@ public class IOUtil200Test extends TestBase {
         IOUtil.write("Initial", StandardCharsets.UTF_8, testFile);
 
         try (FileOutputStream fosAppend = IOUtil.newFileOutputStream(testFile, true);
-                OutputStreamWriter osw = new OutputStreamWriter(fosAppend, StandardCharsets.UTF_8)) {
+             OutputStreamWriter osw = new OutputStreamWriter(fosAppend, StandardCharsets.UTF_8)) {
             osw.write("-Appended");
         }
         assertEquals("Initial-Appended", IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
 
         try (FileOutputStream fosOverwrite = IOUtil.newFileOutputStream(testFile);
-                OutputStreamWriter osw = new OutputStreamWriter(fosOverwrite, StandardCharsets.UTF_8)) {
+             OutputStreamWriter osw = new OutputStreamWriter(fosOverwrite, StandardCharsets.UTF_8)) {
             osw.write("Overwritten");
         }
         assertEquals("Overwritten", IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
@@ -2411,7 +2437,7 @@ public class IOUtil200Test extends TestBase {
         int bufferSize = 256;
 
         try (ByteArrayInputStream bais = new ByteArrayInputStream(originalText.getBytes(StandardCharsets.UTF_8));
-                GZIPOutputStream gzos = IOUtil.newGZIPOutputStream(new FileOutputStream(gzippedFile), bufferSize)) {
+             GZIPOutputStream gzos = IOUtil.newGZIPOutputStream(new FileOutputStream(gzippedFile), bufferSize)) {
             IOUtil.write(bais, gzos);
         }
         assertTrue(gzippedFile.exists());

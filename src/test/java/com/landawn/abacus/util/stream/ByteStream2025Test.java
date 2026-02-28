@@ -294,7 +294,7 @@ public class ByteStream2025Test extends TestBase {
     @Test
     public void testFlattmapToObj() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2);
-        List<String> result = stream.flattmapToObj(b -> new String[] { "a" + b, "b" + b }).toList();
+        List<String> result = stream.flatMapArrayToObj(b -> new String[] { "a" + b, "b" + b }).toList();
         assertEquals(Arrays.asList("a1", "b1", "a2", "b2"), result);
     }
 
@@ -1436,9 +1436,7 @@ public class ByteStream2025Test extends TestBase {
     @Test
     public void testDebounce_BasicFunctionality() {
         // Allow 3 elements per 1 second window
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // Only first 3 elements should pass through within the window
         assertEquals(3, result.length);
@@ -1450,9 +1448,7 @@ public class ByteStream2025Test extends TestBase {
     @Test
     public void testDebounce_AllElementsPassWhenWithinLimit() {
         // Allow 10 elements per window, but only 5 elements in stream
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
-                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // All elements should pass
         assertEquals(5, result.length);
@@ -1460,18 +1456,14 @@ public class ByteStream2025Test extends TestBase {
 
     @Test
     public void testDebounce_EmptyStream() {
-        byte[] result = ByteStream.empty()
-                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        byte[] result = ByteStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(0, result.length);
     }
 
     @Test
     public void testDebounce_SingleElement() {
-        byte[] result = ByteStream.of((byte) 42)
-                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
-                .toArray();
+        byte[] result = ByteStream.of((byte) 42).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
 
         assertEquals(1, result.length);
         assertEquals((byte) 42, result[0]);
@@ -1480,9 +1472,7 @@ public class ByteStream2025Test extends TestBase {
     @Test
     public void testDebounce_MaxWindowSizeOne() {
         // Only 1 element allowed per window
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
-                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(1, result.length);
         assertEquals((byte) 1, result[0]);
@@ -1517,9 +1507,7 @@ public class ByteStream2025Test extends TestBase {
             input[i] = (byte) i;
         }
 
-        byte[] result = ByteStream.of(input)
-                .debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10))
-                .toArray();
+        byte[] result = ByteStream.of(input).debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
 
         assertEquals(50, result.length);
     }
@@ -1538,9 +1526,9 @@ public class ByteStream2025Test extends TestBase {
     @Test
     public void testDebounce_ChainedWithOtherOperations() {
         byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9, (byte) 10)
-                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
-                .map(n -> (byte) (n * 10))  // 20, 40, 60
+                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
+                .map(n -> (byte) (n * 10)) // 20, 40, 60
                 .toArray();
 
         assertEquals(3, result.length);

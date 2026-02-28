@@ -64,8 +64,8 @@ public class IOUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_freeDiskSpaceKB() {
-        N.println(IOUtil.freeDiskSpaceKB());
+    public void test_freeDiskSpaceInKB() {
+        N.println(IOUtil.freeDiskSpaceInKB());
     }
 
     @Test

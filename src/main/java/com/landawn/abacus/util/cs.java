@@ -106,6 +106,7 @@ public final class cs { // NOSONAR
     public static final String converter = "converter";
     public static final String coreThreadPoolSize = "coreThreadPoolSize";
     public static final String count = "count";
+    public static final String countOfParts = "countOfParts";
     public static final String creator = "creator";
     public static final String csvHeaders = "csvHeaders";
     public static final String curl = "curl";

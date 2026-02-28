@@ -1538,7 +1538,22 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * The Class MoreFiles.
+     * A nested utility class that extends {@link Files} to provide an alias for
+     * Google Guava's {@code MoreFiles} operations. This class inherits all
+     * static methods from the parent {@link Files} class and can be used interchangeably.
+     *
+     * <p>All Path-based operations available in {@link Files} (such as
+     * {@link Files#asByteSource(Path, OpenOption...)}, {@link Files#asByteSink(Path, OpenOption...)},
+     * {@link Files#listFiles(Path)}, and {@link Files#deleteRecursively(Path, RecursiveDeleteOption...)})
+     * are accessible through this class as well.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // All Files methods are accessible through MoreFiles
+     * ByteSource source = Files.MoreFiles.asByteSource(Paths.get("data.bin"));
+     * }</pre>
+     *
+     * @see Files
      */
     public static final class MoreFiles extends Files {
 

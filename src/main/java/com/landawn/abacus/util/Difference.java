@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -462,7 +461,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#commonSet(Collection, Collection)
      */
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final T1[] a, final T2[] b) {
-        return of(Arrays.asList(a), Arrays.asList(b));
+        return of(Array.asList(a), Array.asList(b));
     }
 
     /**

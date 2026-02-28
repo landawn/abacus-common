@@ -241,7 +241,7 @@ public final class HttpSettings {
      *
      * @return {@code true} if caches should be used, {@code false} otherwise
      */
-    public boolean getUseCaches() { // NOSONAR
+    public boolean useCaches() { // NOSONAR
         return useCaches;
     }
 
@@ -253,14 +253,14 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.setUseCaches(false);   // Disable caching (default)
-     * settings.setUseCaches(true);    // Enable caching
+     * settings.useCaches(false);   // Disable caching (default)
+     * settings.useCaches(true);    // Enable caching
      * }</pre>
      *
      * @param useCaches {@code true} to use caches, {@code false} otherwise
      * @return this HttpSettings instance for method chaining
      */
-    public HttpSettings setUseCaches(final boolean useCaches) {
+    public HttpSettings useCaches(final boolean useCaches) {
         this.useCaches = useCaches;
 
         return this;
@@ -364,7 +364,7 @@ public final class HttpSettings {
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
-            contentFormat = HttpUtil.getContentFormat(HttpUtil.getContentType(headers), HttpUtil.getContentEncoding(headers));
+            return HttpUtil.getContentFormat(HttpUtil.getContentType(headers), HttpUtil.getContentEncoding(headers));
         }
 
         return contentFormat;
@@ -378,7 +378,7 @@ public final class HttpSettings {
      * <pre>{@code
      * settings.setContentFormat(ContentFormat.JSON);
      * settings.setContentFormat(ContentFormat.XML);
-     * settings.setContentFormat(ContentFormat.FormUrlEncoded);
+     * settings.setContentFormat(ContentFormat.FORM_URL_ENCODED);
      * }</pre>
      *
      * @param contentFormat the content format to use
@@ -649,7 +649,7 @@ public final class HttpSettings {
                 .setReadTimeout(readTimeout)
                 .setSSLSocketFactory(sslSocketFactory)
                 .setProxy(proxy)
-                .setUseCaches(useCaches)
+                .useCaches(useCaches)
                 .doInput(doInput)
                 .doOutput(doOutput)
                 .setOneWayRequest(isOneWayRequest)

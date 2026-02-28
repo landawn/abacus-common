@@ -342,7 +342,7 @@ public class HttpHeaders2025Test extends TestBase {
         headers.set("Header1", "value1");
         headers.set("Header2", "value2");
 
-        Set<String> names = headers.headerNameSet();
+        Set<String> names = headers.headerNames();
         assertNotNull(names);
         assertEquals(2, names.size());
         assertTrue(names.contains("Header1"));

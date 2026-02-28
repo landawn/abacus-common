@@ -534,8 +534,8 @@ public class Fn202Test extends TestBase {
         assertEquals(2, Fn.<Collection<Integer>> size().apply(Arrays.asList(1, 2)));
         assertEquals(0, Fn.<Collection<Integer>> size().apply(null));
 
-        assertEquals(1, Fn.<Map<String, Integer>> sizeM().apply(Collections.singletonMap("a", 1)));
-        assertEquals(0, Fn.<Map<String, Integer>> sizeM().apply(null));
+        assertEquals(1, Fn.<Map<String, Integer>> mapSize().apply(Collections.singletonMap("a", 1)));
+        assertEquals(0, Fn.<Map<String, Integer>> mapSize().apply(null));
     }
 
     @Test
@@ -591,9 +591,9 @@ public class Fn202Test extends TestBase {
         assertTrue(Fn.notBlank(s -> (String) s).test("a"));
         assertFalse(Fn.notBlank(s -> (String) s).test(" "));
 
-        assertTrue(Fn.notEmptyA().test(new String[1]));
-        assertTrue(Fn.notEmptyC().test(Arrays.asList(1)));
-        assertTrue(Fn.notEmptyM().test(Collections.singletonMap("a", 1)));
+        assertTrue(Fn.notEmptyArray().test(new String[1]));
+        assertTrue(Fn.notEmptyCollection().test(Arrays.asList(1)));
+        assertTrue(Fn.notEmptyMap().test(Collections.singletonMap("a", 1)));
     }
 
     @Test

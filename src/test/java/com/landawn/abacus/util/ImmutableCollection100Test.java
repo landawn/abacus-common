@@ -199,7 +199,7 @@ public class ImmutableCollection100Test extends TestBase {
         ImmutableCollection<String> immutable3 = ImmutableCollection.wrap(list3);
 
         Assertions.assertEquals(immutable1, immutable2);
-        Assertions.assertNotEquals(immutable1, list2);
+        Assertions.assertEquals(immutable1, list2);
 
         Assertions.assertNotEquals(immutable1, immutable3);
         Assertions.assertNotEquals(immutable1, list3);

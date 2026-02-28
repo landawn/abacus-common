@@ -406,7 +406,7 @@ public class ImmutableCollection2025Test extends TestBase {
         ImmutableCollection<String> collection1 = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
         Collection<String> collection2 = Arrays.asList("a", "b", "c");
 
-        Assertions.assertFalse(collection1.equals(collection2));
+        Assertions.assertTrue(collection1.equals(collection2));
     }
 
     @Test
@@ -445,7 +445,7 @@ public class ImmutableCollection2025Test extends TestBase {
         ImmutableCollection<String> collection1 = ImmutableCollection.wrap(Collections.emptyList());
         Collection<String> collection2 = Collections.emptyList();
 
-        Assertions.assertFalse(collection1.equals(collection2));
+        Assertions.assertTrue(collection1.equals(collection2));
     }
 
     @Test

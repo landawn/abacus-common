@@ -704,11 +704,11 @@ public class FloatStream2025Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flattmapToObj() should flatten array to object stream")
+        @DisplayName("flatMapArrayToObj() should flatten array to object stream")
         public void testFlattmapToObj() {
             FloatStream stream = createFloatStream(1.0f, 2.0f);
             assertArrayEquals(new String[] { "1.0", "2.0", "2.0", "4.0" },
-                    stream.flattmapToObj(f -> new String[] { String.valueOf(f), String.valueOf(f * 2) }).toArray(String[]::new));
+                    stream.flatMapArrayToObj(f -> new String[] { String.valueOf(f), String.valueOf(f * 2) }).toArray(String[]::new));
         }
 
         @Test
@@ -1680,9 +1680,7 @@ public class FloatStream2025Test extends TestBase {
     @Test
     public void testDebounce_BasicFunctionality() {
         // Allow 3 elements per 1 second window
-        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // Only first 3 elements should pass through within the window
         assertEquals(3, result.length);
@@ -1694,9 +1692,7 @@ public class FloatStream2025Test extends TestBase {
     @Test
     public void testDebounce_AllElementsPassWhenWithinLimit() {
         // Allow 10 elements per window, but only 5 elements in stream
-        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
-                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // All elements should pass
         assertEquals(5, result.length);
@@ -1704,18 +1700,14 @@ public class FloatStream2025Test extends TestBase {
 
     @Test
     public void testDebounce_EmptyStream() {
-        float[] result = FloatStream.empty()
-                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        float[] result = FloatStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(0, result.length);
     }
 
     @Test
     public void testDebounce_SingleElement() {
-        float[] result = FloatStream.of(42.5f)
-                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
-                .toArray();
+        float[] result = FloatStream.of(42.5f).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
 
         assertEquals(1, result.length);
         assertEquals(42.5f, result[0], 0.001f);
@@ -1724,9 +1716,7 @@ public class FloatStream2025Test extends TestBase {
     @Test
     public void testDebounce_MaxWindowSizeOne() {
         // Only 1 element allowed per window
-        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
-                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(1, result.length);
         assertEquals(1.0f, result[0], 0.001f);
@@ -1761,18 +1751,14 @@ public class FloatStream2025Test extends TestBase {
             input[i] = i;
         }
 
-        float[] result = FloatStream.of(input)
-                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
-                .toArray();
+        float[] result = FloatStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
 
         assertEquals(500, result.length);
     }
 
     @Test
     public void testDebounce_PreservesOrder() {
-        float[] result = FloatStream.of(10.0f, 20.0f, 30.0f, 40.0f, 50.0f)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        float[] result = FloatStream.of(10.0f, 20.0f, 30.0f, 40.0f, 50.0f).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(10.0f, result[0], 0.001f);
         assertEquals(20.0f, result[1], 0.001f);
@@ -1782,9 +1768,9 @@ public class FloatStream2025Test extends TestBase {
     @Test
     public void testDebounce_ChainedWithOtherOperations() {
         float[] result = FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f)
-                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
-                .map(n -> n * 10)  // 20, 40, 60
+                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
+                .map(n -> n * 10) // 20, 40, 60
                 .toArray();
 
         assertEquals(3, result.length);

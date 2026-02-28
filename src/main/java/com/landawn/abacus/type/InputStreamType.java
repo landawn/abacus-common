@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -30,6 +29,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -151,13 +151,15 @@ public class InputStreamType extends AbstractType<InputStream> {
             return null; // NOSONAR
         }
 
+        final byte[] bytes = str.getBytes(Charsets.DEFAULT);
+
         if (bytesConstructor != null) {
             //noinspection PrimitiveArrayArgumentToVarargsMethod
-            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, str.getBytes()); //NOSONAR
+            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, bytes); // NOSONAR
         } else if (streamConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(str.getBytes()));
+            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(bytes));
         } else {
-            return new ByteArrayInputStream(str.getBytes());
+            return new ByteArrayInputStream(bytes);
         }
     }
 
@@ -363,7 +365,7 @@ public class InputStreamType extends AbstractType<InputStream> {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer writer) {
-                IOUtil.write(new InputStreamReader(x), writer);
+                IOUtil.write(IOUtil.newInputStreamReader(x), writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }

@@ -241,7 +241,6 @@ public class Multimap123Test extends TestBase {
         assertEquals(3, listMultimap.totalValueCount());
     }
 
-
     @Test
     public void testIsEmpty() {
         assertTrue(listMultimap.isEmpty());

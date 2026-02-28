@@ -239,27 +239,27 @@ public class LongList200Test extends TestBase {
     @Test
     public void testDelete() {
         LongList list = LongList.of(10L, 20L, 30L);
-        long deleted = list.delete(1);
+        long deleted = list.removeAt(1);
         assertEquals(20L, deleted);
         assertArrayEquals(new long[] { 10L, 30L }, list.toArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         LongList list = LongList.of(0L, 1L, 2L, 3L, 4L, 5L);
-        list.deleteAllByIndices(1, 3, 5);
+        list.removeAt(1, 3, 5);
         assertArrayEquals(new long[] { 0L, 2L, 4L }, list.toArray());
-        list.deleteAllByIndices();
+        list.removeAt();
         assertArrayEquals(new long[] { 0L, 2L, 4L }, list.toArray());
     }
 
     @Test
     public void testDeleteRange() {
         LongList list = LongList.of(0L, 1L, 2L, 3L, 4L, 5L);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertArrayEquals(new long[] { 0L, 4L, 5L }, list.toArray());
-        list.deleteRange(2, 2);
+        list.removeRange(2, 2);
         assertArrayEquals(new long[] { 0L, 4L, 5L }, list.toArray());
     }
 

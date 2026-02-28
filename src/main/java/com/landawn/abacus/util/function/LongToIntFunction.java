@@ -25,10 +25,11 @@ import com.landawn.abacus.util.Throwables;
  * and {@code java.util.function.LongToIntFunction}, providing compatibility with the Java standard library
  * while adding a predefined default conversion function.
  *
- * @see java.util.function.Function
- * @see java.util.function.LongToIntFunction
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Function
+ * @see java.util.function.LongToIntFunction
  */
 @FunctionalInterface
 public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeException>, java.util.function.LongToIntFunction { //NOSONAR

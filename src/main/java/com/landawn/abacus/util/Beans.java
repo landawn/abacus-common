@@ -924,10 +924,12 @@ public final class Beans {
                 propName = field.getName();
             }
 
-            field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + methodName);
+            if (Strings.isEmpty(propName)) {
+                field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + methodName);
 
-            if (field != null && field.getType().isAssignableFrom(targetType)) {
-                propName = field.getName();
+                if (field != null && field.getType().isAssignableFrom(targetType)) {
+                    propName = field.getName();
+                }
             }
 
             if (Strings.isEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
@@ -1878,9 +1880,9 @@ public final class Beans {
             synchronized (beanDeclaredPropGetMethodPool) {
                 final Map<String, Method> setterMethodList = getPropSetters(cls);
 
-                for (final String key : setterMethodList.keySet()) {
-                    if (Beans.isPropName(cls, propName, key)) {
-                        method = propSetMethodMap.get(key);
+                for (final Map.Entry<String, Method> entry : setterMethodList.entrySet()) {
+                    if (Beans.isPropName(cls, propName, entry.getKey())) {
+                        method = entry.getValue();
 
                         break;
                     }
@@ -2118,7 +2120,7 @@ public final class Beans {
                             propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
                 }
 
-                final PropInfo propInfo = ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(propSetMethod.getName());
+                final PropInfo propInfo = ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(getPropNameByMethod(propSetMethod));
 
                 if (propInfo != null) {
                     propValue = N.convert(propValue, propInfo.jsonXmlType);
@@ -2126,6 +2128,7 @@ public final class Beans {
                     try {
                         propSetMethod.invoke(bean, propValue);
                     } catch (IllegalAccessException | InvocationTargetException e2) {
+                        e.addSuppressed(e2);
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
                 } else {

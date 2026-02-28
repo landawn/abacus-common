@@ -58,7 +58,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testThreadModeAttribute() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicReference<Thread> executionThread = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -84,7 +84,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testStrictEventTypeAttribute() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicInteger normalCount = new AtomicInteger(0);
         AtomicInteger strictCount = new AtomicInteger(0);
 
@@ -112,7 +112,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testStickyAttribute() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicReference<String> receivedEvent = new AtomicReference<>();
 
         eventBus.postSticky("Sticky Event");
@@ -132,7 +132,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testEventIdAttribute() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicInteger event1Count = new AtomicInteger(0);
         AtomicInteger event2Count = new AtomicInteger(0);
 
@@ -161,7 +161,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testIntervalAttribute() throws InterruptedException {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicInteger eventCount = new AtomicInteger(0);
 
         class TestClass {
@@ -189,7 +189,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testDeduplicateAttribute() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicInteger eventCount = new AtomicInteger(0);
         AtomicReference<String> lastEvent = new AtomicReference<>();
 
@@ -216,7 +216,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testMultipleAttributesCombined() throws InterruptedException {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicInteger eventCount = new AtomicInteger(0);
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -253,7 +253,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testMethodRequirements() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
 
         class InvalidSubscriber {
             @Subscribe
@@ -276,7 +276,7 @@ public class Subscribe100Test extends TestBase {
 
     @Test
     public void testAnnotationOnValidMethod() {
-        EventBus eventBus = new EventBus();
+        EventBus eventBus = EventBus.create();
         AtomicReference<String> received = new AtomicReference<>();
 
         class ValidSubscriber {

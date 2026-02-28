@@ -159,7 +159,7 @@ public class DoubleStream2025Test extends TestBase {
     @Test
     public void testFlattmapToObj() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
-        List<String> result = stream.flattmapToObj(x -> new String[] { "A" + x, "B" + x }).toList();
+        List<String> result = stream.flatMapArrayToObj(x -> new String[] { "A" + x, "B" + x }).toList();
         assertEquals(4, result.size());
     }
 
@@ -1325,9 +1325,7 @@ public class DoubleStream2025Test extends TestBase {
     @Test
     public void testDebounce_BasicFunctionality() {
         // Allow 3 elements per 1 second window
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // Only first 3 elements should pass through within the window
         assertEquals(3, result.length);
@@ -1337,9 +1335,7 @@ public class DoubleStream2025Test extends TestBase {
     @Test
     public void testDebounce_AllElementsPassWhenWithinLimit() {
         // Allow 10 elements per window, but only 5 elements in stream
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
-                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         // All elements should pass
         assertEquals(5, result.length);
@@ -1348,18 +1344,14 @@ public class DoubleStream2025Test extends TestBase {
 
     @Test
     public void testDebounce_EmptyStream() {
-        double[] result = DoubleStream.empty()
-                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        double[] result = DoubleStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(0, result.length);
     }
 
     @Test
     public void testDebounce_SingleElement() {
-        double[] result = DoubleStream.of(42.5)
-                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
-                .toArray();
+        double[] result = DoubleStream.of(42.5).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
 
         assertEquals(1, result.length);
         assertEquals(42.5, result[0], 0.001);
@@ -1368,9 +1360,7 @@ public class DoubleStream2025Test extends TestBase {
     @Test
     public void testDebounce_MaxWindowSizeOne() {
         // Only 1 element allowed per window
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
-                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertEquals(1, result.length);
         assertEquals(1.0, result[0], 0.001);
@@ -1405,18 +1395,14 @@ public class DoubleStream2025Test extends TestBase {
             input[i] = i;
         }
 
-        double[] result = DoubleStream.of(input)
-                .debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10))
-                .toArray();
+        double[] result = DoubleStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
 
         assertEquals(500, result.length);
     }
 
     @Test
     public void testDebounce_PreservesOrder() {
-        double[] result = DoubleStream.of(10.0, 20.0, 30.0, 40.0, 50.0)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
+        double[] result = DoubleStream.of(10.0, 20.0, 30.0, 40.0, 50.0).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
         assertArrayEquals(new double[] { 10.0, 20.0, 30.0 }, result, 0.001);
     }
@@ -1424,9 +1410,9 @@ public class DoubleStream2025Test extends TestBase {
     @Test
     public void testDebounce_ChainedWithOtherOperations() {
         double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
-                .filter(n -> n % 2 == 0)  // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // 2, 4, 6
-                .map(n -> n * 10)  // 20, 40, 60
+                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
+                .map(n -> n * 10) // 20, 40, 60
                 .toArray();
 
         assertEquals(3, result.length);

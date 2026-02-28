@@ -189,29 +189,29 @@ public class LongList101Test extends TestBase {
     public void testDeleteAtBoundaries() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
 
-        assertEquals(1L, list.delete(0));
+        assertEquals(1L, list.removeAt(0));
         assertEquals(4, list.size());
         assertEquals(2L, list.get(0));
 
-        assertEquals(5L, list.delete(list.size() - 1));
+        assertEquals(5L, list.removeAt(list.size() - 1));
         assertEquals(3, list.size());
         assertEquals(4L, list.get(list.size() - 1));
     }
 
     @Test
     public void testDeleteAllByIndicesEmpty() {
-        list.deleteAllByIndices();
+        list.removeAt();
         assertTrue(list.isEmpty());
 
         list.addAll(new long[] { 1L, 2L, 3L });
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteAllByIndicesOutOfOrder() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
-        list.deleteAllByIndices(4, 1, 2);
+        list.removeAt(4, 1, 2);
         assertEquals(2, list.size());
         assertEquals(1L, list.get(0));
         assertEquals(4L, list.get(1));
@@ -220,14 +220,14 @@ public class LongList101Test extends TestBase {
     @Test
     public void testDeleteRangeEmptyRange() {
         list.addAll(new long[] { 1L, 2L, 3L });
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteRangeEntireList() {
         list.addAll(new long[] { 1L, 2L, 3L });
-        list.deleteRange(0, 3);
+        list.removeRange(0, 3);
         assertTrue(list.isEmpty());
     }
 

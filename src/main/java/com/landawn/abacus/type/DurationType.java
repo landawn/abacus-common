@@ -120,7 +120,9 @@ public class DurationType extends AbstractType<Duration> {
      */
     @Override
     public Duration get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return Duration.ofMillis(rs.getLong(columnIndex));
+        final long millis = rs.getLong(columnIndex);
+
+        return rs.wasNull() ? null : Duration.ofMillis(millis);
     }
 
     /**
@@ -134,7 +136,9 @@ public class DurationType extends AbstractType<Duration> {
      */
     @Override
     public Duration get(final ResultSet rs, final String columnName) throws SQLException {
-        return Duration.ofMillis(rs.getLong(columnName));
+        final long millis = rs.getLong(columnName);
+
+        return rs.wasNull() ? null : Duration.ofMillis(millis);
     }
 
     /**

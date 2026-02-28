@@ -166,7 +166,7 @@ public class ByteStream201Test extends TestBase {
     @Test
     public void testFlattMapToObj() {
         byteStream = createByteStream(new byte[] { 1, 2 });
-        List<String> result = byteStream.flattmapToObj(b -> new String[] { "E" + b, "F" + b }).toList();
+        List<String> result = byteStream.flatMapArrayToObj(b -> new String[] { "E" + b, "F" + b }).toList();
         assertEquals(Arrays.asList("E1", "F1", "E2", "F2"), result);
     }
 

@@ -255,15 +255,15 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
         return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
     }
 
-    static final DecimalFormat df = new DecimalFormat("#,###.000000");
+    private static final String DECIMAL_FORMAT_PATTERN = "#,###.000000";
 
     /**
      * Returns a string representation of this summary statistics object.
-     * 
+     *
      * <p>The string representation includes min, max, count, sum, and average
      * values formatted with appropriate decimal places. Values are formatted
      * using a DecimalFormat with pattern "#,###.000000".</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}
@@ -273,6 +273,8 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      */
     @Override
     public String toString() {
+        final DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT_PATTERN);
+
         return Strings.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",
                 String.valueOf(count), ", sum=", df.format(getSum()), ", average=", df.format(getAverage()), "}");
     }

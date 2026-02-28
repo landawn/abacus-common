@@ -25,11 +25,12 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends {@link Throwables.FloatBiConsumer} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see FloatConsumer
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeException> { //NOSONAR

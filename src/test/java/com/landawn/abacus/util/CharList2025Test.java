@@ -505,7 +505,7 @@ public class CharList2025Test extends TestBase {
     @DisplayName("Test delete() by index")
     public void testDelete() {
         CharList list = CharList.of('a', 'b', 'c');
-        char deleted = list.delete(1);
+        char deleted = list.removeAt(1);
         assertEquals('b', deleted);
         assertEquals(2, list.size());
         assertEquals('a', list.get(0));
@@ -516,15 +516,15 @@ public class CharList2025Test extends TestBase {
     @DisplayName("Test delete() with invalid index throws exception")
     public void testDeleteInvalidIndex() {
         CharList list = CharList.of('a', 'b', 'c');
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(3));
     }
 
     @Test
-    @DisplayName("Test deleteAllByIndices()")
+    @DisplayName("Test removeAt()")
     public void testDeleteAllByIndices() {
         CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals('a', list.get(0));
         assertEquals('c', list.get(1));
@@ -532,30 +532,30 @@ public class CharList2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteAllByIndices() with empty indices")
+    @DisplayName("Test removeAt() with empty indices")
     public void testDeleteAllByIndicesEmpty() {
         CharList list = CharList.of('a', 'b', 'c');
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
-    @DisplayName("Test deleteRange()")
+    @DisplayName("Test removeRange()")
     public void testDeleteRange() {
         CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals('a', list.get(0));
         assertEquals('e', list.get(1));
     }
 
     @Test
-    @DisplayName("Test deleteRange() with invalid range throws exception")
+    @DisplayName("Test removeRange() with invalid range throws exception")
     public void testDeleteRangeInvalid() {
         CharList list = CharList.of('a', 'b', 'c');
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
     }
 
     @Test

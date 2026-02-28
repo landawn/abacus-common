@@ -25,10 +25,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <R> the result type of method {@code call}
  *
- * @see java.util.concurrent.Callable
- * @see Runnable
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.concurrent.Callable
+ * @see Runnable
  */
 @FunctionalInterface
 public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> { //NOSONAR

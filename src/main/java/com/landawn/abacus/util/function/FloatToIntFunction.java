@@ -20,11 +20,12 @@ package com.landawn.abacus.util.function;
  * <p>This is a primitive type specialization of {@link java.util.function.Function} for the
  * case where the input is a {@code float} and the output is an {@code int}.</p>
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Function
  * @see java.util.function.DoubleToIntFunction
  * @see java.util.function.ToIntFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatToIntFunction {

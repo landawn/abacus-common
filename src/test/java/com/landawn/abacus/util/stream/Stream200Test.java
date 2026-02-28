@@ -994,12 +994,12 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).nMatch(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).nMatch(3, 3, x -> x % 2 == 0));
-        assertTrue(Stream.of(1, 2, 3, 4, 5).nMatch(2, 2, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).countMatchBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).countMatchBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5).countMatchBetween(2, 2, x -> x % 2 == 0));
 
-        assertFalse(Stream.of(1, 2, 3).nMatch(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(2, 4, 6, 8).nMatch(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3).countMatchBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(2, 4, 6, 8).countMatchBetween(2, 3, x -> x % 2 == 0));
     }
 
     @Test

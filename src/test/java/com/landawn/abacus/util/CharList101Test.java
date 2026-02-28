@@ -379,7 +379,7 @@ public class CharList101Test extends TestBase {
     @DisplayName("Test delete()")
     public void testDelete() {
         list.addAll(CharList.of('a', 'b', 'c'));
-        char deleted = list.delete(1);
+        char deleted = list.removeAt(1);
         assertEquals('b', deleted);
         assertEquals(2, list.size());
         assertEquals('a', list.get(0));
@@ -387,10 +387,10 @@ public class CharList101Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteAllByIndices()")
+    @DisplayName("Test removeAt()")
     public void testDeleteAllByIndices() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals('a', list.get(0));
         assertEquals('c', list.get(1));
@@ -398,10 +398,10 @@ public class CharList101Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteRange()")
+    @DisplayName("Test removeRange()")
     public void testDeleteRange() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals('a', list.get(0));
         assertEquals('e', list.get(1));

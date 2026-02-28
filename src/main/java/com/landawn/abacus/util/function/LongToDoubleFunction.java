@@ -25,10 +25,11 @@ import com.landawn.abacus.util.Throwables;
  * and {@code java.util.function.LongToDoubleFunction}, providing compatibility with the Java standard library
  * while adding a predefined identity function.
  *
- * @see java.util.function.Function
- * @see java.util.function.LongToDoubleFunction
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Function
+ * @see java.util.function.LongToDoubleFunction
  */
 @FunctionalInterface
 public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<RuntimeException>, java.util.function.LongToDoubleFunction { //NOSONAR

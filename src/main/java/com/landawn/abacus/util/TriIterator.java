@@ -867,29 +867,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
 
     /**
-     * Performs the given action for each remaining element in the iterator until all elements
-     * have been processed or the action throws an exception.
-     *
-     * <p>This method is similar to {@link #forEachRemaining(TriConsumer)} but supports actions that may throw
-     * checked exceptions. This is particularly useful when the iteration logic involves I/O operations,
-     * database access, or other operations that declare checked exceptions, eliminating the need to
-     * wrap exceptions in unchecked RuntimeExceptions.</p>
+     * Performs the given action for each remaining triple in this iterator.
+     * This variant supports actions that may throw checked exceptions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] ids = {"user1", "user2", "user3"};
-     * String[] names = {"Alice", "Bob", "Charlie"};
-     * String[] emails = {"alice@example.com", "bob@example.com", "charlie@example.com"};
-     * TriIterator<String, String, String> iter = TriIterator.zip(ids, names, emails);
-     *
-     * // Example with IOException - no try-catch needed at call site
-     * iter.foreachRemaining((id, name, email) -> {
-     *     writeToFile(id, name, email);  // method that throws IOException
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(
+     *         List.of("u1", "u2"),
+     *         List.of(20, 30),
+     *         List.of("A", "B"));
+     * iter.foreachRemaining((id, age, level) -> {
+     *     consume(id, age, level); // method may throw checked exception
      * });
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each remaining triple, must not be {@code null}
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E; // NOSONAR

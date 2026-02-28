@@ -534,8 +534,6 @@ public class Duration2025Test extends TestBase {
         assertEquals(10000L, original.toMillis());
         assertEquals(10000L, abs.toMillis());
     }
-    
-
 
     @Test
     public void test_difference_dates() {

@@ -121,7 +121,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
             return LocalTime.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {

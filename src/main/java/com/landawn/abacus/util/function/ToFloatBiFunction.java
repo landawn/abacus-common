@@ -23,10 +23,11 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(Object, Object)}.
  *
- * @param <T> the type of the first argument to the function
- * @param <U> the type of the second argument to the function
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the first argument to the function
+ * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
 public interface ToFloatBiFunction<T, U> {

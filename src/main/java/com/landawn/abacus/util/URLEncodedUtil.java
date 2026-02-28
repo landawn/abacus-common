@@ -1188,12 +1188,12 @@ public final class URLEncodedUtil {
                 propInfo = beanInfo.getPropInfo(name);
 
                 if (value == null) {
-                    propValue = propInfo.jsonXmlType.defaultValue();
+                    propValue = propInfo == null ? null : propInfo.type.defaultValue();
                 } else {
-                    propValue = propInfo.readPropValue(value);
+                    propValue = propInfo == null ? value : propInfo.readPropValue(value);
                 }
 
-                beanInfo.setPropValue(result, name, propValue);
+                beanInfo.setPropValue(result, name, propValue, true);
             }
         }
 
@@ -1247,16 +1247,17 @@ public final class URLEncodedUtil {
             values = entry.getValue();
 
             if (N.isEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
-                propValue = propInfo.jsonXmlType.defaultValue();
+                propValue = propInfo == null ? null : propInfo.type.defaultValue();
             } else {
-                if (propInfo.jsonXmlType.clazz().equals(String[].class)) {
+                if (propInfo != null && propInfo.type.clazz().equals(String[].class)) {
                     propValue = values;
                 } else {
-                    propValue = propInfo.readPropValue(Strings.join(values, ", "));
+                    final String mergedValue = Strings.join(values, ", ");
+                    propValue = propInfo == null ? mergedValue : propInfo.readPropValue(mergedValue);
                 }
             }
 
-            propInfo.setPropValue(result, propValue);
+            beanInfo.setPropValue(result, entry.getKey(), propValue, true);
         }
 
         return beanInfo.finishBeanResult(result);
@@ -1283,7 +1284,7 @@ public final class URLEncodedUtil {
             return null;
         }
 
-        final ByteBuffer bb = ByteBuffer.allocate(content.length());
+        final ByteBuffer bb = ByteBuffer.allocate(content.length() * 4);
         final CharBuffer cb = CharBuffer.wrap(content);
 
         while (cb.hasRemaining()) {
@@ -1305,9 +1306,16 @@ public final class URLEncodedUtil {
             } else if (plusAsBlank && (c == '+')) {
                 bb.put((byte) ' ');
             } else {
-                // Encode non-ASCII chars properly instead of truncating via (byte) cast
                 if (c > 0x7F) {
-                    final byte[] bytes = String.valueOf(c).getBytes(charset);
+                    // Keep surrogate pairs intact when encoding non-ASCII characters.
+                    final byte[] bytes;
+
+                    if (Character.isHighSurrogate(c) && cb.hasRemaining() && Character.isLowSurrogate(cb.charAt(cb.position()))) {
+                        bytes = new String(new char[] { c, cb.get() }).getBytes(charset);
+                    } else {
+                        bytes = String.valueOf(c).getBytes(charset);
+                    }
+
                     for (final byte b : bytes) {
                         bb.put(b);
                     }

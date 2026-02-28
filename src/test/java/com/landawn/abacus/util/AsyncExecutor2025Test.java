@@ -490,6 +490,7 @@ public class AsyncExecutor2025Test extends TestBase {
         };
         AsyncExecutor executor = new AsyncExecutor(plainExecutor);
         executor.shutdown(1, TimeUnit.SECONDS);
+        Assertions.assertThrows(IllegalStateException.class, executor::getExecutor);
     }
 
     @Test

@@ -66,24 +66,35 @@ public class ObjectPool101Test extends TestBase {
     }
 
     @Test
-    public void testCachingBehavior() {
+    public void testKeySetIsLiveView() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key1", 1);
         pool.put("key2", 2);
 
-        Set<String> keys1 = pool.keySet();
-        Set<String> keys2 = pool.keySet();
+        Set<String> keys = pool.keySet();
+        Assertions.assertEquals(2, keys.size());
 
-        Assertions.assertSame(keys1, keys2);
-
+        // Live view reflects subsequent modifications
         pool.put("key3", 3);
-        Set<String> keys3 = pool.keySet();
-        Assertions.assertNotSame(keys1, keys3);
+        Assertions.assertEquals(3, keys.size());
+        Assertions.assertTrue(keys.contains("key3"));
+
+        pool.remove("key1");
+        Assertions.assertEquals(2, keys.size());
+        Assertions.assertFalse(keys.contains("key1"));
+    }
+
+    @Test
+    public void testConstructorZeroCapacity() {
+        // ConcurrentHashMap accepts 0 as initial capacity hint
+        ObjectPool<String, Integer> pool = new ObjectPool<>(0);
+        Assertions.assertNotNull(pool);
+        pool.put("key", 1);
+        Assertions.assertEquals(1, pool.get("key"));
     }
 
     @Test
     public void testConstructorInvalidCapacity() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new ObjectPool<>(0));
         Assertions.assertThrows(IllegalArgumentException.class, () -> new ObjectPool<>(-1));
     }
 
@@ -122,13 +133,13 @@ public class ObjectPool101Test extends TestBase {
     @Test
     public void testPutNullKey() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> pool.put(null, 100));
+        Assertions.assertThrows(NullPointerException.class, () -> pool.put(null, 100));
     }
 
     @Test
     public void testPutNullValue() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> pool.put("key", null));
+        Assertions.assertThrows(NullPointerException.class, () -> pool.put("key", null));
     }
 
     @Test
@@ -172,12 +183,8 @@ public class ObjectPool101Test extends TestBase {
         map.put("two", null);
         map.put("three", 3);
 
-        pool.putAll(map);
-
-        Assertions.assertEquals(2, pool.size());
-        Assertions.assertEquals(1, pool.get("one"));
-        Assertions.assertNull(pool.get("two"));
-        Assertions.assertEquals(3, pool.get("three"));
+        // ConcurrentHashMap does not permit null values
+        Assertions.assertThrows(NullPointerException.class, () -> pool.putAll(map));
     }
 
     @Test
@@ -254,13 +261,25 @@ public class ObjectPool101Test extends TestBase {
     }
 
     @Test
-    public void testKeySetUnmodifiable() {
+    public void testKeySetAddUnsupported() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
 
         Set<String> keys = pool.keySet();
+        // add is unsupported on ConcurrentHashMap's keySet (no default mapped value)
         Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.add("new"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.remove("key"));
+    }
+
+    @Test
+    public void testKeySetRemoveWritesThrough() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+
+        Set<String> keys = pool.keySet();
+        // remove on live view writes through to the map
+        Assertions.assertTrue(keys.remove("key"));
+        Assertions.assertTrue(pool.isEmpty());
+        Assertions.assertNull(pool.get("key"));
     }
 
     @Test
@@ -293,13 +312,24 @@ public class ObjectPool101Test extends TestBase {
     }
 
     @Test
-    public void testValuesUnmodifiable() {
+    public void testValuesAddUnsupported() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
 
         Collection<Integer> values = pool.values();
+        // add is unsupported on ConcurrentHashMap's values view
         Assertions.assertThrows(UnsupportedOperationException.class, () -> values.add(200));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> values.remove(100));
+    }
+
+    @Test
+    public void testValuesRemoveWritesThrough() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+
+        Collection<Integer> values = pool.values();
+        // remove on live view writes through to the map
+        Assertions.assertTrue(values.remove(100));
+        Assertions.assertTrue(pool.isEmpty());
     }
 
     @Test
@@ -324,12 +354,15 @@ public class ObjectPool101Test extends TestBase {
     }
 
     @Test
-    public void testEntrySetUnmodifiable() {
+    public void testEntrySetClearWritesThrough() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
 
         Set<Map.Entry<String, Integer>> entries = pool.entrySet();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> entries.clear());
+        // clear on live view writes through to the map
+        entries.clear();
+        Assertions.assertTrue(pool.isEmpty());
+        Assertions.assertEquals(0, pool.size());
     }
 
     @Test
@@ -388,15 +421,15 @@ public class ObjectPool101Test extends TestBase {
         Assertions.assertEquals(1, pool.size());
     }
 
-    @Test
-    public void testHash() {
-        int hash1 = ObjectPool.hash("test");
-        int hash2 = ObjectPool.hash("test");
-        Assertions.assertEquals(hash1, hash2);
-
-        int hashNull = ObjectPool.hash(null);
-        Assertions.assertEquals(0, hashNull);
-    }
+    //    @Test
+    //    public void testHash() {
+    //        int hash1 = ObjectPool.hash("test");
+    //        int hash2 = ObjectPool.hash("test");
+    //        Assertions.assertEquals(hash1, hash2);
+    //
+    //        int hashNull = ObjectPool.hash(null);
+    //        Assertions.assertEquals(0, hashNull);
+    //    }
 
     @Test
     public void testConcurrentAccess() throws InterruptedException {

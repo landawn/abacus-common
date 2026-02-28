@@ -453,8 +453,15 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @return a new Range with transformed endpoints maintaining the same bound types.
      */
     public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
-        return new Range<>(new LowerEndpoint<>(mapper.apply(lowerEndpoint.value), lowerEndpoint.isClosed),
-                new UpperEndpoint<>(mapper.apply(upperEndpoint.value), upperEndpoint.isClosed), boundType);
+        final U newLower = mapper.apply(lowerEndpoint.value);
+        final U newUpper = mapper.apply(upperEndpoint.value);
+
+        if (newLower.compareTo(newUpper) > 0) {
+            throw new IllegalArgumentException(
+                    "The mapped lower endpoint (" + newLower + ") must not be greater than the mapped upper endpoint (" + newUpper + ")");
+        }
+
+        return new Range<>(new LowerEndpoint<>(newLower, lowerEndpoint.isClosed), new UpperEndpoint<>(newUpper, upperEndpoint.isClosed), boundType);
     }
 
     /**

@@ -120,7 +120,7 @@ public class AbstractIntStream100Test extends TestBase {
 
     @Test
     public void testFlattMapToObj() {
-        Stream<String> result = stream.flattmapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
+        Stream<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
         String[] array = result.toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] { "1", "2", "2", "4", "3", "6", "4", "8", "5", "10" }, array);
     }

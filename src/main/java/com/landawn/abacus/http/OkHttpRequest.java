@@ -53,6 +53,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 
 /**
@@ -429,7 +430,7 @@ public final class OkHttpRequest {
      * @param password the password for authentication
      * @return this OkHttpRequest instance for method chaining
      */
-    public OkHttpRequest basicAuth(final String username, final Object password) {
+    public OkHttpRequest basicAuth(final String username, final String password) {
         requestBuilder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
         return this;
     }
@@ -555,7 +556,7 @@ public final class OkHttpRequest {
         final Map<String, String> map = new HashMap<>();
 
         if (headers != null && !headers.isEmpty()) {
-            for (String headerName : headers.headerNameSet()) {
+            for (String headerName : headers.headerNames()) {
                 map.put(headerName, N.stringOf(headers.get(headerName)));
             }
         }
@@ -1173,7 +1174,7 @@ public final class OkHttpRequest {
         }
 
         try {
-            if (resultClass == null || resultClass.equals(Void.class)) {
+            if (resultClass.equals(Void.class)) {
                 return null;
             } else if (resp.isSuccessful()) {
                 final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
@@ -1183,8 +1184,13 @@ public final class OkHttpRequest {
                 final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
                 final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
                 final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
-                //noinspection DataFlowIssue
-                final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
+                final ResponseBody respBody = resp.body();
+
+                if (respBody == null) {
+                    return null;
+                }
+
+                final InputStream is = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
 
                 if (resultClass.equals(String.class)) {
                     return (T) IOUtil.readAllToString(is, respCharset);
@@ -1193,7 +1199,7 @@ public final class OkHttpRequest {
                 } else {
                     if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
                         return KRYO_PARSER.deserialize(is, resultClass);
-                    } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
+                    } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
                         return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                     } else {
                         final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
@@ -1209,11 +1215,7 @@ public final class OkHttpRequest {
                 throw new IOException(resp.code() + ": " + resp.message());
             }
         } finally {
-            try {
-                IOUtil.close(resp);
-            } finally {
-                doAfterExecution();
-            }
+            IOUtil.close(resp);
         }
     }
 

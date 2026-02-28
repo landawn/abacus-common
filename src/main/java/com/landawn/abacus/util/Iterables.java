@@ -3985,7 +3985,7 @@ public final class Iterables {
      * @param set2 the second set.
      * @return a SetView containing all elements from both sets.
      */
-    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
+    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -4126,7 +4126,7 @@ public final class Iterables {
      * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      */
-    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
+    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -4369,7 +4369,7 @@ public final class Iterables {
      * @see #intersection(Set, Set)
      * @see #union(Set, Set)
      */
-    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
+    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -4475,6 +4475,7 @@ public final class Iterables {
      * @param set the original NavigableSet from which to derive the subset.
      * @param range the Range object that defines the lower and upper bounds of the subset.
      * @return a NavigableSet view of elements within the specified range.
+     * @throws IllegalArgumentException if the set uses a custom comparator inconsistent with the natural ordering implied by {@code range}.
      */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(final NavigableSet<K> set, final Range<K> range) throws IllegalArgumentException {
         if (N.isEmpty(set)) {
@@ -4655,6 +4656,7 @@ public final class Iterables {
      * @param elements the original iterable whose elements have to be permuted.
      * @param comparator the comparator for the iterable's elements.
      * @return an immutable Collection containing all the different permutations of the original iterable.
+     * @throws IllegalArgumentException if {@code elements} is {@code null} or permutation generation arguments are invalid.
      */
     public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator)
             throws IllegalArgumentException {
@@ -5135,9 +5137,11 @@ public final class Iterables {
         }
 
         /**
+         * Returns the tuple at the specified index in this Cartesian product list.
          *
          * @param index the index of the element to return.
          * @return the element at the specified index in this Cartesian product list.
+         * @throws IndexOutOfBoundsException if {@code index} is out of range ({@code index < 0 || index >= size()}).
          */
         @Override
         public List<E> get(final int index) throws IndexOutOfBoundsException {
@@ -5282,14 +5286,20 @@ public final class Iterables {
 
         @Override
         public <A> A[] toArray(A[] a) {
-            if (a.length < size()) {
-                a = N.copyOf(a, size());
+            final int size = size();
+
+            if (a.length < size) {
+                a = N.copyOf(a, size);
             }
 
             final Iterator<T> iter = this.iterator();
 
-            for (int i = 0, len = a.length; i < len; i++) {
+            for (int i = 0; i < size; i++) {
                 a[i] = (A) iter.next();
+            }
+
+            if (a.length > size) {
+                a[size] = null;
             }
 
             return a;

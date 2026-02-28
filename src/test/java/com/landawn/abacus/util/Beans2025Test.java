@@ -1369,8 +1369,7 @@ public class Beans2025Test extends TestBase {
         assertEquals("John", treeMap.get("name"));
         assertEquals(25, treeMap.get("age"));
 
-        Map<String, Object> map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.SNAKE_CASE,
-                IntFunctions.ofLinkedHashMap());
+        Map<String, Object> map = Beans.beanToMap(simpleBean, Arrays.asList("name", "age"), NamingPolicy.SNAKE_CASE, IntFunctions.ofLinkedHashMap());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("age"));
         assertFalse(map.containsKey("active"));
@@ -2450,8 +2449,7 @@ public class Beans2025Test extends TestBase {
 
     @Test
     public void testDeepBean2MapWithSelectPropsNamingAndSupplierFull() {
-        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "simpleBean"), NamingPolicy.SNAKE_CASE,
-                IntFunctions.ofMap());
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, Arrays.asList("id", "simpleBean"), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
         assertTrue(map.containsKey("id"));
         assertTrue(map.containsKey("simple_bean") || map.containsKey("simpleBean"));
     }

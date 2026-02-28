@@ -7,6 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -101,6 +106,18 @@ public class GenericObjectPool100Test extends TestBase {
         GenericObjectPool<TestPoolable> fullPool = new GenericObjectPool<>(40, 4000, EvictionPolicy.ACCESS_COUNT, true, 0.4f, 2048, measure);
         assertEquals(40, fullPool.capacity());
         fullPool.close();
+    }
+
+    @Test
+    public void testSerializationWithEvictionEnabled() throws Exception {
+        GenericObjectPool<TestPoolable> evictPool = new GenericObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
+
+        GenericObjectPool<TestPoolable> deserialized = deserialize(serialize(evictPool));
+        assertNotNull(deserialized);
+        assertFalse(deserialized.isClosed());
+
+        evictPool.close();
+        deserialized.close();
     }
 
     @Test
@@ -211,6 +228,19 @@ public class GenericObjectPool100Test extends TestBase {
     }
 
     @Test
+    public void testTimedAddFailureDoesNotIncrementPutCount() throws InterruptedException {
+        GenericObjectPool<TestPoolable> noBalancePool = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+
+        try {
+            assertTrue(noBalancePool.add(new TestPoolable("first")));
+            assertFalse(noBalancePool.add(new TestPoolable("second"), 1, TimeUnit.MILLISECONDS));
+            assertEquals(1, noBalancePool.stats().putCount());
+        } finally {
+            noBalancePool.close();
+        }
+    }
+
+    @Test
     public void testTake() {
         TestPoolable poolable = new TestPoolable("test1");
         pool.add(poolable);
@@ -282,31 +312,31 @@ public class GenericObjectPool100Test extends TestBase {
     }
 
     @Test
-    public void testVacate() {
+    public void test_evict() {
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));
         }
 
-        pool.vacate();
+        pool.evict();
         assertEquals(8, pool.size());
     }
 
     @Test
-    public void testVacateWithCustomBalanceFactor() {
+    public void test_evictithCustomBalanceFactor() {
         GenericObjectPool<TestPoolable> customPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f);
 
         for (int i = 0; i < 10; i++) {
             customPool.add(new TestPoolable("test" + i));
         }
 
-        customPool.vacate();
+        customPool.evict();
         assertEquals(5, customPool.size());
 
         customPool.close();
     }
 
     @Test
-    public void testVacateWithEvictionPolicy() throws InterruptedException {
+    public void test_evictWithEvictionPolicy() throws InterruptedException {
         TestPoolable p1 = new TestPoolable("p1");
         TestPoolable p2 = new TestPoolable("p2");
         TestPoolable p3 = new TestPoolable("p3");
@@ -326,7 +356,7 @@ public class GenericObjectPool100Test extends TestBase {
         pool.take();
         pool.add(p1);
 
-        pool.vacate();
+        pool.evict();
 
         assertTrue(pool.contains(p1));
         assertTrue(pool.contains(p3));
@@ -527,5 +557,21 @@ public class GenericObjectPool100Test extends TestBase {
         assertEquals(3, stats.getCount());
         assertEquals(2, stats.hitCount());
         assertEquals(1, stats.missCount());
+    }
+
+    private static byte[] serialize(final Object obj) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(obj);
+        }
+
+        return baos.toByteArray();
+    }
+
+    private static <T> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (T) ois.readObject();
+        }
     }
 }

@@ -15,310 +15,179 @@
 package com.landawn.abacus.util;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.logging.Logger;
-import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * A thread-safe, fixed-size map implementation optimized for high-frequency reads and infrequent writes.
- * This map uses open addressing with separate chaining for collision resolution.
- * 
- * <p>ObjectPool is designed for scenarios where:</p>
+ * A thread-safe {@link Map} implementation backed by a {@link ConcurrentHashMap},
+ * providing lock-free concurrent reads and thread-safe writes.
+ *
+ * <p>ObjectPool is designed as a lightweight caching map for scenarios where:</p>
  * <ul>
- *   <li>The number of keys is limited and known in advance</li>
  *   <li>Read operations vastly outnumber write operations</li>
- *   <li>Thread safety is required for all operations</li>
- *   <li>Performance is critical for get operations</li>
+ *   <li>Thread safety is required without external synchronization</li>
+ *   <li>The approximate number of entries is known in advance (for sizing the initial table)</li>
  * </ul>
- * 
- * <p>The map has a fixed capacity and uses a hash table with power-of-two sizing
- * for efficient bitwise operations. When the size exceeds capacity, a warning
- * is logged (once) but the map continues to function.</p>
- * 
+ *
+ * <p><b>Null handling:</b> Neither {@code null} keys nor {@code null} values are permitted.
+ * Write operations ({@link #put}, {@link #putAll}) throw {@link NullPointerException} for
+ * {@code null} keys or values, consistent with the underlying {@link ConcurrentHashMap}.
+ * Read and query operations are null-safe: {@link #get(Object)} and {@link #remove(Object)}
+ * return {@code null}, while {@link #containsKey(Object)} and {@link #containsValue(Object)}
+ * return {@code false} for {@code null} arguments instead of throwing.</p>
+ *
+ * <p><b>View collections:</b> The {@link #keySet()}, {@link #values()}, and {@link #entrySet()}
+ * methods return live views backed by the underlying map. Changes to the map are reflected
+ * in the views, and vice versa where supported.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Create a pool for caching database connections by connection string
- * ObjectPool<String, Connection> connectionPool = new ObjectPool<>(16);
- * 
- * // Store a connection
- * connectionPool.put("jdbc:mysql://localhost/test", connection);
- * 
- * // Retrieve a connection
- * Connection conn = connectionPool.get("jdbc:mysql://localhost/test");
+ * // Create a pool for caching resolved types by name
+ * ObjectPool<String, Type<?>> typeCache = new ObjectPool<>(128);
+ *
+ * // Cache a resolved type
+ * typeCache.put("int", IntType.INSTANCE);
+ *
+ * // Look up a cached type
+ * Type<?> type = typeCache.get("int");
+ *
+ * // Use computeIfAbsent for atomic cache-on-miss
+ * Type<?> resolved = typeCache.computeIfAbsent("long", name -> resolveType(name));
  * }</pre>
- * 
- * <p><b>Note:</b> This implementation does not support {@code null} keys or values.
- * The keySet(), values(), and entrySet() methods return unmodifiable views
- * that are computed on each call.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
- * @see AbstractMap
+ * @see ConcurrentHashMap
  * @see Map
  */
 @Internal
 @Beta
 @SuppressWarnings("java:S2160")
 public final class ObjectPool<K, V> extends AbstractMap<K, V> {
-    private static final Logger logger = LoggerFactory.getLogger(ObjectPool.class);
-
-    private final int capacity;
-
-    private final Entry<K, V>[] table;
-
-    private final int indexMask;
-
-    private volatile int _size = 0; //NOSONAR
-
-    private boolean isWarningLoggedForCapacity;
-
-    private transient Set<K> _keySet = null; //NOSONAR
-
-    private transient Collection<V> _values = null; //NOSONAR
-
-    private transient Set<Map.Entry<K, V>> _entrySet; //NOSONAR
+    private final ConcurrentHashMap<K, V> map;
 
     /**
-     * Constructs an ObjectPool with the specified capacity.
-     * The actual capacity will be the specified value, and the internal
-     * hash table size will be adjusted for optimal performance.
+     * Constructs an ObjectPool with the specified initial capacity.
+     * The {@code capacity} parameter is used as the initial capacity hint
+     * for the underlying {@link ConcurrentHashMap}, helping to avoid rehashing
+     * when the approximate number of entries is known in advance.
      *
-     * @param capacity the maximum expected number of entries
-     * @throws IllegalArgumentException if capacity is not positive
+     * @param capacity the initial capacity hint; used to size the underlying hash table
      */
-    @SuppressWarnings("unchecked")
     public ObjectPool(final int capacity) {
-        N.checkArgPositive(capacity, cs.capacity);
-
-        this.capacity = capacity;
-        // Table size must be a power of 2 for indexMask (hash & indexMask) to work correctly
-        int tableSize = Integer.highestOneBit(capacity);
-        if (tableSize < capacity) {
-            tableSize = tableSize << 1;
-        }
-        if (tableSize < 1) {
-            tableSize = 1;
-        }
-        table = new Entry[tableSize];
-        indexMask = table.length - 1;
+        this.map = new ConcurrentHashMap<>(capacity);
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key.
-     * This operation is thread-safe and optimized for performance.
+     * Returns the value to which the specified key is mapped, or {@code null}
+     * if this map contains no mapping for the key.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-     * pool.put("one", 1);
-     * Integer value = pool.get("one");     // Returns 1
-     * Integer missing = pool.get("two");   // Returns null
-     * }</pre>
+     * <p>This operation is lock-free and safe for concurrent use.
+     * Unlike {@link ConcurrentHashMap#get(Object)}, this method returns
+     * {@code null} for a {@code null} key instead of throwing
+     * {@link NullPointerException}.</p>
      *
      * @param key the key whose associated value is to be returned
-     * @return the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key
+     * @return the value to which the specified key is mapped,
+     *         or {@code null} if the key is {@code null} or no mapping exists
      */
     @MayReturnNull
     @Override
     public V get(final Object key) {
-        final int hash = hash(key);
-        final int i = hash & indexMask;
-
-        for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-            if ((hash == entry.hash) && key.equals(entry.key)) {
-                return entry.value;
-            }
+        if (key == null) {
+            return null;
         }
 
-        return null;
+        return map.get(key);
     }
 
     /**
      * Associates the specified value with the specified key in this map.
      * If the map previously contained a mapping for the key, the old value is replaced.
-     * This operation is thread-safe.
      *
-     * <p>If the pool size exceeds its capacity, a warning is logged once,
-     * but the operation completes successfully.</p>
-     *
-     * @param key key with which the specified value is to be associated
+     * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
-     * @return the previous value associated with key, or {@code null} if there was no mapping for key
-     * @throws IllegalArgumentException if the key or value is null
+     * @return the previous value associated with {@code key},
+     *         or {@code null} if there was no mapping for the key
+     * @throws NullPointerException if the specified key or value is {@code null}
      */
     @MayReturnNull
     @Override
     public V put(final K key, final V value) {
-        synchronized (table) {
-            return putValue(key, value);
-        }
-    }
-
-    /**
-     * Internal method to put a value without additional synchronization.
-     * This method handles the actual insertion logic including collision resolution.
-     *
-     * @param key the key to insert
-     * @param value the value to associate with the key
-     * @return the previous value associated with the key, or null
-     * @throws IllegalArgumentException if key or value is null
-     */
-    private V putValue(final K key, final V value) {
-        if ((key == null) || (value == null)) {
-            throw new IllegalArgumentException();
-        }
-
-        final int hash = hash(key);
-        final int i = hash & indexMask;
-
-        //            if (size() > capacity) {
-        //                throw new IndexOutOfBoundsException("Object pool is full of capacity=" + capacity);
-        //            }
-        //
-
-        if (!isWarningLoggedForCapacity && size() > capacity) {
-            final Set<Map.Entry<K, V>> entrySet = entrySet();
-
-            logger.warn("Pool size={} is bigger than capacity={}, first entry={}, last entry={}", size(), capacity, N.firstElement(entrySet),
-                    N.lastElement(entrySet));
-
-            isWarningLoggedForCapacity = true;
-        }
-
-        for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-            if ((hash == entry.hash) && key.equals(entry.key)) {
-                final V previousValue = entry.value;
-                entry.value = value;
-
-                return previousValue;
-            }
-        }
-
-        final Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
-        table[i] = entry;
-
-        _keySet = null;
-        _values = null;
-        _entrySet = null;
-
-        updateSize(1);
-
-        return null;
+        return map.put(key, value);
     }
 
     /**
      * Copies all of the mappings from the specified map to this map.
      * These mappings will replace any mappings that this map had for
      * any of the keys currently in the specified map.
-     * This operation is thread-safe.
-     * 
-     * <p>Null values in the source map are silently ignored.</p>
      *
      * @param m mappings to be stored in this map
-     * @throws IllegalArgumentException if any key in the map is null
+     * @throws NullPointerException if the specified map is {@code null},
+     *         or if any key or value in the specified map is {@code null}
      */
     @Override
     public void putAll(final Map<? extends K, ? extends V> m) {
-        synchronized (table) {
-            for (final Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
-                if (entry.getValue() != null) {
-                    putValue(entry.getKey(), entry.getValue());
-                }
-            }
-        }
+        map.putAll(m);
     }
 
     /**
-     * Removes the mapping for a key from this map if it is present.
-     * This operation is thread-safe.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-     * pool.put("key", 100);
-     * Integer removed = pool.remove("key");    // Returns 100
-     * Integer notFound = pool.remove("key");   // Returns null
-     * }</pre>
+     * Removes the mapping for the specified key from this map if present.
+     *
+     * <p>Unlike {@link ConcurrentHashMap#remove(Object)}, this method returns
+     * {@code null} for a {@code null} key instead of throwing
+     * {@link NullPointerException}.</p>
      *
      * @param key key whose mapping is to be removed from the map
-     * @return the previous value associated with key, or {@code null} if there was no mapping for key
+     * @return the previous value associated with {@code key},
+     *         or {@code null} if the key is {@code null} or no mapping existed
      */
     @MayReturnNull
     @Override
     public V remove(final Object key) {
-        if (_size == 0) {
+        if (key == null) {
             return null;
         }
 
-        final int hash = hash(key);
-        final int i = hash & indexMask;
-
-        synchronized (table) {
-            Entry<K, V> prev = table[i];
-            Entry<K, V> e = prev;
-
-            while (e != null) {
-                final Entry<K, V> next = e.next;
-
-                if ((hash == e.hash) && key.equals(e.key)) {
-                    if (prev == e) { // NOSONAR
-                        table[i] = next;
-                    } else {
-                        prev.next = next;
-                    }
-
-                    _keySet = null;
-                    _values = null;
-                    _entrySet = null;
-
-                    updateSize(-1);
-
-                    return e.value;
-                }
-
-                prev = e;
-                e = next;
-            }
-
-            return null;
-        }
+        return map.remove(key);
     }
 
     /**
      * Returns {@code true} if this map contains a mapping for the specified key.
-     * This method also verifies that the associated value is not {@code null}.
+     *
+     * <p>Unlike {@link ConcurrentHashMap#containsKey(Object)}, this method
+     * returns {@code false} for a {@code null} key instead of throwing
+     * {@link NullPointerException}.</p>
      *
      * @param key key whose presence in this map is to be tested
-     * @return {@code true} if this map contains a {@code non-null} mapping for the specified key
+     * @return {@code true} if this map contains a mapping for the specified key;
+     *         {@code false} if the key is {@code null} or not present
      */
     @Override
     public boolean containsKey(final Object key) {
-        final int hash = hash(key);
-        final int i = hash & indexMask;
-
-        for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-            if ((hash == entry.hash) && (entry.value != null) && key.equals(entry.key)) {
-                return true;
-            }
+        if (key == null) {
+            return false;
         }
 
-        return false;
+        return map.containsKey(key);
     }
 
     /**
      * Returns {@code true} if this map maps one or more keys to the specified value.
-     * This operation requires a full scan of the map and is not optimized for performance.
+     *
+     * <p>Unlike {@link ConcurrentHashMap#containsValue(Object)}, this method
+     * returns {@code false} for a {@code null} value instead of throwing
+     * {@link NullPointerException}.</p>
      *
      * @param value value whose presence in this map is to be tested
-     * @return {@code true} if this map maps one or more keys to the specified value
+     * @return {@code true} if this map maps one or more keys to the specified value;
+     *         {@code false} if the value is {@code null} or not present
      */
     @Override
     public boolean containsValue(final Object value) {
@@ -326,141 +195,57 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             return false;
         }
 
-        for (final Entry<K, V> element : table) {
-            for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                if (value.equals(entry.value)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return map.containsValue(value);
     }
 
     /**
-     * Returns an unmodifiable Set view of the keys contained in this map.
-     * The set is backed by the map, so changes to the map are reflected in the set.
-     * The set is computed on each call to this method.
-     * 
-     * <p>The returned set does not support modification operations.</p>
+     * Returns a {@link Set} view of the keys contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice versa.
      *
-     * @return an unmodifiable set view of the keys contained in this map
+     * @return a set view of the keys contained in this map
+     * @see ConcurrentHashMap#keySet()
      */
     @Override
     public Set<K> keySet() {
-        Set<K> tmp = _keySet;
-
-        if (tmp == null) {
-            synchronized (table) {
-                tmp = N.newHashSet(_size);
-
-                for (final Entry<K, V> element : table) {
-                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                        if (entry.value != null) {
-                            tmp.add(entry.key);
-                        }
-                    }
-                }
-
-                tmp = Collections.unmodifiableSet(tmp);
-
-                _keySet = tmp;
-            }
-        }
-
-        return tmp;
+        return map.keySet();
     }
 
     /**
-     * Returns an unmodifiable Collection view of the values contained in this map.
-     * The collection is backed by the map, so changes to the map are reflected in the collection.
-     * The collection is computed on each call to this method.
-     * 
-     * <p>The returned collection does not support modification operations.</p>
+     * Returns a {@link Collection} view of the values contained in this map.
+     * The collection is backed by the map, so changes to the map are
+     * reflected in the collection, and vice versa.
      *
-     * @return an unmodifiable collection view of the values contained in this map
+     * @return a collection view of the values contained in this map
+     * @see ConcurrentHashMap#values()
      */
     @Override
     public Collection<V> values() {
-        Collection<V> tmp = _values;
-
-        if (tmp == null) {
-            synchronized (table) {
-                tmp = N.newHashSet(_size);
-
-                V value = null;
-
-                for (final Entry<K, V> element : table) {
-                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                        value = entry.value;
-
-                        if (value != null) {
-                            tmp.add(value);
-                        }
-                    }
-                }
-
-                tmp = Collections.unmodifiableCollection(tmp);
-
-                _values = tmp;
-            }
-        }
-
-        return tmp;
+        return map.values();
     }
 
     /**
-     * Returns an unmodifiable Set view of the mappings contained in this map.
-     * The set is backed by the map, so changes to the map are reflected in the set.
-     * The set is computed on each call to this method.
-     * 
-     * <p>The returned set does not support modification operations.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-     * pool.put("one", 1);
-     * pool.put("two", 2);
-     * 
-     * for (Map.Entry<String, Integer> entry : pool.entrySet()) {
-     *     System.out.println(entry.getKey() + " = " + entry.getValue());
-     * }
-     * }</pre>
+     * Returns a {@link Set} view of the mappings contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice versa. Entries support
+     * {@link Map.Entry#setValue(Object)} which writes through to this map.
      *
-     * @return an unmodifiable set view of the mappings contained in this map
+     * @return a set view of the mappings contained in this map
+     * @see ConcurrentHashMap#entrySet()
      */
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        Set<Map.Entry<K, V>> tmp = _entrySet;
-
-        if (tmp == null) {
-            synchronized (table) {
-                tmp = N.newHashSet(_size);
-
-                for (final Entry<K, V> element : table) {
-                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                        if (entry.value != null) {
-                            tmp.add(entry);
-                        }
-                    }
-                }
-
-                tmp = Collections.unmodifiableSet(tmp);
-
-                _entrySet = tmp;
-            }
-        }
-
-        return tmp;
+        return map.entrySet();
     }
 
-    private synchronized void updateSize(final int delta) {
-        _size += delta;
-    }
-
+    /**
+     * Returns the number of key-value mappings in this map.
+     *
+     * @return the number of key-value mappings in this map
+     */
     @Override
     public int size() {
-        return _size;
+        return map.size();
     }
 
     /**
@@ -470,139 +255,62 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public boolean isEmpty() {
-        return _size == 0;
+        return map.isEmpty();
     }
 
     /**
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
-     * This operation is thread-safe.
      */
     @Override
     public void clear() {
-        synchronized (table) {
-            Arrays.fill(table, null);
-
-            _keySet = null;
-            _values = null;
-            _entrySet = null;
-
-            _size = 0;
-        }
+        map.clear();
     }
 
     /**
-     * Computes the hash code for the given key.
-     * This method uses the same hash spreading technique as HashMap
-     * to ensure good distribution of hash values.
+     * Returns the hash code value for this map, computed as the sum of the
+     * hash codes of each entry in the map's {@link #entrySet()} view.
      *
-     * @param key the key to hash
-     * @return the hash code, or 0 if key is null
+     * @return the hash code value for this map
      */
-    static int hash(final Object key) {
-        int h;
-
-        return (key == null) ? 0 : ((h = key.hashCode()) ^ (h >>> 16));
+    @Override
+    public int hashCode() {
+        return map.hashCode();
     }
 
     /**
-     * A hash table entry (node) in the ObjectPool.
-     * Each entry stores a key-value pair along with its hash code
-     * and a reference to the next entry in the collision chain.
+     * Compares the specified object with this map for equality.
+     * Returns {@code true} if the given object is also a {@link Map} and the two maps
+     * represent the same mappings, as defined by the {@link Map#equals(Object)} contract.
      *
-     * @param <K> the type of keys
-     * @param <V> the type of values
+     * <p>If {@code other} is also an {@code ObjectPool}, the comparison is performed
+     * directly between the backing {@link ConcurrentHashMap} instances for efficiency.</p>
+     *
+     * @param other object to be compared for equality with this map
+     * @return {@code true} if the specified object is equal to this map
      */
-    static class Entry<K, V> implements Map.Entry<K, V> {
-
-        /** The key for this entry */
-        final K key;
-
-        /** The value for this entry */
-        V value;
-
-        /** Reference to the next entry in the collision chain */
-        Entry<K, V> next;
-
-        /** Cached hash code of the key */
-        final int hash;
-
-        Entry(final int h, final K k, final V v, final Entry<K, V> n) {
-            value = v;
-            next = n;
-            key = k;
-            hash = h;
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
         }
 
-        @Override
-        public final K getKey() {
-            return key;
+        if (other instanceof ObjectPool op) {
+            return map.equals(op.map);
         }
 
-        @Override
-        public final V getValue() {
-            return value;
-        }
+        return map.equals(other);
+    }
 
-        /**
-         * Replaces the value corresponding to this entry with the specified value.
-         *
-         * @param newValue new value to be stored in this entry
-         * @return old value corresponding to the entry
-         */
-        @Override
-        public final V setValue(final V newValue) {
-            final V oldValue = value;
-            value = newValue;
-
-            return oldValue;
-        }
-
-        /**
-         * Compares the specified object with this entry for equality.
-         * Returns {@code true} if the given object is also a map entry and
-         * the two entries represent the same mapping.
-         *
-         * @param obj object to be compared for equality with this map entry
-         * @return {@code true} if the specified object is equal to this map entry
-         */
-        @Override
-        public final boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (obj instanceof Map.Entry) {
-                final Map.Entry<K, V> other = (Map.Entry<K, V>) obj;
-
-                return N.equals(getKey(), other.getKey()) && N.equals(getValue(), other.getValue());
-            }
-
-            return false;
-        }
-
-        /**
-         * Returns the hash code value for this map entry.
-         * The hash code is computed as the XOR of the hash codes
-         * of the entry's key and value.
-         *
-         * @return the hash code value for this map entry
-         */
-        @Override
-        public final int hashCode() {
-            return N.hashCode(getKey()) ^ N.hashCode(getValue());
-        }
-
-        /**
-         * Returns a String representation of this map entry.
-         * The string representation consists of the key followed by
-         * an equals sign ("=") followed by the associated value.
-         *
-         * @return a String representation of this map entry
-         */
-        @Override
-        public final String toString() {
-            return getKey() + "=" + getValue();
-        }
+    /**
+     * Returns a string representation of this map. The string representation
+     * consists of a list of key-value mappings in the order returned by the
+     * map's {@link #entrySet()} view's iterator, enclosed in braces ({@code "{}"}).
+     *
+     * @return a string representation of this map
+     */
+    @Override
+    public String toString() {
+        return map.toString();
     }
 }

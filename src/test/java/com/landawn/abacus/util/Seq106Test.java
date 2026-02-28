@@ -24,7 +24,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithEmptySequence() throws Exception {
         Seq<Integer, Exception> emptySeq = Seq.of();
-        Seq<Integer, Exception> result = emptySeq.flattmap(n -> new Integer[] { n, n * 2 });
+        Seq<Integer, Exception> result = emptySeq.flatMapArray(n -> new Integer[] { n, n * 2 });
 
         assertEquals(0, result.count());
     }
@@ -32,7 +32,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithSingleElement() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(5);
-        List<Integer> result = seq.flattmap(n -> new Integer[] { n, n * 10 }).toList();
+        List<Integer> result = seq.flatMapArray(n -> new Integer[] { n, n * 10 }).toList();
 
         assertEquals(Arrays.asList(5, 50), result);
     }
@@ -40,7 +40,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithMultipleElements() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        List<Integer> result = seq.flattmap(n -> new Integer[] { n, n * 10 }).toList();
+        List<Integer> result = seq.flatMapArray(n -> new Integer[] { n, n * 10 }).toList();
 
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
     }
@@ -48,7 +48,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithEmptyArrays() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        List<Integer> result = seq.flattmap(n -> new Integer[0]).toList();
+        List<Integer> result = seq.flatMapArray(n -> new Integer[0]).toList();
 
         assertTrue(result.isEmpty());
     }
@@ -56,7 +56,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithMixedArraySizes() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        List<Integer> result = seq.flattmap(n -> {
+        List<Integer> result = seq.flatMapArray(n -> {
             if (n == 1)
                 return new Integer[] { n };
             else if (n == 2)
@@ -71,7 +71,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithNullArrays() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        List<Integer> result = seq.flattmap(n -> n == 2 ? null : new Integer[] { n }).toList();
+        List<Integer> result = seq.flatMapArray(n -> n == 2 ? null : new Integer[] { n }).toList();
 
         assertEquals(Arrays.asList(1, 3), result);
     }
@@ -79,7 +79,7 @@ public class Seq106Test extends TestBase {
     @Test
     public void testFlattmap_WithStringToCharArray() throws Exception {
         Seq<String, Exception> seq = Seq.of("Hello", "World");
-        List<Character> result = seq.flattmap(s -> s.chars().mapToObj(c -> (char) c).toArray(Character[]::new)).toList();
+        List<Character> result = seq.flatMapArray(s -> s.chars().mapToObj(c -> (char) c).toArray(Character[]::new)).toList();
 
         assertEquals(Arrays.asList('H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd'), result);
     }
@@ -90,7 +90,7 @@ public class Seq106Test extends TestBase {
         seq.close();
 
         assertThrows(IllegalStateException.class, () -> {
-            seq.flattmap(n -> new Integer[] { n });
+            seq.flatMapArray(n -> new Integer[] { n });
         });
     }
 

@@ -21,11 +21,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(int, int)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <R> the type of the result of the function
  * @see java.util.function.Function
  * @see IntFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeException> { //NOSONAR

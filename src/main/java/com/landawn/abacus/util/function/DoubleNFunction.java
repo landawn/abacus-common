@@ -23,10 +23,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <R> the type of the result of the function
  *
- * @see DoubleFunction
- * @see DoubleBiFunction
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see DoubleFunction
+ * @see DoubleBiFunction
  */
 @FunctionalInterface
 public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, RuntimeException> { //NOSONAR

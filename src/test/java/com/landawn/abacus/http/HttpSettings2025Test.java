@@ -45,7 +45,7 @@ public class HttpSettings2025Test extends TestBase {
         HttpSettings settings = HttpSettings.create();
         HttpSettings result = settings.setConnectTimeout(5000L);
         assertEquals(5000L, settings.getConnectTimeout());
-        assertEquals(settings, result);   // Verify method chaining
+        assertEquals(settings, result); // Verify method chaining
     }
 
     @Test
@@ -98,22 +98,22 @@ public class HttpSettings2025Test extends TestBase {
     @Test
     public void testGetUseCachesDefault() {
         HttpSettings settings = HttpSettings.create();
-        assertFalse(settings.getUseCaches());
+        assertFalse(settings.useCaches());
     }
 
     @Test
     public void testSetUseCaches() {
         HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setUseCaches(true);
-        assertTrue(settings.getUseCaches());
+        HttpSettings result = settings.useCaches(true);
+        assertTrue(settings.useCaches());
         assertEquals(settings, result);
     }
 
     @Test
     public void testSetUseCachesFalse() {
         HttpSettings settings = HttpSettings.create();
-        settings.setUseCaches(false);
-        assertFalse(settings.getUseCaches());
+        settings.useCaches(false);
+        assertFalse(settings.useCaches());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class HttpSettings2025Test extends TestBase {
         HttpSettings original = HttpSettings.create()
                 .setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
-                .setUseCaches(true)
+                .useCaches(true)
                 .doInput(false)
                 .doOutput(false)
                 .setOneWayRequest(true)
@@ -312,7 +312,7 @@ public class HttpSettings2025Test extends TestBase {
         assertNotNull(copy);
         assertEquals(5000L, copy.getConnectTimeout());
         assertEquals(10000L, copy.getReadTimeout());
-        assertTrue(copy.getUseCaches());
+        assertTrue(copy.useCaches());
         assertFalse(copy.doInput());
         assertFalse(copy.doOutput());
         assertTrue(copy.isOneWayRequest());
@@ -371,7 +371,7 @@ public class HttpSettings2025Test extends TestBase {
         HttpSettings settings = HttpSettings.create()
                 .setConnectTimeout(5000L)
                 .setReadTimeout(10000L)
-                .setUseCaches(false)
+                .useCaches(false)
                 .doInput(true)
                 .doOutput(true)
                 .setOneWayRequest(false)
@@ -382,7 +382,7 @@ public class HttpSettings2025Test extends TestBase {
 
         assertEquals(5000L, settings.getConnectTimeout());
         assertEquals(10000L, settings.getReadTimeout());
-        assertFalse(settings.getUseCaches());
+        assertFalse(settings.useCaches());
         assertTrue(settings.doInput());
         assertTrue(settings.doOutput());
         assertFalse(settings.isOneWayRequest());

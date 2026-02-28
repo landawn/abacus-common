@@ -32,7 +32,7 @@ public class Joiner100Test extends TestBase {
 
     @Test
     public void testDefauLt() {
-        Joiner joiner = Joiner.defauLt();
+        Joiner joiner = Joiner.withDefault();
         assertNotNull(joiner);
     }
 

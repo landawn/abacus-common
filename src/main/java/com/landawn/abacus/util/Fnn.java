@@ -413,6 +413,7 @@ public final class Fnn {
         return new Throwables.Function<>() {
             private final R none = (R) Fn.NONE;
             private final Map<T, R> resultMap = new ConcurrentHashMap<>();
+            private final Object resultMapLock = new Object();
             private volatile R resultForNull = none; //NOSONAR
 
             @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
@@ -436,7 +437,7 @@ public final class Fnn {
                     result = resultMap.get(t);
 
                     if (result == null) {
-                        synchronized (resultMap) {
+                        synchronized (resultMapLock) {
                             result = resultMap.get(t);
                             if (result == null) {
                                 result = func.apply(t);
@@ -1080,7 +1081,7 @@ public final class Fnn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T, E extends Exception> Throwables.Predicate<T[], E> isEmptyArray() {
-        return (Throwables.Predicate) Fn.IS_EMPTY_A;
+        return (Throwables.Predicate) Fn.IS_EMPTY_ARRAY;
     }
 
     /**
@@ -1095,7 +1096,7 @@ public final class Fnn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isEmptyCollection() {
-        return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_C;
+        return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_COLLECTION;
     }
 
     /**
@@ -1110,7 +1111,7 @@ public final class Fnn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isEmptyMap() {
-        return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_M;
+        return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_MAP;
     }
 
     /**
@@ -1164,8 +1165,8 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, E extends Exception> Throwables.Predicate<T[], E> notEmptyA() {
-        return (Throwables.Predicate) Fn.NOT_EMPTY_A;
+    public static <T, E extends Exception> Throwables.Predicate<T[], E> notEmptyArray() {
+        return (Throwables.Predicate) Fn.NOT_EMPTY_ARRAY;
     }
 
     /**
@@ -1179,8 +1180,8 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notEmptyC() {
-        return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_C;
+    public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notEmptyCollection() {
+        return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_COLLECTION;
     }
 
     /**
@@ -1194,8 +1195,8 @@ public final class Fnn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notEmptyM() {
-        return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_M;
+    public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notEmptyMap() {
+        return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_MAP;
     }
 
     /**

@@ -114,7 +114,7 @@ public class LongStream101Test extends TestBase {
     @Test
     public void testFlattMapToObj() {
         LongStream stream = createLongStream(1L, 2L, 3L);
-        List<String> result = stream.flattmapToObj(n -> new String[] { String.valueOf(n), String.valueOf(n * 10) }).toList();
+        List<String> result = stream.flatMapArrayToObj(n -> new String[] { String.valueOf(n), String.valueOf(n * 10) }).toList();
         assertEquals(Arrays.asList("1", "10", "2", "20", "3", "30"), result);
     }
 

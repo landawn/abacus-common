@@ -338,7 +338,7 @@ public class HttpUtil100Test extends TestBase {
         assertEquals("application/json", HttpUtil.getContentType(ContentFormat.JSON_GZIP));
         assertEquals("application/xml", HttpUtil.getContentType(ContentFormat.XML));
         assertEquals("application/xml", HttpUtil.getContentType(ContentFormat.XML_LZ4));
-        assertEquals("application/x-www-form-urlencoded", HttpUtil.getContentType(ContentFormat.FormUrlEncoded));
+        assertEquals("application/x-www-form-urlencoded", HttpUtil.getContentType(ContentFormat.FORM_URL_ENCODED));
         assertEquals("", HttpUtil.getContentType(ContentFormat.KRYO));
     }
 
@@ -372,7 +372,7 @@ public class HttpUtil100Test extends TestBase {
         assertEquals(ContentFormat.XML_SNAPPY, HttpUtil.getContentFormat("application/xml", "snappy"));
         assertEquals(ContentFormat.XML_LZ4, HttpUtil.getContentFormat("application/xml", "lz4"));
 
-        assertEquals(ContentFormat.FormUrlEncoded, HttpUtil.getContentFormat("application/x-www-form-urlencoded", ""));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded", ""));
         assertEquals(ContentFormat.KRYO, HttpUtil.getContentFormat("application/kryo", ""));
 
         assertEquals(ContentFormat.GZIP, HttpUtil.getContentFormat("", "gzip"));
@@ -385,7 +385,7 @@ public class HttpUtil100Test extends TestBase {
         assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("text/json", ""));
         assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("something/json", ""));
         assertEquals(ContentFormat.XML, HttpUtil.getContentFormat("text/xml", ""));
-        assertEquals(ContentFormat.FormUrlEncoded, HttpUtil.getContentFormat("something/urlencoded", ""));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("something/urlencoded", ""));
         assertEquals(ContentFormat.KRYO, HttpUtil.getContentFormat("something/kryo", ""));
 
         // Test case insensitive
@@ -432,7 +432,7 @@ public class HttpUtil100Test extends TestBase {
         assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.NONE));
         assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.JSON));
         assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.XML));
-        assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.FormUrlEncoded));
+        assertSame(bais, HttpUtil.wrapInputStream(bais, ContentFormat.FORM_URL_ENCODED));
 
     }
 
@@ -444,7 +444,7 @@ public class HttpUtil100Test extends TestBase {
         assertSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.NONE));
         assertSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.JSON));
         assertSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.XML));
-        assertSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.FormUrlEncoded));
+        assertSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.FORM_URL_ENCODED));
         assertNull(HttpUtil.wrapOutputStream(null, ContentFormat.JSON));
 
         assertNotSame(baos, HttpUtil.wrapOutputStream(baos, ContentFormat.JSON_GZIP));

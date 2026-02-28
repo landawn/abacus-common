@@ -118,7 +118,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Factory Methods:</b>
  * <ul>
- *   <li>{@link #defauLt()} - Default configuration with comma separator</li>
+ *   <li>{@link #withDefault()} - Default configuration with comma separator</li>
  *   <li>{@link #with(CharSequence)} - Simple separator configuration</li>
  *   <li>{@link #with(CharSequence, CharSequence)} - Separator and key-value delimiter</li>
  *   <li>{@link #with(CharSequence, CharSequence, CharSequence)} - Separator with prefix/suffix</li>
@@ -269,7 +269,7 @@ public final class Joiner implements Closeable {
     }
 
     Joiner(final CharSequence separator, final CharSequence keyValueDelimiter) {
-        this(separator, keyValueDelimiter, "", "");
+        this(separator, keyValueDelimiter, Strings.EMPTY, Strings.EMPTY);
     }
 
     Joiner(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) {
@@ -298,17 +298,17 @@ public final class Joiner implements Closeable {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.defauLt().appendAll("a", "b", "c").toString();   // Returns: "a, b, c"
+     * Joiner.withDefault().appendAll("a", "b", "c").toString();   // Returns: "a, b, c"
      * }</pre>
      *
      * @return a new Joiner instance with default delimiters.
      * @see #with(CharSequence)
      * @see #with(CharSequence, CharSequence)
-     * @see Splitter#defauLt()
-     * @see Splitter.MapSplitter#defauLt()
+     * @see Splitter#withDefault()
+     * @see Splitter.MapSplitter#withDefault()
      */
     @Beta
-    public static Joiner defauLt() {
+    public static Joiner withDefault() {
         return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
     }
 
@@ -2859,16 +2859,17 @@ public final class Joiner implements Closeable {
 
                 if (suffix.isEmpty()) {
                     result = buffer.toString();
+                    latestToStringValue = result;
                 } else {
                     final int initialLength = buffer.length();
+
+                    latestToStringValue = buffer.toString();
 
                     result = buffer.append(suffix).toString();
 
                     // reset value to pre-append initialLength
                     buffer.setLength(initialLength);
                 }
-
-                latestToStringValue = result;
 
                 return result;
             } finally {
@@ -2896,6 +2897,10 @@ public final class Joiner implements Closeable {
      */
     public <A extends Appendable> A appendTo(final A appendable) throws IOException {
         if (buffer == null) {
+            if (Strings.isNotEmpty(emptyValue)) {
+                appendable.append(emptyValue);
+            }
+
             return appendable;
         }
 

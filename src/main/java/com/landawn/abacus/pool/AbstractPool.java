@@ -110,17 +110,25 @@ public abstract class AbstractPool implements Pool {
     /**
      * Lock used for synchronizing pool operations.
      */
-    final ReentrantLock lock = new ReentrantLock();
+    transient ReentrantLock lock = newLock();
 
     /**
      * Condition variable signaled when the pool is not empty.
      */
-    final transient Condition notEmpty = lock.newCondition();
+    transient Condition notEmpty = newCondition(lock); //NOSONAR
 
     /**
      * Condition variable signaled when the pool is not full.
      */
-    final transient Condition notFull = lock.newCondition();
+    transient Condition notFull = newCondition(lock); //NOSONAR
+
+    static ReentrantLock newLock() {
+        return new ReentrantLock();
+    }
+
+    static Condition newCondition(final ReentrantLock lock) {
+        return lock.newCondition();
+    }
 
     /**
      * Maximum number of objects the pool can hold.

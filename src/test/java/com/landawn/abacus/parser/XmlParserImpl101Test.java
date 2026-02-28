@@ -933,7 +933,7 @@ public class XmlParserImpl101Test extends TestBase {
         Assertions.assertFalse(staxParser.isSerializableByJson(beanList));
 
         List<Object> mixedList = Arrays.asList("string", new TestBean());
-        Assertions.assertTrue(staxParser.isSerializableByJson(mixedList));
+        Assertions.assertFalse(staxParser.isSerializableByJson(mixedList));
     }
 
     @Test

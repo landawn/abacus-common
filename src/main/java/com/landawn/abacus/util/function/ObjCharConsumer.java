@@ -44,11 +44,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <T> the type of the object argument to the operation
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see java.util.function.ObjIntConsumer
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, RuntimeException> { //NOSONAR

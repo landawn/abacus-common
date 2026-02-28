@@ -435,7 +435,7 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testDelete() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
-        short deleted = list.delete(1);
+        short deleted = list.removeAt(1);
         assertEquals((short) 2, deleted);
         assertEquals(2, list.size());
         assertEquals((short) 1, list.get(0));
@@ -445,14 +445,14 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testDeleteOutOfBounds() {
         ShortList list = ShortList.of((short) 1, (short) 2);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals((short) 1, list.get(0));
         assertEquals((short) 3, list.get(1));
@@ -462,7 +462,7 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testDeleteRange() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals((short) 1, list.get(0));
         assertEquals((short) 5, list.get(1));
@@ -471,7 +471,7 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testDeleteRangeEmpty() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 

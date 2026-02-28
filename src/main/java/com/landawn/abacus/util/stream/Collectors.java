@@ -18,6 +18,7 @@ import static com.landawn.abacus.util.stream.StreamBase.ERROR_MSG_FOR_NO_SUCH_EX
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,8 +108,6 @@ import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 
-// Claude Opus 4 and generate the Javadoc with blow prompts 
-// Please generate comprehensive javadoc for all public methods starting from line 6 in Collectors.java, including public static methods.  Please use javadoc of method "toCollection" as a template to generate javadoc for other methods. Please include a very simple sample in couple of lines if appropriate. Please don't take shortcut. The generated javadoc should be specific and details enough to describe the behavior of the method. And merge the generated javadoc into source file Collectors.java to replace existing javadoc in Collectors.java. Don't generate javadoc for method which is not found in Collectors.java. Remember don't use any cache file because I have modified Collectors.java. Again, don't generate javadoc for the method which is not in the attached file. Please read and double check if the method is in the attached file before starting to generate javadoc. If the method is not the attached file, don't generate javadoc for it.
 /**
  * A comprehensive factory utility class providing static methods for creating {@link Collector} instances
  * for use with Java Streams. This abstract sealed class extends the functionality of the standard
@@ -814,33 +813,28 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> a.right()[0] == 0 ? BigDecimal.ZERO
-            : new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]));
+            : new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128);
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger, long[]>, Optional<BigDecimal>> AveragingBigInteger_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
-            : Optional.of(new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0])));
+            : Optional.of(new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128));
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher_orElseThrow = a -> {
         if (a.right()[0] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]));
+        return new BigDecimal(a.left()).divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128);
     };
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> Tuple.of(
-            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
-            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])));
+            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128),
+            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1]), MathContext.DECIMAL128));
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> Tuple.of(
-            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0])),
-            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1])),
-            a.right()[2] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2])));
+            a.right()[0] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[0]).divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128),
+            a.right()[1] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[1]).divide(new BigDecimal(a.right()[1]), MathContext.DECIMAL128),
+            a.right()[2] == 0 ? BigDecimal.ZERO : new BigDecimal(a.left()[2]).divide(new BigDecimal(a.right()[2]), MathContext.DECIMAL128));
 
     private static final Supplier<Pair<BigDecimal, long[]>> AveragingBigDecimal_Supplier = () -> Pair.of(BigDecimal.ZERO, new long[1]);
 
@@ -874,33 +868,28 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> a.right()[0] == 0 ? BigDecimal.ZERO
-            : a.left().divide(new BigDecimal(a.right()[0]));
+            : a.left().divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128);
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal, long[]>, Optional<BigDecimal>> AveragingBigDecimal_Finisher_op = a -> a.right()[0] == 0 ? Optional.empty()
-            : Optional.of(a.left().divide(new BigDecimal(a.right()[0])));
+            : Optional.of(a.left().divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128));
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher_orElseThrow = a -> {
         if (a.right()[0] == 0) {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
-        return a.left().divide(new BigDecimal(a.right()[0]));
+        return a.left().divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128);
     };
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> Tuple.of(
-            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
-            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])));
+            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128),
+            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1]), MathContext.DECIMAL128));
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> Tuple.of(
-            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0])),
-            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1])),
-            a.right()[2] == 0 ? BigDecimal.ZERO : a.left()[2].divide(new BigDecimal(a.right()[2])));
+            a.right()[0] == 0 ? BigDecimal.ZERO : a.left()[0].divide(new BigDecimal(a.right()[0]), MathContext.DECIMAL128),
+            a.right()[1] == 0 ? BigDecimal.ZERO : a.left()[1].divide(new BigDecimal(a.right()[1]), MathContext.DECIMAL128),
+            a.right()[2] == 0 ? BigDecimal.ZERO : a.left()[2].divide(new BigDecimal(a.right()[2]), MathContext.DECIMAL128));
 
     private static final Supplier<CharSummaryStatistics> SummarizingChar_Supplier = CharSummaryStatistics::new;
 
@@ -4433,7 +4422,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find minimum value and count of occurrences
      * Optional<Pair<Integer, Long>> result = Stream.of(1, 3, 1, 5, 1)
-     *     .collect(Collectors.minAlll(Collectors.counting()));
+     *     .collect(Collectors.minAllWith(Collectors.counting()));
      * // Result: Optional[Pair(1, 3)]
      * }</pre>
      *
@@ -4442,9 +4431,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the minimum element and applies downstream
      */
+    @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> minAlll(final Collector<T, ?, R> downstream) {
-        return minAlll(Comparators.nullsLast(), downstream);
+    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> minAllWith(final Collector<T, ?, R> downstream) {
+        return minAllWith(Comparators.nullsLast(), downstream);
     }
 
     /**
@@ -4460,7 +4450,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find shortest string and concatenate all shortest strings
      * Optional<Pair<String, String>> result = Stream.of("a", "bb", "a", "ccc")
-     *     .collect(Collectors.minAlll(
+     *     .collect(Collectors.minAllWith(
      *         Comparator.comparingInt(String::length),
      *         Collectors.joining(",")));
      * // Result: Optional[Pair("a", "a,a")]
@@ -4472,8 +4462,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the minimum element and applies downstream
      */
-    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
-        return minAlll(comparator, downstream, Fn.identity());
+    @Beta
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        return minAllWith(comparator, downstream, Fn.identity());
     }
 
     /**
@@ -4489,7 +4480,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find minimum and format result
      * String result = Stream.of(1, 3, 1, 5, 1)
-     *     .collect(Collectors.minAlll(
+     *     .collect(Collectors.minAllWith(
      *         Comparator.naturalOrder(),
      *         Collectors.counting(),
      *         opt -> opt.map(p -> "Min: " + p.left() + ", Count: " + p.right())
@@ -4505,9 +4496,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param finisher a function to apply to the final result
      * @return a {@code Collector} which finds the minimum and transforms the result
      */
-    public static <T, R, RR> Collector<T, ?, RR> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
+    @Beta
+    public static <T, R, RR> Collector<T, ?, RR> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
-        return maxAlll(Comparators.reverseOrder(comparator), downstream, finisher);
+        return maxAllWith(Comparators.reverseOrder(comparator), downstream, finisher);
     }
 
     /**
@@ -4820,7 +4812,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find maximum value and sum of all maximums
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 3, 5, 1, 5)
-     *     .collect(Collectors.maxAlll(Collectors.summingInt(i -> i)));
+     *     .collect(Collectors.maxAllWith(Collectors.summingInt(i -> i)));
      * // Result: Optional[Pair(5, 15)]
      * }</pre>
      *
@@ -4829,9 +4821,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the maximum element and applies downstream
      */
+    @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> maxAlll(final Collector<T, ?, R> downstream) {
-        return maxAlll(Comparators.nullsFirst(), downstream);
+    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> maxAllWith(final Collector<T, ?, R> downstream) {
+        return maxAllWith(Comparators.nullsFirst(), downstream);
     }
 
     /**
@@ -4847,7 +4840,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find longest strings and join them
      * Optional<Pair<String, String>> result = Stream.of("abc", "xy", "def")
-     *     .collect(Collectors.maxAlll(
+     *     .collect(Collectors.maxAllWith(
      *         Comparator.comparingInt(String::length),
      *         Collectors.joining("-")));
      * // Result: Optional[Pair("abc", "abc-def")]
@@ -4859,8 +4852,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the maximum element and applies downstream
      */
-    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
-        return maxAlll(comparator, downstream, Fn.identity());
+    @Beta
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        return maxAllWith(comparator, downstream, Fn.identity());
     }
 
     /**
@@ -4876,7 +4870,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Find maximum and create custom result
      * boolean hasMax = Stream.of(1, 3, 5, 5, 2)
-     *     .collect(Collectors.maxAlll(
+     *     .collect(Collectors.maxAllWith(
      *         Comparator.naturalOrder(),
      *         Collectors.toList(),
      *         opt -> opt.isPresent() && opt.get().right().size() > 1));
@@ -4891,8 +4885,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param finisher a function to apply to the final result
      * @return a {@code Collector} which finds the maximum and transforms the result
      */
+    @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, R, RR> Collector<T, ?, RR> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
+    public static <T, R, RR> Collector<T, ?, RR> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
         final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
@@ -7331,7 +7326,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#groupingBy(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
         final Supplier<M> mapSupplier = (Supplier<M>) mapFactory;
 
         return java.util.stream.Collectors.groupingBy(keyMapper, mapSupplier, downstream);
@@ -7476,7 +7471,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#groupingByConcurrent(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
         final Supplier<M> mapSupplier = (Supplier<M>) mapFactory;
 
         return java.util.stream.Collectors.groupingByConcurrent(keyMapper, mapSupplier, downstream);

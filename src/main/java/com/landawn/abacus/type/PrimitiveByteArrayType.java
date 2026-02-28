@@ -165,7 +165,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
             return IOUtil.readAllBytes(is);
         } else if (obj instanceof Blob blob) {
             try {
-                return blob.getBytes(1, (int) blob.length());
+                final long len = blob.length();
+
+                if (len > Integer.MAX_VALUE) {
+                    throw new UnsupportedOperationException("Blob too large to convert to byte[]: " + len + " bytes");
+                }
+
+                return blob.getBytes(1, (int) len);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {

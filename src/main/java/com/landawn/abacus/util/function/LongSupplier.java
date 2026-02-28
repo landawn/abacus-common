@@ -24,10 +24,11 @@ import com.landawn.abacus.util.Throwables;
  * and {@code java.util.function.LongSupplier}, providing compatibility with the Java standard library
  * while adding predefined supplier instances for common use cases.
  *
- * @see java.util.function.LongSupplier
- * @see java.util.function.Supplier
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.LongSupplier
+ * @see java.util.function.Supplier
  */
 @FunctionalInterface
 public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>, java.util.function.LongSupplier { //NOSONAR

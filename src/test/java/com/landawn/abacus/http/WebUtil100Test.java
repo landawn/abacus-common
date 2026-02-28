@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.N;
 
 @Tag("new-test")
 public class WebUtil100Test extends TestBase {
@@ -29,7 +30,8 @@ public class WebUtil100Test extends TestBase {
         assertTrue(result.contains(".header(\"Content-Type\", \"application/json\")"));
         assertTrue(result.contains(".header(\"Authorization\", \"Bearer token123\")"));
         assertTrue(result.contains("String requestBody = \"{\\\"name\\\":\\\"John\\\",\\\"age\\\":30}\";"));
-        assertTrue(result.contains(".post(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
     }
 
     @Test
@@ -67,7 +69,8 @@ public class WebUtil100Test extends TestBase {
 
         String result = WebUtil.convertCurlToHttpRequest(curl);
         assertNotNull(result);
-        assertTrue(result.contains(".put(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".put();"));
     }
 
     @Test
@@ -75,8 +78,10 @@ public class WebUtil100Test extends TestBase {
         String curl = "curl -X PATCH https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
         String result = WebUtil.convertCurlToHttpRequest(curl);
+        N.println(result);
         assertNotNull(result);
-        assertTrue(result.contains(".execute(HttpMethod.PATCH, requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".execute(HttpMethod.PATCH);"));
     }
 
     @Test

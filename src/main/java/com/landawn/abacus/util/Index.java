@@ -2068,8 +2068,11 @@ public final class Index {
 
             return toOptionalInt(N.INDEX_NOT_FOUND);
         } else {
-            return ofSubArray(source.subList(N.max(fromIndex, 0), source.size()).toArray(), 0,
+            final int adjustedFromIndex = N.max(fromIndex, 0);
+            final OptionalInt result = ofSubArray(source.subList(adjustedFromIndex, source.size()).toArray(), 0,
                     subListToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray(), 0, sizeToMatch);
+
+            return result.isPresent() ? toOptionalInt(result.orElseThrow() + adjustedFromIndex) : result;
         }
     }
 

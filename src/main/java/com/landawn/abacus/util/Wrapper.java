@@ -344,9 +344,22 @@ public abstract class Wrapper<T> implements Immutable {
             return hashFunction.applyAsInt(value);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(final Object obj) {
-            return (obj == this) || (obj instanceof Wrapper<?> other && equalsFunction.test(value, (T) other.value));
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof Wrapper<?> other) {
+                try {
+                    return equalsFunction.test(value, (T) other.value);
+                } catch (final ClassCastException e) {
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         @Override

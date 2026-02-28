@@ -83,7 +83,7 @@ public class ActivityPrint2025Test extends TestBase {
 
         ActivityPrint result = print.setLiveTime(15000);
 
-        assertEquals(print, result);   // returns this for chaining
+        assertEquals(print, result); // returns this for chaining
         assertEquals(15000, print.getLiveTime());
     }
 
@@ -91,10 +91,7 @@ public class ActivityPrint2025Test extends TestBase {
     public void testSetLiveTimeToZero() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        ActivityPrint result = print.setLiveTime(0);
-
-        assertEquals(0, print.getLiveTime());
-        assertEquals(print, result);
+        assertThrows(IllegalArgumentException.class, () -> print.setLiveTime(0));
     }
 
     @Test
@@ -118,7 +115,7 @@ public class ActivityPrint2025Test extends TestBase {
 
         ActivityPrint result = print.setMaxIdleTime(7500);
 
-        assertEquals(print, result);   // returns this for chaining
+        assertEquals(print, result); // returns this for chaining
         assertEquals(7500, print.getMaxIdleTime());
     }
 
@@ -126,10 +123,7 @@ public class ActivityPrint2025Test extends TestBase {
     public void testSetMaxIdleTimeToZero() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        ActivityPrint result = print.setMaxIdleTime(0);
-
-        assertEquals(0, print.getMaxIdleTime());
-        assertEquals(print, result);
+        assertThrows(IllegalArgumentException.class, () -> print.setMaxIdleTime(0));
     }
 
     @Test

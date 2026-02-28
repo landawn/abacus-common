@@ -58,106 +58,106 @@ public class JsonParserImpl101Test extends TestBase {
     }
 
     @Test
-    public void testReadString_SimpleTypes() {
-        String result1 = parser.readString("\"hello\"", null, String.class);
+    public void testparse_SimpleTypes() {
+        String result1 = parser.parse("\"hello\"", null, String.class);
         Assertions.assertEquals("\"hello\"", result1);
 
-        Integer result2 = parser.readString("123", null, Integer.class);
+        Integer result2 = parser.parse("123", null, Integer.class);
         Assertions.assertEquals(123, result2);
 
-        Boolean result3 = parser.readString("true", null, Boolean.class);
+        Boolean result3 = parser.parse("true", null, Boolean.class);
         Assertions.assertTrue(result3);
 
-        String result4 = parser.readString(null, null, String.class);
+        String result4 = parser.parse(null, null, String.class);
         Assertions.assertNull(result4);
 
-        String result5 = parser.readString("", null, String.class);
+        String result5 = parser.parse("", null, String.class);
         Assertions.assertEquals("", result5);
     }
 
     @Test
-    public void testReadString_WithConfig() {
+    public void testparse_WithConfig() {
         JsonDeserializationConfig config = JDC.create().readNullToEmpty(true);
 
-        String result1 = parser.readString(null, config, String.class);
+        String result1 = parser.parse(null, config, String.class);
         Assertions.assertEquals("", result1);
 
-        List<String> result2 = parser.readString(null, config, List.class);
+        List<String> result2 = parser.parse(null, config, List.class);
         Assertions.assertNotNull(result2);
         Assertions.assertTrue(result2.isEmpty());
 
-        Map<String, Object> result3 = parser.readString(null, config, Map.class);
+        Map<String, Object> result3 = parser.parse(null, config, Map.class);
         Assertions.assertNotNull(result3);
         Assertions.assertTrue(result3.isEmpty());
     }
 
     @Test
-    public void testReadString_ComplexTypes() {
-        Map<String, Object> result1 = parser.readString("{\"key\":\"value\"}", null, Map.class);
+    public void testparse_ComplexTypes() {
+        Map<String, Object> result1 = parser.parse("{\"key\":\"value\"}", null, Map.class);
         Assertions.assertEquals("value", result1.get("key"));
 
-        List<String> result2 = parser.readString("[\"a\",\"b\",\"c\"]", null, List.class);
+        List<String> result2 = parser.parse("[\"a\",\"b\",\"c\"]", null, List.class);
         Assertions.assertEquals(3, result2.size());
         Assertions.assertEquals("a", result2.get(0));
 
         String json = "{\"list\":[1,2,3],\"map\":{\"nested\":\"value\"}}";
-        Map<String, Object> result3 = parser.readString(json, null, Map.class);
+        Map<String, Object> result3 = parser.parse(json, null, Map.class);
         Assertions.assertTrue(result3.get("list") instanceof List);
         Assertions.assertTrue(result3.get("map") instanceof Map);
     }
 
     @Test
-    public void testReadString_Array() {
-        int[] intArray = parser.readString("[1,2,3]", null, int[].class);
+    public void testparse_Array() {
+        int[] intArray = parser.parse("[1,2,3]", null, int[].class);
         Assertions.assertArrayEquals(new int[] { 1, 2, 3 }, intArray);
 
-        String[] strArray = parser.readString("[\"a\",\"b\",\"c\"]", null, String[].class);
+        String[] strArray = parser.parse("[\"a\",\"b\",\"c\"]", null, String[].class);
         Assertions.assertArrayEquals(new String[] { "a", "b", "c" }, strArray);
 
-        Object[] objArray = parser.readString("[1,\"two\",true]", null, Object[].class);
+        Object[] objArray = parser.parse("[1,\"two\",true]", null, Object[].class);
         Assertions.assertEquals(3, objArray.length);
     }
 
     @Test
-    public void testReadString_OutputArray() {
+    public void testparse_OutputArray() {
         Object[] output = new Object[3];
-        parser.readString("[\"a\",\"b\",\"c\"]", null, output);
+        parser.parse("[\"a\",\"b\",\"c\"]", null, output);
         Assertions.assertEquals("a", output[0]);
         Assertions.assertEquals("b", output[1]);
         Assertions.assertEquals("c", output[2]);
 
         Object[] output2 = new Object[3];
-        parser.readString(null, null, output2);
+        parser.parse(null, null, output2);
         Assertions.assertNull(output2[0]);
     }
 
     @Test
-    public void testReadString_OutputCollection() {
+    public void testparse_OutputCollection() {
         List<String> output = new ArrayList<>();
-        parser.readString("[\"x\",\"y\",\"z\"]", null, output);
+        parser.parse("[\"x\",\"y\",\"z\"]", null, output);
         Assertions.assertEquals(3, output.size());
         Assertions.assertEquals("x", output.get(0));
 
         Set<Integer> outputSet = new HashSet<>();
-        parser.readString("[1,2,3]", null, outputSet);
+        parser.parse("[1,2,3]", null, outputSet);
         Assertions.assertEquals(3, outputSet.size());
         Assertions.assertTrue(outputSet.contains(1));
 
         List<String> output2 = new ArrayList<>();
-        parser.readString(null, null, output2);
+        parser.parse(null, null, output2);
         Assertions.assertTrue(output2.isEmpty());
     }
 
     @Test
-    public void testReadString_OutputMap() {
+    public void testparse_OutputMap() {
         Map<String, Object> output = new HashMap<>();
-        parser.readString("{\"a\":1,\"b\":2}", null, output);
+        parser.parse("{\"a\":1,\"b\":2}", null, output);
         Assertions.assertEquals(2, output.size());
         Assertions.assertEquals(1, output.get("a"));
         Assertions.assertEquals(2, output.get("b"));
 
         Map<String, Object> output2 = new HashMap<>();
-        parser.readString("", null, output2);
+        parser.parse("", null, output2);
         Assertions.assertTrue(output2.isEmpty());
     }
 

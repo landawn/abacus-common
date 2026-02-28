@@ -59,100 +59,100 @@ public class N102Test extends TestBase {
     @Test
     public void testDeleteRange_boolean() {
         boolean[] arr = { true, false, true, false, true };
-        boolean[] result = N.deleteRange(arr, 1, 3);
+        boolean[] result = N.removeRange(arr, 1, 3);
         assertArrayEquals(new boolean[] { true, false, true }, result);
 
-        assertEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.deleteRange((boolean[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.removeRange((boolean[]) null, 0, 0));
 
         boolean[] original = { true, false };
-        boolean[] noDeletion = N.deleteRange(original, 0, 0);
+        boolean[] noDeletion = N.removeRange(original, 0, 0);
         assertArrayEquals(original, noDeletion);
     }
 
     @Test
     public void testDeleteRange_char() {
-        char[] result = N.deleteRange(charArray, 1, 3);
+        char[] result = N.removeRange(charArray, 1, 3);
         assertArrayEquals(new char[] { 'a', 'd', 'e' }, result);
 
-        assertEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.deleteRange((char[]) null, 0, 0));
-        assertArrayEquals(charArray.clone(), N.deleteRange(charArray, 0, 0));
+        assertEquals(CommonUtil.EMPTY_CHAR_ARRAY, N.removeRange((char[]) null, 0, 0));
+        assertArrayEquals(charArray.clone(), N.removeRange(charArray, 0, 0));
     }
 
     @Test
     public void testDeleteRange_byte() {
-        byte[] result = N.deleteRange(byteArray, 1, 3);
+        byte[] result = N.removeRange(byteArray, 1, 3);
         assertArrayEquals(new byte[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.deleteRange((byte[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_BYTE_ARRAY, N.removeRange((byte[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_short() {
-        short[] result = N.deleteRange(shortArray, 1, 3);
+        short[] result = N.removeRange(shortArray, 1, 3);
         assertArrayEquals(new short[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.deleteRange((short[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_SHORT_ARRAY, N.removeRange((short[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_int() {
-        int[] result = N.deleteRange(intArray, 1, 3);
+        int[] result = N.removeRange(intArray, 1, 3);
         assertArrayEquals(new int[] { 1, 4, 5 }, result);
 
-        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.deleteRange((int[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, N.removeRange((int[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_long() {
-        long[] result = N.deleteRange(longArray, 1, 3);
+        long[] result = N.removeRange(longArray, 1, 3);
         assertArrayEquals(new long[] { 1L, 4L, 5L }, result);
 
-        assertEquals(CommonUtil.EMPTY_LONG_ARRAY, N.deleteRange((long[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_LONG_ARRAY, N.removeRange((long[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_float() {
-        float[] result = N.deleteRange(floatArray, 1, 3);
+        float[] result = N.removeRange(floatArray, 1, 3);
         assertArrayEquals(new float[] { 1.0f, 4.0f, 5.0f }, result);
 
-        assertEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.deleteRange((float[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_FLOAT_ARRAY, N.removeRange((float[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_double() {
-        double[] result = N.deleteRange(doubleArray, 1, 3);
+        double[] result = N.removeRange(doubleArray, 1, 3);
         assertArrayEquals(new double[] { 1.0, 4.0, 5.0 }, result);
 
-        assertEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.deleteRange((double[]) null, 0, 0));
+        assertEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.removeRange((double[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_String() {
-        String[] result = N.deleteRange(stringArray, 1, 3);
+        String[] result = N.removeRange(stringArray, 1, 3);
         assertArrayEquals(new String[] { "one", "four", "five" }, result);
 
-        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.deleteRange((String[]) null, 0, 0));
+        assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, N.removeRange((String[]) null, 0, 0));
     }
 
     @Test
     public void testDeleteRange_generic() {
-        Integer[] result = N.deleteRange(integerArray, 1, 3);
+        Integer[] result = N.removeRange(integerArray, 1, 3);
         assertArrayEquals(new Integer[] { 1, 4, 5 }, result);
     }
 
     @Test
     public void testDeleteRange_List() {
         List<Integer> list = new ArrayList<>(integerList);
-        assertTrue(N.deleteRange(list, 1, 3));
+        assertTrue(N.removeRange(list, 1, 3));
         assertEquals(Arrays.asList(1, 4, 5), list);
 
         List<Integer> emptyList = new ArrayList<>();
-        assertFalse(N.deleteRange(emptyList, 0, 0));
+        assertFalse(N.removeRange(emptyList, 0, 0));
     }
 
     @Test
     public void testDeleteRange_String_method() {
-        String result = N.deleteRange("hello world", 5, 6);
+        String result = N.removeRange("hello world", 5, 6);
         assertEquals("helloworld", result);
     }
 

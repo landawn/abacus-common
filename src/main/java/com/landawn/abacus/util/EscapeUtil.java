@@ -820,6 +820,12 @@ public final class EscapeUtil {
          * The first translator to consume codepoints from the input is the <i>winner</i>.
          * Execution stops with the number of consumed codepoints being returned.
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return the number of code points consumed by the winning translator, or {@code 0} if none match
+         * @throws IOException if writing translated output fails
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -997,6 +1003,11 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param codepoint the Unicode code point to evaluate and optionally escape
+         * @param out the destination writer for escaped output
+         * @return {@code true} if the code point is escaped; otherwise {@code false}
+         * @throws IOException if writing escaped output fails
          */
         @Override
         public boolean translate(final int codepoint, final Writer out) throws IOException {
@@ -1024,6 +1035,10 @@ public final class EscapeUtil {
         /**
          * Implementation of translate that throws out unpaired surrogates.
          * {@inheritDoc}
+         *
+         * @param codepoint the Unicode code point to evaluate
+         * @param out the destination writer (unused when dropping unpaired surrogates)
+         * @return {@code true} if the code point is an unpaired surrogate and is consumed
          */
         @Override
         public boolean translate(final int codepoint, final Writer out) {
@@ -1040,6 +1055,12 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return the number of consumed characters for a recognized unicode escape, or {@code 0} if no escape is found
+         * @throws IOException if writing translated output fails
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -1154,6 +1175,11 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param codepoint the Unicode code point to evaluate and optionally escape
+         * @param out the destination writer for escaped output
+         * @return {@code true} if the code point is escaped; otherwise {@code false}
+         * @throws IOException if writing escaped output fails
          */
         @Override
         public boolean translate(final int codepoint, final Writer out) throws IOException {
@@ -1187,6 +1213,11 @@ public final class EscapeUtil {
          * @return the Unicode escape string representation of the codepoint
          */
         protected String toUtf16Escape(final int codepoint) {
+            if (codepoint > 0xFFFF) {
+                final char[] surrogatePair = Character.toChars(codepoint);
+                return "\\u" + hex(surrogatePair[0]) + "\\u" + hex(surrogatePair[1]);
+            }
+
             return "\\u" + hex(codepoint);
         }
     }
@@ -1203,6 +1234,12 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return the number of consumed characters for a recognized octal escape, or {@code 0} if no escape is found
+         * @throws IOException if writing translated output fails
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -1309,6 +1346,12 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return the number of consumed characters for a recognized numeric entity, or {@code 0} if no entity is found
+         * @throws IOException if writing translated output fails
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -1420,6 +1463,12 @@ public final class EscapeUtil {
 
         /**
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return the number of consumed characters for the matched lookup key, or {@code 0} if no key matches
+         * @throws IOException if writing translated output fails
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -1453,6 +1502,12 @@ public final class EscapeUtil {
         /**
          * Implementation of translate that maps onto the abstract translate (int, Writer) method.
          * {@inheritDoc}
+         *
+         * @param input the character sequence to translate
+         * @param index the current index in the input sequence
+         * @param out the destination writer for translated output
+         * @return {@code 1} if translation occurs for the current code point; otherwise {@code 0}
+         * @throws IOException if writing translated output fails
          */
         @Override
         public final int translate(final CharSequence input, final int index, final Writer out) throws IOException {

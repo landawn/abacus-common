@@ -666,7 +666,7 @@ public class DoubleList2025Test extends TestBase {
     public void testDelete() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
 
-        double deleted = list.delete(1);
+        double deleted = list.removeAt(1);
         assertEquals(20.5, deleted, DELTA);
         assertEquals(2, list.size());
         assertEquals(10.5, list.get(0), DELTA);
@@ -676,7 +676,7 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testDeleteFirst() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        double deleted = list.delete(0);
+        double deleted = list.removeAt(0);
         assertEquals(10.5, deleted, DELTA);
         assertEquals(2, list.size());
     }
@@ -684,7 +684,7 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testDeleteLast() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        double deleted = list.delete(2);
+        double deleted = list.removeAt(2);
         assertEquals(30.5, deleted, DELTA);
         assertEquals(2, list.size());
     }
@@ -692,14 +692,14 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testDeleteThrowsException() {
         list.add(10.5);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(1));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5, 50.5 });
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(30.5, list.get(1), DELTA);
@@ -709,14 +709,14 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testDeleteAllByIndicesEmpty() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteAllByIndicesDuplicates() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5 });
-        list.deleteAllByIndices(1, 1, 2);
+        list.removeAt(1, 1, 2);
         assertEquals(2, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(40.5, list.get(1), DELTA);
@@ -726,7 +726,7 @@ public class DoubleList2025Test extends TestBase {
     public void testDeleteRange() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5, 50.5 });
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(40.5, list.get(1), DELTA);
@@ -736,21 +736,21 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testDeleteRangeEmpty() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteRangeAll() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        list.deleteRange(0, 3);
+        list.removeRange(0, 3);
         assertEquals(0, list.size());
     }
 
     @Test
     public void testDeleteRangeThrowsException() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(1, 4));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(1, 4));
     }
 
     @Test
@@ -1605,7 +1605,7 @@ public class DoubleList2025Test extends TestBase {
         list.add(2.2);
         assertEquals(2, list.size());
 
-        list.delete(0);
+        list.removeAt(0);
         assertEquals(1, list.size());
     }
 

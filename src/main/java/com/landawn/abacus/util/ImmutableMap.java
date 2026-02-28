@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -596,7 +595,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         private final Map<K, V> map;
 
         Builder() {
-            map = new HashMap<>();
+            map = new LinkedHashMap<>();
         }
 
         Builder(final Map<K, V> backedMap) {

@@ -3971,7 +3971,7 @@ public final class Numbers {
             case 4:
             case 9:
                 final long tst = (long) Math.sqrt(n);
-                return tst * tst == n;
+                return tst * tst == n || (tst + 1) * (tst + 1) == n;
 
             default:
                 return false;
@@ -5468,7 +5468,7 @@ public final class Numbers {
      */
     public static int gcd(int a, int b) throws ArithmeticException {
 
-        if ((a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)) {
+        if ((a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE) || (a == Integer.MIN_VALUE && b == Integer.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^31");
         }
 
@@ -5548,7 +5548,7 @@ public final class Numbers {
      */
     public static long gcd(long a, long b) throws ArithmeticException {
 
-        if ((a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)) {
+        if ((a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE) || (a == Long.MIN_VALUE && b == Long.MIN_VALUE)) {
             throw new ArithmeticException("overflow by 2^63");
         }
 

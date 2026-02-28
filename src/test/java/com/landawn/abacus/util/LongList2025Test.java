@@ -330,7 +330,7 @@ public class LongList2025Test extends TestBase {
         list.add(1L);
         list.add(2L);
         list.add(3L);
-        long deleted = list.delete(1);
+        long deleted = list.removeAt(1);
         assertEquals(2L, deleted);
         assertEquals(2, list.size());
         assertEquals(3L, list.get(1));
@@ -338,7 +338,7 @@ public class LongList2025Test extends TestBase {
 
     @Test
     public void testDeleteOutOfBounds() {
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(0));
     }
 
     @Test
@@ -347,7 +347,7 @@ public class LongList2025Test extends TestBase {
         list.add(2L);
         list.add(3L);
         list.add(4L);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(2, list.size());
         assertEquals(1L, list.get(0));
         assertEquals(3L, list.get(1));
@@ -359,7 +359,7 @@ public class LongList2025Test extends TestBase {
         list.add(2L);
         list.add(3L);
         list.add(4L);
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertEquals(2, list.size());
         assertEquals(1L, list.get(0));
         assertEquals(4L, list.get(1));

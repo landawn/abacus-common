@@ -36,7 +36,7 @@ public class ParseException2025Test extends TestBase {
     public void testTokenAndMessageConstructor() {
         int token = 42;
         String message = "Parse error at token";
-        ParsingException exception = new ParsingException(token, message);
+        ParsingException exception = new ParsingException(message, token);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertNull(exception.getCause());
@@ -70,7 +70,7 @@ public class ParseException2025Test extends TestBase {
         assertEquals(-2, exception1.getErrorToken());
 
         int customToken = 100;
-        ParsingException exception2 = new ParsingException(customToken, "Error");
+        ParsingException exception2 = new ParsingException("Error", customToken);
         assertEquals(customToken, exception2.getErrorToken());
     }
 
@@ -97,14 +97,14 @@ public class ParseException2025Test extends TestBase {
     @Test
     public void testNegativeToken() {
         int negativeToken = -100;
-        ParsingException exception = new ParsingException(negativeToken, "Error");
+        ParsingException exception = new ParsingException("Error", negativeToken);
         assertEquals(negativeToken, exception.getErrorToken());
     }
 
     @Test
     public void testZeroToken() {
         int zeroToken = 0;
-        ParsingException exception = new ParsingException(zeroToken, "Error");
+        ParsingException exception = new ParsingException("Error", zeroToken);
         assertEquals(zeroToken, exception.getErrorToken());
     }
 }

@@ -40,10 +40,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <T> the type of the object argument to the predicate
  *
- * @see java.util.function.Predicate
- * @see java.util.function.BiPredicate
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Predicate
+ * @see java.util.function.BiPredicate
  */
 @FunctionalInterface
 public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, RuntimeException> { // NOSONAR

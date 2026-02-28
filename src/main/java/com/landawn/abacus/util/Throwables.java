@@ -1407,9 +1407,16 @@ public final class Throwables {
     public interface BooleanSupplier<E extends Throwable> {
 
         /**
-         * Gets a boolean result.
+         * Returns a boolean result from this supplier.
+         * Implementations may throw a checked exception while computing the result.
          *
-         * @return the boolean result
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Throwables.BooleanSupplier<Exception> supplier = () -> true;
+         * boolean result = supplier.getAsBoolean();
+         * }</pre>
+         *
+         * @return the supplied boolean result
          * @throws E if an exception occurs while getting the result
          */
         boolean getAsBoolean() throws E; // NOSONAR

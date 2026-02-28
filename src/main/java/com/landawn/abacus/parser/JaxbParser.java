@@ -58,7 +58,7 @@ import jakarta.xml.bind.Unmarshaller;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * JAXBParser parser = new JAXBParser();
+ * JaxbParser parser = new JaxbParser();
  * 
  * // Serialization
  * Person person = new Person("John", 30);
@@ -71,19 +71,19 @@ import jakarta.xml.bind.Unmarshaller;
  * @see AbstractXmlParser
  * @see jakarta.xml.bind.JAXB
  */
-final class JAXBParser extends AbstractXmlParser {
+final class JaxbParser extends AbstractXmlParser {
 
     /**
-     * Constructs a new JAXBParser with default configuration.
+     * Constructs a new JaxbParser with default configuration.
      * 
      * <p>This constructor creates a parser instance with default XML serialization
      * and deserialization configurations.</p>
      */
-    JAXBParser() {
+    JaxbParser() {
     }
 
     /**
-     * Constructs a new JAXBParser with specified configurations.
+     * Constructs a new JaxbParser with specified configurations.
      * 
      * <p>This constructor allows customization of the parser behavior through
      * XML serialization and deserialization configuration objects.</p>
@@ -91,7 +91,7 @@ final class JAXBParser extends AbstractXmlParser {
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
      */
-    JAXBParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    JaxbParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
         super(xsc, xdc);
     }
 
@@ -316,14 +316,14 @@ final class JAXBParser extends AbstractXmlParser {
 
     @Override
     public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
-        Reader reader = null;
+        InputStream is = null;
 
         try {
-            reader = IOUtil.newFileReader(source);
+            is = IOUtil.newFileInputStream(source);
 
-            return deserialize(reader, config, targetClass);
+            return deserialize(is, config, targetClass);
         } finally {
-            IOUtil.close(reader);
+            IOUtil.close(is);
         }
     }
 
@@ -334,13 +334,7 @@ final class JAXBParser extends AbstractXmlParser {
 
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
-        final BufferedReader br = Objectory.createBufferedReader(source);
-
-        try {
-            return read(br, config, targetClass);
-        } finally {
-            Objectory.recycle(br);
-        }
+        return read(source, config, targetClass);
     }
 
     @Override
@@ -381,6 +375,21 @@ final class JAXBParser extends AbstractXmlParser {
      * @return the deserialized object
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
+    @SuppressWarnings("unchecked")
+    <T> T read(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
+            throw new ParsingException("'ignoredPropNames' is not supported");
+        }
+
+        final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
+
+        try {
+            return (T) unmarshaller.unmarshal(source);
+        } catch (final JAXBException e) {
+            throw new ParsingException(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {

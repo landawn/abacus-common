@@ -84,6 +84,8 @@ final class GuavaHashFunction implements HashFunction {
      * <p>Creates a new hasher by delegating to the wrapped Guava hash function's
      * {@code newHasher()} method. The returned hasher is wrapped in a {@link GuavaHasher}
      * to adapt it to the abacus-common API.
+     *
+     * @return a new hasher backed by the wrapped Guava hash function
      */
     @Override
     public Hasher newHasher() {
@@ -96,6 +98,9 @@ final class GuavaHashFunction implements HashFunction {
      * <p>Creates a new hasher optimized for the expected input size by delegating to
      * the wrapped Guava hash function's {@code newHasher(int)} method. The returned
      * hasher is wrapped in a {@link GuavaHasher}.
+     *
+     * @param expectedInputSize the expected number of bytes to be hashed
+     * @return a new hasher backed by the wrapped Guava hash function
      */
     @Override
     public Hasher newHasher(final int expectedInputSize) {
@@ -107,6 +112,9 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of an integer by delegating to the wrapped Guava hash
      * function's {@code hashInt()} method.
+     *
+     * @param input the integer value to hash
+     * @return the hash code for the supplied integer
      */
     @Override
     public HashCode hash(final int input) {
@@ -118,6 +126,9 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of a long by delegating to the wrapped Guava hash
      * function's {@code hashLong()} method.
+     *
+     * @param input the long value to hash
+     * @return the hash code for the supplied long
      */
     @Override
     public HashCode hash(final long input) {
@@ -129,6 +140,9 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of a byte array by delegating to the wrapped Guava hash
      * function's {@code hashBytes()} method.
+     *
+     * @param input the byte array to hash
+     * @return the hash code for the supplied bytes
      */
     @Override
     public HashCode hash(final byte[] input) {
@@ -140,6 +154,11 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of a portion of a byte array by delegating to the wrapped
      * Guava hash function's {@code hashBytes(byte[], int, int)} method.
+     *
+     * @param input the byte array containing the bytes to hash
+     * @param off the start offset in the array
+     * @param len the number of bytes to hash
+     * @return the hash code for the requested byte range
      */
     @Override
     public HashCode hash(final byte[] input, final int off, final int len) {
@@ -151,6 +170,9 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of a character sequence without encoding by delegating to
      * the wrapped Guava hash function's {@code hashUnencodedChars()} method.
+     *
+     * @param input the character sequence to hash
+     * @return the hash code for the supplied character sequence
      */
     @Override
     public HashCode hash(final CharSequence input) {
@@ -162,6 +184,10 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of an encoded character sequence by delegating to the
      * wrapped Guava hash function's {@code hashString()} method.
+     *
+     * @param input the character sequence to hash
+     * @param charset the charset used to encode the characters before hashing
+     * @return the hash code for the supplied encoded character sequence
      */
     @Override
     public HashCode hash(final CharSequence input, final Charset charset) {
@@ -173,6 +199,11 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Computes the hash of an object using a funnel by delegating to the wrapped
      * Guava hash function's {@code hashObject()} method.
+     *
+     * @param <T> the type of the instance to hash
+     * @param instance the object instance to hash
+     * @param funnel the funnel that translates the object into bytes
+     * @return the hash code for the supplied object
      */
     @Override
     public <T> HashCode hash(final T instance, final Funnel<? super T> funnel) {
@@ -184,6 +215,8 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Returns the number of bits in hash codes produced by this function by
      * delegating to the wrapped Guava hash function's {@code bits()} method.
+     *
+     * @return the bit length of hash codes produced by this function
      */
     @Override
     public int bits() {

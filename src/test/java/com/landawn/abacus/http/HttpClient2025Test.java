@@ -306,19 +306,19 @@ public class HttpClient2025Test extends TestBase {
     }
 
     @Test
-    public void testDeleteWithQueryParametersAndResultClass() throws IOException {
-        server.enqueue(new MockResponse().setBody("Deleted"));
-        HttpClient client = HttpClient.create(baseUrl);
-        String response = client.delete("id=123", String.class);
-        assertEquals("Deleted", response);
-    }
-
-    @Test
     public void testDeleteWithSettingsAndResultClass() throws IOException {
         server.enqueue(new MockResponse().setBody("Deleted"));
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
         String response = client.delete(settings, String.class);
+        assertEquals("Deleted", response);
+    }
+
+    @Test
+    public void testDeleteWithQueryParametersAndResultClass() throws IOException {
+        server.enqueue(new MockResponse().setBody("Deleted"));
+        HttpClient client = HttpClient.create(baseUrl);
+        String response = client.delete("id=123", String.class);
         assertEquals("Deleted", response);
     }
 
@@ -565,22 +565,22 @@ public class HttpClient2025Test extends TestBase {
     }
 
     @Test
-    public void testAsyncGetWithQueryParametersAndResultClass() throws Exception {
-        server.enqueue(new MockResponse().setBody("Async response"));
-        HttpClient client = HttpClient.create(baseUrl);
-
-        ContinuableFuture<String> future = client.asyncGet("param=value", String.class);
-        String response = future.get();
-        assertEquals("Async response", response);
-    }
-
-    @Test
     public void testAsyncGetWithSettingsAndResultClass() throws Exception {
         server.enqueue(new MockResponse().setBody("Async response"));
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
 
         ContinuableFuture<String> future = client.asyncGet(settings, String.class);
+        String response = future.get();
+        assertEquals("Async response", response);
+    }
+
+    @Test
+    public void testAsyncGetWithQueryParametersAndResultClass() throws Exception {
+        server.enqueue(new MockResponse().setBody("Async response"));
+        HttpClient client = HttpClient.create(baseUrl);
+
+        ContinuableFuture<String> future = client.asyncGet("param=value", String.class);
         String response = future.get();
         assertEquals("Async response", response);
     }
@@ -607,22 +607,22 @@ public class HttpClient2025Test extends TestBase {
     }
 
     @Test
-    public void testAsyncDeleteWithQueryParameters() throws Exception {
-        server.enqueue(new MockResponse().setBody("Async deleted"));
-        HttpClient client = HttpClient.create(baseUrl);
-
-        ContinuableFuture<String> future = client.asyncDelete("id=123");
-        String response = future.get();
-        assertEquals("Async deleted", response);
-    }
-
-    @Test
     public void testAsyncDeleteWithSettings() throws Exception {
         server.enqueue(new MockResponse().setBody("Async deleted"));
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
 
         ContinuableFuture<String> future = client.asyncDelete(settings);
+        String response = future.get();
+        assertEquals("Async deleted", response);
+    }
+
+    @Test
+    public void testAsyncDeleteWithQueryParameters() throws Exception {
+        server.enqueue(new MockResponse().setBody("Async deleted"));
+        HttpClient client = HttpClient.create(baseUrl);
+
+        ContinuableFuture<String> future = client.asyncDelete("id=123");
         String response = future.get();
         assertEquals("Async deleted", response);
     }
@@ -649,22 +649,22 @@ public class HttpClient2025Test extends TestBase {
     }
 
     @Test
-    public void testAsyncDeleteWithQueryParametersAndResultClass() throws Exception {
-        server.enqueue(new MockResponse().setBody("Async deleted"));
-        HttpClient client = HttpClient.create(baseUrl);
-
-        ContinuableFuture<String> future = client.asyncDelete("id=123", String.class);
-        String response = future.get();
-        assertEquals("Async deleted", response);
-    }
-
-    @Test
     public void testAsyncDeleteWithSettingsAndResultClass() throws Exception {
         server.enqueue(new MockResponse().setBody("Async deleted"));
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
 
         ContinuableFuture<String> future = client.asyncDelete(settings, String.class);
+        String response = future.get();
+        assertEquals("Async deleted", response);
+    }
+
+    @Test
+    public void testAsyncDeleteWithQueryParametersAndResultClass() throws Exception {
+        server.enqueue(new MockResponse().setBody("Async deleted"));
+        HttpClient client = HttpClient.create(baseUrl);
+
+        ContinuableFuture<String> future = client.asyncDelete("id=123", String.class);
         String response = future.get();
         assertEquals("Async deleted", response);
     }

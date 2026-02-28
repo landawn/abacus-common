@@ -768,7 +768,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testSizeM() {
-        Function<Map<String, Integer>, Integer> sizeM = Fn.sizeM();
+        Function<Map<String, Integer>, Integer> sizeM = Fn.mapSize();
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
@@ -915,7 +915,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testNotEmptyA() {
-        Predicate<String[]> pred = Fn.notEmptyA();
+        Predicate<String[]> pred = Fn.notEmptyArray();
         assertFalse(pred.test(new String[0]));
         assertFalse(pred.test(null));
         assertTrue(pred.test(new String[] { "a" }));
@@ -923,7 +923,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testNotEmptyC() {
-        Predicate<List<String>> pred = Fn.notEmptyC();
+        Predicate<List<String>> pred = Fn.notEmptyCollection();
         assertFalse(pred.test(Collections.emptyList()));
         assertFalse(pred.test(null));
         assertTrue(pred.test(Arrays.asList("a")));
@@ -931,7 +931,7 @@ public class Fn104Test extends TestBase {
 
     @Test
     public void testNotEmptyM() {
-        Predicate<Map<String, Integer>> pred = Fn.notEmptyM();
+        Predicate<Map<String, Integer>> pred = Fn.notEmptyMap();
         assertFalse(pred.test(Collections.emptyMap()));
         assertFalse(pred.test(null));
         Map<String, Integer> map = new HashMap<>();

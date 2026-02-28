@@ -106,6 +106,11 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
         }
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
+
+        if (map == null) {
+            return null;
+        }
+
         final SetMultimap<K, E> multiMap = N.newLinkedSetMultimap(map.size());
 
         for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

@@ -90,7 +90,7 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_center() {
-        assertEquals(Strings.center("a", 4, "yz"), "yzayz");
+        assertEquals(Strings.center("a", 4, "yz"), "yayz");
         assertEquals(Strings.center(null, 4, " "), "    ");
         assertEquals(Strings.center("", 4, " "), "    ");
         assertEquals(Strings.center("ab", 4, " "), " ab ");
@@ -155,7 +155,7 @@ public class NStringTest extends AbstractParserTest {
             }
             final List<Integer> list = IntList.range(0, maxNum).toList();
             final List<Integer> listA = new ArrayList<>(list);
-            N.deleteAllByIndices(listA, indices);
+            N.removeAt(listA, indices);
 
             final IntList tmp = IntList.range(0, maxNum);
             tmp.removeAll(indices);
@@ -170,21 +170,21 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_13() {
         final Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
-        final String str = Joiner.defauLt().appendEntries(map).toString();
+        final String str = Joiner.withDefault().appendEntries(map).toString();
         N.println(str);
 
-        final Map<String, Integer> map2 = MapSplitter.defauLt().split(str, String.class, Integer.class);
+        final Map<String, Integer> map2 = MapSplitter.withDefault().split(str, String.class, Integer.class);
 
         assertEquals(map, map2);
     }
 
     @Test
     public void test_joiner() {
-        N.println(Joiner.defauLt().repeat(2, 10).toString());
-        N.println(Joiner.defauLt().append(1).repeat(2, 10).toString());
+        N.println(Joiner.withDefault().repeat(2, 10).toString());
+        N.println(Joiner.withDefault().append(1).repeat(2, 10).toString());
 
-        N.println(Joiner.defauLt().repeat(null, 10).toString());
-        N.println(Joiner.defauLt().append(1).repeat(null, 10).toString());
+        N.println(Joiner.withDefault().repeat(null, 10).toString());
+        N.println(Joiner.withDefault().append(1).repeat(null, 10).toString());
     }
 
     @Test
@@ -1206,10 +1206,10 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(null, Strings.deleteWhitespace((String) null));
-            assertEquals("", Strings.deleteWhitespace(""));
-            assertEquals("abc", Strings.deleteWhitespace("abc \r"));
-            assertEquals("abcabc", Strings.deleteWhitespace("abc\n\rabc"));
+            assertEquals(null, Strings.removeWhitespace((String) null));
+            assertEquals("", Strings.removeWhitespace(""));
+            assertEquals("abc", Strings.removeWhitespace("abc \r"));
+            assertEquals("abcabc", Strings.removeWhitespace("abc\n\rabc"));
         }
 
     }
@@ -2620,7 +2620,7 @@ public class NStringTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_array_deleteAllByIndices() {
+    public void test_array_removeAt() {
         final int len = 37;
 
         {
@@ -2641,7 +2641,7 @@ public class NStringTest extends AbstractParserTest {
                 }
             }
 
-            assertTrue(CommonUtil.equals(list.trimToSize().array(), N.deleteAllByIndices(a, indices)));
+            assertTrue(CommonUtil.equals(list.trimToSize().array(), N.removeAt(a, indices)));
         }
 
         {
@@ -2662,7 +2662,7 @@ public class NStringTest extends AbstractParserTest {
                 }
             }
 
-            assertTrue(CommonUtil.equals(list.trimToSize().array(), N.deleteAllByIndices(a, indices)));
+            assertTrue(CommonUtil.equals(list.trimToSize().array(), N.removeAt(a, indices)));
         }
     }
 
@@ -2676,8 +2676,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(true, a[3]);
             assertEquals(true, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(false, a[2]);
 
             a = N.remove(a, true);
@@ -2714,8 +2714,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals('d', a[3]);
             assertEquals('e', a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals('c', a[2]);
 
             a = N.remove(a, 'a');
@@ -2747,8 +2747,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4, a[3]);
             assertEquals(5, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3, a[2]);
 
             a = N.remove(a, (byte) 1);
@@ -2780,8 +2780,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4, a[3]);
             assertEquals(5, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3, a[2]);
 
             a = N.remove(a, (short) 1);
@@ -2813,8 +2813,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4, a[3]);
             assertEquals(5, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3, a[2]);
 
             a = N.remove(a, 1);
@@ -2846,8 +2846,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4, a[3]);
             assertEquals(5, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3, a[2]);
 
             a = N.remove(a, 1);
@@ -2879,8 +2879,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4f, a[3]);
             assertEquals(5f, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3f, a[2]);
 
             a = N.remove(a, 1);
@@ -2912,8 +2912,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4d, a[3]);
             assertEquals(5d, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3d, a[2]);
 
             a = N.remove(a, 1);
@@ -2945,8 +2945,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(4, a[3]);
             assertEquals(5, a[4]);
 
-            a = N.deleteByIndex(a, 3);
-            a = N.deleteAllByIndices(a, 3);
+            a = N.removeAt(a, 3);
+            a = N.removeAt(a, 3);
             assertEquals(3, a[2]);
 
             a = N.remove(a, 1);
@@ -2981,27 +2981,27 @@ public class NStringTest extends AbstractParserTest {
 
         {
             List<?> list = CommonUtil.asList(1, 2, 3);
-            N.deleteAllByIndices(list, 0, 1, 2);
+            N.removeAt(list, 0, 1, 2);
             N.println(list);
             assertEquals(0, list.size());
 
             list = CommonUtil.asList(1, 2, 3);
-            N.deleteAllByIndices(list, 0, 1, 1);
+            N.removeAt(list, 0, 1, 1);
             N.println(list);
             assertEquals(CommonUtil.asList(3), list);
 
             list = CommonUtil.asList(1, 2, 3);
-            N.deleteAllByIndices(list, 0, 2);
+            N.removeAt(list, 0, 2);
             N.println(list);
             assertEquals(CommonUtil.asList(2), list);
 
             list = CommonUtil.asList(1, 2, 3);
-            N.deleteAllByIndices(list, 1);
+            N.removeAt(list, 1);
             N.println(list);
             assertEquals(CommonUtil.asList(1, 3), list);
 
             list = CommonUtil.asList(1, 2, 2, 3);
-            N.deleteAllByIndices(list, 1);
+            N.removeAt(list, 1);
             N.println(list);
             assertEquals(CommonUtil.asList(1, 2, 3), list);
         }
@@ -3014,7 +3014,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new boolean[] { true, true, false, false }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3022,7 +3022,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new char[] { 'a', 'a', 'b', 'b' }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3030,7 +3030,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new byte[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3038,7 +3038,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new short[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3046,7 +3046,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new int[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3054,7 +3054,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new long[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3062,7 +3062,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new float[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3070,7 +3070,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new double[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
@@ -3078,7 +3078,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
             assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
             assertTrue(CommonUtil.equals(new Object[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(CommonUtil.equals(a, N.deleteAllByIndices(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
     }
 
@@ -4202,7 +4202,7 @@ public class NStringTest extends AbstractParserTest {
 
         str = Strings.padStart("abc", 6, "12");
         N.println(str);
-        assertEquals("1212abc", str);
+        assertEquals("121abc", str);
 
         str = Strings.padStart("abc", 6, "1");
         N.println(str);
@@ -4222,7 +4222,7 @@ public class NStringTest extends AbstractParserTest {
 
         str = Strings.padEnd("abc", 6, "12");
         N.println(str);
-        assertEquals("abc1212", str);
+        assertEquals("abc121", str);
 
         str = Strings.padEnd("abc", 6, "1");
         N.println(str);

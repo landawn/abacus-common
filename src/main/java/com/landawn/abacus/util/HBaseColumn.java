@@ -404,8 +404,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Compares this HBaseColumn with another based on their version timestamps.
-     * The comparison is done in ascending order of versions.
+     * Compares this HBaseColumn with another for ordering.
+     * The comparison is primarily done in ascending order of versions.
+     * If versions are equal, value comparison is used as a tie-breaker to keep
+     * {@code compareTo} consistent with {@link #equals(Object)}.
      *
      * @param o the HBaseColumn to compare with
      * @return a negative integer, zero, or a positive integer as this column's version
@@ -413,7 +415,55 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      */
     @Override
     public int compareTo(final HBaseColumn<T> o) {
-        return Long.compare(version, o.version);
+        if (this == o) {
+            return 0;
+        }
+
+        int result = Long.compare(version, o.version);
+
+        if (result != 0) {
+            return result;
+        }
+
+        if (N.equals(value, o.value)) {
+            return 0;
+        }
+
+        if (value == null) {
+            return -1;
+        }
+
+        if (o.value == null) {
+            return 1;
+        }
+
+        if ((value instanceof Comparable<?>) && value.getClass().isInstance(o.value)) {
+            result = ((Comparable<Object>) value).compareTo(o.value);
+
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        result = value.getClass().getName().compareTo(o.value.getClass().getName());
+
+        if (result != 0) {
+            return result;
+        }
+
+        result = Integer.compare(N.hashCode(value), N.hashCode(o.value));
+
+        if (result != 0) {
+            return result;
+        }
+
+        result = N.toString(value).compareTo(N.toString(o.value));
+
+        if (result != 0) {
+            return result;
+        }
+
+        return Integer.compare(System.identityHashCode(this), System.identityHashCode(o));
     }
 
     /**

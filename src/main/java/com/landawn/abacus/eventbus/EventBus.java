@@ -142,29 +142,19 @@ public class EventBus {
     /**
      * Creates a new EventBus instance with a randomly generated identifier.
      * This EventBus will use the default executor for asynchronous event delivery.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * EventBus eventBus = new EventBus();
-     * }</pre>
+     * Use the static factory methods {@link #create()}, {@link #create(String)}, or {@link #create(String, Executor)} to obtain instances.
      */
-    @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
-    public EventBus() {
+    private EventBus() {
         this(Strings.uuidWithoutHyphens());
     }
 
     /**
      * Creates a new EventBus instance with the specified identifier.
      * This EventBus will use the default executor for asynchronous event delivery.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * EventBus eventBus = new EventBus("myEventBus");
-     * }</pre>
      *
      * @param identifier the unique identifier for this EventBus instance
      */
-    public EventBus(final String identifier) {
+    private EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
     }
 
@@ -172,17 +162,11 @@ public class EventBus {
      * Creates a new EventBus instance with the specified identifier and executor.
      * The executor is used for asynchronous event delivery when ThreadMode.THREAD_POOL_EXECUTOR is specified.
      * If the executor is an ExecutorService, a shutdown hook will be registered to properly shutdown the executor.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * EventBus eventBus = new EventBus("myEventBus", executor);
-     * }</pre>
      *
      * @param identifier the unique identifier for this EventBus instance
      * @param executor the executor to use for asynchronous event delivery, or {@code null} to use the default executor
      */
-    public EventBus(final String identifier, final Executor executor) {
+    private EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
 
@@ -224,11 +208,60 @@ public class EventBus {
     }
 
     /**
-     * Returns the unique identifier of this EventBus instance.
-     * 
+     * Creates a new EventBus instance with a randomly generated identifier.
+     * This EventBus will use the default executor for asynchronous event delivery.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EventBus eventBus = new EventBus("myBus");
+     * EventBus eventBus = EventBus.create();
+     * }</pre>
+     *
+     * @return a new EventBus instance
+     */
+    public static EventBus create() {
+        return new EventBus();
+    }
+
+    /**
+     * Creates a new EventBus instance with the specified identifier.
+     * This EventBus will use the default executor for asynchronous event delivery.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * EventBus eventBus = EventBus.create("myEventBus");
+     * }</pre>
+     *
+     * @param identifier the unique identifier for this EventBus instance
+     * @return a new EventBus instance with the given identifier
+     */
+    public static EventBus create(final String identifier) {
+        return new EventBus(identifier);
+    }
+
+    /**
+     * Creates a new EventBus instance with the specified identifier and executor.
+     * The executor is used for asynchronous event delivery when ThreadMode.THREAD_POOL_EXECUTOR is specified.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ExecutorService executor = Executors.newFixedThreadPool(4);
+     * EventBus eventBus = EventBus.create("myEventBus", executor);
+     * }</pre>
+     *
+     * @param identifier the unique identifier for this EventBus instance
+     * @param executor the executor to use for asynchronous event delivery, or {@code null} to use the default executor
+     * @return a new EventBus instance with the given identifier and executor
+     */
+    public static EventBus create(final String identifier, final Executor executor) {
+        return new EventBus(identifier, executor);
+    }
+
+    /**
+     * Returns the unique identifier of this EventBus instance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * EventBus eventBus = EventBus.create("myBus");
      * String id = eventBus.identifier();   // Returns "myBus"
      * }</pre>
      *
@@ -383,16 +416,6 @@ public class EventBus {
             throw new RuntimeException("Unsupported thread mode: " + threadMode);
         }
 
-        boolean alreadyRegistered = false;
-
-        synchronized (registeredSubMap) {
-            alreadyRegistered = registeredSubMap.containsKey(subscriber);
-        }
-
-        if (alreadyRegistered) {
-            unregister(subscriber);
-        }
-
         if (logger.isDebugEnabled()) {
             logger.debug("Registering subscriber: " + subscriber + " with eventId: " + eventId + " and thread mode: " + threadMode);
         }
@@ -414,9 +437,34 @@ public class EventBus {
             eventSubList.add(new SubIdentifier(sub, subscriber, eventId, threadMode));
         }
 
+        Set<SubIdentifier> oldSubEvents = null;
+
         synchronized (registeredSubMap) {
-            registeredSubMap.put(subscriber, eventSubList);
+            final List<SubIdentifier> removed = registeredSubMap.put(subscriber, eventSubList);
+            oldSubEvents = removed == null ? null : N.newHashSet(removed);
             listOfSubEventSubs = null;
+        }
+
+        if (N.notEmpty(oldSubEvents)) {
+            synchronized (registeredEventIdSubMap) {
+                final List<String> keyToRemove = new ArrayList<>();
+
+                for (final Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
+                    entry.getValue().removeAll(oldSubEvents);
+
+                    if (entry.getValue().isEmpty()) {
+                        keyToRemove.add(entry.getKey());
+                    }
+
+                    listOfEventIdSubMap.remove(entry.getKey());
+                }
+
+                if (N.notEmpty(keyToRemove)) {
+                    for (final String key : keyToRemove) {
+                        registeredEventIdSubMap.remove(key);
+                    }
+                }
+            }
         }
 
         if (Strings.isEmpty(eventId)) {
@@ -601,7 +649,8 @@ public class EventBus {
         Set<SubIdentifier> subEvents = null;
 
         synchronized (registeredSubMap) {
-            subEvents = N.newHashSet(registeredSubMap.remove(subscriber));
+            final List<SubIdentifier> removed = registeredSubMap.remove(subscriber);
+            subEvents = removed == null ? null : N.newHashSet(removed);
             listOfSubEventSubs = null;
         }
 
@@ -744,13 +793,15 @@ public class EventBus {
      * @return this EventBus instance for method chaining
      */
     public EventBus postSticky(final String eventId, final Object event) {
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
+
         synchronized (stickyEventMap) {
-            stickyEventMap.put(event, eventId);
+            stickyEventMap.put(event, normalizedEventId);
 
             mapOfStickyEvent = null;
         }
 
-        post(eventId, event);
+        post(normalizedEventId, event);
 
         return this;
     }
@@ -779,7 +830,7 @@ public class EventBus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Configuration config = getConfiguration();
-     * eventBus.removeStickyEvent(config, "appConfig");
+     * eventBus.removeStickyEvent("appConfig", config);
      * }</pre>
      * @param eventId the event ID the sticky event was posted with
      * @param event the sticky event to remove
@@ -787,10 +838,13 @@ public class EventBus {
      * @return {@code true} if the event was removed, {@code false} otherwise
      */
     public boolean removeStickyEvent(final String eventId, final Object event) {
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
+
         synchronized (stickyEventMap) {
             final String val = stickyEventMap.get(event);
+            final String normalizedStoredEventId = Strings.isEmpty(val) ? null : val;
 
-            if (N.equals(val, eventId) && (val != null || stickyEventMap.containsKey(event))) {
+            if (N.equals(normalizedStoredEventId, normalizedEventId) && (val != null || stickyEventMap.containsKey(event))) {
                 stickyEventMap.remove(event);
 
                 mapOfStickyEvent = null;
@@ -833,11 +887,13 @@ public class EventBus {
      * @return {@code true} if one or more events were removed, {@code false} otherwise
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> keyToRemove = new ArrayList<>();
 
         synchronized (stickyEventMap) {
             for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
-                if (N.equals(entry.getValue(), eventId) && eventType.isAssignableFrom(entry.getKey().getClass())) {
+                if (N.equals(Strings.isEmpty(entry.getValue()) ? null : entry.getValue(), normalizedEventId)
+                        && eventType.isAssignableFrom(entry.getKey().getClass())) {
                     keyToRemove.add(entry.getKey());
                 }
             }
@@ -906,11 +962,13 @@ public class EventBus {
      * @return a list of sticky events matching both the type and event ID
      */
     public List<Object> getStickyEvents(final String eventId, final Class<?> eventType) {
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> result = new ArrayList<>();
 
         synchronized (stickyEventMap) {
             for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
-                if (N.equals(entry.getValue(), eventId) && eventType.isAssignableFrom(entry.getKey().getClass())) {
+                if (N.equals(Strings.isEmpty(entry.getValue()) ? null : entry.getValue(), normalizedEventId)
+                        && eventType.isAssignableFrom(entry.getKey().getClass())) {
                     result.add(entry.getKey());
                 }
             }

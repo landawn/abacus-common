@@ -211,11 +211,6 @@ public final class PrefixSearchTable<K, V> {
 
     private static record Node<K, V>(V value, Map<K, Node<K, V>> children) {
 
-        private Node(V value, Map<K, Node<K, V>> children) {
-            this.value = value;
-            this.children = children;
-        }
-
         Builder<K, V> toBuilder() {
             Builder<K, V> builder = new Builder<>();
             builder.value = value;
@@ -229,7 +224,7 @@ public final class PrefixSearchTable<K, V> {
 
             Builder<K, V> child(K key) {
                 requireNonNull(key);
-                return children.computeIfAbsent(key, k -> new Builder<K, V>());
+                return children.computeIfAbsent(key, k -> new Builder<>());
             }
 
             /**

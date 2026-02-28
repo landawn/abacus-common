@@ -51,7 +51,7 @@ public class ReflectASM100Test extends TestBase {
         ReflectASM<TestPerson> reflect = ReflectASM.on("com.landawn.abacus.util.ReflectASM100Test$TestPerson");
         Assertions.assertNotNull(reflect);
 
-        reflect._new();
+        reflect.newInstance();
     }
 
     @Test
@@ -59,7 +59,7 @@ public class ReflectASM100Test extends TestBase {
         ReflectASM<TestPerson> reflect = ReflectASM.on(TestPerson.class);
         Assertions.assertNotNull(reflect);
 
-        reflect._new();
+        reflect.newInstance();
     }
 
     @Test
@@ -75,9 +75,9 @@ public class ReflectASM100Test extends TestBase {
     @Test
     public void testNew() {
         ReflectASM<TestPerson> reflect = ReflectASM.on(TestPerson.class);
-        ReflectASM<TestPerson> newReflect = reflect._new();
+        ReflectASM<TestPerson> newReflect = reflect.newInstance();
 
-        newReflect._new();
+        newReflect.newInstance();
     }
 
     @Test
@@ -190,6 +190,6 @@ public class ReflectASM100Test extends TestBase {
     @Test
     public void testWithList() {
         ReflectASM<ArrayList> listReflect = ReflectASM.on(ArrayList.class);
-        listReflect._new();
+        listReflect.newInstance();
     }
 }

@@ -22,10 +22,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, int)}.
  *
- * @param <T> the type of the first object argument to the predicate
- * @param <U> the type of the second object argument to the predicate
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the first object argument to the predicate
+ * @param <U> the type of the second object argument to the predicate
  */
 @FunctionalInterface
 public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T, U, RuntimeException> { //NOSONAR

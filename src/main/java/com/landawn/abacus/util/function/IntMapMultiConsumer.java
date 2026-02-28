@@ -21,9 +21,10 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(int, java.util.function.IntConsumer)}.
  *
- * @see java.util.stream.IntStream.IntMapMultiConsumer
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.stream.IntStream.IntMapMultiConsumer
  */
 @FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR

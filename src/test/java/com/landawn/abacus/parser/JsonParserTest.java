@@ -1787,7 +1787,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         jsonParser.deserialize(str, Object.class);
 
-        jsonParser.readString(str, Object.class);
+        jsonParser.parse(str, Object.class);
     }
 
     @Test
@@ -1796,14 +1796,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String str = jsonParser.serialize(nullElement);
         assertNull(jsonParser.deserialize(str, String.class));
 
-        assertEquals(0, jsonParser.readString(nullElement, int.class).intValue());
+        assertEquals(0, jsonParser.parse(nullElement, int.class).intValue());
 
         final List<String> list = new ArrayList<>();
-        jsonParser.readString(nullElement, list);
+        jsonParser.parse(nullElement, list);
         assertEquals(0, list.size());
 
         final Map<String, Object> map = new HashMap<>();
-        jsonParser.readString(nullElement, map);
+        jsonParser.parse(nullElement, map);
         assertEquals(0, map.size());
     }
 
@@ -2038,9 +2038,9 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    public void test_readString() {
+    public void test_parse() {
         String st = "aksfjei, null, null  ,  ,  \"null\",  askejiow,askjei, ";
-        List<String> c = jsonParser.readString(st, List.class);
+        List<String> c = jsonParser.parse(st, List.class);
 
         N.println(c);
 
@@ -2053,14 +2053,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
         assertTrue(NULL_STRING.equals(c.get(4)));
 
         st = "aks\\\"fjei, null, null  ,  ,  askejiow,askjei, ";
-        c = jsonParser.readString(st, List.class);
+        c = jsonParser.parse(st, List.class);
 
         for (final String e : c) {
             N.println(e);
         }
 
         st = "aks\\\"fjei, null, null  ,  ,  ask\\nejiow,askjei, aa\\u4231, dakslf\\nasfe\\tadfe\\bad s\\rae fe aer \\fsfwe";
-        c = jsonParser.readString(st, List.class);
+        c = jsonParser.parse(st, List.class);
 
         for (final String e : c) {
             N.println(e);
@@ -2068,44 +2068,44 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    public void test_readString_2() {
+    public void test_parse_2() {
         String str = jsonParser.serialize("abc");
         N.println(str);
-        assertTrue(N.equals("abc", jsonParser.readString(str, String.class)));
+        assertTrue(N.equals("abc", jsonParser.parse(str, String.class)));
 
         final Date date = Dates.currentDate();
         str = jsonParser.serialize(date);
         N.println(str);
-        assertTrue(N.equals(N.stringOf(date), N.stringOf(jsonParser.readString(str, Date.class))));
+        assertTrue(N.equals(N.stringOf(date), N.stringOf(jsonParser.parse(str, Date.class))));
 
         str = jsonParser.serialize(Array.of(1, 2, 3));
         N.println(str);
 
-        assertTrue(N.equals(Array.of(1, 2, 3), jsonParser.readString(str, int[].class)));
+        assertTrue(N.equals(Array.of(1, 2, 3), jsonParser.parse(str, int[].class)));
         assertTrue(N.equals(Array.of(1, 2, 3), jsonParser.deserialize(str, int[].class)));
 
         str = jsonParser.serialize(Array.of('a', 'b', 'c'));
         N.println(str);
 
-        assertTrue(N.equals(Array.of('a', 'b', 'c'), jsonParser.readString(str, char[].class)));
+        assertTrue(N.equals(Array.of('a', 'b', 'c'), jsonParser.parse(str, char[].class)));
         assertTrue(N.equals(Array.of('a', 'b', 'c'), jsonParser.deserialize(str, char[].class)));
 
         str = jsonParser.serialize(N.asArray("a", "b", "c"));
         N.println(str);
 
-        assertTrue(N.equals(N.asArray("a", "b", "c"), jsonParser.readString(str, String[].class)));
+        assertTrue(N.equals(N.asArray("a", "b", "c"), jsonParser.parse(str, String[].class)));
         assertTrue(N.equals(N.asArray("a", "b", "c"), jsonParser.deserialize(str, String[].class)));
 
-        assertTrue(N.equals(N.asList('a', 'b', 'c'), jsonParser.readString(str, JDC.create().setElementType(char.class), List.class)));
+        assertTrue(N.equals(N.asList('a', 'b', 'c'), jsonParser.parse(str, JDC.create().setElementType(char.class), List.class)));
         assertTrue(N.equals(N.asList('a', 'b', 'c'), jsonParser.deserialize(str, JDC.create().setElementType(char.class), List.class)));
 
         str = jsonParser.serialize(N.asArray("a", "b", "c"));
         N.println(str);
 
-        assertTrue(N.equals(N.asList("a", "b", "c"), jsonParser.readString(str, List.class)));
+        assertTrue(N.equals(N.asList("a", "b", "c"), jsonParser.parse(str, List.class)));
         assertTrue(N.equals(N.asList("a", "b", "c"), jsonParser.deserialize(str, List.class)));
         final List<String> list = new ArrayList<>();
-        jsonParser.readString(str, list);
+        jsonParser.parse(str, list);
 
         assertTrue(N.equals(N.asList("a", "b", "c"), list));
 
@@ -2114,34 +2114,34 @@ public class JsonParserTest extends AbstractJsonParserTest {
         str = jsonParser.serialize(map);
 
         map.clear();
-        jsonParser.readString(str, map);
+        jsonParser.parse(str, map);
 
         N.println(map);
     }
 
     @Test
-    public void test_readString_3() {
+    public void test_parse_3() {
         final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JsonSerializationConfig jsc = JSC.create().bracketRootValue(false);
         String str = jsonParser.serialize(entityId, jsc);
         N.println(str);
 
-        final EntityId entityId2 = jsonParser.readString(str, EntityId.class);
+        final EntityId entityId2 = jsonParser.parse(str, EntityId.class);
         assertEquals(entityId, entityId2);
 
         final String[] array = N.asArray("abc", "123");
         str = jsonParser.serialize(array, jsc);
         N.println(str);
 
-        final String[] array2 = jsonParser.readString(str, String[].class);
+        final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
         final List<String> list = N.asList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
-        final List<String> list2 = jsonParser.readString(str, JDC.create().setElementType(String.class), List.class);
+        final List<String> list2 = jsonParser.parse(str, JDC.create().setElementType(String.class), List.class);
         assertTrue(N.equals(list, list2));
 
         final Account account = new Account();
@@ -2152,45 +2152,45 @@ public class JsonParserTest extends AbstractJsonParserTest {
         str = jsonParser.serialize(account, jsc);
         N.println(str);
 
-        final Account account2 = jsonParser.readString(str, Account.class);
+        final Account account2 = jsonParser.parse(str, Account.class);
         assertTrue(N.equals(account, account2));
 
         final Map<String, Object> props = Beans.beanToMap(account);
         str = jsonParser.serialize(props, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Map.class);
+        jsonParser.parse(str, Map.class);
 
         final Dataset dataset = N.newDataset(N.asList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Dataset.class);
+        jsonParser.parse(str, Dataset.class);
     }
 
     @Test
-    public void test_readString_4() {
+    public void test_parse_4() {
         final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JsonSerializationConfig jsc = JSC.create().bracketRootValue(true);
         String str = jsonParser.serialize(entityId, jsc);
         N.println(str);
 
-        final EntityId entityId2 = jsonParser.readString(str, EntityId.class);
+        final EntityId entityId2 = jsonParser.parse(str, EntityId.class);
         assertEquals(entityId, entityId2);
 
         final String[] array = N.asArray("abc", "123");
         str = jsonParser.serialize(array, jsc);
         N.println(str);
 
-        final String[] array2 = jsonParser.readString(str, String[].class);
+        final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
         final List<String> list = N.asList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
-        final List<String> list2 = jsonParser.readString(str, JDC.create().setElementType(String.class), List.class);
+        final List<String> list2 = jsonParser.parse(str, JDC.create().setElementType(String.class), List.class);
         assertTrue(N.equals(list, list2));
 
         final Account account = new Account();
@@ -2201,45 +2201,45 @@ public class JsonParserTest extends AbstractJsonParserTest {
         str = jsonParser.serialize(account, jsc);
         N.println(str);
 
-        final Account account2 = jsonParser.readString(str, Account.class);
+        final Account account2 = jsonParser.parse(str, Account.class);
         assertTrue(N.equals(account, account2));
 
         final Map<String, Object> props = Beans.beanToMap(account);
         str = jsonParser.serialize(props, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Map.class);
+        jsonParser.parse(str, Map.class);
 
         final Dataset dataset = N.newDataset(N.asList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Dataset.class);
+        jsonParser.parse(str, Dataset.class);
     }
 
     @Test
-    public void test_readString_5() {
+    public void test_parse_5() {
         final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
         final JsonSerializationConfig jsc = JSC.create().bracketRootValue(false).quoteMapKey(false).quotePropName(false).setStringQuotation(WD.CHAR_ZERO);
         String str = jsonParser.serialize(entityId, jsc);
         N.println(str);
 
-        final EntityId entityId2 = jsonParser.readString(str, EntityId.class);
+        final EntityId entityId2 = jsonParser.parse(str, EntityId.class);
         assertEquals(entityId, entityId2);
 
         final String[] array = N.asArray("abc", "123");
         str = jsonParser.serialize(array, jsc);
         N.println(str);
 
-        final String[] array2 = jsonParser.readString(str, String[].class);
+        final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
         final List<String> list = N.asList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
-        final List<String> list2 = jsonParser.readString(str, JDC.create().setElementType(String.class), List.class);
+        final List<String> list2 = jsonParser.parse(str, JDC.create().setElementType(String.class), List.class);
         assertTrue(N.equals(list, list2));
 
         final Account account = new Account();
@@ -2250,20 +2250,20 @@ public class JsonParserTest extends AbstractJsonParserTest {
         str = jsonParser.serialize(account, jsc);
         N.println(str);
 
-        final Account account2 = jsonParser.readString(str, Account.class);
+        final Account account2 = jsonParser.parse(str, Account.class);
         assertTrue(N.equals(account, account2));
 
         final Map<String, Object> props = Beans.beanToMap(account);
         str = jsonParser.serialize(props, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Map.class);
+        jsonParser.parse(str, Map.class);
 
         final Dataset dataset = N.newDataset(N.asList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
-        jsonParser.readString(str, Dataset.class);
+        jsonParser.parse(str, Dataset.class);
     }
 
     @Test

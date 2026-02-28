@@ -22,18 +22,18 @@ public class EventBus100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        eventBus = new EventBus();
+        eventBus = EventBus.create();
     }
 
     @Test
-    public void testConstructorWithIdentifier() {
-        EventBus bus = new EventBus("testBus");
+    public void testCreateWithIdentifier() {
+        EventBus bus = EventBus.create("testBus");
         Assertions.assertEquals("testBus", bus.identifier());
     }
 
     @Test
-    public void testConstructorWithIdentifierAndExecutor() {
-        EventBus bus = new EventBus("testBus", null);
+    public void testCreateWithIdentifierAndExecutor() {
+        EventBus bus = EventBus.create("testBus", null);
         Assertions.assertEquals("testBus", bus.identifier());
     }
 
@@ -49,7 +49,7 @@ public class EventBus100Test extends TestBase {
 
     @Test
     public void testIdentifier() {
-        EventBus bus = new EventBus("myIdentifier");
+        EventBus bus = EventBus.create("myIdentifier");
         Assertions.assertEquals("myIdentifier", bus.identifier());
     }
 
@@ -475,7 +475,7 @@ public class EventBus100Test extends TestBase {
 
     @Test
     public void testIsSupportedThreadMode() {
-        EventBus bus = new EventBus();
+        EventBus bus = EventBus.create();
 
         Assertions.assertTrue(bus.isSupportedThreadMode(null));
         Assertions.assertTrue(bus.isSupportedThreadMode(ThreadMode.DEFAULT));

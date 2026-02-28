@@ -1047,31 +1047,31 @@ public class N203Test extends TestBase {
     @Test
     public void testNMatchArray() {
         Integer[] arr = { 1, 2, 3, 4, 5, 6 };
-        assertTrue(N.nMatch(arr, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.nMatch(arr, 2, 4, IS_EVEN_INTEGER));
-        assertFalse(N.nMatch(arr, 4, 5, IS_EVEN_INTEGER));
-        assertTrue(N.nMatch(arr, 0, 0, x -> x > 10));
-        assertFalse(N.nMatch(arr, 1, 1, x -> x > 10));
+        assertTrue(N.countMatchBetween(arr, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.countMatchBetween(arr, 2, 4, IS_EVEN_INTEGER));
+        assertFalse(N.countMatchBetween(arr, 4, 5, IS_EVEN_INTEGER));
+        assertTrue(N.countMatchBetween(arr, 0, 0, x -> x > 10));
+        assertFalse(N.countMatchBetween(arr, 1, 1, x -> x > 10));
 
-        assertTrue(N.nMatch((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
-        assertFalse(N.nMatch((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
+        assertTrue(N.countMatchBetween((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
+        assertFalse(N.countMatchBetween((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
 
-        assertThrows(IllegalArgumentException.class, () -> N.nMatch(arr, -1, 2, IS_EVEN_INTEGER));
-        assertThrows(IllegalArgumentException.class, () -> N.nMatch(arr, 3, 1, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(arr, -1, 2, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(arr, 3, 1, IS_EVEN_INTEGER));
     }
 
     @Test
     public void testNMatchIterable() {
         List<Integer> list = List.of(1, 2, 3, 4, 5, 6);
-        assertTrue(N.nMatch(list, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.nMatch(list, 1, 2, x -> x > 5));
-        assertTrue(N.nMatch(list, 1, 1, x -> x > 5));
+        assertTrue(N.countMatchBetween(list, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.countMatchBetween(list, 1, 2, x -> x > 5));
+        assertTrue(N.countMatchBetween(list, 1, 1, x -> x > 5));
     }
 
     @Test
     public void testNMatchIterator() {
         Iterator<Integer> iter = List.of(1, 2, 3, 4, 5, 6).iterator();
-        assertTrue(N.nMatch(iter, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.countMatchBetween(iter, 3, 3, IS_EVEN_INTEGER));
     }
 
     @Test

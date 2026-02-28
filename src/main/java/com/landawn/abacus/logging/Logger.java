@@ -72,16 +72,29 @@ public interface Logger {
 
     /**
      * Case-insensitive String constant used to retrieve the name of the root logger.
-     * 
-     * <p>This constant can be used with LoggerFactory.getLogger(String) to obtain
+     *
+     * <p>This constant can be used with {@link LoggerFactory#getLogger(String)} to obtain
      * the root logger instance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+     * rootLogger.info("Root logger message");
+     * }</pre>
      */
     String ROOT_LOGGER_NAME = "ROOT";
 
     /**
      * Gets the name of this logger instance.
-     * 
-     * <p>Logger names typically follow Java package naming conventions.</p>
+     *
+     * <p>Logger names typically follow Java package naming conventions,
+     * usually corresponding to the fully qualified class name.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Logger logger = LoggerFactory.getLogger(MyClass.class);
+     * String loggerName = logger.getName(); // returns "com.example.MyClass"
+     * }</pre>
      *
      * @return the name of this logger
      */

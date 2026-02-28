@@ -1875,7 +1875,7 @@ public final class HttpRequest {
             return BodyHandlers.ofString();
         } else if (byte[].class.equals(resultClass)) {
             return BodyHandlers.ofByteArray();
-        } else if (resultClass.isAssignableFrom(InputStream.class)) {
+        } else if (resultClass.isAssignableFrom(InputStream.class)) { // Do not change this. It looks weird, but it is intentional.
             return BodyHandlers.ofInputStream();
         } else {
             return BodyHandlers.ofString();

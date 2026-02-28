@@ -96,10 +96,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Map creation with factory methods
- * Map<String, Integer> map = Maps.newHashMap();
- * Map<String, Integer> linkedMap = Maps.newLinkedHashMap();
- * Map<String, Integer> sortedMap = Maps.newTreeMap();
+ * // Map creation with JDK collection types
+ * Map<String, Integer> map = new HashMap<>();
+ * Map<String, Integer> linkedMap = new LinkedHashMap<>();
+ * Map<String, Integer> sortedMap = new TreeMap<>();
  *
  * // Zip operations for map creation
  * List<String> keys = Arrays.asList("a", "b", "c");
@@ -139,7 +139,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Map Creation Utilities:</b>
  * <ul>
- *   <li><b>Factory Methods:</b> {@code newHashMap()}, {@code newLinkedHashMap()}, {@code newTreeMap()}</li>
+ *   <li><b>JDK Types:</b> {@code HashMap}, {@code LinkedHashMap}, {@code TreeMap}</li>
  *   <li><b>Builder Patterns:</b> {@code of()} for immutable-style map creation</li>
  *   <li><b>Zip Operations:</b> {@code zip()} for combining separate key/value collections</li>
  *   <li><b>Specialized Maps:</b> {@code newIdentityHashMap()}, {@code newConcurrentHashMap()}</li>
@@ -2621,7 +2621,7 @@ public final class Maps {
      * @return a list of values corresponding to the keys found in the map. Returns an empty list
      *         if {@code map} or {@code keys} is {@code null} or empty.
      */
-    public static <K, V> List<V> getValuesIfPresent(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
+    public static <K, V> List<V> getValuesIfPresent(final Map<K, ? extends V> map, final Collection<?> keys) {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
             return new ArrayList<>();
         }
@@ -2665,6 +2665,7 @@ public final class Maps {
      * @return a list of values corresponding to the keys, using defaultValue when absent. Returns an empty list
      *         if {@code keys} is {@code null} or empty. If {@code map} is {@code null} or empty, the returned list
      *         contains {@code defaultValue} repeated {@code keys.size()} times.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      */
     public static <K, V> List<V> getValuesOrDefault(final Map<K, V> map, final Collection<?> keys, final V defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
@@ -2981,7 +2982,7 @@ public final class Maps {
      * map.put("key2", null);
      *
      * String result1 = Maps.putIfAbsent(map, "key1", "newValue");
-     * // result1 = null (key1 already has a value, not changed)
+     * // result1 = "value1" (key1 already has a non-null value, not changed)
      * // map = {key1=value1, key2=null}
      *
      * String result2 = Maps.putIfAbsent(map, "key2", "value2");
@@ -2998,7 +2999,7 @@ public final class Maps {
      * @param map the map to put the value in.
      * @param key the key to associate the value with.
      * @param value the value to put if the key is absent.
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key or if the key was mapped to {@code null}.
+     * @return the existing non-null value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the new value is put).
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final V value) {
@@ -3023,7 +3024,7 @@ public final class Maps {
      *
      * // Supplier is only called when the key is absent
      * List<String> result1 = Maps.putIfAbsent(map, "key1", () -> new ArrayList<>());
-     * // result1 = null (key1 already has a value, supplier not called)
+     * // result1 = [a, b] (key1 already has a non-null value, supplier not called)
      * // map = {key1=[a, b]}
      *
      * List<String> result2 = Maps.putIfAbsent(map, "key2", () -> new ArrayList<>());
@@ -3036,7 +3037,7 @@ public final class Maps {
      * @param map the map to put the value in.
      * @param key the key to associate the value with.
      * @param supplier the supplier to get the value from if the key is absent.
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key or if the key was mapped to {@code null}.
+     * @return the existing non-null value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the supplier's value is put).
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
@@ -3524,7 +3525,7 @@ public final class Maps {
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key.
      */
     @MayReturnNull
-    public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) throws IllegalArgumentException {
+    public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {
         if (N.isEmpty(map)) {
             return null;
         }
@@ -4175,8 +4176,7 @@ public final class Maps {
      * @return a new map which is the unflattened version of the input map. Keys without the delimiter
      *         are copied as-is; no error is raised when the delimiter is absent.
      */
-    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier)
-            throws IllegalArgumentException {
+    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier) {
         final M result = mapSupplier.get();
         final Splitter keySplitter = Splitter.with(delimiter);
 
@@ -4273,15 +4273,24 @@ public final class Maps {
             newKey = keyConverter.apply(key);
 
             if (!newKeySet.add(newKey)) {
-                throw new IllegalStateException("Duplicate new Keys: " + Joiner.defauLt().appendAll(newKeySet).append(newKey));
+                throw new IllegalStateException("Duplicate new Keys: " + Joiner.withDefault().appendAll(newKeySet).append(newKey));
             }
         }
 
         final Map<K, Object> mapToUse = (Map<K, Object>) map;
-        final Iterator<K> newKeyIter = newKeySet.iterator();
+
+        final Object[] values = new Object[keys.size()];
+        int idx = 0;
 
         for (final K key : keys) {
-            mapToUse.put(newKeyIter.next(), mapToUse.remove(key));
+            values[idx++] = mapToUse.remove(key);
+        }
+
+        final Iterator<K> newKeyIter = newKeySet.iterator();
+        idx = 0;
+
+        while (newKeyIter.hasNext()) {
+            mapToUse.put(newKeyIter.next(), values[idx++]);
         }
     }
 
@@ -4369,7 +4378,13 @@ public final class Maps {
             newKey = keyConverter.apply(key);
 
             if (!N.equals(key, newKey)) {
-                map.merge(newKey, map.remove(key), merger);
+                final V value = map.remove(key);
+
+                if (value == null) {
+                    map.putIfAbsent(newKey, null);
+                } else {
+                    map.merge(newKey, value, merger);
+                }
             }
         }
     }

@@ -196,22 +196,22 @@ public class ImmutableArray100Test extends TestBase {
         Assertions.assertFalse(array.contains(null));
     }
 
-    @Test
-    public void testCopy() {
-        ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
-
-        ImmutableArray<String> copy1 = array.copy(1, 4);
-        Assertions.assertEquals(3, copy1.length());
-        Assertions.assertEquals("b", copy1.get(0));
-        Assertions.assertEquals("c", copy1.get(1));
-        Assertions.assertEquals("d", copy1.get(2));
-
-        ImmutableArray<String> copy2 = array.copy(0, 5);
-        Assertions.assertEquals(5, copy2.length());
-
-        ImmutableArray<String> copy3 = array.copy(2, 2);
-        Assertions.assertEquals(0, copy3.length());
-    }
+    //    @Test
+    //    public void testCopy() {
+    //        ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
+    //
+    //        ImmutableArray<String> copy1 = array.copy(1, 4);
+    //        Assertions.assertEquals(3, copy1.length());
+    //        Assertions.assertEquals("b", copy1.get(0));
+    //        Assertions.assertEquals("c", copy1.get(1));
+    //        Assertions.assertEquals("d", copy1.get(2));
+    //
+    //        ImmutableArray<String> copy2 = array.copy(0, 5);
+    //        Assertions.assertEquals(5, copy2.length());
+    //
+    //        ImmutableArray<String> copy3 = array.copy(2, 2);
+    //        Assertions.assertEquals(0, copy3.length());
+    //    }
 
     @Test
     public void testCopy_InvalidRange() {

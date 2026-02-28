@@ -1,6 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -499,7 +498,7 @@ public class ImmutableSet2025Test extends TestBase {
         assertEquals(set1.hashCode(), set2.hashCode());
 
         Set<String> hashSet = new HashSet<>(Arrays.asList("a", "b", "c"));
-        assertNotEquals(set1, hashSet);
+        assertEquals(set1, hashSet);
         assertEquals(hashSet, set1);
     }
 

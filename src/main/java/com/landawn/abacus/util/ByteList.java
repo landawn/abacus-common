@@ -735,7 +735,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * from the beginning and removes the first matching element found.
      *
      * <p>This method runs in linear time, as it may need to search through the entire list
-     * to find the element.</p>
+     * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the byte value to be removed from this list
      * @return {@code true} if this list contained the specified element (and it was removed);
@@ -992,15 +992,31 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return numRemoved;
     }
 
+    //    /**
+    //     * Removes the element at the specified position in this list and returns it.
+    //     * Shifts any subsequent elements to the left (subtracts one from their indices).
+    //     *
+    //     * @param index the index of the element to be removed. Must be between 0 and size()-1.
+    //     * @return the element that was removed from the list
+    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+    //     * @deprecated replaced by {@link #removeAt(int)}.
+    //     */
+    //    @Deprecated
+    //    public byte delete(final int index) {
+    //        return removeAt(index);
+    //    }
+
     /**
-     * Removes the element at the specified position in this list and returns it.
-     * Shifts any subsequent elements to the left (subtracts one from their indices).
+     * Removes and returns the element at the specified index.
      *
-     * @param index the index of the element to be removed. Must be between 0 and size()-1.
-     * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+     * <p>This is the preferred index-based removal method.
+     * Unlike {@link #remove(byte)}, this method removes by index, not by value.</p>
+     *
+     * @param index the index of the element to remove
+     * @return the removed element
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public byte delete(final int index) {
+    public byte removeAt(final int index) {
         rangeCheck(index);
 
         final byte oldValue = elementData[index];
@@ -1021,7 +1037,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)10, (byte)20, (byte)30, (byte)40, (byte)50);
-     * list.deleteAllByIndices(1, 3);   // Remove elements at positions 1 and 3
+     * list.removeAt(1, 3);   // Remove elements at positions 1 and 3
      * // list now contains: [10, 30, 50]
      * }</pre>
      *
@@ -1029,7 +1045,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *                Invalid indices (negative or &gt;= size) are ignored.
      */
     @Override
-    public void deleteAllByIndices(final int... indices) {
+    public void removeAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1038,7 +1054,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             N.checkElementIndex(index, size);
         }
 
-        final byte[] tmp = N.deleteAllByIndices(elementData, indices);
+        final byte[] tmp = N.removeAt(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
@@ -1046,7 +1062,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             N.fill(elementData, tmp.length, size, (byte) 0);
         }
 
-        // size = tmp.length; // incorrect. the array returned N.deleteAllByIndices(elementData, indices) contains empty elements after size.
+        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
         size = size - (elementData.length - tmp.length);
     }
 
@@ -1061,7 +1077,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *         or if fromIndex &gt; toIndex
      */
     @Override
-    public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (fromIndex == toIndex) {
@@ -1132,7 +1148,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -1181,7 +1197,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -2791,7 +2807,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public byte removeFirst() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(0);
+        return removeAt(0);
     }
 
     /**
@@ -2807,7 +2823,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public byte removeLast() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(size - 1);
+        return removeAt(size - 1);
     }
 
     /**

@@ -243,6 +243,8 @@ class JsonStreamReader extends JsonStringReader {
                         if (nextEvent > 0 && nextEvent < 32) {
                             break;
                         }
+                    } else {
+                        nextEvent = 0;
                     }
 
                     ch = saveChar(ch);

@@ -131,7 +131,7 @@ public class AbstractDoubleStream100Test extends TestBase {
     public void testFlattMapToObj() {
         stream = createDoubleStream(new double[] { 1.0, 2.0 });
 
-        List<String> result = stream.flattmapToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 2) }).toList();
+        List<String> result = stream.flatMapArrayToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 2) }).toList();
 
         assertEquals(Arrays.asList("1.0", "2.0", "2.0", "4.0"), result);
     }

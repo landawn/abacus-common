@@ -222,7 +222,7 @@ public class ObjectPool100Test extends TestBase {
         }
 
         @Override
-        public void vacate() {
+        public void evict() {
             if (closed)
                 throw new IllegalStateException("Pool is closed");
             synchronized (lock) {
@@ -545,7 +545,7 @@ public class ObjectPool100Test extends TestBase {
         }
         assertEquals(5, pool.size());
 
-        pool.vacate();
+        pool.evict();
         assertTrue(pool.size() < 5);
         assertTrue(pool.size() >= 0);
     }

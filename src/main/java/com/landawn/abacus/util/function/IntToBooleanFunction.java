@@ -19,11 +19,12 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(int)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Function
  * @see IntFunction
  * @see IntPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntToBooleanFunction {

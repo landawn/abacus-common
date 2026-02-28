@@ -24,7 +24,7 @@ public class Joiner102Test extends TestBase {
 
     @Test
     public void testDefauLt() {
-        Joiner joiner = Joiner.defauLt();
+        Joiner joiner = Joiner.withDefault();
         joiner.append("a").append("b").append("c");
         Assertions.assertEquals("a, b, c", joiner.toString());
     }

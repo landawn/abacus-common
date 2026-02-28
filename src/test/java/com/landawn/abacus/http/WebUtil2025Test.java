@@ -34,7 +34,8 @@ public class WebUtil2025Test extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users\")"));
-        assertTrue(result.contains(".post(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
         assertTrue(result.contains("String requestBody"));
     }
 
@@ -54,7 +55,8 @@ public class WebUtil2025Test extends TestBase {
         String result = WebUtil.convertCurlToHttpRequest(curl);
 
         assertNotNull(result);
-        assertTrue(result.contains(".put(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".put();"));
     }
 
     @Test
@@ -81,7 +83,8 @@ public class WebUtil2025Test extends TestBase {
         String result = WebUtil.convertCurlToHttpRequest(curl);
 
         assertNotNull(result);
-        assertTrue(result.contains(".post(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
     }
 
     @Test
@@ -91,7 +94,8 @@ public class WebUtil2025Test extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
-        assertTrue(result.contains(".post(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
     }
 
     @Test
@@ -101,7 +105,8 @@ public class WebUtil2025Test extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
-        assertTrue(result.contains(".post(requestBody);"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
     }
 
     @Test
@@ -292,7 +297,7 @@ public class WebUtil2025Test extends TestBase {
         // Should not add another Content-Type header
         int firstIndex = result.indexOf("Content-Type");
         int lastIndex = result.lastIndexOf("Content-Type");
-        assertEquals(firstIndex, lastIndex);   // Only one occurrence
+        assertEquals(firstIndex, lastIndex); // Only one occurrence
     }
 
     @Test

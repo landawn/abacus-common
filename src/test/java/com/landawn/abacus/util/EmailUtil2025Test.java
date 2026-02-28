@@ -267,7 +267,8 @@ public class EmailUtil2025Test extends TestBase {
         File excelFile = File.createTempFile("data_", ".xlsx");
 
         try {
-            try (FileOutputStream pdfFos = new FileOutputStream(pdfFile); FileOutputStream excelFos = new FileOutputStream(excelFile)) {
+            try (FileOutputStream pdfFos = new FileOutputStream(pdfFile);
+                 FileOutputStream excelFos = new FileOutputStream(excelFile)) {
                 pdfFos.write("PDF report content".getBytes());
                 excelFos.write("Excel data content".getBytes());
             }

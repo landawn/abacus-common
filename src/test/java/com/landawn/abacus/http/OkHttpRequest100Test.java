@@ -561,7 +561,7 @@ public class OkHttpRequest100Test extends TestBase {
     }
 
     @Test
-    public void testExecuteWithFormUrlEncodedResponse() throws IOException {
+    public void testExecuteWithFORM_URL_ENCODEDResponse() throws IOException {
         server.enqueue(new MockResponse().setBody("name=John&age=30").setHeader("Content-Type", "application/x-www-form-urlencoded"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
 

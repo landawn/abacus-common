@@ -1580,7 +1580,8 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_InputStreamToOutputStream() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)); FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
+             FileOutputStream fos = new FileOutputStream(outputFile)) {
             long bytesWritten = IOUtil.write(is, fos);
             assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
         }
@@ -1591,7 +1592,8 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_InputStreamWithOffsetCountToOutputStream() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream("0123456789ABCDEF".getBytes(UTF_8)); FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (InputStream is = new ByteArrayInputStream("0123456789ABCDEF".getBytes(UTF_8));
+             FileOutputStream fos = new FileOutputStream(outputFile)) {
             long bytesWritten = IOUtil.write(is, 5, 6, fos);
             assertEquals(6, bytesWritten);
         }
@@ -1602,7 +1604,8 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_InputStreamToOutputStreamWithFlush() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)); FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
+             FileOutputStream fos = new FileOutputStream(outputFile)) {
             long bytesWritten = IOUtil.write(is, fos, true);
             assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
         }
@@ -1613,7 +1616,8 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testWrite_InputStreamWithOffsetCountToOutputStreamWithFlush() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream("0123456789".getBytes(UTF_8)); FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (InputStream is = new ByteArrayInputStream("0123456789".getBytes(UTF_8));
+             FileOutputStream fos = new FileOutputStream(outputFile)) {
             long bytesWritten = IOUtil.write(is, 3, 4, fos, true);
             assertEquals(4, bytesWritten);
         }
@@ -1883,7 +1887,8 @@ public class IOUtil2025Test extends TestBase {
             data[i] = (byte) i;
         }
 
-        try (InputStream is = new ByteArrayInputStream(data); FileOutputStream fos = new FileOutputStream(outputFile)) {
+        try (InputStream is = new ByteArrayInputStream(data);
+             FileOutputStream fos = new FileOutputStream(outputFile)) {
             long bytesWritten = IOUtil.write(is, 10, 20, fos);
             assertEquals(20, bytesWritten);
         }
@@ -1900,7 +1905,8 @@ public class IOUtil2025Test extends TestBase {
         File outputFile1 = Files.createTempFile(tempFolder, "output1", ".txt").toFile();
         File outputFile2 = Files.createTempFile(tempFolder, "output2", ".txt").toFile();
 
-        try (Reader reader1 = new StringReader(UNICODE_CONTENT); Reader reader2 = new StringReader(UNICODE_CONTENT)) {
+        try (Reader reader1 = new StringReader(UNICODE_CONTENT);
+             Reader reader2 = new StringReader(UNICODE_CONTENT)) {
             IOUtil.write(reader1, UTF_8, outputFile1);
             IOUtil.write(reader2, UTF_16, outputFile2);
         }
@@ -3212,7 +3218,8 @@ public class IOUtil2025Test extends TestBase {
         byte[] testData = "Transfer test data".getBytes(UTF_8);
         Files.write(sourceFile.toPath(), testData);
 
-        try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(targetFile)) {
+        try (FileInputStream fis = new FileInputStream(sourceFile);
+             FileOutputStream fos = new FileOutputStream(targetFile)) {
 
             long transferred = IOUtil.transfer(fis.getChannel(), fos.getChannel());
 
@@ -3226,7 +3233,8 @@ public class IOUtil2025Test extends TestBase {
         File sourceFile = Files.createTempFile(tempFolder, "source", ".bin").toFile();
         File targetFile = Files.createTempFile(tempFolder, "target", ".bin").toFile();
 
-        try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(targetFile)) {
+        try (FileInputStream fis = new FileInputStream(sourceFile);
+             FileOutputStream fos = new FileOutputStream(targetFile)) {
 
             long transferred = IOUtil.transfer(fis.getChannel(), fos.getChannel());
 
@@ -3245,7 +3253,8 @@ public class IOUtil2025Test extends TestBase {
         }
         Files.write(sourceFile.toPath(), largeData);
 
-        try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(targetFile)) {
+        try (FileInputStream fis = new FileInputStream(sourceFile);
+             FileOutputStream fos = new FileOutputStream(targetFile)) {
 
             long transferred = IOUtil.transfer(fis.getChannel(), fos.getChannel());
 
@@ -4937,7 +4946,8 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testNewInputStreamReader_WithInputStream() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)); java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is)) {
+        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
+             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is)) {
             assertNotNull(isr);
             char[] buffer = new char[1024];
             int charsRead = isr.read(buffer);
@@ -4948,7 +4958,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testNewInputStreamReader_WithInputStreamAndCharset() throws Exception {
         try (InputStream is = new ByteArrayInputStream(UNICODE_CONTENT.getBytes(UTF_8));
-                java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_8)) {
+             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_8)) {
             assertNotNull(isr);
             char[] buffer = new char[1024];
             int charsRead = isr.read(buffer);
@@ -4959,7 +4969,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testNewInputStreamReader_WithUTF16() throws Exception {
         try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_16));
-                java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_16)) {
+             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_16)) {
             assertNotNull(isr);
             char[] buffer = new char[1024];
             int charsRead = isr.read(buffer);
@@ -5116,7 +5126,8 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testNewBufferedReader_WithInputStream() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)); java.io.BufferedReader br = IOUtil.newBufferedReader(is)) {
+        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
+             java.io.BufferedReader br = IOUtil.newBufferedReader(is)) {
             assertNotNull(br);
             String line = br.readLine();
             assertEquals(TEST_CONTENT, line);
@@ -5125,7 +5136,8 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testNewBufferedReader_WithInputStreamAndCharset() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(UNICODE_CONTENT.getBytes(UTF_8)); java.io.BufferedReader br = IOUtil.newBufferedReader(is, UTF_8)) {
+        try (InputStream is = new ByteArrayInputStream(UNICODE_CONTENT.getBytes(UTF_8));
+             java.io.BufferedReader br = IOUtil.newBufferedReader(is, UTF_8)) {
             assertNotNull(br);
             String line = br.readLine();
             assertEquals(UNICODE_CONTENT, line);
@@ -5223,7 +5235,8 @@ public class IOUtil2025Test extends TestBase {
             lz4Out.write(TEST_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); LZ4BlockInputStream lz4In = IOUtil.newLZ4BlockInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             LZ4BlockInputStream lz4In = IOUtil.newLZ4BlockInputStream(is)) {
             assertNotNull(lz4In);
             byte[] buffer = new byte[1024];
             int bytesRead = lz4In.read(buffer);
@@ -5258,7 +5271,8 @@ public class IOUtil2025Test extends TestBase {
             lz4Out.write(MULTILINE_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); LZ4BlockInputStream lz4In = IOUtil.newLZ4BlockInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             LZ4BlockInputStream lz4In = IOUtil.newLZ4BlockInputStream(is)) {
             byte[] buffer = new byte[1024];
             int bytesRead = lz4In.read(buffer);
             assertEquals(MULTILINE_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
@@ -5272,7 +5286,8 @@ public class IOUtil2025Test extends TestBase {
             snappyOut.write(TEST_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); SnappyInputStream snappyIn = IOUtil.newSnappyInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             SnappyInputStream snappyIn = IOUtil.newSnappyInputStream(is)) {
             assertNotNull(snappyIn);
             byte[] buffer = new byte[1024];
             int bytesRead = snappyIn.read(buffer);
@@ -5307,7 +5322,8 @@ public class IOUtil2025Test extends TestBase {
             snappyOut.write(MULTILINE_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); SnappyInputStream snappyIn = IOUtil.newSnappyInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             SnappyInputStream snappyIn = IOUtil.newSnappyInputStream(is)) {
             byte[] buffer = new byte[1024];
             int bytesRead = snappyIn.read(buffer);
             assertEquals(MULTILINE_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
@@ -5321,7 +5337,8 @@ public class IOUtil2025Test extends TestBase {
             gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is)) {
             assertNotNull(gzipIn);
             byte[] buffer = new byte[1024];
             int bytesRead = gzipIn.read(buffer);
@@ -5336,7 +5353,8 @@ public class IOUtil2025Test extends TestBase {
             gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is, 4096)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is, 4096)) {
             assertNotNull(gzipIn);
             byte[] buffer = new byte[1024];
             int bytesRead = gzipIn.read(buffer);
@@ -5371,7 +5389,8 @@ public class IOUtil2025Test extends TestBase {
             gzipOut.write(MULTILINE_CONTENT.getBytes(UTF_8));
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is, 8192)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is, 8192)) {
             byte[] buffer = new byte[1024];
             int bytesRead = gzipIn.read(buffer);
             assertEquals(MULTILINE_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
@@ -5394,7 +5413,8 @@ public class IOUtil2025Test extends TestBase {
             zipOut.closeEntry();
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is)) {
             assertNotNull(zipIn);
             java.util.zip.ZipEntry entry = zipIn.getNextEntry();
             assertNotNull(entry);
@@ -5415,7 +5435,8 @@ public class IOUtil2025Test extends TestBase {
             zipOut.closeEntry();
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is, UTF_8)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is, UTF_8)) {
             assertNotNull(zipIn);
             java.util.zip.ZipEntry entry = zipIn.getNextEntry();
             assertNotNull(entry);
@@ -5463,7 +5484,8 @@ public class IOUtil2025Test extends TestBase {
             zipOut.closeEntry();
         }
 
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray()); java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is)) {
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
+             java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is)) {
             java.util.zip.ZipEntry entry1 = zipIn.getNextEntry();
             assertEquals("file1.txt", entry1.getName());
 
@@ -5482,7 +5504,7 @@ public class IOUtil2025Test extends TestBase {
         conn.connect();
 
         try (InputStream in = conn.getInputStream()) {
-            in.readAllBytes();   // simulate use
+            in.readAllBytes(); // simulate use
         }
 
         IOUtil.close(conn);
@@ -7008,14 +7030,14 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testFreeDiskSpaceKb_Default() {
-        long freeSpace = IOUtil.freeDiskSpaceKB();
+        long freeSpace = IOUtil.freeDiskSpaceInKB();
 
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKb_WithTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKB(5000);
+        long freeSpace = IOUtil.freeDiskSpaceInKB(5000);
 
         assertTrue(freeSpace > 0);
     }
@@ -7023,7 +7045,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testFreeDiskSpaceKb_WithPath() throws Exception {
         String path = tempFolder.toFile().getAbsolutePath();
-        long freeSpace = IOUtil.freeDiskSpaceKB(path);
+        long freeSpace = IOUtil.freeDiskSpaceInKB(path);
 
         assertTrue(freeSpace > 0);
     }
@@ -7031,7 +7053,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testFreeDiskSpaceKb_WithPathAndTimeout() throws Exception {
         String path = tempFolder.toFile().getAbsolutePath();
-        long freeSpace = IOUtil.freeDiskSpaceKB(path, 5000);
+        long freeSpace = IOUtil.freeDiskSpaceInKB(path, 5000);
 
         assertTrue(freeSpace > 0);
     }

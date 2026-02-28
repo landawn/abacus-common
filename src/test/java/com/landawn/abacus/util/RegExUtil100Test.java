@@ -411,6 +411,6 @@ public class RegExUtil100Test extends TestBase {
         Assertions.assertTrue(RegExUtil.matches("user@example.com", RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER));
 
         Assertions.assertTrue(RegExUtil.find("Visit https://example.com", RegExUtil.HTTP_URL_FINDER));
-        Assertions.assertFalse(RegExUtil.find("Protocol: ftp://files.com", RegExUtil.URL_FINDER));
+        Assertions.assertTrue(RegExUtil.find("Protocol: ftp://files.com", RegExUtil.URL_FINDER));
     }
 }

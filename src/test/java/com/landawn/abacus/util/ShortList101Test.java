@@ -532,7 +532,7 @@ public class ShortList101Test extends TestBase {
         list.reverse();
         list.shuffle();
         list.fill((short) 0);
-        list.deleteRange(0, 0);
+        list.removeRange(0, 0);
 
         assertTrue(list.isEmpty());
     }

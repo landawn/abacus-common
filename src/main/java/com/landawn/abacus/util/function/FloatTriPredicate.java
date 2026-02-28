@@ -23,11 +23,12 @@ import com.landawn.abacus.util.Throwables;
  * This interface is similar to {@link java.util.function.BiPredicate} but accepts three arguments
  * instead of two.</p>
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
  * @see FloatPredicate
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeException> { //NOSONAR

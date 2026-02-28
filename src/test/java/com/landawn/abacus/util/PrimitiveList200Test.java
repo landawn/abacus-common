@@ -282,23 +282,23 @@ public class PrimitiveList200Test extends TestBase {
     @Test
     public void testDelete() {
         IntList list = IntList.of(1, 2, 3);
-        int deleted = list.delete(1);
+        int deleted = list.removeAt(1);
         assertEquals(2, deleted);
         assertArrayEquals(new int[] { 1, 3 }, list.toArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        list.deleteAllByIndices(1, 3, 5);
+        list.removeAt(1, 3, 5);
         assertArrayEquals(new int[] { 0, 2, 4 }, list.toArray());
     }
 
     @Test
     public void testDeleteRange() {
         IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertArrayEquals(new int[] { 0, 4, 5 }, list.toArray());
     }
 

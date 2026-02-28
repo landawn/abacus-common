@@ -27,26 +27,26 @@ public class IOCase2025Test extends TestBase {
     }
 
     @Test
-    public void testCheckRegionMatches_sensitive() {
+    public void testCheckRegiocountMatchBetweenes_sensitive() {
         IOCase ioCase = IOCase.SENSITIVE;
-        assertTrue(ioCase.checkRegionMatches("File.txt", 0, "File"));
-        assertFalse(ioCase.checkRegionMatches("File.txt", 0, "file"));
-        assertTrue(ioCase.checkRegionMatches("Hello World", 6, "World"));
-        assertFalse(ioCase.checkRegionMatches("Hello World", 6, "world"));
+        assertTrue(ioCase.checkRegiocountMatchBetweenes("File.txt", 0, "File"));
+        assertFalse(ioCase.checkRegiocountMatchBetweenes("File.txt", 0, "file"));
+        assertTrue(ioCase.checkRegiocountMatchBetweenes("Hello World", 6, "World"));
+        assertFalse(ioCase.checkRegiocountMatchBetweenes("Hello World", 6, "world"));
     }
 
     @Test
-    public void testCheckRegionMatches_insensitive() {
+    public void testCheckRegiocountMatchBetweenes_insensitive() {
         IOCase ioCase = IOCase.INSENSITIVE;
-        assertTrue(ioCase.checkRegionMatches("File.txt", 0, "File"));
-        assertTrue(ioCase.checkRegionMatches("File.txt", 0, "file"));
-        assertTrue(ioCase.checkRegionMatches("Hello World", 6, "world"));
+        assertTrue(ioCase.checkRegiocountMatchBetweenes("File.txt", 0, "File"));
+        assertTrue(ioCase.checkRegiocountMatchBetweenes("File.txt", 0, "file"));
+        assertTrue(ioCase.checkRegiocountMatchBetweenes("Hello World", 6, "world"));
     }
 
     @Test
-    public void testCheckRegionMatches_withNull() {
-        assertThrows(IllegalArgumentException.class, () -> IOCase.SENSITIVE.checkRegionMatches(null, 0, "test"));
-        assertThrows(IllegalArgumentException.class, () -> IOCase.SENSITIVE.checkRegionMatches("test", 0, null));
+    public void testCheckRegiocountMatchBetweenes_withNull() {
+        assertThrows(IllegalArgumentException.class, () -> IOCase.SENSITIVE.checkRegiocountMatchBetweenes(null, 0, "test"));
+        assertThrows(IllegalArgumentException.class, () -> IOCase.SENSITIVE.checkRegiocountMatchBetweenes("test", 0, null));
     }
 
     @Test

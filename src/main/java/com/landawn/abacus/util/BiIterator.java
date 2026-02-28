@@ -61,7 +61,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     @SuppressWarnings("rawtypes")
     private static final BiIterator EMPTY = new BiIterator() {
         /**
-         * Constructs an empty BiIterator.
+         * Always returns {@code false} because this iterator is empty.
+         *
+         * @return {@code false}
          */
         @Override
         public boolean hasNext() {
@@ -919,10 +921,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
     /**
      * Performs the given action for each remaining pair of elements in this iterator.
-     * This variant allows the action to throw checked exceptions.
+     * This variant supports actions that may throw checked exceptions.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
+     * iter.foreachRemaining((key, value) -> {
+     *     processEntry(key, value); // method may throw checked exception
+     * });
+     * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action a BiConsumer that processes each pair of elements, must not be {@code null}
+     * @param action the action to perform for each remaining pair of elements, must not be {@code null}
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E; // NOSONAR

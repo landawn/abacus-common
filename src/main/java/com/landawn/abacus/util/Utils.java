@@ -60,7 +60,7 @@ final class Utils {
 
     static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
-    static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     static final JsonSerializationConfig jsc = JSC.create().quotePropName(true).quoteMapKey(true);
 

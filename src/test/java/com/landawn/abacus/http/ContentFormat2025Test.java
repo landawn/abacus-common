@@ -122,13 +122,13 @@ public class ContentFormat2025Test extends TestBase {
     }
 
     @Test
-    public void testContentTypeFormUrlEncoded() {
-        assertEquals("application/x-www-form-urlencoded", ContentFormat.FormUrlEncoded.contentType());
+    public void testContentTypeFORM_URL_ENCODED() {
+        assertEquals("application/x-www-form-urlencoded", ContentFormat.FORM_URL_ENCODED.contentType());
     }
 
     @Test
-    public void testContentEncodingFormUrlEncoded() {
-        assertEquals("", ContentFormat.FormUrlEncoded.contentEncoding());
+    public void testContentEncodingFORM_URL_ENCODED() {
+        assertEquals("", ContentFormat.FORM_URL_ENCODED.contentEncoding());
     }
 
     @Test

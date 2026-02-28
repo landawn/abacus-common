@@ -224,7 +224,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
-    static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     private final Set<R> _rowKeySet; //NOSONAR
 
@@ -1309,6 +1309,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #get(Object, Object)
      */
     public boolean containsValueAt(final R rowKey, final C columnKey, final Object value) {
+        if (!containsCell(rowKey, columnKey)) {
+            return false;
+        }
+
         return N.equals(get(rowKey, columnKey), value);
     }
 
@@ -1339,6 +1343,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #countOfNonNullValues()
      */
     public boolean containsValue(final Object value) {
+        if (rowCount() == 0 || columnCount() == 0) {
+            return false;
+        }
 
         if (_isInitialized) {
             for (final List<V> column : _columnList) {
@@ -1679,12 +1686,14 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         checkRowKey(rowKey);
 
+        final int removedRowIndex = this.getRowIndex(rowKey);
+
         _rowKeySet.remove(rowKey);
 
-        if (_rowKeyIndexMap != null) {
+        {
             final int columnLength = columnCount();
             final int newRowSize = rowCount();
-            final int removedRowIndex = _rowKeyIndexMap.remove(rowKey);
+            _rowKeyIndexMap.remove(rowKey);
 
             if (removedRowIndex == newRowSize) {
                 // removed the last row.
@@ -2013,7 +2022,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final List<V> column = _columnList.get(getColumnIndex(columnKey));
 
-        return ImmutableList.wrap(column);
+        return ImmutableList.wrap(column); // ImmutableList.wrap(new ArrayList<>(column));
     }
 
     /**
@@ -2281,11 +2290,13 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         checkColumnKey(columnKey);
 
+        final int removedColumnIndex = this.getColumnIndex(columnKey);
+
         _columnKeySet.remove(columnKey);
 
-        if (_columnKeyIndexMap != null) {
+        {
             final int newColumnLength = columnCount();
-            final int removedColumnIndex = _columnKeyIndexMap.remove(columnKey);
+            _columnKeyIndexMap.remove(columnKey);
 
             if (removedColumnIndex == newColumnLength) {
                 // removed the last column
@@ -4490,6 +4501,8 @@ public final class Sheet<R, C, V> implements Cloneable {
             return Stream.empty();
         }
 
+        initIndexMap();
+
         final int columnLength = columnCount();
 
         return Stream.of(new ObjIteratorEx<>() {
@@ -4626,6 +4639,8 @@ public final class Sheet<R, C, V> implements Cloneable {
         if (rowCount() == 0 || columnCount() == 0) {
             return Stream.empty();
         }
+
+        initIndexMap();
 
         final int rowLength = rowCount();
 
@@ -5484,6 +5499,8 @@ public final class Sheet<R, C, V> implements Cloneable {
             return Stream.empty();
         }
 
+        initIndexMap();
+
         return Stream.of(new ObjIteratorEx<>() {
             private final int toIndex = toRowIndex;
             private int cursor = fromRowIndex;
@@ -5631,6 +5648,8 @@ public final class Sheet<R, C, V> implements Cloneable {
             return Stream.empty();
         }
 
+        initIndexMap();
+
         return Stream.of(new ObjIteratorEx<>() {
             private final int columnLength = columnCount();
             private final Object[] rowData = new Object[columnLength];
@@ -5747,6 +5766,8 @@ public final class Sheet<R, C, V> implements Cloneable {
             return Stream.empty();
         }
 
+        initIndexMap();
+
         return Stream.of(new ObjIteratorEx<>() {
             private final int toIndex = toColumnIndex;
             private int cursor = fromColumnIndex;
@@ -5860,6 +5881,8 @@ public final class Sheet<R, C, V> implements Cloneable {
         if (rowCount() == 0 || columnCount() == 0) {
             return Stream.empty();
         }
+
+        initIndexMap();
 
         return Stream.of(new ObjIteratorEx<>() {
             private final int rowLength = rowCount();

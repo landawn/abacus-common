@@ -561,7 +561,7 @@ public class IntList2025Test extends TestBase {
     @Test
     public void test_delete() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
-        int removed = list.delete(2);
+        int removed = list.removeAt(2);
         assertEquals(3, removed);
         assertEquals(4, list.size());
         assertEquals(4, list.get(2));
@@ -570,14 +570,14 @@ public class IntList2025Test extends TestBase {
     @Test
     public void test_delete_outOfBounds() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(3));
     }
 
     @Test
-    public void test_deleteAllByIndices() {
+    public void test_removeAt() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(1, list.get(0));
         assertEquals(3, list.get(1));
@@ -585,34 +585,34 @@ public class IntList2025Test extends TestBase {
     }
 
     @Test
-    public void test_deleteAllByIndices_empty() {
+    public void test_removeAt_empty() {
         IntList list = IntList.of(1, 2, 3);
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
-    public void test_deleteRange() {
+    public void test_removeRange() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals(1, list.get(0));
         assertEquals(5, list.get(1));
     }
 
     @Test
-    public void test_deleteRange_empty() {
+    public void test_removeRange_empty() {
         IntList list = IntList.of(1, 2, 3);
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 
     @Test
-    public void test_deleteRange_outOfBounds() {
+    public void test_removeRange_outOfBounds() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 4));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
     }
 
     @Test

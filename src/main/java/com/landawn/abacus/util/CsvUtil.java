@@ -172,7 +172,7 @@ public final class CsvUtil {
      * // Result: ["Name", "Age", "City"]
      * }</pre>
      */
-    public static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.readString(line, jdc, String[].class);
+    public static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.parse(line, jdc, String[].class);
 
     /**
      * CSV line parser that expects JSON array format.
@@ -185,7 +185,7 @@ public final class CsvUtil {
      * // row contains: ["John", "30", "NYC"]
      * }</pre>
      */
-    public static final BiConsumer<String, String[]> CSV_LINE_PARSER_IN_JSON = (line, output) -> jsonParser.readString(line, jdc, output);
+    public static final BiConsumer<String, String[]> CSV_LINE_PARSER_IN_JSON = (line, output) -> jsonParser.parse(line, jdc, output);
 
     private static final Function<String, String[]> defaultCsvHeaderParser = CSV_HEADER_PARSER;
 
@@ -690,25 +690,32 @@ public final class CsvUtil {
                 columnList.add(new ArrayList<>());
             }
 
-            final String[] row = new String[columnCount];
+            if (count > 0) {
+                long resultCount = 0;
+                final String[] row = new String[columnCount];
 
-            while (count-- > 0 && (line = br.readLine()) != null) {
-                N.fill(row, null);
-                lineParser.accept(line, row);
+                while ((line = br.readLine()) != null) {
+                    N.fill(row, null);
+                    lineParser.accept(line, row);
 
-                if (rowFilter != null && !rowFilter.test(row)) {
-                    continue;
-                }
-
-                if (noSelectColumnNamesSpecified) {
-                    for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                        columnList.get(columnIndex++).add(row[i]);
+                    if (rowFilter != null && !rowFilter.test(row)) {
+                        continue;
                     }
-                } else {
-                    for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                        if (isColumnSelected[i]) {
+
+                    if (noSelectColumnNamesSpecified) {
+                        for (int i = 0, columnIndex = 0; i < columnCount; i++) {
                             columnList.get(columnIndex++).add(row[i]);
                         }
+                    } else {
+                        for (int i = 0, columnIndex = 0; i < columnCount; i++) {
+                            if (isColumnSelected[i]) {
+                                columnList.get(columnIndex++).add(row[i]);
+                            }
+                        }
+                    }
+
+                    if (++resultCount >= count) {
+                        break;
                     }
                 }
             }
@@ -1036,33 +1043,40 @@ public final class CsvUtil {
                 columnList.add(new ArrayList<>());
             }
 
-            final String[] row = new String[columnCount];
+            if (count > 0) {
+                long resultCount = 0;
+                final String[] row = new String[columnCount];
 
-            while (count-- > 0 && (line = br.readLine()) != null) {
-                N.fill(row, null);
-                lineParser.accept(line, row);
+                while ((line = br.readLine()) != null) {
+                    N.fill(row, null);
+                    lineParser.accept(line, row);
 
-                if (rowFilter != null && !rowFilter.test(row)) {
-                    continue;
-                }
-
-                if (noSelectColumnNamesSpecified) {
-                    for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                        if (propInfos[i] == null) {
-                            columnList.get(columnIndex++).add(row[i]);
-                        } else {
-                            columnList.get(columnIndex++).add(propInfos[i].readPropValue(row[i]));
-                        }
+                    if (rowFilter != null && !rowFilter.test(row)) {
+                        continue;
                     }
-                } else {
-                    for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                        if (isColumnSelected[i]) {
+
+                    if (noSelectColumnNamesSpecified) {
+                        for (int i = 0, columnIndex = 0; i < columnCount; i++) {
                             if (propInfos[i] == null) {
                                 columnList.get(columnIndex++).add(row[i]);
                             } else {
                                 columnList.get(columnIndex++).add(propInfos[i].readPropValue(row[i]));
                             }
                         }
+                    } else {
+                        for (int i = 0, columnIndex = 0; i < columnCount; i++) {
+                            if (isColumnSelected[i]) {
+                                if (propInfos[i] == null) {
+                                    columnList.get(columnIndex++).add(row[i]);
+                                } else {
+                                    columnList.get(columnIndex++).add(propInfos[i].readPropValue(row[i]));
+                                }
+                            }
+                        }
+                    }
+
+                    if (++resultCount >= count) {
+                        break;
                     }
                 }
             }
@@ -1333,19 +1347,26 @@ public final class CsvUtil {
                 // continue
             }
 
-            final String[] row = new String[columnCount];
+            if (count > 0) {
+                long resultCount = 0;
+                final String[] row = new String[columnCount];
 
-            while (count-- > 0 && (line = br.readLine()) != null) {
-                N.fill(row, null);
-                lineParser.accept(line, row);
+                while ((line = br.readLine()) != null) {
+                    N.fill(row, null);
+                    lineParser.accept(line, row);
 
-                if (rowFilter != null && !rowFilter.test(row)) {
-                    continue;
-                }
+                    if (rowFilter != null && !rowFilter.test(row)) {
+                        continue;
+                    }
 
-                for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                    if (columnTypes[i] != null) {
-                        columnList.get(columnIndex++).add(columnTypes[i].valueOf(row[i]));
+                    for (int i = 0, columnIndex = 0; i < columnCount; i++) {
+                        if (columnTypes[i] != null) {
+                            columnList.get(columnIndex++).add(columnTypes[i].valueOf(row[i]));
+                        }
+                    }
+
+                    if (++resultCount >= count) {
+                        break;
                     }
                 }
             }
@@ -1644,28 +1665,36 @@ public final class CsvUtil {
             final NoCachingNoUpdating.DisposableArray<String> disposableRowData = NoCachingNoUpdating.DisposableArray.wrap(selectRowData);
             final Object[] output = new Object[selectColumnCount];
 
-            while (count-- > 0 && (line = br.readLine()) != null) {
-                N.fill(rowData, null);
-                lineParser.accept(line, rowData);
+            if (count > 0) {
+                long resultCount = 0;
 
-                if (rowFilter != null && !rowFilter.test(rowData)) {
-                    continue;
-                }
+                while ((line = br.readLine()) != null) {
+                    N.fill(rowData, null);
+                    lineParser.accept(line, rowData);
 
-                if (!noSelectColumnNamesSpecified) {
-                    for (int i = 0, j = 0; i < columnCount; i++) {
-                        if (isColumnSelected[i]) {
-                            selectRowData[j++] = rowData[i];
+                    if (rowFilter != null && !rowFilter.test(rowData)) {
+                        continue;
+                    }
+
+                    if (!noSelectColumnNamesSpecified) {
+                        for (int i = 0, j = 0; i < columnCount; i++) {
+                            if (isColumnSelected[i]) {
+                                selectRowData[j++] = rowData[i];
+                            }
                         }
                     }
-                }
 
-                N.fill(output, null);
+                    N.fill(output, null);
 
-                rowExtractor.accept(immutableColumnNameList, disposableRowData, output);
+                    rowExtractor.accept(immutableColumnNameList, disposableRowData, output);
 
-                for (int i = 0; i < selectColumnCount; i++) {
-                    columnList.get(i).add(output[i]);
+                    for (int i = 0; i < selectColumnCount; i++) {
+                        columnList.get(i).add(output[i]);
+                    }
+
+                    if (++resultCount >= count) {
+                        break;
+                    }
                 }
             }
 
@@ -2767,8 +2796,12 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0 && reader.readLine() != null) { // NOSONAR
-                // continue
+            while (offset-- > 0) { // NOSONAR
+                line = reader.readLine();
+
+                if (line == null) {
+                    break;
+                }
             }
 
             long cnt = 0;
@@ -3438,17 +3471,72 @@ public final class CsvUtil {
                 final boolean closeReaderWhenStreamIsClosed) {
             N.checkArgNotNull(rowMapper, "rowMapper");
 
-            final Callable<Stream<T>> action = () -> {
+            if (headerParser == null && lineParser == null && escapeCharToBackSlashForWrite == null) {
+                // No custom parsers configured, safe to use apply() directly
+                final Callable<Stream<T>> action = () -> {
+                    if (sourceFile != null) {
+                        return CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
+                    } else if (sourceReader != null) {
+                        return CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
+                    } else {
+                        throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
+                    }
+                };
+
+                return apply(action);
+            }
+
+            // Custom parsers configured: set ThreadLocals inside Stream.defer() so they're active during lazy consumption
+            final Function<String, String[]> hp = headerParser;
+            final BiConsumer<String, String[]> lp = lineParser;
+            final Boolean escBack = escapeCharToBackSlashForWrite;
+
+            //noinspection resource
+            return Stream.defer(() -> {
+                final Function<String, String[]> prevHp = hp != null ? CsvUtil.getCurrentHeaderParser() : null;
+                final BiConsumer<String, String[]> prevLp = lp != null ? CsvUtil.getCurrentLineParser() : null;
+                final Boolean prevEscBack = escBack != null ? CsvUtil.isBackSlashEscapeCharForWrite() : null;
+
+                if (hp != null) {
+                    CsvUtil.setHeaderParser(hp);
+                }
+                if (lp != null) {
+                    CsvUtil.setLineParser(lp);
+                }
+                if (escBack != null) {
+                    if (escBack) {
+                        CsvUtil.setEscapeCharToBackSlashForWrite();
+                    } else {
+                        CsvUtil.resetEscapeCharForWrite();
+                    }
+                }
+
+                final Stream<T> stream;
+
                 if (sourceFile != null) {
-                    return CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
+                    stream = CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
                 } else if (sourceReader != null) {
-                    return CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
+                    stream = CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
                 } else {
                     throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
                 }
-            };
 
-            return apply(action);
+                return stream.onClose(() -> {
+                    if (hp != null) {
+                        CsvUtil.setHeaderParser(prevHp);
+                    }
+                    if (lp != null) {
+                        CsvUtil.setLineParser(prevLp);
+                    }
+                    if (escBack != null) {
+                        if (Boolean.TRUE.equals(prevEscBack)) {
+                            CsvUtil.setEscapeCharToBackSlashForWrite();
+                        } else {
+                            CsvUtil.resetEscapeCharForWrite();
+                        }
+                    }
+                });
+            });
         }
     }
 

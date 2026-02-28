@@ -62,7 +62,7 @@ public class Pool100Test extends TestBase {
         }
 
         @Override
-        public void vacate() {
+        public void evict() {
             if (closed) {
                 throw new IllegalStateException("Pool is closed");
             }
@@ -158,18 +158,18 @@ public class Pool100Test extends TestBase {
     public void testVacate() {
         pool.setSize(5);
         assertEquals(5, pool.size());
-        pool.vacate();
+        pool.evict();
         assertEquals(3, pool.size());
-        pool.vacate();
+        pool.evict();
         assertEquals(1, pool.size());
-        pool.vacate();
+        pool.evict();
         assertEquals(0, pool.size());
     }
 
     @Test
     public void testVacateOnClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.vacate());
+        assertThrows(IllegalStateException.class, () -> pool.evict());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class Pool100Test extends TestBase {
         assertFalse(pool.isEmpty());
         assertEquals(8, pool.size());
 
-        pool.vacate();
+        pool.evict();
         assertEquals(6, pool.size());
 
         PoolStats stats = pool.stats();

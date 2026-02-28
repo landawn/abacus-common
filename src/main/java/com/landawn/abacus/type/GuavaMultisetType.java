@@ -62,7 +62,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         declaringName = getTypeName(typeClass, parameterTypeName, true);
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
-        isOrdered = declaringName.startsWith("Linked") || declaringName.startsWith("Sorted");
+        isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || TreeMultiset.class.isAssignableFrom(typeClass);
 
         jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
     }

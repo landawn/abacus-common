@@ -19,9 +19,10 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a primitive type specialization of {@code Consumer} for {@code float} varargs.</p>
  *
- * @see java.util.function.Consumer
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Consumer
  */
 @FunctionalInterface
 public interface FloatNConsumer {

@@ -192,23 +192,23 @@ public class CharList200Test extends TestBase {
     @Test
     public void testDelete() {
         list.addAll(CharList.of('a', 'b', 'c'));
-        assertEquals('b', list.delete(1));
+        assertEquals('b', list.removeAt(1));
         assertEquals(2, list.size());
         assertArrayEquals(new char[] { 'a', 'c' }, list.toArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, list.trimToSize().toArray());
     }
 
     @Test
     public void testDeleteRange() {
         list.addAll(CharList.of('a', 'b', 'c', 'd', 'e'));
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertArrayEquals(new char[] { 'a', 'e' }, list.trimToSize().toArray());
     }
 

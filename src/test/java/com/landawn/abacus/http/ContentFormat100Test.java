@@ -24,7 +24,7 @@ public class ContentFormat100Test extends TestBase {
         assertEquals("application/xml", ContentFormat.XML_SNAPPY.contentType());
         assertEquals("application/xml", ContentFormat.XML_GZIP.contentType());
         assertEquals("application/xml", ContentFormat.XML_BR.contentType());
-        assertEquals("application/x-www-form-urlencoded", ContentFormat.FormUrlEncoded.contentType());
+        assertEquals("application/x-www-form-urlencoded", ContentFormat.FORM_URL_ENCODED.contentType());
         assertEquals("", ContentFormat.KRYO.contentType());
         assertEquals("", ContentFormat.LZ4.contentType());
         assertEquals("", ContentFormat.SNAPPY.contentType());
@@ -45,7 +45,7 @@ public class ContentFormat100Test extends TestBase {
         assertEquals("snappy", ContentFormat.XML_SNAPPY.contentEncoding());
         assertEquals("gzip", ContentFormat.XML_GZIP.contentEncoding());
         assertEquals("br", ContentFormat.XML_BR.contentEncoding());
-        assertEquals("", ContentFormat.FormUrlEncoded.contentEncoding());
+        assertEquals("", ContentFormat.FORM_URL_ENCODED.contentEncoding());
         assertEquals("kryo", ContentFormat.KRYO.contentEncoding());
         assertEquals("lz4", ContentFormat.LZ4.contentEncoding());
         assertEquals("snappy", ContentFormat.SNAPPY.contentEncoding());
@@ -60,7 +60,7 @@ public class ContentFormat100Test extends TestBase {
 
         assertEquals(ContentFormat.JSON, ContentFormat.valueOf("JSON"));
         assertEquals(ContentFormat.XML_GZIP, ContentFormat.valueOf("XML_GZIP"));
-        assertEquals(ContentFormat.FormUrlEncoded, ContentFormat.valueOf("FormUrlEncoded"));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, ContentFormat.valueOf("FORM_URL_ENCODED"));
     }
 
     @Test

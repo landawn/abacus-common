@@ -329,12 +329,12 @@ public class HttpResponse2025Test extends TestBase {
     }
 
     @Test
-    public void testResponseWithFormUrlEncodedFormat() {
+    public void testResponseWithFORM_URL_ENCODEDFormat() {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/x-www-form-urlencoded"));
 
         HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "key=value".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.FormUrlEncoded, StandardCharsets.UTF_8);
+                ContentFormat.FORM_URL_ENCODED, StandardCharsets.UTF_8);
 
         String body = response.body(String.class);
         assertEquals("key=value", body);

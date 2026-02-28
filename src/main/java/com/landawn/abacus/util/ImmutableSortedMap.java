@@ -456,7 +456,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param map the Map whose mappings are to be placed in the ImmutableSortedMap
      * @return an ImmutableSortedMap containing the same mappings as the provided Map, or the same instance if already an ImmutableSortedMap
      */
-    public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableSortedMap) {
             return (ImmutableSortedMap<K, V>) map;
         } else if (N.isEmpty(map)) {
@@ -645,6 +645,16 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     @Override
     public K firstKey() {
         return sortedMap.firstKey();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     /**

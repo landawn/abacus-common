@@ -720,21 +720,21 @@ public class N103Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(N.nMatch(integerArray, 2, 3, i -> i % 2 == 0));
-        assertFalse(N.nMatch(integerArray, 3, 4, i -> i % 2 == 0));
-        assertTrue(N.nMatch(new Integer[0], 0, 0, i -> true));
+        assertTrue(N.countMatchBetween(integerArray, 2, 3, i -> i % 2 == 0));
+        assertFalse(N.countMatchBetween(integerArray, 3, 4, i -> i % 2 == 0));
+        assertTrue(N.countMatchBetween(new Integer[0], 0, 0, i -> true));
     }
 
     @Test
     public void testNMatchIterable() {
-        assertTrue(N.nMatch(integerList, 1, 2, i -> i > 3));
-        assertFalse(N.nMatch(integerList, 0, 1, i -> i > 3));
+        assertTrue(N.countMatchBetween(integerList, 1, 2, i -> i > 3));
+        assertFalse(N.countMatchBetween(integerList, 0, 1, i -> i > 3));
     }
 
     @Test
     public void testNMatchIterator() {
-        assertTrue(N.nMatch(integerList.iterator(), 2, 2, i -> i % 2 == 0));
-        assertFalse(N.nMatch(integerList.iterator(), 3, 5, i -> i % 2 == 0));
+        assertTrue(N.countMatchBetween(integerList.iterator(), 2, 2, i -> i % 2 == 0));
+        assertFalse(N.countMatchBetween(integerList.iterator(), 3, 5, i -> i % 2 == 0));
     }
 
     @Test
@@ -1115,17 +1115,17 @@ public class N103Test extends TestBase {
 
     @Test
     public void testNMatchNegativeAtLeast() {
-        assertThrows(IllegalArgumentException.class, () -> N.nMatch(integerArray, -1, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, -1, 2, i -> true));
     }
 
     @Test
     public void testNMatchNegativeAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.nMatch(integerArray, 1, -1, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, 1, -1, i -> true));
     }
 
     @Test
     public void testNMatchAtLeastGreaterThanAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.nMatch(integerArray, 3, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, 3, 2, i -> true));
     }
 
     @Test
@@ -1310,11 +1310,11 @@ public class N103Test extends TestBase {
     public void testNMatchEdgeCases() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
 
-        assertTrue(N.nMatch(arr, 2, 2, i -> i % 2 == 0));
+        assertTrue(N.countMatchBetween(arr, 2, 2, i -> i % 2 == 0));
 
-        assertTrue(N.nMatch(arr, 0, 5, i -> false));
+        assertTrue(N.countMatchBetween(arr, 0, 5, i -> false));
 
-        assertFalse(N.nMatch(arr, 10, 10, i -> true));
+        assertFalse(N.countMatchBetween(arr, 10, 10, i -> true));
     }
 
     @Test

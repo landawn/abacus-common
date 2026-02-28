@@ -484,7 +484,11 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
             return true;
         }
 
-        return obj instanceof AbstractImmutableMap im && valueMap.equals(im.valueMap);
+        if (obj instanceof AbstractImmutableMap im) {
+            return valueMap.equals(im.valueMap);
+        }
+
+        return valueMap.equals(obj);
     }
 
     /**

@@ -198,12 +198,12 @@ public class Seq107Test extends TestBase {
 
     @Test
     public void testFlattmapWithSkipCountAndToArray() throws Exception {
-        assertEquals(10, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flattmap(s -> new String[] { s, s.toUpperCase() }).count());
-        assertEquals(6, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flattmap(s -> new String[] { s, s.toUpperCase() }).skip(4).count());
+        assertEquals(10, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flatMapArray(s -> new String[] { s, s.toUpperCase() }).count());
+        assertEquals(6, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flatMapArray(s -> new String[] { s, s.toUpperCase() }).skip(4).count());
         assertArrayEquals(new String[] { "a", "A", "b", "B", "c", "C", "d", "D", "e", "E" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flattmap(s -> new String[] { s, s.toUpperCase() }).toArray(String[]::new));
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flatMapArray(s -> new String[] { s, s.toUpperCase() }).toArray(String[]::new));
         assertArrayEquals(new String[] { "c", "C", "d", "D", "e", "E" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flattmap(s -> new String[] { s, s.toUpperCase() }).skip(4).toArray(String[]::new));
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").flatMapArray(s -> new String[] { s, s.toUpperCase() }).skip(4).toArray(String[]::new));
     }
 
     @Test

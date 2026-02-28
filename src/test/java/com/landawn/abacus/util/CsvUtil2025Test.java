@@ -1183,7 +1183,7 @@ public class CsvUtil2025Test extends TestBase {
     @SuppressWarnings("unchecked")
     public void testJsonParserParseJson() {
         String json = "{\"name\":\"John\",\"age\":30}";
-        Map<String, Object> result = CsvUtil.jsonParser.readString(json, Map.class);
+        Map<String, Object> result = CsvUtil.jsonParser.parse(json, Map.class);
         assertNotNull(result);
         assertEquals("John", result.get("name"));
         assertEquals(30, result.get("age"));

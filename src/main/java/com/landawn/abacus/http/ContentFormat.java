@@ -52,7 +52,7 @@ public enum ContentFormat {
     /** XML content format with Brotli compression. */
     XML_BR("application/xml", "br"), //
     /** Form URL encoded content format. */
-    FormUrlEncoded("application/x-www-form-urlencoded", ""), //
+    FORM_URL_ENCODED("application/x-www-form-urlencoded", ""), //
     /** Kryo serialization format. */
     KRYO("", "kryo"), //
     /** LZ4 compression only. */

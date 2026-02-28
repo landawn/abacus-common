@@ -109,7 +109,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
             return OffsetDateTime.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {

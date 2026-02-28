@@ -315,7 +315,7 @@ public class ParallelArrayStream101Test extends TestBase {
         public void testFlattMapArray() {
             Function<Integer, Integer[]> duplicate = x -> new Integer[] { x, x };
 
-            List<Integer> result = stream.limit(3).flattmap(duplicate).sorted().toList();
+            List<Integer> result = stream.limit(3).flatMapArray(duplicate).sorted().toList();
 
             assertEquals(Arrays.asList(1, 1, 2, 2, 3, 3), result);
         }
@@ -705,21 +705,21 @@ public class ParallelArrayStream101Test extends TestBase {
         }
 
         @Test
-        @DisplayName("nMatch() should check if count is within range")
+        @DisplayName("countMatchBetween() should check if count is within range")
         public void testNMatch() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.nMatch(3, 7, even);
+            boolean result = stream.countMatchBetween(3, 7, even);
 
             assertTrue(result);
         }
 
         @Test
-        @DisplayName("nMatch() should return false if count is outside range")
+        @DisplayName("countMatchBetween() should return false if count is outside range")
         public void testNMatchOutsideRange() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.nMatch(1, 3, even);
+            boolean result = stream.countMatchBetween(1, 3, even);
 
             assertFalse(result);
         }

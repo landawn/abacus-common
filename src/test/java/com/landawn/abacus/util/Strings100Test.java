@@ -756,9 +756,9 @@ public class Strings100Test extends TestBase {
     @Test
     @DisplayName("Test deleteWhitespace()")
     public void testDeleteWhitespace() {
-        assertNull(Strings.deleteWhitespace((String) null));
-        assertEquals("", Strings.deleteWhitespace(""));
-        assertEquals("abc", Strings.deleteWhitespace("   ab  c  "));
+        assertNull(Strings.removeWhitespace((String) null));
+        assertEquals("", Strings.removeWhitespace(""));
+        assertEquals("abc", Strings.removeWhitespace("   ab  c  "));
     }
 
     @Test
@@ -1067,8 +1067,8 @@ public class Strings100Test extends TestBase {
     @Test
     @DisplayName("Test lastIndexOfAny(char...)")
     public void testLastIndexOfAnyChars() {
-        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] {'a'}));
-        assertEquals(-1, Strings.lastIndexOfAny("", new char[] {'a'}));
+        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] { 'a' }));
+        assertEquals(-1, Strings.lastIndexOfAny("", new char[] { 'a' }));
         assertEquals(1, Strings.lastIndexOfAny("zzabyycdxx", 'z', 'x'));
         assertEquals(7, Strings.lastIndexOfAny("zzabyycdxx", 'd', 'x'));
     }

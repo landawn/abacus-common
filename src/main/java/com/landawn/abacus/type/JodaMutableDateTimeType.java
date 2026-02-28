@@ -22,7 +22,9 @@ import java.sql.Timestamp;
 
 import org.joda.time.MutableDateTime;
 
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for Joda-Time MutableDateTime objects.
@@ -152,7 +154,16 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
             return new MutableDateTime(System.currentTimeMillis());
         }
 
-        return str.length() == 20 ? jodaISO8601DateTimeFT.parseMutableDateTime(str) : jodaISO8601TimestampFT.parseMutableDateTime(str);
+        if (isPossibleMillis(str)) {
+            try {
+                return new MutableDateTime(Numbers.toLong(str));
+            } catch (final NumberFormatException e) {
+                // ignore;
+            }
+        }
+
+        return str.length() == 20 ? jodaISO8601DateTimeFT.parseMutableDateTime(str)
+                : (str.length() == 24 ? jodaISO8601TimestampFT.parseMutableDateTime(str) : new MutableDateTime(Dates.parseTimestamp(str).getTime()));
     }
 
     /**

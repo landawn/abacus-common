@@ -316,11 +316,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
     @Test
     public void test_generatePropNameTableClasses_config_withLowerCaseUnderscore() {
         final List<Class<?>> classes = Arrays.asList(User.class);
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("s")
-                .generateSnakeCase(true)
-                .build();
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(classes).className("s").generateSnakeCase(true).build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
 
@@ -332,11 +328,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
     @Test
     public void test_generatePropNameTableClasses_config_withUpperCaseUnderscore() {
         final List<Class<?>> classes = Arrays.asList(User.class);
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("s")
-                .generateScreamingSnakeCase(true)
-                .build();
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(classes).className("s").generateScreamingSnakeCase(true).build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
 
@@ -538,8 +530,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .entityClasses(classes)
                 .className("s")
                 .generateSnakeCase(true)
-                .propNameConverterForSnakeCase(
-                        (cls, propName) -> propName.equals("id") ? "user_id_custom" : Strings.toSnakeCase(propName))
+                .propNameConverterForSnakeCase((cls, propName) -> propName.equals("id") ? "user_id_custom" : Strings.toSnakeCase(propName))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
@@ -555,8 +546,7 @@ public class CodeGenerationUtil2025Test extends TestBase {
                 .entityClasses(classes)
                 .className("s")
                 .generateScreamingSnakeCase(true)
-                .propNameConverterForScreamingSnakeCase(
-                        (cls, propName) -> propName.equals("id") ? "USER_ID_CUSTOM" : Strings.toScreamingSnakeCase(propName))
+                .propNameConverterForScreamingSnakeCase((cls, propName) -> propName.equals("id") ? "USER_ID_CUSTOM" : Strings.toScreamingSnakeCase(propName))
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);

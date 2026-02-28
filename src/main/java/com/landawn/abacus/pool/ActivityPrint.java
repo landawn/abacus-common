@@ -16,6 +16,7 @@ package com.landawn.abacus.pool;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
@@ -61,30 +62,33 @@ public final class ActivityPrint implements Cloneable, Serializable {
     @Serial
     private static final long serialVersionUID = -45207875951748322L;
 
+    private static final AtomicIntegerFieldUpdater<ActivityPrint> ACCESS_COUNT_UPDATER = AtomicIntegerFieldUpdater.newUpdater(ActivityPrint.class,
+            "accessCount");
+
     /**
      * The timestamp when this ActivityPrint was created (in milliseconds).
      */
-    private long createdTime;
+    private volatile long createdTime;
 
     /**
      * The maximum lifetime allowed for the pooled object (in milliseconds).
      */
-    private long liveTime;
+    private volatile long liveTime;
 
     /**
      * The maximum idle time allowed before the pooled object is considered inactive (in milliseconds).
      */
-    private long maxIdleTime;
+    private volatile long maxIdleTime;
 
     /**
      * The timestamp of the last access to the pooled object (in milliseconds).
      */
-    private long lastAccessTime;
+    private volatile long lastAccessTime;
 
     /**
      * The total number of times this pooled object has been accessed.
      */
-    private int accessCount;
+    private volatile int accessCount;
 
     /**
      * Creates a new ActivityPrint with the specified lifetime and idle time limits.
@@ -146,13 +150,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * activity.setLiveTime(7200000);   // set to 2 hours
      * }</pre>
      *
-     * @param liveTime the new maximum lifetime in milliseconds
+     * @param liveTime the new maximum lifetime in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
-     * @throws IllegalArgumentException if liveTime is negative
+     * @throws IllegalArgumentException if liveTime is not positive
      */
     public ActivityPrint setLiveTime(final long liveTime) throws IllegalArgumentException {
-        if (liveTime < 0) {
-            throw new IllegalArgumentException("liveTime cannot be negative, got: " + liveTime);
+        if (liveTime <= 0) {
+            throw new IllegalArgumentException("liveTime must be positive, got: " + liveTime);
         }
 
         this.liveTime = liveTime;
@@ -177,13 +181,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * activity.setMaxIdleTime(600000);   // set to 10 minutes
      * }</pre>
      *
-     * @param maxIdleTime the new maximum idle time in milliseconds
+     * @param maxIdleTime the new maximum idle time in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
-     * @throws IllegalArgumentException if maxIdleTime is negative
+     * @throws IllegalArgumentException if maxIdleTime is not positive
      */
     public ActivityPrint setMaxIdleTime(final long maxIdleTime) throws IllegalArgumentException {
-        if (maxIdleTime < 0) {
-            throw new IllegalArgumentException("maxIdleTime cannot be negative, got: " + maxIdleTime);
+        if (maxIdleTime <= 0) {
+            throw new IllegalArgumentException("maxIdleTime must be positive, got: " + maxIdleTime);
         }
 
         this.maxIdleTime = maxIdleTime;
@@ -257,7 +261,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * }</pre>
      */
     public void updateAccessCount() {
-        accessCount++;
+        ACCESS_COUNT_UPDATER.incrementAndGet(this);
     }
 
     /**

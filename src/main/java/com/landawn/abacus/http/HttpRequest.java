@@ -468,7 +468,7 @@ public final class HttpRequest {
     public HttpRequest useCaches(final boolean useCaches) {
         checkSettings();
 
-        settings.setUseCaches(useCaches);
+        settings.useCaches(useCaches);
 
         return this;
     }

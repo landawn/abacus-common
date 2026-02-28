@@ -190,7 +190,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
             return ZonedDateTime.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {

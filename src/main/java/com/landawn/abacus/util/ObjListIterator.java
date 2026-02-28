@@ -115,6 +115,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         /**
          * Operation not supported.
          *
+         * @param e the element argument (not used because this operation is unsupported)
          * @throws UnsupportedOperationException always
          * @deprecated - UnsupportedOperationException
          */
@@ -127,6 +128,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         /**
          * Operation not supported.
          *
+         * @param e the element argument (not used because this operation is unsupported)
          * @throws UnsupportedOperationException always
          * @deprecated - UnsupportedOperationException
          */
@@ -295,6 +297,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */
@@ -307,6 +310,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */
@@ -390,6 +394,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */
@@ -402,6 +407,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */
@@ -492,6 +498,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */
@@ -504,6 +511,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             /**
              * Operation not supported.
              *
+             * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
              * @deprecated - UnsupportedOperationException
              */

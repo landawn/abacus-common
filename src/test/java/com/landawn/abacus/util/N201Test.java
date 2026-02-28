@@ -955,79 +955,79 @@ public class N201Test extends TestBase {
 
     @Test
     public void testDeleteByIndexBoolean() {
-        assertArrayEquals(new boolean[] { false }, N.deleteByIndex(new boolean[] { true, false }, 0));
-        assertArrayEquals(new boolean[] { true }, N.deleteByIndex(new boolean[] { true, false }, 1));
-        assertArrayEquals(new boolean[0], N.deleteByIndex(new boolean[] { true }, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(new boolean[] { true }, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(new boolean[0], 0));
+        assertArrayEquals(new boolean[] { false }, N.removeAt(new boolean[] { true, false }, 0));
+        assertArrayEquals(new boolean[] { true }, N.removeAt(new boolean[] { true, false }, 1));
+        assertArrayEquals(new boolean[0], N.removeAt(new boolean[] { true }, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[] { true }, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[0], 0));
     }
 
     @Test
     public void testDeleteByIndexInt() {
-        assertArrayEquals(new int[] { 2, 3 }, N.deleteByIndex(new int[] { 1, 2, 3 }, 0));
-        assertArrayEquals(new int[] { 1, 3 }, N.deleteByIndex(new int[] { 1, 2, 3 }, 1));
-        assertArrayEquals(new int[] { 1, 2 }, N.deleteByIndex(new int[] { 1, 2, 3 }, 2));
+        assertArrayEquals(new int[] { 2, 3 }, N.removeAt(new int[] { 1, 2, 3 }, 0));
+        assertArrayEquals(new int[] { 1, 3 }, N.removeAt(new int[] { 1, 2, 3 }, 1));
+        assertArrayEquals(new int[] { 1, 2 }, N.removeAt(new int[] { 1, 2, 3 }, 2));
     }
 
     @Test
     public void testDeleteByIndexGeneric() {
-        assertArrayEquals(new String[] { "b", "c" }, N.deleteByIndex(new String[] { "a", "b", "c" }, 0));
+        assertArrayEquals(new String[] { "b", "c" }, N.removeAt(new String[] { "a", "b", "c" }, 0));
         String[] emptyArr = {};
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(emptyArr, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(emptyArr, 0));
         String[] nullArr = null;
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(nullArr, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(nullArr, 0));
 
     }
 
     @Test
     public void testDeleteAllByIndicesBoolean() {
-        assertArrayEquals(new boolean[] { true, true }, N.deleteAllByIndices(new boolean[] { true, false, true }, 1));
-        assertArrayEquals(new boolean[] { false }, N.deleteAllByIndices(new boolean[] { true, false, true }, 0, 2));
-        assertArrayEquals(new boolean[] { true, false, true }, N.deleteAllByIndices(new boolean[] { true, false, true }));
-        assertArrayEquals(new boolean[0], N.deleteAllByIndices(new boolean[] { true, false, true }, 0, 1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[0], 0, 1, 2));
-        assertArrayEquals(new boolean[0], N.deleteAllByIndices(new boolean[0]));
+        assertArrayEquals(new boolean[] { true, true }, N.removeAt(new boolean[] { true, false, true }, 1));
+        assertArrayEquals(new boolean[] { false }, N.removeAt(new boolean[] { true, false, true }, 0, 2));
+        assertArrayEquals(new boolean[] { true, false, true }, N.removeAt(new boolean[] { true, false, true }));
+        assertArrayEquals(new boolean[0], N.removeAt(new boolean[] { true, false, true }, 0, 1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[0], 0, 1, 2));
+        assertArrayEquals(new boolean[0], N.removeAt(new boolean[0]));
 
         boolean[] arrToClone = { true, false };
-        boolean[] cloned = N.deleteAllByIndices(arrToClone);
+        boolean[] cloned = N.removeAt(arrToClone);
         assertNotSame(arrToClone, cloned);
         assertArrayEquals(arrToClone, cloned);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[] { true }, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(new boolean[] { true }, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[] { true }, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[] { true }, -1));
     }
 
     @Test
     public void testDeleteAllByIndicesInt() {
-        assertArrayEquals(new int[] { 1, 4 }, N.deleteAllByIndices(new int[] { 1, 2, 3, 4 }, 1, 2));
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, N.deleteAllByIndices(new int[] { 1, 2, 3, 4 }));
-        assertArrayEquals(new int[] { 4 }, N.deleteAllByIndices(new int[] { 1, 2, 3, 4 }, 0, 1, 2));
-        assertArrayEquals(new int[] {}, N.deleteAllByIndices(new int[] { 1, 2, 3, 4 }, 0, 1, 2, 3));
+        assertArrayEquals(new int[] { 1, 4 }, N.removeAt(new int[] { 1, 2, 3, 4 }, 1, 2));
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, N.removeAt(new int[] { 1, 2, 3, 4 }));
+        assertArrayEquals(new int[] { 4 }, N.removeAt(new int[] { 1, 2, 3, 4 }, 0, 1, 2));
+        assertArrayEquals(new int[] {}, N.removeAt(new int[] { 1, 2, 3, 4 }, 0, 1, 2, 3));
     }
 
     @Test
     public void testDeleteAllByIndicesGeneric() {
-        assertArrayEquals(new String[] { "a", "d" }, N.deleteAllByIndices(new String[] { "a", "b", "c", "d" }, 1, 2));
+        assertArrayEquals(new String[] { "a", "d" }, N.removeAt(new String[] { "a", "b", "c", "d" }, 1, 2));
         String[] arrNull = null;
-        assertThrows(NullPointerException.class, () -> N.deleteAllByIndices(arrNull, 1, 2));
+        assertThrows(NullPointerException.class, () -> N.removeAt(arrNull, 1, 2));
     }
 
     @Test
     public void testDeleteAllByIndicesList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        assertTrue(N.deleteAllByIndices(list, 1, 3));
+        assertTrue(N.removeAt(list, 1, 3));
         assertEquals(Arrays.asList("a", "c", "e"), list);
 
         List<String> list2 = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        assertTrue(N.deleteAllByIndices(list2, 0, 4));
+        assertTrue(N.removeAt(list2, 0, 4));
         assertEquals(Arrays.asList("b", "c", "d"), list2);
 
-        assertFalse(N.deleteAllByIndices(list, new int[0]));
-        assertThrows(IllegalArgumentException.class, () -> N.deleteAllByIndices((List<String>) null, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteAllByIndices(list, 10));
+        assertFalse(N.removeAt(list, new int[0]));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((List<String>) null, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(list, 10));
 
         List<Integer> intList = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
-        N.deleteAllByIndices(intList, 0, 0, 1);
+        N.removeAt(intList, 0, 0, 1);
         assertEquals(Arrays.asList(3, 4, 5), intList);
 
     }

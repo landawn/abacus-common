@@ -66,7 +66,7 @@ package com.landawn.abacus.pool;
  * @see GenericObjectPool
  * @see GenericKeyedObjectPool
  */
-public abstract class PoolFactory { //NOSONAR
+public final class PoolFactory { //NOSONAR
 
     private PoolFactory() {
         // singleton

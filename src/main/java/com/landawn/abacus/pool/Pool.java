@@ -36,7 +36,7 @@ import java.io.Serializable;
  * @see ObjectPool
  * @see KeyedObjectPool
  */
-public interface Pool extends Serializable {
+public interface Pool extends Serializable, AutoCloseable {
 
     /**
      * Acquires an exclusive lock on this pool.
@@ -112,13 +112,13 @@ public interface Pool extends Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
-     *     pool.vacate();   // free up some space
+     *     pool.evict();   // free up some space
      * }
      * }</pre>
      * 
      * @throws IllegalStateException if the pool has been closed
      */
-    void vacate();
+    void evict();
 
     /**
      * Removes all objects from this pool.
@@ -183,6 +183,7 @@ public interface Pool extends Serializable {
      * }
      * }</pre>
      */
+    @Override
     void close();
 
     /**

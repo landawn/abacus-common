@@ -338,7 +338,7 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testDelete() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f);
-        float removed = list.delete(1);
+        float removed = list.removeAt(1);
         assertEquals(2.0f, removed, 0.0001f);
         assertEquals(2, list.size());
         assertEquals(3.0f, list.get(1), 0.0001f);
@@ -347,13 +347,13 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testDelete_outOfBounds() {
         FloatList list = FloatList.of(1.0f, 2.0f);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(5));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(5));
     }
 
     @Test
     public void testDeleteAllByIndices() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(1.0f, list.get(0), 0.0001f);
         assertEquals(3.0f, list.get(1), 0.0001f);
@@ -363,14 +363,14 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testDeleteAllByIndices_empty() {
         FloatList list = FloatList.of(1.0f, 2.0f);
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(2, list.size());
     }
 
     @Test
     public void testDeleteRange() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals(1.0f, list.get(0), 0.0001f);
         assertEquals(5.0f, list.get(1), 0.0001f);
@@ -379,7 +379,7 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testDeleteRange_sameIndices() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f);
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 

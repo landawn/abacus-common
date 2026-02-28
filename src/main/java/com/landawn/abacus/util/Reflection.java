@@ -14,14 +14,14 @@
 
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * A utility class that provides simplified reflection operations with improved performance through caching.
@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create instance from class name
- * MyClass obj = Reflection.on("com.example.MyClass")._new();
+ * MyClass obj = Reflection.on("com.example.MyClass").newInstance();
  * 
  * // Access instance fields and methods
  * Reflection.on(obj)
@@ -80,14 +80,14 @@ public final class Reflection<T> {
 
     private final Class<T> cls;
 
-    private final T target;
+    private final T instance;
 
     private final ReflectASM<T> reflectASM;
 
-    Reflection(final Class<T> cls, final T target) {
+    Reflection(final Class<T> cls, final T instance) {
         this.cls = cls;
-        this.target = target;
-        reflectASM = isReflectASMAvailable ? new ReflectASM<>(cls, target) : null;
+        this.instance = instance;
+        reflectASM = isReflectASMAvailable ? new ReflectASM<>(cls, instance) : null;
     }
 
     /**
@@ -97,7 +97,7 @@ public final class Reflection<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<MyClass> ref = Reflection.on("com.example.MyClass");
-     * MyClass instance = ref._new();
+     * MyClass instance = ref.newInstance();
      * }</pre>
      *
      * @param <T> the type of the class
@@ -115,7 +115,7 @@ public final class Reflection<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<String> ref = Reflection.on(String.class);
-     * String str = ref._new("Hello");
+     * String str = ref.newInstance("Hello");
      * }</pre>
      *
      * @param <T> the type of the class
@@ -132,17 +132,17 @@ public final class Reflection<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyClass obj = new MyClass();
-     * Reflection<MyClass> ref = Reflection.on(obj);
+     * MyClass instance = new MyClass();
+     * Reflection<MyClass> ref = Reflection.on(instance);
      * ref.set("field", "value");
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param target the object to reflect upon
+     * @param instance the object to reflect upon
      * @return a Reflection instance for the specified object
      */
-    public static <T> Reflection<T> on(final T target) {
-        return new Reflection<>((Class<T>) target.getClass(), target);
+    public static <T> Reflection<T> on(final T instance) {
+        return new Reflection<>((Class<T>) instance.getClass(), instance);
     }
 
     /**
@@ -150,13 +150,13 @@ public final class Reflection<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyClass obj = Reflection.on(MyClass.class)._new();
+     * MyClass obj = Reflection.on(MyClass.class).newInstance();
      * }</pre>
      *
      * @return a new Reflection instance wrapping the newly created object
      * @throws RuntimeException if the class cannot be instantiated
      */
-    public Reflection<T> _new() { //NOSONAR
+    public Reflection<T> newInstance() { //NOSONAR
         return new Reflection<>(cls, N.newInstance(cls));
     }
 
@@ -166,16 +166,16 @@ public final class Reflection<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Person person = Reflection.on(Person.class)._new("John", 30).instance();
+     * Person person = Reflection.on(Person.class).newInstance("John", 30).instance();
      * }</pre>
      *
      * @param args the arguments to pass to the constructor
      * @return a new Reflection instance wrapping the newly created object
      * @throws RuntimeException if no matching constructor is found or instantiation fails
      */
-    public Reflection<T> _new(final Object... args) { //NOSONAR
+    public Reflection<T> newInstance(final Object... args) { //NOSONAR
         if (N.isEmpty(args)) {
-            return _new();
+            return newInstance();
         }
 
         final Constructor<T> constructor = getDeclaredConstructor(cls, getTypes(args));
@@ -190,14 +190,14 @@ public final class Reflection<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyClass obj = Reflection.on(MyClass.class)._new().instance();
+     * MyClass obj = Reflection.on(MyClass.class).newInstance().instance();
      * }</pre>
      *
      * @return the target instance, or {@code null} if reflecting on a class
      */
     @MayReturnNull
     public T instance() {
-        return target;
+        return instance;
     }
 
     /**
@@ -223,7 +223,7 @@ public final class Reflection<T> {
                 final Field field = getField(fieldName);
                 ClassUtil.setAccessibleQuietly(field, true);
 
-                return (V) field.get(target);
+                return (V) field.get(instance);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -255,7 +255,7 @@ public final class Reflection<T> {
                 final Field field = getField(fieldName);
                 ClassUtil.setAccessibleQuietly(field, true);
 
-                field.set(target, value); //NOSONAR
+                field.set(instance, value); //NOSONAR
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -289,7 +289,7 @@ public final class Reflection<T> {
                 final Method method = getDeclaredMethod(cls, methodName, getTypes(args));
                 ClassUtil.setAccessibleQuietly(method, true);
 
-                return (V) method.invoke(target, args);
+                return (V) method.invoke(instance, args);
             } catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -336,7 +336,7 @@ public final class Reflection<T> {
         Field field = fieldPool.get(fieldName);
 
         if (field == null) {
-            field = cls.getField(fieldName);
+            field = cls.getDeclaredField(fieldName);
             fieldPool.put(fieldName, field);
         }
 

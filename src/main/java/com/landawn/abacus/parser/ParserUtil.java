@@ -1568,7 +1568,7 @@ public final class ParserUtil {
                                 final Collection c = (Collection) subPropValue;
 
                                 if (c.size() == 0) {
-                                    subPropValue = N.newCollection((Class<Collection>) propInfo.type.getElementType().clazz());
+                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
                                     c.add(subPropValue);
                                 } else if (propInfo.type.isList()) {
                                     subPropValue = ((List) c).get(0);
@@ -1635,11 +1635,13 @@ public final class ParserUtil {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
                 return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
             } else {
-                if (!setPropValue(obj, propInfoFromOtherBean.name, propValue, true)) {
-                    for (final String alias : propInfoFromOtherBean.aliases) {
-                        if (setPropValue(obj, alias, propValue, true)) {
-                            return true;
-                        }
+                if (setPropValue(obj, propInfoFromOtherBean.name, propValue, true)) {
+                    return true;
+                }
+
+                for (final String alias : propInfoFromOtherBean.aliases) {
+                    if (setPropValue(obj, alias, propValue, true)) {
+                        return true;
                     }
                 }
 
@@ -1667,11 +1669,10 @@ public final class ParserUtil {
          * @param inputPropName the input property name to match
          * @param propNameByMethod the actual property name derived from a method
          * @return {@code true} if the names match according to any supported pattern
-         * @throws RuntimeException if the property name exceeds 128 characters
          */
         private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
             if (inputPropName.length() > 128) {
-                throw new RuntimeException("The property name exceed 128: " + inputPropName);
+                return false;
             }
 
             inputPropName = inputPropName.trim();
@@ -2795,6 +2796,10 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalDate.class, new DateTimeReaderWriter<java.time.LocalDate>() {
                 @Override
                 public java.time.LocalDate read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalDate");
                     } else {
@@ -2815,6 +2820,10 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalTime.class, new DateTimeReaderWriter<java.time.LocalTime>() {
                 @Override
                 public java.time.LocalTime read(final PropInfo propInfo, final String strValue) {
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime");
                     } else {

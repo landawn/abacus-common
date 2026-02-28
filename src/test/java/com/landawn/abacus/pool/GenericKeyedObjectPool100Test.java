@@ -7,6 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -103,6 +108,18 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         GenericKeyedObjectPool<String, TestPoolable> fullPool = new GenericKeyedObjectPool<>(40, 4000, EvictionPolicy.ACCESS_COUNT, true, 0.4f, 2048, measure);
         assertEquals(40, fullPool.capacity());
         fullPool.close();
+    }
+
+    @Test
+    public void testSerializationWithEvictionEnabled() throws Exception {
+        GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
+
+        GenericKeyedObjectPool<String, TestPoolable> deserialized = deserialize(serialize(evictPool));
+        assertNotNull(deserialized);
+        assertFalse(deserialized.isClosed());
+
+        evictPool.close();
+        deserialized.close();
     }
 
     @Test
@@ -333,24 +350,24 @@ public class GenericKeyedObjectPool100Test extends TestBase {
     }
 
     @Test
-    public void testVacate() {
+    public void test_evict() {
         for (int i = 0; i < 10; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));
         }
 
-        pool.vacate();
+        pool.evict();
         assertEquals(8, pool.size());
     }
 
     @Test
-    public void testVacateWithCustomBalanceFactor() {
+    public void test_evictWithCustomBalanceFactor() {
         GenericKeyedObjectPool<String, TestPoolable> customPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f);
 
         for (int i = 0; i < 10; i++) {
             customPool.put("key" + i, new TestPoolable("value" + i));
         }
 
-        customPool.vacate();
+        customPool.evict();
         assertEquals(5, customPool.size());
 
         customPool.close();
@@ -518,5 +535,21 @@ public class GenericKeyedObjectPool100Test extends TestBase {
         assertEquals(3, stats.getCount());
         assertEquals(2, stats.hitCount());
         assertEquals(1, stats.missCount());
+    }
+
+    private static byte[] serialize(final Object obj) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(obj);
+        }
+
+        return baos.toByteArray();
+    }
+
+    private static <T> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (T) ois.readObject();
+        }
     }
 }

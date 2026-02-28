@@ -917,7 +917,7 @@ public final class Median {
         if (len == 1) {
             return Pair.of(source[fromIndex], OptionalFloat.empty());
         } else if (len == 2) {
-            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalFloat.of(source[fromIndex + 1]))
+            return Float.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], OptionalFloat.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalFloat.of(source[fromIndex]));
         } else if (len == 3) {
             return Pair.of(N.median(source, fromIndex, toIndex), OptionalFloat.empty());
@@ -1031,7 +1031,7 @@ public final class Median {
         if (len == 1) {
             return Pair.of(source[fromIndex], OptionalDouble.empty());
         } else if (len == 2) {
-            return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalDouble.of(source[fromIndex + 1]))
+            return Double.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], OptionalDouble.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalDouble.of(source[fromIndex]));
         } else if (len == 3) {
             return Pair.of(N.median(source, fromIndex, toIndex), OptionalDouble.empty());

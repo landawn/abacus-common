@@ -281,7 +281,7 @@ public class DoubleStream103Test extends TestBase {
         DoubleStream stream = createDoubleStream(1.0, 2.0);
         DoubleFunction<String[]> mapper = x -> new String[] { "X" + x, "Y" + x };
 
-        List<String> result = stream.flattmapToObj(mapper).toList();
+        List<String> result = stream.flatMapArrayToObj(mapper).toList();
         assertEquals(Arrays.asList("X1.0", "Y1.0", "X2.0", "Y2.0"), result);
     }
 

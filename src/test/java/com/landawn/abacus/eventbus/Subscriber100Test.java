@@ -23,7 +23,7 @@ public class Subscriber100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        eventBus = new EventBus();
+        eventBus = EventBus.create();
     }
 
     @Test

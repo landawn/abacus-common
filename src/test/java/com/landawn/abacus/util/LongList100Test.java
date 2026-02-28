@@ -409,7 +409,7 @@ public class LongList100Test extends TestBase {
     public void testDelete() {
         list.addAll(new long[] { 10L, 20L, 30L });
 
-        long deleted = list.delete(1);
+        long deleted = list.removeAt(1);
         assertEquals(20L, deleted);
         assertEquals(2, list.size());
         assertEquals(10L, list.get(0));
@@ -420,7 +420,7 @@ public class LongList100Test extends TestBase {
     public void testDeleteAllByIndices() {
         list.addAll(new long[] { 10L, 20L, 30L, 40L, 50L });
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(10L, list.get(0));
         assertEquals(30L, list.get(1));
@@ -431,7 +431,7 @@ public class LongList100Test extends TestBase {
     public void testDeleteRange() {
         list.addAll(new long[] { 10L, 20L, 30L, 40L, 50L });
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertEquals(3, list.size());
         assertEquals(10L, list.get(0));
         assertEquals(40L, list.get(1));

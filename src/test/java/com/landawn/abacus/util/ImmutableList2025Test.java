@@ -715,7 +715,7 @@ public class ImmutableList2025Test extends TestBase {
         List<String> list3 = Arrays.asList("a", "b", "c");
 
         Assertions.assertEquals(list1, list2);
-        Assertions.assertNotEquals(list1, list3);
+        Assertions.assertEquals(list1, list3);
     }
 
     @Test

@@ -2429,7 +2429,7 @@ public final class Strings {
      * Strings.center("ab", 4, " ")     = " ab "
      * Strings.center("abcd", 2, " ")   = "abcd"
      * Strings.center("a", 4, " ")      = " a  "
-     * Strings.center("a", 4, "yz")     = "yzayz"
+     * Strings.center("a", 4, "yz")     = "yayz"
      * Strings.center("abc", 7, "")     = "  abc  "
      * }</pre>
      *
@@ -2549,37 +2549,27 @@ public final class Strings {
             return str;
         }
 
-        @SuppressWarnings("DuplicateExpressions")
-        final int delta = ((minLength - str.length()) % padStr.length() == 0) ? ((minLength - str.length()) / padStr.length())
-                : ((minLength - str.length()) / padStr.length() + 1);
-        switch (delta) {
-            case 1:
-                return padStr + str;
+        final int padLen = minLength - str.length();
 
-            case 2:
-                return padStr + padStr + str;
+        final StringBuilder sb = Objectory.createStringBuilder(minLength);
 
-            case 3:
-                return padStr + padStr + padStr + str;
+        try {
+            int remaining = padLen;
 
-            default: {
-                final long bufferSizeLong = str.length() + (long) padStr.length() * delta;
-                final int bufferSize = bufferSizeLong > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) bufferSizeLong;
-                final StringBuilder sb = Objectory.createStringBuilder(bufferSize);
-
-                try {
-                    //noinspection StringRepeatCanBeUsed
-                    for (int i = 0; i < delta; i++) {
-                        sb.append(padStr);
-                    }
-
-                    sb.append(str);
-
-                    return sb.toString();
-                } finally {
-                    Objectory.recycle(sb);
-                }
+            while (remaining >= padStr.length()) {
+                sb.append(padStr);
+                remaining -= padStr.length();
             }
+
+            if (remaining > 0) {
+                sb.append(padStr, 0, remaining);
+            }
+
+            sb.append(str);
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
     }
 
@@ -2673,38 +2663,31 @@ public final class Strings {
             return str;
         }
 
-        @SuppressWarnings("DuplicateExpressions")
-        final int delta = ((minLength - str.length()) % padStr.length() == 0) ? ((minLength - str.length()) / padStr.length())
-                : ((minLength - str.length()) / padStr.length() + 1);
+        final int padLen = minLength - str.length();
 
-        switch (delta) {
-            case 1:
-                return str + padStr;
+        if (padLen <= padStr.length()) {
+            return str + padStr.substring(0, padLen);
+        }
 
-            case 2:
-                return str + padStr + padStr;
+        final StringBuilder sb = Objectory.createStringBuilder(minLength);
 
-            case 3:
-                return str + padStr + padStr + padStr;
+        try {
+            sb.append(str);
 
-            default: {
-                final long bufferSizeLong = str.length() + (long) padStr.length() * delta;
-                final int bufferSize = bufferSizeLong > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) bufferSizeLong;
-                final StringBuilder sb = Objectory.createStringBuilder(bufferSize);
+            int remaining = padLen;
 
-                try {
-                    sb.append(str);
-
-                    //noinspection StringRepeatCanBeUsed
-                    for (int i = 0; i < delta; i++) {
-                        sb.append(padStr);
-                    }
-
-                    return sb.toString();
-                } finally {
-                    Objectory.recycle(sb);
-                }
+            while (remaining >= padStr.length()) {
+                sb.append(padStr);
+                remaining -= padStr.length();
             }
+
+            if (remaining > 0) {
+                sb.append(padStr, 0, remaining);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
     }
 
@@ -2887,7 +2870,7 @@ public final class Strings {
      */
     @MayReturnNull
     public static byte[] getBytes(final String string) {
-        return string == null ? null : string.getBytes();
+        return string == null ? null : string.getBytes(Charsets.DEFAULT);
     }
 
     /**
@@ -3688,7 +3671,7 @@ public final class Strings {
         int outOffset = 0;
         int oldCodepoint, newCodePoint;
 
-        for (int i = 0; i < strLen; i += Character.charCount(newCodePoint)) {
+        for (int i = 0; i < strLen; i += Character.charCount(oldCodepoint)) {
             oldCodepoint = str.codePointAt(i);
 
             if (Character.isUpperCase(oldCodepoint) || Character.isTitleCase(oldCodepoint)) {
@@ -4287,8 +4270,8 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.replaceAll("abacadae", 0, "a", "z");      // returns "zbzczde"
-     * Strings.replaceAll("abacadae", 3, "a", "z");      // returns "abzczde"
+     * Strings.replaceAll("abacadae", 0, "a", "z");      // returns "zbzczdze"
+     * Strings.replaceAll("abacadae", 3, "a", "z");      // returns "abaczdze"
      * Strings.replaceAll("abacadae", 5, "a", "z");      // returns "abacadze"
      * Strings.replaceAll("hello world", 0, "o", "0");   // returns "hell0 w0rld"
      * Strings.replaceAll("hello world", 6, "o", "0");   // returns "hello w0rld"
@@ -4670,7 +4653,7 @@ public final class Strings {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(str.length() + (N.len(replacement) - N.len(target)) * (N.min(16, max)));
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + (N.len(replacement) - N.len(target)) * (max < 0 ? 16 : N.min(16, max)));
         final int substrLength = target.length();
         sb.append(str, 0, fromIndex);
         int start = fromIndex;
@@ -6844,9 +6827,59 @@ public final class Strings {
      *
      * @param str the String to delete whitespace from, may be {@code null}
      * @return the String without whitespaces, {@code null} if {@code null} String input
-     * @see #deleteWhitespace(String[])
+     * @see #removeWhitespace(String[])
+     * @deprecated Use {@link #removeWhitespace(String)} instead
      */
     public static String deleteWhitespace(final String str) {
+        return removeWhitespace(str);
+    }
+
+    /**
+     * Deletes all whitespace from each string in the provided array.
+     *
+     * <p>Whitespace is determined by {@link Character#isWhitespace(char)}. This includes spaces,
+     * tabs, newlines, and other Unicode whitespace characters. Each string in the array is processed
+     * independently and updated in-place.</p>
+     *
+     * <p>If the input array is {@code null} or empty, the method does nothing.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] strs = {"  hello  ", "world\t123", " h i "};
+     * Strings.deleteWhitespace(strs);
+     * // strs is now {"hello", "world123", "hi"}
+     * }</pre>
+     *
+     * @param strs the array of strings to be processed. Each string in the array will be updated in-place.
+     * @see #removeWhitespace(String)
+     * @deprecated Use {@link #removeWhitespace(String[])} instead
+     */
+    public static void deleteWhitespace(final String[] strs) {
+        removeWhitespace(strs);
+    }
+
+    /**
+     * Deletes all whitespace from a String as defined by {@link Character#isWhitespace(char)}.
+     *
+     * <p>This method removes all characters for which {@link Character#isWhitespace(char)} returns {@code true}.
+     * This includes spaces, tabs, newlines, and other Unicode whitespace characters. The method returns
+     * {@code null} if the input is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.deleteWhitespace(null)           = null
+     * Strings.deleteWhitespace("")             = ""
+     * Strings.deleteWhitespace("abc")          = "abc"
+     * Strings.deleteWhitespace("   ab  c  ")   = "abc"
+     * Strings.deleteWhitespace("a\tb\nc")      = "abc"
+     * Strings.deleteWhitespace("a b\tc\r\n")   = "abc"
+     * }</pre>
+     *
+     * @param str the String to delete whitespace from, may be {@code null}
+     * @return the String without whitespaces, {@code null} if {@code null} String input
+     * @see #removeWhitespace(String[])
+     */
+    public static String removeWhitespace(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
@@ -6884,15 +6917,15 @@ public final class Strings {
      * }</pre>
      *
      * @param strs the array of strings to be processed. Each string in the array will be updated in-place.
-     * @see #deleteWhitespace(String)
+     * @see #removeWhitespace(String)
      */
-    public static void deleteWhitespace(final String[] strs) {
+    public static void removeWhitespace(final String[] strs) {
         if (N.isEmpty(strs)) {
             return;
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = deleteWhitespace(strs[i]);
+            strs[i] = removeWhitespace(strs[i]);
         }
     }
 
@@ -9633,6 +9666,10 @@ public final class Strings {
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
     public static int lastIndexOf(final String str, final String valueToFind, final String delimiter) {
+        if (str == null) {
+            return N.INDEX_NOT_FOUND;
+        }
+
         return lastIndexOf(str, valueToFind, delimiter, str.length());
     }
 
@@ -9809,6 +9846,10 @@ public final class Strings {
      *         or -1 if the substring does not occur with proper boundaries or if any parameter is {@code null}.
      */
     public static int lastIndexOfIgnoreCase(final String str, final String valueToFind, final String delimiter) {
+        if (str == null) {
+            return N.INDEX_NOT_FOUND;
+        }
+
         return lastIndexOfIgnoreCase(str, valueToFind, delimiter, str.length());
     }
 
@@ -9878,7 +9919,7 @@ public final class Strings {
 
         //noinspection DuplicateExpressions
         if (index == 0 && (index + valueToFind.length() == len || (len >= index + valueToFind.length() + delimiter.length()
-                && delimiter.equals(str.substring(index + valueToFind.length(), index + valueToFind.length() + delimiter.length()))))) {
+                && delimiter.equalsIgnoreCase(str.substring(index + valueToFind.length(), index + valueToFind.length() + delimiter.length()))))) {
             return index;
         }
 
@@ -10098,20 +10139,39 @@ public final class Strings {
             return N.INDEX_NOT_FOUND;
         }
 
-        int fromIndex = isLastIndex ? str.length() : 0;
+        final int strLen = str.length();
+        final int substrLen = substr.length();
 
-        for (int found = 0; fromIndex >= 0;) {
-            fromIndex = isLastIndex ? str.lastIndexOf(substr, fromIndex) : str.indexOf(substr, fromIndex);
+        if (isLastIndex) {
+            for (int found = 0, fromIndex = strLen; fromIndex >= 0;) {
+                fromIndex = str.lastIndexOf(substr, fromIndex);
 
-            if (fromIndex < 0) {
-                return N.INDEX_NOT_FOUND;
+                if (fromIndex < 0) {
+                    return N.INDEX_NOT_FOUND;
+                }
+
+                if (++found >= ordinal) {
+                    return fromIndex;
+                }
+
+                // fromIndex = isLastIndex ? (fromIndex - substrLen) : (fromIndex + substrLen);
+                fromIndex = fromIndex - Math.max(substrLen, 1);
             }
+        } else {
+            for (int found = 0, fromIndex = 0; fromIndex <= strLen;) {
+                fromIndex = str.indexOf(substr, fromIndex);
 
-            if (++found >= ordinal) {
-                return fromIndex;
+                if (fromIndex < 0) {
+                    return N.INDEX_NOT_FOUND;
+                }
+
+                if (++found >= ordinal) {
+                    return fromIndex;
+                }
+
+                // fromIndex = isLastIndex ? (fromIndex - substrLen) : (fromIndex + substrLen);
+                fromIndex = fromIndex + Math.max(substrLen, 1);
             }
-
-            fromIndex = isLastIndex ? (fromIndex - substr.length()) : (fromIndex + substr.length());
         }
 
         return N.INDEX_NOT_FOUND;
@@ -10463,6 +10523,9 @@ public final class Strings {
      * Strings.ordinalIndexOf("aabaabaa", "ab", 2);   // returns 4
      * Strings.ordinalIndexOf("aabaabaa", "c", 1);    // returns -1
      * Strings.ordinalIndexOf("", "", 1);             // returns 0
+     * Strings.ordinalIndexOf("", "", 2);             // returns -1
+     * Strings.ordinalIndexOf("abc", "", 1);          // returns 0
+     * Strings.ordinalIndexOf("abc", "", 2);          // returns 1
      * Strings.ordinalIndexOf("", null, 1);           // returns -1
      * Strings.ordinalIndexOf(null, "", 1);           // returns -1
      * Strings.ordinalIndexOf(null, null, 1);         // returns -1
@@ -10644,12 +10707,13 @@ public final class Strings {
         }
 
         final int strLen = str.length();
-        final int increment = Math.max(valueToFind.length(), 1);
+        final int valLen = valueToFind.length();
+        final int increment = Math.max(valLen, 1);
         final int end = strLen - increment + 1;
 
         return IntStream.ofIndices(str, fromIndex, increment, (s, from) -> {
             for (int idx = from; idx < end; idx++) {
-                if (str.regionMatches(true, idx, valueToFind, 0, increment)) {
+                if (str.regionMatches(true, idx, valueToFind, 0, valLen)) {
                     return idx;
                 }
             }
@@ -11776,6 +11840,16 @@ public final class Strings {
             }
 
             return equalsIgnoreCase(str, searchStrs[1]);
+        }
+
+        if (str == null) {
+            for (final String searchStr : searchStrs) {
+                if (searchStr == null) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         final String sourceText = str.toLowerCase();
@@ -15385,16 +15459,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deleting a range of characters
-     * Strings.deleteRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
-     * Strings.deleteRange("Hello World", 5, 11);   // returns "Hello" (removes " World")
-     * Strings.deleteRange("Test", 0, 2);           // returns "st" (removes "Te")
+     * Strings.removeRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
+     * Strings.removeRange("Hello World", 5, 11);   // returns "Hello" (removes " World")
+     * Strings.removeRange("Test", 0, 2);           // returns "st" (removes "Te")
      *
      * // Edge cases
-     * Strings.deleteRange(null, 0, 1);             // returns ""
-     * Strings.deleteRange("", 0, 0);               // returns "" (OK - valid range for empty string)
-     * Strings.deleteRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
-     * Strings.deleteRange("ABC", 3, 5);            // returns "ABC" (no deletion when fromIndex >= length)
-     * Strings.deleteRange("ABC", 0, 10);           // returns "" (deletes entire string and beyond)
+     * Strings.removeRange(null, 0, 1);             // returns ""
+     * Strings.removeRange("", 0, 0);               // returns "" (OK - valid range for empty string)
+     * Strings.removeRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
+     * Strings.removeRange("ABC", 3, 5);            // returns "ABC" (no deletion when fromIndex >= length)
+     * Strings.removeRange("ABC", 0, 10);           // returns "" (deletes entire string and beyond)
      * }</pre>
      *
      * @param str the input string from which a range of characters are to be deleted; may be {@code null}
@@ -15402,11 +15476,11 @@ public final class Strings {
      * @param toIndex the final index of the range to be deleted, exclusive; must be &gt;= {@code fromIndex} and &lt;= {@code str.length()}
      * @return a new string with the specified range of characters deleted. An empty String is returned if the specified String is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is invalid
-     * @see N#deleteRange(String, int, int)
+     * @see N#removeRange(String, int, int)
      * @see #replaceRange(String, int, int, String)
      */
     @Beta
-    public static String deleteRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public static String removeRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = N.len(str);
 
         N.checkFromToIndex(fromIndex, toIndex, len);
@@ -15421,7 +15495,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex));
+        return Strings.concat(str.substring(0, fromIndex), str.substring(toIndex));
     }
 
     /**
@@ -19318,7 +19392,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes()); // NOSONAR
+        return BASE64_ENCODER.encodeToString(str.getBytes(Charsets.DEFAULT)); // NOSONAR
     }
 
     /**
@@ -19442,7 +19516,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(base64Decode(base64String)); // NOSONAR
+        return new String(base64Decode(base64String), Charsets.DEFAULT); // NOSONAR
     }
 
     /**
@@ -19596,7 +19670,7 @@ public final class Strings {
             return Strings.EMPTY;
         }
 
-        return new String(BASE64_URL_DECODER.decode(base64String)); // NOSONAR
+        return new String(BASE64_URL_DECODER.decode(base64String), Charsets.DEFAULT); // NOSONAR
     }
 
     /**

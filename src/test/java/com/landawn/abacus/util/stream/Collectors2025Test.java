@@ -843,7 +843,7 @@ public class Collectors2025Test extends TestBase {
 
     @Test
     public void testMinAlll_WithDownstream() {
-        Optional<Pair<Integer, Long>> result = integerList.stream().collect(Collectors.minAlll(Collectors.counting()));
+        Optional<Pair<Integer, Long>> result = integerList.stream().collect(Collectors.minAllWith(Collectors.counting()));
         assertTrue(result.isPresent());
         assertEquals(1, result.get().left());
         assertEquals(1L, result.get().right());
@@ -851,7 +851,8 @@ public class Collectors2025Test extends TestBase {
 
     @Test
     public void testMinAlll_WithComparatorAndDownstream() {
-        Optional<Pair<String, Long>> result = stringList.stream().collect(Collectors.minAlll(Comparator.comparingInt(String::length), Collectors.counting()));
+        Optional<Pair<String, Long>> result = stringList.stream()
+                .collect(Collectors.minAllWith(Comparator.comparingInt(String::length), Collectors.counting()));
         assertTrue(result.isPresent());
         assertEquals("date", result.get().left());
         assertEquals(1L, result.get().right());
@@ -889,7 +890,7 @@ public class Collectors2025Test extends TestBase {
 
     @Test
     public void testMaxAlll_WithDownstream() {
-        Optional<Pair<Integer, Long>> result = integerList.stream().collect(Collectors.maxAlll(Collectors.counting()));
+        Optional<Pair<Integer, Long>> result = integerList.stream().collect(Collectors.maxAllWith(Collectors.counting()));
         assertTrue(result.isPresent());
         assertEquals(5, result.get().left());
         assertEquals(1L, result.get().right());
@@ -897,7 +898,8 @@ public class Collectors2025Test extends TestBase {
 
     @Test
     public void testMaxAlll_WithComparatorAndDownstream() {
-        Optional<Pair<String, Long>> result = stringList.stream().collect(Collectors.maxAlll(Comparator.comparingInt(String::length), Collectors.counting()));
+        Optional<Pair<String, Long>> result = stringList.stream()
+                .collect(Collectors.maxAllWith(Comparator.comparingInt(String::length), Collectors.counting()));
         assertTrue(result.isPresent());
         assertEquals("elderberry", result.get().left());
         assertEquals(1L, result.get().right());

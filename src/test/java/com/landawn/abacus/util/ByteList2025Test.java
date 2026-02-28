@@ -414,7 +414,7 @@ public class ByteList2025Test extends TestBase {
     @Test
     public void test_delete() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-        byte deleted = list.delete(1);
+        byte deleted = list.removeAt(1);
         assertEquals(20, deleted);
         assertEquals(2, list.size());
         assertArrayEquals(new byte[] { 10, 30 }, list.toArray());
@@ -423,29 +423,29 @@ public class ByteList2025Test extends TestBase {
     @Test
     public void test_delete_indexOutOfBounds() {
         ByteList list = ByteList.of((byte) 1, (byte) 2);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
-    public void test_deleteAllByIndices() {
+    public void test_removeAt() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertArrayEquals(new byte[] { 10, 30, 50 }, list.toArray());
     }
 
     @Test
-    public void test_deleteAllByIndices_empty() {
+    public void test_removeAt_empty() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
-    public void test_deleteRange() {
+    public void test_removeRange() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertArrayEquals(new byte[] { 1, 5 }, list.toArray());
     }

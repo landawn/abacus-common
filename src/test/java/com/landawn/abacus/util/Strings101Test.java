@@ -13,7 +13,7 @@ import static com.landawn.abacus.util.Strings.base64UrlEncode;
 import static com.landawn.abacus.util.Strings.concat;
 import static com.landawn.abacus.util.Strings.copyThenStrip;
 import static com.landawn.abacus.util.Strings.copyThenTrim;
-import static com.landawn.abacus.util.Strings.deleteRange;
+import static com.landawn.abacus.util.Strings.removeRange;
 import static com.landawn.abacus.util.Strings.extractFirstDouble;
 import static com.landawn.abacus.util.Strings.extractFirstInteger;
 import static com.landawn.abacus.util.Strings.findAllEmailAddresses;
@@ -562,28 +562,28 @@ public class Strings101Test extends TestBase {
 
     @Test
     public void testDeleteRange() {
-        assertEquals("Ho World", deleteRange("Hello World", 1, 4));
-        assertEquals("World", deleteRange("Hello World", 0, 6));
-        assertEquals("Hello", deleteRange("Hello World", 5, 11));
-        assertEquals("", deleteRange("Hello", 0, 5));
-        assertEquals("Hello", deleteRange("Hello", 2, 2));
+        assertEquals("Ho World", removeRange("Hello World", 1, 4));
+        assertEquals("World", removeRange("Hello World", 0, 6));
+        assertEquals("Hello", removeRange("Hello World", 5, 11));
+        assertEquals("", removeRange("Hello", 0, 5));
+        assertEquals("Hello", removeRange("Hello", 2, 2));
 
-        assertEquals("", deleteRange("", 0, 0));
+        assertEquals("", removeRange("", 0, 0));
 
         try {
-            deleteRange("Hello", 5, 10);
+            removeRange("Hello", 5, 10);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
         }
 
         try {
-            deleteRange("Hello", -1, 3);
+            removeRange("Hello", -1, 3);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
         }
 
         try {
-            deleteRange("Hello", 3, 1);
+            removeRange("Hello", 3, 1);
             fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
         }

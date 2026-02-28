@@ -312,7 +312,7 @@ public @interface JsonXmlField {
          * <p>Use this for:</p>
          * <ul>
          *   <li>Input-only fields like passwords or temporary data</li>
-         *   <li>Fields that should accept values but never direction them</li>
+         *   <li>Fields that should accept values but never expose them in output</li>
          *   <li>Configuration fields that are needed for setup but not for output</li>
          * </ul>
          *
@@ -322,7 +322,7 @@ public @interface JsonXmlField {
          * private String password;  // Accepted but never returned
          *
          * @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
-         * private String resetToken;  // Used for validation, not direction
+         * private String resetToken;  // Used for validation, not exposed in output
          * }</pre>
          */
         DESERIALIZE_ONLY

@@ -570,6 +570,12 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         double delta1, delta2 = Double.MAX_VALUE;
         double fraction;
         int i = 1;
+
+        if (y1 == 0) {
+            // value is an exact integer, no fractional part
+            return of(wholeNumber * sign, 1);
+        }
+
         //        System.out.println("---");
         do {
             delta1 = delta2;
@@ -1505,7 +1511,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     public int hashCode() {
         if (hashCode == 0) {
             // hashcode update should be atomic.
-            hashCode = 37 * (37 * 17 + getNumerator()) + getDenominator();
+            int h = 37 * (37 * 17 + getNumerator()) + getDenominator();
+            hashCode = h == 0 ? 1 : h;
         }
         return hashCode;
     }

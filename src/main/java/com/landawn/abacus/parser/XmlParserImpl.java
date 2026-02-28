@@ -38,7 +38,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
@@ -954,29 +953,29 @@ final class XmlParserImpl extends AbstractXmlParser {
             return true;
         } else {
             for (final Object e : a) {
-                if (e != null && Type.of(e.getClass()).isSerializable()) {
-                    return true;
+                if (e != null && !Type.of(e.getClass()).isSerializable()) {
+                    return false;
                 }
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
      * Checks if a collection can be serialized as JSON.
      * Collections containing only serializable types can be serialized as JSON for efficiency.
-     * 
+     *
      * @param c the collection to check
      * @return {@code true} if the collection can be serialized as JSON
      */
     protected boolean isSerializableByJson(final Collection<?> c) {
         for (final Object e : c) {
-            if (e != null && Type.of(e.getClass()).isSerializable()) {
-                return true;
+            if (e != null && !Type.of(e.getClass()).isSerializable()) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -1080,14 +1079,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        Reader reader = null;
+        InputStream is = null;
 
         try {
-            reader = IOUtil.newFileReader(source);
+            is = IOUtil.newFileInputStream(source);
 
-            return deserialize(reader, config, targetType);
+            return deserialize(is, config, targetType);
         } finally {
-            IOUtil.closeQuietly(reader);
+            IOUtil.closeQuietly(is);
         }
     }
 
@@ -1151,13 +1150,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        final BufferedReader br = Objectory.createBufferedReader(source);
-
-        try {
-            return read(br, config, null, targetType);
-        } finally {
-            Objectory.recycle(br);
-        }
+        return read(source, config, null, targetType);
     }
 
     /**
@@ -1347,14 +1340,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
-        Reader reader = null;
+        InputStream is = null;
 
         try {
-            reader = IOUtil.newFileReader(source);
+            is = IOUtil.newFileInputStream(source);
 
-            return read(reader, config, nodeTypes, null);
+            return deserialize(is, config, nodeTypes);
         } finally {
-            IOUtil.closeQuietly(reader);
+            IOUtil.closeQuietly(is);
         }
     }
 
@@ -1388,13 +1381,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
-        final BufferedReader br = Objectory.createBufferedReader(source);
-
-        try {
-            return read(br, config, nodeTypes, null);
-        } finally {
-            Objectory.recycle(br);
-        }
+        return read(source, config, nodeTypes, null);
     }
 
     /**
@@ -1480,6 +1467,91 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         return readByDOMParser(source, config, targetType);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T read(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
+        final XmlDeserializationConfig configToUse = check(config);
+
+        switch (parserType) {
+            case StAX:
+                XMLStreamReader xmlReader = null;
+
+                try {
+                    xmlReader = createXMLStreamReader(source);
+
+                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
+                        // do nothing.
+                    }
+
+                    if (targetType == null && N.notEmpty(nodeTypes)) {
+                        String nodeName = null;
+
+                        if (xmlReader.getAttributeCount() > 0) {
+                            nodeName = xmlReader.getAttributeValue(null, XmlConstants.NAME);
+                        }
+
+                        if (Strings.isEmpty(nodeName)) {
+                            nodeName = xmlReader.getLocalName();
+                        }
+
+                        targetType = (Type<T>) nodeTypes.get(nodeName);
+                    }
+
+                    if (targetType == null) {
+                        throw new ParsingException("No target type is specified");
+                    }
+
+                    return readByStreamParser(xmlReader, configToUse, targetType);
+                } catch (final XMLStreamException e) {
+                    throw new ParsingException(e);
+                } finally {
+                    if (xmlReader != null) {
+                        try {
+                            xmlReader.close();
+                        } catch (final XMLStreamException e) {
+                            // ignore
+                        }
+                    }
+                }
+
+            case DOM: //NOSONAR
+                final DocumentBuilder docBuilder = XmlUtil.createContentParser();
+
+                try {
+                    final Document doc = docBuilder.parse(source);
+                    final Node node = doc.getDocumentElement();
+
+                    if (node == null) {
+                        throw new ParsingException("No root element found in XML document");
+                    }
+
+                    if (targetType == null && N.notEmpty(nodeTypes)) {
+                        String nodeName = XmlUtil.getAttribute(node, XmlConstants.NAME);
+
+                        if (Strings.isEmpty(nodeName)) {
+                            nodeName = node.getNodeName();
+                        }
+
+                        targetType = (Type<T>) nodeTypes.get(nodeName);
+                    }
+
+                    if (targetType == null) {
+                        throw new ParsingException("No target type is specified");
+                    }
+
+                    return readByDOMParser(node, configToUse, targetType);
+                } catch (final SAXException e) {
+                    throw new ParsingException(e);
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    XmlUtil.recycleContentParser(docBuilder);
+                }
+
+            default:
+                throw new ParsingException("Unsupported parser: " + parserType);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -1572,8 +1644,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         return readByStreamParser(xmlReader, config, null, null, targetType);
     }
 
-    @SuppressFBWarnings("SF_SWITCH_NO_DEFAULT")
-    @SuppressWarnings({ "null", "fallthrough", "deprecation" })
+    @SuppressWarnings({ "null", "deprecation" })
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserializationConfig config, PropInfo propInfo, Type<?> propType,
             Type<?> targetType) throws XMLStreamException {
         if (targetType.clazz().equals(Object.class)) {
@@ -2212,6 +2283,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         return collectionToArray(list, targetType);
                                     }
                                 }
+
+                                break;
                             }
 
                             case XMLStreamConstants.END_ELEMENT: {
@@ -2300,6 +2373,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     return (T) result;
                                 }
                             }
+
+                            break;
                         }
 
                         case XMLStreamConstants.END_ELEMENT: {
@@ -2380,7 +2455,15 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(node, targetClass)) : getConcreteClass(node, targetClass);
 
-        if (!targetType.clazz().equals(targetClass)) {
+        if (targetType == null) {
+            if (targetClass == null) {
+                throw new ParsingException("Unable to determine target type for xml node: " + node.getNodeName());
+            }
+
+            targetType = Type.of(targetClass);
+        } else if (targetClass == null) {
+            targetClass = targetType.clazz();
+        } else if (!targetType.clazz().equals(targetClass)) {
             targetType = Type.of(targetClass);
         }
 

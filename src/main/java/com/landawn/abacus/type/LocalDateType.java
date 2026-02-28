@@ -131,7 +131,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
             return LocalDate.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {

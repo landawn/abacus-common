@@ -140,7 +140,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
             return Instant.now();
         }
 
-        if (str.charAt(4) != '-') {
+        if (isPossibleMillis(str)) {
             try {
                 return Instant.ofEpochMilli(Numbers.toLong(str));
             } catch (final NumberFormatException e2) {

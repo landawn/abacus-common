@@ -30,48 +30,48 @@ public class JsonParser100Test extends TestBase {
     }
 
     @Test
-    public void testReadStringWithClass() {
+    public void testparseWithClass() {
         String json = "\"test\"";
-        String result = parser.readString(json, String.class);
+        String result = parser.parse(json, String.class);
         Assertions.assertEquals("\"test\"", result);
 
-        String nullResult = parser.readString(null, String.class);
+        String nullResult = parser.parse(null, String.class);
         Assertions.assertNull(nullResult);
     }
 
     @Test
-    public void testReadStringWithConfigAndClass() {
+    public void testparseWithConfigAndClass() {
         String json = "{\"name\":\"John\",\"age\":30}";
-        Map<String, Object> result = parser.readString(json, null, Map.class);
+        Map<String, Object> result = parser.parse(json, null, Map.class);
         Assertions.assertEquals("John", result.get("name"));
         Assertions.assertEquals(30, result.get("age"));
     }
 
     @Test
-    public void testReadStringToArray() {
+    public void testparseToArray() {
         String json = "[1,2,3]";
         Integer[] array = new Integer[3];
-        parser.readString(json, array);
+        parser.parse(json, array);
         Assertions.assertEquals(1, array[0]);
         Assertions.assertEquals(2, array[1]);
         Assertions.assertEquals(3, array[2]);
     }
 
     @Test
-    public void testReadStringToArrayWithConfig() {
+    public void testparseToArrayWithConfig() {
         String json = "[\"a\",\"b\",\"c\"]";
         String[] array = new String[3];
-        parser.readString(json, null, array);
+        parser.parse(json, null, array);
         Assertions.assertEquals("a", array[0]);
         Assertions.assertEquals("b", array[1]);
         Assertions.assertEquals("c", array[2]);
     }
 
     @Test
-    public void testReadStringToCollection() {
+    public void testparseToCollection() {
         String json = "[1,2,3]";
         List<Integer> list = new ArrayList<>();
-        parser.readString(json, list);
+        parser.parse(json, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals(1, list.get(0));
         Assertions.assertEquals(2, list.get(1));
@@ -79,10 +79,10 @@ public class JsonParser100Test extends TestBase {
     }
 
     @Test
-    public void testReadStringToCollectionWithConfig() {
+    public void testparseToCollectionWithConfig() {
         String json = "[\"x\",\"y\",\"z\"]";
         List<String> list = new ArrayList<>();
-        parser.readString(json, null, list);
+        parser.parse(json, null, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals("x", list.get(0));
         Assertions.assertEquals("y", list.get(1));
@@ -90,19 +90,19 @@ public class JsonParser100Test extends TestBase {
     }
 
     @Test
-    public void testReadStringToMap() {
+    public void testparseToMap() {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
         Map<String, String> map = new HashMap<>();
-        parser.readString(json, map);
+        parser.parse(json, map);
         Assertions.assertEquals("value1", map.get("key1"));
         Assertions.assertEquals("value2", map.get("key2"));
     }
 
     @Test
-    public void testReadStringToMapWithConfig() {
+    public void testparseToMapWithConfig() {
         String json = "{\"a\":1,\"b\":2}";
         Map<String, Integer> map = new HashMap<>();
-        parser.readString(json, null, map);
+        parser.parse(json, null, map);
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
     }

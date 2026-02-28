@@ -15,7 +15,15 @@ public class JoinerTest extends AbstractTest {
 
     @Test
     public void test_001() throws IOException {
-        String str = Joiner.defauLt().useForNull("NULL").append(false).append(0).append(3L).append(5d).append((Boolean) null).append((Double) null).toString();
+        String str = Joiner.withDefault()
+                .useForNull("NULL")
+                .append(false)
+                .append(0)
+                .append(3L)
+                .append(5d)
+                .append((Boolean) null)
+                .append((Double) null)
+                .toString();
         N.println(str);
 
         assertEquals("false, 0, 3, 5.0, NULL, NULL", str);

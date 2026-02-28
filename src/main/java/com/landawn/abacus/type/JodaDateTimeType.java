@@ -22,7 +22,9 @@ import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
 
+import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for Joda-Time DateTime objects.
@@ -154,7 +156,16 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             return new DateTime(System.currentTimeMillis());
         }
 
-        return str.length() == 20 ? jodaISO8601DateTimeFT.parseDateTime(str) : jodaISO8601TimestampFT.parseDateTime(str);
+        if (isPossibleMillis(str)) {
+            try {
+                return new DateTime(Numbers.toLong(str));
+            } catch (final NumberFormatException e) {
+                // ignore;
+            }
+        }
+
+        return str.length() == 20 ? jodaISO8601DateTimeFT.parseDateTime(str)
+                : (str.length() == 24 ? jodaISO8601TimestampFT.parseDateTime(str) : new DateTime(Dates.parseTimestamp(str).getTime()));
     }
 
     /**

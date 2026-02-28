@@ -84,6 +84,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a byte by delegating to the wrapped Guava hasher's {@code putByte()} method.
+     *
+     * @param b the byte to add to the hash state
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final byte b) {
@@ -95,6 +98,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a byte array by delegating to the wrapped Guava hasher's {@code putBytes()} method.
+     *
+     * @param bytes the bytes to add to the hash state
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final byte[] bytes) {
@@ -107,6 +113,11 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds a portion of a byte array by delegating to the wrapped Guava hasher's
      * {@code putBytes(byte[], int, int)} method.
+     *
+     * @param bytes the source byte array
+     * @param off the start offset in the array
+     * @param len the number of bytes to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final byte[] bytes, final int off, final int len) {
@@ -119,6 +130,9 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds bytes from a ByteBuffer by delegating to the wrapped Guava hasher's
      * {@code putBytes(ByteBuffer)} method.
+     *
+     * @param bytes the buffer containing bytes to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final ByteBuffer bytes) {
@@ -130,6 +144,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a short value by delegating to the wrapped Guava hasher's {@code putShort()} method.
+     *
+     * @param s the short value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final short s) {
@@ -141,6 +158,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds an integer value by delegating to the wrapped Guava hasher's {@code putInt()} method.
+     *
+     * @param i the integer value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final int i) {
@@ -152,6 +172,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a long value by delegating to the wrapped Guava hasher's {@code putLong()} method.
+     *
+     * @param l the long value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final long l) {
@@ -163,6 +186,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a float value by delegating to the wrapped Guava hasher's {@code putFloat()} method.
+     *
+     * @param f the float value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final float f) {
@@ -174,6 +200,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a double value by delegating to the wrapped Guava hasher's {@code putDouble()} method.
+     *
+     * @param d the double value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final double d) {
@@ -185,6 +214,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a boolean value by delegating to the wrapped Guava hasher's {@code putBoolean()} method.
+     *
+     * @param b the boolean value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final boolean b) {
@@ -196,6 +228,9 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      * 
      * <p>Adds a character value by delegating to the wrapped Guava hasher's {@code putChar()} method.
+     *
+     * @param c the character value to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final char c) {
@@ -208,6 +243,9 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds all characters from an array. This implementation processes the entire array
      * by calling {@link #put(char[], int, int)} with appropriate parameters.
+     *
+     * @param chars the character array to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final char[] chars) {
@@ -223,6 +261,12 @@ final class GuavaHasher implements Hasher {
      * 
      * <p><b>Implementation Note:</b> This method validates the array bounds using
      * {@link N#checkFromIndexSize} before processing the characters.
+     *
+     * @param chars the source character array
+     * @param off the start offset in the array
+     * @param len the number of characters to add
+     * @return this hasher instance
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is out of bounds for the array
      */
     @Override
     public Hasher put(final char[] chars, final int off, final int len) throws IndexOutOfBoundsException {
@@ -240,6 +284,9 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds a character sequence without encoding by delegating to the wrapped Guava
      * hasher's {@code putUnencodedChars()} method.
+     *
+     * @param charSequence the character sequence to add
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final CharSequence charSequence) {
@@ -252,6 +299,10 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds an encoded character sequence by delegating to the wrapped Guava hasher's
      * {@code putString()} method.
+     *
+     * @param charSequence the character sequence to add
+     * @param charset the charset used to encode the characters
+     * @return this hasher instance
      */
     @Override
     public Hasher put(final CharSequence charSequence, final Charset charset) {
@@ -264,6 +315,11 @@ final class GuavaHasher implements Hasher {
      * 
      * <p>Adds an object using a funnel by delegating to the wrapped Guava hasher's
      * {@code putObject()} method.
+     *
+     * @param <T> the type of the instance to add
+     * @param instance the object instance to add
+     * @param funnel the funnel that translates the object into bytes
+     * @return this hasher instance
      */
     @Override
     public <T> Hasher put(final T instance, final Funnel<? super T> funnel) {
@@ -277,6 +333,8 @@ final class GuavaHasher implements Hasher {
      * <p>Computes the final hash code by delegating to the wrapped Guava hasher's
      * {@code hash()} method. After this method is called, the hasher instance should
      * not be used again.
+     *
+     * @return the computed hash code
      */
     @Override
     public HashCode hash() {

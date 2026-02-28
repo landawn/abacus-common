@@ -842,7 +842,7 @@ public final class RegExUtil {
      * @see #HTTP_URL_FINDER
      * @see #URL_MATCHER
      */
-    public static final Pattern URL_FINDER = Pattern.compile("^(https?|ftp|file)://[^\\s/$.?#].[^\\s]*$");
+    public static final Pattern URL_FINDER = Pattern.compile("(https?|ftp|file)://[^\\s/$.?#].[^\\s]*");
 
     /**
      * A regular expression {@link Pattern} that matches HTTP and HTTPS URLs.

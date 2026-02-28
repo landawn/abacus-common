@@ -166,10 +166,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Null Handling:</b>
  * <ul>
- *   <li>Null key/value support depends on underlying map implementation</li>
- *   <li>HashMap-backed BiMaps support one null key and one null value</li>
- *   <li>Null keys and values must still maintain bijective constraints</li>
- *   <li>Builder pattern rejects null keys and values by default</li>
+ *   <li>Null keys and null values are not supported and will cause {@code IllegalArgumentException}</li>
  * </ul>
  *
  * <p><b>Error Conditions:</b>
@@ -1331,7 +1328,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param <V> the type of the values in the BiMap.
      * @param map the map whose entries are to be placed into the new BiMap.
      * @return a new Builder instance for a BiMap with the specified map as its initial data.
-     *
+     * @throws IllegalArgumentException if {@code map} is {@code null}.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);

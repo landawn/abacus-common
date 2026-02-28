@@ -23,10 +23,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <R> the type of the result of the function
  *
- * @see CharFunction
- * @see java.util.function.Function
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see CharFunction
+ * @see java.util.function.Function
  */
 @FunctionalInterface
 public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeException> { //NOSONAR

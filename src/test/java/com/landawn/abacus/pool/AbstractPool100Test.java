@@ -36,7 +36,7 @@ public class AbstractPool100Test extends TestBase {
         }
 
         @Override
-        public void vacate() {
+        public void evict() {
             assertNotClosed();
             currentSize = Math.max(0, currentSize - 1);
         }
@@ -249,14 +249,14 @@ public class AbstractPool100Test extends TestBase {
     public void testVacate() {
         pool.setSize(10);
         assertEquals(10, pool.size());
-        pool.vacate();
+        pool.evict();
         assertEquals(9, pool.size());
     }
 
     @Test
     public void testVacateOnClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.vacate());
+        assertThrows(IllegalStateException.class, () -> pool.evict());
     }
 
     @Test

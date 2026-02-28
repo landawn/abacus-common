@@ -233,6 +233,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         return isObjectType;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>A single-value type is serializable if its underlying JSON value type or value type
+     * (with a value extractor) is itself serializable.
+     *
+     * @return {@code true} if this type is serializable, {@code false} otherwise
+     */
     @Override
     public boolean isSerializable() {
         return isSerializable;

@@ -136,7 +136,7 @@ public class AbstractStream100Test extends TestBase {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
         Stream<Integer> stream = createStream(input);
 
-        List<Integer> sums = stream.slidingMap(Integer::sum).toList();
+        List<Integer> sums = stream.slidingMap((a, b) -> a + (b == null ? 0 : b)).toList();
         assertEquals(Arrays.asList(3, 5, 7, 9), sums);
     }
 
@@ -154,7 +154,7 @@ public class AbstractStream100Test extends TestBase {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
         Stream<Integer> stream = createStream(input);
 
-        List<Integer> sums = stream.slidingMap((a, b, c) -> a + b + c).toList();
+        List<Integer> sums = stream.slidingMap((a, b, c) -> a + (b == null ? 0 : b) + (c == null ? 0 : c)).toList();
         assertEquals(Arrays.asList(6, 9, 12), sums);
     }
 

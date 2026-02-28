@@ -259,6 +259,18 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
     }
 
     /**
+     * Creates an XML stream reader that filters out whitespace and comments from a byte stream.
+     * XML encoding is detected from the stream content (for example, BOM/XML declaration).
+     *
+     * @param is the input stream containing XML content to parse
+     * @return an XMLStreamReader configured to skip whitespace and comments
+     */
+    protected XMLStreamReader createXMLStreamReader(final InputStream is) {
+        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is),
+                reader -> !(reader.isWhiteSpace() || reader.getEventType() == XMLStreamConstants.COMMENT));
+    }
+
+    /**
      * Extracts and converts a property value from an XML node to the appropriate Java type.
      * This method handles {@code null} values, type conversions, and formatted property values.
      *

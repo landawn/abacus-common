@@ -1338,7 +1338,7 @@ public class Fn103Test extends TestBase {
 
             StringBuilder result2 = operator.apply(sb1, sb2);
             assertSame(sb2, result2);
-            assertEquals("Hello WorldHi", result2.toString());
+            assertEquals("HiHello World", result2.toString());
         }
 
         @Test
@@ -2534,7 +2534,7 @@ public class Fn103Test extends TestBase {
 
             @Test
             public void testNotEmptyA() throws Exception {
-                Throwables.Predicate<String[], Exception> predicate = Fnn.notEmptyA();
+                Throwables.Predicate<String[], Exception> predicate = Fnn.notEmptyArray();
 
                 assertFalse(predicate.test(null));
                 assertFalse(predicate.test(new String[0]));
@@ -2543,7 +2543,7 @@ public class Fn103Test extends TestBase {
 
             @Test
             public void testNotEmptyC() throws Exception {
-                Throwables.Predicate<Collection<String>, Exception> predicate = Fnn.notEmptyC();
+                Throwables.Predicate<Collection<String>, Exception> predicate = Fnn.notEmptyCollection();
 
                 assertFalse(predicate.test(null));
                 assertFalse(predicate.test(new ArrayList<>()));
@@ -2552,7 +2552,7 @@ public class Fn103Test extends TestBase {
 
             @Test
             public void testNotEmptyM() throws Exception {
-                Throwables.Predicate<Map<String, String>, Exception> predicate = Fnn.notEmptyM();
+                Throwables.Predicate<Map<String, String>, Exception> predicate = Fnn.notEmptyMap();
 
                 assertFalse(predicate.test(null));
                 assertFalse(predicate.test(new HashMap<>()));

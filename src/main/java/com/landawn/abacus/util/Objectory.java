@@ -300,6 +300,10 @@ public final class Objectory {
      * @return an Object array of the specified size
      */
     public static Object[] createObjectArray(final int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("The specified array size cannot be negative: " + size);
+        }
+
         if (size > POOLABLE_ARRAY_LENGTH) {
             return new Object[size];
         }
@@ -1039,21 +1043,23 @@ public final class Objectory {
      * @param objArray the array to recycle
      */
     public static void recycle(final Object[] objArray) {
-        if ((objArray == null) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
+        if ((objArray == null) || (objArray.length == 0) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
             return;
         }
 
-        final int poolSize = N.min(MAX_ARRAY_POOL_SIZE, MAX_ARRAY_LENGTH / objArray.length);
-        Queue<Object[]> arrayQueue = objectArrayPool[objArray.length];
+        synchronized (objectArrayPool) {
+            final int poolSize = N.min(MAX_ARRAY_POOL_SIZE, MAX_ARRAY_LENGTH / objArray.length);
+            Queue<Object[]> arrayQueue = objectArrayPool[objArray.length];
 
-        if (arrayQueue == null) {
-            arrayQueue = new ArrayBlockingQueue<>(poolSize);
-            objectArrayPool[objArray.length] = arrayQueue;
-        }
+            if (arrayQueue == null) {
+                arrayQueue = new ArrayBlockingQueue<>(poolSize);
+                objectArrayPool[objArray.length] = arrayQueue;
+            }
 
-        if (arrayQueue.size() < poolSize) {
-            Arrays.fill(objArray, null);
-            arrayQueue.offer(objArray);
+            if (arrayQueue.size() < poolSize) {
+                Arrays.fill(objArray, null);
+                arrayQueue.offer(objArray);
+            }
         }
     }
 

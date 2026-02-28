@@ -48,46 +48,46 @@ public class NTest3 {
     }
 
     @Test
-    public void test_deleteAllByIndices() {
+    public void test_removeAt() {
         {
             List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 1, 3, 5);
+            N.removeAt(c, 1, 3, 5);
             N.println(c);
             assertEquals(CommonUtil.asLinkedList(1, 3, 5), c);
         }
         {
             List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 0, 2, 4);
+            N.removeAt(c, 0, 2, 4);
             N.println(c);
             assertEquals(CommonUtil.asLinkedList(2, 4, 6), c);
         }
         {
             List<Integer> c = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 0, 1, 2, 4, 5);
+            N.removeAt(c, 0, 1, 2, 4, 5);
             N.println(c);
             assertEquals(CommonUtil.asLinkedList(4), c);
         }
         {
             List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 1, 3, 5);
+            N.removeAt(c, 1, 3, 5);
             N.println(c);
             assertEquals(CommonUtil.asList(1, 3, 5), c);
         }
         {
             List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 0, 2, 4);
+            N.removeAt(c, 0, 2, 4);
             N.println(c);
             assertEquals(CommonUtil.asList(2, 4, 6), c);
         }
         {
             List<Integer> c = CommonUtil.asList(1, 2, 3, 4, 5, 6);
 
-            N.deleteAllByIndices(c, 0, 1, 2, 4, 5);
+            N.removeAt(c, 0, 1, 2, 4, 5);
             N.println(c);
             assertEquals(CommonUtil.asList(4), c);
         }

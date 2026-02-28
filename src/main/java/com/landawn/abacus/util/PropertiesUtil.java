@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,7 +171,7 @@ public final class PropertiesUtil {
 
                         if ((file != null) && (file.lastModified() > resource.getLastLoadTime())) {
                             final long lastLoadTime = file.lastModified();
-                            Reader reader = null;
+                            InputStream is = null;
 
                             if (logger.isWarnEnabled()) {
                                 logger.warn("Start to refresh properties with the updated file: " + file.getAbsolutePath());
@@ -180,20 +179,19 @@ public final class PropertiesUtil {
                             }
 
                             try {
-                                reader = IOUtil.newFileReader(resource.getFile());
+                                is = IOUtil.newFileInputStream(resource.getFile());
 
                                 if (resource.getType() == ResourceType.PROPERTIES) {
-                                    merge(load(reader), (Properties<String, String>) properties);
+                                    merge(load(is), (Properties<String, String>) properties);
                                 } else {
-                                    merge(loadFromXml(reader, (Class<Properties<String, Object>>) properties.getClass()),
-                                            (Properties<String, Object>) properties);
+                                    merge(loadFromXml(is, (Class<Properties<String, Object>>) properties.getClass()), (Properties<String, Object>) properties);
                                 }
 
                                 resource.setLastLoadTime(lastLoadTime);
                             } catch (final Exception e) {
                                 logger.error("Failed to refresh properties: " + properties, e);
                             } finally {
-                                IOUtil.close(reader);
+                                IOUtil.close(is);
                             }
 
                             if (logger.isWarnEnabled()) {
@@ -297,10 +295,13 @@ public final class PropertiesUtil {
      * @return a File object with properly formatted path
      */
     public static File formatPath(File file) {
-        final String formattedPath = file.getAbsolutePath().replace("%20", " ");
+        if (!file.exists()) {
+            final String formattedPath = file.getAbsolutePath().replace("%20", " ");
+            final File formattedFile = new File(formattedPath); //NOSONAR
 
-        if (!file.exists() || (new File(formattedPath)).exists()) { //NOSONAR
-            file = new File(formattedPath); //NOSONAR
+            if (formattedFile.exists()) {
+                return formattedFile;
+            }
         }
 
         return file;
@@ -395,7 +396,7 @@ public final class PropertiesUtil {
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
             folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
-            folderPrefix = folderPrefix.replace("\\.\\.\\" + File.separatorChar, "");
+            folderPrefix = folderPrefix.replace(".." + File.separatorChar, "");
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
         }
@@ -615,10 +616,9 @@ public final class PropertiesUtil {
      */
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
         Properties<String, String> properties = null;
-
-        Reader reader = null;
+        InputStream is = null;
         try {
-            reader = IOUtil.newFileReader(source);
+            is = IOUtil.newFileInputStream(source);
 
             if (autoRefresh) {
                 final Resource resource = new Resource(Properties.class, source, ResourceType.PROPERTIES);
@@ -628,17 +628,17 @@ public final class PropertiesUtil {
                     properties = (Properties<String, String>) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = load(reader);
+                        properties = load(is);
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = load(reader);
+                properties = load(is);
             }
 
             return properties;
         } finally {
-            IOUtil.close(reader);
+            IOUtil.close(is);
         }
     }
 
@@ -857,10 +857,10 @@ public final class PropertiesUtil {
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
-        Reader reader = null;
+        InputStream is = null;
 
         try {
-            reader = IOUtil.newFileReader(source);
+            is = IOUtil.newFileInputStream(source);
 
             if (autoRefresh) {
                 final Resource resource = new Resource(targetClass, source, ResourceType.XML);
@@ -870,18 +870,18 @@ public final class PropertiesUtil {
                     properties = (T) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = loadFromXml(reader, targetClass);
+                        properties = loadFromXml(is, targetClass);
 
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = loadFromXml(reader, targetClass);
+                properties = loadFromXml(is, targetClass);
             }
 
             return properties;
         } finally {
-            IOUtil.close(reader);
+            IOUtil.close(is);
         }
     }
 
@@ -915,7 +915,11 @@ public final class PropertiesUtil {
             throw new UncheckedIOException(e);
         }
 
-        final Node node = doc.getFirstChild();
+        final Node node = doc.getDocumentElement();
+
+        if (node == null) {
+            throw new ParsingException("No document element found in XML source");
+        }
 
         return loadFromXml(node, null, true, null, targetClass);
     }
@@ -950,7 +954,11 @@ public final class PropertiesUtil {
             throw new UncheckedIOException(e);
         }
 
-        final Node node = doc.getFirstChild();
+        final Node node = doc.getDocumentElement();
+
+        if (node == null) {
+            throw new ParsingException("No document element found in XML source");
+        }
 
         return loadFromXml(node, null, true, null, targetClass);
     }
@@ -1073,20 +1081,17 @@ public final class PropertiesUtil {
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output) {
-        Writer writer = null;
+        OutputStream os = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
-
-            store(properties, comments, writer);
-
-            writer.flush();
+            os = IOUtil.newFileOutputStream(output);
+            store(properties, comments, os);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(writer);
+            IOUtil.close(os);
         }
     }
 
@@ -1106,12 +1111,15 @@ public final class PropertiesUtil {
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        final java.util.Properties tmp = new java.util.Properties();
+
+        tmp.putAll(properties);
 
         try {
-            store(properties, comments, bw);
-        } finally {
-            Objectory.recycle(bw);
+            tmp.store(output, comments);
+            output.flush();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -1166,12 +1174,14 @@ public final class PropertiesUtil {
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
+        OutputStream os = null;
         Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
+            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newOutputStreamWriter(os, Charsets.UTF_8);
 
             storeToXml(properties, rootElementName, writeTypeInfo, writer);
 
@@ -1180,6 +1190,7 @@ public final class PropertiesUtil {
             throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(writer);
+            IOUtil.close(os);
         }
     }
 
@@ -1203,7 +1214,7 @@ public final class PropertiesUtil {
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
             throws UncheckedIOException {
-        storeToXml(properties, rootElementName, writeTypeInfo, true, IOUtil.newOutputStreamWriter(output));
+        storeToXml(properties, rootElementName, writeTypeInfo, true, IOUtil.newOutputStreamWriter(output, Charsets.UTF_8));
     }
 
     /**
@@ -1474,7 +1485,11 @@ public final class PropertiesUtil {
 
         try { //NOSONAR
             final Document doc = docBuilder.parse(new InputSource(xml));
-            final Node root = doc.getFirstChild();
+            final Node root = doc.getDocumentElement();
+
+            if (root == null) {
+                throw new RuntimeException("No document element found in XML source");
+            }
 
             // TODO it's difficult to support duplicated property and may be misused.
             if (hasDuplicatedPropName(root)) {
@@ -2145,7 +2160,8 @@ public final class PropertiesUtil {
             final int prime = 31;
             int result = 1;
             result = prime * result + N.hashCode(targetClass);
-            return prime * result + N.hashCode(filePath);
+            result = prime * result + N.hashCode(filePath);
+            return prime * result + N.hashCode(resourceType);
         }
 
         @SuppressFBWarnings
@@ -2156,7 +2172,7 @@ public final class PropertiesUtil {
             }
 
             if (obj instanceof Resource other) {
-                return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath);
+                return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath) && N.equals(other.resourceType, resourceType);
 
             }
 

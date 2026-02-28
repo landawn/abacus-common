@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
@@ -55,6 +56,15 @@ public class TypeFactory100Test extends TestBase {
     public void testGetTypeWithString() {
         Type<String> type = TypeFactory.getType("String");
         assertNotNull(type);
+    }
+
+    @Test
+    public void testGetSheetTypeIsCached() {
+        Type<?> type1 = TypeFactory.getType("Sheet<String, Integer, Long>");
+        Type<?> type2 = TypeFactory.getType("Sheet<String, Integer, Long>");
+
+        assertNotNull(type1);
+        assertSame(type1, type2);
     }
 
     @Test

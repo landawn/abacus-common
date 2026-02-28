@@ -470,19 +470,19 @@ public final class XmlUtil {
         DocumentBuilder documentBuilder = null;
 
         synchronized (docBuilderFactory) {
-            try {
-                final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
-                final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
+            final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
+            final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
 
+            try {
                 docBuilderFactory.setIgnoringComments(ignoreComments);
                 docBuilderFactory.setIgnoringElementContentWhitespace(ignoringElementContentWhitespace);
 
                 documentBuilder = docBuilderFactory.newDocumentBuilder();
-
-                docBuilderFactory.setIgnoringComments(orgIgnoreComments);
-                docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
             } catch (final ParserConfigurationException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
+            } finally {
+                docBuilderFactory.setIgnoringComments(orgIgnoreComments);
+                docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
             }
         }
 
@@ -511,14 +511,18 @@ public final class XmlUtil {
      * @throws RuntimeException if the parser cannot be created
      */
     public static DocumentBuilder createContentParser() {
+        DocumentBuilder documentBuilder;
+
         synchronized (contentDocBuilderPool) {
-            DocumentBuilder documentBuilder = contentDocBuilderPool.poll();
+            documentBuilder = contentDocBuilderPool.poll();
+        }
 
-            try {
-                if (documentBuilder == null) {
-                    final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
-                    final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
+        if (documentBuilder == null) {
+            synchronized (docBuilderFactory) {
+                final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
+                final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
 
+                try {
                     if (!orgIgnoreComments) {
                         docBuilderFactory.setIgnoringComments(true);
                     }
@@ -528,16 +532,16 @@ public final class XmlUtil {
                     }
 
                     documentBuilder = docBuilderFactory.newDocumentBuilder();
-
+                } catch (final ParserConfigurationException e) {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                } finally {
                     docBuilderFactory.setIgnoringComments(orgIgnoreComments);
                     docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
                 }
-            } catch (final ParserConfigurationException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
             }
-
-            return documentBuilder;
         }
+
+        return documentBuilder;
     }
 
     /**

@@ -310,7 +310,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     public void testFlattMap() {
         Function<Integer, String[]> mapper = n -> new String[] { "P" + n, "Q" + n };
 
-        List<String> result = stream.limit(2).flattmap(mapper).toList();
+        List<String> result = stream.limit(2).flatMapArray(mapper).toList();
 
         assertHaveSameElements(Arrays.asList("P1", "Q1", "P2", "Q2"), result);
     }
@@ -602,7 +602,7 @@ public class ParallelIteratorStream100Test extends TestBase {
 
     @Test
     public void testNMatch() throws Exception {
-        boolean result = stream.nMatch(3, 5, n -> n % 2 == 0);
+        boolean result = stream.countMatchBetween(3, 5, n -> n % 2 == 0);
 
         assertTrue(result);
     }

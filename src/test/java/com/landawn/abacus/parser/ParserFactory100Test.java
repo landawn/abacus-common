@@ -32,7 +32,7 @@ public class ParserFactory100Test extends TestBase {
 
     @Test
     public void testIsKryoAvailable() {
-        boolean available = ParserFactory.isAvroParserAvailable();
+        boolean available = ParserFactory.isKryoParserAvailable();
         assertTrue(available || !available);
     }
 
@@ -46,7 +46,7 @@ public class ParserFactory100Test extends TestBase {
 
     @Test
     public void testCreateKryoParser() {
-        if (ParserFactory.isAvroParserAvailable()) {
+        if (ParserFactory.isKryoParserAvailable()) {
             KryoParser parser = ParserFactory.createKryoParser();
             assertNotNull(parser);
         }
@@ -106,17 +106,17 @@ public class ParserFactory100Test extends TestBase {
     }
 
     @Test
-    public void testCreateJAXBParser() {
-        XmlParser parser = ParserFactory.createJAXBParser();
+    public void testCreateJaxbParser() {
+        XmlParser parser = ParserFactory.createJaxbParser();
         assertNotNull(parser);
     }
 
     @Test
-    public void testCreateJAXBParserWithConfig() {
+    public void testCreateJaxbParserWithConfig() {
         XmlSerializationConfig xsc = new XmlSerializationConfig();
         XmlDeserializationConfig xdc = new XmlDeserializationConfig();
 
-        XmlParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+        XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
         assertNotNull(parser);
     }
 

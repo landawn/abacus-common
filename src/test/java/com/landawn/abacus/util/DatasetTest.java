@@ -647,8 +647,8 @@ public class DatasetTest extends AbstractTest {
         assertEquals("address2", accounts1.get(0).getContact().getAddress());
         assertEquals(2, accounts1.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(),
-                CommonUtil.asMap("ct", "contact"), Account.class);
+        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
+                Account.class);
         accounts2.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts2.size());
         assertEquals("firstName1", accounts2.get(0).getFirstName());

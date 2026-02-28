@@ -108,7 +108,7 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>Sorting Operations:</b> sort, reverseSort, isSorted</li>
  *   <li><b>Set Operations:</b> intersection, difference, symmetricDifference, disjoint</li>
  *   <li><b>Transformation:</b> reverse, rotate, shuffle, swap</li>
- *   <li><b>Range Operations:</b> subList, deleteRange, replaceRange</li>
+ *   <li><b>Range Operations:</b> subList, removeRange, replaceRange</li>
  *   <li><b>Conversion:</b> toArray, boxed, toSet, toCollection</li>
  * </ul>
  *
@@ -421,14 +421,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
-     * list.deleteAllByIndices(1, 3);   // removes elements at indices 1 and 3
+     * list.removeAt(1, 3);   // removes elements at indices 1 and 3
      * // list now contains [10, 30, 50]
      * }</pre>
      *
      * @param indices the indices of elements to be removed. Null or empty array results in no change.
      *                Invalid indices (negative or &gt;= size()) are ignored.
      */
-    public abstract void deleteAllByIndices(int... indices);
+    public abstract void removeAt(int... indices);
 
     /**
      * Removes from this list all elements whose index is between fromIndex (inclusive)
@@ -440,7 +440,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
-     * list.deleteRange(1, 4);   // removes elements at indices 1, 2, and 3
+     * list.removeRange(1, 4);   // removes elements at indices 1, 2, and 3
      * // list now contains [10, 50]
      * }</pre>
      *
@@ -451,7 +451,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
-    public abstract void deleteRange(int fromIndex, int toIndex);
+    public abstract void removeRange(int fromIndex, int toIndex);
 
     /**
      * Moves a range of elements within this list to a new position.

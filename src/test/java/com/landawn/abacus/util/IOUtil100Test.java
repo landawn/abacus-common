@@ -86,25 +86,25 @@ public class IOUtil100Test extends TestBase {
 
     @Test
     public void testFreeDiskSpaceKb() {
-        long freeSpace = IOUtil.freeDiskSpaceKB();
+        long freeSpace = IOUtil.freeDiskSpaceInKB();
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKB(5000);
+        long freeSpace = IOUtil.freeDiskSpaceInKB(5000);
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithPath() {
-        long freeSpace = IOUtil.freeDiskSpaceKB(tempDir.getAbsolutePath());
+        long freeSpace = IOUtil.freeDiskSpaceInKB(tempDir.getAbsolutePath());
         assertTrue(freeSpace > 0);
     }
 
     @Test
     public void testFreeDiskSpaceKbWithPathAndTimeout() {
-        long freeSpace = IOUtil.freeDiskSpaceKB(tempDir.getAbsolutePath(), 5000);
+        long freeSpace = IOUtil.freeDiskSpaceInKB(tempDir.getAbsolutePath(), 5000);
         assertTrue(freeSpace > 0);
     }
 
@@ -951,23 +951,27 @@ public class IOUtil100Test extends TestBase {
         byte[] content1 = TEST_CONTENT.getBytes(UTF_8);
         byte[] content2 = TEST_CONTENT.getBytes(UTF_8);
 
-        try (InputStream is1 = new ByteArrayInputStream(content1); InputStream is2 = new ByteArrayInputStream(content2)) {
+        try (InputStream is1 = new ByteArrayInputStream(content1);
+             InputStream is2 = new ByteArrayInputStream(content2)) {
             assertTrue(IOUtil.contentEquals(is1, is2));
         }
 
         byte[] content3 = "Different".getBytes(UTF_8);
-        try (InputStream is1 = new ByteArrayInputStream(content1); InputStream is3 = new ByteArrayInputStream(content3)) {
+        try (InputStream is1 = new ByteArrayInputStream(content1);
+             InputStream is3 = new ByteArrayInputStream(content3)) {
             assertFalse(IOUtil.contentEquals(is1, is3));
         }
     }
 
     @Test
     public void testContentEqualsReader() throws IOException {
-        try (Reader r1 = new StringReader(TEST_CONTENT); Reader r2 = new StringReader(TEST_CONTENT)) {
+        try (Reader r1 = new StringReader(TEST_CONTENT);
+             Reader r2 = new StringReader(TEST_CONTENT)) {
             assertTrue(IOUtil.contentEquals(r1, r2));
         }
 
-        try (Reader r1 = new StringReader(TEST_CONTENT); Reader r3 = new StringReader("Different")) {
+        try (Reader r1 = new StringReader(TEST_CONTENT);
+             Reader r3 = new StringReader("Different")) {
             assertFalse(IOUtil.contentEquals(r1, r3));
         }
     }
@@ -1257,7 +1261,7 @@ public class IOUtil100Test extends TestBase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try (ReadableByteChannel src = Channels.newChannel(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-                WritableByteChannel dest = Channels.newChannel(baos)) {
+             WritableByteChannel dest = Channels.newChannel(baos)) {
 
             long transferred = IOUtil.transfer(src, dest);
 

@@ -614,6 +614,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#cancel(boolean)
      */
     public boolean cancelAll(final boolean mayInterruptIfRunning) {
+        final boolean thisCancelled = cancel(mayInterruptIfRunning);
         boolean upFuturesCancelled = true;
 
         if (upFutures != null && !upFutures.isEmpty()) {
@@ -622,7 +623,6 @@ public class ContinuableFuture<T> implements Future<T> {
             }
         }
 
-        final boolean thisCancelled = cancel(mayInterruptIfRunning);
         return thisCancelled && upFuturesCancelled;
     }
 

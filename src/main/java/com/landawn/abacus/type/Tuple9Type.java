@@ -139,6 +139,16 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
     }
 
     /**
+     * Returns whether this type is a parameterized type.
+     *
+     * @return {@code true} always, as Tuple9 is a parameterized type
+     */
+    @Override
+    public boolean isParameterizedType() {
+        return true;
+    }
+
+    /**
      * Converts the given Tuple9 object to its string representation.
      * The tuple is serialized as a JSON array containing its nine elements.
      *

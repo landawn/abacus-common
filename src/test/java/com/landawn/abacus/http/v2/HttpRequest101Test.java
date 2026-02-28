@@ -1,5 +1,6 @@
 package com.landawn.abacus.http.v2;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,16 +14,24 @@ import java.net.Authenticator;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.PushPromiseHandler;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -34,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.http.HttpMethod;
+import com.landawn.abacus.util.IOUtil;
 
 import lombok.Data;
 
@@ -676,6 +686,30 @@ public class HttpRequest101Test extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    public void testAsyncExecuteWithObjectResultClassUsesStringBodyHandler() throws Exception {
+        HttpRequest request = HttpRequest.create(testUrl, mockHttpClient);
+        when(mockStringResponse.statusCode()).thenReturn(200);
+        when(mockStringResponse.body()).thenReturn("test response");
+
+        CompletableFuture<HttpResponse<String>> completedFuture = CompletableFuture.completedFuture(mockStringResponse);
+        AtomicReference<BodyHandler<?>> capturedBodyHandler = new AtomicReference<>();
+
+        when(mockHttpClient.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenAnswer(invocation -> {
+            capturedBodyHandler.set(invocation.getArgument(1));
+            return (CompletableFuture<HttpResponse<Object>>) (CompletableFuture<?>) completedFuture;
+        });
+
+        CompletableFuture<Object> future = request.asyncExecute(HttpMethod.GET, Object.class);
+        assertEquals("test response", future.get());
+
+        Object decodedBody = decodeBody(capturedBodyHandler.get(), "abc");
+        assertNotNull(decodedBody);
+        assertTrue(decodedBody instanceof InputStream);
+        assertEquals("abc", IOUtil.readAllToString((InputStream) decodedBody));
+    }
+
+    @Test
     public void testAsyncExecuteWithHttpMethodBodyHandlerAndPushPromiseHandler() throws Exception {
         HttpRequest request = HttpRequest.create(testUrl, mockHttpClient);
         PushPromiseHandler<String> pushHandler = mock(PushPromiseHandler.class);
@@ -716,5 +750,41 @@ public class HttpRequest101Test extends TestBase {
             this.username = username;
             this.password = password;
         }
+    }
+
+    private static Object decodeBody(final BodyHandler<?> bodyHandler, final String payload) throws Exception {
+        final BodySubscriber<?> bodySubscriber = bodyHandler.apply(new HttpResponse.ResponseInfo() {
+            @Override
+            public int statusCode() {
+                return 200;
+            }
+
+            @Override
+            public HttpHeaders headers() {
+                return HttpHeaders.of(Map.of(), (name, value) -> true);
+            }
+
+            @Override
+            public HttpClient.Version version() {
+                return HttpClient.Version.HTTP_1_1;
+            }
+        });
+
+        bodySubscriber.onSubscribe(new Flow.Subscription() {
+            @Override
+            public void request(final long n) {
+                // no-op
+            }
+
+            @Override
+            public void cancel() {
+                // no-op
+            }
+        });
+
+        bodySubscriber.onNext(List.of(ByteBuffer.wrap(payload.getBytes(StandardCharsets.UTF_8))));
+        bodySubscriber.onComplete();
+
+        return ((CompletionStage<?>) bodySubscriber.getBody()).toCompletableFuture().get();
     }
 }

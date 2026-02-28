@@ -150,22 +150,27 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return rs.getInt(columnIndex) > 0;
+        final int value = rs.getInt(columnIndex);
+
+        return rs.wasNull() ? null : value > 0;
     }
 
     /**
      * Retrieves a Boolean value from a ResultSet using the specified column label.
      * Reads an integer value and converts it to Boolean (positive values are true).
+     * Returns {@code null} for SQL NULL values.
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return Boolean.TRUE if the integer value is greater than 0, Boolean.FALSE otherwise
+     * @return Boolean.TRUE if the integer value is greater than 0, Boolean.FALSE if 0 or negative, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
-        return rs.getInt(columnName) > 0;
+        final int value = rs.getInt(columnName);
+
+        return rs.wasNull() ? null : value > 0;
     }
 
     /**

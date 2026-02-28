@@ -3817,6 +3817,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3843,6 +3844,7 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3873,6 +3875,7 @@ sealed class CommonUtil permits N {
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated
+     * @throws NullPointerException if {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -4081,8 +4084,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * boolean[] a = {true, false, true};
      * boolean[] b = {true, false, false};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first boolean array; must not be null
@@ -4133,8 +4136,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * char[] a = {'a', 'b', 'c'};
      * char[] b = {'a', 'b', 'd'};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first char array; must not be null
@@ -4185,8 +4188,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * byte[] a = {1, 2, 3};
      * byte[] b = {1, 2, 4};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first byte array, must not be null
@@ -4237,8 +4240,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * short[] a = {1, 2, 3};
      * short[] b = {1, 2, 4};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first short array, must not be null
@@ -4289,8 +4292,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * int[] a = {1, 2, 3};
      * int[] b = {1, 2, 4};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first int array, must not be null
@@ -4341,8 +4344,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
      * long[] b = {1L, 2L, 4L};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first long array, must not be null
@@ -4393,8 +4396,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f};
      * float[] b = {1.0f, 2.0f, 4.0f};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first float array, must not be null
@@ -4433,8 +4436,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f};
      * float[] b = {1.01f, 2.01f, 3.01f};
-     * equals(a, b, 0.02f);    // returns true
-     * equals(a, b, 0.001f);   // returns false
+     * N.equals(a, b, 0.02f);    // returns true
+     * N.equals(a, b, 0.001f);   // returns false
      * }</pre>
      *
      * @param a the first float array, must not be null
@@ -4481,8 +4484,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * double[] a = {1.0, 2.0, 3.0};
      * double[] b = {1.0, 2.0, 4.0};
-     * CommonUtil.equals(a, 0, b, 0, 2);   // returns true
-     * CommonUtil.equals(a, 0, b, 0, 3);   // returns false
+     * N.equals(a, 0, b, 0, 2);   // returns true
+     * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
      * @param a the first double array, must not be null
@@ -4521,8 +4524,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * double[] a = {1.0, 2.0, 3.0};
      * double[] b = {1.01, 2.01, 3.01};
-     * equals(a, b, 0.02);    // returns true
-     * equals(a, b, 0.001);   // returns false
+     * N.equals(a, b, 0.02);    // returns true
+     * N.equals(a, b, 0.001);   // returns false
      * }</pre>
      *
      * @param a the first double array, must not be null
@@ -10096,7 +10099,7 @@ sealed class CommonUtil permits N {
                     componentType = componentType.getComponentType();
                 }
 
-                return ClassUtil.isPrimitiveType(cls) || ClassUtil.isPrimitiveArrayType(cls);
+                return ClassUtil.isPrimitiveType(componentType) || ClassUtil.isPrimitiveArrayType(componentType);
             }
 
             return false;
@@ -10808,7 +10811,11 @@ sealed class CommonUtil permits N {
             final int sizeAfter = c.size();
 
             if (sizeAfter > sizeBefore) {
-                c.remove(obj);
+                if (c instanceof List) {
+                    ((List<?>) c).remove(c.size() - 1); // remove last element (the one just added) to avoid corrupting order
+                } else {
+                    c.remove(obj);
+                }
             }
 
             b = false;
@@ -11623,7 +11630,7 @@ sealed class CommonUtil permits N {
 
         final int res = size < MAX_HASH_LENGTH ? (int) (size * 1.25) + 1 : MAX_ARRAY_SIZE;
 
-        return res >= 1024 ? res : (Math.min(res, 256));
+        return res > 256 ? res : Math.min(res, 256);
     }
 
     /**
@@ -12098,8 +12105,7 @@ sealed class CommonUtil permits N {
      * @see #toMap(Iterable, Function, Function, IntFunction)
      * @see #toMap(Iterable, Function, Function, BiFunction, IntFunction)
      */
-    public static <K, V> Map<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
-            throws IllegalArgumentException {
+    public static <K, V> Map<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor) {
         // checkArgNotNull(keyExtractor);
 
         if (isEmpty(c)) {
@@ -12163,8 +12169,7 @@ sealed class CommonUtil permits N {
      * @see #toMap(Iterable, Function, Function, IntFunction)
      * @see #toMap(Iterable, Function, Function, BiFunction, IntFunction)
      */
-    public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
-            throws IllegalArgumentException {
+    public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor) {
         if (isEmpty(c)) {
             return newLinkedHashMap();
         }
@@ -13131,6 +13136,12 @@ sealed class CommonUtil permits N {
      *         Returns an empty Dataset if {@code m} is {@code null} or empty.
      */
     public static Dataset newDataset(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
+        if (isEmpty(m)) {
+            final List<String> columnNameList = asList(keyColumnName, valueColumnName);
+            final List<List<Object>> columnList = asList(new ArrayList<>(), new ArrayList<>());
+            return new RowDataset(columnNameList, columnList);
+        }
+
         final List<Object> keyColumn = new ArrayList<>(m.size());
         final List<Object> valueColumn = new ArrayList<>(m.size());
 
@@ -13312,7 +13323,7 @@ sealed class CommonUtil permits N {
             final Iterator<? extends Dataset> iter = dss.iterator();
             final Dataset firstDataset = iter.next();
 
-            if (iter.hasNext()) {
+            while (iter.hasNext()) {
                 checkIfColumnNamesAreSame(firstDataset, iter.next());
             }
         }
@@ -13450,8 +13461,7 @@ sealed class CommonUtil permits N {
      * @return the array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a) throws IllegalArgumentException {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
@@ -13589,8 +13599,7 @@ sealed class CommonUtil permits N {
      * @return the array containing the elements of the collection.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final Class<A[]> targetType)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final Class<A[]> targetType) throws IllegalArgumentException {
         checkArgNotNull(targetType);
 
         if (isEmpty(c)) {
@@ -27114,8 +27123,8 @@ sealed class CommonUtil permits N {
                 result.add(c.get(j));
             }
         } else {
-            final T[] a = (T[]) c.subList(fromIndex, toIndex).toArray();
-            result = InternalUtil.createList(copyOfRange(a, 0, a.length, step));
+            final T[] a = (T[]) c.toArray();
+            result = InternalUtil.createList(copyOfRange(a, fromIndex, toIndex, step));
         }
 
         return result;
@@ -28491,7 +28500,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28541,7 +28550,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28575,7 +28584,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28616,7 +28625,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28650,7 +28659,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28691,7 +28700,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28732,7 +28741,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -28766,7 +28775,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -32440,7 +32449,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfMin(final Collection<? extends T> c) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> int[] indicesOfMin(final Collection<? extends T> c) {
         return indicesOfMin(c, NATURAL_COMPARATOR);
     }
 
@@ -32545,7 +32554,7 @@ sealed class CommonUtil permits N {
      * @param a the array to search within
      * @return an array of indices of all maximum elements. An empty array if the input array is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfMax(final T[] a) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> int[] indicesOfMax(final T[] a) {
         return indicesOfMax(a, NATURAL_COMPARATOR);
     }
 
@@ -32629,7 +32638,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfMax(final Collection<? extends T> c) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> int[] indicesOfMax(final Collection<? extends T> c) {
         return indicesOfMax(c, NATURAL_COMPARATOR);
     }
 

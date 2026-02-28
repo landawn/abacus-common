@@ -1470,15 +1470,17 @@ public final class Profiler {
          */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
-            double result = Integer.MAX_VALUE;
+            double result = Double.MAX_VALUE;
+            boolean found = false;
             if (methodStatisticsList != null) {
                 for (final MethodStatistics methodStatistics : methodStatisticsList) {
                     if (methodStatistics.getMethodName().equals(methodName) && (methodStatistics.getElapsedTimeInMillis() < result)) {
                         result = methodStatistics.getElapsedTimeInMillis();
+                        found = true;
                     }
                 }
             }
-            return result;
+            return found ? result : 0;
         }
 
         /**
@@ -1739,16 +1741,18 @@ public final class Profiler {
          */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
-            double result = Integer.MAX_VALUE;
+            double result = Double.MAX_VALUE;
+            boolean found = false;
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     final double loopMethodMinTime = loopStatistics.getMethodMinElapsedTimeInMillis(methodName);
-                    if (loopMethodMinTime < result) {
+                    if (loopMethodMinTime > 0 && loopMethodMinTime < result) {
                         result = loopMethodMinTime;
+                        found = true;
                     }
                 }
             }
-            return result;
+            return found ? result : 0;
         }
 
         /**
@@ -1925,7 +1929,7 @@ public final class Profiler {
          * @see #writeXmlResult(Writer) for machine-readable XML output
          */
         public void printResult() {
-            writeResult(new PrintWriter(System.out)); //NOSONAR
+            writeResult(new PrintWriter(IOUtil.newOutputStreamWriter(System.out))); //NOSONAR
         }
 
         /**
@@ -1962,7 +1966,7 @@ public final class Profiler {
          * @see #printResult() for console output
          */
         public void writeResult(final OutputStream output) {
-            writeResult(new PrintWriter(output));
+            writeResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 
         /**
@@ -2161,7 +2165,7 @@ public final class Profiler {
          * @see #writeResult(OutputStream) for plain text output
          */
         public void writeHtmlResult(final OutputStream output) {
-            writeHtmlResult(new PrintWriter(output));
+            writeHtmlResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 
         /**
@@ -2375,7 +2379,7 @@ public final class Profiler {
          * @see #writeResult(OutputStream) for plain text output
          */
         public void writeXmlResult(final OutputStream output) {
-            writeXmlResult(new PrintWriter(output));
+            writeXmlResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 
         /**

@@ -222,8 +222,8 @@ public class Joiner200Test extends TestBase {
 
     @Test
     public void testDefaultJoiner() {
-        assertEquals("a, b", Joiner.defauLt().append("a").append("b").toString());
-        assertEquals("k=v", Joiner.defauLt().appendEntry("k", "v").toString());
+        assertEquals("a, b", Joiner.withDefault().append("a").append("b").toString());
+        assertEquals("k=v", Joiner.withDefault().appendEntry("k", "v").toString());
     }
 
     @Test

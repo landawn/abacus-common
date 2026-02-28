@@ -1500,7 +1500,8 @@ public class Dataset112Test extends TestBase {
     @Test
     public void testFlatMapWithBiFunction() {
         Tuple2<String, String> fromColumns = Tuple.of("name", "age");
-        Dataset mapped = testDataset.flatMapColumns(fromColumns, "name_parts", Arrays.asList("id"), (String name, Integer age) -> Arrays.asList(name, age.toString()));
+        Dataset mapped = testDataset.flatMapColumns(fromColumns, "name_parts", Arrays.asList("id"),
+                (String name, Integer age) -> Arrays.asList(name, age.toString()));
 
         assertNotNull(mapped);
         assertTrue(mapped.containsColumn("name_parts"));

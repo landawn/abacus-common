@@ -65,19 +65,19 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void test_deleteRange() {
+    public void test_removeRange() {
         {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.deleteRange(1, 4);
+            byteList.removeRange(1, 4);
 
             N.println(byteList.array());
 
-            byteList.deleteRange(1, 4);
+            byteList.removeRange(1, 4);
 
             N.println(byteList.array());
 
-            byteList.deleteRange(1, 4);
+            byteList.removeRange(1, 4);
 
             N.println(byteList.array());
         }
@@ -134,10 +134,10 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void test_deleteAllByIndices() {
+    public void test_removeAt() {
         final LongList list = LongList.of(1, 2, 3, 4, 5, 6);
 
-        list.deleteAllByIndices(1, 3, 5);
+        list.removeAt(1, 3, 5);
 
         assertEquals(3, list.size());
 
@@ -200,7 +200,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of('a'), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains('a'));
 
         arrayList.addAll(CharList.of(Array.of('a', 'b', 'c')));
@@ -346,7 +346,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of((byte) 1), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains((byte) 1));
 
         arrayList.addAll(ByteList.of(Array.of((byte) 1, (byte) 2, (byte) 3)));
@@ -489,7 +489,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of((short) 1), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains((short) 1));
 
         arrayList.addAll(ShortList.of(Array.of((short) 1, (short) 2, (short) 3)));
@@ -581,13 +581,13 @@ public class PrimitiveListTest extends AbstractTest {
     @Test
     public void test_delete() {
         IntList list = IntList.range(1, 10);
-        list.deleteRange(0, 9);
+        list.removeRange(0, 9);
         list = IntList.range(1, 10);
-        list.deleteRange(0, 8);
+        list.removeRange(0, 8);
         list = IntList.range(1, 10);
-        list.deleteRange(1, 8);
+        list.removeRange(1, 8);
         list = IntList.range(1, 10);
-        list.deleteRange(1, 9);
+        list.removeRange(1, 9);
     }
 
     @Test
@@ -677,7 +677,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of(1), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains(1));
 
         arrayList.addAll(IntList.of(Array.of(1, 2, 3)));
@@ -820,7 +820,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of(1L), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains(1L));
 
         arrayList.addAll(LongList.of(Array.of(1L, 2L, 3L)));
@@ -963,7 +963,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of(1f), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains(1f));
 
         arrayList.addAll(FloatList.of(Array.of(1f, 2f, 3f)));
@@ -1106,7 +1106,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of(1d), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
         assertFalse(arrayList.contains(1d));
 
         arrayList.addAll(DoubleList.of(Array.of(1d, 2d, 3d)));
@@ -1249,7 +1249,7 @@ public class PrimitiveListTest extends AbstractTest {
         N.println(CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size()));
         assertTrue(CommonUtil.equals(Array.of(true), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
-        arrayList.delete(0);
+        arrayList.removeAt(0);
 
         arrayList.addAll(BooleanList.of(Array.of(false, true, false)));
         assertTrue(arrayList.contains(false));

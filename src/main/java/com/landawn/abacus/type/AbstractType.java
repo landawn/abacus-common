@@ -87,18 +87,18 @@ public abstract class AbstractType<T> implements Type<T> {
     protected static final Type[] EMPTY_TYPE_ARRAY = {};
 
     /** Map for converting separator strings to regex patterns */
-    private static final Map<String, String> separatorConvertor = new HashMap<>();
+    private static final Map<String, String> separatorConverter = new HashMap<>();
 
     static {
-        separatorConvertor.put(".", "\\.");
-        separatorConvertor.put("|", "\\|");
-        separatorConvertor.put("-", "\\-");
-        separatorConvertor.put("*", "\\*");
-        separatorConvertor.put("?", "\\?");
-        separatorConvertor.put("+", "\\+");
-        separatorConvertor.put("$", "\\$");
-        separatorConvertor.put("^", "\\^");
-        separatorConvertor.put("\\", "\\\\");
+        separatorConverter.put(".", "\\.");
+        separatorConverter.put("|", "\\|");
+        separatorConverter.put("-", "\\-");
+        separatorConverter.put("*", "\\*");
+        separatorConverter.put("?", "\\?");
+        separatorConverter.put("+", "\\+");
+        separatorConverter.put("$", "\\$");
+        separatorConverter.put("^", "\\^");
+        separatorConverter.put("\\", "\\\\");
     }
 
     /** The name of this type */
@@ -992,7 +992,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return array of split strings
      */
     protected static String[] split(final String string, final String separator) {
-        final String newValue = separatorConvertor.get(separator);
+        final String newValue = separatorConverter.get(separator);
 
         return (newValue == null) ? string.split(separator) : string.split(newValue);
     }
@@ -1060,7 +1060,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param dateTime the character sequence to check
      * @return {@code true} if it could be a long timestamp
      */
-    protected static boolean isPossibleLong(final CharSequence dateTime) {
+    protected static boolean isPossibleMillis(final CharSequence dateTime) {
         final int len = dateTime.length();
 
         if (len > 4) {

@@ -24,10 +24,11 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface is similar to {@link java.util.function.BinaryOperator} but accepts three arguments
  * instead of two.</p>
  *
- * @see java.util.function.BinaryOperator
- * @see java.util.function.DoubleBinaryOperator
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.BinaryOperator
+ * @see java.util.function.DoubleBinaryOperator
  */
 @FunctionalInterface
 public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<RuntimeException> { //NOSONAR

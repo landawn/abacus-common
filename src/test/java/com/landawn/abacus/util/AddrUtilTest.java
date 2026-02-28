@@ -35,7 +35,7 @@ public class AddrUtilTest extends AbstractTest {
             N.println(add.toString());
         }
 
-        N.println(AddrUtil.getAddressListFromUrl(N.asList(new URL("https://www.google.com:443/"))));
+        N.println(AddrUtil.getAddressListFromURL(N.asList(new URL("https://www.google.com:443/"))));
 
         try {
             AddrUtil.getServerList(Strings.EMPTY);

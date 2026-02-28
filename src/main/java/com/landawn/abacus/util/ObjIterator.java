@@ -352,6 +352,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+
+                    if (iter == null) {
+                        iter = ObjIterator.empty();
+                    }
                 }
             }
         };

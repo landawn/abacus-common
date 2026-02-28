@@ -33,47 +33,47 @@ import java.io.Serial;
  * // In a DAO method expecting unique result
  * List<User> users = query.getResultList();
  * if (users.size() > 1) {
- *     throw new DuplicatedResultException("Expected unique user but found " + users.size());
+ *     throw new DuplicateResultException("Expected unique user but found " + users.size());
  * }
  * }</pre>
  * 
  * @see IllegalStateException
  */
-public class DuplicatedResultException extends IllegalStateException {
+public class DuplicateResultException extends IllegalStateException {
 
     @Serial
     private static final long serialVersionUID = -8407459420058648924L;
 
     /**
-     * Constructs a new {@code DuplicatedResultException} with no detail message.
+     * Constructs a new {@code DuplicateResultException} with no detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * throw new DuplicatedResultException();
+     * throw new DuplicateResultException();
      * }</pre>
      */
-    public DuplicatedResultException() {
+    public DuplicateResultException() {
     }
 
     /**
-     * Constructs a new {@code DuplicatedResultException} with the specified detail message.
+     * Constructs a new {@code DuplicateResultException} with the specified detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * throw new DuplicatedResultException("Found 3 records for unique ID: " + id);
+     * throw new DuplicateResultException("Found 3 records for unique ID: " + id);
      * }</pre>
      *
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      */
-    public DuplicatedResultException(final String message) {
+    public DuplicateResultException(final String message) {
         super(message);
     }
 
     /**
-     * Constructs a new {@code DuplicatedResultException} with the specified detail message and cause.
+     * Constructs a new {@code DuplicateResultException} with the specified detail message and cause.
      *
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
@@ -83,7 +83,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * try {
      *     return repository.findUniqueById(id);
      * } catch (DataAccessException e) {
-     *     throw new DuplicatedResultException("Multiple results for unique constraint", e);
+     *     throw new DuplicateResultException("Multiple results for unique constraint", e);
      * }
      * }</pre>
      *
@@ -92,12 +92,12 @@ public class DuplicatedResultException extends IllegalStateException {
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
      *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
      */
-    public DuplicatedResultException(final String message, final Throwable cause) {
+    public DuplicateResultException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Constructs a new {@code DuplicatedResultException} with the specified cause and a detail
+     * Constructs a new {@code DuplicateResultException} with the specified cause and a detail
      * message of {@code (cause==null ? null : cause.toString())} (which typically contains the
      * class and detail message of {@code cause}).
      *
@@ -107,14 +107,14 @@ public class DuplicatedResultException extends IllegalStateException {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (SQLException e) {
-     *     throw new DuplicatedResultException(e);
+     *     throw new DuplicateResultException(e);
      * }
      * }</pre>
      *
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
      *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
      */
-    public DuplicatedResultException(final Throwable cause) {
+    public DuplicateResultException(final Throwable cause) {
         super(cause);
     }
 }

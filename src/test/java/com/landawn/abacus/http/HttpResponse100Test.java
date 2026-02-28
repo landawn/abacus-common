@@ -250,10 +250,10 @@ public class HttpResponse100Test extends TestBase {
     }
 
     @Test
-    public void testBodyWithFormUrlEncoded() {
+    public void testBodyWithFORM_URL_ENCODED() {
         String formData = "name=John&age=30";
         HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), formData.getBytes(StandardCharsets.UTF_8),
-                ContentFormat.FormUrlEncoded, StandardCharsets.UTF_8);
+                ContentFormat.FORM_URL_ENCODED, StandardCharsets.UTF_8);
 
         Map<String, String> result = response.body(Map.class);
         assertEquals("John", result.get("name"));

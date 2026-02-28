@@ -169,7 +169,7 @@ public class BooleanList101Test extends TestBase {
         list.add(false);
         list.add(true);
 
-        list.deleteRange(0, 3);
+        list.removeRange(0, 3);
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
     }
@@ -601,7 +601,7 @@ public class BooleanList101Test extends TestBase {
         list.reverse();
         list.shuffle();
         list.fill(true);
-        list.deleteRange(0, 0);
+        list.removeRange(0, 0);
 
         assertTrue(list.isEmpty());
     }

@@ -600,7 +600,7 @@ public class ExcelUtil100Test extends TestBase {
 
             Cell cell7 = row.createCell(6);
             ExcelUtil.setCellValue(cell7, null);
-            assertEquals("null", cell7.getStringCellValue());
+            assertEquals("", cell7.getStringCellValue());
 
             Cell cell8 = row.createCell(7);
             ExcelUtil.setCellValue(cell8, new Object());

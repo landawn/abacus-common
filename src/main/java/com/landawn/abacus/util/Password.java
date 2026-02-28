@@ -131,7 +131,17 @@ public final class Password {
      *         Returns {@code true} if both are {@code null}, {@code false} if only one is {@code null}
      */
     public boolean isEqual(final String plainPassword, final String encryptedPassword) {
-        return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));
+        if (plainPassword == null) {
+            return encryptedPassword == null;
+        }
+
+        if (encryptedPassword == null) {
+            return false;
+        }
+
+        final String encrypted = encrypt(plainPassword);
+
+        return MessageDigest.isEqual(encrypted.getBytes(Charsets.UTF_8), encryptedPassword.getBytes(Charsets.UTF_8));
     }
 
     /**

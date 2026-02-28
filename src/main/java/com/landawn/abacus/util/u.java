@@ -6241,7 +6241,7 @@ public class u { // NOSONAR
          * @return this {@code Optional} if a value is present, otherwise the {@code Optional} produced by the supplying function
          * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
          */
-        public Optional<T> or(final Supplier<? extends Optional<? extends T>> supplier) throws IllegalArgumentException {
+        public Optional<T> or(final Supplier<? extends Optional<? extends T>> supplier) {
             if (isPresent()) {
                 return this;
             } else {
@@ -6699,10 +6699,10 @@ public class u { // NOSONAR
          * @return a {@code Nullable} containing the value if present in the {@code Optional}, otherwise an empty {@code Nullable}
          */
         public static <T> Nullable<T> from(final Optional<T> optional) {
-            if (optional.isPresent()) {
-                return new Nullable<>(optional.get());
-            } else {
+            if (optional == null || !optional.isPresent()) {
                 return Nullable.empty();
+            } else {
+                return new Nullable<>(optional.get());
             }
         }
 
@@ -7385,6 +7385,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a {@code Nullable} to be returned
          * @return this {@code Nullable} if a value is present, otherwise the {@code Nullable} produced by the supplying function
+         * @throws IllegalArgumentException if the supplying function rejects arguments while creating a fallback {@code Nullable}
          * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
          */
         public Nullable<T> or(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {

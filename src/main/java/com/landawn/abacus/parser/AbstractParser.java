@@ -121,7 +121,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final Type<String> strType = TypeFactory.getType(String.class);
 
-    static final Type<String> strArrayType = TypeFactory.getType(String[].class);
+    static final Type<String[]> strArrayType = TypeFactory.getType(String[].class);
 
     @SuppressWarnings("rawtypes")
     static final Type<List> listType = TypeFactory.getType(List.class);
@@ -196,30 +196,30 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return deserialize(source, null, targetType);
     }
 
-    static final Map<Class<?>, Tuple2<Function<Class<?>, Object>, Function<Object, Object>>> mapOfCreatorAndConvertorForTargetType = new HashMap<>();
+    static final Map<Class<?>, Tuple2<Function<Class<?>, Object>, Function<Object, Object>>> mapOfCreatorAndConverterForTargetType = new HashMap<>();
 
     static {
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class, Tuple.of(t -> new ArrayList<>(), t -> ImmutableList.wrap((List<?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableList.class, Tuple.of(t -> new ArrayList<>(), t -> ImmutableList.wrap((List<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class, Tuple.of(t -> new HashSet<>(), t -> ImmutableSet.wrap((Set<?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableSet.class, Tuple.of(t -> new HashSet<>(), t -> ImmutableSet.wrap((Set<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class, Tuple.of(t -> new TreeSet<>(), t -> ImmutableSortedSet.wrap((SortedSet<?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableSortedSet.class, Tuple.of(t -> new TreeSet<>(), t -> ImmutableSortedSet.wrap((SortedSet<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
+        mapOfCreatorAndConverterForTargetType.put(ImmutableNavigableSet.class,
                 Tuple.of(t -> new TreeSet<>(), t -> ImmutableNavigableSet.wrap((NavigableSet<?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConvertorForTargetType.get(ImmutableList.class));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConverterForTargetType.get(ImmutableList.class));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class, Tuple.of(t -> new HashMap<>(), t -> ImmutableMap.wrap((Map<?, ?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableMap.class, Tuple.of(t -> new HashMap<>(), t -> ImmutableMap.wrap((Map<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class, Tuple.of(t -> new BiMap<>(), t -> ImmutableBiMap.wrap((BiMap<?, ?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableBiMap.class, Tuple.of(t -> new BiMap<>(), t -> ImmutableBiMap.wrap((BiMap<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class, Tuple.of(t -> new TreeMap<>(), t -> ImmutableSortedMap.wrap((SortedMap<?, ?>) t)));
+        mapOfCreatorAndConverterForTargetType.put(ImmutableSortedMap.class, Tuple.of(t -> new TreeMap<>(), t -> ImmutableSortedMap.wrap((SortedMap<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
+        mapOfCreatorAndConverterForTargetType.put(ImmutableNavigableMap.class,
                 Tuple.of(t -> new TreeMap<>(), t -> ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t)));
 
-        mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.of(N::newInstance, t -> t));
+        mapOfCreatorAndConverterForTargetType.put(Object.class, Tuple.of(N::newInstance, t -> t));
     }
 
     /**
@@ -262,14 +262,14 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a tuple containing the creator function and converter function for the target type
      */
-    protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConvertorForTargetType(final Class<?> propClass,
+    protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConverterForTargetType(final Class<?> propClass,
             final Class<?> attributeTypeClass) {
         final Class<?> t = choosePropClass(propClass, attributeTypeClass);
 
-        Tuple2<Function<Class<?>, Object>, Function<Object, Object>> result = mapOfCreatorAndConvertorForTargetType.get(t);
+        Tuple2<Function<Class<?>, Object>, Function<Object, Object>> result = mapOfCreatorAndConverterForTargetType.get(t);
 
         if (result == null) {
-            result = mapOfCreatorAndConvertorForTargetType.get(Object.class);
+            result = mapOfCreatorAndConverterForTargetType.get(Object.class);
         }
 
         return result;

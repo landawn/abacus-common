@@ -438,7 +438,7 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testFlattmapArray() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).flattmap(n -> new Integer[] { n, n * 10 });
+        Stream<Integer> stream = Stream.of(1, 2, 3).flatMapArray(n -> new Integer[] { n, n * 10 });
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
     }
 
@@ -1083,8 +1083,8 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(2, 4, 6, 8).nMatch(2, 3, n -> n > 5));
-        assertFalse(Stream.of(2, 4, 6, 8).nMatch(5, 10, n -> n > 5));
+        assertTrue(Stream.of(2, 4, 6, 8).countMatchBetween(2, 3, n -> n > 5));
+        assertFalse(Stream.of(2, 4, 6, 8).countMatchBetween(5, 10, n -> n > 5));
     }
 
     @Test

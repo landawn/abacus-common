@@ -24,9 +24,10 @@ import com.landawn.abacus.util.Throwables;
  * <p>There is no requirement that a new or distinct result be returned each
  * time the supplier is invoked.</p>
  *
- * @see java.util.function.Supplier
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Supplier
  */
 @FunctionalInterface
 public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException> { //NOSONAR

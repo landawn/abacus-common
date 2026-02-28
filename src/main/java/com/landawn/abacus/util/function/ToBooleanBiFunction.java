@@ -22,10 +22,11 @@ package com.landawn.abacus.util.function;
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
  *
- * @see java.util.function.BiFunction
- * @see ToBooleanFunction
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.BiFunction
+ * @see ToBooleanFunction
  */
 @FunctionalInterface
 public interface ToBooleanBiFunction<T, U> {

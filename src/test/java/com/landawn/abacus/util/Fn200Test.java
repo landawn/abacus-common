@@ -318,7 +318,7 @@ public class Fn200Test extends TestBase {
 
     @Test
     public void sizeM() {
-        assertThat(Fn.sizeM().apply(java.util.Map.of("a", 1))).isEqualTo(1);
+        assertThat(Fn.mapSize().apply(java.util.Map.of("a", 1))).isEqualTo(1);
     }
 
     @Test

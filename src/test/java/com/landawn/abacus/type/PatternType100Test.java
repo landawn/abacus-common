@@ -99,7 +99,7 @@ public class PatternType100Test extends TestBase {
     }
 
     @Test
-    public void testPatternMatching() {
+    public void testPattercountMatchBetweening() {
         Pattern emailPattern = patternType.valueOf("\\w+@\\w+\\.\\w+");
         assertNotNull(emailPattern);
         assertTrue(emailPattern.matcher("test@example.com").find());

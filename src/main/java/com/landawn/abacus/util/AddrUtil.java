@@ -261,7 +261,7 @@ public final class AddrUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URL url = new URL("http://localhost:8080/path");
-     * InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
+     * InetSocketAddress addr = AddrUtil.getAddressFromURL(url);
      * // Returns InetSocketAddress with host="localhost" and port=8080
      * }</pre>
      *
@@ -270,7 +270,7 @@ public final class AddrUtil {
      * @throws NullPointerException if {@code url} is {@code null}
      * @see #getAddressList(Collection)
      */
-    public static InetSocketAddress getAddressFromUrl(final URL url) {
+    public static InetSocketAddress getAddressFromURL(final URL url) {
         return new InetSocketAddress(url.getHost(), getPort(url));
     }
 
@@ -292,16 +292,16 @@ public final class AddrUtil {
      *     new URL("http://localhost:8080"),
      *     new URL("http://127.0.0.1:9090")
      * );
-     * List<InetSocketAddress> addresses = AddrUtil.getAddressListFromUrl(urls);
+     * List<InetSocketAddress> addresses = AddrUtil.getAddressListFromURL(urls);
      * // Returns a list with two InetSocketAddress instances
      * }</pre>
      *
      * @param urls a collection of {@link URL} objects to be converted; may be {@code null} or empty
      * @return a list of {@link InetSocketAddress} instances corresponding to the URLs,
      *         or an empty list if the input collection is {@code null} or empty
-     * @see #getAddressFromUrl(URL)
+     * @see #getAddressFromURL(URL)
      */
-    public static List<InetSocketAddress> getAddressListFromUrl(final Collection<URL> urls) {
+    public static List<InetSocketAddress> getAddressListFromURL(final Collection<URL> urls) {
         if (N.isEmpty(urls)) {
             return new ArrayList<>();
         }

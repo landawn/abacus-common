@@ -1675,28 +1675,28 @@ public class Fn107Test extends TestBase {
 
         @Test
         public void testNotEmptyA() {
-            Throwables.Predicate<String[], RuntimeException> notEmptyA = Fnn.notEmptyA();
-            Assertions.assertFalse(notEmptyA.test(null));
-            Assertions.assertFalse(notEmptyA.test(new String[0]));
-            Assertions.assertTrue(notEmptyA.test(new String[] { "a" }));
+            Throwables.Predicate<String[], RuntimeException> notEmptyArray = Fnn.notEmptyArray();
+            Assertions.assertFalse(notEmptyArray.test(null));
+            Assertions.assertFalse(notEmptyArray.test(new String[0]));
+            Assertions.assertTrue(notEmptyArray.test(new String[] { "a" }));
         }
 
         @Test
         public void testNotEmptyC() {
-            Throwables.Predicate<java.util.List<String>, RuntimeException> notEmptyC = Fnn.notEmptyC();
-            Assertions.assertFalse(notEmptyC.test(null));
-            Assertions.assertFalse(notEmptyC.test(new java.util.ArrayList<>()));
-            Assertions.assertTrue(notEmptyC.test(java.util.Arrays.asList("a")));
+            Throwables.Predicate<java.util.List<String>, RuntimeException> notEmptyCollection = Fnn.notEmptyCollection();
+            Assertions.assertFalse(notEmptyCollection.test(null));
+            Assertions.assertFalse(notEmptyCollection.test(new java.util.ArrayList<>()));
+            Assertions.assertTrue(notEmptyCollection.test(java.util.Arrays.asList("a")));
         }
 
         @Test
         public void testNotEmptyM() {
-            Throwables.Predicate<Map<String, Integer>, RuntimeException> notEmptyM = Fnn.notEmptyM();
-            Assertions.assertFalse(notEmptyM.test(null));
-            Assertions.assertFalse(notEmptyM.test(new HashMap<>()));
+            Throwables.Predicate<Map<String, Integer>, RuntimeException> notEmptyMap = Fnn.notEmptyMap();
+            Assertions.assertFalse(notEmptyMap.test(null));
+            Assertions.assertFalse(notEmptyMap.test(new HashMap<>()));
             Map<String, Integer> map = new HashMap<>();
             map.put("a", 1);
-            Assertions.assertTrue(notEmptyM.test(map));
+            Assertions.assertTrue(notEmptyMap.test(map));
         }
 
         @Test

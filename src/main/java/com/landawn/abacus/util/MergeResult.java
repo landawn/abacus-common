@@ -135,7 +135,7 @@ public enum MergeResult {
      * @param <T> the type of the values being compared (must be Comparable)
      * @param a the first value to compare
      * @param b the second value to compare
-     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is greater than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T extends Comparable<? super T>> MergeResult maxFirst(final T a, final T b) {
         return N.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -160,7 +160,7 @@ public enum MergeResult {
      * @param a the first value to compare
      * @param b the second value to compare
      * @param cmp the comparator to use for comparison
-     * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
+     * @return {@link #TAKE_FIRST} if a is greater than or equal to b, {@link #TAKE_SECOND} otherwise
      */
     public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) {
         return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;

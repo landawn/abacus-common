@@ -703,163 +703,163 @@ public class N101Test extends TestBase {
     @Test
     public void testDeleteByIndexBoolean() {
         boolean[] arr = { true, false, true, false };
-        boolean[] result = N.deleteByIndex(arr, 1);
+        boolean[] result = N.removeAt(arr, 1);
         assertArrayEquals(new boolean[] { true, true, false }, result);
 
-        result = N.deleteByIndex(arr, 0);
+        result = N.removeAt(arr, 0);
         assertArrayEquals(new boolean[] { false, true, false }, result);
 
-        result = N.deleteByIndex(arr, 3);
+        result = N.removeAt(arr, 3);
         assertArrayEquals(new boolean[] { true, false, true }, result);
     }
 
     @Test
     public void testDeleteByIndexChar() {
         char[] arr = { 'a', 'b', 'c', 'd' };
-        char[] result = N.deleteByIndex(arr, 1);
+        char[] result = N.removeAt(arr, 1);
         assertArrayEquals(new char[] { 'a', 'c', 'd' }, result);
     }
 
     @Test
     public void testDeleteByIndexByte() {
         byte[] arr = { 1, 2, 3, 4 };
-        byte[] result = N.deleteByIndex(arr, 1);
+        byte[] result = N.removeAt(arr, 1);
         assertArrayEquals(new byte[] { 1, 3, 4 }, result);
     }
 
     @Test
     public void testDeleteByIndexShort() {
         short[] arr = { 1, 2, 3, 4 };
-        short[] result = N.deleteByIndex(arr, 1);
+        short[] result = N.removeAt(arr, 1);
         assertArrayEquals(new short[] { 1, 3, 4 }, result);
     }
 
     @Test
     public void testDeleteByIndexInt() {
         int[] arr = { 1, 2, 3, 4 };
-        int[] result = N.deleteByIndex(arr, 1);
+        int[] result = N.removeAt(arr, 1);
         assertArrayEquals(new int[] { 1, 3, 4 }, result);
     }
 
     @Test
     public void testDeleteByIndexLong() {
         long[] arr = { 1L, 2L, 3L, 4L };
-        long[] result = N.deleteByIndex(arr, 1);
+        long[] result = N.removeAt(arr, 1);
         assertArrayEquals(new long[] { 1L, 3L, 4L }, result);
     }
 
     @Test
     public void testDeleteByIndexFloat() {
         float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f };
-        float[] result = N.deleteByIndex(arr, 1);
+        float[] result = N.removeAt(arr, 1);
         assertArrayEquals(new float[] { 1.0f, 3.0f, 4.0f }, result, 0.001f);
     }
 
     @Test
     public void testDeleteByIndexDouble() {
         double[] arr = { 1.0, 2.0, 3.0, 4.0 };
-        double[] result = N.deleteByIndex(arr, 1);
+        double[] result = N.removeAt(arr, 1);
         assertArrayEquals(new double[] { 1.0, 3.0, 4.0 }, result, 0.001);
     }
 
     @Test
     public void testDeleteByIndexObject() {
         Integer[] arr = { 1, 2, 3, 4 };
-        Integer[] result = N.deleteByIndex(arr, 1);
+        Integer[] result = N.removeAt(arr, 1);
         assertArrayEquals(new Integer[] { 1, 3, 4 }, result);
     }
 
     @Test
     public void testDeleteByIndexInvalidIndex() {
         int[] arr = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteByIndex(arr, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(arr, 3));
     }
 
     @Test
     public void testDeleteAllByIndicesBoolean() {
         boolean[] arr = { true, false, true, false, true };
-        boolean[] result = N.deleteAllByIndices(arr, 1, 3);
+        boolean[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new boolean[] { true, true, true }, result);
 
-        result = N.deleteAllByIndices(arr, 1, 1, 3);
+        result = N.removeAt(arr, 1, 1, 3);
         assertArrayEquals(new boolean[] { true, true, true }, result);
 
-        result = N.deleteAllByIndices(arr, 3, 1);
+        result = N.removeAt(arr, 3, 1);
         assertArrayEquals(new boolean[] { true, true, true }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesChar() {
         char[] arr = { 'a', 'b', 'c', 'd', 'e' };
-        char[] result = N.deleteAllByIndices(arr, 1, 3);
+        char[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new char[] { 'a', 'c', 'e' }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesByte() {
         byte[] arr = { 1, 2, 3, 4, 5 };
-        byte[] result = N.deleteAllByIndices(arr, 1, 3);
+        byte[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new byte[] { 1, 3, 5 }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesShort() {
         short[] arr = { 1, 2, 3, 4, 5 };
-        short[] result = N.deleteAllByIndices(arr, 1, 3);
+        short[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new short[] { 1, 3, 5 }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesInt() {
         int[] arr = { 1, 2, 3, 4, 5 };
-        int[] result = N.deleteAllByIndices(arr, 1, 3);
+        int[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new int[] { 1, 3, 5 }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesLong() {
         long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        long[] result = N.deleteAllByIndices(arr, 1, 3);
+        long[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new long[] { 1L, 3L, 5L }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesFloat() {
         float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        float[] result = N.deleteAllByIndices(arr, 1, 3);
+        float[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new float[] { 1.0f, 3.0f, 5.0f }, result, 0.001f);
     }
 
     @Test
     public void testDeleteAllByIndicesDouble() {
         double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        double[] result = N.deleteAllByIndices(arr, 1, 3);
+        double[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new double[] { 1.0, 3.0, 5.0 }, result, 0.001);
     }
 
     @Test
     public void testDeleteAllByIndicesString() {
         String[] arr = { "a", "b", "c", "d", "e" };
-        String[] result = N.deleteAllByIndices(arr, 1, 3);
+        String[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new String[] { "a", "c", "e" }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesObject() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
-        Integer[] result = N.deleteAllByIndices(arr, 1, 3);
+        Integer[] result = N.removeAt(arr, 1, 3);
         assertArrayEquals(new Integer[] { 1, 3, 5 }, result);
     }
 
     @Test
     public void testDeleteAllByIndicesList() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        boolean result = N.deleteAllByIndices(list, 1, 3);
+        boolean result = N.removeAt(list, 1, 3);
         assertTrue(result);
         assertEquals(Arrays.asList("a", "c", "e"), list);
 
         list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        result = N.deleteAllByIndices(list);
+        result = N.removeAt(list);
         assertFalse(result);
         assertEquals(Arrays.asList("a", "b", "c"), list);
     }
@@ -1554,7 +1554,7 @@ public class N101Test extends TestBase {
     public void testLinkedListOperations() {
         LinkedList<String> linkedList = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
 
-        boolean result = N.deleteAllByIndices(linkedList, 1, 3);
+        boolean result = N.removeAt(linkedList, 1, 3);
         assertTrue(result);
         assertEquals(Arrays.asList("a", "c", "e"), linkedList);
 
@@ -1574,10 +1574,10 @@ public class N101Test extends TestBase {
         result = N.insert(arr, 5, 6);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        result = N.deleteByIndex(arr, 0);
+        result = N.removeAt(arr, 0);
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, result);
 
-        result = N.deleteByIndex(arr, 4);
+        result = N.removeAt(arr, 4);
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
 
         result = N.removeDuplicates(arr, 2, 3, false);

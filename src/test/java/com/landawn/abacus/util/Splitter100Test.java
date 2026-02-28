@@ -32,7 +32,7 @@ public class Splitter100Test extends TestBase {
 
     @Test
     public void testDefault() {
-        Splitter splitter = Splitter.defauLt();
+        Splitter splitter = Splitter.withDefault();
         List<String> result = splitter.split("a, b, c");
         assertEquals(Arrays.asList("a", "b", "c"), result);
     }
@@ -394,7 +394,7 @@ public class Splitter100Test extends TestBase {
 
     @Test
     public void testMapSplitterDefault() {
-        Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.defauLt();
+        Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.withDefault();
         Map<String, String> result = mapSplitter.split("a=1, b=2, c=3");
         Map<String, String> expected = new LinkedHashMap<>();
         expected.put("a", "1");

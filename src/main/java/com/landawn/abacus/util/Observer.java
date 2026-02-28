@@ -105,7 +105,7 @@ public abstract class Observer<T> implements Immutable {
 
     protected final Dispatcher<Object> dispatcher;
 
-    protected boolean hasMore = true;
+    protected volatile boolean hasMore = true;
 
     protected Observer() {
         this(new Dispatcher<>());
@@ -128,9 +128,15 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param queue the BlockingQueue to complete
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void complete(final BlockingQueue<?> queue) {
-        ((Queue) queue).offer(COMPLETE_FLAG);
+        if (!((Queue) queue).offer(COMPLETE_FLAG)) {
+            try {
+                ((BlockingQueue) queue).put(COMPLETE_FLAG);
+            } catch (final InterruptedException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
+        }
     }
 
     /**
@@ -650,7 +656,7 @@ public abstract class Observer<T> implements Immutable {
 
         dispatcher.append(new Dispatcher<>() {
             private final long startTime = System.currentTimeMillis();
-            private boolean isDelayed = false;
+            private volatile boolean isDelayed = false;
 
             @Override
             public void onNext(final Object param) {
@@ -998,7 +1004,7 @@ public abstract class Observer<T> implements Immutable {
                     if (downDispatcher != null) {
                         downDispatcher.onNext(list);
                     }
-                }, timespan, timespan, unit), timespan);
+                }, timespan, timespan, unit), Math.max(1L, unit.toMillis(timespan)));
             }
 
             @Override
@@ -1071,8 +1077,9 @@ public abstract class Observer<T> implements Immutable {
         N.checkArgument(count > 0, "count cannot be 0 or negative");
 
         dispatcher.append(new Dispatcher<>() {
-            private final long startTime = System.currentTimeMillis();
-            private final long interval = timespan + timeskip;
+            private final long startNanos = System.nanoTime();
+            private final long intervalNanos = unit.toNanos(timeskip);
+            private final long timespanNanos = unit.toNanos(timespan);
             private final List<T> queue = new ArrayList<>();
 
             { //NOSONAR
@@ -1086,12 +1093,12 @@ public abstract class Observer<T> implements Immutable {
                     if (downDispatcher != null) {
                         downDispatcher.onNext(list);
                     }
-                }, timespan, interval, unit), interval);
+                }, timespan, timeskip, unit), Math.max(1L, unit.toMillis(timeskip)));
             }
 
             @Override
             public void onNext(final Object param) {
-                if ((System.currentTimeMillis() - startTime) % interval <= timespan) {
+                if ((System.nanoTime() - startNanos) % intervalNanos <= timespanNanos) {
                     List<T> list = null;
 
                     synchronized (queue) {
@@ -1464,8 +1471,9 @@ public abstract class Observer<T> implements Immutable {
             schedulerForObserveOp.schedule(() -> {
                 try {
                     dispatcher.onNext(0L);
-
-                    onComplete.run();
+                    dispatcher.onComplete();
+                } catch (final Exception e) {
+                    dispatcher.onError(e);
                 } finally {
                     cancelScheduledFutures();
                 }
@@ -1491,7 +1499,7 @@ public abstract class Observer<T> implements Immutable {
         private final TimeUnit unit;
 
         /** The future. */
-        private ScheduledFuture<?> future = null;
+        private volatile ScheduledFuture<?> future = null;
 
         IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
             this.initialDelay = initialDelay;
@@ -1528,6 +1536,8 @@ public abstract class Observer<T> implements Immutable {
                     if (!hasMore) {
                         try {
                             dispatcher.onComplete();
+                        } catch (final Exception e) {
+                            dispatcher.onError(e);
                         } finally {
                             try {
                                 future.cancel(true);
@@ -1540,8 +1550,9 @@ public abstract class Observer<T> implements Immutable {
                             dispatcher.onNext(val++);
                         } catch (final Exception e) {
                             try {
-                                future.cancel(true);
+                                dispatcher.onError(e);
                             } finally {
+                                future.cancel(true);
                                 cancelScheduledFutures();
                             }
                         }

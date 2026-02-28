@@ -1618,10 +1618,7 @@ public final class ClassUtil {
                 }
 
                 if (constructor != null) {
-                    if (constructorPool == null) {
-                        constructorPool = new ConcurrentHashMap<>();
-                        classDeclaredConstructorPool.put(cls, constructorPool);
-                    }
+                    constructorPool = classDeclaredConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
                     constructorPool.put(Array.asList(parameterTypes.clone()), constructor);
                 }
@@ -1664,10 +1661,7 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    if (methodNamePool == null) {
-                        methodNamePool = new ConcurrentHashMap<>();
-                        classNoArgDeclaredMethodPool.put(cls, methodNamePool);
-                    }
+                    methodNamePool = classNoArgDeclaredMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
                     methodNamePool.put(methodName, method);
                 }
@@ -1690,15 +1684,8 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    if (methodNamePool == null) {
-                        methodNamePool = new ConcurrentHashMap<>();
-                        classDeclaredMethodPool.put(cls, methodNamePool);
-                    }
-
-                    if (methodPool == null) {
-                        methodPool = new ConcurrentHashMap<>();
-                        methodNamePool.put(methodName, methodPool);
-                    }
+                    methodNamePool = classDeclaredMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
+                    methodPool = methodNamePool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
 
                     methodPool.put(Array.asList(parameterTypes.clone()), method);
                 }
@@ -1963,7 +1950,7 @@ public final class ClassUtil {
             res = res.substring("interface [L".length(), res.length() - 1) + "[]";
         }
 
-        res = res.replaceAll("java.lang.", "").replace("class ", "").replace("interface ", ""); //NOSONAR
+        res = res.replace("java.lang.", "").replace("class ", "").replace("interface ", ""); //NOSONAR
 
         final int idx = res.lastIndexOf('$');
 
@@ -1984,7 +1971,7 @@ public final class ClassUtil {
 
                     final String tmp = res.substring(i + 1, j);
 
-                    if (tmp.substring(0, tmp.length() / 2).equals(tmp.substring(tmp.length() / 2 + 1))) {
+                    if (tmp.length() > 1 && tmp.substring(0, tmp.length() / 2).equals(tmp.substring(tmp.length() / 2 + 1))) {
                         sb.append(Strings.reverse(tmp.substring(0, tmp.length() / 2)));
                     } else {
                         sb.append(Strings.reverse(tmp));

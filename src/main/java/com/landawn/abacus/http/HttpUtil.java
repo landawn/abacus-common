@@ -152,7 +152,7 @@ public final class HttpUtil {
         contentFormat2Parser.put(ContentFormat.XML_SNAPPY, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_GZIP, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_BR, xmlParser);
-        contentFormat2Parser.put(ContentFormat.FormUrlEncoded, jsonParser);
+        contentFormat2Parser.put(ContentFormat.FORM_URL_ENCODED, jsonParser);
         contentFormat2Parser.put(ContentFormat.KRYO, kryoParser);
 
         // by default
@@ -176,7 +176,7 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.XML_SNAPPY, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.XML_GZIP, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.XML_BR, HttpHeaders.Values.APPLICATION_XML);
-        contentFormat2Type.put(ContentFormat.FormUrlEncoded, HttpHeaders.Values.APPLICATION_URL_ENCODED);
+        contentFormat2Type.put(ContentFormat.FORM_URL_ENCODED, HttpHeaders.Values.APPLICATION_URL_ENCODED);
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
@@ -1123,7 +1123,13 @@ public final class HttpUtil {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
         } catch (final IOException e) {
-            return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
+            final InputStream errorStream = connection.getErrorStream();
+
+            if (errorStream == null) {
+                return N.emptyInputStream();
+            }
+
+            return N.defaultIfNull(wrapInputStream(errorStream, contentFormat), N.emptyInputStream());
         }
     }
 
@@ -1199,9 +1205,10 @@ public final class HttpUtil {
             return defaultIfNull;
         }
 
+        final String contentTypeLowerCase = contentType.toLowerCase(Locale.ROOT);
         int fromIndex = -1;
 
-        if ((fromIndex = contentType.indexOf("charset")) >= 0) {
+        if ((fromIndex = contentTypeLowerCase.indexOf("charset")) >= 0) {
             fromIndex = contentType.indexOf('=', fromIndex);
 
             if (fromIndex < 0) {
@@ -1211,7 +1218,22 @@ public final class HttpUtil {
             fromIndex += 1;
             final int toIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
 
-            return Charset.forName(toIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, toIndex).trim());
+            String charsetName = (toIndex < 0 ? contentType.substring(fromIndex) : contentType.substring(fromIndex, toIndex)).trim();
+
+            if (charsetName.length() > 1) {
+                final char first = charsetName.charAt(0);
+                final char last = charsetName.charAt(charsetName.length() - 1);
+
+                if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+                    charsetName = charsetName.substring(1, charsetName.length() - 1).trim();
+                }
+            }
+
+            try {
+                return Charset.forName(charsetName);
+            } catch (final RuntimeException e) {
+                return defaultIfNull;
+            }
         }
 
         return defaultIfNull;
@@ -1245,7 +1267,7 @@ public final class HttpUtil {
         final TrustManager[] trustAllCerts = { new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
-                return null; // NOSONAR
+                return new X509Certificate[0];
             }
 
             @Override

@@ -26,11 +26,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <R> the type of the result of the function
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
  * @see FloatFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, RuntimeException> { //NOSONAR

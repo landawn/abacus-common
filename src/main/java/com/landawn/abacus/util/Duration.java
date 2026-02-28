@@ -1334,6 +1334,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
         if (millis > 0) {
             sb.append('.');
+
+            if (millis < 10) {
+                sb.append("00");
+            } else if (millis < 100) {
+                sb.append('0');
+            }
+
             sb.append(millis);
         }
 

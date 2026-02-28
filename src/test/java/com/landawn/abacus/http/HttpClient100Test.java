@@ -231,6 +231,17 @@ public class HttpClient100Test extends TestBase {
     }
 
     @Test
+    public void testGetHttpResponseRequestUrlContainsQueryParameters() throws IOException {
+        server.enqueue(new MockResponse().setBody("Hello World"));
+        HttpClient client = HttpClient.create(baseUrl);
+
+        HttpResponse response = client.get("param=value", HttpResponse.class);
+
+        assertNotNull(response);
+        assertTrue(response.requestUrl().contains("param=value"));
+    }
+
+    @Test
     public void testGetWithQueryParametersAndSettings() throws IOException {
         server.enqueue(new MockResponse().setBody("Hello World"));
         HttpClient client = HttpClient.create(baseUrl);
@@ -518,6 +529,22 @@ public class HttpClient100Test extends TestBase {
         assertNotNull(connection);
         String urlStr = connection.getURL().toString();
         assertTrue(urlStr.contains("param=value"));
+    }
+
+    @Test
+    public void testOpenConnectionDoesNotExhaustConnectionLimit() throws IOException {
+        HttpClient client = HttpClient.create(baseUrl, 1);
+
+        HttpURLConnection firstConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertNotNull(firstConnection);
+        firstConnection.disconnect();
+
+        HttpURLConnection secondConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertNotNull(secondConnection);
+        secondConnection.disconnect();
+
+        server.enqueue(new MockResponse().setBody("OK"));
+        assertEquals("OK", client.get());
     }
 
     @Test

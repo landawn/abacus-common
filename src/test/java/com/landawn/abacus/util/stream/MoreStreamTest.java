@@ -209,12 +209,12 @@ public class MoreStreamTest {
     }
 
     @Test
-    public void test_flattmapToObj() {
+    public void test_flatMapArrayToObj() {
         StreamEx.of(1, 2, 3).println();
         IntStream.of(1, 2, 3).mapToObj(i -> N.repeat("a", i)).println();
         IntStream.of(1, 2, 3).mapToObj(i -> Array.repeat("a", i)).println();
         IntStream.of(1, 2, 3).flatmapToObj(i -> N.repeat("a", i)).println();
-        IntStream.of(1, 2, 3).flattmapToObj(i -> Array.repeat("a", i)).println();
+        IntStream.of(1, 2, 3).flatMapArrayToObj(i -> Array.repeat("a", i)).println();
 
         IntStream.range(0, 100).map(i -> i % 11).boxed().groupBy(Fn.identity(), i -> i + "a").println();
     }
@@ -1143,7 +1143,7 @@ public class MoreStreamTest {
     @Test
     public void test_groupBy() {
         assertEquals("a=[a], b=[b], c=[c]", Stream.of("a", "b", "c").groupBy(e -> e).join(", "));
-        assertEquals("a=[a], b=[b], c=[c]", Joiner.defauLt().appendEntries(Stream.of("a", "b", "c").groupTo(e -> e)).toString());
+        assertEquals("a=[a], b=[b], c=[c]", Joiner.withDefault().appendEntries(Stream.of("a", "b", "c").groupTo(e -> e)).toString());
 
         Stream.of("a", "b", "c").groupBy(e -> e, Collectors.toSet()).forEach(N::println);
         Stream.of("a", "b", "c", "b").groupBy(e -> e, Collectors.toSet()).forEach(N::println);

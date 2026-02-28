@@ -1105,7 +1105,7 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set<String> names = headers.headerNameSet();
+     * Set<String> names = headers.headerNames();
      * for (String name : names) {
      *     System.out.println(name + ": " + headers.get(name));
      * }
@@ -1113,7 +1113,7 @@ public final class HttpHeaders {
      *
      * @return a set view of the header names backed by the underlying map
      */
-    public Set<String> headerNameSet() {
+    public Set<String> headerNames() {
         return map.keySet();
     }
 

@@ -129,7 +129,7 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testSlidingMap() {
         stream = createStream(1, 2, 3, 4);
-        Stream<Integer> result = stream.slidingMap((a, b) -> a + b);
+        Stream<Integer> result = stream.slidingMap((a, b) -> a + (b == null ? 0 : b));
         assertEquals(Arrays.asList(3, 5, 7), result.toList());
     }
 
@@ -143,7 +143,7 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testSlidingMapTriFunction() {
         stream = createStream(1, 2, 3, 4, 5);
-        Stream<Integer> result = stream.slidingMap((a, b, c) -> a + b + c);
+        Stream<Integer> result = stream.slidingMap((a, b, c) -> a + (b == null ? 0 : b) + (c == null ? 0 : c));
         assertEquals(Arrays.asList(6, 9, 12), result.toList());
     }
 
@@ -200,22 +200,22 @@ public class AbstractStream103Test extends TestBase {
     public void testFlattMap() {
         {
             stream = createStream(1, 2, 3);
-            Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
+            Stream<Integer> result = stream.flatMapArray(i -> new Integer[] { i, i * 10 });
             assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
         }
         {
             stream = createStream(1, 2, 3);
-            Stream<Integer> result = stream.parallel().flattmap(i -> new Integer[] { i, i * 10 });
+            Stream<Integer> result = stream.parallel().flatMapArray(i -> new Integer[] { i, i * 10 });
             assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
         }
         {
             stream = createStream(1, 2, 3).map(e -> e);
-            Stream<Integer> result = stream.flattmap(i -> new Integer[] { i, i * 10 });
+            Stream<Integer> result = stream.flatMapArray(i -> new Integer[] { i, i * 10 });
             assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
         }
         {
             stream = createStream(1, 2, 3).map(e -> e);
-            Stream<Integer> result = stream.parallel().flattmap(i -> new Integer[] { i, i * 10 });
+            Stream<Integer> result = stream.parallel().flatMapArray(i -> new Integer[] { i, i * 10 });
             assertHaveSameElements(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
         }
     }

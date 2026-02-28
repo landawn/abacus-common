@@ -336,7 +336,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
             return true;
         }
 
-        return obj instanceof ImmutableCollection ic && coll.equals(ic.coll);
+        if (obj instanceof ImmutableCollection ic) {
+            return coll.equals(ic.coll);
+        }
+
+        return coll.equals(obj);
     }
 
     /**

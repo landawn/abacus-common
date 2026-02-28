@@ -26,7 +26,7 @@ public class EventBus2025Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        eventBus = new EventBus();
+        eventBus = EventBus.create();
     }
 
     @AfterEach
@@ -45,7 +45,7 @@ public class EventBus2025Test extends TestBase {
 
     @Test
     public void testConstructorWithIdentifier() {
-        EventBus bus = new EventBus("testBus");
+        EventBus bus = EventBus.create("testBus");
         assertEquals("testBus", bus.identifier());
     }
 
@@ -89,7 +89,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.register(subscriber, "testId");
         eventBus.post("hello");
 
-        assertNull(result.get());   // Should not receive without matching event ID
+        assertNull(result.get()); // Should not receive without matching event ID
     }
 
     @Test
@@ -127,11 +127,33 @@ public class EventBus2025Test extends TestBase {
     }
 
     @Test
+    public void testStickyEventWithEmptyEventIdBehavesAsNoEventId() {
+        eventBus.postSticky("", "sticky message");
+
+        AtomicReference<String> result = new AtomicReference<>();
+        Object handler = new Object() {
+            @Subscribe(sticky = true)
+            public void handle(String event) {
+                result.set(event);
+            }
+        };
+
+        eventBus.register(handler);
+        assertEquals("sticky message", result.get());
+        assertEquals(1, eventBus.getStickyEvents("", String.class).size());
+        assertEquals(1, eventBus.getStickyEvents(String.class).size());
+        assertTrue(eventBus.removeStickyEvent("", "sticky message"));
+        assertTrue(eventBus.getStickyEvents(String.class).isEmpty());
+
+        eventBus.unregister(handler);
+    }
+
+    @Test
     public void testRemoveStickyEvent() {
         String event = "sticky";
         eventBus.postSticky(event);
         assertTrue(eventBus.removeStickyEvent(event));
-        assertFalse(eventBus.removeStickyEvent(event));   // Already removed
+        assertFalse(eventBus.removeStickyEvent(event)); // Already removed
     }
 
     @Test
@@ -181,7 +203,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.register(handler);
         eventBus.post("async event");
 
-        Thread.sleep(100);   // Wait for async execution
+        Thread.sleep(100); // Wait for async execution
         assertEquals("async event", result.get());
         assertNotEquals(Thread.currentThread().getName(), threadName.get());
 
@@ -226,6 +248,15 @@ public class EventBus2025Test extends TestBase {
         assertTrue(eventBus.removeStickyEvents("eventId", String.class));
         List<Object> events = eventBus.getStickyEvents("eventId", String.class);
         assertEquals(0, events.size());
+    }
+
+    @Test
+    public void testRemoveStickyEventsWithEmptyEventIdBehavesAsNoEventId() {
+        eventBus.postSticky("", "test1");
+        eventBus.postSticky("", "test2");
+
+        assertTrue(eventBus.removeStickyEvents("", String.class));
+        assertEquals(0, eventBus.getStickyEvents("", String.class).size());
     }
 
     static class TestHandler {

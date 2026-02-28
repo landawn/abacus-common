@@ -77,20 +77,20 @@ public class Seq104Test extends TestBase {
     @Test
     public void testNMatch() {
         Seq<Integer, RuntimeException> seq1 = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq1.nMatch(2, 4, n -> n % 2 == 0));
+        assertTrue(seq1.countMatchBetween(2, 4, n -> n % 2 == 0));
 
         Seq<Integer, RuntimeException> seq2 = Seq.of(1, 2, 3);
-        assertFalse(seq2.nMatch(2, 4, n -> n % 2 == 0));
+        assertFalse(seq2.countMatchBetween(2, 4, n -> n % 2 == 0));
 
         Seq<Integer, RuntimeException> seq3 = Seq.of(2, 4, 6, 8, 10);
-        assertFalse(seq3.nMatch(2, 4, n -> n % 2 == 0));
+        assertFalse(seq3.countMatchBetween(2, 4, n -> n % 2 == 0));
 
-        assertFalse(Seq.<Integer, RuntimeException> empty().nMatch(1, 2, n -> n % 2 == 0));
-        assertTrue(Seq.<Integer, RuntimeException> empty().nMatch(0, 0, n -> n % 2 == 0));
+        assertFalse(Seq.<Integer, RuntimeException> empty().countMatchBetween(1, 2, n -> n % 2 == 0));
+        assertTrue(Seq.<Integer, RuntimeException> empty().countMatchBetween(0, 0, n -> n % 2 == 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).nMatch(-1, 2, n -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).nMatch(2, -1, n -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).nMatch(3, 2, n -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).countMatchBetween(-1, 2, n -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).countMatchBetween(2, -1, n -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).countMatchBetween(3, 2, n -> true));
     }
 
     @Test

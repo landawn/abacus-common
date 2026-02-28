@@ -27,6 +27,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object, Object)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <A> the type of the first argument to the operation
  * @param <B> the type of the second argument to the operation
  * @param <C> the type of the third argument to the operation
@@ -34,8 +37,6 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see TriConsumer
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> { //NOSONAR

@@ -449,15 +449,15 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlParser parser = ParserFactory.createJAXBParser();
+     * XmlParser parser = ParserFactory.createJaxbParser();
      * // Use with JAXB-annotated classes
      * }</pre>
      *
      * @return a new JAXB {@link XmlParser} instance
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XmlParser createJAXBParser() {
-        return new JAXBParser();
+    public static XmlParser createJaxbParser() {
+        return new JaxbParser();
     }
 
     /**
@@ -468,7 +468,7 @@ public final class ParserFactory {
      * <pre>{@code
      * XmlSerializationConfig xsc = new XmlSerializationConfig().prettyFormat(true);
      * XmlDeserializationConfig xdc = new XmlDeserializationConfig();
-     * XmlParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+     * XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
      * }</pre>
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
@@ -476,8 +476,8 @@ public final class ParserFactory {
      * @return a new JAXB {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XmlParser createJAXBParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
-        return new JAXBParser(xsc, xdc);
+    public static XmlParser createJaxbParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+        return new JaxbParser(xsc, xdc);
     }
 
     /**

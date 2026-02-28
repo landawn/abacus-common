@@ -1334,22 +1334,22 @@ public class Seq200Test extends TestBase {
     }
 
     @Test
-    public void test_nMatch() throws Exception {
+    public void test_countMatchBetween() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.nMatch(3, 3, x -> x % 2 == 0));
+        assertTrue(seq.countMatchBetween(3, 3, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.nMatch(2, 2, x -> x % 2 == 0));
+        assertFalse(seq.countMatchBetween(2, 2, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.nMatch(1, 5, x -> x % 2 == 0));
+        assertTrue(seq.countMatchBetween(1, 5, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.nMatch(4, 5, x -> x % 2 == 0));
+        assertFalse(seq.countMatchBetween(4, 5, x -> x % 2 == 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).nMatch(-1, 1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).nMatch(1, -1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).nMatch(2, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(-1, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(1, -1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(2, 1, x -> true));
     }
 
     @Test
@@ -2188,11 +2188,11 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_delay() throws Exception {
         long startTime = System.currentTimeMillis();
-        Seq<Integer, Exception> seq = Seq.of(1, 2).delay(Duration.ofMillis(10));
+        Seq<Integer, Exception> seq = Seq.of(1, 2).delay(Duration.ofMillis(100));
         List<Integer> result = drainWithException(seq);
         long endTime = System.currentTimeMillis();
         assertEquals(Arrays.asList(1, 2), result);
-        assertTrue(endTime - startTime < 15, "Should have some delay, approx 20ms for 2 elements. Actual: " + (endTime - startTime));
+        assertTrue(endTime - startTime < 150, "Should have some delay, approx 200ms for 2 elements. Actual: " + (endTime - startTime));
     }
 
     @Test

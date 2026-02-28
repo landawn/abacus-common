@@ -527,7 +527,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final DatumReader<Object> datumReader = new GenericDatumReader<>(schema);
 
             try (DataFileStream<Object> dataFileReader = new DataFileStream<>(source, datumReader)) {
-                if (targetClass.isAssignableFrom(GenericRecord.class)) {
+                if (GenericRecord.class.isAssignableFrom(targetClass)) {
                     return (T) (dataFileReader.hasNext() ? dataFileReader.next() : null);
                 } else if (targetType.isBean() || targetType.isMap()) {
                     return dataFileReader.hasNext() ? fromGenericRecord((GenericRecord) dataFileReader.next(), targetClass) : null;

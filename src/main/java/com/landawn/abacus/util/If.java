@@ -296,7 +296,7 @@ public final class If {
 
     final boolean b; // change to package-private for testing purposes
 
-    If(final boolean b) {
+    private If(final boolean b) {
         this.b = b;
     }
 

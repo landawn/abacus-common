@@ -215,6 +215,15 @@ public class HBaseColumn100Test extends TestBase {
     }
 
     @Test
+    public void testCompareToWithSameVersionDifferentValues() {
+        HBaseColumn<String> col1 = new HBaseColumn<>("a", 100L);
+        HBaseColumn<String> col2 = new HBaseColumn<>("b", 100L);
+
+        Assertions.assertNotEquals(0, col1.compareTo(col2));
+        Assertions.assertNotEquals(0, col2.compareTo(col1));
+    }
+
+    @Test
     public void testHashCode() {
         HBaseColumn<String> col1 = new HBaseColumn<>("test", 12345L);
         HBaseColumn<String> col2 = new HBaseColumn<>("test", 12345L);

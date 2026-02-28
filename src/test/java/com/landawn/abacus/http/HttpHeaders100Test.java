@@ -308,7 +308,7 @@ public class HttpHeaders100Test extends TestBase {
         headers.set("Header1", "value1");
         headers.set("Header2", "value2");
 
-        Set<String> names = headers.headerNameSet();
+        Set<String> names = headers.headerNames();
         assertEquals(2, names.size());
         assertTrue(names.contains("Header1"));
         assertTrue(names.contains("Header2"));

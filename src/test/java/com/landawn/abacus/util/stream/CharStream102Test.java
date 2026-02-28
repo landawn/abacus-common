@@ -2279,24 +2279,24 @@ public class CharStream102Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmapToObjArray() {
-        assertEquals(6, CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).count());
-        assertEquals(4, CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).count());
+        assertEquals(6, CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
+        assertEquals(4, CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3" },
-                CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toArray(String[]::new));
+                CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray(String[]::new));
         assertArrayEquals(new String[] { "A2", "B2", "A3", "B3" },
-                CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toArray(String[]::new));
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toList());
-        assertEquals(N.asList("A2", "B2", "A3", "B3"), CharStream.of('1', '2', '3').flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toList());
-        assertEquals(6, CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).count());
-        assertEquals(4, CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).count());
+                CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toArray(String[]::new));
+        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
+        assertEquals(N.asList("A2", "B2", "A3", "B3"), CharStream.of('1', '2', '3').flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toList());
+        assertEquals(6, CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
+        assertEquals(4, CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3" },
-                CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toArray(String[]::new));
+                CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray(String[]::new));
         assertArrayEquals(new String[] { "A2", "B2", "A3", "B3" },
-                CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toArray(String[]::new));
+                CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toArray(String[]::new));
         assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"),
-                CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).toList());
+                CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
         assertEquals(N.asList("A2", "B2", "A3", "B3"),
-                CharStream.of('1', '2', '3').map(e -> e).flattmapToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toList());
+                CharStream.of('1', '2', '3').map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(2).toList());
     }
 
 }

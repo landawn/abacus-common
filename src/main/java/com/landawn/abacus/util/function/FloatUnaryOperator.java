@@ -23,11 +23,12 @@ import com.landawn.abacus.util.Throwables;
  * This is also a specialization of {@link FloatFunction} for the case where the operand and result
  * are of the same primitive type.</p>
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.UnaryOperator
  * @see java.util.function.DoubleUnaryOperator
  * @see java.util.function.IntUnaryOperator
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR

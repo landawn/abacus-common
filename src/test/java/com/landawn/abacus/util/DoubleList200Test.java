@@ -150,11 +150,11 @@ public class DoubleList200Test extends TestBase {
     @Test
     public void testDeleteAndRange() {
         DoubleList list = DoubleList.of(1.1, 2.2, 3.3, 4.4, 5.5);
-        double deleted = list.delete(2);
+        double deleted = list.removeAt(2);
         assertEquals(3.3, deleted, delta);
         assertArrayEquals(new double[] { 1.1, 2.2, 4.4, 5.5 }, list.toArray(), delta);
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertArrayEquals(new double[] { 1.1, 5.5 }, list.toArray(), delta);
     }
 

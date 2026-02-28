@@ -490,7 +490,7 @@ public class BooleanList2025Test extends TestBase {
     @Test
     public void test_delete() {
         BooleanList list = BooleanList.of(true, false, true);
-        boolean deleted = list.delete(1);
+        boolean deleted = list.removeAt(1);
         assertFalse(deleted);
         assertEquals(2, list.size());
         assertTrue(list.get(0));
@@ -500,13 +500,13 @@ public class BooleanList2025Test extends TestBase {
     @Test
     public void test_delete_outOfBounds() {
         BooleanList list = BooleanList.of(true, false);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
 
     @Test
-    public void test_deleteAllByIndices() {
+    public void test_removeAt() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertTrue(list.get(0));
         assertTrue(list.get(1));
@@ -514,39 +514,39 @@ public class BooleanList2025Test extends TestBase {
     }
 
     @Test
-    public void test_deleteAllByIndices_empty() {
+    public void test_removeAt_empty() {
         BooleanList list = BooleanList.of(true, false);
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(2, list.size());
     }
 
     @Test
-    public void test_deleteRange() {
+    public void test_removeRange() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertTrue(list.get(0));
         assertTrue(list.get(1));
     }
 
     @Test
-    public void test_deleteRange_sameIndices() {
+    public void test_removeRange_sameIndices() {
         BooleanList list = BooleanList.of(true, false);
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(2, list.size());
     }
 
     @Test
-    public void test_deleteRange_invalid() {
+    public void test_removeRange_invalid() {
         BooleanList list = BooleanList.of(true, false);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(0, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
     }
 
     @Test
     public void test_moveRange() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.moveRange(1, 3, 2);   // true, false, false, true, true
+        list.moveRange(1, 3, 2); // true, false, false, true, true
         assertEquals(BooleanList.of(true, false, false, true, true), list);
     }
 

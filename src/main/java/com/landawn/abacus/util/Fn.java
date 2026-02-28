@@ -129,9 +129,6 @@ import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Stream;
 
-//Claude Opus 4 and generate the Javadoc with blow prompts 
-// Please generate comprehensive javadoc for all public methods starting from line 6 in Fn.java, including public static methods. Please use javadoc of method "toStr()" as a template to generate javadoc for other methods. Please don't take shortcut. The generated javadoc should be specific and details enough to describe the behavior of the method. And merge the generated javadoc into source file Fn.java to replace existing javadoc in Fn.java. Don't generate javadoc for method which is not found in Fn.java. Remember don't use any cache file because I have modified Fn.java. Again, don't generate javadoc for the method which is not in the attached file. Please read and double check if the method is in the attached file before starting to generate javadoc. If the method is not the attached file, don't generate javadoc for it.
-
 /**
  * A comprehensive factory utility class providing static methods for creating and manipulating
  * standard Java functional interfaces. This final class serves as the primary toolkit for
@@ -461,7 +458,7 @@ public final class Fn {
     private static final Function<Collection, Integer> SIZE = t -> t == null ? 0 : t.size();
 
     @SuppressWarnings("rawtypes")
-    private static final Function<Map, Integer> SIZE_MAP = t -> t == null ? 0 : t.size();
+    private static final Function<Map, Integer> MAP_SIZE = t -> t == null ? 0 : t.size();
 
     static final Function<Map.Entry<Object, Object>, Object> KEY = Entry::getKey;
 
@@ -820,21 +817,21 @@ public final class Fn {
 
     private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
 
-    static final Predicate<Object[]> IS_EMPTY_A = value -> value == null || value.length == 0;
+    static final Predicate<Object[]> IS_EMPTY_ARRAY = value -> value == null || value.length == 0;
 
     @SuppressWarnings("rawtypes")
-    static final Predicate<Collection> IS_EMPTY_C = value -> value == null || value.size() == 0;
+    static final Predicate<Collection> IS_EMPTY_COLLECTION = value -> value == null || value.size() == 0;
 
     @SuppressWarnings("rawtypes")
-    static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.isEmpty();
+    static final Predicate<Map> IS_EMPTY_MAP = value -> value == null || value.isEmpty();
 
-    static final Predicate<Object[]> NOT_EMPTY_A = value -> value != null && value.length > 0;
-
-    @SuppressWarnings("rawtypes")
-    static final Predicate<Collection> NOT_EMPTY_C = value -> value != null && value.size() > 0;
+    static final Predicate<Object[]> NOT_EMPTY_ARRAY = value -> value != null && value.length > 0;
 
     @SuppressWarnings("rawtypes")
-    static final Predicate<Map> NOT_EMPTY_M = value -> value != null && !value.isEmpty();
+    static final Predicate<Collection> NOT_EMPTY_COLLECTION = value -> value != null && value.size() > 0;
+
+    @SuppressWarnings("rawtypes")
+    static final Predicate<Map> NOT_EMPTY_MAP = value -> value != null && !value.isEmpty();
 
     private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::flatToMap;
 
@@ -1879,9 +1876,10 @@ public final class Fn {
      * @return a Function that returns Map size
      * @see Map#size()
      */
+    @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map> Function<T, Integer> sizeM() {
-        return (Function<T, Integer>) SIZE_MAP;
+    public static <T extends Map> Function<T, Integer> mapSize() {
+        return (Function<T, Integer>) MAP_SIZE;
     }
 
     /**
@@ -2013,7 +2011,7 @@ public final class Fn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<T[]> isEmptyArray() {
-        return (Predicate) IS_EMPTY_A;
+        return (Predicate) IS_EMPTY_ARRAY;
     }
 
     /**
@@ -2025,7 +2023,7 @@ public final class Fn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Predicate<T> isEmptyCollection() {
-        return (Predicate<T>) IS_EMPTY_C;
+        return (Predicate<T>) IS_EMPTY_COLLECTION;
     }
 
     /**
@@ -2037,7 +2035,7 @@ public final class Fn {
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Predicate<T> isEmptyMap() {
-        return (Predicate<T>) IS_EMPTY_M;
+        return (Predicate<T>) IS_EMPTY_MAP;
     }
 
     /**
@@ -2129,8 +2127,8 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<T[]> notEmptyA() {
-        return (Predicate) NOT_EMPTY_A;
+    public static <T> Predicate<T[]> notEmptyArray() {
+        return (Predicate) NOT_EMPTY_ARRAY;
     }
 
     /**
@@ -2141,8 +2139,8 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection> Predicate<T> notEmptyC() {
-        return (Predicate<T>) NOT_EMPTY_C;
+    public static <T extends Collection> Predicate<T> notEmptyCollection() {
+        return (Predicate<T>) NOT_EMPTY_COLLECTION;
     }
 
     /**
@@ -2153,8 +2151,8 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map> Predicate<T> notEmptyM() {
-        return (Predicate<T>) NOT_EMPTY_M;
+    public static <T extends Map> Predicate<T> notEmptyMap() {
+        return (Predicate<T>) NOT_EMPTY_MAP;
     }
 
     /**
@@ -4597,7 +4595,7 @@ public final class Fn {
      * @param cmp the Comparator to use (uses natural order if null)
      * @return a Function that compares its input to the target using the comparator
      */
-    public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
 
         final Comparator<? super T> cmpToUse = cmp == null ? (Comparator<? super T>) Comparators.naturalOrder() : cmp;
@@ -4629,7 +4627,7 @@ public final class Fn {
      * @param cmp the Comparator to use (uses natural order if null)
      * @return a BiFunction that compares two values using the comparator
      */
-    public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
 
         if (cmp == null || cmp == Comparators.naturalOrder()) { // NOSONAR
@@ -7493,6 +7491,7 @@ public final class Fn {
          * @param <T> the type of PrimitiveList
          * @return a BiConsumer that adds all elements from the second PrimitiveList to the first PrimitiveList
          */
+        @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofAddAlll() {
             return (BiConsumer<T, T>) ADD_ALL_2;
@@ -7529,6 +7528,7 @@ public final class Fn {
          * @param <T> the type of PrimitiveList
          * @return a BiConsumer that removes all elements in the second PrimitiveList from the first PrimitiveList
          */
+        @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofRemoveAlll() {
             return (BiConsumer<T, T>) REMOVE_ALL_2;
@@ -7799,6 +7799,7 @@ public final class Fn {
          * @param <T> the type of PrimitiveList
          * @return a BiFunction that adds all elements from the second PrimitiveList to the first and returns the first list
          */
+        @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofAddAlll() {
             return (BiFunction<T, T, T>) ADD_ALL_2;
@@ -7835,6 +7836,7 @@ public final class Fn {
          * @param <T> the type of PrimitiveList
          * @return a BiFunction that removes all elements in the second PrimitiveList from the first and returns the first list
          */
+        @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofRemoveAlll() {
             return (BiFunction<T, T, T>) REMOVE_ALL_2;
@@ -8036,7 +8038,7 @@ public final class Fn {
             if (t.length() >= u.length()) {
                 return t.append(u);
             } else {
-                return u.append(t);
+                return u.insert(0, t);
             }
         };
 

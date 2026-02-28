@@ -65,7 +65,7 @@ class WebUtilTest {
 
     @Test
     public void test_sendRequestByHAR() {
-        HARUtil.logRequestCurlForHARRequest(true, '"');
+        HARUtil.logCurl(true, '"');
         File file = new File("./src/test/resources/sjpermits.org.har");
         final String targetUrl = "https://sjpermits.org/permits/ir/detail_5.asp";
 

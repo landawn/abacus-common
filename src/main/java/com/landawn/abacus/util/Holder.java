@@ -515,6 +515,7 @@ public final class Holder<T> implements Mutable {
      * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null} and must not return {@code null}.
      * @return an {@code Optional} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Optional}.
      * @throws IllegalArgumentException if the mapper is {@code null}.
+     * @throws NullPointerException if the mapping function returns {@code null}.
      * @throws E if the mapping function throws an exception.
      */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)

@@ -264,7 +264,7 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testSizeM() {
-        Function<Map<String, Integer>, Integer> sizeM = Fn.sizeM();
+        Function<Map<String, Integer>, Integer> sizeM = Fn.mapSize();
 
         Map<String, Integer> map = new HashMap<>();
         assertEquals(Integer.valueOf(0), sizeM.apply(map));
@@ -396,32 +396,32 @@ public class Fn101Test extends TestBase {
 
     @Test
     public void testNotEmptyA() {
-        Predicate<String[]> notEmptyA = Fn.notEmptyA();
+        Predicate<String[]> notEmptyArray = Fn.notEmptyArray();
 
-        assertFalse(notEmptyA.test(new String[0]));
-        assertFalse(notEmptyA.test(null));
-        assertTrue(notEmptyA.test(new String[] { "a" }));
+        assertFalse(notEmptyArray.test(new String[0]));
+        assertFalse(notEmptyArray.test(null));
+        assertTrue(notEmptyArray.test(new String[] { "a" }));
     }
 
     @Test
     public void testNotEmptyC() {
-        Predicate<Collection<String>> notEmptyC = Fn.notEmptyC();
+        Predicate<Collection<String>> notEmptyCollection = Fn.notEmptyCollection();
 
-        assertFalse(notEmptyC.test(new ArrayList<>()));
-        assertFalse(notEmptyC.test(null));
-        assertTrue(notEmptyC.test(Arrays.asList("a")));
+        assertFalse(notEmptyCollection.test(new ArrayList<>()));
+        assertFalse(notEmptyCollection.test(null));
+        assertTrue(notEmptyCollection.test(Arrays.asList("a")));
     }
 
     @Test
     public void testNotEmptyM() {
-        Predicate<Map<String, Integer>> notEmptyM = Fn.notEmptyM();
+        Predicate<Map<String, Integer>> notEmptyMap = Fn.notEmptyMap();
 
-        assertFalse(notEmptyM.test(new HashMap<>()));
-        assertFalse(notEmptyM.test(null));
+        assertFalse(notEmptyMap.test(new HashMap<>()));
+        assertFalse(notEmptyMap.test(null));
 
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
-        assertTrue(notEmptyM.test(map));
+        assertTrue(notEmptyMap.test(map));
     }
 
     @Test

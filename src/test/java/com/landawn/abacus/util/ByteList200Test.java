@@ -392,14 +392,14 @@ public class ByteList200Test extends TestBase {
     public void testDeleteMethods() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
 
-        byte deleted = list.delete(1);
+        byte deleted = list.removeAt(1);
         assertEquals((byte) 2, deleted);
         assertArrayEquals(new byte[] { 1, 3, 4, 5, 6 }, list.toArray());
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertArrayEquals(new byte[] { 1, 5, 6 }, list.toArray());
 
-        list.deleteAllByIndices(0, 2);
+        list.removeAt(0, 2);
         assertArrayEquals(new byte[] { 5 }, list.toArray());
     }
 

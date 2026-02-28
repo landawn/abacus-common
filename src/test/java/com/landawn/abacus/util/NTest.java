@@ -596,7 +596,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_delete() {
         final int[] a = { 1, 2, 3, 4, 5 };
-        final int[] b = N.deleteAllByIndices(a, 0, 0, 1, 3);
+        final int[] b = N.removeAt(a, 0, 0, 1, 3);
         assertTrue(CommonUtil.equals(Array.of(3, 5), b));
     }
 
@@ -1217,7 +1217,7 @@ public class NTest extends AbstractParserTest {
     public void test_stringSplit() {
         final String str = "123, daskf32rfasdf, sf3qijfdlsafj23i9jqfl;sdjfawdfs, akfj3iq2pflsefj32ijrlqawdfjiq2, i3q2jfals;dfj32i9qjfsdk, askdaf";
 
-        Profiler.run(1, 1000, 1, () -> Splitter.defauLt().splitToArray(str)).printResult();
+        Profiler.run(1, 1000, 1, () -> Splitter.withDefault().splitToArray(str)).printResult();
     }
 
     @Test
@@ -2744,17 +2744,17 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testString2Array() {
-        N.println(Splitter.defauLt().splitToArray("a, b, c", char[].class));
-        N.println(Splitter.defauLt().splitToArray("1, 2, 3", byte[].class));
-        N.println(Splitter.defauLt().splitToArray("1, 2, 3", int[].class));
+        N.println(Splitter.withDefault().splitToArray("a, b, c", char[].class));
+        N.println(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class));
+        N.println(Splitter.withDefault().splitToArray("1, 2, 3", int[].class));
     }
 
     @Test
     public void testStringOf() {
-        N.println(CommonUtil.stringOf(Splitter.defauLt().splitToArray(CommonUtil.stringOf(Dates.currentDate()), Date[].class)));
-        N.println(CommonUtil.stringOf(Splitter.defauLt().splitToArray("a, b, c", char[].class)));
-        N.println(CommonUtil.stringOf(Splitter.defauLt().splitToArray("1, 2, 3", byte[].class)));
-        N.println(CommonUtil.stringOf(Splitter.defauLt().splitToArray("1, 2, 3", int[].class)));
+        N.println(CommonUtil.stringOf(Splitter.withDefault().splitToArray(CommonUtil.stringOf(Dates.currentDate()), Date[].class)));
+        N.println(CommonUtil.stringOf(Splitter.withDefault().splitToArray("a, b, c", char[].class)));
+        N.println(CommonUtil.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class)));
+        N.println(CommonUtil.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", int[].class)));
     }
 
     @Test

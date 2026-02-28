@@ -80,7 +80,7 @@ public final class HARUtil {
         }
     };
 
-    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<? super String>>> logRequestCurlForHARRequest_TL = ThreadLocal //NOSONAR
+    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<? super String>>> logCurl_TL = ThreadLocal //NOSONAR
             .withInitial(() -> Tuple.of(false, '\'', defaultCurlLogHandler));
 
     /**
@@ -95,15 +95,14 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Exclude authorization headers when replaying requests
-     * HARUtil.setHttpHeaderFilterForHARRequest((name, value) -> 
+     * HARUtil.setHeaderFilter((name, value) -> 
      *     !name.equalsIgnoreCase("Authorization"));
      * }</pre>
      * 
      * @param httpHeaderFilterForHARRequest the filter to apply to headers, must not be null
      * @throws IllegalArgumentException if httpHeaderFilterForHARRequest is null
      */
-    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest)
-            throws IllegalArgumentException {
+    public static void setHeaderFilter(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
         N.checkArgNotNull(httpHeaderFilterForHARRequest, cs.httpHeaderFilterForHARRequest);
 
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
@@ -120,10 +119,10 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.resetHttpHeaderFilterForHARRequest();
+     * HARUtil.resetHeaderFilter();
      * }</pre>
      */
-    public static void resetHttpHeaderFilterForHARRequest() {
+    public static void resetHeaderFilter() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
     }
 
@@ -139,15 +138,15 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.logRequestCurlForHARRequest(true);
+     * HARUtil.logCurl(true);
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
-     * @see #logRequestCurlForHARRequest(boolean, char)
-     * @see #logRequestCurlForHARRequest(boolean, char, Consumer)
+     * @see #logCurl(boolean, char)
+     * @see #logCurl(boolean, char, Consumer)
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest) {
-        logRequestCurlForHARRequest(logRequest, '\'');
+    public static void logCurl(final boolean logRequest) {
+        logCurl(logRequest, '\'');
     }
 
     /**
@@ -158,16 +157,16 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.logRequestCurlForHARRequest(true, '"');
+     * HARUtil.logCurl(true, '"');
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands (typically ' or ")
-     * @see #logRequestCurlForHARRequest(boolean)
-     * @see #logRequestCurlForHARRequest(boolean, char, Consumer)
+     * @see #logCurl(boolean)
+     * @see #logCurl(boolean, char, Consumer)
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar) {
-        logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, defaultCurlLogHandler));
+    public static void logCurl(final boolean logRequest, final char quoteChar) {
+        logCurl_TL.set(Tuple.of(logRequest, quoteChar, defaultCurlLogHandler));
     }
 
     /**
@@ -179,7 +178,7 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
-     * HARUtil.logRequestCurlForHARRequest(true, '"', curl -> {
+     * HARUtil.logCurl(true, '"', curl -> {
      *     try {
      *         Files.write(Paths.get("curl-commands.txt"),
      *                 (curl + "\n").getBytes(),
@@ -193,12 +192,12 @@ public final class HARUtil {
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands
      * @param logHandler the consumer that will handle the generated curl command strings
-     * @see #logRequestCurlForHARRequest(boolean)
-     * @see #logRequestCurlForHARRequest(boolean, char)
+     * @see #logCurl(boolean)
+     * @see #logCurl(boolean, char)
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
+    public static void logCurl(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
         N.checkArgNotNull(logHandler, "logHandler");
-        logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
+        logCurl_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
 
     /**
@@ -460,7 +459,7 @@ public final class HARUtil {
      * @throws RuntimeException if the HTTP request execution fails
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
-        final String url = getUrlByRequestEntry(requestEntry);
+        final String url = getURLByRequestEntry(requestEntry);
         final HttpMethod httpMethod = getHttpMethodByRequestEntry(requestEntry);
 
         final HttpHeaders httpHeaders = getHeadersByRequestEntry(requestEntry);
@@ -472,7 +471,7 @@ public final class HARUtil {
             WebUtil.setContentTypeByRequestBodyType(bodyContentType, httpHeaders);
         }
 
-        final Tuple3<Boolean, Character, Consumer<? super String>> tp = logRequestCurlForHARRequest_TL.get();
+        final Tuple3<Boolean, Character, Consumer<? super String>> tp = logCurl_TL.get();
 
         if (tp._1 && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
             tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyContentType, tp._2));
@@ -489,13 +488,13 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByURLFromHAR(
      *     new File("capture.har"),
      *     url -> url.contains("/api/users")
      * );
      *
      * requestOpt.ifPresent(request -> {
-     *     String url = HARUtil.getUrlByRequestEntry(request);
+     *     String url = HARUtil.getURLByRequestEntry(request);
      *     HttpMethod method = HARUtil.getHttpMethodByRequestEntry(request);
      *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
      *     System.out.println("Found request: " + method + " " + url);
@@ -506,8 +505,8 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs
      * @return an Optional containing the first matching request entry map, or empty if no match is found
      */
-    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return getRequestEntryByUrlFromHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static Optional<Map<String, Object>> getRequestEntryByURLFromHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return getRequestEntryByURLFromHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -519,7 +518,7 @@ public final class HARUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByURLFromHAR(
      *     harContent, 
      *     url -> url.endsWith("/login")
      * );
@@ -536,7 +535,7 @@ public final class HARUtil {
      * @return an Optional containing the first matching request entry map, or empty if no match is found
      */
     @SuppressWarnings("rawtypes")
-    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static Optional<Map<String, Object>> getRequestEntryByURLFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -551,13 +550,13 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String url = HARUtil.getUrlByRequestEntry(requestEntry);
+     * String url = HARUtil.getURLByRequestEntry(requestEntry);
      * }</pre>
      * 
      * @param requestEntry the HAR request entry map
      * @return the URL string from the request entry
      */
-    public static String getUrlByRequestEntry(final Map<String, Object> requestEntry) {
+    public static String getURLByRequestEntry(final Map<String, Object> requestEntry) {
         return (String) requestEntry.get("url");
     }
 
@@ -587,7 +586,7 @@ public final class HARUtil {
      * configured header filter to determine which headers should be included.
      * Headers that don't pass the filter are excluded from the returned HttpHeaders object.</p>
      * 
-     * <p>The header filter can be configured using {@link #setHttpHeaderFilterForHARRequest(BiPredicate)}.</p>
+     * <p>The header filter can be configured using {@link #setHeaderFilter(BiPredicate)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

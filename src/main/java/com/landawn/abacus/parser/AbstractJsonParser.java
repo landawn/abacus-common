@@ -103,8 +103,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = parser.readString("{\"name\":\"John\",\"age\":30}", Type.of(User.class));
-     * List<String> names = parser.readString("[\"Alice\",\"Bob\"]", Type.of(List.class));
+     * User user = parser.parse("{\"name\":\"John\",\"age\":30}", Type.of(User.class));
+     * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", Type.of(List.class));
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -115,8 +115,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T readString(final String source, final Type<? extends T> targetType) {
-        return readString(source, null, targetType);
+    public <T> T parse(final String source, final Type<? extends T> targetType) {
+        return parse(source, null, targetType);
     }
 
     /**
@@ -125,8 +125,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = parser.readString("{\"name\":\"John\",\"age\":30}", User.class);
-     * List<String> names = parser.readString("[\"Alice\",\"Bob\"]", List.class);
+     * User user = parser.parse("{\"name\":\"John\",\"age\":30}", User.class);
+     * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", List.class);
      * }</pre>
      *
      * @param <T> the type of the target class
@@ -137,8 +137,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T readString(final String source, final Class<? extends T> targetType) {
-        return readString(source, null, targetType);
+    public <T> T parse(final String source, final Class<? extends T> targetType) {
+        return parse(source, null, targetType);
     }
 
     /**
@@ -148,7 +148,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
-     * User user = parser.readString("{\"name\":\"John\"}", config, User.class);
+     * User user = parser.parse("{\"name\":\"John\"}", config, User.class);
      * }</pre>
      *
      * @param <T> the type of the target class
@@ -159,8 +159,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public <T> T readString(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetType)
-            throws UnsupportedOperationException {
+    public <T> T parse(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -171,7 +170,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
-     * parser.readString("[\"Alice\",\"Bob\",\"Charlie\"]", output);
+     * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; must not be {@code null}
@@ -181,8 +180,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws IndexOutOfBoundsException if the JSON array size doesn't match the output array size
      */
     @Override
-    public void readString(final String source, final Object[] output) {
-        readString(source, null, output);
+    public void parse(final String source, final Object[] output) {
+        parse(source, null, output);
     }
 
     /**
@@ -193,7 +192,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <pre>{@code
      * Object[] output = new Object[3];
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
-     * parser.readString("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
+     * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; must not be {@code null}
@@ -202,7 +201,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Object[] output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserializationConfig config, final Object[] output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -213,7 +212,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
-     * parser.readString("[\"Alice\",\"Bob\"]", output);
+     * parser.parse("[\"Alice\",\"Bob\"]", output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; must not be {@code null}
@@ -223,8 +222,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
-    public void readString(final String source, final Collection<?> output) {
-        readString(source, null, output);
+    public void parse(final String source, final Collection<?> output) {
+        parse(source, null, output);
     }
 
     /**
@@ -235,7 +234,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
-     * parser.readString("[\"Alice\",\"Bob\"]", config, output);
+     * parser.parse("[\"Alice\",\"Bob\"]", config, output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; must not be {@code null}
@@ -244,7 +243,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Collection<?> output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserializationConfig config, final Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -255,7 +254,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
-     * parser.readString("{\"name\":\"John\",\"age\":30}", output);
+     * parser.parse("{\"name\":\"John\",\"age\":30}", output);
      * }</pre>
      *
      * @param source the JSON object string to deserialize; must not be {@code null}
@@ -265,8 +264,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override
-    public void readString(final String source, final Map<?, ?> output) {
-        readString(source, null, output);
+    public void parse(final String source, final Map<?, ?> output) {
+        parse(source, null, output);
     }
 
     /**
@@ -277,7 +276,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
-     * parser.readString("{\"name\":\"John\",\"age\":30}", config, output);
+     * parser.parse("{\"name\":\"John\",\"age\":30}", config, output);
      * }</pre>
      *
      * @param source the JSON object string to deserialize; must not be {@code null}
@@ -286,7 +285,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserializationConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

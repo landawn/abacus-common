@@ -106,6 +106,8 @@ final class ThreadMonitor implements Runnable {
      * if the timeout amount is not greater than zero
      */
     public static Thread start(final Thread thread, final long timeout) {
+        N.checkArgNotNull(thread, "thread");
+
         Thread monitor = null;
         if (timeout > 0) {
             final ThreadMonitor threadMonitor = new ThreadMonitor(thread, timeout);

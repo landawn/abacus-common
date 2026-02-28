@@ -120,14 +120,14 @@ public class ShortList200Test extends TestBase {
     public void testDeleteMethods() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6);
 
-        short deleted = list.delete(1);
+        short deleted = list.removeAt(1);
         assertEquals((short) 2, deleted);
         assertArrayEquals(new short[] { 1, 3, 4, 5, 6 }, list.toArray());
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertArrayEquals(new short[] { 1, 5, 6 }, list.toArray());
 
-        list.deleteAllByIndices(0, 2);
+        list.removeAt(0, 2);
         assertArrayEquals(new short[] { 5 }, list.toArray());
     }
 

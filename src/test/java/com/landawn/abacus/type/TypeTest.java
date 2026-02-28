@@ -214,10 +214,7 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_valueOf() throws Exception {
-        List<Type<Object>> types = N.asList(byte.class, short.class, int.class, long.class)
-                .stream()
-                .map(cls -> TypeFactory.getType(cls))
-                .toList();
+        List<Type<Object>> types = N.asList(byte.class, short.class, int.class, long.class).stream().map(cls -> TypeFactory.getType(cls)).toList();
 
         Map<Class<?>, Object[]> rangValues = N.asMap(byte.class, N.asArray(Byte.MIN_VALUE, Byte.MAX_VALUE), short.class,
                 N.asArray(Short.MIN_VALUE, Short.MAX_VALUE), int.class, N.asArray(-1000000, 1000000), long.class, N.asArray(-1000000, 1000000));

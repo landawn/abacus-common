@@ -93,12 +93,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Comparator used to determine eviction order based on the configured eviction policy.
      */
-    final Comparator<Map.Entry<K, E>> cmp;
+    transient Comparator<Map.Entry<K, E>> cmp;
 
     /**
      * Future representing the scheduled eviction task, {@code null} if eviction is disabled.
      */
-    ScheduledFuture<?> scheduleFuture;
+    transient ScheduledFuture<?> scheduleFuture;
 
     /**
      * Constructs a new GenericKeyedObjectPool with basic configuration.
@@ -160,42 +160,44 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         this.memoryMeasure = memoryMeasure;
         pool = new HashMap<>(Math.min(capacity, 1000));
 
-        switch (this.evictionPolicy) {
+        cmp = createComparator();
+        scheduleEvictionTask();
+    }
+
+    private Comparator<Map.Entry<K, E>> createComparator() {
+        switch (evictionPolicy) {
             case LAST_ACCESS_TIME:
-
-                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getLastAccessTime());
-
-                break;
+                return Comparator.comparingLong(o -> o.getValue().activityPrint().getLastAccessTime());
 
             case ACCESS_COUNT:
-                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getAccessCount());
-
-                break;
+                return Comparator.comparingLong(o -> o.getValue().activityPrint().getAccessCount());
 
             case EXPIRATION_TIME:
-                cmp = Comparator.comparingLong(o -> o.getValue().activityPrint().getExpirationTime());
-
-                break;
+                return Comparator.comparingLong(o -> o.getValue().activityPrint().getExpirationTime());
 
             default:
                 throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
         }
+    }
 
-        if (evictDelay > 0) {
-            final Runnable evictTask = () -> {
-                // Evict from the pool
-                try {
-                    evict();
-                } catch (final Exception e) {
-                    // ignore
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(ExceptionUtil.getErrorMessage(e, true));
-                    }
-                }
-            };
-
-            scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
+    private void scheduleEvictionTask() {
+        if (evictDelay <= 0 || isClosed) {
+            return;
         }
+
+        final Runnable evictTask = () -> {
+            // Evict from the pool
+            try {
+                removeExpired();
+            } catch (final Exception e) {
+                // ignore
+                if (logger.isWarnEnabled()) {
+                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                }
+            }
+        };
+
+        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -239,8 +241,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             return false;
         }
 
-        putCount.incrementAndGet();
-
         lock.lock();
 
         try {
@@ -254,7 +254,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             if (pool.size() >= capacity) {
                 if (autoBalance) {
-                    vacate();
+                    evict();
+
+                    if (pool.size() >= capacity) {
+                        return false;
+                    }
                 } else {
                     return false;
                 }
@@ -270,7 +274,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             if (memoryMeasure != null) {
                 if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                     if (autoBalance) {
-                        vacate();
+                        evict();
 
                         if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                             // ignore.
@@ -296,6 +300,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
             }
+
+            putCount.incrementAndGet();
 
             notEmpty.signal();
 
@@ -656,13 +662,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public void vacate() throws IllegalStateException {
+    public void evict() throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
+            evict((int) (pool.size() * balanceFactor)); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -674,10 +680,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Returns the current number of key-value mappings in the pool.
      *
      * @return the number of mappings currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public int size() throws IllegalStateException {
-        // assertNotClosed();
+        assertNotClosed();
 
         return pool.size();
     }
@@ -723,20 +730,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Removes the specified number of entries from the pool based on the eviction policy.
      * This method is called internally during vacate operations.
      *
-     * @param vacationNumber the number of entries to remove
+     * @param numberToEvict the number of entries to remove
      */
-    protected void vacate(final int vacationNumber) {
+    protected void evict(final int numberToEvict) {
         final int size = pool.size();
 
-        if (vacationNumber >= size) {
+        if (numberToEvict >= size) {
             destroyAll(new HashMap<>(pool), Caller.VACATE);
             pool.clear();
-        } else if (vacationNumber > 0) {
+        } else if (numberToEvict > 0) {
             final Comparator<Map.Entry<K, E>> reversedCmp = cmp.reversed();
-            final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, reversedCmp);
+            final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
 
             for (final Map.Entry<K, E> entry : pool.entrySet()) {
-                if (heap.size() < vacationNumber) {
+                if (heap.size() < numberToEvict) {
                     heap.offer(entry);
                 } else if (cmp.compare(entry, heap.peek()) < 0) {
                     heap.poll();
@@ -760,7 +767,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings({ "null", "deprecation" })
-    protected void evict() {
+    protected void removeExpired() {
         lock.lock();
 
         Map<K, E> removingObjects = null;
@@ -892,12 +899,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Serial
     private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
-        lock.lock();
+        is.defaultReadObject();
 
-        try {
-            is.defaultReadObject();
-        } finally {
-            lock.unlock();
-        }
+        lock = newLock();
+        notEmpty = newCondition(lock);
+        notFull = newCondition(lock);
+        cmp = createComparator();
+        scheduleEvictionTask();
     }
 }

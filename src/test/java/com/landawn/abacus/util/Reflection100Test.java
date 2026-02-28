@@ -58,7 +58,7 @@ public class Reflection100Test extends TestBase {
     public void testOnWithClassName() {
         Reflection<TestClass> reflection = Reflection.on("com.landawn.abacus.util.Reflection100Test$TestClass");
         Assertions.assertNotNull(reflection);
-        TestClass instance = reflection._new().instance();
+        TestClass instance = reflection.newInstance().instance();
         Assertions.assertNotNull(instance);
     }
 
@@ -73,7 +73,7 @@ public class Reflection100Test extends TestBase {
     public void testOnWithClass() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
         Assertions.assertNotNull(reflection);
-        TestClass instance = reflection._new().instance();
+        TestClass instance = reflection.newInstance().instance();
         Assertions.assertNotNull(instance);
     }
 
@@ -88,7 +88,7 @@ public class Reflection100Test extends TestBase {
     @Test
     public void testNewNoArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
-        Reflection<TestClass> newReflection = reflection._new();
+        Reflection<TestClass> newReflection = reflection.newInstance();
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
         Assertions.assertEquals("publicValue", newReflection.instance().publicField);
@@ -97,7 +97,7 @@ public class Reflection100Test extends TestBase {
     @Test
     public void testNewWithArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
-        Reflection<TestClass> newReflection = reflection._new("customValue");
+        Reflection<TestClass> newReflection = reflection.newInstance("customValue");
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
         Assertions.assertEquals("customValue", newReflection.instance().publicField);
@@ -106,7 +106,7 @@ public class Reflection100Test extends TestBase {
     @Test
     public void testNewWithMultipleArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
-        Reflection<TestClass> newReflection = reflection._new("customValue", 100);
+        Reflection<TestClass> newReflection = reflection.newInstance("customValue", 100);
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
         Assertions.assertEquals("customValue", newReflection.instance().publicField);
@@ -116,7 +116,7 @@ public class Reflection100Test extends TestBase {
     public void testNewWithEmptyArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
         Object[] emptyArgs = new Object[0];
-        Reflection<TestClass> newReflection = reflection._new(emptyArgs);
+        Reflection<TestClass> newReflection = reflection.newInstance(emptyArgs);
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
     }
@@ -124,7 +124,7 @@ public class Reflection100Test extends TestBase {
     @Test
     public void testNewWithNullArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
-        Reflection<TestClass> newReflection = reflection._new((Object) null);
+        Reflection<TestClass> newReflection = reflection.newInstance((Object) null);
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
     }
@@ -133,7 +133,7 @@ public class Reflection100Test extends TestBase {
     public void testNewWithInvalidArgs() {
         Reflection<TestClass> reflection = Reflection.on(TestClass.class);
         Assertions.assertThrows(RuntimeException.class, () -> {
-            reflection._new(123, "invalid", true);
+            reflection.newInstance(123, "invalid", true);
         });
     }
 
@@ -313,7 +313,7 @@ public class Reflection100Test extends TestBase {
     @Test
     public void testNewWithPrimitiveArgs() {
         Reflection<PrimitiveTestClass> reflection = Reflection.on(PrimitiveTestClass.class);
-        Reflection<PrimitiveTestClass> newReflection = reflection._new(42);
+        Reflection<PrimitiveTestClass> newReflection = reflection.newInstance(42);
         Assertions.assertNotNull(newReflection);
         Assertions.assertEquals(42, newReflection.instance().intValue);
     }

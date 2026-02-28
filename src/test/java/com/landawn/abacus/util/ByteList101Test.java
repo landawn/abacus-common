@@ -502,7 +502,7 @@ public class ByteList101Test extends TestBase {
         list.reverse();
         list.shuffle();
         list.fill((byte) 0);
-        list.deleteRange(0, 0);
+        list.removeRange(0, 0);
 
         assertTrue(list.isEmpty());
     }

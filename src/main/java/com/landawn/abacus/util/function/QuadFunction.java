@@ -27,6 +27,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object, Object)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <A> the type of the first argument to the function
  * @param <B> the type of the second argument to the function
  * @param <C> the type of the third argument to the function
@@ -35,8 +38,6 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
  * @see TriFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR

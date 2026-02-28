@@ -213,29 +213,29 @@ public class FloatList101Test extends TestBase {
     public void testDeleteAtBoundaries() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
 
-        assertEquals(1.1f, list.delete(0), DELTA);
+        assertEquals(1.1f, list.removeAt(0), DELTA);
         assertEquals(4, list.size());
         assertEquals(2.2f, list.get(0), DELTA);
 
-        assertEquals(5.5f, list.delete(list.size() - 1), DELTA);
+        assertEquals(5.5f, list.removeAt(list.size() - 1), DELTA);
         assertEquals(3, list.size());
         assertEquals(4.4f, list.get(list.size() - 1), DELTA);
     }
 
     @Test
     public void testDeleteAllByIndicesEmpty() {
-        list.deleteAllByIndices();
+        list.removeAt();
         assertTrue(list.isEmpty());
 
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteAllByIndicesOutOfOrder() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
-        list.deleteAllByIndices(4, 1, 2);
+        list.removeAt(4, 1, 2);
         assertEquals(2, list.size());
         assertEquals(1.1f, list.get(0), DELTA);
         assertEquals(4.4f, list.get(1), DELTA);
@@ -244,14 +244,14 @@ public class FloatList101Test extends TestBase {
     @Test
     public void testDeleteRangeEmptyRange() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteRangeEntireList() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        list.deleteRange(0, 3);
+        list.removeRange(0, 3);
         assertTrue(list.isEmpty());
     }
 

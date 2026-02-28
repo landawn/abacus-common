@@ -25,12 +25,13 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <A> the type of the first argument to the function
  * @param <B> the type of the second argument to the function
  * @param <C> the type of the third argument to the function
  * @param <R> the type of the result of the function
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C, R, RuntimeException> { //NOSONAR

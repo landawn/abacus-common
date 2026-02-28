@@ -179,7 +179,7 @@ public class HttpUtil2025Test extends TestBase {
         assertEquals(ContentFormat.JSON_GZIP, HttpUtil.getContentFormat("application/json", "gzip"));
         assertEquals(ContentFormat.XML, HttpUtil.getContentFormat("application/xml", null));
         assertEquals(ContentFormat.XML_GZIP, HttpUtil.getContentFormat("application/xml", "gzip"));
-        assertEquals(ContentFormat.FormUrlEncoded, HttpUtil.getContentFormat("application/x-www-form-urlencoded", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded", null));
         assertEquals(ContentFormat.GZIP, HttpUtil.getContentFormat(null, "gzip"));
         assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat(null, null));
     }
@@ -290,7 +290,7 @@ public class HttpUtil2025Test extends TestBase {
 
     @Test
     public void testHttpDateFormat() {
-        Date date = new Date(1445412480000L);   // Wed, 21 Oct 2015 07:28:00 GMT
+        Date date = new Date(1445412480000L); // Wed, 21 Oct 2015 07:28:00 GMT
         String formatted = HttpUtil.HttpDate.format(date);
         assertNotNull(formatted);
         assertTrue(formatted.contains("GMT"));

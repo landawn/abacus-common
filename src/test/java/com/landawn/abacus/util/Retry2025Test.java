@@ -150,7 +150,7 @@ public class Retry2025Test extends TestBase {
     }
 
     @Test
-    public void testRun_NoRetryOnNonMatchingException() {
+    public void testRun_NoRetryOnNocountMatchBetweeningException() {
         Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 
@@ -286,7 +286,7 @@ public class Retry2025Test extends TestBase {
     }
 
     @Test
-    public void testCall_NoRetryOnNonMatchingException() {
+    public void testCall_NoRetryOnNocountMatchBetweeningException() {
         Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);
 

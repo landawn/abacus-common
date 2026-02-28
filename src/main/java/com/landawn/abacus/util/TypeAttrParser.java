@@ -341,15 +341,25 @@ public final class TypeAttrParser {
             cls = ClassUtil.forName(className);
         }
 
+        if ((args.length & 1) != 0) {
+            throw new IllegalArgumentException("The specified args must be [Class, value] pairs, but length is: " + args.length);
+        }
+
+        for (int i = 0; i < args.length; i += 2) {
+            if (!(args[i] instanceof Class<?>)) {
+                throw new IllegalArgumentException("The arg at index " + i + " must be a Class, but was: " + N.toString(args[i]));
+            }
+        }
+
         int parameterLength = attrTypeParameters.length + attrParameters.length + (args.length / 2);
 
         if (parameterLength > 0) {
             Class<?>[] parameterTypes = new Class[parameterLength];
             Object[] parameters = new Object[parameterLength];
 
-            for (int i = 0; i < args.length; i++) {
+            for (int i = 0; i < args.length; i += 2) {
                 parameterTypes[i / 2] = (Class<?>) args[i];
-                parameters[i / 2] = args[++i];
+                parameters[i / 2] = args[i + 1];
             }
 
             for (int i = 0; i < attrTypeParameters.length; i++) {
@@ -371,9 +381,9 @@ public final class TypeAttrParser {
                     parameterTypes = new Class[parameterLength];
                     parameters = new Object[parameterLength];
 
-                    for (int i = 0; i < args.length; i++) {
+                    for (int i = 0; i < args.length; i += 2) {
                         parameterTypes[i / 2] = (Class<?>) args[i];
-                        parameters[i / 2] = args[++i];
+                        parameters[i / 2] = args[i + 1];
                     }
 
                     for (int i = 0; i < attrTypeParameters.length; i++) {

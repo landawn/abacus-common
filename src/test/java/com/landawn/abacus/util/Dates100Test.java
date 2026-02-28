@@ -1129,7 +1129,8 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testTruncatedEqualsCalendarsWithCalendarField() {
-        Calendar cal1 = Calendar.getInstance();
+        Calendar cal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal1.setTimeInMillis(FIXED_TIME_MILLIS);
         Calendar cal2 = (Calendar) cal1.clone();
         cal2.add(Calendar.MINUTE, 1);
 
@@ -1158,7 +1159,7 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testTruncatedEqualsDates() {
-        java.util.Date date1 = new java.util.Date();
+        java.util.Date date1 = new java.util.Date(FIXED_TIME_MILLIS);
         java.util.Date date2 = new java.util.Date(date1.getTime() + 60000);
 
         assertTrue(Dates.truncatedEquals(date1, date2, Calendar.HOUR_OF_DAY));
@@ -1922,4 +1923,3 @@ public class Dates100Test extends TestBase {
         }
     }
 }
-

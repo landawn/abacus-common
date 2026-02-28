@@ -589,6 +589,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     // static final String ISO_8601_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'";
 
+    private static final String ISO_8601_TIMESTAMP_FORMAT_2 = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
     /**
      * This constant defines the date format specified by RFC 1123 / RFC 822.
      *
@@ -632,7 +634,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     private static final Map<String, Queue<DateFormat>> dfPool = new ObjectPool<>(64);
 
-    private static final Map<TimeZone, Queue<Calendar>> calendarPool = new ObjectPool<>(64);
+    private static final ConcurrentHashMap<TimeZone, Queue<Calendar>> calendarPool = new ConcurrentHashMap<>(64);
 
     private static final Queue<DateFormat> utcTimestampDFPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
@@ -958,6 +960,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new {@code XMLGregorianCalendar} instance representing the current date and time.
      */
     public static XMLGregorianCalendar currentXMLGregorianCalendar() {
+        if (dataTypeFactory == null) {
+            throw new UnsupportedOperationException("DatatypeFactory is not available. XMLGregorianCalendar operations are not supported.");
+        }
+
         return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
     }
 
@@ -1643,6 +1649,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         //        return null;
         //    }
 
+        if (dataTypeFactory == null) {
+            throw new UnsupportedOperationException("DatatypeFactory is not available. XMLGregorianCalendar operations are not supported.");
+        }
+
         return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis));
     }
 
@@ -1668,6 +1678,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         //    if (timeInMillis == 0) {
         //        return null;
         //    }
+
+        if (dataTypeFactory == null) {
+            throw new UnsupportedOperationException("DatatypeFactory is not available. XMLGregorianCalendar operations are not supported.");
+        }
 
         return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis, tz));
     }
@@ -1771,7 +1785,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         final long timeInMillis = fastDateParse(date, formatToUse, timeZoneToUse);
 
-        if (timeInMillis != 0) {
+        if (timeInMillis != Long.MIN_VALUE) {
             return createJUDate(timeInMillis);
         }
 
@@ -2267,7 +2281,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         final long timeInMillis = fastDateParse(dateTime, formatToUse, timeZoneToUse);
 
-        if (timeInMillis != 0) {
+        if (timeInMillis != Long.MIN_VALUE) {
             return timeInMillis;
         }
 
@@ -2999,8 +3013,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            utcCalendarPool.add(c);
-            utcTimestampFormatCharsPool.add(utcTimestamp);
+            utcCalendarPool.offer(c);
+            utcTimestampFormatCharsPool.offer(utcTimestamp);
         }
     }
 
@@ -5384,7 +5398,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     private static DateFormat getSDF(final String format, final TimeZone timeZone) {
         DateFormat sdf = null;
 
-        if (timeZone == UTC_TIME_ZONE) {
+        if (UTC_TIME_ZONE.equals(timeZone)) {
             //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 sdf = utcTimestampDFPool.poll();
@@ -5427,18 +5441,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
-        if (timeZone == UTC_TIME_ZONE) {
+        if (UTC_TIME_ZONE.equals(timeZone)) {
             //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
-                utcTimestampDFPool.add(sdf);
+                utcTimestampDFPool.offer(sdf);
             } else //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
-                utcDateTimeDFPool.add(sdf);
+                utcDateTimeDFPool.offer(sdf);
             } else {
-                dfPool.get(format).add(sdf);
+                dfPool.get(format).offer(sdf);
             }
         } else {
-            dfPool.get(format).add(sdf);
+            dfPool.get(format).offer(sdf);
         }
     }
 
@@ -5470,6 +5484,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
                         }
                         break;
 
+                    case 23:
+                        if (str.charAt(10) == 'T') {
+                            return ISO_8601_TIMESTAMP_FORMAT_2;
+                        } else {
+                            return LOCAL_TIMESTAMP_FORMAT;
+                        }
+
                     case 24:
                         if (str.charAt(23) == 'Z') {
                             return ISO_8601_TIMESTAMP_FORMAT;
@@ -5490,7 +5511,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                         // throw new RuntimeException("No valid date format found for: " + str);
                         return null;
                 }
-            } else if (len == 29 || str.charAt(3) == ',') {
+            } else if (len == 29 || (len >= 4 && str.charAt(3) == ',')) {
                 return RFC_1123_DATE_TIME_FORMAT;
             }
         }
@@ -5511,7 +5532,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         if (!((len == 19) || (len == 20) || (len == 24)) || !(format.equals(ISO_8601_TIMESTAMP_FORMAT) || format.equals(ISO_8601_DATE_TIME_FORMAT)
                 || format.equals(ISO_LOCAL_DATE_TIME_FORMAT) || format.equals(LOCAL_DATE_TIME_FORMAT))) {
-            return 0;
+            return Long.MIN_VALUE;
         }
 
         final int year = parseInt(str, 0, 4);
@@ -5522,20 +5543,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
         final int second = parseInt(str, 17, 19);
         final int milliSecond = len == 24 ? parseInt(str, 20, 23) : 0;
 
+        if (year < 0 || month < 0 || date < 0 || hourOfDay < 0 || minute < 0 || second < 0 || milliSecond < 0) {
+            return Long.MIN_VALUE; // malformed input, fall back to SimpleDateFormat
+        }
+
         Calendar c = null;
         Queue<Calendar> timeZoneCalendarQueue = null;
 
-        if (timeZone == UTC_TIME_ZONE) {
+        if (UTC_TIME_ZONE.equals(timeZone)) {
             c = utcCalendarPool.poll();
         } else {
-            timeZoneCalendarQueue = calendarPool.get(timeZone);
-
-            if (timeZoneCalendarQueue == null) {
-                timeZoneCalendarQueue = new ArrayBlockingQueue<>(POOL_SIZE);
-                calendarPool.put(timeZone, timeZoneCalendarQueue);
-            } else {
-                c = timeZoneCalendarQueue.poll();
-            }
+            timeZoneCalendarQueue = calendarPool.computeIfAbsent(timeZone, tz -> new ArrayBlockingQueue<>(POOL_SIZE));
+            c = timeZoneCalendarQueue.poll();
         }
 
         if (c == null) {
@@ -5549,10 +5568,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         final long timeInMillis = c.getTimeInMillis();
 
-        if (timeZone == UTC_TIME_ZONE) {
-            utcCalendarPool.add(c);
+        if (UTC_TIME_ZONE.equals(timeZone)) {
+            utcCalendarPool.offer(c);
         } else {
-            timeZoneCalendarQueue.add(c);
+            timeZoneCalendarQueue.offer(c);
         }
 
         return timeInMillis;
@@ -5562,7 +5581,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         int result = 0;
 
         while (fromIndex < toIndex) {
-            result = (result * 10) + (str.charAt(fromIndex++) - 48);
+            final char ch = str.charAt(fromIndex++);
+
+            if (ch < '0' || ch > '9') {
+                return -1;
+            }
+
+            result = (result * 10) + (ch - 48);
         }
 
         return result;

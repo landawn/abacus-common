@@ -329,13 +329,13 @@ public class ByteList100Test extends TestBase {
         list.add((byte) 20);
         list.add((byte) 30);
 
-        assertEquals((byte) 20, list.delete(1));
+        assertEquals((byte) 20, list.removeAt(1));
         assertEquals(2, list.size());
         assertEquals((byte) 10, list.get(0));
         assertEquals((byte) 30, list.get(1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
     }
 
     @Test
@@ -346,13 +346,13 @@ public class ByteList100Test extends TestBase {
         list.add((byte) 4);
         list.add((byte) 5);
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals((byte) 1, list.get(0));
         assertEquals((byte) 3, list.get(1));
         assertEquals((byte) 5, list.get(2));
 
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
@@ -364,16 +364,16 @@ public class ByteList100Test extends TestBase {
         list.add((byte) 4);
         list.add((byte) 5);
 
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals((byte) 1, list.get(0));
         assertEquals((byte) 5, list.get(1));
 
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(2, list.size());
 
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(0, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(-1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 1));
     }
 
     @Test

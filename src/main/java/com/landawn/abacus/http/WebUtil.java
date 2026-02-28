@@ -167,24 +167,16 @@ public final class WebUtil {
         } else if (httpMethod == HttpMethod.DELETE) {
             sb.append(indent).append(".delete();");
         } else {
+            if (Strings.isNotEmpty(body)) {
+                sb.append(indent).append(".body(requestBody)");
+            }
+
             if (httpMethod == HttpMethod.POST) {
                 sb.append(indent).append(".post(");
-
-                if (Strings.isNotEmpty(body)) {
-                    sb.append("requestBody");
-                }
             } else if (httpMethod == HttpMethod.PUT) {
                 sb.append(indent).append(".put(");
-
-                if (Strings.isNotEmpty(body)) {
-                    sb.append("requestBody");
-                }
             } else {
                 sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
-
-                if (Strings.isNotEmpty(body)) {
-                    sb.append(", requestBody");
-                }
             }
             sb.append(");");
         }

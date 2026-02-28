@@ -144,11 +144,11 @@ public class FloatList200Test extends TestBase {
     @Test
     public void testDeleteAndRange() {
         FloatList list = FloatList.of(1.1f, 2.2f, 3.3f, 4.4f, 5.5f);
-        float deleted = list.delete(2);
+        float deleted = list.removeAt(2);
         assertEquals(3.3f, deleted, delta);
         assertArrayEquals(new float[] { 1.1f, 2.2f, 4.4f, 5.5f }, list.toArray(), delta);
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertArrayEquals(new float[] { 1.1f, 5.5f }, list.toArray(), delta);
     }
 

@@ -321,6 +321,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param componentType the Class object representing the component type of the new array.
      * @param dimensions the dimensions of the new array.
      * @return the new array.
+     * @throws IllegalArgumentException if the component type or dimensions are not valid for array creation.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -952,6 +953,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return the same input array.
      * @see N#asArray(Object...)
      */
+    @SafeVarargs
     public static <T extends CharSequence> T[] of(final T... a) {
         return a;
     }
@@ -1056,6 +1058,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #oF(Object...)
      */
     @Beta
+    @SafeVarargs
     public static <T> T[] with(final T... a) { //NOSONAR
         return a;
     }

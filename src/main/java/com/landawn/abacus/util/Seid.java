@@ -696,16 +696,16 @@ public class Seid implements EntityId {
 
                     int i = 0;
 
-                    for (final Map.Entry<String, Object> entry : entrySet) {
+                    for (final String key : keys) {
                         if (i++ > 0) {
                             sb.append(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
 
-                        final String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
+                        final String propName = NameUtil.isCanonicalName(entityName, key) ? NameUtil.getSimpleName(key) : key;
 
                         sb.append(propName);
                         sb.append('=');
-                        sb.append(N.stringOf(entry.getValue()));
+                        sb.append(N.stringOf(values.get(key)));
                     }
 
                     sb.append('}');

@@ -1114,17 +1114,30 @@ public interface Type<T> {
     SerializationType getSerializationType();
 
     /**
-     * Gets the element type for collection/array types.
+     * Returns the element type for collection-like, array-like, or container types.
+     * Returns {@code null} if this type does not define a single element type.
      *
-     * @return the element type, or {@code null} if not applicable
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<?> listType = Type.ofList(String.class);
+     * Type<?> elementType = listType.getElementType();
+     * }</pre>
+     *
+     * @return the element type, or {@code null} if this type is not an element-based type
      */
     Type<?> getElementType(); //NOSONAR
 
     /**
-     * Gets the parameter types for generic types.
-     * For example, Map&lt;K,V&gt; returns types for K and V.
+     * Returns the generic parameter types for this type declaration.
+     * For example, {@code Map<K, V>} returns parameter types for {@code K} and {@code V}.
      *
-     * @return array of parameter types, empty if none
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<?> mapType = Type.ofMap(String.class, Integer.class);
+     * Type<?>[] parameterTypes = mapType.getParameterTypes();
+     * }</pre>
+     *
+     * @return an array of parameter types, or an empty array if this type is not parameterized
      */
     Type<?>[] getParameterTypes(); //NOSONAR
 

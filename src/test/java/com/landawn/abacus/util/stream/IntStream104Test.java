@@ -879,28 +879,28 @@ public class IntStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmapToObj() {
-        Stream<String> stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        Stream<String> stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(6, stringStream.count());
 
-        stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(5, stringStream.skip(1).count());
 
-        stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3" }, stringStream.toArray(String[]::new));
 
-        stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3" }, stringStream.skip(1).toArray(String[]::new));
 
-        stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
 
-        stringStream = IntStream.of(1, 2, 3).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
-        stringStream = IntStream.of(1, 2, 3).map(e -> e).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(6, stringStream.count());
 
-        stringStream = IntStream.of(1, 2, 3).map(e -> e).flattmapToObj(i -> new String[] { "A" + i, "B" + i });
+        stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
     }
 

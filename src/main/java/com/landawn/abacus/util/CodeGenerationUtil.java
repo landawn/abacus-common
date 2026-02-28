@@ -277,7 +277,9 @@ public final class CodeGenerationUtil {
 
                     for (int j = i; j < size; j++) {
                         if ("}".equals(Strings.strip(lines.get(j)))) {
-                            N.deleteRange(lines, Strings.isBlank(lines.get(i - 1)) ? i - 1 : i, Strings.isBlank(lines.get(j + 1)) ? j + 2 : j + 1);
+                            final int deleteFrom = (i > 0 && Strings.isBlank(lines.get(i - 1))) ? i - 1 : i;
+                            final int deleteTo = (j + 1 < size && Strings.isBlank(lines.get(j + 1))) ? j + 2 : j + 1;
+                            N.removeRange(lines, deleteFrom, deleteTo);
                             break;
                         }
                     }

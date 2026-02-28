@@ -57,7 +57,7 @@ import com.landawn.abacus.util.ThreadMode;
  *         eventId = "criticalEvents",
  *         sticky = true,
  *         strictEventType = true,
- *         interval = 1000,
+ *         intervalMillis = 1000,
  *         deduplicate = true
  *     )
  *     public void onCriticalEvent(CriticalEvent event) {

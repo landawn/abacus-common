@@ -22,11 +22,12 @@ package com.landawn.abacus.util.function;
  * <p>Note: Unlike other primitive function interfaces in this package, this interface does not extend
  * from java.util.function as the JDK does not provide a LongToFloatFunction interface.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Function
  * @see LongToDoubleFunction
  * @see LongToIntFunction
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongToFloatFunction {

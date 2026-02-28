@@ -448,7 +448,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param map the Map whose mappings are to be placed in the ImmutableNavigableMap
      * @return an ImmutableNavigableMap containing the same mappings as the provided Map, or the same instance if already an ImmutableNavigableMap
      */
-    public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableNavigableMap) {
             return (ImmutableNavigableMap<K, V>) map;
         } else if (N.isEmpty(map)) {
@@ -962,5 +962,15 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     @Override
     public ImmutableNavigableMap<K, V> tailMap(final K fromKey, final boolean inclusive) {
         return wrap(navigableMap.tailMap(fromKey, inclusive));
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

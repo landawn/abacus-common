@@ -383,25 +383,29 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     }
 
     /**
-     * Returns a new ImmutableArray containing the elements from the specified range
-     * of this array. The range is half-open: [fromIndex, toIndex).
+     * Returns a new array containing the elements from the specified range of this immutable array.
+     * The range is half-open: [fromIndex, toIndex).
+     *
+     * <p>The returned array is a defensive copy and is not backed by this {@code ImmutableArray}.
+     * Modifications to the returned array do not affect this {@code ImmutableArray}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
-     * ImmutableArray<String> subArray = array.copy(1, 4);   // contains ["b", "c", "d"]
+     * String[] subArray = array.copy(1, 4);   // contains ["b", "c", "d"]
+     * subArray[0] = "x";                      // does not affect 'array'
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new ImmutableArray containing the specified range of elements
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; length(),
-     *         or fromIndex &gt; toIndex
+     * @return a new array containing the specified range of elements
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > length()},
+     *         or {@code fromIndex > toIndex}
      */
-    public ImmutableArray<T> copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public T[] copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, length);
 
-        return new ImmutableArray<>(N.copyOfRange(elements, fromIndex, toIndex));
+        return N.copyOfRange(elements, fromIndex, toIndex);
     }
 
     /**

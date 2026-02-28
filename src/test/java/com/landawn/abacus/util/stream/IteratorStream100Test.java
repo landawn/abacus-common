@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.If;
@@ -102,7 +102,7 @@ public class IteratorStream100Test extends TestBase {
     public void testSlidingMap() {
         {
             Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-            List<Integer> result = stream.slidingMap(1, false, (a, b) -> a + b).toList();
+            List<Integer> result = stream.slidingMap(1, false, (a, b) -> a + (b == null ? 0 : b)).toList();
             assertEquals(Arrays.asList(3, 5, 7, 9), result);
 
             Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5));
@@ -249,7 +249,7 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testFlattMap() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        List<Integer> result = stream.flattmap(x -> new Integer[] { x, x * 10 }).toList();
+        List<Integer> result = stream.flatMapArray(x -> new Integer[] { x, x * 10 }).toList();
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
     }
 
@@ -801,12 +801,12 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertTrue(stream.nMatch(2, 3, x -> x % 2 == 0));
+        assertTrue(stream.countMatchBetween(2, 3, x -> x % 2 == 0));
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertFalse(stream2.nMatch(3, 4, x -> x % 2 == 0));
+        assertFalse(stream2.countMatchBetween(3, 4, x -> x % 2 == 0));
 
-        assertTrue(emptyStream.nMatch(0, 0, x -> true));
+        assertTrue(emptyStream.countMatchBetween(0, 0, x -> true));
     }
 
     @Test

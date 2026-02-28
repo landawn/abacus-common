@@ -334,13 +334,13 @@ public class ShortList100Test extends TestBase {
         list.add((short) 20);
         list.add((short) 30);
 
-        assertEquals((short) 20, list.delete(1));
+        assertEquals((short) 20, list.removeAt(1));
         assertEquals(2, list.size());
         assertEquals((short) 10, list.get(0));
         assertEquals((short) 30, list.get(1));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.delete(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
     }
 
     @Test
@@ -351,13 +351,13 @@ public class ShortList100Test extends TestBase {
         list.add((short) 4);
         list.add((short) 5);
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals((short) 1, list.get(0));
         assertEquals((short) 3, list.get(1));
         assertEquals((short) 5, list.get(2));
 
-        list.deleteAllByIndices();
+        list.removeAt();
         assertEquals(3, list.size());
     }
 
@@ -369,16 +369,16 @@ public class ShortList100Test extends TestBase {
         list.add((short) 4);
         list.add((short) 5);
 
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertEquals(2, list.size());
         assertEquals((short) 1, list.get(0));
         assertEquals((short) 5, list.get(1));
 
-        list.deleteRange(1, 1);
+        list.removeRange(1, 1);
         assertEquals(2, list.size());
 
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(0, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.deleteRange(-1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 1));
     }
 
     @Test

@@ -207,7 +207,7 @@ public class StreamTest extends AbstractTest {
                         .parallel(64)
                         .onEach(Fn.sleep(1))
                         .parallel(16)
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(32, executor1)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .parallel(16, executor1)
@@ -217,14 +217,14 @@ public class StreamTest extends AbstractTest {
                         .parallel(128, executor)
                         .filter(it -> it > 0)
                         .onEach(Fn.sleep(3))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(6)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .sequential()
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel()
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
                                 closeExecutor("###", k, startTime, null);
@@ -276,7 +276,7 @@ public class StreamTest extends AbstractTest {
                         .parallel(64)
                         .onEach(Fn.sleep(1))
                         .parallel(16)
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(32, executor1)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .parallel(16, executor1)
@@ -286,14 +286,14 @@ public class StreamTest extends AbstractTest {
                         .parallel(256, executor)
                         .filter(it -> it > 0)
                         .onEach(Fn.sleep(3))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(12)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .sequential()
                         .filter(it -> it > 0)
                         .parallel()
                         .mapToObj(it -> it * 1 - 100 + 100)
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
                                 closeExecutor("###", k, startTime, executor1);
@@ -345,12 +345,12 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
                         .onEach(Fn.sleep(1))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(32, executor1)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .parallel(16, executor1)
@@ -360,7 +360,7 @@ public class StreamTest extends AbstractTest {
                         .parallel(128, executor)
                         .filter(it -> it > 0)
                         .onEach(Fn.sleep(3))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .sequential()
@@ -368,7 +368,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
                         .onEach(Fn.sleep(1))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
                                 closeExecutor("###", k, startTime, null);
@@ -420,12 +420,12 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(128)
                         .onEach(Fn.sleep(1))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(32, executor1)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .parallel(16, executor1)
@@ -435,7 +435,7 @@ public class StreamTest extends AbstractTest {
                         .parallel(256, executor)
                         .filter(it -> it > 0)
                         .onEach(Fn.sleep(3))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
                         .sequential()
@@ -443,7 +443,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
                         .onEach(Fn.sleep(1))
-                        .flattmap(N::asArray)
+                        .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
                                 closeExecutor("###", k, startTime, executor1);
@@ -705,9 +705,9 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_Fn_notEmptyOrNull() throws Exception {
-        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.notEmptyA()).forEach(Fn.println());
-        Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.notEmptyC()).forEach(Fn.println());
-        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyM()).forEach(Fn.println());
+        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.notEmptyArray()).forEach(Fn.println());
+        Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.notEmptyCollection()).forEach(Fn.println());
+        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyMap()).forEach(Fn.println());
 
         Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
         Stream.just(CommonUtil.asList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
@@ -715,9 +715,9 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat('=', 80));
 
-        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyA()).forEach(Fn.println());
-        Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.notEmptyC()).forEach(Fn.println());
-        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyM()).forEach(Fn.println());
+        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyArray()).forEach(Fn.println());
+        Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.notEmptyCollection()).forEach(Fn.println());
+        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyMap()).forEach(Fn.println());
 
         Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
         Seq.just(CommonUtil.asList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());

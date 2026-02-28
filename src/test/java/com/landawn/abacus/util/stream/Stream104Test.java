@@ -1044,26 +1044,26 @@ public class Stream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmap() {
-        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).count());
-        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).skip(1).count());
+        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).count());
+        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).count());
         assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).toArray());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toArray());
         assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).skip(1).toArray());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toArray());
         assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).toList());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toList());
         assertEquals(N.asList(2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flattmap(Fn.identity()).skip(1).toList());
-        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).count());
-        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).skip(1).count());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toList());
+        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).count());
+        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).count());
         assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).toArray());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toArray());
         assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).skip(1).toArray());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toArray());
         assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).toList());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toList());
         assertEquals(N.asList(2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flattmap(Fn.identity()).skip(1).toList());
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toList());
     }
 
     @Test

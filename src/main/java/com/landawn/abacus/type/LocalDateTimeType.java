@@ -25,6 +25,21 @@ import java.time.LocalDateTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for {@link LocalDateTime} values. Provides serialization, deserialization,
+ * and JDBC integration for Java's {@code LocalDateTime} type, supporting conversions
+ * to and from strings, milliseconds, and SQL timestamps.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<LocalDateTime> type = Type.ofLocalDateTime();
+ * LocalDateTime dt = type.valueOf("2024-03-15T10:30:00");
+ * String str = type.stringOf(dt);
+ * }</pre>
+ *
+ * @see AbstractTemporalType
+ * @see LocalDateTime
+ */
 public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getSimpleName();
@@ -139,7 +154,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
             return LocalDateTime.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {

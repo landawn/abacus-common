@@ -133,7 +133,7 @@ public class AbstractLongStream101Test extends TestBase {
     @Test
     public void testFlattMapToObj() {
         stream = createLongStream(new long[] { 1, 2, 3 });
-        List<String> result = stream.flattmapToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) }).toList();
+        List<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) }).toList();
         assertEquals(Arrays.asList("1", "2", "2", "4", "3", "6"), result);
     }
 

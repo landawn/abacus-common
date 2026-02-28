@@ -178,11 +178,11 @@ final class JsonParserImpl extends AbstractJsonParser {
      *     .readNullToEmpty(true);
      *
      * String json = "{\"name\":\"John\",\"age\":30}";
-     * User user = parser.readString(json, config, Type.of(User.class));
+     * User user = parser.parse(json, config, Type.of(User.class));
      *
      * // Deserialize collection with type safety
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.readString(jsonArray, config, new TypeReference<List<Item>>() {});
+     * List<Item> items = parser.parse(jsonArray, config, new TypeReference<List<Item>>() {});
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -194,7 +194,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T readString(String source, JsonDeserializationConfig config, Type<? extends T> targetType) {
+    public <T> T parse(String source, JsonDeserializationConfig config, Type<? extends T> targetType) {
         final JsonDeserializationConfig configToUse = check(config);
 
         if ((Strings.isEmpty(source) && configToUse.readNullToEmpty()) || (source != null && source.isEmpty())) {
@@ -208,7 +208,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
 
-            return readString(source, jr, configToUse, targetType, null);
+            return parse(source, jr, configToUse, targetType, null);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -219,7 +219,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation delegates to {@link #readString(String, JsonDeserializationConfig, Type)}
+     * <p>This implementation delegates to {@link #parse(String, JsonDeserializationConfig, Type)}
      * after converting the class to a Type.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -228,7 +228,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *     .ignoreUnmatchedProperty(true);
      *
      * String json = "{\"name\":\"John\",\"age\":30}";
-     * User user = parser.readString(json, config, User.class);
+     * User user = parser.parse(json, config, User.class);
      * }</pre>
      *
      * @param <T> the type of the target class
@@ -240,8 +240,8 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T readString(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
-        return readString(source, config, Type.of(targetClass));
+    public <T> T parse(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetClass) {
+        return parse(source, config, Type.of(targetClass));
     }
 
     /**
@@ -255,7 +255,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
      * String json = "[1, 2, 3, 4, 5]";
      * Integer[] numbers = new Integer[5];
-     * parser.readString(json, config, numbers);
+     * parser.parse(json, config, numbers);
      * // numbers array is now filled: [1, 2, 3, 4, 5]
      * }</pre>
      *
@@ -267,7 +267,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Object[] output) {
+    public void parse(final String source, final JsonDeserializationConfig config, final Object[] output) {
         final JsonDeserializationConfig configToUse = check(config);
 
         //    if (N.isEmpty(str)) { // TODO ?
@@ -283,7 +283,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, Type.of(output.getClass()), output);
+            parse(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -302,7 +302,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
      * String json = "[\"apple\", \"banana\", \"orange\"]";
      * List<String> fruits = new ArrayList<>();
-     * parser.readString(json, config, fruits);
+     * parser.parse(json, config, fruits);
      * // fruits now contains: ["apple", "banana", "orange"]
      * }</pre>
      *
@@ -314,7 +314,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Collection<?> output) {
+    public void parse(final String source, final JsonDeserializationConfig config, final Collection<?> output) {
         final JsonDeserializationConfig configToUse = check(config);
 
         //    if (N.isEmpty(str)) { // TODO ?
@@ -330,7 +330,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, Type.of(output.getClass()), output);
+            parse(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -349,7 +349,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserializationConfig config = new JsonDeserializationConfig();
      * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
      * Map<String, String> map = new HashMap<>();
-     * parser.readString(json, config, map);
+     * parser.parse(json, config, map);
      * // map now contains: {key1=value1, key2=value2}
      * }</pre>
      *
@@ -361,7 +361,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override
-    public void readString(final String source, final JsonDeserializationConfig config, final Map<?, ?> output) {
+    public void parse(final String source, final JsonDeserializationConfig config, final Map<?, ?> output) {
         final JsonDeserializationConfig configToUse = check(config);
 
         if (Strings.isEmpty(source)) {
@@ -373,7 +373,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, Type.of(output.getClass()), output);
+            parse(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -392,7 +392,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonReader jr = JsonStringReader.parse(jsonString, charBuffer);
-     * MyBean bean = readString(jsonString, jr, config, Type.of(MyBean.class), null);
+     * MyBean bean = parse(jsonString, jr, config, Type.of(MyBean.class), null);
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -406,7 +406,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws ParsingException if the JSON structure doesn't match the target class or is invalid
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readString(final String source, final JsonReader jr, final JsonDeserializationConfig config, final Type<? extends T> targetType,
+    protected <T> T parse(final String source, final JsonReader jr, final JsonDeserializationConfig config, final Type<? extends T> targetType,
             final Object output) throws IOException {
         final Class<? extends T> targetClass = targetType.clazz();
         final Object[] a = (output instanceof Object[]) ? (Object[]) output : null;
@@ -2329,8 +2329,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
                 }
 
-                throw new ParsingException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz())
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz())
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported", firstTokenToUse);
         }
     }
 
@@ -2355,7 +2355,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParsingException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken); //NOSONAR
             }
 
             return null; // result;
@@ -2444,7 +2444,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             }
                         }
                     } else {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     break;
@@ -2452,7 +2452,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case COMMA:
 
                     if (isPropName) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
                         isPropName = true;
 
@@ -2472,7 +2472,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACE:
 
                     if (isPropName) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2524,12 +2524,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACKET:
 
                     if (isPropName) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        readCollection(jr, defaultJsonDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null, null);
+                        readCollection(jr, defaultJsonDeserializationConfig, null, Strings.isEmpty(propName) ? null : config.getPropHandler(propName), false,
+                                List.class, null, null);
                     } else {
                         if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
                             final StringBuilder sb = Objectory.createStringBuilder();
@@ -2565,7 +2566,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 Objectory.recycle(sb);
                             }
                         } else {
-                            propValue = readBracketedValue(jr, config, config.getPropHandler(propName), propType);
+                            propValue = readBracketedValue(jr, config, Strings.isEmpty(propName) ? null : config.getPropHandler(propName), propType);
                         }
 
                         setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
@@ -2577,9 +2578,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if ((isPropName && propInfo != null) /* check for empty JSON text {} */
                             || (isPropName && Strings.isEmpty(propName) && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token); //NOSONAR
                     } else {
                         if (jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2594,7 +2595,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     return beanInfo.finishBeanResult(result);
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }
@@ -2654,11 +2655,11 @@ final class JsonParserImpl extends AbstractJsonParser {
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
 
-        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
+        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = getCreatorAndConverterForTargetType(targetClass, null);
 
         @SuppressWarnings("rawtypes")
         final Map<Object, Object> result = output == null
-                ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConvertor._1.apply(targetClass)
+                ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass)
                         : N.newMap(Map.class.equals(targetClass) ? config.getMapInstanceType() : (Class<Map>) targetClass))
                 : output;
 
@@ -2678,7 +2679,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             //
             //    return null; // (T) result;
 
-            return (T) creatorAndConvertor._2.apply(result);
+            return (T) creatorAndConverter._2.apply(result);
         }
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
@@ -2718,7 +2719,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
                         }
                     } else {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     break;
@@ -2726,7 +2727,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case COMMA:
 
                     if (isKey) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
                         isKey = true;
 
@@ -2749,7 +2750,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if (isKey) {
                         key = readBracedValue(jr, config, keyType);
-                        propType = valueType;
+                        propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
+                        propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                             readMap(jr, defaultJsonDeserializationConfig, null, false, Map.class, null, null);
@@ -2769,13 +2771,16 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if (isKey) {
                         key = readBracketedValue(jr, config, null, keyType);
-                        propType = valueType;
+                        propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
+                        propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            readCollection(jr, defaultJsonDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null, null);
+                            readCollection(jr, defaultJsonDeserializationConfig, null, Strings.isEmpty(propName) ? null : config.getPropHandler(propName),
+                                    false, List.class, null, null);
                         } else {
                             //noinspection DataFlowIssue
-                            value = readBracketedValue(jr, config, key instanceof String ? config.getPropHandler((String) key) : null, propType);
+                            value = readBracketedValue(jr, config,
+                                    key instanceof String && Strings.isNotEmpty((String) key) ? config.getPropHandler((String) key) : null, propType);
 
                             if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
                                 result.put(key, value);
@@ -2789,9 +2794,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if (isKey && key != null /* check for empty JSON text {} */
                             || (isKey && key == null && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                     } else {
                         if (jr.hasText()) {
                             if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
@@ -2806,10 +2811,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
                     }
 
-                    return (T) creatorAndConvertor._2.apply(result);
+                    return (T) creatorAndConverter._2.apply(result);
 
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }
@@ -2916,7 +2921,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         case END_BRACKET, EOF:
 
                             if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                                throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                                throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                             } else if (jr.hasText() || preToken == COMMA) {
                                 value = readValue(jr, readNullToEmpty, eleType);
 
@@ -2928,7 +2933,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             return collectionToArray(c, targetType);
 
                         default:
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                     }
                 }
             } finally {
@@ -2990,7 +2995,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     case END_BRACKET, EOF:
 
                         if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                            throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                            throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                         } else if (jr.hasText() || preToken == COMMA) {
                             value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3002,7 +3007,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         return (T) output;
 
                     default:
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                 }
             }
         }
@@ -3027,10 +3032,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         @SuppressWarnings("rawtypes")
         final BiConsumer<Collection<Object>, Object> propHandlerToUse = propHandler == null ? DEFAULT_PROP_HANDLER : (BiConsumer) propHandler;
 
-        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
+        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = getCreatorAndConverterForTargetType(targetClass, null);
 
         final Collection<Object> result = output == null
-                ? (Collection.class.isAssignableFrom(targetClass) ? (Collection<Object>) creatorAndConvertor._1.apply(targetClass) : new ArrayList<>())
+                ? (Collection.class.isAssignableFrom(targetClass) ? (Collection<Object>) creatorAndConverter._1.apply(targetClass) : new ArrayList<>())
                 : output;
 
         Object value = null;
@@ -3051,7 +3056,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 propHandlerToUse.accept(result, value);
             }
 
-            return (T) creatorAndConvertor._2.apply(result);
+            return (T) creatorAndConverter._2.apply(result);
         }
 
         for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
@@ -3109,7 +3114,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACKET, EOF:
 
                     if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                     } else if (jr.hasText() || preToken == COMMA) {
                         value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3119,10 +3124,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
                     }
 
-                    return (T) creatorAndConvertor._2.apply(result);
+                    return (T) creatorAndConverter._2.apply(result);
 
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }
@@ -3130,11 +3135,11 @@ final class JsonParserImpl extends AbstractJsonParser {
     @SuppressWarnings("unused")
     protected <T> T readMapEntity(final JsonReader jr, final JsonDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
-        final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
+        final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken);
             }
 
             return null;
@@ -3154,11 +3159,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                         if (mapEntity == null) {
                             mapEntity = new MapEntity(jr.getText());
                         } else {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
                     } else {
                         if (mapEntity == null) {
-                            throw new ParsingException(token, "Bean name cannot be null or empty");
+                            throw new ParsingException("Bean name cannot be null or empty", token);
                         }
                     }
 
@@ -3175,13 +3180,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                     }
 
                     return (T) mapEntity;
 
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }
@@ -3189,11 +3194,11 @@ final class JsonParserImpl extends AbstractJsonParser {
     @SuppressWarnings({ "unused" })
     protected <T> T readEntityId(final JsonReader jr, final JsonDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
-        final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
+        final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
-                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken);
             }
 
             return null;
@@ -3213,11 +3218,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                         if (entityId == null) {
                             entityId = Seid.of(jr.getText());
                         } else {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
                     } else {
                         if (entityId == null) {
-                            throw new ParsingException(token, "Bean name cannot be null or empty");
+                            throw new ParsingException("Bean name cannot be null or empty", token);
                         }
                     }
 
@@ -3234,13 +3239,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                     }
 
                     return (T) entityId;
 
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }
@@ -3253,7 +3258,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
-                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken);
             }
 
             return null;
@@ -3316,14 +3321,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     valueType = hasValueTypes ? config.getValueType(key, objType) : objType;
                                 }
                             } else {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             }
 
                             break;
 
                         case COMMA:
                             if (isKey) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             } else {
                                 isKey = true;
 
@@ -3342,7 +3347,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case START_BRACE:
                             if (isKey) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
                                     readMap(jr, defaultJsonDeserializationConfig, null, false, Map.class, null, null);
@@ -3357,12 +3362,13 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case START_BRACKET:
                             if (isKey) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
-                                    readCollection(jr, defaultJsonDeserializationConfig, null, config.getPropHandler(key), false, List.class, null, null);
+                                    readCollection(jr, defaultJsonDeserializationConfig, null, Strings.isEmpty(key) ? null : config.getPropHandler(key), false,
+                                            List.class, null, null);
                                 } else {
-                                    value = readBracketedValue(jr, config, config.getPropHandler(key), valueType);
+                                    value = readBracketedValue(jr, config, Strings.isEmpty(key) ? null : config.getPropHandler(key), valueType);
 
                                     addDatasetColumnValue(key, value, valueCount, result);
                                 }
@@ -3372,7 +3378,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case END_BRACE:
                             if (isKey && key != null /* check for empty JSON text {} */) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             } else {
                                 if (jr.hasText()) {
                                     if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
@@ -3404,14 +3410,14 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                             break;
                         default:
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     if (isBraceEnded) {
                         if (token == END_BRACKET || token == EOF /*should not happen*/) {
                             break;
                         } else if (token != START_BRACE) {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         isBraceEnded = false;
@@ -3420,7 +3426,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             } else if (token == END_BRACKET || token == EOF /*should not happen*/) {
                 // end
             } else {
-                throw new ParsingException(token, getErrorMsg(jr, token));
+                throw new ParsingException(getErrorMsg(jr, token), token);
             }
 
             rs = new RowDataset(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
@@ -3454,13 +3460,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                             final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             }
 
                             if (order == 6) {
                                 isFrozen = jr.readValue(boolType);
                             } else {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             }
                         }
 
@@ -3474,14 +3480,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 columnName = jr.getText();
                             }
                         } else {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         break;
 
                     case COMMA:
                         if (isKey) {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         } else {
                             isKey = true;
 
@@ -3489,13 +3495,13 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 final Integer order = datasetSheetPropOrder.get(columnName);
 
                                 if (order == null) {
-                                    throw new ParsingException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(getErrorMsg(jr, token), token);
                                 }
 
                                 if (order == 6) {
                                     isFrozen = jr.readValue(boolType);
                                 } else {
-                                    throw new ParsingException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(getErrorMsg(jr, token), token);
                                 }
                             }
                         }
@@ -3506,7 +3512,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         switch (order) {
@@ -3519,7 +3525,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 break;
 
                             default:
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         break;
@@ -3544,7 +3550,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         if (isKey) {
                                             columnName = jr.getText();
                                         } else {
-                                            throw new ParsingException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(getErrorMsg(jr, token), token);
                                         }
 
                                         break;
@@ -3557,19 +3563,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                                                 columnName = jr.getText();
                                             }
                                         } else {
-                                            throw new ParsingException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(getErrorMsg(jr, token), token);
                                         }
 
                                         break;
 
                                     case COMMA:
                                         if (isKey) {
-                                            throw new ParsingException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(getErrorMsg(jr, token), token);
                                         } else {
                                             isKey = true;
 
                                             if (jr.hasText()) {
-                                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                                throw new ParsingException(getErrorMsg(jr, token), token);
                                             }
                                         }
 
@@ -3589,7 +3595,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         }
 
                                         final List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null,
-                                                config.getPropHandler(columnName), false, List.class, null, null);
+                                                Strings.isEmpty(columnName) ? null : config.getPropHandler(columnName), false, List.class, null, null);
 
                                         if (columnList == null) {
                                             //noinspection DataFlowIssue
@@ -3604,7 +3610,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     case END_BRACE:
                                         if (jr.hasText()) {
                                             // it should not happen.
-                                            throw new ParsingException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(getErrorMsg(jr, token), token);
                                         }
 
                                         columnName = null;
@@ -3613,11 +3619,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         break;
 
                                     default:
-                                        throw new ParsingException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(getErrorMsg(jr, token), token);
                                 }
                             } while (readingColumns);
                         } else {
-                            throw new ParsingException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
+                            throw new ParsingException(getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText(), token);
                         }
 
                         break;
@@ -3625,9 +3631,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                     case END_BRACE, EOF:
 
                         if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                            throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                            throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                         } else if ((isKey && columnName != null) || jr.hasText()) {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         if (columnNameList == null) {
@@ -3648,7 +3654,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         return (T) rs;
 
                     default:
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                 }
             }
         }
@@ -3682,7 +3688,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
-                throw new ParsingException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken);
             }
 
             return null;
@@ -3697,6 +3703,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         String rowKeyType = null;
         String columnKeyType = null;
         List<Type<?>> columnTypeList = null;
+        Type<?> columnKeyValueType = strType;
 
         String columnName = null;
         Type<?> valueType = defaultValueType;
@@ -3715,7 +3722,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         final Integer order = datasetSheetPropOrder.get(columnName);
 
                         if (order == null) {
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                         }
 
                         switch (order) { //NOSONAR
@@ -3725,10 +3732,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                             case 11:
                                 columnKeyType = jr.readValue(strType);
+                                columnKeyValueType = Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType);
                                 break;
 
                             default:
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                         }
                     }
 
@@ -3742,14 +3750,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                             columnName = jr.getText();
                         }
                     } else {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     break;
 
                 case COMMA:
                     if (isKey) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
                         isKey = true;
 
@@ -3757,7 +3765,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             final Integer order = datasetSheetPropOrder.get(columnName);
 
                             if (order == null) {
-                                throw new ParsingException(token, getErrorMsg(jr, token));
+                                throw new ParsingException(getErrorMsg(jr, token), token);
                             }
 
                             switch (order) { //NOSONAR
@@ -3767,10 +3775,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                                 case 11:
                                     columnKeyType = jr.readValue(strType);
+                                    columnKeyValueType = Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType);
                                     break;
 
                                 default:
-                                    throw new ParsingException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(getErrorMsg(jr, token), token);
                             }
                         }
                     }
@@ -3781,7 +3790,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     final Integer order = datasetSheetPropOrder.get(columnName);
 
                     if (order == null) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     switch (order) {
@@ -3795,12 +3804,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                             break;
 
                         case 9:
-                            columnKeyList = readCollection(jr, JDC.create().setElementType(Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType)),
-                                    null, null, false, List.class, null, null);
+                            columnKeyList = readCollection(jr, JDC.create().setElementType(columnKeyValueType), null, null, false, List.class, null, null);
                             break;
 
                         default:
-                            throw new ParsingException(token, getErrorMsg(jr, token));
+                            throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     break;
@@ -3823,7 +3831,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     if (isKey) {
                                         columnName = jr.getText();
                                     } else {
-                                        throw new ParsingException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(getErrorMsg(jr, token), token);
                                     }
 
                                     break;
@@ -3836,26 +3844,34 @@ final class JsonParserImpl extends AbstractJsonParser {
                                             columnName = jr.getText();
                                         }
                                     } else {
-                                        throw new ParsingException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(getErrorMsg(jr, token), token);
                                     }
 
                                     break;
 
                                 case COMMA:
                                     if (isKey) {
-                                        throw new ParsingException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(getErrorMsg(jr, token), token);
                                     } else {
                                         isKey = true;
 
                                         if (jr.hasText()) {
-                                            throw new ParsingException(token, getErrorMsg(jr, token));
+                                            throw new ParsingException(getErrorMsg(jr, token), token);
                                         }
                                     }
 
                                     break;
 
                                 case START_BRACKET:
-                                    final int index = N.indexOf(columnKeyList, columnName);
+                                    final Object parsedColumnKey;
+
+                                    try {
+                                        parsedColumnKey = columnKeyValueType.valueOf(columnName);
+                                    } catch (final Exception e) {
+                                        throw new ParsingException("Column: " + columnName + " can't be parsed as type: " + columnKeyValueType.name(), e);
+                                    }
+
+                                    final int index = N.indexOf(columnKeyList, parsedColumnKey);
 
                                     if (index == N.INDEX_NOT_FOUND) {
                                         throw new ParsingException("Column: " + columnName + " is not found column list: " + columnKeyList);
@@ -3868,7 +3884,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     }
 
                                     final List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null,
-                                            config.getPropHandler(columnName), false, List.class, null, null);
+                                            Strings.isEmpty(columnName) ? null : config.getPropHandler(columnName), false, List.class, null, null);
 
                                     if (columnList == null) {
                                         //noinspection DataFlowIssue
@@ -3883,7 +3899,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 case END_BRACE:
                                     if (jr.hasText()) {
                                         // it should not happen.
-                                        throw new ParsingException(token, getErrorMsg(jr, token));
+                                        throw new ParsingException(getErrorMsg(jr, token), token);
                                     }
 
                                     columnName = null;
@@ -3892,11 +3908,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 default:
-                                    throw new ParsingException(token, getErrorMsg(jr, token));
+                                    throw new ParsingException(getErrorMsg(jr, token), token);
                             }
                         } while (readingColumns);
                     } else {
-                        throw new ParsingException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
+                        throw new ParsingException(getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText(), token);
                     }
 
                     break;
@@ -3904,9 +3920,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_BRACE, EOF:
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
-                        throw new ParsingException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
                     } else if ((isKey && columnName != null) || jr.hasText()) {
-                        throw new ParsingException(token, getErrorMsg(jr, token));
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     if (rowKeyList == null) {
@@ -3922,7 +3938,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     return (T) sheet;
 
                 default:
-                    throw new ParsingException(token, getErrorMsg(jr, token));
+                    throw new ParsingException(getErrorMsg(jr, token), token);
             }
         }
     }

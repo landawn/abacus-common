@@ -1217,8 +1217,10 @@ public class Sheet200Test extends TestBase {
             assertThrows(IllegalStateException.class, () -> sheet.sortByColumnKey());
             assertThrows(IllegalStateException.class, () -> sheet.sortColumnsByRowValues("R1", (Comparator) Comparator.naturalOrder()));
             assertThrows(IllegalStateException.class, () -> sheet.sortRowsByColumnValues("C1", (Comparator) Comparator.naturalOrder()));
-            assertThrows(IllegalStateException.class, () -> sheet.sortColumnsByRowValues(Collections.singletonList("R1"), (Comparator) Comparator.naturalOrder()));
-            assertThrows(IllegalStateException.class, () -> sheet.sortRowsByColumnValues(Collections.singletonList("C1"), (Comparator) Comparator.naturalOrder()));
+            assertThrows(IllegalStateException.class,
+                    () -> sheet.sortColumnsByRowValues(Collections.singletonList("R1"), (Comparator) Comparator.naturalOrder()));
+            assertThrows(IllegalStateException.class,
+                    () -> sheet.sortRowsByColumnValues(Collections.singletonList("C1"), (Comparator) Comparator.naturalOrder()));
         }
     }
 

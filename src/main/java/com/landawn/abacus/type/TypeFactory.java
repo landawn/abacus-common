@@ -767,9 +767,10 @@ public final class TypeFactory {
                     }
 
                     if (typeParameters.length == 3) {
-                        return new SheetType(typeParameters[0], typeParameters[1], typeParameters[2]);
+                        type = new SheetType(typeParameters[0], typeParameters[1], typeParameters[2]);
+                    } else {
+                        type = new SheetType(ObjectType.OBJECT, ObjectType.OBJECT, ObjectType.OBJECT);
                     }
-                    return new SheetType(ObjectType.OBJECT, ObjectType.OBJECT, ObjectType.OBJECT);
                 } else if (HBaseColumn.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
                         throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". HBaseColumn Type can only have one type parameter.");

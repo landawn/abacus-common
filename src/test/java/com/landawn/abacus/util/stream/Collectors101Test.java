@@ -960,7 +960,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testMinAlll() {
-        Optional<Pair<Integer, Long>> result = Stream.of(1, 3, 1, 5, 1).collect(Collectors.minAlll(Collectors.counting()));
+        Optional<Pair<Integer, Long>> result = Stream.of(1, 3, 1, 5, 1).collect(Collectors.minAllWith(Collectors.counting()));
 
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(1, result.get().left());
@@ -970,7 +970,7 @@ public class Collectors101Test extends TestBase {
     @Test
     public void testMinAlllWithComparator() {
         Optional<Pair<String, Integer>> result = Stream.of("a", "bb", "ccc", "d", "e")
-                .collect(Collectors.minAlll(Comparator.comparing(String::length), Collectors.countingToInt()));
+                .collect(Collectors.minAllWith(Comparator.comparing(String::length), Collectors.countingToInt()));
 
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("a", result.get().left());
@@ -980,7 +980,7 @@ public class Collectors101Test extends TestBase {
     @Test
     public void testMinAlllWithComparatorAndFinisher() {
         String result = Stream.of("a", "bb", "ccc", "d", "e")
-                .collect(Collectors.minAlll(Comparator.comparing(String::length), Collectors.counting(),
+                .collect(Collectors.minAllWith(Comparator.comparing(String::length), Collectors.counting(),
                         opt -> opt.map(p -> p.left() + ":" + p.right()).orElse("none")));
 
         Assertions.assertEquals("a:3", result);
@@ -1023,7 +1023,7 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testMaxAlll() {
-        Optional<Pair<Integer, Long>> result = Stream.of(5, 3, 5, 1, 5).collect(Collectors.maxAlll(Collectors.counting()));
+        Optional<Pair<Integer, Long>> result = Stream.of(5, 3, 5, 1, 5).collect(Collectors.maxAllWith(Collectors.counting()));
 
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(5, result.get().left());
@@ -1033,7 +1033,7 @@ public class Collectors101Test extends TestBase {
     @Test
     public void testMaxAlllWithComparator() {
         Optional<Pair<String, Integer>> result = Stream.of("a", "bb", "ccc", "dd", "eee")
-                .collect(Collectors.maxAlll(Comparator.comparing(String::length), Collectors.countingToInt()));
+                .collect(Collectors.maxAllWith(Comparator.comparing(String::length), Collectors.countingToInt()));
 
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("ccc", result.get().left());
@@ -1043,7 +1043,7 @@ public class Collectors101Test extends TestBase {
     @Test
     public void testMaxAlllWithComparatorAndFinisher() {
         String result = Stream.of("a", "bb", "ccc", "dd", "eee")
-                .collect(Collectors.maxAlll(Comparator.comparing(String::length), Collectors.counting(),
+                .collect(Collectors.maxAllWith(Comparator.comparing(String::length), Collectors.counting(),
                         opt -> opt.map(p -> p.left() + ":" + p.right()).orElse("none")));
 
         Assertions.assertEquals("ccc:2", result);

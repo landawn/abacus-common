@@ -352,11 +352,11 @@ public class Strings103Test extends TestBase {
     @Test
     public void testDeleteWhitespace() {
         String[] arr = { "  hello  ", "world\t123", " h i ", null };
-        Strings.deleteWhitespace(arr);
+        Strings.removeWhitespace(arr);
 
-        Strings.deleteWhitespace((String[]) null);
+        Strings.removeWhitespace((String[]) null);
 
-        Strings.deleteWhitespace(new String[0]);
+        Strings.removeWhitespace(new String[0]);
     }
 
     @Test
@@ -1128,7 +1128,7 @@ public class Strings103Test extends TestBase {
         Strings.trimToEmpty((String[]) null);
         Strings.stripToNull((String[]) null);
         Strings.stripToEmpty((String[]) null);
-        Strings.deleteWhitespace((String[]) null);
+        Strings.removeWhitespace((String[]) null);
 
     }
 }

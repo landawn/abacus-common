@@ -463,7 +463,7 @@ public final class IOUtil {
     /**
      * The operating system name.
      */
-    public static final String OS_NAME = System.getProperty("os.name");
+    public static final String OS_NAME = N.defaultIfNull(System.getProperty("os.name"), "");
 
     /**
      * The operating system version.
@@ -499,8 +499,8 @@ public final class IOUtil {
     /**
      * Flag indicating whether the current platform is Android.
      */
-    public static final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID)
-            || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID);
+    public static final boolean IS_PLATFORM_ANDROID = N.defaultIfNull(System.getProperty(JAVA_VENDOR_STR), "").toUpperCase().contains(ANDROID)
+            || N.defaultIfNull(System.getProperty(JAVA_VM_VENDOR_STR), "").toUpperCase().contains(ANDROID);
 
     // ..
     /**
@@ -738,8 +738,8 @@ public final class IOUtil {
         if (ret == null) {
             // This may be slow on some machine. Move it from static initialization block to method.
 
-            final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID) //NOSONAR
-                    || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID); //NOSONAR
+            final boolean IS_PLATFORM_ANDROID = N.defaultIfNull(System.getProperty(JAVA_VENDOR_STR), "").toUpperCase().contains(ANDROID) //NOSONAR
+                    || N.defaultIfNull(System.getProperty(JAVA_VM_VENDOR_STR), "").toUpperCase().contains(ANDROID); //NOSONAR
 
             // implementation for android support
             if (IS_PLATFORM_ANDROID) {
@@ -774,12 +774,12 @@ public final class IOUtil {
 
     /**
      * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
-     * This is equivalent to calling {@code freeDiskSpaceKB(new File(".").getAbsolutePath())}.
+     * This is equivalent to calling {@code freeDiskSpaceInKB(new File(".").getAbsolutePath())}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceKB();
+     *     long freeSpace = IOUtil.freeDiskSpaceInKB();
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space: " + e.getMessage());
@@ -789,7 +789,7 @@ public final class IOUtil {
      * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      */
-    public static long freeDiskSpaceKB() throws UncheckedIOException {
+    public static long freeDiskSpaceInKB() throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb();
         } catch (final IOException e) {
@@ -799,13 +799,13 @@ public final class IOUtil {
 
     /**
      * Returns the free disk space on the volume where the current working directory resides, in kilobytes (KB).
-     * This is equivalent to calling {@code freeDiskSpaceKB(new File(".").getAbsolutePath(), timeout)}.
+     * This is equivalent to calling {@code freeDiskSpaceInKB(new File(".").getAbsolutePath(), timeout)}.
      * The command to retrieve the disk space will be aborted if it exceeds the specified timeout.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceKB(5000);   // 5-second timeout
+     *     long freeSpace = IOUtil.freeDiskSpaceInKB(5000);   // 5-second timeout
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
@@ -816,7 +816,7 @@ public final class IOUtil {
      * @return the amount of free disk space in kilobytes.
      * @throws UncheckedIOException if an I/O error occurs or the command times out.
      */
-    public static long freeDiskSpaceKB(final long timeout) throws UncheckedIOException {
+    public static long freeDiskSpaceInKB(final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(timeout);
         } catch (final IOException e) {
@@ -840,11 +840,11 @@ public final class IOUtil {
      * <pre>{@code
      * try {
      *     // For Windows
-     *     long freeSpace = IOUtil.freeDiskSpaceKB("C:\\");
+     *     long freeSpace = IOUtil.freeDiskSpaceInKB("C:\\");
      *     System.out.println("Free space on C: " + freeSpace + " KB");
      * 
      *     // For Unix-like systems
-     *     long freeSpaceUnix = IOUtil.freeDiskSpaceKB("/home");
+     *     long freeSpaceUnix = IOUtil.freeDiskSpaceInKB("/home");
      *     System.out.println("Free space on /home: " + freeSpaceUnix + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path: " + e.getMessage());
@@ -856,7 +856,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs while retrieving the free space information.
      * @throws IllegalArgumentException if the path is invalid.
      */
-    public static long freeDiskSpaceKB(final String path) throws UncheckedIOException {
+    public static long freeDiskSpaceInKB(final String path) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path);
         } catch (final IOException e) {
@@ -878,7 +878,7 @@ public final class IOUtil {
      * <pre>{@code
      * try {
      *     // For Windows, with a 5-second timeout
-     *     long freeSpace = IOUtil.freeDiskSpaceKB("C:\\", 5000);
+     *     long freeSpace = IOUtil.freeDiskSpaceInKB("C:\\", 5000);
      *     System.out.println("Free space on C: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space for the specified path within the timeout: " + e.getMessage());
@@ -891,7 +891,7 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs or the command times out.
      * @throws IllegalArgumentException if the path is invalid.
      */
-    public static long freeDiskSpaceKB(final String path, final long timeout) throws UncheckedIOException {
+    public static long freeDiskSpaceInKB(final String path, final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path, timeout);
         } catch (final IOException e) {
@@ -1352,10 +1352,14 @@ public final class IOUtil {
                 count += cnt;
 
                 if (count < maxLen && count >= arrayLength) {
-                    int newCapacity = (int) (arrayLength * 1.75);
+                    // Use long arithmetic to prevent integer overflow when calculating new capacity
+                    long newCapacityLong = (long) (arrayLength * 1.75);
+                    int newCapacity;
 
-                    if (newCapacity < 0 || newCapacity > maxLen || newCapacity > N.MAX_ARRAY_SIZE) {
+                    if (newCapacityLong < 0 || newCapacityLong > maxLen || newCapacityLong > N.MAX_ARRAY_SIZE) {
                         newCapacity = (int) N.min(maxLen, N.MAX_ARRAY_SIZE);
+                    } else {
+                        newCapacity = (int) newCapacityLong;
                     }
 
                     if (newCapacity <= arrayLength) {
@@ -4469,8 +4473,8 @@ public final class IOUtil {
         InputStream is = null;
 
         try {
-            os = IOUtil.newFileOutputStream(output);
             is = IOUtil.newFileInputStream(source);
+            os = IOUtil.newFileOutputStream(output);
 
             return write(is, offset, count, os, true);
         } finally {
@@ -4718,6 +4722,7 @@ public final class IOUtil {
      *     long bytesWritten = IOUtil.write(is, 100, 500, os, true);
      * }
      * }</pre>
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or {@code output} is {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
@@ -5274,16 +5279,21 @@ public final class IOUtil {
     }
 
     /**
-     * Appends the content of the Reader to the target file.
-     * This file is opened to write with the default charset.
+     * Appends all characters from the specified {@code Reader} to the target file using the default charset.
      *
-     * @param source     the Reader to read from, must not be {@code null}.
-     * @param targetFile the file to which the Reader content will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
-     * @return the number of characters appended to the target file.
-     * @throws IOException if an I/O error occurs.
+     * <p>If the target file exists, content is appended; otherwise a new file is created.
+     * Missing parent directories are created as needed. This method does not close the input reader.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Sample codes
+     * }</pre>
+     *
+     * @param source the {@code Reader} to read from.
+     * @param targetFile the file to append to.
+     * @return the number of characters appended to {@code targetFile}.
+     * @throws IOException if an I/O error occurs while appending.
      */
-
     public static long append(final Reader source, final File targetFile) throws IOException {
         return append(source, DEFAULT_CHARSET, targetFile);
     }
@@ -8772,9 +8782,13 @@ public final class IOUtil {
         } else {
             Path sourcePath = sourceFile.toPath();
             Path parentPath = sourcePath.getParent();
+            final Path normalizedTargetPath = targetFile.toPath().toAbsolutePath().normalize();
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (normalizedTargetPath.equals(file.toAbsolutePath().normalize())) {
+                        return FileVisitResult.CONTINUE;
+                    }
                     // Relativize from parent to include source directory name
                     String zipEntryName = parentPath.relativize(file).toString();
                     zipEntryName = zipEntryName.replace('\\', '/');
@@ -8880,7 +8894,8 @@ public final class IOUtil {
                 // Fix for Zip Slip
                 File newFile = new File(targetDir, ze.getName());
 
-                if (!newFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath())) {
+                if (!newFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath() + File.separator)
+                        && !newFile.getCanonicalPath().equals(targetDir.getCanonicalPath())) {
                     throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
                 }
 
@@ -8964,6 +8979,9 @@ public final class IOUtil {
      * @see #splitBySize(File, long, File)
      */
     public static void split(final File file, final int countOfParts) throws IOException {
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgPositive(countOfParts, cs.countOfParts);
+
         split(file, countOfParts, file.getParentFile());
     }
 
@@ -9013,7 +9031,17 @@ public final class IOUtil {
      * @see #splitBySize(File, long, File)
      */
     public static void split(final File file, final int countOfParts, final File destDir) throws IOException {
-        final long sizeOfPart = (file.length() % countOfParts) == 0 ? (file.length() / countOfParts) : (file.length() / countOfParts) + 1;
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgPositive(countOfParts, cs.countOfParts);
+
+        final long fileLen = file.length();
+
+        if (fileLen == 0) {
+            splitBySize(file, 1, destDir);
+            return;
+        }
+
+        final long sizeOfPart = (fileLen % countOfParts) == 0 ? (fileLen / countOfParts) : (fileLen / countOfParts) + 1;
 
         splitBySize(file, sizeOfPart, destDir);
     }
@@ -9114,12 +9142,13 @@ public final class IOUtil {
     public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws IOException {
         checkFileExists(file);
         checkDestDirectory(destDir);
+        N.checkArgPositive(sizeOfPart, "sizeOfPart");
 
-        final int numOfParts = (int) ((file.length() % sizeOfPart) == 0 ? (file.length() / sizeOfPart) : (file.length() / sizeOfPart) + 1);
+        final long fileLength = file.length();
+        final long numOfParts = Math.max(1L, (fileLength % sizeOfPart) == 0 ? (fileLength / sizeOfPart) : (fileLength / sizeOfPart) + 1);
 
         final String fileName = file.getName();
-        final long fileLength = file.length();
-        int fileSerNum = 1;
+        long fileSerNum = 1;
 
         final byte[] buf = Objectory.createByteArrayBuffer();
         InputStream input = null;
@@ -9128,14 +9157,17 @@ public final class IOUtil {
         try {
             input = IOUtil.newFileInputStream(file);
 
-            for (int i = 0; i < numOfParts; i++) {
+            for (long i = 0; i < numOfParts; i++) {
                 final String subFileName = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + fileName + "_"
                         + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
                 output = IOUtil.newFileOutputStream(new File(subFileName));
                 long partLength = sizeOfPart;
 
                 if (i == numOfParts - 1) {
-                    partLength += fileLength % sizeOfPart;
+                    final long remainder = fileLength % sizeOfPart;
+                    if (remainder != 0) {
+                        partLength = remainder;
+                    }
                 }
 
                 int count = 0;
@@ -9667,8 +9699,9 @@ public final class IOUtil {
                             bytes.clear();
                         }
                     }
+                } else {
+                    buffer.append(url.charAt(i++));
                 }
-                buffer.append(url.charAt(i++));
             }
             decoded = buffer.toString();
         }
@@ -10878,7 +10911,14 @@ public final class IOUtil {
             ZipFile zf = null;
             try {
                 zf = new ZipFile(source);
-                final ZipEntry ze = zf.entries().nextElement();
+                final java.util.Enumeration<? extends ZipEntry> entries = zf.entries();
+
+                if (!entries.hasMoreElements()) {
+                    close(zf);
+                    throw new IOException("ZIP file is empty: " + source.getAbsolutePath());
+                }
+
+                final ZipEntry ze = entries.nextElement();
                 is = zf.getInputStream(ze);
                 outputZipFile.setValue(zf);
             } catch (IOException e) {

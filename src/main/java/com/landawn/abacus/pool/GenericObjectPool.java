@@ -98,12 +98,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Comparator used to determine eviction order based on the configured eviction policy.
      */
-    final Comparator<E> cmp;
+    transient Comparator<E> cmp;
 
     /**
      * Future representing the scheduled eviction task, {@code null} if eviction is disabled.
      */
-    ScheduledFuture<?> scheduleFuture;
+    transient ScheduledFuture<?> scheduleFuture;
 
     /**
      * Constructs a new GenericObjectPool with basic configuration.
@@ -165,43 +165,45 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         this.memoryMeasure = memoryMeasure;
         pool = new ArrayDeque<>(Math.min(capacity, 1000));
 
-        switch (this.evictionPolicy) {
+        cmp = createComparator();
+        scheduleEvictionTask();
+    }
+
+    private Comparator<E> createComparator() {
+        switch (evictionPolicy) {
             // =============================================== For Priority Queue
             case LAST_ACCESS_TIME:
-
-                cmp = Comparator.comparingLong(o -> o.activityPrint().getLastAccessTime());
-
-                break;
+                return Comparator.comparingLong(o -> o.activityPrint().getLastAccessTime());
 
             case ACCESS_COUNT:
-                cmp = Comparator.comparingLong(o -> o.activityPrint().getAccessCount());
-
-                break;
+                return Comparator.comparingLong(o -> o.activityPrint().getAccessCount());
 
             case EXPIRATION_TIME:
-                cmp = Comparator.comparingLong(o -> o.activityPrint().getExpirationTime());
-
-                break;
+                return Comparator.comparingLong(o -> o.activityPrint().getExpirationTime());
 
             default:
                 throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
         }
+    }
 
-        if (evictDelay > 0) {
-            final Runnable evictTask = () -> {
-                // Evict from the pool
-                try {
-                    evict();
-                } catch (final Exception e) {
-                    // ignore
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(ExceptionUtil.getErrorMessage(e, true));
-                    }
-                }
-            };
-
-            scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
+    private void scheduleEvictionTask() {
+        if (evictDelay <= 0 || isClosed) {
+            return;
         }
+
+        final Runnable evictTask = () -> {
+            // Evict from the pool
+            try {
+                removeExpired();
+            } catch (final Exception e) {
+                // ignore
+                if (logger.isWarnEnabled()) {
+                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                }
+            }
+        };
+
+        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -244,14 +246,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             return false;
         }
 
-        putCount.incrementAndGet();
-
         lock.lock();
 
         try {
             if (pool.size() >= capacity) {
                 if (autoBalance) {
-                    vacate();
+                    evict();
+
+                    if (pool.size() >= capacity) {
+                        return false;
+                    }
                 } else {
                     return false;
                 }
@@ -268,7 +272,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                     if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                         if (autoBalance) {
-                            vacate();
+                            evict();
 
                             if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                                 // ignore.
@@ -290,6 +294,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             } else {
                 pool.push(element);
             }
+
+            putCount.incrementAndGet();
 
             notEmpty.signal();
 
@@ -367,15 +373,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             return false;
         }
 
-        putCount.incrementAndGet();
-
         long nanos = unit.toNanos(timeout);
 
         lock.lock();
 
         try {
             if ((pool.size() >= capacity) && autoBalance) {
-                vacate();
+                evict();
             }
 
             int maxSpins = 10000;
@@ -392,7 +396,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                         if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                             if (autoBalance) {
-                                vacate();
+                                evict();
 
                                 if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
                                     // ignore. 
@@ -411,6 +415,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         pool.push(element);
                     }
 
+                    putCount.incrementAndGet();
                     notEmpty.signal();
 
                     return true;
@@ -497,14 +502,15 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            element = pool.size() > 0 ? pool.pop() : null;
+            while (pool.size() > 0) {
+                element = pool.pop();
 
-            if (element != null) {
                 final ActivityPrint activityPrint = element.activityPrint();
 
                 if (activityPrint.isExpired()) {
                     destroy(element, Caller.EVICT);
                     element = null;
+                    notFull.signal();
                 } else {
                     activityPrint.updateLastAccessTime();
                     activityPrint.updateAccessCount();
@@ -518,9 +524,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                             totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
                         }
                     }
-                }
 
-                notFull.signal();
+                    notFull.signal();
+                    break;
+                }
             }
         } finally {
             lock.unlock();
@@ -646,13 +653,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public void vacate() throws IllegalStateException {
+    public void evict() throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
+            evict((int) (pool.size() * balanceFactor)); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -705,10 +712,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Returns the current number of objects in the pool.
      *
      * @return the number of objects currently in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public int size() throws IllegalStateException {
-        // assertNotClosed();
+        assertNotClosed();
 
         return pool.size();
     }
@@ -754,20 +762,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Removes the specified number of objects from the pool based on the eviction policy.
      * This method is called internally during vacate operations.
      *
-     * @param vacationNumber the number of objects to remove
+     * @param numberToEvict the number of objects to remove
      */
-    protected void vacate(final int vacationNumber) {
+    protected void evict(final int numberToEvict) {
         final int size = pool.size();
 
-        if (vacationNumber >= size) {
+        if (numberToEvict >= size) {
             destroyAll(new ArrayList<>(pool), Caller.VACATE);
             pool.clear();
-        } else if (vacationNumber > 0) {
+        } else if (numberToEvict > 0) {
             final Comparator<E> reversedCmp = cmp.reversed();
-            final Queue<E> heap = new PriorityQueue<>(vacationNumber, reversedCmp);
+            final Queue<E> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
 
             for (final E element : pool) {
-                if (heap.size() < vacationNumber) {
+                if (heap.size() < numberToEvict) {
                     heap.offer(element);
                 } else if (cmp.compare(element, heap.peek()) < 0) {
                     heap.poll();
@@ -788,7 +796,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings("deprecation")
-    protected void evict() {
+    protected void removeExpired() {
         lock.lock();
 
         List<E> removingObjects = null;
@@ -918,12 +926,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Serial
     private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
-        lock.lock();
+        is.defaultReadObject();
 
-        try {
-            is.defaultReadObject();
-        } finally {
-            lock.unlock();
-        }
+        lock = newLock();
+        notEmpty = newCondition(lock);
+        notFull = newCondition(lock);
+        cmp = createComparator();
+        scheduleEvictionTask();
     }
 }

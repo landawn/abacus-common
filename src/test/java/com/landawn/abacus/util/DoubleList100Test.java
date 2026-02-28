@@ -361,7 +361,7 @@ public class DoubleList100Test extends TestBase {
     public void testDelete() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
 
-        double deleted = list.delete(1);
+        double deleted = list.removeAt(1);
         assertEquals(20.5, deleted, DELTA);
         assertEquals(2, list.size());
         assertEquals(10.5, list.get(0), DELTA);
@@ -372,7 +372,7 @@ public class DoubleList100Test extends TestBase {
     public void testDeleteAllByIndices() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5, 50.5 });
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(30.5, list.get(1), DELTA);
@@ -383,7 +383,7 @@ public class DoubleList100Test extends TestBase {
     public void testDeleteRange() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5, 50.5 });
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(40.5, list.get(1), DELTA);

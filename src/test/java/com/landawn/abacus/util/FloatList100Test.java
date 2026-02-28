@@ -361,7 +361,7 @@ public class FloatList100Test extends TestBase {
     public void testDelete() {
         list.addAll(new float[] { 10.5f, 20.5f, 30.5f });
 
-        float deleted = list.delete(1);
+        float deleted = list.removeAt(1);
         assertEquals(20.5f, deleted, DELTA);
         assertEquals(2, list.size());
         assertEquals(10.5f, list.get(0), DELTA);
@@ -372,7 +372,7 @@ public class FloatList100Test extends TestBase {
     public void testDeleteAllByIndices() {
         list.addAll(new float[] { 10.5f, 20.5f, 30.5f, 40.5f, 50.5f });
 
-        list.deleteAllByIndices(1, 3);
+        list.removeAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5f, list.get(0), DELTA);
         assertEquals(30.5f, list.get(1), DELTA);
@@ -383,7 +383,7 @@ public class FloatList100Test extends TestBase {
     public void testDeleteRange() {
         list.addAll(new float[] { 10.5f, 20.5f, 30.5f, 40.5f, 50.5f });
 
-        list.deleteRange(1, 3);
+        list.removeRange(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5f, list.get(0), DELTA);
         assertEquals(40.5f, list.get(1), DELTA);

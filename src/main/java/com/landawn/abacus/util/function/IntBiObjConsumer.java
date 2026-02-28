@@ -22,12 +22,13 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(int, Object, Object)}.
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <T> the type of the first object argument to the operation
  * @param <U> the type of the second object argument to the operation
  * @see java.util.function.Consumer
  * @see IntObjConsumer
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U, RuntimeException> { //NOSONAR

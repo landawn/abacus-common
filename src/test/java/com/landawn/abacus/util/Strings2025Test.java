@@ -1530,17 +1530,17 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test deleteWhitespace()")
     public void testDeleteWhitespace() {
-        assertEquals("abc", Strings.deleteWhitespace("a b c"));
-        assertEquals("abc", Strings.deleteWhitespace("  a  b  c  "));
-        assertEquals("abc", Strings.deleteWhitespace("abc"));
-        assertNull(Strings.deleteWhitespace((String) null));
+        assertEquals("abc", Strings.removeWhitespace("a b c"));
+        assertEquals("abc", Strings.removeWhitespace("  a  b  c  "));
+        assertEquals("abc", Strings.removeWhitespace("abc"));
+        assertNull(Strings.removeWhitespace((String) null));
     }
 
     @Test
     @DisplayName("Test deleteWhitespace() with array")
     public void testDeleteWhitespace_Array() {
         String[] array = { "a b", " x y z " };
-        Strings.deleteWhitespace(array);
+        Strings.removeWhitespace(array);
         assertArrayEquals(new String[] { "ab", "xyz" }, array);
     }
 
@@ -2236,10 +2236,31 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test indicesOfIgnoreCase()")
     public void testIndicesOfIgnoreCase() {
-        int[] indices = Strings.indicesOfIgnoreCase("AbCaBc", "abc").toArray();
-        assertArrayEquals(new int[] { 0, 3 }, indices);
-        int[] indices2 = Strings.indicesOfIgnoreCase("abc", "xyz").toArray();
-        assertArrayEquals(new int[0], indices2);
+        {
+            int[] indices = Strings.indicesOfIgnoreCase("AbCaBc", "abc").toArray();
+            assertArrayEquals(new int[] { 0, 3 }, indices);
+            int[] indices2 = Strings.indicesOfIgnoreCase("abc", "xyz").toArray();
+            assertArrayEquals(new int[0], indices2);
+
+            int[] indices3 = Strings.indicesOfIgnoreCase("abc", "").toArray();
+            assertArrayEquals(new int[] { 0, 1, 2 }, indices3);
+
+            int[] indices4 = Strings.indicesOfIgnoreCase("abc", null).toArray();
+            assertEquals(0, indices4.length);
+        }
+
+        {
+            int[] indices = Strings.indicesOfIgnoreCase("AbCaBc", "abc", 1).toArray();
+            assertArrayEquals(new int[] { 3 }, indices);
+            int[] indices2 = Strings.indicesOfIgnoreCase("abc", "xyz", 1).toArray();
+            assertArrayEquals(new int[0], indices2);
+
+            int[] indices3 = Strings.indicesOfIgnoreCase("abc", "", 1).toArray();
+            assertArrayEquals(new int[] { 1, 2 }, indices3);
+
+            int[] indices4 = Strings.indicesOfIgnoreCase("abc", null, 1).toArray();
+            assertEquals(0, indices4.length);
+        }
     }
 
     @Test
@@ -2294,9 +2315,9 @@ public class Strings2025Test extends TestBase {
     @DisplayName("Test lastIndexOfAny() with char array")
     public void testLastIndexOfAny_CharArray() {
         assertEquals(0, Strings.lastIndexOfAny("abc", 'a', 'c'));
-        assertEquals(5, Strings.lastIndexOfAny("abcabc", new char[] {'c'}));
+        assertEquals(5, Strings.lastIndexOfAny("abcabc", new char[] { 'c' }));
         assertEquals(-1, Strings.lastIndexOfAny("abc", 'x', 'y'));
-        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] {'a'}));
+        assertEquals(-1, Strings.lastIndexOfAny((String) null, new char[] { 'a' }));
     }
 
     @Test
@@ -2310,6 +2331,8 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test ordinalIndexOf()")
     public void testOrdinalIndexOf() {
+        assertEquals(0, Strings.ordinalIndexOf("", "", 1));
+        assertEquals(-1, Strings.ordinalIndexOf("", "", 2));
         assertEquals(0, Strings.ordinalIndexOf("aabaabaa", "a", 1));
         assertEquals(3, Strings.ordinalIndexOf("aabaabaa", "a", 3));
         assertEquals(5, Strings.ordinalIndexOf("aabaabaa", "b", 2));
@@ -2318,7 +2341,8 @@ public class Strings2025Test extends TestBase {
         assertEquals(3, Strings.ordinalIndexOf("abcabc", "abc", 2));
         assertEquals(-1, Strings.ordinalIndexOf("abcabc", "abc", 3));
         assertEquals(-1, Strings.ordinalIndexOf(null, "abc", 1));
-        assertEquals(0, Strings.ordinalIndexOf("", "", 1));
+        assertEquals(0, Strings.ordinalIndexOf("abc", "", 1));
+        assertEquals(1, Strings.ordinalIndexOf("abc", "", 2));
         assertEquals(-1, Strings.ordinalIndexOf("", null, 1));
         assertEquals(-1, Strings.ordinalIndexOf(null, "", 1));
         assertEquals(-1, Strings.ordinalIndexOf(null, null, 1));
@@ -3218,10 +3242,10 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test deleteRange()")
+    @DisplayName("Test removeRange()")
     public void testDeleteRange() {
-        assertEquals("abfg", Strings.deleteRange("abcdefg", 2, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> Strings.deleteRange(null, 0, 1));
+        assertEquals("abfg", Strings.removeRange("abcdefg", 2, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> Strings.removeRange(null, 0, 1));
     }
 
     @Test

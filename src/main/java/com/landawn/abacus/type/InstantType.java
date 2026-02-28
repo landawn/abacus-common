@@ -145,7 +145,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
             return Instant.now();
         }
 
-        if (isPossibleLong(str)) {
+        if (isPossibleMillis(str)) {
             try {
                 return Instant.ofEpochMilli(Numbers.toLong(str));
             } catch (final NumberFormatException e2) {

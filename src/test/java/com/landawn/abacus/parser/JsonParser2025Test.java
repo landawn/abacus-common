@@ -41,51 +41,51 @@ public class JsonParser2025Test extends TestBase {
     }
 
     @Test
-    public void test_readString_withClass() {
+    public void test_parse_withClass() {
         String json = "\"hello\"";
-        String result = parser.readString(json, String.class);
+        String result = parser.parse(json, String.class);
         Assertions.assertEquals("\"hello\"", result);
 
         String numJson = "42";
-        Integer numResult = parser.readString(numJson, Integer.class);
+        Integer numResult = parser.parse(numJson, Integer.class);
         Assertions.assertEquals(42, numResult);
 
         String mapJson = "{\"name\":\"John\",\"age\":30}";
-        Map<?, ?> mapResult = parser.readString(mapJson, Map.class);
+        Map<?, ?> mapResult = parser.parse(mapJson, Map.class);
         Assertions.assertEquals("John", mapResult.get("name"));
         Assertions.assertEquals(30, mapResult.get("age"));
 
         String listJson = "[1,2,3]";
-        List<?> listResult = parser.readString(listJson, List.class);
+        List<?> listResult = parser.parse(listJson, List.class);
         Assertions.assertEquals(3, listResult.size());
         Assertions.assertEquals(1, listResult.get(0));
 
-        String nullResult = parser.readString(null, String.class);
+        String nullResult = parser.parse(null, String.class);
         Assertions.assertNull(nullResult);
     }
 
     @Test
-    public void test_readString_withConfigAndClass() {
+    public void test_parse_withConfigAndClass() {
         String json = "{\"name\":\"Jane\",\"age\":25}";
         JsonDeserializationConfig config = new JsonDeserializationConfig();
 
-        Map<?, ?> result = parser.readString(json, config, Map.class);
+        Map<?, ?> result = parser.parse(json, config, Map.class);
         Assertions.assertEquals("Jane", result.get("name"));
         Assertions.assertEquals(25, result.get("age"));
 
-        Map<?, ?> result2 = parser.readString(json, null, Map.class);
+        Map<?, ?> result2 = parser.parse(json, null, Map.class);
         Assertions.assertEquals("Jane", result2.get("name"));
 
         String boolJson = "true";
-        Boolean boolResult = parser.readString(boolJson, config, Boolean.class);
+        Boolean boolResult = parser.parse(boolJson, config, Boolean.class);
         Assertions.assertEquals(true, boolResult);
     }
 
     @Test
-    public void test_readString_toArray() {
+    public void test_parse_toArray() {
         String json = "[1,2,3,4,5]";
         Integer[] array = new Integer[5];
-        parser.readString(json, array);
+        parser.parse(json, array);
 
         Assertions.assertEquals(1, array[0]);
         Assertions.assertEquals(2, array[1]);
@@ -95,35 +95,35 @@ public class JsonParser2025Test extends TestBase {
 
         String strJson = "[\"a\",\"b\",\"c\"]";
         String[] strArray = new String[3];
-        parser.readString(strJson, strArray);
+        parser.parse(strJson, strArray);
         Assertions.assertEquals("a", strArray[0]);
         Assertions.assertEquals("b", strArray[1]);
         Assertions.assertEquals("c", strArray[2]);
     }
 
     @Test
-    public void test_readString_toArrayWithConfig() {
+    public void test_parse_toArrayWithConfig() {
         String json = "[10,20,30]";
         Integer[] array = new Integer[3];
         JsonDeserializationConfig config = new JsonDeserializationConfig();
 
-        parser.readString(json, config, array);
+        parser.parse(json, config, array);
         Assertions.assertEquals(10, array[0]);
         Assertions.assertEquals(20, array[1]);
         Assertions.assertEquals(30, array[2]);
 
         Integer[] array2 = new Integer[3];
-        parser.readString(json, null, array2);
+        parser.parse(json, null, array2);
         Assertions.assertEquals(10, array2[0]);
         Assertions.assertEquals(20, array2[1]);
         Assertions.assertEquals(30, array2[2]);
     }
 
     @Test
-    public void test_readString_toCollection() {
+    public void test_parse_toCollection() {
         String json = "[1,2,3,4]";
         List<Integer> list = new ArrayList<>();
-        parser.readString(json, list);
+        parser.parse(json, list);
 
         Assertions.assertEquals(4, list.size());
         Assertions.assertEquals(1, list.get(0));
@@ -133,33 +133,33 @@ public class JsonParser2025Test extends TestBase {
 
         List<Integer> list2 = new ArrayList<>();
         list2.add(999);
-        parser.readString(json, list2);
+        parser.parse(json, list2);
         Assertions.assertEquals(5, list2.size());
         Assertions.assertEquals(999, list2.get(0));
     }
 
     @Test
-    public void test_readString_toCollectionWithConfig() {
+    public void test_parse_toCollectionWithConfig() {
         String json = "[\"x\",\"y\",\"z\"]";
         List<String> list = new ArrayList<>();
         JsonDeserializationConfig config = new JsonDeserializationConfig();
 
-        parser.readString(json, config, list);
+        parser.parse(json, config, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals("x", list.get(0));
         Assertions.assertEquals("y", list.get(1));
         Assertions.assertEquals("z", list.get(2));
 
         List<String> list2 = new ArrayList<>();
-        parser.readString(json, null, list2);
+        parser.parse(json, null, list2);
         Assertions.assertEquals(3, list2.size());
     }
 
     @Test
-    public void test_readString_toMap() {
+    public void test_parse_toMap() {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
         Map<String, String> map = new HashMap<>();
-        parser.readString(json, map);
+        parser.parse(json, map);
 
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals("value1", map.get("key1"));
@@ -168,25 +168,25 @@ public class JsonParser2025Test extends TestBase {
 
         Map<String, String> map2 = new HashMap<>();
         map2.put("old", "data");
-        parser.readString(json, map2);
+        parser.parse(json, map2);
         Assertions.assertEquals(4, map2.size());
         Assertions.assertEquals("data", map2.get("old"));
     }
 
     @Test
-    public void test_readString_toMapWithConfig() {
+    public void test_parse_toMapWithConfig() {
         String json = "{\"a\":1,\"b\":2,\"c\":3}";
         Map<String, Integer> map = new LinkedHashMap<>();
         JsonDeserializationConfig config = new JsonDeserializationConfig();
 
-        parser.readString(json, config, map);
+        parser.parse(json, config, map);
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
         Assertions.assertEquals(3, map.get("c"));
 
         Map<String, Integer> map2 = new HashMap<>();
-        parser.readString(json, null, map2);
+        parser.parse(json, null, map2);
         Assertions.assertEquals(3, map2.size());
     }
 
@@ -385,7 +385,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_edgeCases_emptyArray() {
         String json = "[]";
         List<Integer> list = new ArrayList<>();
-        parser.readString(json, list);
+        parser.parse(json, list);
         Assertions.assertEquals(0, list.size());
     }
 
@@ -393,14 +393,14 @@ public class JsonParser2025Test extends TestBase {
     public void test_edgeCases_emptyMap() {
         String json = "{}";
         Map<String, Object> map = new HashMap<>();
-        parser.readString(json, map);
+        parser.parse(json, map);
         Assertions.assertEquals(0, map.size());
     }
 
     @Test
     public void test_edgeCases_nestedStructures() {
         String json = "{\"outer\":{\"inner\":{\"value\":42}}}";
-        Map<?, ?> result = parser.readString(json, Map.class);
+        Map<?, ?> result = parser.parse(json, Map.class);
         Map<?, ?> outer = (Map<?, ?>) result.get("outer");
         Map<?, ?> inner = (Map<?, ?>) outer.get("inner");
         Assertions.assertEquals(42, inner.get("value"));
@@ -409,7 +409,7 @@ public class JsonParser2025Test extends TestBase {
     @Test
     public void test_edgeCases_arrayOfArrays() {
         String json = "[[1,2],[3,4],[5,6]]";
-        List<?> result = parser.readString(json, List.class);
+        List<?> result = parser.parse(json, List.class);
         Assertions.assertEquals(3, result.size());
         List<?> first = (List<?>) result.get(0);
         Assertions.assertEquals(2, first.size());

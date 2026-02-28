@@ -43,194 +43,194 @@ public class N202Test extends TestBase {
 
     @Test
     public void testDeleteRangeBooleanArray() {
-        assertArrayEquals(new boolean[] {}, N.deleteRange((boolean[]) null, 0, 0));
-        assertArrayEquals(new boolean[] {}, N.deleteRange(new boolean[] {}, 0, 0));
-        assertArrayEquals(new boolean[] { true, false, true }, N.deleteRange(new boolean[] { true, false, true }, 1, 1));
-        assertArrayEquals(new boolean[] { false, true }, N.deleteRange(new boolean[] { true, false, true }, 0, 1));
-        assertArrayEquals(new boolean[] { true, false }, N.deleteRange(new boolean[] { true, false, true }, 2, 3));
-        assertArrayEquals(new boolean[] { true, true }, N.deleteRange(new boolean[] { true, false, true }, 1, 2));
-        assertArrayEquals(new boolean[] {}, N.deleteRange(new boolean[] { true, false, true }, 0, 3));
+        assertArrayEquals(new boolean[] {}, N.removeRange((boolean[]) null, 0, 0));
+        assertArrayEquals(new boolean[] {}, N.removeRange(new boolean[] {}, 0, 0));
+        assertArrayEquals(new boolean[] { true, false, true }, N.removeRange(new boolean[] { true, false, true }, 1, 1));
+        assertArrayEquals(new boolean[] { false, true }, N.removeRange(new boolean[] { true, false, true }, 0, 1));
+        assertArrayEquals(new boolean[] { true, false }, N.removeRange(new boolean[] { true, false, true }, 2, 3));
+        assertArrayEquals(new boolean[] { true, true }, N.removeRange(new boolean[] { true, false, true }, 1, 2));
+        assertArrayEquals(new boolean[] {}, N.removeRange(new boolean[] { true, false, true }, 0, 3));
 
         final boolean[] original = { true, false, true, true, false };
-        boolean[] result = N.deleteRange(original, 1, 3);
+        boolean[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new boolean[] { true, true, false }, result);
         assertArrayEquals(new boolean[] { true, false, true, true, false }, original, "Original array should not be modified.");
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(new boolean[] { true }, -1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(new boolean[] { true }, 0, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(new boolean[] { true }, 1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(new boolean[] { true }, -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(new boolean[] { true }, 0, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(new boolean[] { true }, 1, 0));
     }
 
     @Test
     public void testDeleteRangeCharArray() {
-        assertArrayEquals(new char[] {}, N.deleteRange((char[]) null, 0, 0));
-        assertArrayEquals(new char[] {}, N.deleteRange(new char[] {}, 0, 0));
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.deleteRange(new char[] { 'a', 'b', 'c' }, 1, 1));
-        assertArrayEquals(new char[] { 'b', 'c' }, N.deleteRange(new char[] { 'a', 'b', 'c' }, 0, 1));
-        assertArrayEquals(new char[] { 'a' }, N.deleteRange(new char[] { 'a', 'b', 'c' }, 1, 3));
+        assertArrayEquals(new char[] {}, N.removeRange((char[]) null, 0, 0));
+        assertArrayEquals(new char[] {}, N.removeRange(new char[] {}, 0, 0));
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, N.removeRange(new char[] { 'a', 'b', 'c' }, 1, 1));
+        assertArrayEquals(new char[] { 'b', 'c' }, N.removeRange(new char[] { 'a', 'b', 'c' }, 0, 1));
+        assertArrayEquals(new char[] { 'a' }, N.removeRange(new char[] { 'a', 'b', 'c' }, 1, 3));
         final char[] original = { 'a', 'b', 'c', 'd', 'e' };
-        char[] result = N.deleteRange(original, 1, 3);
+        char[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new char[] { 'a', 'd', 'e' }, result);
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd', 'e' }, original, "Original array should not be modified.");
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(new char[] { 'a' }, -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(new char[] { 'a' }, -1, 0));
     }
 
     @Test
     public void testDeleteRangeByteArray() {
-        assertArrayEquals(new byte[] {}, N.deleteRange((byte[]) null, 0, 0));
-        assertArrayEquals(new byte[] {}, N.deleteRange(new byte[] {}, 0, 0));
-        assertArrayEquals(new byte[] { 1, 2, 3 }, N.deleteRange(new byte[] { 1, 2, 3 }, 1, 1));
-        assertArrayEquals(new byte[] { 2, 3 }, N.deleteRange(new byte[] { 1, 2, 3 }, 0, 1));
+        assertArrayEquals(new byte[] {}, N.removeRange((byte[]) null, 0, 0));
+        assertArrayEquals(new byte[] {}, N.removeRange(new byte[] {}, 0, 0));
+        assertArrayEquals(new byte[] { 1, 2, 3 }, N.removeRange(new byte[] { 1, 2, 3 }, 1, 1));
+        assertArrayEquals(new byte[] { 2, 3 }, N.removeRange(new byte[] { 1, 2, 3 }, 0, 1));
         final byte[] original = { 1, 2, 3, 4, 5 };
-        byte[] result = N.deleteRange(original, 1, 3);
+        byte[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new byte[] { 1, 4, 5 }, result);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, original);
     }
 
     @Test
     public void testDeleteRangeShortArray() {
-        assertArrayEquals(new short[] {}, N.deleteRange((short[]) null, 0, 0));
-        assertArrayEquals(new short[] {}, N.deleteRange(new short[] {}, 0, 0));
-        assertArrayEquals(new short[] { 1, 2, 3 }, N.deleteRange(new short[] { 1, 2, 3 }, 1, 1));
-        assertArrayEquals(new short[] { 2, 3 }, N.deleteRange(new short[] { 1, 2, 3 }, 0, 1));
+        assertArrayEquals(new short[] {}, N.removeRange((short[]) null, 0, 0));
+        assertArrayEquals(new short[] {}, N.removeRange(new short[] {}, 0, 0));
+        assertArrayEquals(new short[] { 1, 2, 3 }, N.removeRange(new short[] { 1, 2, 3 }, 1, 1));
+        assertArrayEquals(new short[] { 2, 3 }, N.removeRange(new short[] { 1, 2, 3 }, 0, 1));
         final short[] original = { 1, 2, 3, 4, 5 };
-        short[] result = N.deleteRange(original, 1, 3);
+        short[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new short[] { 1, 4, 5 }, result);
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, original);
     }
 
     @Test
     public void testDeleteRangeIntArray() {
-        assertArrayEquals(new int[] {}, N.deleteRange((int[]) null, 0, 0));
-        assertArrayEquals(new int[] {}, N.deleteRange(new int[] {}, 0, 0));
-        assertArrayEquals(new int[] { 1, 2, 3 }, N.deleteRange(new int[] { 1, 2, 3 }, 1, 1));
-        assertArrayEquals(new int[] { 2, 3 }, N.deleteRange(new int[] { 1, 2, 3 }, 0, 1));
+        assertArrayEquals(new int[] {}, N.removeRange((int[]) null, 0, 0));
+        assertArrayEquals(new int[] {}, N.removeRange(new int[] {}, 0, 0));
+        assertArrayEquals(new int[] { 1, 2, 3 }, N.removeRange(new int[] { 1, 2, 3 }, 1, 1));
+        assertArrayEquals(new int[] { 2, 3 }, N.removeRange(new int[] { 1, 2, 3 }, 0, 1));
         final int[] original = { 1, 2, 3, 4, 5 };
-        int[] result = N.deleteRange(original, 1, 3);
+        int[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new int[] { 1, 4, 5 }, result);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, original);
     }
 
     @Test
     public void testDeleteRangeLongArray() {
-        assertArrayEquals(new long[] {}, N.deleteRange((long[]) null, 0, 0));
-        assertArrayEquals(new long[] {}, N.deleteRange(new long[] {}, 0, 0));
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, N.deleteRange(new long[] { 1L, 2L, 3L }, 1, 1));
-        assertArrayEquals(new long[] { 2L, 3L }, N.deleteRange(new long[] { 1L, 2L, 3L }, 0, 1));
+        assertArrayEquals(new long[] {}, N.removeRange((long[]) null, 0, 0));
+        assertArrayEquals(new long[] {}, N.removeRange(new long[] {}, 0, 0));
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, N.removeRange(new long[] { 1L, 2L, 3L }, 1, 1));
+        assertArrayEquals(new long[] { 2L, 3L }, N.removeRange(new long[] { 1L, 2L, 3L }, 0, 1));
         final long[] original = { 1L, 2L, 3L, 4L, 5L };
-        long[] result = N.deleteRange(original, 1, 3);
+        long[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new long[] { 1L, 4L, 5L }, result);
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, original);
     }
 
     @Test
     public void testDeleteRangeFloatArray() {
-        assertArrayEquals(new float[] {}, N.deleteRange((float[]) null, 0, 0), DELTAf);
-        assertArrayEquals(new float[] {}, N.deleteRange(new float[] {}, 0, 0), DELTAf);
-        assertArrayEquals(new float[] { 1f, 2f, 3f }, N.deleteRange(new float[] { 1f, 2f, 3f }, 1, 1), DELTAf);
-        assertArrayEquals(new float[] { 2f, 3f }, N.deleteRange(new float[] { 1f, 2f, 3f }, 0, 1), DELTAf);
+        assertArrayEquals(new float[] {}, N.removeRange((float[]) null, 0, 0), DELTAf);
+        assertArrayEquals(new float[] {}, N.removeRange(new float[] {}, 0, 0), DELTAf);
+        assertArrayEquals(new float[] { 1f, 2f, 3f }, N.removeRange(new float[] { 1f, 2f, 3f }, 1, 1), DELTAf);
+        assertArrayEquals(new float[] { 2f, 3f }, N.removeRange(new float[] { 1f, 2f, 3f }, 0, 1), DELTAf);
         final float[] original = { 1f, 2f, 3f, 4f, 5f };
-        float[] result = N.deleteRange(original, 1, 3);
+        float[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new float[] { 1f, 4f, 5f }, result, DELTAf);
         assertArrayEquals(new float[] { 1f, 2f, 3f, 4f, 5f }, original, DELTAf);
     }
 
     @Test
     public void testDeleteRangeDoubleArray() {
-        assertArrayEquals(new double[] {}, N.deleteRange((double[]) null, 0, 0), DELTA);
-        assertArrayEquals(new double[] {}, N.deleteRange(new double[] {}, 0, 0), DELTA);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, N.deleteRange(new double[] { 1.0, 2.0, 3.0 }, 1, 1), DELTA);
-        assertArrayEquals(new double[] { 2.0, 3.0 }, N.deleteRange(new double[] { 1.0, 2.0, 3.0 }, 0, 1), DELTA);
+        assertArrayEquals(new double[] {}, N.removeRange((double[]) null, 0, 0), DELTA);
+        assertArrayEquals(new double[] {}, N.removeRange(new double[] {}, 0, 0), DELTA);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, N.removeRange(new double[] { 1.0, 2.0, 3.0 }, 1, 1), DELTA);
+        assertArrayEquals(new double[] { 2.0, 3.0 }, N.removeRange(new double[] { 1.0, 2.0, 3.0 }, 0, 1), DELTA);
         final double[] original = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        double[] result = N.deleteRange(original, 1, 3);
+        double[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new double[] { 1.0, 4.0, 5.0 }, result, DELTA);
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, original, DELTA);
     }
 
     @Test
     public void testDeleteRangeStringArray() {
-        assertArrayEquals(new String[] {}, N.deleteRange((String[]) null, 0, 0));
-        assertArrayEquals(new String[] {}, N.deleteRange(new String[] {}, 0, 0));
-        assertArrayEquals(new String[] { "a", "b", "c" }, N.deleteRange(new String[] { "a", "b", "c" }, 1, 1));
-        assertArrayEquals(new String[] { "b", "c" }, N.deleteRange(new String[] { "a", "b", "c" }, 0, 1));
+        assertArrayEquals(new String[] {}, N.removeRange((String[]) null, 0, 0));
+        assertArrayEquals(new String[] {}, N.removeRange(new String[] {}, 0, 0));
+        assertArrayEquals(new String[] { "a", "b", "c" }, N.removeRange(new String[] { "a", "b", "c" }, 1, 1));
+        assertArrayEquals(new String[] { "b", "c" }, N.removeRange(new String[] { "a", "b", "c" }, 0, 1));
         final String[] original = { "a", "b", "c", "d", "e" };
-        String[] result = N.deleteRange(original, 1, 3);
+        String[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new String[] { "a", "d", "e" }, result);
         assertArrayEquals(new String[] { "a", "b", "c", "d", "e" }, original);
     }
 
     @Test
     public void testDeleteRangeGenericArray() {
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange((Integer[]) null, 0, 1));
-        assertArrayEquals(new Integer[] {}, N.deleteRange(new Integer[] {}, 0, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange((Integer[]) null, 0, 1));
+        assertArrayEquals(new Integer[] {}, N.removeRange(new Integer[] {}, 0, 0));
         Integer[] originalArr = { 1, 2, 3, 4, 5 };
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, N.deleteRange(originalArr, 1, 1));
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, N.removeRange(originalArr, 1, 1));
 
-        assertArrayEquals(new Integer[] { 2, 3 }, N.deleteRange(new Integer[] { 1, 2, 3 }, 0, 1));
+        assertArrayEquals(new Integer[] { 2, 3 }, N.removeRange(new Integer[] { 1, 2, 3 }, 0, 1));
 
-        assertArrayEquals(new Integer[] { 4, 5 }, N.deleteRange(new Integer[] { 1, 2, 3, 4, 5 }, 0, 3));
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, N.deleteRange(new Integer[] { 1, 2, 3, 4, 5 }, 3, 5));
-        assertArrayEquals(new Integer[] { 1, 5 }, N.deleteRange(new Integer[] { 1, 2, 3, 4, 5 }, 1, 4));
-        assertArrayEquals(new Integer[] {}, N.deleteRange(new Integer[] { 1, 2, 3 }, 0, 3));
+        assertArrayEquals(new Integer[] { 4, 5 }, N.removeRange(new Integer[] { 1, 2, 3, 4, 5 }, 0, 3));
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, N.removeRange(new Integer[] { 1, 2, 3, 4, 5 }, 3, 5));
+        assertArrayEquals(new Integer[] { 1, 5 }, N.removeRange(new Integer[] { 1, 2, 3, 4, 5 }, 1, 4));
+        assertArrayEquals(new Integer[] {}, N.removeRange(new Integer[] { 1, 2, 3 }, 0, 3));
 
         Integer[] original = { 10, 20, 30, 40, 50 };
-        Integer[] result = N.deleteRange(original, 1, 3);
+        Integer[] result = N.removeRange(original, 1, 3);
         assertArrayEquals(new Integer[] { 10, 40, 50 }, result);
         assertArrayEquals(new Integer[] { 10, 20, 30, 40, 50 }, original, "Original array should not be modified.");
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(new Integer[] { 1 }, -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(new Integer[] { 1 }, -1, 0));
     }
 
     @Test
     public void testDeleteRangeList() {
         List<String> list = toMutableList("a", "b", "c", "d");
-        assertTrue(N.deleteRange(list, 1, 3));
+        assertTrue(N.removeRange(list, 1, 3));
         assertEquals(toMutableList("a", "d"), list);
 
         List<String> list2 = toMutableList("a", "b", "c");
-        assertFalse(N.deleteRange(list2, 1, 1));
+        assertFalse(N.removeRange(list2, 1, 1));
         assertEquals(toMutableList("a", "b", "c"), list2);
 
         List<String> list3 = toMutableList("a", "b", "c");
-        assertTrue(N.deleteRange(list3, 0, 3));
+        assertTrue(N.removeRange(list3, 0, 3));
         assertTrue(list3.isEmpty());
 
         List<String> list4 = toMutableList("a", "b", "c");
-        assertTrue(N.deleteRange(list4, 0, 1));
+        assertTrue(N.removeRange(list4, 0, 1));
         assertEquals(toMutableList("b", "c"), list4);
 
         List<String> list5 = toMutableList("a", "b", "c");
-        assertTrue(N.deleteRange(list5, 2, 3));
+        assertTrue(N.removeRange(list5, 2, 3));
         assertEquals(toMutableList("a", "b"), list5);
 
         List<String> emptyList = new ArrayList<>();
-        assertFalse(N.deleteRange(emptyList, 0, 0));
+        assertFalse(N.removeRange(emptyList, 0, 0));
         assertTrue(emptyList.isEmpty());
 
         List<Integer> linkedList = new LinkedList<>(Arrays.asList(1, 2, 3, 4, 5));
-        assertTrue(N.deleteRange(linkedList, 1, 3));
+        assertTrue(N.removeRange(linkedList, 1, 3));
         assertEquals(Arrays.asList(1, 4, 5), linkedList);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(toMutableList("a"), -1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(toMutableList("a"), 0, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange(toMutableList("a"), 1, 0));
-        N.deleteRange((List<String>) null, 0, 0);
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(toMutableList("a"), -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(toMutableList("a"), 0, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange(toMutableList("a"), 1, 0));
+        N.removeRange((List<String>) null, 0, 0);
 
     }
 
     @Test
     public void testDeleteRangeString() {
-        assertEquals("ac", N.deleteRange("abc", 1, 2));
-        assertEquals("abc", N.deleteRange("abc", 1, 1));
-        assertEquals("", N.deleteRange("abc", 0, 3));
-        assertEquals("c", N.deleteRange("abc", 0, 2));
-        assertEquals("ab", N.deleteRange("abc", 2, 3));
-        assertEquals("", N.deleteRange("", 0, 0));
-        assertEquals("", N.deleteRange((String) null, 0, 0));
+        assertEquals("ac", N.removeRange("abc", 1, 2));
+        assertEquals("abc", N.removeRange("abc", 1, 1));
+        assertEquals("", N.removeRange("abc", 0, 3));
+        assertEquals("c", N.removeRange("abc", 0, 2));
+        assertEquals("ab", N.removeRange("abc", 2, 3));
+        assertEquals("", N.removeRange("", 0, 0));
+        assertEquals("", N.removeRange((String) null, 0, 0));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange("a", -1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.deleteRange("a", 0, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange("a", -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange("a", 0, 2));
     }
 
     @Test

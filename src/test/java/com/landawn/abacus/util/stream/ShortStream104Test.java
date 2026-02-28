@@ -285,7 +285,7 @@ public class ShortStream104Test extends TestBase {
 
     @Test
     public void testFlattMapToObj() {
-        Stream<String> stream = createShortStream((short) 1, (short) 2).flattmapToObj(n -> new String[] { "A" + n, "B" + n });
+        Stream<String> stream = createShortStream((short) 1, (short) 2).flatMapArrayToObj(n -> new String[] { "A" + n, "B" + n });
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2" }, stream.toArray());
     }
 

@@ -25,11 +25,12 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends {@link Throwables.DoubleTriConsumer} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Consumer
  * @see java.util.function.DoubleConsumer
  * @see java.util.function.BiConsumer
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeException> { //NOSONAR

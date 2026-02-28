@@ -675,7 +675,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * If the list does not contain the element, it is unchanged.
      *
      * <p>This method runs in linear time, as it may need to search through the entire list
-     * to find the element.</p>
+     * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -956,18 +956,34 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return numRemoved;
     }
 
+    //    /**
+    //     * Removes the element at the specified position in this list.
+    //     * Shifts any subsequent elements to the left (subtracts one from their indices).
+    //     *
+    //     * <p>This method runs in linear time in the worst case, as it may need to shift
+    //     * all elements after the removed element.</p>
+    //     *
+    //     * @param index the index of the element to be removed
+    //     * @return the element that was removed from the list
+    //     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+    //     * @deprecated replaced by {@link #removeAt(int)}.
+    //     */
+    //    @Deprecated
+    //    public boolean delete(final int index) {
+    //        return removeAt(index);
+    //    }
+
     /**
-     * Removes the element at the specified position in this list.
-     * Shifts any subsequent elements to the left (subtracts one from their indices).
+     * Removes and returns the element at the specified index.
      *
-     * <p>This method runs in linear time in the worst case, as it may need to shift
-     * all elements after the removed element.</p>
+     * <p>This is the preferred index-based removal method.
+     * Unlike {@link #remove(boolean)}, this method removes by index, not by value.</p>
      *
-     * @param index the index of the element to be removed
-     * @return the element that was removed from the list
+     * @param index the index of the element to remove
+     * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public boolean delete(final int index) {
+    public boolean removeAt(final int index) {
         rangeCheck(index);
 
         final boolean oldValue = elementData[index];
@@ -988,7 +1004,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.deleteAllByIndices(1, 3);   // removes elements at indices 1 and 3
+     * list.removeAt(1, 3);   // removes elements at indices 1 and 3
      * // list is now [true, true, true]
      * }</pre>
      *
@@ -998,7 +1014,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
-    public void deleteAllByIndices(final int... indices) {
+    public void removeAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1007,7 +1023,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             N.checkElementIndex(index, size);
         }
 
-        final boolean[] tmp = N.deleteAllByIndices(elementData, indices);
+        final boolean[] tmp = N.removeAt(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
@@ -1015,7 +1031,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             N.fill(elementData, tmp.length, size, false);
         }
 
-        // size = tmp.length; // incorrect. the array returned N.deleteAllByIndices(elementData, indices) contains empty elements after size.
+        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
         size = size - (elementData.length - tmp.length);
     }
 
@@ -1029,7 +1045,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.deleteRange(1, 4);   // removes elements at indices 1, 2, and 3
+     * list.removeRange(1, 4);   // removes elements at indices 1, 2, and 3
      * // list is now [true, true]
      * }</pre>
      *
@@ -1039,7 +1055,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *                                   or {@code fromIndex > toIndex}
      */
     @Override
-    public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (fromIndex == toIndex) {
@@ -1109,7 +1125,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -1157,7 +1173,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -2370,7 +2386,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public boolean removeFirst() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(0);
+        return removeAt(0);
     }
 
     /**
@@ -2384,7 +2400,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public boolean removeLast() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(size - 1);
+        return removeAt(size - 1);
     }
 
     /**

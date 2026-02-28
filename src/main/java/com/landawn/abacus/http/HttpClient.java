@@ -452,6 +452,7 @@ public final class HttpClient {
         }
 
         _netURL = netUrl == null ? createNetUrl(url) : netUrl;
+        checkSupportedProtocol(_netURL);
         _url = Strings.isEmpty(url) ? _netURL.toString() : url;
         _maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
         _connectTimeoutInMillis = (connectTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectTimeoutInMillis;
@@ -465,9 +466,19 @@ public final class HttpClient {
 
     private static URL createNetUrl(final String url) {
         try {
-            return URI.create(N.checkArgNotNull(url, "url")).toURL();
+            final URL netUrl = URI.create(N.checkArgNotNull(url, "url")).toURL();
+            checkSupportedProtocol(netUrl);
+            return netUrl;
         } catch (final MalformedURLException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
+        }
+    }
+
+    private static void checkSupportedProtocol(final URL netUrl) {
+        final String protocol = netUrl == null ? null : netUrl.getProtocol();
+
+        if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
+            throw new IllegalArgumentException("Only HTTP/HTTPS protocol is supported, but got: " + protocol);
         }
     }
 
@@ -1083,19 +1094,6 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with query parameters and deserializes the response to the specified type.
-     *
-     * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
-     * @param resultClass The class of the expected response object (for deserialization)
-     * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
-     */
-    public <T> T delete(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
-        return delete(queryParameters, _settings, resultClass);
-    }
-
-    /**
      * Performs a DELETE request with custom settings and deserializes the response to the specified type.
      *
      * @param <T> The type of the response object
@@ -1106,6 +1104,19 @@ public final class HttpClient {
      */
     public <T> T delete(final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
         return delete(null, settings, resultClass);
+    }
+
+    /**
+     * Performs a DELETE request with query parameters and deserializes the response to the specified type.
+     *
+     * @param <T> The type of the response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return The deserialized response object
+     * @throws UncheckedIOException if an I/O error occurs
+     */
+    public <T> T delete(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
+        return delete(queryParameters, _settings, resultClass);
     }
 
     /**
@@ -1399,7 +1410,7 @@ public final class HttpClient {
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final boolean doOutput = request != null && !(httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE);
 
-        final HttpURLConnection connection = openConnection(httpMethod, request, settings, doOutput, resultClass);
+        final HttpURLConnection connection = openConnection(httpMethod, request, settings, doOutput, resultClass, true);
         final long sentRequestAtMillis = System.currentTimeMillis();
         InputStream is = null;
         OutputStream os = null;
@@ -1434,7 +1445,7 @@ public final class HttpClient {
                     } else {
                         if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                             HttpUtil.kryoParser.serialize(request, os);
-                        } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
+                        } else if (requestContentFormat == ContentFormat.FORM_URL_ENCODED) {
                             IOUtil.write(URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset), os);
                         } else {
                             final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
@@ -1467,43 +1478,41 @@ public final class HttpClient {
 
             if (isOneWayRequest(settings, resultClass, outputStream, outputWriter)) {
                 return null;
+            } else if (outputStream != null) {
+                IOUtil.write(is, outputStream, true);
+
+                return null;
+            } else if (outputWriter != null) {
+                final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
+
+                try {
+                    IOUtil.write(br, outputWriter, true);
+                } finally {
+                    Objectory.recycle(br);
+                }
+
+                return null;
             } else {
-                if (outputStream != null) {
-                    IOUtil.write(is, outputStream, true);
-
-                    return null;
-                } else if (outputWriter != null) {
-                    final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
-
-                    try {
-                        IOUtil.write(br, outputWriter, true);
-                    } finally {
-                        Objectory.recycle(br);
-                    }
-
-                    return null;
+                if (resultClass.equals(HttpResponse.class)) {
+                    return (T) new HttpResponse(connection.getURL().toString(), sentRequestAtMillis, System.currentTimeMillis(), statusCode,
+                            connection.getResponseMessage(), respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
                 } else {
-                    if (resultClass.equals(HttpResponse.class)) {
-                        return (T) new HttpResponse(_url, sentRequestAtMillis, System.currentTimeMillis(), statusCode, connection.getResponseMessage(),
-                                respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
+                    if (resultClass.equals(String.class)) {
+                        return (T) IOUtil.readAllToString(is, respCharset);
+                    } else if (byte[].class.equals(resultClass)) {
+                        return (T) IOUtil.readAllBytes(is);
                     } else {
-                        if (resultClass.equals(String.class)) {
-                            return (T) IOUtil.readAllToString(is, respCharset);
-                        } else if (byte[].class.equals(resultClass)) {
-                            return (T) IOUtil.readAllBytes(is);
+                        if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                            return HttpUtil.kryoParser.deserialize(is, resultClass);
+                        } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                         } else {
-                            if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                                return HttpUtil.kryoParser.deserialize(is, resultClass);
-                            } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
-                                return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
-                            } else {
-                                final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
+                            final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
-                                try {
-                                    return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
-                                } finally {
-                                    Objectory.recycle(br);
-                                }
+                            try {
+                                return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
+                            } finally {
+                                Objectory.recycle(br);
                             }
                         }
                     }
@@ -1570,6 +1579,7 @@ public final class HttpClient {
     /**
      * Opens a new HTTP connection with the specified method and settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
+     * The returned connection is caller-managed and does not consume the client's max-connection quota.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1587,12 +1597,13 @@ public final class HttpClient {
      */
     public HttpURLConnection openConnection(final HttpMethod httpMethod, final HttpSettings settings, final boolean doOutput, final Class<?> resultClass)
             throws UncheckedIOException {
-        return openConnection(httpMethod, null, settings, doOutput, resultClass);
+        return openConnection(httpMethod, null, settings, doOutput, resultClass, false);
     }
 
     /**
      * Opens a new HTTP connection with query parameters and the specified settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
+     * The returned connection is caller-managed and does not consume the client's max-connection quota.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1606,13 +1617,18 @@ public final class HttpClient {
      * @param doOutput Whether the connection will send a request body
      * @param resultClass The expected result class (used for optimization)
      * @return A configured HttpURLConnection ready for use
-     * @throws UncheckedIOException if an I/O error occurs or connection limit is exceeded
-     * @throws RuntimeException if maximum connection limit is exceeded
+     * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressWarnings("unused")
     public HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
             final Class<?> resultClass) throws UncheckedIOException {
-        if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
+        return openConnection(httpMethod, queryParameters, settings, doOutput, resultClass, false);
+    }
+
+    @SuppressWarnings("unused")
+    private HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
+            final Class<?> resultClass, final boolean trackConnectionLimit) throws UncheckedIOException {
+        if (trackConnectionLimit && _activeConnectionCounter.incrementAndGet() > _maxConnection) {
             _activeConnectionCounter.decrementAndGet();
             throw new RuntimeException("Cannot create connection: exceeded maximum connection limit of " + _maxConnection);
         }
@@ -1672,7 +1688,7 @@ public final class HttpClient {
                 connection.setDoOutput(true);
             }
 
-            connection.setUseCaches((settings != null && settings.getUseCaches()) || (_settings != null && _settings.getUseCaches()));
+            connection.setUseCaches((settings != null && settings.useCaches()) || (_settings != null && _settings.useCaches()));
 
             //noinspection DataFlowIssue
             setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
@@ -1684,7 +1700,7 @@ public final class HttpClient {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (!success) {
+            if (trackConnectionLimit && !success) {
                 _activeConnectionCounter.decrementAndGet();
             }
         }
@@ -1703,7 +1719,7 @@ public final class HttpClient {
         if (headers != null) {
             Object headerValue = null;
 
-            for (final String headerName : headers.headerNameSet()) {
+            for (final String headerName : headers.headerNames()) {
                 // lazy set content-encoding
                 // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream,
                 // error may happen when read the input stream in sever side.
@@ -1724,7 +1740,9 @@ public final class HttpClient {
             IOUtil.closeQuietly(os);
             IOUtil.closeQuietly(is);
         } finally {
-            _activeConnectionCounter.decrementAndGet();
+            if (connection != null) {
+                _activeConnectionCounter.decrementAndGet();
+            }
         }
 
         // connection.disconnect();
@@ -1827,25 +1845,6 @@ public final class HttpClient {
     }
 
     /**
-     * Performs an asynchronous GET request with query parameters and deserializes the response.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Object> params = Map.of("userId", 123);
-     * client.asyncGet(params, User.class)
-     *     .thenRunAsync(user -> System.out.println("User: " + user.getName()));
-     * }</pre>
-     *
-     * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
-     * @param resultClass The class of the expected response object (for deserialization)
-     * @return A ContinuableFuture that will complete with the deserialized response object
-     */
-    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
-        return asyncGet(queryParameters, _settings, resultClass);
-    }
-
-    /**
      * Performs an asynchronous GET request with custom settings and deserializes the response.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1864,6 +1863,25 @@ public final class HttpClient {
      */
     public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) {
         return asyncGet(null, settings, resultClass);
+    }
+
+    /**
+     * Performs an asynchronous GET request with query parameters and deserializes the response.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("userId", 123);
+     * client.asyncGet(params, User.class)
+     *     .thenRunAsync(user -> System.out.println("User: " + user.getName()));
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
+        return asyncGet(queryParameters, _settings, resultClass);
     }
 
     /**
@@ -1907,23 +1925,6 @@ public final class HttpClient {
     }
 
     /**
-     * Performs an asynchronous DELETE request with query parameters.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Object> params = Map.of("id", 123);
-     * client.asyncDelete(params)
-     *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
-     * }</pre>
-     *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
-     * @return A ContinuableFuture that will complete with the response body as a String
-     */
-    public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
-        return asyncDelete(queryParameters, String.class);
-    }
-
-    /**
      * Performs an asynchronous DELETE request with custom settings.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1939,6 +1940,23 @@ public final class HttpClient {
      */
     public ContinuableFuture<String> asyncDelete(final HttpSettings settings) {
         return asyncDelete(settings, String.class);
+    }
+
+    /**
+     * Performs an asynchronous DELETE request with query parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("id", 123);
+     * client.asyncDelete(params)
+     *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
+     * }</pre>
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @return A ContinuableFuture that will complete with the response body as a String
+     */
+    public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
+        return asyncDelete(queryParameters, String.class);
     }
 
     /**
@@ -1964,18 +1982,6 @@ public final class HttpClient {
     }
 
     /**
-     * Performs an asynchronous DELETE request with query parameters and deserializes the response to the specified type.
-     *
-     * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
-     * @param resultClass The class of the expected response object (for deserialization)
-     * @return A ContinuableFuture that will complete with the deserialized response object
-     */
-    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) {
-        return asyncDelete(queryParameters, _settings, resultClass);
-    }
-
-    /**
      * Performs an asynchronous DELETE request with custom settings and deserializes the response to the specified type.
      *
      * @param <T> The type of the response object
@@ -1985,6 +1991,18 @@ public final class HttpClient {
      */
     public <T> ContinuableFuture<T> asyncDelete(final HttpSettings settings, final Class<T> resultClass) {
         return asyncDelete(null, settings, resultClass);
+    }
+
+    /**
+     * Performs an asynchronous DELETE request with query parameters and deserializes the response to the specified type.
+     *
+     * @param <T> The type of the response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
+     */
+    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) {
+        return asyncDelete(queryParameters, _settings, resultClass);
     }
 
     /**

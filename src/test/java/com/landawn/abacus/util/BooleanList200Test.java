@@ -153,7 +153,7 @@ public class BooleanList200Test extends TestBase {
     @DisplayName("Test deleting an element at a specific index")
     public void testDelete() {
         BooleanList list = BooleanList.of(true, false, true);
-        boolean deletedValue = list.delete(1);
+        boolean deletedValue = list.removeAt(1);
         assertFalse(deletedValue);
         assertEquals(2, list.size());
         assertEquals("[true, true]", list.toString());
@@ -387,7 +387,7 @@ public class BooleanList200Test extends TestBase {
     @DisplayName("Test deleting elements by multiple indices")
     public void testDeleteAllByIndices() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.deleteAllByIndices(0, 2, 4);
+        list.removeAt(0, 2, 4);
         assertArrayEquals(new boolean[] { false, false }, list.toArray());
     }
 
@@ -395,7 +395,7 @@ public class BooleanList200Test extends TestBase {
     @DisplayName("Test deleting a range of elements")
     public void testDeleteRange() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.deleteRange(1, 4);
+        list.removeRange(1, 4);
         assertArrayEquals(new boolean[] { true, true }, list.toArray());
     }
 

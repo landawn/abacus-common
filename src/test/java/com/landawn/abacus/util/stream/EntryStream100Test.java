@@ -676,9 +676,9 @@ public class EntryStream100Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(EntryStream.of(testMap).nMatch(2, 4, e -> e.getValue() > 2));
+        assertTrue(EntryStream.of(testMap).countMatchBetween(2, 4, e -> e.getValue() > 2));
 
-        assertTrue(EntryStream.of(testMap).nMatch(1, 3, (k, v) -> k.length() == 3 && v > 0));
+        assertTrue(EntryStream.of(testMap).countMatchBetween(1, 3, (k, v) -> k.length() == 3 && v > 0));
     }
 
     @Test

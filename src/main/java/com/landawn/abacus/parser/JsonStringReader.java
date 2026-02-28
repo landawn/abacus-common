@@ -374,6 +374,8 @@ class JsonStringReader extends AbstractJsonReader {
                     if (nextEvent > 0 && nextEvent < 32) {
                         break;
                     }
+                } else {
+                    nextEvent = 0;
                 }
 
                 ch = saveChar(ch);
@@ -394,6 +396,8 @@ class JsonStringReader extends AbstractJsonReader {
                         if (nextEvent > 0 && nextEvent < 32) {
                             break;
                         }
+                    } else {
+                        nextEvent = 0;
                     }
 
                     ch = saveChar(ch);
@@ -513,7 +517,7 @@ class JsonStringReader extends AbstractJsonReader {
     protected void throwExceptionDueToUnexpectedNonStringToken() {
         throw new ParsingException(
                 "\"false\", \"true\", \"null\" or a number is expected in or before \"" + (nextChar > 0 ? String.valueOf(cbuf, 0, N.min(32, nextChar))
-                        : String.valueOf(strValue, strBeginIndex - 1, N.min(32, strEndIndex - strBeginIndex + 1))));
+                        : String.valueOf(strValue, Math.max(0, strBeginIndex - 1), N.min(32, strEndIndex - Math.max(0, strBeginIndex - 1)))));
     }
 
     @Override

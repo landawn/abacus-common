@@ -688,7 +688,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Float.compare() to handle NaN values correctly.
      *
      * <p>This method runs in linear time, as it may need to search through the entire list
-     * to find the element.</p>
+     * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
@@ -932,15 +932,31 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         return numRemoved;
     }
 
+    //    /**
+    //     * Removes the element at the specified position in this list. Shifts any subsequent elements
+    //     * to the left (subtracts one from their indices). Returns the element that was removed from the list.
+    //     *
+    //     * @param index the index of the element to be removed. Must be between 0 (inclusive) and size (exclusive).
+    //     * @return the element previously at the specified position
+    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+    //     * @deprecated replaced by {@link #removeAt(int)}.
+    //     */
+    //    @Deprecated
+    //    public float delete(final int index) {
+    //        return removeAt(index);
+    //    }
+
     /**
-     * Removes the element at the specified position in this list. Shifts any subsequent elements
-     * to the left (subtracts one from their indices). Returns the element that was removed from the list.
+     * Removes and returns the element at the specified index.
      *
-     * @param index the index of the element to be removed. Must be between 0 (inclusive) and size (exclusive).
-     * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+     * <p>This is the preferred index-based removal method.
+     * Unlike {@link #remove(float)}, this method removes by index, not by value.</p>
+     *
+     * @param index the index of the element to remove
+     * @return the removed element
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public float delete(final int index) {
+    public float removeAt(final int index) {
         rangeCheck(index);
 
         final float oldValue = elementData[index];
@@ -960,7 +976,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws IndexOutOfBoundsException if any index is out of range (index &lt; 0 || index &gt;= size())
      */
     @Override
-    public void deleteAllByIndices(final int... indices) {
+    public void removeAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -969,7 +985,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             N.checkElementIndex(index, size);
         }
 
-        final float[] tmp = N.deleteAllByIndices(elementData, indices);
+        final float[] tmp = N.removeAt(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
@@ -977,7 +993,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             N.fill(elementData, tmp.length, size, 0f);
         }
 
-        // size = tmp.length; // incorrect. the array returned N.deleteAllByIndices(elementData, indices) contains empty elements after size.
+        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
         size = size - (elementData.length - tmp.length);
     }
 
@@ -991,7 +1007,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
-    public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (fromIndex == toIndex) {
@@ -1051,7 +1067,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -1098,7 +1114,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -2420,7 +2436,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public float removeFirst() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(0);
+        return removeAt(0);
     }
 
     /**
@@ -2432,7 +2448,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public float removeLast() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(size - 1);
+        return removeAt(size - 1);
     }
 
     /**

@@ -2007,7 +2007,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (newValue == oldValue) {
-            // continue.
+            ret = oldValue;
         } else if (N.notEmpty(newValue)) {
             oldValue.clear();
             oldValue.addAll(newValue);
@@ -2065,7 +2065,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (newValue == oldValue) {
-            // continue.
+            ret = oldValue;
         } else if (N.notEmpty(newValue)) {
             if (oldValue == null) {
                 putValues(key, newValue);
@@ -2148,7 +2148,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V newValue = remappingFunction.apply(oldValue, elements);
 
         if (newValue == oldValue) {
-            // continue.
+            ret = oldValue;
         } else if (N.notEmpty(newValue)) {
             oldValue.clear();
             oldValue.addAll(newValue);
@@ -2224,7 +2224,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V newValue = remappingFunction.apply(oldValue, e);
 
         if (newValue == oldValue) {
-            // continue.
+            ret = oldValue;
         } else if (N.notEmpty(newValue)) {
             oldValue.clear();
             oldValue.addAll(newValue);
@@ -3322,7 +3322,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #toMap()
      */
     public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) {
-        final M result = supplier.apply(totalValueCount());
+        final M result = supplier.apply(keyCount());
 
         // result.putAll(backingMap);
 

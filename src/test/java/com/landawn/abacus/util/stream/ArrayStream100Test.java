@@ -289,7 +289,7 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testFlattMap() {
         Stream<String> stream = Stream.of(new String[] { "ab", "cd" });
-        List<Character> result = stream.flattmap(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
+        List<Character> result = stream.flatMapArray(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
         assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
     }
 
@@ -740,10 +740,10 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = Stream.of(integerArray);
-        assertTrue(stream.nMatch(5, 5, x -> x <= 5));
+        assertTrue(stream.countMatchBetween(5, 5, x -> x <= 5));
 
         Stream<Integer> stream2 = Stream.of(integerArray);
-        assertTrue(stream2.nMatch(1, 3, x -> x > 8));
+        assertTrue(stream2.countMatchBetween(1, 3, x -> x > 8));
     }
 
     @Test

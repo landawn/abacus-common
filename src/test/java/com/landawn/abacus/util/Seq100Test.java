@@ -1720,9 +1720,9 @@ public class Seq100Test extends TestBase {
 
     @Test
     public void testNMatch() throws Exception {
-        assertTrue(Seq.of(1, 2, 3, 4, 5).nMatch(2, 3, x -> x > 2));
-        assertFalse(Seq.of(1, 2, 3).nMatch(2, 3, x -> x > 2));
-        assertTrue(Seq.of(1, 2, 3, 4, 5).nMatch(0, 2, x -> x > 10));
+        assertTrue(Seq.of(1, 2, 3, 4, 5).countMatchBetween(2, 3, x -> x > 2));
+        assertFalse(Seq.of(1, 2, 3).countMatchBetween(2, 3, x -> x > 2));
+        assertTrue(Seq.of(1, 2, 3, 4, 5).countMatchBetween(0, 2, x -> x > 10));
     }
 
     @Test

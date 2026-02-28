@@ -1071,14 +1071,14 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testNMatch_Predicate() {
-        assertTrue(EntryStream.of(testMap).nMatch(2, 3, e -> e.getValue() > 3));
-        assertFalse(EntryStream.of(testMap).nMatch(5, 10, e -> e.getValue() > 3));
+        assertTrue(EntryStream.of(testMap).countMatchBetween(2, 3, e -> e.getValue() > 3));
+        assertFalse(EntryStream.of(testMap).countMatchBetween(5, 10, e -> e.getValue() > 3));
     }
 
     @Test
     public void testNMatch_BiPredicate() {
-        assertTrue(EntryStream.of(testMap).nMatch(2, 3, (k, v) -> v > 3));
-        assertFalse(EntryStream.of(testMap).nMatch(5, 10, (k, v) -> v > 3));
+        assertTrue(EntryStream.of(testMap).countMatchBetween(2, 3, (k, v) -> v > 3));
+        assertFalse(EntryStream.of(testMap).countMatchBetween(5, 10, (k, v) -> v > 3));
     }
 
     @Test
@@ -1873,9 +1873,7 @@ public class EntryStream2025Test extends TestBase {
         largeMap.put("d", 4);
         largeMap.put("e", 5);
 
-        List<Entry<String, Integer>> result = EntryStream.of(largeMap)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(largeMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         // Only first 3 entries should pass through within the window
         assertEquals(3, result.size());
@@ -1887,9 +1885,7 @@ public class EntryStream2025Test extends TestBase {
     @Test
     public void testDebounce_AllElementsPassWhenWithinLimit() {
         // Allow 10 elements per window, but only 5 elements in stream
-        List<Entry<String, Integer>> result = EntryStream.of(testMap)
-                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         // All elements should pass
         assertEquals(5, result.size());
@@ -1897,9 +1893,7 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testDebounce_EmptyStream() {
-        List<Entry<String, Integer>> result = EntryStream.of(emptyMap)
-                .debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(emptyMap).debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         assertTrue(result.isEmpty());
     }
@@ -1909,9 +1903,7 @@ public class EntryStream2025Test extends TestBase {
         Map<String, Integer> singleMap = new LinkedHashMap<>();
         singleMap.put("only", 1);
 
-        List<Entry<String, Integer>> result = EntryStream.of(singleMap)
-                .debounce(1, com.landawn.abacus.util.Duration.ofMillis(100))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(singleMap).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toList();
 
         assertEquals(1, result.size());
         assertEquals("only", result.get(0).getKey());
@@ -1920,9 +1912,7 @@ public class EntryStream2025Test extends TestBase {
     @Test
     public void testDebounce_MaxWindowSizeOne() {
         // Only 1 element allowed per window
-        List<Entry<String, Integer>> result = EntryStream.of(testMap)
-                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         assertEquals(1, result.size());
         assertEquals("one", result.get(0).getKey());
@@ -1957,18 +1947,14 @@ public class EntryStream2025Test extends TestBase {
             largeMap.put("key" + i, i);
         }
 
-        List<Entry<String, Integer>> result = EntryStream.of(largeMap)
-                .debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(largeMap).debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10)).toList();
 
         assertEquals(50, result.size());
     }
 
     @Test
     public void testDebounce_PreservesOrder() {
-        List<Entry<String, Integer>> result = EntryStream.of(testMap)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         assertEquals("one", result.get(0).getKey());
         assertEquals("two", result.get(1).getKey());
@@ -1990,9 +1976,9 @@ public class EntryStream2025Test extends TestBase {
         map.put("j", 10);
 
         List<Entry<String, Integer>> result = EntryStream.of(map)
-                .filter((k, v) -> v % 2 == 0)  // b=2, d=4, f=6, h=8, j=10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))  // b=2, d=4, f=6
-                .mapValue(v -> v * 10)  // b=20, d=40, f=60
+                .filter((k, v) -> v % 2 == 0) // b=2, d=4, f=6, h=8, j=10
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // b=2, d=4, f=6
+                .mapValue(v -> v * 10) // b=20, d=40, f=60
                 .toList();
 
         assertEquals(3, result.size());
@@ -2010,9 +1996,7 @@ public class EntryStream2025Test extends TestBase {
         mapWithNull.put("d", null);
         mapWithNull.put("e", 5);
 
-        List<Entry<String, Integer>> result = EntryStream.of(mapWithNull)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toList();
+        List<Entry<String, Integer>> result = EntryStream.of(mapWithNull).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
 
         assertEquals(3, result.size());
         assertEquals("a", result.get(0).getKey());
@@ -2029,9 +2013,7 @@ public class EntryStream2025Test extends TestBase {
         largeMap.put("d", 4);
         largeMap.put("e", 5);
 
-        Map<String, Integer> result = EntryStream.of(largeMap)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toMap();
+        Map<String, Integer> result = EntryStream.of(largeMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toMap();
 
         assertEquals(3, result.size());
         assertTrue(result.containsKey("a"));

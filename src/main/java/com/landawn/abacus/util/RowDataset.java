@@ -131,7 +131,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
-    private static final KryoParser kryoParser = ParserFactory.isAvroParserAvailable() ? ParserFactory.createKryoParser() : null;
+    private static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
     private static final JsonSerializationConfig jsc = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
@@ -537,7 +537,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnCount = columnCount();
         final int columnSizeToMove = N.size(columns);
 
-        if (newPosition > columnCount - columnSizeToMove) {
+        if (newPosition < 0 || newPosition > columnCount - columnSizeToMove) {
             throw new IndexOutOfBoundsException("The new row position must be >= 0 and <= " + (columnCount - columnSizeToMove));
         }
 
@@ -1769,7 +1769,7 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         for (final List<Object> element : _columnList) {
-            N.deleteAllByIndices(element, rowIndexesToRemove);
+            N.removeAt(element, rowIndexesToRemove);
         }
 
         modCount++;
@@ -2214,6 +2214,10 @@ public final class RowDataset implements Dataset, Cloneable {
 
         if (rowType == null && rowClass != null) {
             rowType = Type.of(rowClass);
+        }
+
+        if (rowType == null) {
+            throw new IllegalArgumentException("Row type cannot be determined from columnNames=" + columnNames);
         }
 
         if (rowSupplier == null && !rowType.isBean()) {
@@ -3141,7 +3145,7 @@ public final class RowDataset implements Dataset, Cloneable {
                             final Object defaultIdPropValue = idPropInfo.type.defaultValue();
                             final List<Object> idColumn = tmp._columnList.get(tmp.getColumnIndex(newPropEntityIdNames.get(i)));
 
-                            if (!Stream.of(idColumn).nMatch(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
+                            if (!Stream.of(idColumn).countMatchBetween(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
                                 isToMerge = false;
                                 break;
                             }
@@ -4158,18 +4162,14 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final OutputStream output) {
-        Writer writer = null;
+        final Writer writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
 
         try {
-            writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
-
             toCsv(fromRowIndex, toRowIndex, columnNames, writer);
 
             writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            IOUtil.close(writer);
         }
     }
 
@@ -5960,12 +5960,12 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             if (filter.test(disposableArray)) {
-                if (--max < 0) {
-                    break;
-                }
-
                 for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                     newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
+                }
+
+                if (--max <= 0) {
+                    break;
                 }
             }
         }

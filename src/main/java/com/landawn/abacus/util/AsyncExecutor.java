@@ -585,6 +585,7 @@ public class AsyncExecutor {
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             isShutdown = true; // Mark as shutdown even if executor is null
+            executor = null;
             return;
         }
 

@@ -742,7 +742,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * with the lowest index i such that elementData[i] == e.
      *
      * <p>This method runs in linear time, as it may need to search through the entire list
-     * to find the element.</p>
+     * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
@@ -994,15 +994,31 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return numRemoved;
     }
 
+    //    /**
+    //     * Removes the element at the specified position in this list. Shifts any subsequent elements
+    //     * to the left (subtracts one from their indices).
+    //     *
+    //     * @param index the index of the element to be removed
+    //     * @return the element that was removed from the list
+    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+    //     * @deprecated replaced by {@link #removeAt(int)}.
+    //     */
+    //    @Deprecated
+    //    public short delete(final int index) {
+    //        return removeAt(index);
+    //    }
+
     /**
-     * Removes the element at the specified position in this list. Shifts any subsequent elements
-     * to the left (subtracts one from their indices).
+     * Removes and returns the element at the specified index.
      *
-     * @param index the index of the element to be removed
-     * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+     * <p>This is the preferred index-based removal method.
+     * Unlike {@link #remove(short)}, this method removes by index, not by value.</p>
+     *
+     * @param index the index of the element to remove
+     * @return the removed element
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public short delete(final int index) {
+    public short removeAt(final int index) {
         rangeCheck(index);
 
         final short oldValue = elementData[index];
@@ -1019,7 +1035,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param indices the indices of elements to be removed. Can be empty, {@code null}, or contain duplicates.
      */
     @Override
-    public void deleteAllByIndices(final int... indices) {
+    public void removeAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1028,7 +1044,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             N.checkElementIndex(index, size);
         }
 
-        final short[] tmp = N.deleteAllByIndices(elementData, indices);
+        final short[] tmp = N.removeAt(elementData, indices);
 
         N.copy(tmp, 0, elementData, 0, tmp.length);
 
@@ -1036,7 +1052,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             N.fill(elementData, tmp.length, size, (short) 0);
         }
 
-        // size = tmp.length; // incorrect. the array returned N.deleteAllByIndices(elementData, indices) contains empty elements after size.
+        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
         size = size - (elementData.length - tmp.length);
     }
 
@@ -1051,7 +1067,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     @Override
-    public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (fromIndex == toIndex) {
@@ -1111,7 +1127,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -1158,7 +1174,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
-            deleteRange(fromIndex, toIndex);
+            removeRange(fromIndex, toIndex);
             return;
         }
 
@@ -2512,7 +2528,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public short removeFirst() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(0);
+        return removeAt(0);
     }
 
     /**
@@ -2524,7 +2540,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public short removeLast() {
         throwNoSuchElementExceptionIfEmpty();
 
-        return delete(size - 1);
+        return removeAt(size - 1);
     }
 
     /**

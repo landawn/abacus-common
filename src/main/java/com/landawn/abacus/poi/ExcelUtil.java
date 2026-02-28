@@ -35,6 +35,7 @@ import java.util.function.Function;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1155,7 +1156,9 @@ public final class ExcelUtil {
     }
 
     static void setCellValue(Cell cell, Object cellValue) {
-        if (cellValue instanceof String val) {
+        if (cellValue == null) {
+            cell.setBlank();
+        } else if (cellValue instanceof String val) {
             cell.setCellValue(val);
         } else if (cellValue instanceof Boolean val) {
             cell.setCellValue(val);
@@ -1169,10 +1172,10 @@ public final class ExcelUtil {
             cell.setCellValue(val);
         } else if (cellValue instanceof Integer val) {
             cell.setCellValue(val);
-        } else if (cellValue instanceof Double val) {
-            cell.setCellValue(val);
+        } else if (cellValue instanceof Number val) {
+            cell.setCellValue(val.doubleValue());
         } else {
-            cell.setCellValue(cellValue == null ? Strings.NULL : N.stringOf(cellValue));
+            cell.setCellValue(N.stringOf(cellValue));
         }
     }
 
@@ -1369,20 +1372,26 @@ public final class ExcelUtil {
                     bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
-                int idx = 0;
+                final int cellCount = row.getLastCellNum();
 
-                for (Cell cell : row) {
-                    if (idx++ > 0) {
+                for (int i = 0; i < cellCount; i++) {
+                    if (i > 0) {
                         bw.write(separator);
                     }
 
-                    switch (cell.getCellType()) {
-                        case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
-                        case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
-                        case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
-                        case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
-                        case BLANK -> CsvUtil.writeField(bw, strType, "");
-                        default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
+                    final Cell cell = row.getCell(i);
+
+                    if (cell == null || cell.getCellType() == CellType.BLANK) {
+                        CsvUtil.writeField(bw, strType, "");
+                    } else {
+                        switch (cell.getCellType()) {
+                            case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
+                            case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
+                            case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
+                            case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
+                            case ERROR -> CsvUtil.writeField(bw, strType, "");
+                            default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
+                        }
                     }
                 }
             }

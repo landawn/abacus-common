@@ -120,11 +120,11 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testFlattMapToObjArray() {
         List<String> result = createCharStream(new char[] { 'a', 'b' })
-                .flattmapToObj(c -> new String[] { String.valueOf(c), String.valueOf(Character.toUpperCase(c)) })
+                .flatMapArrayToObj(c -> new String[] { String.valueOf(c), String.valueOf(Character.toUpperCase(c)) })
                 .toList();
         assertEquals(Arrays.asList("a", "A", "b", "B"), result);
 
-        result = createCharStream(new char[] {}).flattmapToObj(c -> new String[] { String.valueOf(c) }).toList();
+        result = createCharStream(new char[] {}).flatMapArrayToObj(c -> new String[] { String.valueOf(c) }).toList();
         assertEquals(0, result.size());
     }
 

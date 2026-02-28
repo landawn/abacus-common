@@ -51,7 +51,7 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_createKryoParser() {
-        if (ParserFactory.isAvroParserAvailable()) {
+        if (ParserFactory.isKryoParserAvailable()) {
             KryoParser parser = ParserFactory.createKryoParser();
             assertNotNull(parser);
         }
@@ -94,22 +94,22 @@ public class ParserFactory2025Test extends TestBase {
     }
 
     @Test
-    public void test_createJAXBParser() {
-        XmlParser parser = ParserFactory.createJAXBParser();
+    public void test_createJaxbParser() {
+        XmlParser parser = ParserFactory.createJaxbParser();
         assertNotNull(parser);
     }
 
     @Test
-    public void test_createJAXBParser_withConfig() {
+    public void test_createJaxbParser_withConfig() {
         XmlSerializationConfig xsc = new XmlSerializationConfig();
         XmlDeserializationConfig xdc = new XmlDeserializationConfig();
-        XmlParser parser = ParserFactory.createJAXBParser(xsc, xdc);
+        XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
         assertNotNull(parser);
     }
 
     @Test
     public void test_registerKryo_class() {
-        if (ParserFactory.isAvroParserAvailable()) {
+        if (ParserFactory.isKryoParserAvailable()) {
             ParserFactory.registerKryo(String.class);
         }
     }
@@ -121,7 +121,7 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_registerKryo_classWithId() {
-        if (ParserFactory.isAvroParserAvailable()) {
+        if (ParserFactory.isKryoParserAvailable()) {
             ParserFactory.registerKryo(Integer.class, 100);
         }
     }

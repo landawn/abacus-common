@@ -57,7 +57,7 @@ public class Reflection101Test extends TestBase {
 
     @Test
     public void testNewNoArgs() {
-        Reflection<TestClass> ref = Reflection.on(TestClass.class)._new();
+        Reflection<TestClass> ref = Reflection.on(TestClass.class).newInstance();
         TestClass instance = ref.instance();
 
         Assertions.assertNotNull(instance);
@@ -66,7 +66,7 @@ public class Reflection101Test extends TestBase {
 
     @Test
     public void testNewWithArgs() {
-        Reflection<TestClass> ref = Reflection.on(TestClass.class)._new("custom");
+        Reflection<TestClass> ref = Reflection.on(TestClass.class).newInstance("custom");
         TestClass instance = ref.instance();
 
         Assertions.assertNotNull(instance);
@@ -75,7 +75,7 @@ public class Reflection101Test extends TestBase {
 
     @Test
     public void testNewWithMultipleArgs() {
-        Reflection<TestClass> ref = Reflection.on(TestClass.class)._new("custom", 100);
+        Reflection<TestClass> ref = Reflection.on(TestClass.class).newInstance("custom", 100);
         TestClass instance = ref.instance();
 
         Assertions.assertNotNull(instance);

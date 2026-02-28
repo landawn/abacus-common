@@ -843,26 +843,26 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlattmapToObj() {
-        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).count());
-        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).count());
+        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).count());
+        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).count());
         assertArrayEquals(new String[] { "F1.0", "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0" },
-                FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toArray());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toArray());
         assertArrayEquals(new String[] { "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0" },
-                FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toArray());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toArray());
         assertEquals(N.asList("F1.0", "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0"),
-                FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toList());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toList());
         assertEquals(N.asList("F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0"),
-                FloatStream.of(1, 2, 3, 4, 5).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toList());
-        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).count());
-        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).count());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toList());
+        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).count());
+        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).count());
         assertArrayEquals(new String[] { "F1.0", "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0" },
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toArray());
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toArray());
         assertArrayEquals(new String[] { "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0" },
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toArray());
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toArray());
         assertEquals(N.asList("F1.0", "F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0"),
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toList());
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).toList());
         assertEquals(N.asList("F10.0", "F2.0", "F20.0", "F3.0", "F30.0", "F4.0", "F40.0", "F5.0", "F50.0"),
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flattmapToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toList());
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArrayToObj(f -> new String[] { "F" + f, "F" + (f * 10) }).skip(1).toList());
     }
 
     @Test

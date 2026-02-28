@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -226,6 +227,33 @@ public class PropertiesUtil2025Test extends TestBase {
     }
 
     @Test
+    public void testLoadFromXmlFileWithAutoRefreshUtf16() throws Exception {
+        File utf16XmlFile = tempDir.resolve("utf16-auto-refresh.xml").toFile();
+        Files.writeString(utf16XmlFile.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-16\"?><root><message>v1</message></root>", StandardCharsets.UTF_16);
+
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(utf16XmlFile, true);
+        assertEquals("v1", props.get("message"));
+
+        Thread.sleep(1100);
+
+        Files.writeString(utf16XmlFile.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-16\"?><root><message>v2</message></root>", StandardCharsets.UTF_16);
+
+        boolean refreshed = false;
+        long deadline = System.currentTimeMillis() + 8000;
+
+        while (System.currentTimeMillis() < deadline) {
+            if ("v2".equals(props.get("message"))) {
+                refreshed = true;
+                break;
+            }
+
+            Thread.sleep(200);
+        }
+
+        assertTrue(refreshed, "Expected auto-refresh to update UTF-16 XML properties");
+    }
+
+    @Test
     public void testLoadFromXmlFileWithoutAutoRefresh() {
         Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, false);
 
@@ -240,6 +268,16 @@ public class PropertiesUtil2025Test extends TestBase {
 
             assertNotNull(props);
             assertNotNull(props.get("database"));
+        }
+    }
+
+    @Test
+    public void testLoadFromXmlInputStreamWithLeadingComment() throws IOException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!-- leading comment --><root><name>test</name></root>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8))) {
+            Properties<String, Object> props = PropertiesUtil.loadFromXml(is);
+            assertEquals("test", props.get("name"));
         }
     }
 
@@ -260,6 +298,16 @@ public class PropertiesUtil2025Test extends TestBase {
 
             assertNotNull(props);
             assertNotNull(props.get("database"));
+        }
+    }
+
+    @Test
+    public void testLoadFromXmlReaderWithLeadingComment() throws IOException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!-- leading comment --><root><name>reader</name></root>";
+
+        try (Reader reader = new StringReader(xml)) {
+            Properties<String, Object> props = PropertiesUtil.loadFromXml(reader);
+            assertEquals("reader", props.get("name"));
         }
     }
 
@@ -601,6 +649,21 @@ public class PropertiesUtil2025Test extends TestBase {
     }
 
     @Test
+    public void testXml2JavaFromReaderWithLeadingCommentAndNullClassName() throws IOException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!-- schema comment --><app><title>MyApp</title></app>";
+
+        String srcPath = tempDir.resolve("src10").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+
+        try (Reader reader = new StringReader(xml)) {
+            PropertiesUtil.xmlToJava(reader, srcPath, "com.test10", null, false);
+        }
+
+        File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "test10", "App.java");
+        assertTrue(generatedFile.exists());
+    }
+
+    @Test
     public void testStoreAndLoadRoundTrip() throws IOException {
         Properties<String, String> original = new Properties<>();
         original.put("key1", "value1");
@@ -619,6 +682,18 @@ public class PropertiesUtil2025Test extends TestBase {
     }
 
     @Test
+    public void testStoreAndLoadRoundTripWithUnicode() throws IOException {
+        Properties<String, String> original = new Properties<>();
+        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
+
+        File tempFile = tempDir.resolve("roundtrip-unicode.properties").toFile();
+        PropertiesUtil.store(original, "Unicode round trip test", tempFile);
+
+        Properties<String, String> loaded = PropertiesUtil.load(tempFile);
+        assertEquals(original.get("greeting"), loaded.get("greeting"));
+    }
+
+    @Test
     public void testStoreToXmlAndLoadRoundTrip() throws IOException {
         Properties<String, Object> original = new Properties<>();
         original.put("stringKey", "stringValue");
@@ -632,6 +707,22 @@ public class PropertiesUtil2025Test extends TestBase {
 
         assertNotNull(loaded);
         assertEquals("stringValue", loaded.get("stringKey"));
+    }
+
+    @Test
+    public void testStoreToXmlAndLoadRoundTripWithUnicode() throws IOException {
+        Properties<String, Object> original = new Properties<>();
+        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
+
+        File tempFile = tempDir.resolve("roundtrip-unicode.xml").toFile();
+        PropertiesUtil.storeToXml(original, "root", true, tempFile);
+
+        String xmlContent = Files.readString(tempFile.toPath(), Charsets.UTF_8);
+        assertTrue(xmlContent.contains("encoding=\"UTF-8\""));
+        assertTrue(xmlContent.contains("\u4f60\u597d"));
+
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(tempFile);
+        assertEquals(original.get("greeting"), loaded.get("greeting"));
     }
 
     @Test
